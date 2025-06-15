@@ -1,28 +1,55 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-800 to-black text-white flex flex-col items-center justify-center px-4">
-    <div class="max-w-2xl text-center">
-      <h1 class="text-4xl md:text-5xl font-bold mb-6 leading-tight">
-        שלום צוקים של הנשמה
-      </h1>
-      <p class="text-xl mb-8">
-        Bienvenido al <strong>Análisis Cabalístico del Alma</strong>, un espacio donde exploramos los caminos del alma, el Tikun, y las raíces espirituales de tu existencia.
-        Descubre lo que tu nombre, fecha de nacimiento y energías revelan sobre tu propósito en este mundo.
+  <div class="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white px-4 py-12 flex items-center justify-center">
+    <div class="max-w-xl w-full bg-white/5 backdrop-blur rounded-xl shadow-lg p-8">
+      <h1 class="text-3xl md:text-4xl font-bold mb-4 text-center text-yellow-400">Análisis Cabalístico del Alma</h1>
+      <p class="text-center text-white/90 mb-8">
+        Descubre los secretos numerológicos de tu alma y el propósito sagrado de tu existencia.
       </p>
-      <NuxtLink to="/consulta" class="bg-white text-indigo-800 px-6 py-3 rounded-full text-lg font-semibold hover:bg-indigo-200 transition">
-        Comenzar Consulta
-      </NuxtLink>
+
+      <form @submit.prevent="leerAlma" class="space-y-5">
+        <div>
+          <label for="nombre" class="block text-sm font-medium mb-1">🟡 Nombre Completo *</label>
+          <input v-model="nombre" id="nombre" type="text" required class="w-full px-4 py-2 bg-white/10 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Tu nombre completo tal como aparece en tu documento" />
+        </div>
+
+        <div>
+          <label for="fecha" class="block text-sm font-medium mb-1">📅 Fecha de Nacimiento *</label>
+          <input v-model="fechaNacimiento" id="fecha" type="date" required class="w-full px-4 py-2 bg-white/10 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+        </div>
+
+        <div>
+          <label for="lugar" class="block text-sm font-medium mb-1">📍 Lugar de Nacimiento (opcional)</label>
+          <input v-model="lugarNacimiento" id="lugar" type="text" class="w-full px-4 py-2 bg-white/10 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Ciudad, País" />
+        </div>
+
+        <div>
+          <label for="hora" class="block text-sm font-medium mb-1">⏰ Hora de Nacimiento (opcional)</label>
+          <input v-model="horaNacimiento" id="hora" type="time" class="w-full px-4 py-2 bg-white/10 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+        </div>
+
+        <button type="submit" class="w-full py-3 bg-yellow-400 hover:bg-yellow-300 text-black rounded font-semibold text-lg transition">
+          ⭐ Revelar mi Análisis Cabalístico
+        </button>
+      </form>
+
+      <div v-if="resultado" class="mt-8 text-indigo-200 border-t border-white/10 pt-6">
+        <h2 class="text-xl font-bold mb-2">Resultado espiritual</h2>
+        <p>{{ resultado }}</p>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-// No se necesita JS por ahora
-</script>
+import { ref } from 'vue'
 
-<style>
-body {
-  margin: 0;
-  font-family: 'Inter', sans-serif;
-  background-color: #000;
+const nombre = ref('')
+const fechaNacimiento = ref('')
+const lugarNacimiento = ref('')
+const horaNacimiento = ref('')
+const resultado = ref('')
+
+function leerAlma() {
+  resultado.value = `Querido ${nombre.value}, tu alma refleja un propósito elevado. Naciste en una fecha significativa con potencial de revelar luz a través de tu corrección espiritual (Tikún). Sigue el camino de la sabiduría.`
 }
-</style>
+</script>

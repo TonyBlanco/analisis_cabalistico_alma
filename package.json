@@ -7,7 +7,7 @@
     "build": "nuxt build && prisma generate",
     "start": "nuxt start",
     "lint": "nuxt lint",
-    "vercel-build": "npm install --legacy-peer-deps && nuxt build && prisma generate"
+    "vercel-build": "npm install --legacy-peer-deps && nuxt build && prisma generate" 
   },
   "dependencies": {
     "@prisma/client": "^5.0.0",
@@ -17,7 +17,7 @@
     "@typescript-eslint/eslint-plugin": "^8.34.0",
     "@typescript-eslint/parser": "^8.34.0",
     "autoprefixer": "^10.4.14",
-    "eslint": "^9.0.0",
+    "eslint": "^9.29.0",
     "postcss": "^8.4.24",
     "prisma": "^5.0.0",
     "tailwindcss": "^3.3.5",

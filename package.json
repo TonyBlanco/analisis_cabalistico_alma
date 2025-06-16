@@ -7,7 +7,7 @@
     "build": "nuxt build && prisma generate",
     "start": "nuxt start",
     "lint": "nuxt lint",
-    "vercel-build": "npm install --legacy-peer-deps && nuxt build && prisma generate" 
+    "vercel-build": "nuxt build && prisma generate" 
   },
   "dependencies": {
     "@prisma/client": "^5.0.0",

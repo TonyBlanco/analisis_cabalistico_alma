@@ -1,12 +1,5 @@
 {
-  "framework": "nuxtjs",
+  "framework": "nuxt",
   "buildCommand": "npm run build",
-  "outputDirectory": ".output",
-  "ignoreCommand": "false",
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/"
-    }
-  ]
+  "outputDirectory": ".output"
 }

@@ -1,43 +1,29 @@
 # Dockerfile
-FROM node:20-alpine AS builder
-
-# Instalar dependencias del sistema necesarias para compilar binarios nativos
-RUN apk add --no-cache python3 make g++ libc6-compat
+FROM node:20
 
 WORKDIR /app
 
-# Copiar archivos de configuración
+# Copiar solo package.json primero
 COPY package*.json ./
-COPY prisma ./prisma/
 
-# Instalar dependencias con logs detallados
-RUN npm ci --verbose
+# Debug: Ver qué hay en package.json
+RUN cat package.json
 
-# Copiar el resto del código
+# Instalar dependencias
+RUN npm install
+
+# Copiar el resto
 COPY . .
 
-# Generar Prisma Client
-RUN npx prisma generate
+# Debug: Listar archivos
+RUN ls -la
 
-# Construir con logs detallados
-RUN npm run build --verbose || (echo "Build failed. Listing node_modules:" && ls -la node_modules && exit 1)
-
-# Etapa de producción
-FROM node:20-alpine AS runner
-
-RUN apk add --no-cache libc6-compat
-
-WORKDIR /app
-
-# Copiar archivos necesarios desde la etapa de build
-COPY --from=builder /app/.output ./.output
-COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/package*.json ./
-
-# Instalar solo dependencias de producción
-RUN npm ci --only=production
+# Intentar build con más output
+RUN npm run build || (echo "=== ERROR EN BUILD ===" && \
+    echo "Node version:" && node --version && \
+    echo "NPM version:" && npm --version && \
+    echo "Package.json scripts:" && cat package.json | grep -A 10 scripts && \
+    exit 1)
 
 EXPOSE 3000
-
-# Comando para iniciar la aplicación
-CMD ["node", ".output/server/index.mjs"]
+CMD ["npm", "start"]

@@ -10,15 +10,17 @@ WORKDIR /app
 COPY package*.json ./
 COPY prisma ./prisma/
 
-# Instalar dependencias
-RUN npm ci
+# Instalar dependencias con logs detallados
+RUN npm ci --verbose
 
 # Copiar el resto del código
 COPY . .
 
-# Generar Prisma Client y construir la aplicación
+# Generar Prisma Client
 RUN npx prisma generate
-RUN npm run build
+
+# Construir con logs detallados
+RUN npm run build --verbose || (echo "Build failed. Listing node_modules:" && ls -la node_modules && exit 1)
 
 # Etapa de producción
 FROM node:20-alpine AS runner

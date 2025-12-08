@@ -1,4 +1,12 @@
 {
+	"name": "analisis-cabalistico-alma",
+	"version": "1.0.0",
+	"private": true,
+	"scripts": {
+		"build": "cd tonyblanco-app && npm install && npm run build",
+		"start": "cd tonyblanco-app && npm start",
+		"dev": "cd tonyblanco-app && npm run dev"
+	},
 	"devDependencies": {
 		"typescript": "^5.9.3"
 	}

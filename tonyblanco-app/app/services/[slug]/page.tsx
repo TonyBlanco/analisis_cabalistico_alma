@@ -213,7 +213,6 @@ export default function ServiceDetailPage() {
               <button
                 onClick={() => router.push(`/booking/${service.slug}`)}
                 className="w-full py-3 sm:py-4 bg-[#D4AF37] text-black rounded-lg hover:bg-[#B8941F] transition-all body-font font-semibold text-base sm:text-lg mb-4 sm:mb-6">
-              >
                 {service.requires_booking ? 'Reservar Ahora' : 'Adquirir Ahora'}
               </button>
 
@@ -284,7 +283,6 @@ export default function ServiceDetailPage() {
           <button
             onClick={() => router.push('/contact')}
             className="px-6 py-2.5 sm:px-8 sm:py-3 bg-[#D4AF37] text-black rounded-lg hover:bg-[#B8941F] transition-all body-font font-semibold text-sm sm:text-base">
-          >
             Contactar a Tony
           </button>
         </div>

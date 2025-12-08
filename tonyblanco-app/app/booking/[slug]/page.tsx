@@ -58,8 +58,8 @@ export default function BookingPage() {
         getAvailableSlots(),
         getBlockedDates()
       ]);
-      setAvailableSlots(slots);
-      setBlockedDates(blocked.map((b: any) => b.date));
+      setAvailableSlots(slots as any[]);
+      setBlockedDates((blocked as any[]).map((b: any) => b.date));
     } catch (error) {
       console.error('Error cargando disponibilidad:', error);
     }

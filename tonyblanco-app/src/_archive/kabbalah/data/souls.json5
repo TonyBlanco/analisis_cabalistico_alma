@@ -1,0 +1,55 @@
+{
+  yechidah: {
+    id: "yechidah",
+    name: {
+      en: "unity",
+      he: "יחידה",
+      roman: "yechida",
+    },
+  },
+
+  chaya: {
+    id: "chaya",
+    name: {
+      en: "life",
+      he: "חיה",
+      roman: "chaya",
+    },
+  },
+
+  neshama: {
+    id: "neshama",
+    name: {
+      en: "psyche",
+      he: "נשמה",
+      roman: "neshama",
+    },
+  },
+
+  ruach: {
+    id: "ruach",
+    name: {
+      en: "spirit",
+      he: "רוח",
+      roman: "ruach",
+    },
+  },
+
+  nephesh: {
+    id: "nephesh",
+    name: {
+      en: "life-force",
+      he: "נפש",
+      roman: "nephesh",
+    },
+  },
+
+  guph: {
+    id: "guph",
+    name: {
+      en: "body",
+      he: "גוף",
+      roman: "guph",
+    },
+  },
+}

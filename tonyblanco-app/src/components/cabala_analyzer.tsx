@@ -1,8 +1,8 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { Calendar, Heart, Sparkles, Target, Zap, Users, Moon, Sun, Star, LogIn, User } from 'lucide-react';
-import { calcularAnalisisCabalistico, API_BASE_URL } from '../lib/api';
-import { loginForTesting, isAuthenticated, logout, getAuthToken } from '../lib/auth';
+import { calcularAnalisisCabalistico, API_BASE_URL } from '@/lib/api';
+import { loginForTesting, isAuthenticated, logout, getAuthToken } from '@/lib/auth';
 
 const CabalaAnalyzer = () => {
   const [formData, setFormData] = useState({
@@ -157,9 +157,9 @@ const CabalaAnalyzer = () => {
       // Llamar a la API del backend
       const resultadoAPI = await calcularAnalisisCabalistico({
         nombre,
-        dia,
-        mes,
-        anio: ano
+        dia: dia.toString(),
+        mes: mes.toString(),
+        anio: ano.toString()
       });
 
       // Capturar información del usuario
@@ -1017,7 +1017,7 @@ const CabalaAnalyzer = () => {
                   {Object.entries(result.casas || {}).map(([casa, frecuencia]) => (
                     <div key={casa} className="text-center p-3 bg-white rounded-lg border border-gray-200">
                       <div className="text-lg font-bold text-gray-900">{casa}</div>
-                      <div className="text-sm text-gray-600">{frecuencia} {frecuencia === 1 ? 'vez' : 'veces'}</div>
+                      <div className="text-sm text-gray-600">{String(frecuencia)} {frecuencia === 1 ? 'vez' : 'veces'}</div>
                     </div>
                   ))}
                 </div>

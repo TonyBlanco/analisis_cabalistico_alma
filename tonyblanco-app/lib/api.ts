@@ -1,0 +1,317 @@
+// API Configuration and Utilities
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+
+// Exportar como API_BASE_URL para compatibilidad
+export const API_BASE_URL = API_URL;
+
+// Type definitions for API responses
+export interface User {
+  id: number;
+  username: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  profile: UserProfile;
+}
+
+export interface UserProfile {
+  user_type: 'personal' | 'therapist';
+  full_name: string;
+  phone: string;
+  birth_date?: string;
+  profession?: string;
+  specialization?: string;
+  license_number?: string;
+  years_of_experience?: number;
+  subscription_status: 'trial' | 'active' | 'canceled' | 'expired';
+  subscription_start_date?: string;
+  subscription_end_date?: string;
+  max_fichas_per_month: number;
+  fichas_created_this_month: number;
+}
+
+export interface RegisterResponse {
+  user: User;
+  token: string;
+  message: string;
+}
+
+export interface LoginResponse {
+  token: string;
+}
+
+export interface Service {
+  id: number;
+  slug: string;
+  name: string;
+  category: number;
+  category_name: string;
+  service_type: string;
+  short_description: string;
+  full_description: string;
+  benefits: string[];
+  includes: string[];
+  price_usd: number;
+  price_eur: number;
+  has_discount: boolean;
+  discount_price_usd?: number;
+  discount_price_eur?: number;
+  discount_label?: string;
+  duration_value: number;
+  duration_type: string;
+  duration_display: string;
+  is_active: boolean;
+  requires_booking: boolean;
+  max_participants?: number;
+  platform: string;
+  is_featured: boolean;
+  is_bestseller: boolean;
+  price_display: {
+    usd: {
+      original: number;
+      current: number;
+      has_discount: boolean;
+      discount_label?: string;
+    };
+    eur: {
+      original: number;
+      current: number;
+      has_discount: boolean;
+      discount_label?: string;
+    };
+  };
+}
+
+export interface ServiceCategory {
+  id: number;
+  name: string;
+  display_name: string;
+  description: string;
+  icon: string;
+  order: number;
+  is_active: boolean;
+  services_count: number;
+}
+
+export interface Booking {
+  id: number;
+  service?: number;
+  package?: number;
+  service_name: string;
+  scheduled_date?: string;
+  timezone: string;
+  client_name: string;
+  client_email: string;
+  client_phone: string;
+  client_notes: string;
+  currency: 'USD' | 'EUR';
+  amount_paid: number;
+  payment_method: 'stripe' | 'paypal' | 'bizum' | 'transfer';
+  status: 'pending' | 'confirmed' | 'completed' | 'canceled' | 'rescheduled';
+  meeting_link?: string;
+  created_at: string;
+}
+
+// Helper function to get auth token
+export const getAuthToken = (): string | null => {
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem('authToken');
+  }
+  return null;
+};
+
+// Helper function to set auth token
+export const setAuthToken = (token: string): void => {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('authToken', token);
+  }
+};
+
+// Helper function to remove auth token
+export const removeAuthToken = (): void => {
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('authToken');
+  }
+};
+
+// Generic fetch wrapper with auth
+async function apiRequest<T>(
+  endpoint: string,
+  options: RequestInit = {}
+): Promise<T> {
+  const token = getAuthToken();
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(options.headers as Record<string, string>),
+  };
+
+  if (token) {
+    headers['Authorization'] = `Token ${token}`;
+  }
+
+  const response = await fetch(`${API_URL}${endpoint}`, {
+    ...options,
+    headers,
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: 'Error en la solicitud' }));
+    throw new Error(error.message || error.error || `Error: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+// ========== AUTH API ==========
+
+export const registerTherapist = async (data: {
+  username: string;
+  email: string;
+  password: string;
+  full_name: string;
+  profession: string;
+  specialization?: string;
+  license_number?: string;
+  years_of_experience: number;
+  phone: string;
+}): Promise<RegisterResponse> => {
+  return apiRequest<RegisterResponse>('/register/therapist/', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+};
+
+export const registerPersonal = async (data: {
+  username: string;
+  email: string;
+  password: string;
+  full_name: string;
+  phone?: string;
+  birth_date?: string;
+}): Promise<RegisterResponse> => {
+  return apiRequest<RegisterResponse>('/register/personal/', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+};
+
+export const login = async (username: string, password: string): Promise<LoginResponse> => {
+  return apiRequest<LoginResponse>('/login/', {
+    method: 'POST',
+    body: JSON.stringify({ username, password }),
+  });
+};
+
+export const getCurrentUser = async (): Promise<User> => {
+  return apiRequest<User>('/me/');
+};
+
+// ========== SERVICES API ==========
+
+export const getServiceCategories = async (): Promise<ServiceCategory[]> => {
+  return apiRequest<ServiceCategory[]>('/services/categories/');
+};
+
+export const getServices = async (params?: {
+  category?: string;
+  type?: string;
+  featured?: boolean;
+}): Promise<Service[]> => {
+  const queryParams = new URLSearchParams();
+  if (params?.category) queryParams.append('category', params.category);
+  if (params?.type) queryParams.append('type', params.type);
+  if (params?.featured) queryParams.append('featured', 'true');
+  
+  const query = queryParams.toString();
+  return apiRequest<Service[]>(`/services/${query ? `?${query}` : ''}`);
+};
+
+export const getService = async (slug: string): Promise<Service> => {
+  return apiRequest<Service>(`/services/${slug}/`);
+};
+
+// ========== BOOKINGS API ==========
+
+export const createBooking = async (data: {
+  service?: number;
+  package?: number;
+  scheduled_date?: string;
+  timezone: string;
+  client_name: string;
+  client_email: string;
+  client_phone: string;
+  client_notes?: string;
+  currency: 'USD' | 'EUR';
+  payment_method: 'stripe' | 'paypal' | 'bizum' | 'transfer';
+}): Promise<Booking> => {
+  return apiRequest<Booking>('/bookings/', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+};
+
+export const getUserBookings = async (): Promise<Booking[]> => {
+  return apiRequest<Booking[]>('/bookings/');
+};
+
+export const getBooking = async (id: number): Promise<Booking> => {
+  return apiRequest<Booking>(`/bookings/${id}/`);
+};
+
+// ========== AVAILABLE SLOTS API ==========
+
+export const getAvailableSlots = async (params?: {
+  day?: number;
+  service?: number;
+}) => {
+  const queryParams = new URLSearchParams();
+  if (params?.day !== undefined) queryParams.append('day', params.day.toString());
+  if (params?.service) queryParams.append('service', params.service.toString());
+  
+  const query = queryParams.toString();
+  return apiRequest(`/availability/slots/${query ? `?${query}` : ''}`);
+};
+
+export const getBlockedDates = async (params?: {
+  start_date?: string;
+  end_date?: string;
+}) => {
+  const queryParams = new URLSearchParams();
+  if (params?.start_date) queryParams.append('start_date', params.start_date);
+  if (params?.end_date) queryParams.append('end_date', params.end_date);
+  
+  const query = queryParams.toString();
+  return apiRequest(`/availability/blocked/${query ? `?${query}` : ''}`);
+};
+
+export default {
+  // Auth
+  registerTherapist,
+  registerPersonal,
+  login,
+  getCurrentUser,
+  // Services
+  getServiceCategories,
+  getServices,
+  getService,
+  // Bookings
+  createBooking,
+  getUserBookings,
+  getBooking,
+  // Availability
+  getAvailableSlots,
+  getBlockedDates,
+};
+
+// Función para calcular análisis cabalístico
+export async function calcularAnalisisCabalistico(data: {
+  nombre: string;
+  dia: string;
+  mes: string;
+  anio: string;
+}) {
+  return apiRequest<any>('/fichas/', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}

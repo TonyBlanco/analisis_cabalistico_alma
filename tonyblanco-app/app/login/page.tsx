@@ -76,13 +76,13 @@ function LoginContent() {
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label className="block text-gray-400 mb-2 text-sm body-font">Usuario</label>
+              <label className="block text-gray-400 mb-2 text-sm body-font">Usuario o Email</label>
               <input 
                 type="text" 
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 className="w-full bg-slate-800/50 border border-slate-700 rounded-lg p-3 text-white focus:ring-2 focus:ring-[#D4AF37] outline-none transition-all"
-                placeholder="Ej: tony"
+                placeholder="Ej: tony o correo"
               />
             </div>
             

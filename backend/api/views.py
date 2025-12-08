@@ -8,6 +8,7 @@ from rest_framework.authtoken.models import Token
 from datetime import date
 from django.utils import timezone
 from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, get_user_model
 from google.auth.transport import requests
 from google.oauth2 import id_token
 
@@ -137,6 +138,36 @@ class CurrentUserView(APIView):
             })
         
         return Response(user_data)
+
+
+class EmailOrUsernameAuthToken(APIView):
+    """Permite login con username o email y devuelve un token."""
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        username_or_email = request.data.get('username') or request.data.get('email')
+        password = request.data.get('password')
+
+        if not username_or_email or not password:
+            return Response({'detail': 'Usuario/email y contraseña son requeridos'}, status=status.HTTP_400_BAD_REQUEST)
+
+        UserModel = get_user_model()
+
+        user = (
+            UserModel.objects.filter(username=username_or_email).first()
+            or UserModel.objects.filter(email=username_or_email).first()
+        )
+
+        if not user:
+            return Response({'detail': 'Credenciales inválidas'}, status=status.HTTP_400_BAD_REQUEST)
+
+        user_auth = authenticate(username=user.username, password=password)
+
+        if not user_auth:
+            return Response({'detail': 'Credenciales inválidas'}, status=status.HTTP_400_BAD_REQUEST)
+
+        token, _ = Token.objects.get_or_create(user=user_auth)
+        return Response({'token': token.key})
 
 
 class CalculoCabalisticoView(APIView):

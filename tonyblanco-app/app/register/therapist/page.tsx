@@ -33,6 +33,11 @@ export default function TherapistRegister() {
       return;
     }
 
+    if (formData.password.length < 8) {
+      setError('La contraseña debe tener al menos 8 caracteres');
+      return;
+    }
+
     if (!formData.yearsOfExperience || parseInt(formData.yearsOfExperience) < 0) {
       setError('Por favor ingresa años de experiencia válidos');
       return;

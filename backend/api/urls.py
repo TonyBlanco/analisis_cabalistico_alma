@@ -8,6 +8,7 @@ from .views import (
     RegisterTherapistView,
     RegisterPersonalView,
     CurrentUserView,
+    EmailOrUsernameAuthToken,
     GoogleOAuthView,
     AdminStatsView,
     AdminUsersView,
@@ -43,7 +44,7 @@ urlpatterns = [
     path('', welcome_api, name='api_welcome'),
     
     # Autenticación
-    path('login/', obtain_auth_token, name='api_token_auth'),
+    path('login/', EmailOrUsernameAuthToken.as_view(), name='api_token_auth'),
     path('login/google/', GoogleOAuthView.as_view(), name='google_oauth'),
     path('register/therapist/', RegisterTherapistView.as_view(), name='register_therapist'),
     path('register/personal/', RegisterPersonalView.as_view(), name='register_personal'),

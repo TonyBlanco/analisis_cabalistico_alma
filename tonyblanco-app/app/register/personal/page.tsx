@@ -30,6 +30,11 @@ export default function PersonalRegister() {
       return;
     }
 
+    if (formData.password.length < 8) {
+      setError('La contraseña debe tener al menos 8 caracteres');
+      return;
+    }
+
     setLoading(true);
 
     try {

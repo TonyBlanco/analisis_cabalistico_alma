@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { API_BASE_URL } from '@/lib/api';
 
 export default function MyFichasPage() {
   const [fichas, setFichas] = useState<any[]>([]);
@@ -16,7 +17,7 @@ export default function MyFichasPage() {
 
     (async () => {
       try {
-        const res = await fetch('http://localhost:8000/api/fichas/', {
+        const res = await fetch(`${API_BASE_URL}/fichas/`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

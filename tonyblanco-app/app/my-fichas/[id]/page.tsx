@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import { API_BASE_URL } from '@/lib/api';
 import { Trash2, RefreshCw } from 'lucide-react';
 import TreeOfLife from '../../../src/components/tree/tree_of_life_visualizer';
 

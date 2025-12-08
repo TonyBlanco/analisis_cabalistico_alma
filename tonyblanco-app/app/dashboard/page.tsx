@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FichaNumerologica } from '../../src/types';
+import { API_BASE_URL } from '@/lib/api';
 
 export default function Dashboard() {
   const router = useRouter();
@@ -44,7 +45,7 @@ export default function Dashboard() {
       const headers: Record<string,string> = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = `Token ${token}`;
 
-      const res = await fetch('http://localhost:8000/api/calcular/', {
+      const res = await fetch(`${API_BASE_URL}/calcular/`, {
         method: 'POST',
         headers,
         body: JSON.stringify({

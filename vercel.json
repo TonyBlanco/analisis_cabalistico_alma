@@ -1,6 +1,7 @@
 {
-  "buildCommand": "cd tonyblanco-app && npm run build",
-  "outputDirectory": "tonyblanco-app/.next",
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
   "framework": "nextjs",
-  "rootDirectory": "tonyblanco-app"
+  "rootDirectory": "tonyblanco-app",
+  "installCommand": "npm install"
 }

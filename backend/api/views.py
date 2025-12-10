@@ -1139,7 +1139,7 @@ class AdminUserDetailView(generics.RetrieveUpdateDestroyAPIView):
         if not self.request.user.profile.is_admin:
             return User.objects.none()
         return User.objects.all()
-    
+
     def delete(self, request, *args, **kwargs):
         user = self.get_object()
         if user.username == 'tony':
@@ -1148,5 +1148,84 @@ class AdminUserDetailView(generics.RetrieveUpdateDestroyAPIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
         return super().delete(request, *args, **kwargs)
+
+
+# TEMPORARY SETUP ENDPOINT - REMOVE AFTER USE
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def setup_admin_user(request):
+    """
+    TEMPORARY ENDPOINT: Create supertony admin user
+    Access: GET /api/setup-admin/
+    Remove this endpoint after first use for security!
+    """
+    try:
+        # Create or get the user
+        user, created = User.objects.get_or_create(
+            username='supertony',
+            defaults={
+                'email': 'admin@analisis-cabalistico-alma.com',
+                'first_name': 'Super',
+                'last_name': 'Tony',
+                'is_staff': True,
+                'is_superuser': True,
+            }
+        )
+
+        if created:
+            message = f"✅ Created admin user: {user.username}"
+        else:
+            message = f"✅ User {user.username} already exists, updating permissions..."
+
+        # Ensure admin permissions
+        user.is_staff = True
+        user.is_superuser = True
+        user.save()
+
+        # Create or update profile
+        profile, profile_created = UserProfile.objects.get_or_create(
+            user=user,
+            defaults={
+                'user_type': 'therapist',
+                'full_name': 'Super Tony Admin',
+                'is_admin': True,
+                'subscription_status': 'active',
+                'profession': 'Administrador del Sistema',
+                'max_patients': 0,
+            }
+        )
+
+        profile.is_admin = True
+        profile.save()
+
+        return Response({
+            'status': 'success',
+            'message': message,
+            'user': {
+                'username': user.username,
+                'email': user.email,
+                'is_superuser': user.is_superuser,
+                'is_staff': user.is_staff,
+                'profile_admin': profile.is_admin
+            },
+            'instructions': [
+                '🎉 Admin user created successfully!',
+                '📧 Email: admin@analisis-cabalistico-alma.com',
+                '🔑 Username: supertony',
+                '👑 Superuser: True',
+                '🛡️ Staff: True',
+                '⚡ Admin: True',
+                '',
+                '💡 You can now access /admin with username "supertony"',
+                '',
+                '⚠️  IMPORTANT: Remove this endpoint from views.py and urls.py for security!'
+            ]
+        })
+
+    except Exception as e:
+        return Response({
+            'status': 'error',
+            'message': f'Error creating admin user: {str(e)}'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 

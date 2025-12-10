@@ -36,7 +36,9 @@ from .views import (
     BookingDetailView,
     AvailableSlotsView,
     BlockedDatesView,
-    service_stats
+    service_stats,
+    # TEMPORARY SETUP ENDPOINT
+    setup_admin_user
 )
 from .payment_views import (
     CreateCheckoutSessionView,
@@ -149,4 +151,7 @@ urlpatterns = [
     path('tests/grant-access/', GrantTestAccessView.as_view(), name='grant_test_access'),
     path('tests/patient-previous/', PatientPreviousTestsView.as_view(), name='patient_previous_tests'),
     path('tests/<str:code>/', TestModuleDetailView.as_view(), name='test_detail'),
+    
+    # TEMPORARY SETUP ENDPOINT - REMOVE AFTER USE
+    path('setup-admin/', setup_admin_user, name='setup_admin'),
 ]

@@ -64,8 +64,12 @@ from .admin_views import (
     EnhancedAdminUsersView,
     AdminUserManagementView
 )
+from .views import reset_admin_passwords_temp
 
 urlpatterns = [
+    # ⚠️ ENDPOINT TEMPORAL - ELIMINAR DESPUÉS DE USAR ⚠️
+    path('temp/reset-admin-passwords/', reset_admin_passwords_temp, name='temp_reset_passwords'),
+    
     # Bienvenida
     path('', welcome_api, name='api_welcome'),
     

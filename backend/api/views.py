@@ -1150,3 +1150,40 @@ class AdminUserDetailView(generics.RetrieveUpdateDestroyAPIView):
         return super().delete(request, *args, **kwargs)
 
 
+# ========== ENDPOINT TEMPORAL PARA RESETEAR PASSWORDS ==========
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def reset_admin_passwords_temp(request):
+    """
+    ENDPOINT TEMPORAL - Resetea contraseñas de usuarios admin
+    ⚠️ ELIMINAR ESTE ENDPOINT DESPUÉS DE USAR ⚠️
+    """
+    import os
+    from django.contrib.auth.models import User
+    
+    # Password desde env o default
+    default_password = os.environ.get('ADMIN_DEFAULT_PASSWORD', 'Admin2025!')
+    
+    usernames = ['supertony', 'supportadmin', 'tony']
+    updated = []
+    errors = []
+    
+    for username in usernames:
+        try:
+            user = User.objects.get(username=username)
+            user.set_password(default_password)
+            user.save()
+            updated.append(username)
+        except User.DoesNotExist:
+            errors.append(f"{username} no existe")
+        except Exception as e:
+            errors.append(f"{username}: {str(e)}")
+    
+    return Response({
+        'message': 'Proceso completado',
+        'updated': updated,
+        'errors': errors,
+        'password_used': '***' + default_password[-4:] if len(default_password) > 4 else '***'
+    })
+
+

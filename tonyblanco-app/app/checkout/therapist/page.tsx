@@ -30,13 +30,17 @@ export default function TherapistCheckout() {
         throw new Error('Plan no configurado. Contacta soporte.');
       }
 
-      const { checkoutUrl } = await createCheckoutSession(
-        token,
-        plan.priceId,
-        selectedPlan
-      );
+      const response = await createCheckoutSession({
+        planType: selectedPlan,
+        successUrl: `${window.location.origin}/checkout/success`,
+        cancelUrl: `${window.location.origin}/checkout/cancel`
+      });
 
-      window.location.href = checkoutUrl;
+      if (response.url) {
+        window.location.href = response.url;
+      } else {
+        throw new Error('No checkout URL returned');
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al procesar el pago');
       setLoading(false);

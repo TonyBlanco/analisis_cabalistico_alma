@@ -23,7 +23,7 @@ export default function BAIAssessment() {
     tipo: 'inicial'
   });
   
-  const [responses, setResponses] = useState({});
+  const [responses, setResponses] = useState<Record<number, number>>({});
   const [showResults, setShowResults] = useState(false);
   const [startTime] = useState(Date.now());
 
@@ -142,21 +142,22 @@ export default function BAIAssessment() {
     'Gravemente (casi no podía soportarlo)'
   ];
 
-  const handleResponse = (qId, val) => {
-    setResponses({ ...responses, [qId]: parseInt(val) });
+  const handleResponse = (qId: string | number, val: string | number) => {
+    setResponses({ ...responses, [qId]: parseInt(String(val)) });
   };
 
   const calcScores = () => {
     let total = 0, fisico = 0, cognitivo = 0;
     Object.entries(responses).forEach(([k, v]) => {
-      total += v;
+      const vNum = v as number;
+      total += vNum;
       const q = questions.find(q => q.id === parseInt(k));
-      if (q) q.cat === 'F' ? fisico += v : cognitivo += v;
+      if (q) q.cat === 'F' ? fisico += vNum : cognitivo += vNum;
     });
     return { total, fisico, cognitivo };
   };
 
-  const getSeverity = (score) => {
+  const getSeverity = (score: number) => {
     if (score <= 7) return { lvl: 'Mínima', col: 'green', desc: 'Ansiedad mínima' };
     if (score <= 15) return { lvl: 'Leve', col: 'blue', desc: 'Ansiedad leve' };
     if (score <= 25) return { lvl: 'Moderada', col: 'yellow', desc: 'Ansiedad moderada' };
@@ -258,7 +259,7 @@ export default function BAIAssessment() {
     };
   };
 
-  const genRec = (s, sev, panic) => {
+  const genRec = (s: any, sev: any, panic: boolean) => {
     const r = [];
     
     if (panic) {
@@ -316,7 +317,7 @@ export default function BAIAssessment() {
       const res = await executeTest(payload);
       
       // Si viene de un paciente, guardar también en el perfil del paciente
-      if (patientId && patient) {
+      if (patientId && patient && scores && sev) {
         const testResult = {
           patientId: patientId,
           testType: 'wellness' as const,
@@ -353,7 +354,7 @@ export default function BAIAssessment() {
   const allFilled = clientData.nombre && clientData.edad && clientData.terapeuta;
   const allAnswered = Object.keys(responses).length === 21;
   const scores = showResults ? calcScores() : null;
-  const sev = showResults ? getSeverity(scores.total) : null;
+  const sev = scores ? getSeverity(scores.total) : null;
   const panic = showResults ? checkPanicSymptoms() : false;
 
   return (
@@ -532,7 +533,7 @@ export default function BAIAssessment() {
                 </div>
               )}
             </>
-          ) : (
+          ) : scores && sev ? (
             <div className="space-y-4">
               {panic && (
                 <div className="bg-orange-100 border-l-4 border-orange-600 p-4">
@@ -667,6 +668,10 @@ export default function BAIAssessment() {
                   {JSON.stringify(genJSON(), null, 2)}
                 </pre>
               </details>
+            </div>
+          ) : (
+            <div className="p-4 bg-yellow-50 border border-yellow-200 rounded">
+              <p className="text-sm text-yellow-800">Por favor, complete el cuestionario antes de ver los resultados.</p>
             </div>
           )}
         </div>

@@ -116,6 +116,8 @@ const KABBALAH_METHODS: KabbalisticMethod[] = [
       'Redirección espiritual después de trauma',
       'Entender por qué ciertos dones vienen naturalmente',
     ],
+    calculations: ['Extracción de vocales del nombre hebreo', 'Suma de valores de vocales', 'Reducción numérica', 'Análisis del Neshamá'],
+    available: true,
   },
   {
     id: 'tikun',

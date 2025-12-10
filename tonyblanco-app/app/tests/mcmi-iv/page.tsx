@@ -208,7 +208,7 @@ export default function MCMIIVAssessment() {
                 <div className="grid grid-cols-3 gap-2 text-xs">
                   {Object.keys(scores.scales).map((scale) => (
                     <div key={scale} className="p-2 rounded bg-white">
-                      <span className="font-semibold">{scale}:</span> {scores.scales[scale]}
+                      <span className="font-semibold">{scale}:</span> {(scores.scales as Record<string, number>)[scale]}
                     </div>
                   ))}
                 </div>

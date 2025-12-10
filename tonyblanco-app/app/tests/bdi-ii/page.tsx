@@ -23,7 +23,7 @@ export default function BDIIAssessment() {
     tipo: 'inicial'
   });
   
-  const [responses, setResponses] = useState({});
+  const [responses, setResponses] = useState<Record<number, number>>({});
   const [showResults, setShowResults] = useState(false);
   const [startTime] = useState(Date.now());
   const [isAvailable, setIsAvailable] = useState(true);
@@ -133,21 +133,22 @@ export default function BDIIAssessment() {
     { id: 21, cat: 'S', text: 'Interés sexual', opts: ['Sin cambios', 'Menos interesado', 'Mucho menos interesado', 'Perdí completamente el interés'] }
   ];
 
-  const handleResponse = (qId, val) => {
-    setResponses({ ...responses, [qId]: parseInt(val) });
+  const handleResponse = (qId: string | number, val: string | number) => {
+    setResponses({ ...responses, [qId]: parseInt(val as string) });
   };
 
   const calcScores = () => {
     let total = 0, ca = 0, s = 0;
     Object.entries(responses).forEach(([k, v]) => {
-      total += v;
+      const numVal = typeof v === 'number' ? v : 0;
+      total += numVal;
       const q = questions.find(q => q.id === parseInt(k));
-      if (q) q.cat === 'CA' ? ca += v : s += v;
+      if (q) q.cat === 'CA' ? ca += numVal : s += numVal;
     });
     return { total, ca, s };
   };
 
-  const getSeverity = (score) => {
+  const getSeverity = (score: number) => {
     if (score <= 13) return { lvl: 'Mínima', col: 'green', desc: 'Depresión mínima o ausente' };
     if (score <= 19) return { lvl: 'Leve', col: 'yellow', desc: 'Depresión leve' };
     if (score <= 28) return { lvl: 'Moderada', col: 'orange', desc: 'Depresión moderada' };
@@ -196,7 +197,7 @@ export default function BDIIAssessment() {
     };
   };
 
-  const genRec = (s, sui) => {
+  const genRec = (s: any, sui: any) => {
     const r = [];
     if (sui.risk) r.push('URGENTE: Evaluación inmediata riesgo suicida');
     if (s.total >= 29) r.push('Considerar intervención intensiva/psiquiátrica');
@@ -282,8 +283,8 @@ export default function BDIIAssessment() {
   const allFilled = clientData.nombre && clientData.edad && clientData.terapeuta;
   const allAnswered = Object.keys(responses).length === 21;
   const scores = showResults ? calcScores() : null;
-  const sev = showResults ? getSeverity(scores.total) : null;
-  const sui = showResults ? checkSuicide() : null;
+  const sev = scores ? getSeverity(scores.total) : null;
+  const sui = scores ? checkSuicide() : null;
 
   return (
     <div className="min-h-screen bg-slate-50 p-4" style={{ backgroundColor: '#f8fafc' }}>
@@ -395,7 +396,7 @@ export default function BDIIAssessment() {
                 </div>
               )}
             </>
-          ) : (
+          ) : scores && sev && sui ? (
             <div className="space-y-4">
               {sui.risk && (
                 <div className="bg-red-100 border-l-4 border-red-600 p-4">
@@ -452,6 +453,10 @@ export default function BDIIAssessment() {
                 <summary className="font-bold text-sm cursor-pointer">Vista previa JSON</summary>
                 <pre className="text-xs overflow-auto max-h-48 bg-white p-2 rounded mt-2">{JSON.stringify(genJSON(), null, 2)}</pre>
               </details>
+            </div>
+          ) : (
+            <div className="p-4 bg-yellow-50 border border-yellow-200 rounded">
+              <p className="text-sm text-yellow-800">Por favor, complete el cuestionario antes de ver los resultados.</p>
             </div>
           )}
         </div>

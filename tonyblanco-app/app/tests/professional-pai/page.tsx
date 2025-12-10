@@ -13,7 +13,7 @@ export default function PAIAssessment() {
     terapeuta: ''
   });
   
-  const [responses, setResponses] = useState({});
+  const [responses, setResponses] = useState<Record<string, number>>({});
   const [showResults, setShowResults] = useState(false);
   const [serverResult, setServerResult] = useState<any | null>(null);
    const [allowed, setAllowed] = useState<boolean | null>(null);
@@ -204,56 +204,56 @@ export default function PAIAssessment() {
                   <div className="h-4 bg-gray-200 rounded w-1/2 mb-3"></div>
                 </div>
               </div>
-            ) : (
-            <>
-            allowed === false ? (
+            ) : allowed === false ? (
               <div className="p-6 bg-red-50 border-l-4 border-red-500 rounded">
                 <h3 className="font-bold text-red-600 mb-2">Acceso restringido</h3>
                 <p className="text-sm text-gray-700">Este test está reservado para profesionales. Si crees que deberías tener acceso, por favor actualiza tu plan o contáctanos.</p>
               </div>
             ) : (
-              <div className="bg-blue-50 border-l-4 border-blue-600 p-4 mb-6">
-                <h2 className="font-bold text-lg mb-3 flex items-center"><User size={20} className="mr-2" /> Datos del Cliente</h2>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Nombre completo</label>
-                    <input type="text" value={clientData.nombre} onChange={(e) => handleClientDataChange('nombre', e.target.value)} className="w-full p-2 border rounded" placeholder="Nombre del cliente" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Edad</label>
-                    <input type="number" value={clientData.edad} onChange={(e) => handleClientDataChange('edad', e.target.value)} className="w-full p-2 border rounded" placeholder="Edad" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Fecha de evaluación</label>
-                    <input type="date" value={clientData.fecha} onChange={(e) => handleClientDataChange('fecha', e.target.value)} className="w-full p-2 border rounded" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Terapeuta</label>
-                    <input type="text" value={clientData.terapeuta} onChange={(e) => handleClientDataChange('terapeuta', e.target.value)} className="w-full p-2 border rounded" placeholder="Nombre del terapeuta" />
-                  </div>
-                </div>
-              </div>
-              {allFieldsFilled && (
-                <div className="space-y-6">
-                  <div className="bg-gray-50 p-4 rounded">
-                    <p className="text-sm text-gray-700 mb-2"><strong>Instrucciones:</strong> Indique la frecuencia con la que experimenta cada afirmación</p>
-                    <div className="flex gap-4 text-sm"><span><strong>0</strong>=Nunca</span><span><strong>1</strong>=Rara vez</span><span><strong>2</strong>=A veces</span><span><strong>3</strong>=Frecuentemente</span><span><strong>4</strong>=Siempre</span></div>
-                  </div>
-                  {questions.map((q, idx) => (
-                    <div key={q.id} className="border-b pb-4">
-                      <p className="font-medium mb-3 text-gray-800">{idx + 1}. {q.text}</p>
-                      <div className="flex gap-4">
-                        {[0, 1, 2, 3, 4].map((value) => (
-                          <label key={value} className="flex items-center cursor-pointer"><input type="radio" name={q.id} value={value} checked={responses[q.id] === value} onChange={() => handleResponse(q.id, value)} className="mr-2" /><span className="text-sm">{value}</span></label>
-                        ))}
-                      </div>
+              <>
+                <div className="bg-blue-50 border-l-4 border-blue-600 p-4 mb-6">
+                  <h2 className="font-bold text-lg mb-3 flex items-center"><User size={20} className="mr-2" /> Datos del Cliente</h2>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Nombre completo</label>
+                      <input type="text" value={clientData.nombre} onChange={(e) => handleClientDataChange('nombre', e.target.value)} className="w-full p-2 border rounded" placeholder="Nombre del cliente" />
                     </div>
-                  ))}
-
-                  <button onClick={handleSubmit} disabled={!allQuestionsAnswered} className={`w-full py-3 rounded-lg font-semibold text-white ${allQuestionsAnswered ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400 cursor-not-allowed'}`}>Generar Resultados</button>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Edad</label>
+                      <input type="number" value={clientData.edad} onChange={(e) => handleClientDataChange('edad', e.target.value)} className="w-full p-2 border rounded" placeholder="Edad" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Fecha de evaluación</label>
+                      <input type="date" value={clientData.fecha} onChange={(e) => handleClientDataChange('fecha', e.target.value)} className="w-full p-2 border rounded" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Terapeuta</label>
+                      <input type="text" value={clientData.terapeuta} onChange={(e) => handleClientDataChange('terapeuta', e.target.value)} className="w-full p-2 border rounded" placeholder="Nombre del terapeuta" />
+                    </div>
+                  </div>
                 </div>
-              )}
-            </>
+                {allFieldsFilled && (
+                  <div className="space-y-6">
+                    <div className="bg-gray-50 p-4 rounded">
+                      <p className="text-sm text-gray-700 mb-2"><strong>Instrucciones:</strong> Indique la frecuencia con la que experimenta cada afirmación</p>
+                      <div className="flex gap-4 text-sm"><span><strong>0</strong>=Nunca</span><span><strong>1</strong>=Rara vez</span><span><strong>2</strong>=A veces</span><span><strong>3</strong>=Frecuentemente</span><span><strong>4</strong>=Siempre</span></div>
+                    </div>
+                    {questions.map((q, idx) => (
+                      <div key={q.id} className="border-b pb-4">
+                        <p className="font-medium mb-3 text-gray-800">{idx + 1}. {q.text}</p>
+                        <div className="flex gap-4">
+                          {[0, 1, 2, 3, 4].map((value) => (
+                            <label key={value} className="flex items-center cursor-pointer"><input type="radio" name={q.id} value={value} checked={responses[q.id] === value} onChange={() => handleResponse(q.id, value)} className="mr-2" /><span className="text-sm">{value}</span></label>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+
+                    <button onClick={handleSubmit} disabled={!allQuestionsAnswered} className={`w-full py-3 rounded-lg font-semibold text-white ${allQuestionsAnswered ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400 cursor-not-allowed'}`}>Generar Resultados</button>
+                  </div>
+                )}
+              </>
+            )
           ) : (
             <div className="space-y-6">
               <div className="bg-green-50 border-l-4 border-green-600 p-6">

@@ -115,7 +115,7 @@ export function analyzeLongTermTrends(patientId: string, months: number = 3): Pa
     endDate.toISOString()
   );
   
-  const trends = [];
+  const trends: Array<{ system: string; direction: 'improving' | 'stable' | 'declining'; changePercentage: number }> = [];
   
   if (tests.length >= 2) {
     const firstTest = tests[tests.length - 1];
@@ -216,7 +216,7 @@ export function correlateKabbalisticFindings(
       }
     });
     
-    if (relatedSystems.length > 0) {
+    if (relatedSystems.length > 0 && wellnessTest.wellnessData) {
       // Buscar hallazgos en wellness test
       const wellnessFindings = wellnessTest.wellnessData.systemScores.filter(sys =>
         relatedSystems.includes(sys.system)

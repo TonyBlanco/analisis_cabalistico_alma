@@ -110,7 +110,7 @@ export default function CompleteNumerologyPage() {
         client_name: formData.nombre.trim(),
         client_birth_date: formData.fecha_nacimiento,
         save_result: true,
-        patient_id: patientId || undefined
+        patient_id: patientId ? parseInt(patientId) : undefined
       };
 
       console.log('Enviando payload:', payload);

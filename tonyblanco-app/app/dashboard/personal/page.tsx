@@ -13,7 +13,13 @@ interface UserProfile {
   birth_data?: {
     full_name?: string;
     birth_date?: string;
+    birth_time?: string;
+    birth_city?: string;
+    birth_country?: string;
+    birth_latitude?: number;
+    birth_longitude?: number;
     is_locked?: boolean;
+    unlock_requested?: boolean;
   }
 }
 
@@ -238,10 +244,11 @@ export default function PersonalDashboard() {
               <p className="text-gray-200">Fecha: <strong className="text-white">
                 {(() => {
                   try {
+                    if (!userProfile.birth_data?.birth_date) return 'No configurado';
                     const date = new Date(userProfile.birth_data.birth_date);
                     return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
                   } catch {
-                    return userProfile.birth_data.birth_date;
+                    return userProfile.birth_data?.birth_date || 'No configurado';
                   }
                 })()}
               </strong></p>

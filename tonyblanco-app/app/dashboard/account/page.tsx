@@ -23,6 +23,8 @@ interface UserProfile {
     birth_time?: string;
     birth_city?: string;
     birth_country?: string;
+    birth_latitude?: number;
+    birth_longitude?: number;
     is_locked?: boolean;
   };
   membership_expires?: string;
@@ -354,7 +356,7 @@ export default function AccountPage() {
                           value={editForm.birth_city || ''}
                           onChange={(e) => {
                             const city = e.target.value;
-                            setEditForm(prev => ({...prev, birth_city: city}));
+                            setEditForm((prev: any) => ({...prev, birth_city: city}));
                             setGeocodingError('');
                             
                             // Limpiar timeout anterior
@@ -364,7 +366,7 @@ export default function AccountPage() {
                             
                             // Limpiar coordenadas si cambia la ciudad
                             if (city !== userProfile?.birth_data?.birth_city) {
-                              setEditForm(prev => ({
+                              setEditForm((prev: any) => ({
                                 ...prev,
                                 birth_city: city,
                                 birth_latitude: undefined,
@@ -383,7 +385,7 @@ export default function AccountPage() {
                                 try {
                                   const geoResult = await geocodeCity(cityToGeocode, countryToUse);
                                   if (geoResult && geoResult.success) {
-                                    setEditForm(prev => ({
+                                    setEditForm((prev: any) => ({
                                       ...prev,
                                       birth_city: cityToGeocode,
                                       birth_latitude: geoResult.latitude,
@@ -430,7 +432,7 @@ export default function AccountPage() {
                             try {
                               const geoResult = await geocodeCity(editForm.birth_city, country);
                               if (geoResult && geoResult.success) {
-                                setEditForm(prev => ({
+                                setEditForm((prev: any) => ({
                                   ...prev,
                                   birth_country: country,
                                   birth_latitude: geoResult.latitude,

@@ -55,6 +55,7 @@ export interface TestModule {
   order: number;
   estimated_duration: number;
   is_available: boolean;
+  requires_license?: boolean;
   user_access: UserTestAccess | null;
 }
 

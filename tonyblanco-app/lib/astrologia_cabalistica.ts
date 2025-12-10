@@ -431,7 +431,7 @@ export class CabalaAstrologer {
       for (const body of bodies) {
         try {
           const eq = Equator(body, date, observer, true, true);
-          const ecl = Ecliptic(eq);
+          const ecl = Ecliptic(eq as any);
           const bodyName = body.toString().replace('Body.', '');
           positions.push({ name: bodyName, deg: ecl.elon });
         } catch (err) {

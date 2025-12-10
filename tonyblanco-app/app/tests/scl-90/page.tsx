@@ -136,10 +136,10 @@ export default function SCL90RAssessment() {
     Object.keys(dimensions).forEach(dim => {
       const items = dimensions[dim].items.map((q: any) => responses[q.id] || 0);
       allItems.push(...items);
-      dimScores[dimensions[dim].id] = items.reduce((s, v) => s + v, 0) / (items.length || 1);
+      dimScores[dimensions[dim].id] = items.reduce((s: number, v: number) => s + v, 0) / (items.length || 1);
     });
-    const gsi = allItems.reduce((s, v) => s + v, 0) / (allItems.length || 1);
-    const psdi = allItems.filter(v => v > 0).reduce((s, v) => s + v, 0) / (allItems.filter(v => v > 0).length || 1);
+    const gsi = allItems.reduce((s: number, v: number) => s + v, 0) / (allItems.length || 1);
+    const psdi = allItems.filter(v => v > 0).reduce((s: number, v: number) => s + v, 0) / (allItems.filter(v => v > 0).length || 1);
     const pst = allItems.filter(v => v > 0).length;
     return { dimScores, gsi, psdi, pst };
   };

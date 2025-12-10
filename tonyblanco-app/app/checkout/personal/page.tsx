@@ -45,13 +45,17 @@ export default function PersonalCheckout() {
         throw new Error('Plan no configurado. Contacta soporte.');
       }
 
-      const { checkoutUrl } = await createCheckoutSession(
-        token,
-        plan.priceId,
-        'personal'
-      );
+      const response = await createCheckoutSession({
+        planType: 'personal',
+        successUrl: `${window.location.origin}/checkout/success`,
+        cancelUrl: `${window.location.origin}/checkout/cancel`
+      });
 
-      window.location.href = checkoutUrl;
+      if (response.url) {
+        window.location.href = response.url;
+      } else {
+        throw new Error('No checkout URL returned');
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al procesar el pago');
       setLoading(false);

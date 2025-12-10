@@ -331,15 +331,15 @@ export default function TestResultDetailPage() {
             </div>
             <div className="mt-4 bg-yellow-900/10 p-4 rounded">
               <h4 className="font-bold mb-2">Escalas de Validez</h4>
-              <p className="text-sm text-gray-400">Inconsistencia: {paiData.escalas_validez?.inconsistencia?.puntuacion} {paiData.escalas_validez?.inconsistencia?.valido ? '' : '⚠ Revisar validez'}</p>
+              <p className="text-sm text-gray-400">Inconsistencia: {payload.escalas_validez?.inconsistencia?.puntuacion} {payload.escalas_validez?.inconsistencia?.valido ? '' : '⚠ Revisar validez'}</p>
               <p className="text-sm text-gray-400">Inconsistencia: {payload.escalas_validez?.inconsistencia?.puntuacion} {payload.escalas_validez?.inconsistencia?.valido ? '' : '⚠ Revisar validez'}</p>
               <p className="text-sm text-gray-400">Simulación: {payload.escalas_validez?.simulacion?.puntuacion} {payload.escalas_validez?.simulacion?.posible_simulacion ? '⚠ Posible simulación' : ''}</p>
             </div>
-            {paiData.interpretacion && (
+            {payload.interpretacion && (
               <div className="mt-4 bg-gray-900 p-4 rounded">
                 <h4 className="font-bold mb-2">Interpretación</h4>
                 <ul className="text-sm space-y-2">
-                  {paiData.interpretacion.map((txt: string, idx: number) => (
+                  {payload.interpretacion.map((txt: string, idx: number) => (
                     <li key={idx} className="text-gray-300">• {txt}</li>
                   ))}
                 </ul>

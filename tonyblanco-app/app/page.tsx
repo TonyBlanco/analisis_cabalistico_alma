@@ -57,11 +57,19 @@ export default function KabbalistLanding() {
   };
 
   const handleTherapistClick = () => {
-    router.push('/register/therapist');
+    router.push('/landing/therapist');
   };
 
   const handlePersonalClick = () => {
-    router.push('/register/personal');
+    router.push('/landing/personal');
+  };
+
+  const handleDemoClick = () => {
+    router.push('/demo');
+  };
+
+  const handleLoginClick = () => {
+    router.push('/login');
   };
 
   return (
@@ -99,7 +107,7 @@ export default function KabbalistLanding() {
       </div>
 
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Spartan:wght@300;400;500&display=swap');
+        /* Fonts loaded in layout */
 
         * { cursor: none; }
         
@@ -221,13 +229,25 @@ export default function KabbalistLanding() {
             </button>
           </div>
 
-          {/* Services Link */}
-          <div className="flex justify-center mt-8 animate-fadeInUp-delay-2">
+          {/* Secondary Actions */}
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mt-8 animate-fadeInUp-delay-2">
             <button
-              onClick={() => router.push('/services')}
+              onClick={handleDemoClick}
               className="px-6 py-3 rounded-lg border border-[#D4AF37]/30 text-[#D4AF37] hover:bg-[#D4AF37]/10 transition-all body-font"
             >
-              Ver todos los servicios →
+              🎯 Probar Demo
+            </button>
+            <button
+              onClick={handleLoginClick}
+              className="px-6 py-3 rounded-lg bg-slate-800/50 border border-slate-700 text-gray-300 hover:bg-slate-700/50 hover:border-[#D4AF37]/30 transition-all body-font"
+            >
+              Ya soy miembro →
+            </button>
+            <button
+              onClick={() => router.push('/services')}
+              className="px-6 py-3 rounded-lg border border-slate-700 text-gray-400 hover:bg-slate-800/30 transition-all body-font"
+            >
+              Ver servicios
             </button>
           </div>
         </div>

@@ -1,0 +1,2834 @@
+{
+  "meta_config": {
+    "version": "3.0_Migrated",
+    "description": "Base de datos maestra con soporte para cálculos automáticos de Gematría, Temurah, Atbash y Notarikon",
+    "total_entries": 180,
+    "categories": [
+      "nombres_divinos",
+      "conceptos_misticos",
+      "numeros",
+      "emociones",
+      "naturaleza",
+      "tiempo",
+      "cuerpo",
+      "verbos",
+      "angeles",
+      "patriarcas",
+      "lugares_sagrados",
+      "objetos_rituales",
+      "virtudes",
+      "sefirot"
+    ],
+    "generated_at": "2025-12-09T22:47:29.234Z",
+    "source": "hebrew_words_database.json"
+  },
+  "alphabet_registry": [
+    {
+      "letter": "א",
+      "name": "Aleph",
+      "val_std": 1,
+      "val_ord": 1,
+      "val_sof": 1,
+      "atbash": "ת",
+      "type": "mother"
+    },
+    {
+      "letter": "ב",
+      "name": "Bet",
+      "val_std": 2,
+      "val_ord": 2,
+      "val_sof": 2,
+      "atbash": "ש",
+      "type": "double"
+    },
+    {
+      "letter": "ג",
+      "name": "Gimel",
+      "val_std": 3,
+      "val_ord": 3,
+      "val_sof": 3,
+      "atbash": "ר",
+      "type": "double"
+    },
+    {
+      "letter": "ד",
+      "name": "Dalet",
+      "val_std": 4,
+      "val_ord": 4,
+      "val_sof": 4,
+      "atbash": "ק",
+      "type": "double"
+    },
+    {
+      "letter": "ה",
+      "name": "He",
+      "val_std": 5,
+      "val_ord": 5,
+      "val_sof": 5,
+      "atbash": "צ",
+      "type": "simple"
+    },
+    {
+      "letter": "ו",
+      "name": "Vav",
+      "val_std": 6,
+      "val_ord": 6,
+      "val_sof": 6,
+      "atbash": "פ",
+      "type": "simple"
+    },
+    {
+      "letter": "ז",
+      "name": "Zayin",
+      "val_std": 7,
+      "val_ord": 7,
+      "val_sof": 7,
+      "atbash": "ע",
+      "type": "simple"
+    },
+    {
+      "letter": "ח",
+      "name": "Chet",
+      "val_std": 8,
+      "val_ord": 8,
+      "val_sof": 8,
+      "atbash": "ס",
+      "type": "simple"
+    },
+    {
+      "letter": "ט",
+      "name": "Tet",
+      "val_std": 9,
+      "val_ord": 9,
+      "val_sof": 9,
+      "atbash": "נ",
+      "type": "simple"
+    },
+    {
+      "letter": "י",
+      "name": "Yod",
+      "val_std": 10,
+      "val_ord": 10,
+      "val_sof": 10,
+      "atbash": "מ",
+      "type": "simple"
+    },
+    {
+      "letter": "כ",
+      "name": "Kaf",
+      "val_std": 20,
+      "val_ord": 11,
+      "val_sof": 500,
+      "atbash": "ל",
+      "type": "double"
+    },
+    {
+      "letter": "ך",
+      "name": "Kaf Sofit",
+      "val_std": 20,
+      "val_ord": 11,
+      "val_sof": 500,
+      "atbash": "ל",
+      "type": "sofit"
+    },
+    {
+      "letter": "ל",
+      "name": "Lamed",
+      "val_std": 30,
+      "val_ord": 12,
+      "val_sof": 30,
+      "atbash": "כ",
+      "type": "simple"
+    },
+    {
+      "letter": "מ",
+      "name": "Mem",
+      "val_std": 40,
+      "val_ord": 13,
+      "val_sof": 600,
+      "atbash": "י",
+      "type": "mother"
+    },
+    {
+      "letter": "ם",
+      "name": "Mem Sofit",
+      "val_std": 40,
+      "val_ord": 13,
+      "val_sof": 600,
+      "atbash": "י",
+      "type": "sofit"
+    },
+    {
+      "letter": "נ",
+      "name": "Nun",
+      "val_std": 50,
+      "val_ord": 14,
+      "val_sof": 700,
+      "atbash": "ט",
+      "type": "simple"
+    },
+    {
+      "letter": "ן",
+      "name": "Nun Sofit",
+      "val_std": 50,
+      "val_ord": 14,
+      "val_sof": 700,
+      "atbash": "ט",
+      "type": "sofit"
+    },
+    {
+      "letter": "ס",
+      "name": "Samech",
+      "val_std": 60,
+      "val_ord": 15,
+      "val_sof": 60,
+      "atbash": "ח",
+      "type": "simple"
+    },
+    {
+      "letter": "ע",
+      "name": "Ayin",
+      "val_std": 70,
+      "val_ord": 16,
+      "val_sof": 70,
+      "atbash": "ז",
+      "type": "simple"
+    },
+    {
+      "letter": "פ",
+      "name": "Pei",
+      "val_std": 80,
+      "val_ord": 17,
+      "val_sof": 800,
+      "atbash": "ו",
+      "type": "double"
+    },
+    {
+      "letter": "ף",
+      "name": "Pei Sofit",
+      "val_std": 80,
+      "val_ord": 17,
+      "val_sof": 800,
+      "atbash": "ו",
+      "type": "sofit"
+    },
+    {
+      "letter": "צ",
+      "name": "Tzadik",
+      "val_std": 90,
+      "val_ord": 18,
+      "val_sof": 900,
+      "atbash": "ה",
+      "type": "simple"
+    },
+    {
+      "letter": "ץ",
+      "name": "Tzadik Sofit",
+      "val_std": 90,
+      "val_ord": 18,
+      "val_sof": 900,
+      "atbash": "ה",
+      "type": "sofit"
+    },
+    {
+      "letter": "ק",
+      "name": "Qof",
+      "val_std": 100,
+      "val_ord": 19,
+      "val_sof": 100,
+      "atbash": "ד",
+      "type": "simple"
+    },
+    {
+      "letter": "ר",
+      "name": "Resh",
+      "val_std": 200,
+      "val_ord": 20,
+      "val_sof": 200,
+      "atbash": "ג",
+      "type": "double"
+    },
+    {
+      "letter": "ש",
+      "name": "Shin",
+      "val_std": 300,
+      "val_ord": 21,
+      "val_sof": 300,
+      "atbash": "ב",
+      "type": "mother"
+    },
+    {
+      "letter": "ת",
+      "name": "Tav",
+      "val_std": 400,
+      "val_ord": 22,
+      "val_sof": 400,
+      "atbash": "א",
+      "type": "double"
+    }
+  ],
+  "lexicon": [
+    {
+      "id": "cue_1",
+      "hebrew_clean": "לב",
+      "hebrew_full": "לב",
+      "transliteration": "Lev",
+      "category": "cuerpo",
+      "meaning_es": "Corazón",
+      "gematria_std": 32,
+      "related": [],
+      "references": [
+        "Proverbios 4:23"
+      ],
+      "mystical_desc": "Centro emocional y espiritual. 32 caminos de sabiduría en el Sefer Yetzirah"
+    },
+    {
+      "id": "cue_2",
+      "hebrew_clean": "עין",
+      "hebrew_full": "עין",
+      "transliteration": "Ayin",
+      "category": "cuerpo",
+      "meaning_es": "Ojo",
+      "gematria_std": 130,
+      "related": [],
+      "references": [],
+      "mystical_desc": "La capacidad de percibir lo divino"
+    },
+    {
+      "id": "cue_3",
+      "hebrew_clean": "אזן",
+      "hebrew_full": "אזן",
+      "transliteration": "Ozen",
+      "category": "cuerpo",
+      "meaning_es": "Oído, Oreja",
+      "gematria_std": 58,
+      "related": [],
+      "references": [],
+      "mystical_desc": "Escuchar la voz divina"
+    },
+    {
+      "id": "cue_4",
+      "hebrew_clean": "יד",
+      "hebrew_full": "יד",
+      "transliteration": "Yad",
+      "category": "cuerpo",
+      "meaning_es": "Mano",
+      "gematria_std": 14,
+      "related": [
+        "דוד"
+      ],
+      "references": [],
+      "mystical_desc": "Instrumento de acción en el mundo. Mismo valor que David"
+    },
+    {
+      "id": "cue_5",
+      "hebrew_clean": "רגל",
+      "hebrew_full": "רגל",
+      "transliteration": "Regel",
+      "category": "cuerpo",
+      "meaning_es": "Pie, Pierna",
+      "gematria_std": 233,
+      "related": [],
+      "references": [],
+      "mystical_desc": "Caminar en los senderos de Dios"
+    },
+    {
+      "id": "cue_6",
+      "hebrew_clean": "דם",
+      "hebrew_full": "דם",
+      "transliteration": "Dam",
+      "category": "cuerpo",
+      "meaning_es": "Sangre",
+      "gematria_std": 44,
+      "related": [],
+      "references": [
+        "Levítico 17:11"
+      ],
+      "mystical_desc": "La vida está en la sangre"
+    },
+    {
+      "id": "ver_7",
+      "hebrew_clean": "ברא",
+      "hebrew_full": "ברא",
+      "transliteration": "Bara",
+      "category": "verbos",
+      "meaning_es": "Crear (de la nada)",
+      "gematria_std": 203,
+      "related": [],
+      "references": [
+        "Génesis 1:1"
+      ],
+      "mystical_desc": "Creación ex nihilo, exclusivo de Dios"
+    },
+    {
+      "id": "ver_8",
+      "hebrew_clean": "עשה",
+      "hebrew_full": "עשה",
+      "transliteration": "Asah",
+      "category": "verbos",
+      "meaning_es": "Hacer, Fabricar",
+      "gematria_std": 375,
+      "related": [],
+      "references": [],
+      "mystical_desc": "Hacer de algo existente"
+    },
+    {
+      "id": "ver_9",
+      "hebrew_clean": "יצר",
+      "hebrew_full": "יצר",
+      "transliteration": "Yatzar",
+      "category": "verbos",
+      "meaning_es": "Formar, Modelar",
+      "gematria_std": 300,
+      "related": [],
+      "references": [
+        "Génesis 2:7"
+      ],
+      "mystical_desc": "Formar como un artesano. Dios formó al hombre del polvo"
+    },
+    {
+      "id": "ver_10",
+      "hebrew_clean": "דבר",
+      "hebrew_full": "דבר",
+      "transliteration": "Davar",
+      "category": "verbos",
+      "meaning_es": "Palabra, Cosa",
+      "gematria_std": 206,
+      "related": [],
+      "references": [],
+      "mystical_desc": "La palabra que crea realidad"
+    },
+    {
+      "id": "ver_11",
+      "hebrew_clean": "אמר",
+      "hebrew_full": "אמר",
+      "transliteration": "Amar",
+      "category": "verbos",
+      "meaning_es": "Decir",
+      "gematria_std": 241,
+      "related": [],
+      "references": [],
+      "mystical_desc": "Expresión del pensamiento divino"
+    },
+    {
+      "id": "ver_12",
+      "hebrew_clean": "שמע",
+      "hebrew_full": "שמע",
+      "transliteration": "Shema",
+      "category": "verbos",
+      "meaning_es": "Escuchar, Oír",
+      "gematria_std": 410,
+      "related": [],
+      "references": [
+        "Deuteronomio 6:4"
+      ],
+      "mystical_desc": "Escucha Israel. Primera palabra de la oración fundamental"
+    },
+    {
+      "id": "ver_13",
+      "hebrew_clean": "ראה",
+      "hebrew_full": "ראה",
+      "transliteration": "Raah",
+      "category": "verbos",
+      "meaning_es": "Ver",
+      "gematria_std": 206,
+      "related": [],
+      "references": [],
+      "mystical_desc": "Percepción espiritual y física"
+    },
+    {
+      "id": "ver_14",
+      "hebrew_clean": "ידע",
+      "hebrew_full": "ידע",
+      "transliteration": "Yada",
+      "category": "verbos",
+      "meaning_es": "Conocer",
+      "gematria_std": 84,
+      "related": [],
+      "references": [],
+      "mystical_desc": "Conocimiento íntimo y experiencial"
+    },
+    {
+      "id": "ver_15",
+      "hebrew_clean": "הלך",
+      "hebrew_full": "הלך",
+      "transliteration": "Halach",
+      "category": "verbos",
+      "meaning_es": "Caminar, Ir",
+      "gematria_std": 55,
+      "related": [],
+      "references": [],
+      "mystical_desc": "Caminar en los caminos de Dios. Halajá = ley judía"
+    },
+    {
+      "id": "ver_16",
+      "hebrew_clean": "בוא",
+      "hebrew_full": "בוא",
+      "transliteration": "Bo",
+      "category": "verbos",
+      "meaning_es": "Venir, Entrar",
+      "gematria_std": 9,
+      "related": [],
+      "references": [],
+      "mystical_desc": "Entrar en la presencia divina"
+    },
+    {
+      "id": "ver_17",
+      "hebrew_clean": "שוב",
+      "hebrew_full": "שוב",
+      "transliteration": "Shuv",
+      "category": "verbos",
+      "meaning_es": "Volver, Regresar",
+      "gematria_std": 308,
+      "related": [
+        "תשובה"
+      ],
+      "references": [],
+      "mystical_desc": "Retornar a Dios en arrepentimiento"
+    },
+    {
+      "id": "ver_18",
+      "hebrew_clean": "חיה",
+      "hebrew_full": "חיה",
+      "transliteration": "Chayah",
+      "category": "verbos",
+      "meaning_es": "Vivir",
+      "gematria_std": 23,
+      "related": [
+        "חיים"
+      ],
+      "references": [],
+      "mystical_desc": "Vivir plenamente según la voluntad divina"
+    },
+    {
+      "id": "con_19",
+      "hebrew_clean": "מלך",
+      "hebrew_full": "מלך",
+      "transliteration": "Melech",
+      "category": "conceptos_misticos",
+      "meaning_es": "Rey",
+      "gematria_std": 90,
+      "related": [
+        "מלכות"
+      ],
+      "references": [],
+      "mystical_desc": "Dios como Rey del Universo"
+    },
+    {
+      "id": "con_20",
+      "hebrew_clean": "כהן",
+      "hebrew_full": "כהן",
+      "transliteration": "Kohen",
+      "category": "conceptos_misticos",
+      "meaning_es": "Sacerdote",
+      "gematria_std": 75,
+      "related": [],
+      "references": [],
+      "mystical_desc": "Intermediario entre Dios y el pueblo"
+    },
+    {
+      "id": "con_21",
+      "hebrew_clean": "נביא",
+      "hebrew_full": "נביא",
+      "transliteration": "Navi",
+      "category": "conceptos_misticos",
+      "meaning_es": "Profeta",
+      "gematria_std": 63,
+      "related": [],
+      "references": [],
+      "mystical_desc": "Portavoz de la palabra divina"
+    },
+    {
+      "id": "vir_22",
+      "hebrew_clean": "צדיק",
+      "hebrew_full": "צדיק",
+      "transliteration": "Tzadik",
+      "category": "virtudes",
+      "meaning_es": "Justo, Virtuoso",
+      "gematria_std": 204,
+      "related": [],
+      "references": [],
+      "mystical_desc": "El justo que sostiene el mundo"
+    },
+    {
+      "id": "con_23",
+      "hebrew_clean": "רשע",
+      "hebrew_full": "רשע",
+      "transliteration": "Rasha",
+      "category": "conceptos_misticos",
+      "meaning_es": "Malvado, Inicuo",
+      "gematria_std": 570,
+      "related": [],
+      "references": [],
+      "mystical_desc": "El que se aleja del camino divino"
+    },
+    {
+      "id": "con_24",
+      "hebrew_clean": "סוד",
+      "hebrew_full": "סוד",
+      "transliteration": "Sod",
+      "category": "conceptos_misticos",
+      "meaning_es": "Secreto, Misterio",
+      "gematria_std": 70,
+      "related": [],
+      "references": [],
+      "mystical_desc": "Nivel esotérico de interpretación (PARDES)"
+    },
+    {
+      "id": "con_25",
+      "hebrew_clean": "רז",
+      "hebrew_full": "רז",
+      "transliteration": "Raz",
+      "category": "conceptos_misticos",
+      "meaning_es": "Secreto, Misterio",
+      "gematria_std": 207,
+      "related": [
+        "סוד"
+      ],
+      "references": [],
+      "mystical_desc": "Misterios ocultos de la Torá"
+    },
+    {
+      "id": "vir_26",
+      "hebrew_clean": "קדוש",
+      "hebrew_full": "קדוש",
+      "transliteration": "Kadosh",
+      "category": "virtudes",
+      "meaning_es": "Santo, Sagrado",
+      "gematria_std": 410,
+      "related": [],
+      "references": [],
+      "mystical_desc": "Separado y elevado para propósito divino"
+    },
+    {
+      "id": "vir_27",
+      "hebrew_clean": "ברוך",
+      "hebrew_full": "ברוך",
+      "transliteration": "Baruch",
+      "category": "virtudes",
+      "meaning_es": "Bendito",
+      "gematria_std": 228,
+      "related": [],
+      "references": [],
+      "mystical_desc": "Bendecido por Dios. Inicio de bendiciones"
+    },
+    {
+      "id": "vir_28",
+      "hebrew_clean": "תהלה",
+      "hebrew_full": "תהלה",
+      "transliteration": "Tehilah",
+      "category": "virtudes",
+      "meaning_es": "Alabanza",
+      "gematria_std": 440,
+      "related": [],
+      "references": [],
+      "mystical_desc": "Alabar y glorificar a Dios"
+    },
+    {
+      "id": "con_29",
+      "hebrew_clean": "זהר",
+      "hebrew_full": "זהר",
+      "transliteration": "Zohar",
+      "category": "conceptos_misticos",
+      "meaning_es": "Esplendor, Brillo",
+      "gematria_std": 212,
+      "related": [],
+      "references": [],
+      "mystical_desc": "El Libro del Esplendor, texto fundamental de la Cábala"
+    },
+    {
+      "id": "con_30",
+      "hebrew_clean": "קבלה",
+      "hebrew_full": "קבלה",
+      "transliteration": "Kabbalah",
+      "category": "conceptos_misticos",
+      "meaning_es": "Recepción, Tradición mística",
+      "gematria_std": 137,
+      "related": [],
+      "references": [],
+      "mystical_desc": "La tradición mística judía recibida"
+    },
+    {
+      "id": "ver_31",
+      "hebrew_clean": "מעשה",
+      "hebrew_full": "מעשה",
+      "transliteration": "Maaseh",
+      "category": "verbos",
+      "meaning_es": "Acción, Obra",
+      "gematria_std": 415,
+      "related": [],
+      "references": [],
+      "mystical_desc": "Maaseh Bereshit/Merkavah: Misterios de la Creación/Carroza"
+    },
+    {
+      "id": "con_32",
+      "hebrew_clean": "מרכבה",
+      "hebrew_full": "מרכבה",
+      "transliteration": "Merkavah",
+      "category": "conceptos_misticos",
+      "meaning_es": "Carroza, Trono divino",
+      "gematria_std": 267,
+      "related": [],
+      "references": [
+        "Ezequiel 1"
+      ],
+      "mystical_desc": "La visión mística del trono de Dios"
+    },
+    {
+      "id": "con_33",
+      "hebrew_clean": "פרדס",
+      "hebrew_full": "פרדס",
+      "transliteration": "PaRDeS",
+      "category": "conceptos_misticos",
+      "meaning_es": "Paraíso / Cuatro niveles de interpretación",
+      "gematria_std": 344,
+      "related": [],
+      "references": [],
+      "mystical_desc": "Peshat, Remez, Derash, Sod: niveles de interpretación de la Torá"
+    },
+    {
+      "id": "con_34",
+      "hebrew_clean": "כלי",
+      "hebrew_full": "כלי",
+      "transliteration": "Kli",
+      "category": "conceptos_misticos",
+      "meaning_es": "Recipiente, Vasija",
+      "gematria_std": 60,
+      "related": [],
+      "references": [],
+      "mystical_desc": "Recipiente espiritual que recibe la luz divina"
+    },
+    {
+      "id": "nat_35",
+      "hebrew_clean": "עץ",
+      "hebrew_full": "עץ",
+      "transliteration": "Etz",
+      "category": "naturaleza",
+      "meaning_es": "Árbol",
+      "gematria_std": 160,
+      "related": [],
+      "references": [],
+      "mystical_desc": "Etz Chaim: Árbol de la Vida"
+    },
+    {
+      "id": "pat_36",
+      "hebrew_clean": "שמואל",
+      "hebrew_full": "שמואל",
+      "transliteration": "Shmuel",
+      "category": "patriarcas",
+      "meaning_es": "Samuel (Dios ha escuchado)",
+      "gematria_std": 377,
+      "related": [],
+      "references": [
+        "1 Samuel 1:20"
+      ],
+      "mystical_desc": "El último juez y primer profeta de Israel"
+    },
+    {
+      "id": "pat_37",
+      "hebrew_clean": "שלמה",
+      "hebrew_full": "שלמה",
+      "transliteration": "Shlomo",
+      "category": "patriarcas",
+      "meaning_es": "Salomón (Paz)",
+      "gematria_std": 375,
+      "related": [
+        "שלום"
+      ],
+      "references": [
+        "2 Samuel 12:24"
+      ],
+      "mystical_desc": "Rey sabio, constructor del Primer Templo"
+    },
+    {
+      "id": "pat_38",
+      "hebrew_clean": "אליהו",
+      "hebrew_full": "אליהו",
+      "transliteration": "Eliyahu",
+      "category": "patriarcas",
+      "meaning_es": "Elías (Mi Dios es YHVH)",
+      "gematria_std": 52,
+      "related": [],
+      "references": [
+        "1 Reyes 17:1"
+      ],
+      "mystical_desc": "Profeta que ascendió vivo al cielo, precursor del Mesías"
+    },
+    {
+      "id": "pat_39",
+      "hebrew_clean": "אלישע",
+      "hebrew_full": "אלישע",
+      "transliteration": "Elisha",
+      "category": "patriarcas",
+      "meaning_es": "Eliseo (Dios es salvación)",
+      "gematria_std": 411,
+      "related": [
+        "אליהו"
+      ],
+      "references": [
+        "1 Reyes 19:16"
+      ],
+      "mystical_desc": "Discípulo de Elías, profeta de milagros"
+    },
+    {
+      "id": "pat_40",
+      "hebrew_clean": "דניאל",
+      "hebrew_full": "דניאל",
+      "transliteration": "Daniel",
+      "category": "patriarcas",
+      "meaning_es": "Daniel (Dios es mi juez)",
+      "gematria_std": 95,
+      "related": [],
+      "references": [
+        "Daniel 1:6"
+      ],
+      "mystical_desc": "Visionario profeta del exilio babilónico"
+    },
+    {
+      "id": "pat_41",
+      "hebrew_clean": "יחזקאל",
+      "hebrew_full": "יחזקאל",
+      "transliteration": "Yechezkel",
+      "category": "patriarcas",
+      "meaning_es": "Ezequiel (Dios fortalece)",
+      "gematria_std": 156,
+      "related": [
+        "מרכבה"
+      ],
+      "references": [
+        "Ezequiel 1:3"
+      ],
+      "mystical_desc": "Profeta de la visión de la Merkavá (Carroza Divina)"
+    },
+    {
+      "id": "pat_42",
+      "hebrew_clean": "ישעיהו",
+      "hebrew_full": "ישעיהו",
+      "transliteration": "Yeshayahu",
+      "category": "patriarcas",
+      "meaning_es": "Isaías (YHVH salva)",
+      "gematria_std": 401,
+      "related": [],
+      "references": [
+        "Isaías 1:1"
+      ],
+      "mystical_desc": "Gran profeta mesiánico del Reino de Judá"
+    },
+    {
+      "id": "pat_43",
+      "hebrew_clean": "ירמיהו",
+      "hebrew_full": "ירמיהו",
+      "transliteration": "Yirmiyahu",
+      "category": "patriarcas",
+      "meaning_es": "Jeremías (YHVH exalta)",
+      "gematria_std": 271,
+      "related": [],
+      "references": [
+        "Jeremías 1:1"
+      ],
+      "mystical_desc": "Profeta del juicio y la esperanza"
+    },
+    {
+      "id": "pat_44",
+      "hebrew_clean": "רחל",
+      "hebrew_full": "רחל",
+      "transliteration": "Rachel",
+      "category": "patriarcas",
+      "meaning_es": "Raquel (Oveja)",
+      "gematria_std": 238,
+      "related": [
+        "יעקב"
+      ],
+      "references": [
+        "Génesis 29:6"
+      ],
+      "mystical_desc": "Matriarca amada, madre de José y Benjamín"
+    },
+    {
+      "id": "pat_45",
+      "hebrew_clean": "לאה",
+      "hebrew_full": "לאה",
+      "transliteration": "Leah",
+      "category": "patriarcas",
+      "meaning_es": "Lea",
+      "gematria_std": 36,
+      "related": [
+        "יעקב"
+      ],
+      "references": [
+        "Génesis 29:16"
+      ],
+      "mystical_desc": "Matriarca, madre de seis tribus de Israel"
+    },
+    {
+      "id": "pat_46",
+      "hebrew_clean": "רבקה",
+      "hebrew_full": "רבקה",
+      "transliteration": "Rivkah",
+      "category": "patriarcas",
+      "meaning_es": "Rebeca",
+      "gematria_std": 307,
+      "related": [
+        "יצחק"
+      ],
+      "references": [
+        "Génesis 24:15"
+      ],
+      "mystical_desc": "Matriarca, esposa de Isaac"
+    },
+    {
+      "id": "pat_47",
+      "hebrew_clean": "מרים",
+      "hebrew_full": "מרים",
+      "transliteration": "Miriam",
+      "category": "patriarcas",
+      "meaning_es": "María/Miriam",
+      "gematria_std": 290,
+      "related": [
+        "משה"
+      ],
+      "references": [
+        "Éxodo 15:20"
+      ],
+      "mystical_desc": "Profetisa, hermana de Moisés y Aarón"
+    },
+    {
+      "id": "pat_48",
+      "hebrew_clean": "אהרן",
+      "hebrew_full": "אהרן",
+      "transliteration": "Aharon",
+      "category": "patriarcas",
+      "meaning_es": "Aarón",
+      "gematria_std": 256,
+      "related": [
+        "משה",
+        "כהן"
+      ],
+      "references": [
+        "Éxodo 4:14"
+      ],
+      "mystical_desc": "Primer Sumo Sacerdote de Israel"
+    },
+    {
+      "id": "pat_49",
+      "hebrew_clean": "יוסף",
+      "hebrew_full": "יוסף",
+      "transliteration": "Yosef",
+      "category": "patriarcas",
+      "meaning_es": "José (Añadirá)",
+      "gematria_std": 156,
+      "related": [
+        "רחל"
+      ],
+      "references": [
+        "Génesis 30:24"
+      ],
+      "mystical_desc": "Soñador, virrey de Egipto, símbolo de Yesod"
+    },
+    {
+      "id": "pat_50",
+      "hebrew_clean": "בנימין",
+      "hebrew_full": "בנימין",
+      "transliteration": "Binyamin",
+      "category": "patriarcas",
+      "meaning_es": "Benjamín (Hijo de la diestra)",
+      "gematria_std": 162,
+      "related": [
+        "רחל"
+      ],
+      "references": [
+        "Génesis 35:18"
+      ],
+      "mystical_desc": "Último hijo de Jacob y Raquel"
+    },
+    {
+      "id": "pat_51",
+      "hebrew_clean": "ראובן",
+      "hebrew_full": "ראובן",
+      "transliteration": "Reuven",
+      "category": "patriarcas",
+      "meaning_es": "Rubén (Miren, un hijo)",
+      "gematria_std": 259,
+      "related": [
+        "לאה"
+      ],
+      "references": [
+        "Génesis 29:32"
+      ],
+      "mystical_desc": "Primogénito de Jacob"
+    },
+    {
+      "id": "pat_52",
+      "hebrew_clean": "שמעון",
+      "hebrew_full": "שמעון",
+      "transliteration": "Shimon",
+      "category": "patriarcas",
+      "meaning_es": "Simeón (Escuchado)",
+      "gematria_std": 466,
+      "related": [
+        "לאה"
+      ],
+      "references": [
+        "Génesis 29:33"
+      ],
+      "mystical_desc": "Segundo hijo de Jacob y Lea"
+    },
+    {
+      "id": "pat_53",
+      "hebrew_clean": "לוי",
+      "hebrew_full": "לוי",
+      "transliteration": "Levi",
+      "category": "patriarcas",
+      "meaning_es": "Leví (Unido)",
+      "gematria_std": 46,
+      "related": [
+        "לאה",
+        "כהן"
+      ],
+      "references": [
+        "Génesis 29:34"
+      ],
+      "mystical_desc": "Tribu sacerdotal de Israel"
+    },
+    {
+      "id": "pat_54",
+      "hebrew_clean": "יהודה",
+      "hebrew_full": "יהודה",
+      "transliteration": "Yehudah",
+      "category": "patriarcas",
+      "meaning_es": "Judá (Alabado)",
+      "gematria_std": 30,
+      "related": [
+        "לאה"
+      ],
+      "references": [
+        "Génesis 29:35"
+      ],
+      "mystical_desc": "Tribu real, de donde viene el Mesías"
+    },
+    {
+      "id": "pat_55",
+      "hebrew_clean": "חנוך",
+      "hebrew_full": "חנוך",
+      "transliteration": "Chanoch",
+      "category": "patriarcas",
+      "meaning_es": "Enoc (Dedicado)",
+      "gematria_std": 84,
+      "related": [],
+      "references": [
+        "Génesis 5:18"
+      ],
+      "mystical_desc": "Caminó con Dios y fue llevado sin ver muerte"
+    },
+    {
+      "id": "pat_56",
+      "hebrew_clean": "נח",
+      "hebrew_full": "נח",
+      "transliteration": "Noach",
+      "category": "patriarcas",
+      "meaning_es": "Noé (Descanso)",
+      "gematria_std": 58,
+      "related": [],
+      "references": [
+        "Génesis 5:29"
+      ],
+      "mystical_desc": "Justo salvado del Diluvio, nueva humanidad"
+    },
+    {
+      "id": "pat_57",
+      "hebrew_clean": "מתושלח",
+      "hebrew_full": "מתושלח",
+      "transliteration": "Metushelach",
+      "category": "patriarcas",
+      "meaning_es": "Matusalén",
+      "gematria_std": 784,
+      "related": [],
+      "references": [
+        "Génesis 5:21"
+      ],
+      "mystical_desc": "El hombre más longevo de la Biblia (969 años)"
+    },
+    {
+      "id": "ang_58",
+      "hebrew_clean": "מטטרון",
+      "hebrew_full": "מטטרון",
+      "transliteration": "Metatron",
+      "category": "angeles",
+      "meaning_es": "Metatrón (Arcángel supremo)",
+      "gematria_std": 314,
+      "related": [
+        "חנוך"
+      ],
+      "references": [
+        "Tradición mística"
+      ],
+      "mystical_desc": "Enoc transformado en arcángel, escriba celestial. Mismo valor que שדי (Shaddai)"
+    },
+    {
+      "id": "ang_59",
+      "hebrew_clean": "סנדלפון",
+      "hebrew_full": "סנדלפון",
+      "transliteration": "Sandalphon",
+      "category": "angeles",
+      "meaning_es": "Sandalfón (Ángel de las oraciones)",
+      "gematria_std": 280,
+      "related": [
+        "אליהו"
+      ],
+      "references": [
+        "Tradición mística"
+      ],
+      "mystical_desc": "Elías transformado en ángel, lleva las oraciones a Dios"
+    },
+    {
+      "id": "ang_60",
+      "hebrew_clean": "רזיאל",
+      "hebrew_full": "רזיאל",
+      "transliteration": "Raziel",
+      "category": "angeles",
+      "meaning_es": "Raziel (Secreto de Dios)",
+      "gematria_std": 248,
+      "related": [
+        "סוד"
+      ],
+      "references": [
+        "Sefer Raziel HaMalach"
+      ],
+      "mystical_desc": "Ángel de los misterios y secretos divinos"
+    },
+    {
+      "id": "ang_61",
+      "hebrew_clean": "צפניאל",
+      "hebrew_full": "צפניאל",
+      "transliteration": "Tzafkiel",
+      "category": "angeles",
+      "meaning_es": "Tzafkiel (Contemplación de Dios)",
+      "gematria_std": 311,
+      "related": [
+        "בינה"
+      ],
+      "references": [
+        "Tradición mística"
+      ],
+      "mystical_desc": "Arcángel de Binah, contemplación divina"
+    },
+    {
+      "id": "ang_62",
+      "hebrew_clean": "צדקיאל",
+      "hebrew_full": "צדקיאל",
+      "transliteration": "Tzadkiel",
+      "category": "angeles",
+      "meaning_es": "Tzadkiel (Justicia de Dios)",
+      "gematria_std": 245,
+      "related": [
+        "חסד"
+      ],
+      "references": [
+        "Tradición mística"
+      ],
+      "mystical_desc": "Arcángel de Chesed, benevolencia y misericordia"
+    },
+    {
+      "id": "ang_63",
+      "hebrew_clean": "כמאל",
+      "hebrew_full": "כמאל",
+      "transliteration": "Kamael",
+      "category": "angeles",
+      "meaning_es": "Kamael (Severidad de Dios)",
+      "gematria_std": 91,
+      "related": [
+        "גבורה"
+      ],
+      "references": [
+        "Tradición mística"
+      ],
+      "mystical_desc": "Arcángel de Geburah, fuerza y justicia"
+    },
+    {
+      "id": "ang_64",
+      "hebrew_clean": "חניאל",
+      "hebrew_full": "חניאל",
+      "transliteration": "Haniel",
+      "category": "angeles",
+      "meaning_es": "Haniel (Gracia de Dios)",
+      "gematria_std": 97,
+      "related": [
+        "נצח"
+      ],
+      "references": [
+        "Tradición mística"
+      ],
+      "mystical_desc": "Arcángel de Netzach, victoria y perseverancia"
+    },
+    {
+      "id": "ang_65",
+      "hebrew_clean": "עזראל",
+      "hebrew_full": "עזראל",
+      "transliteration": "Azrael",
+      "category": "angeles",
+      "meaning_es": "Azrael (Ayuda de Dios)",
+      "gematria_std": 308,
+      "related": [
+        "מות"
+      ],
+      "references": [
+        "Tradición mística"
+      ],
+      "mystical_desc": "Ángel de la muerte, guía las almas al otro mundo"
+    },
+    {
+      "id": "nom_66",
+      "hebrew_clean": "שדי",
+      "hebrew_full": "שדי",
+      "transliteration": "Shaddai",
+      "category": "nombres_divinos",
+      "meaning_es": "El Todopoderoso",
+      "gematria_std": 314,
+      "related": [
+        "מטטרון"
+      ],
+      "references": [
+        "Génesis 17:1"
+      ],
+      "mystical_desc": "Nombre divino en la Mezuzá. Mismo valor que Metatrón"
+    },
+    {
+      "id": "nom_67",
+      "hebrew_clean": "אהיה",
+      "hebrew_full": "אהיה",
+      "transliteration": "Ehyeh",
+      "category": "nombres_divinos",
+      "meaning_es": "Yo Seré",
+      "gematria_std": 21,
+      "related": [
+        "יהוה"
+      ],
+      "references": [
+        "Éxodo 3:14"
+      ],
+      "mystical_desc": "Yo Seré El Que Seré. Nombre de Keter"
+    },
+    {
+      "id": "nom_68",
+      "hebrew_clean": "אדני",
+      "hebrew_full": "אדני",
+      "transliteration": "Adonai",
+      "category": "nombres_divinos",
+      "meaning_es": "Mi Señor",
+      "gematria_std": 65,
+      "related": [
+        "יהוה"
+      ],
+      "references": [],
+      "mystical_desc": "Nombre usado para pronunciar YHVH"
+    },
+    {
+      "id": "nom_69",
+      "hebrew_clean": "צבאות",
+      "hebrew_full": "צבאות",
+      "transliteration": "Tzvaot",
+      "category": "nombres_divinos",
+      "meaning_es": "Ejércitos, Huestes",
+      "gematria_std": 499,
+      "related": [],
+      "references": [
+        "1 Samuel 1:3"
+      ],
+      "mystical_desc": "YHVH Tzvaot: Señor de los Ejércitos Celestiales"
+    },
+    {
+      "id": "nom_70",
+      "hebrew_clean": "עליון",
+      "hebrew_full": "עליון",
+      "transliteration": "Elyon",
+      "category": "nombres_divinos",
+      "meaning_es": "Altísimo",
+      "gematria_std": 166,
+      "related": [],
+      "references": [
+        "Génesis 14:18"
+      ],
+      "mystical_desc": "El Dios Altísimo, supremo sobre todos"
+    },
+    {
+      "id": "con_71",
+      "hebrew_clean": "גלגל",
+      "hebrew_full": "גלגל",
+      "transliteration": "Galgal",
+      "category": "conceptos_misticos",
+      "meaning_es": "Rueda, Ciclo",
+      "gematria_std": 66,
+      "related": [
+        "מרכבה"
+      ],
+      "references": [
+        "Ezequiel 1"
+      ],
+      "mystical_desc": "Las ruedas de la Merkavá, ciclos cósmicos"
+    },
+    {
+      "id": "con_72",
+      "hebrew_clean": "גלגול",
+      "hebrew_full": "גלגול",
+      "transliteration": "Gilgul",
+      "category": "conceptos_misticos",
+      "meaning_es": "Reencarnación",
+      "gematria_std": 72,
+      "related": [],
+      "references": [
+        "Tradición cabalística"
+      ],
+      "mystical_desc": "Transmigración de las almas"
+    },
+    {
+      "id": "con_73",
+      "hebrew_clean": "תיקון",
+      "hebrew_full": "תיקון",
+      "transliteration": "Tikun",
+      "category": "conceptos_misticos",
+      "meaning_es": "Reparación, Corrección",
+      "gematria_std": 566,
+      "related": [],
+      "references": [
+        "Cábala luriánica"
+      ],
+      "mystical_desc": "Reparación del mundo y del alma"
+    },
+    {
+      "id": "con_74",
+      "hebrew_clean": "כוונה",
+      "hebrew_full": "כוונה",
+      "transliteration": "Kavanah",
+      "category": "conceptos_misticos",
+      "meaning_es": "Intención, Concentración",
+      "gematria_std": 131,
+      "related": [],
+      "references": [],
+      "mystical_desc": "Intención espiritual en la oración y acción"
+    },
+    {
+      "id": "con_75",
+      "hebrew_clean": "דבקות",
+      "hebrew_full": "דבקות",
+      "transliteration": "Devekut",
+      "category": "conceptos_misticos",
+      "meaning_es": "Adhesión, Unión con Dios",
+      "gematria_std": 516,
+      "related": [],
+      "references": [
+        "Deuteronomio 11:22"
+      ],
+      "mystical_desc": "Estado de comunión íntima con lo Divino"
+    },
+    {
+      "id": "con_76",
+      "hebrew_clean": "התבוננות",
+      "hebrew_full": "התבוננות",
+      "transliteration": "Hitbonenut",
+      "category": "conceptos_misticos",
+      "meaning_es": "Contemplación profunda",
+      "gematria_std": 878,
+      "related": [
+        "בינה"
+      ],
+      "references": [
+        "Jasidismo"
+      ],
+      "mystical_desc": "Meditación intelectual en conceptos divinos"
+    },
+    {
+      "id": "con_77",
+      "hebrew_clean": "ביטול",
+      "hebrew_full": "ביטול",
+      "transliteration": "Bitul",
+      "category": "conceptos_misticos",
+      "meaning_es": "Anulación del ego",
+      "gematria_std": 47,
+      "related": [],
+      "references": [
+        "Jasidismo"
+      ],
+      "mystical_desc": "Anulación del yo ante lo Divino"
+    },
+    {
+      "id": "con_78",
+      "hebrew_clean": "עבודה",
+      "hebrew_full": "עבודה",
+      "transliteration": "Avodah",
+      "category": "conceptos_misticos",
+      "meaning_es": "Servicio, Trabajo espiritual",
+      "gematria_std": 87,
+      "related": [],
+      "references": [],
+      "mystical_desc": "Servicio a Dios a través de la oración y acción"
+    },
+    {
+      "id": "con_79",
+      "hebrew_clean": "התעוררות",
+      "hebrew_full": "התעוררות",
+      "transliteration": "Hitorerrut",
+      "category": "conceptos_misticos",
+      "meaning_es": "Despertar espiritual",
+      "gematria_std": 1087,
+      "related": [],
+      "references": [
+        "Jasidismo"
+      ],
+      "mystical_desc": "Despertar del alma a la conciencia divina"
+    },
+    {
+      "id": "con_80",
+      "hebrew_clean": "צמצום",
+      "hebrew_full": "צמצום",
+      "transliteration": "Tzimtzum",
+      "category": "conceptos_misticos",
+      "meaning_es": "Contracción divina",
+      "gematria_std": 236,
+      "related": [],
+      "references": [
+        "Cábala luriánica"
+      ],
+      "mystical_desc": "Dios se contrajo para hacer espacio a la Creación"
+    },
+    {
+      "id": "con_81",
+      "hebrew_clean": "שבירה",
+      "hebrew_full": "שבירה",
+      "transliteration": "Shevirah",
+      "category": "conceptos_misticos",
+      "meaning_es": "Ruptura (de las vasijas)",
+      "gematria_std": 517,
+      "related": [
+        "תיקון"
+      ],
+      "references": [
+        "Cábala luriánica"
+      ],
+      "mystical_desc": "Ruptura de las vasijas primordiales, origen del mal"
+    },
+    {
+      "id": "con_82",
+      "hebrew_clean": "ניצוץ",
+      "hebrew_full": "ניצוץ",
+      "transliteration": "Nitzotz",
+      "category": "conceptos_misticos",
+      "meaning_es": "Chispa divina",
+      "gematria_std": 146,
+      "related": [
+        "שבירה"
+      ],
+      "references": [
+        "Cábala luriánica"
+      ],
+      "mystical_desc": "Chispas de luz divina atrapadas en la materia"
+    },
+    {
+      "id": "con_83",
+      "hebrew_clean": "קליפה",
+      "hebrew_full": "קליפה",
+      "transliteration": "Klipah",
+      "category": "conceptos_misticos",
+      "meaning_es": "Cáscara, Fuerza del mal",
+      "gematria_std": 225,
+      "related": [],
+      "references": [
+        "Cábala"
+      ],
+      "mystical_desc": "Fuerzas de impureza que ocultan la luz divina"
+    },
+    {
+      "id": "con_84",
+      "hebrew_clean": "סטרא אחרא",
+      "hebrew_full": "סטרא אחרא",
+      "transliteration": "Sitra Achra",
+      "category": "conceptos_misticos",
+      "meaning_es": "El Otro Lado (fuerzas del mal)",
+      "gematria_std": 673,
+      "related": [
+        "קליפה"
+      ],
+      "references": [
+        "Zohar"
+      ],
+      "mystical_desc": "El lado de la impureza espiritual"
+    },
+    {
+      "id": "con_85",
+      "hebrew_clean": "יצר הרע",
+      "hebrew_full": "יצר הרע",
+      "transliteration": "Yetzer HaRa",
+      "category": "conceptos_misticos",
+      "meaning_es": "Inclinación al mal",
+      "gematria_std": 585,
+      "related": [
+        "יצר הטוב"
+      ],
+      "references": [
+        "Talmud"
+      ],
+      "mystical_desc": "La tendencia natural hacia el egoísmo"
+    },
+    {
+      "id": "con_86",
+      "hebrew_clean": "יצר הטוב",
+      "hebrew_full": "יצר הטוב",
+      "transliteration": "Yetzer HaTov",
+      "category": "conceptos_misticos",
+      "meaning_es": "Inclinación al bien",
+      "gematria_std": 600,
+      "related": [
+        "יצר הרע"
+      ],
+      "references": [
+        "Talmud"
+      ],
+      "mystical_desc": "La tendencia natural hacia lo divino"
+    },
+    {
+      "id": "con_87",
+      "hebrew_clean": "כפרה",
+      "hebrew_full": "כפרה",
+      "transliteration": "Kaparah",
+      "category": "conceptos_misticos",
+      "meaning_es": "Expiación, Perdón",
+      "gematria_std": 305,
+      "related": [
+        "תשובה"
+      ],
+      "references": [
+        "Levítico 16"
+      ],
+      "mystical_desc": "Proceso de limpieza espiritual y perdón"
+    },
+    {
+      "id": "con_88",
+      "hebrew_clean": "גאולה",
+      "hebrew_full": "גאולה",
+      "transliteration": "Geulah",
+      "category": "conceptos_misticos",
+      "meaning_es": "Redención",
+      "gematria_std": 45,
+      "related": [
+        "משיח"
+      ],
+      "references": [],
+      "mystical_desc": "Redención mesiánica final. Mismo valor que Adam"
+    },
+    {
+      "id": "con_89",
+      "hebrew_clean": "תחיה",
+      "hebrew_full": "תחיה",
+      "transliteration": "Techiyah",
+      "category": "conceptos_misticos",
+      "meaning_es": "Resurrección",
+      "gematria_std": 423,
+      "related": [
+        "גאולה"
+      ],
+      "references": [
+        "Daniel 12:2"
+      ],
+      "mystical_desc": "Resurrección de los muertos en la era mesiánica"
+    },
+    {
+      "id": "con_90",
+      "hebrew_clean": "עולם הבא",
+      "hebrew_full": "עולם הבא",
+      "transliteration": "Olam HaBa",
+      "category": "conceptos_misticos",
+      "meaning_es": "El Mundo Venidero",
+      "gematria_std": 193,
+      "related": [],
+      "references": [
+        "Mishná"
+      ],
+      "mystical_desc": "El mundo después de la vida o la era mesiánica"
+    },
+    {
+      "id": "lug_91",
+      "hebrew_clean": "גן עדן",
+      "hebrew_full": "גן עדן",
+      "transliteration": "Gan Eden",
+      "category": "lugares_sagrados",
+      "meaning_es": "Jardín del Edén/Paraíso",
+      "gematria_std": 177,
+      "related": [
+        "גן",
+        "עדן"
+      ],
+      "references": [
+        "Génesis 2:8"
+      ],
+      "mystical_desc": "Paraíso terrenal y celestial"
+    },
+    {
+      "id": "con_92",
+      "hebrew_clean": "גיהנום",
+      "hebrew_full": "גיהנום",
+      "transliteration": "Gehinnom",
+      "category": "conceptos_misticos",
+      "meaning_es": "Gehena, Infierno purificador",
+      "gematria_std": 119,
+      "related": [],
+      "references": [
+        "Josué 15:8"
+      ],
+      "mystical_desc": "Lugar de purificación temporal del alma"
+    },
+    {
+      "id": "lug_93",
+      "hebrew_clean": "סיני",
+      "hebrew_full": "סיני",
+      "transliteration": "Sinai",
+      "category": "lugares_sagrados",
+      "meaning_es": "Monte Sinaí",
+      "gematria_std": 130,
+      "related": [
+        "משה",
+        "תורה"
+      ],
+      "references": [
+        "Éxodo 19:11"
+      ],
+      "mystical_desc": "Monte donde Dios entregó la Torá"
+    },
+    {
+      "id": "nat_94",
+      "hebrew_clean": "הר",
+      "hebrew_full": "הר",
+      "transliteration": "Har",
+      "category": "naturaleza",
+      "meaning_es": "Monte, Montaña",
+      "gematria_std": 205,
+      "related": [],
+      "references": [],
+      "mystical_desc": "Lugar de elevación y revelación"
+    },
+    {
+      "id": "lug_95",
+      "hebrew_clean": "כרמל",
+      "hebrew_full": "כרמל",
+      "transliteration": "Karmel",
+      "category": "lugares_sagrados",
+      "meaning_es": "Monte Carmelo",
+      "gematria_std": 290,
+      "related": [
+        "אליהו"
+      ],
+      "references": [
+        "1 Reyes 18:19"
+      ],
+      "mystical_desc": "Monte de la confrontación de Elías con los profetas de Baal"
+    },
+    {
+      "id": "lug_96",
+      "hebrew_clean": "מוריה",
+      "hebrew_full": "מוריה",
+      "transliteration": "Moriah",
+      "category": "lugares_sagrados",
+      "meaning_es": "Monte Moriah",
+      "gematria_std": 261,
+      "related": [
+        "אברהם",
+        "בית"
+      ],
+      "references": [
+        "Génesis 22:2"
+      ],
+      "mystical_desc": "Monte del sacrificio de Isaac, sitio del Templo"
+    },
+    {
+      "id": "obj_97",
+      "hebrew_clean": "חרב",
+      "hebrew_full": "חרב",
+      "transliteration": "Cherev",
+      "category": "objetos_rituales",
+      "meaning_es": "Espada",
+      "gematria_std": 210,
+      "related": [],
+      "references": [
+        "Génesis 3:24"
+      ],
+      "mystical_desc": "Espada flamígera que guarda el Edén"
+    },
+    {
+      "id": "obj_98",
+      "hebrew_clean": "מטה",
+      "hebrew_full": "מטה",
+      "transliteration": "Mateh",
+      "category": "objetos_rituales",
+      "meaning_es": "Vara, Bastón",
+      "gematria_std": 54,
+      "related": [
+        "משה",
+        "אהרן"
+      ],
+      "references": [
+        "Éxodo 4:2"
+      ],
+      "mystical_desc": "Vara de Moisés que hizo milagros"
+    },
+    {
+      "id": "obj_99",
+      "hebrew_clean": "נר",
+      "hebrew_full": "נר",
+      "transliteration": "Ner",
+      "category": "objetos_rituales",
+      "meaning_es": "Vela, Lámpara",
+      "gematria_std": 250,
+      "related": [
+        "אור"
+      ],
+      "references": [
+        "Proverbios 20:27"
+      ],
+      "mystical_desc": "El alma del hombre es lámpara de Dios"
+    },
+    {
+      "id": "obj_100",
+      "hebrew_clean": "כוס",
+      "hebrew_full": "כוס",
+      "transliteration": "Kos",
+      "category": "objetos_rituales",
+      "meaning_es": "Copa, Cáliz",
+      "gematria_std": 86,
+      "related": [
+        "אלהים"
+      ],
+      "references": [],
+      "mystical_desc": "Copa de bendición en ceremonias. Mismo valor que Elohim"
+    },
+    {
+      "id": "obj_101",
+      "hebrew_clean": "לחם",
+      "hebrew_full": "לחם",
+      "transliteration": "Lechem",
+      "category": "objetos_rituales",
+      "meaning_es": "Pan",
+      "gematria_std": 78,
+      "related": [],
+      "references": [],
+      "mystical_desc": "Pan de la presencia en el Templo, sustento espiritual"
+    },
+    {
+      "id": "obj_102",
+      "hebrew_clean": "יין",
+      "hebrew_full": "יין",
+      "transliteration": "Yayin",
+      "category": "objetos_rituales",
+      "meaning_es": "Vino",
+      "gematria_std": 70,
+      "related": [
+        "סוד"
+      ],
+      "references": [],
+      "mystical_desc": "Vino revela secretos. Mismo valor que Sod (secreto)"
+    },
+    {
+      "id": "obj_103",
+      "hebrew_clean": "קטורת",
+      "hebrew_full": "קטורת",
+      "transliteration": "Ketoret",
+      "category": "objetos_rituales",
+      "meaning_es": "Incienso",
+      "gematria_std": 1116,
+      "related": [],
+      "references": [
+        "Éxodo 30:34"
+      ],
+      "mystical_desc": "Incienso del Templo, símbolo de oración que asciende"
+    },
+    {
+      "id": "obj_104",
+      "hebrew_clean": "שמן",
+      "hebrew_full": "שמן",
+      "transliteration": "Shemen",
+      "category": "objetos_rituales",
+      "meaning_es": "Aceite",
+      "gematria_std": 390,
+      "related": [
+        "משיח"
+      ],
+      "references": [],
+      "mystical_desc": "Aceite de unción, consagración"
+    },
+    {
+      "id": "con_105",
+      "hebrew_clean": "מים חיים",
+      "hebrew_full": "מים חיים",
+      "transliteration": "Mayim Chaim",
+      "category": "conceptos_misticos",
+      "meaning_es": "Agua viva",
+      "gematria_std": 158,
+      "related": [
+        "מים",
+        "חיים"
+      ],
+      "references": [
+        "Jeremías 2:13"
+      ],
+      "mystical_desc": "Agua de vida espiritual, manantial divino"
+    },
+    {
+      "id": "con_106",
+      "hebrew_clean": "כבוד",
+      "hebrew_full": "כבוד",
+      "transliteration": "Kavod",
+      "category": "conceptos_misticos",
+      "meaning_es": "Gloria, Honor",
+      "gematria_std": 32,
+      "related": [
+        "לב"
+      ],
+      "references": [],
+      "mystical_desc": "Gloria divina manifestada. Mismo valor que Lev (corazón)"
+    },
+    {
+      "id": "emo_107",
+      "hebrew_clean": "זכות",
+      "hebrew_full": "זכות",
+      "transliteration": "ahavah",
+      "category": "emociones",
+      "meaning_es": "Amor",
+      "gematria_std": 13,
+      "related": [
+        "אחד"
+      ],
+      "references": [
+        "Deuteronomio 6:5",
+        "Cantar de los Cantares 8:6"
+      ],
+      "mystical_desc": "El amor divino que une todas las cosas. Mismo valor que אחד (Unidad)"
+    },
+    {
+      "id": "num_108",
+      "hebrew_clean": "אחד",
+      "hebrew_full": "אחד",
+      "transliteration": "echad",
+      "category": "numeros",
+      "meaning_es": "Uno, Unidad",
+      "gematria_std": 13,
+      "related": [
+        "אהבה"
+      ],
+      "references": [
+        "Deuteronomio 6:4"
+      ],
+      "mystical_desc": "La unidad absoluta de Dios. Shemá Israel: El Señor es Uno"
+    },
+    {
+      "id": "nom_109",
+      "hebrew_clean": "יהוה",
+      "hebrew_full": "יהוה",
+      "transliteration": "YHVH",
+      "category": "nombres_divinos",
+      "meaning_es": "Tetragrámaton - Nombre Divino",
+      "gematria_std": 26,
+      "related": [
+        "אהיה",
+        "אדני"
+      ],
+      "references": [
+        "Éxodo 3:14"
+      ],
+      "mystical_desc": "El nombre impronunciable de Dios. Representa Ser, Fue, Será"
+    },
+    {
+      "id": "nom_110",
+      "hebrew_clean": "אלהים",
+      "hebrew_full": "אלהים",
+      "transliteration": "Elohim",
+      "category": "nombres_divinos",
+      "meaning_es": "Dios (plural majestuoso)",
+      "gematria_std": 86,
+      "related": [
+        "הטבע"
+      ],
+      "references": [
+        "Génesis 1:1"
+      ],
+      "mystical_desc": "Aspecto de Dios como Creador y Juez. Mismo valor que HaTeva (La Naturaleza)"
+    },
+    {
+      "id": "nat_111",
+      "hebrew_clean": "הטבע",
+      "hebrew_full": "הטבע",
+      "transliteration": "HaTeva",
+      "category": "naturaleza",
+      "meaning_es": "La Naturaleza",
+      "gematria_std": 86,
+      "related": [
+        "אלהים"
+      ],
+      "references": [],
+      "mystical_desc": "La naturaleza y Elohim tienen el mismo valor: Dios está en la naturaleza"
+    },
+    {
+      "id": "con_112",
+      "hebrew_clean": "משיח",
+      "hebrew_full": "משיח",
+      "transliteration": "Mashiach",
+      "category": "conceptos_misticos",
+      "meaning_es": "Mesías, Ungido",
+      "gematria_std": 358,
+      "related": [
+        "נחש"
+      ],
+      "references": [
+        "Isaías 61:1"
+      ],
+      "mystical_desc": "El Mesías redentor. Mismo valor que Nachash (serpiente) - transformación"
+    },
+    {
+      "id": "nat_113",
+      "hebrew_clean": "נחש",
+      "hebrew_full": "נחש",
+      "transliteration": "Nachash",
+      "category": "naturaleza",
+      "meaning_es": "Serpiente",
+      "gematria_std": 358,
+      "related": [
+        "משיח"
+      ],
+      "references": [
+        "Génesis 3:1"
+      ],
+      "mystical_desc": "La serpiente del Edén. Representa la tentación que el Mesías vence"
+    },
+    {
+      "id": "vir_114",
+      "hebrew_clean": "שלום",
+      "hebrew_full": "שלום",
+      "transliteration": "Shalom",
+      "category": "virtudes",
+      "meaning_es": "Paz, Integridad",
+      "gematria_std": 376,
+      "related": [],
+      "references": [
+        "Números 6:26"
+      ],
+      "mystical_desc": "No solo ausencia de conflicto, sino completitud y armonía total"
+    },
+    {
+      "id": "con_115",
+      "hebrew_clean": "שטן",
+      "hebrew_full": "שטן",
+      "transliteration": "Satan",
+      "category": "conceptos_misticos",
+      "meaning_es": "Adversario, Satán",
+      "gematria_std": 364,
+      "related": [],
+      "references": [
+        "Job 1:6"
+      ],
+      "mystical_desc": "El acusador. 364 = días del año menos Yom Kippur (día del perdón)"
+    },
+    {
+      "id": "con_116",
+      "hebrew_clean": "רוח",
+      "hebrew_full": "רוח",
+      "transliteration": "Ruach",
+      "category": "conceptos_misticos",
+      "meaning_es": "Espíritu, Viento, Aliento",
+      "gematria_std": 214,
+      "related": [],
+      "references": [
+        "Génesis 1:2"
+      ],
+      "mystical_desc": "El aliento divino que da vida. Ruach Elohim sobre las aguas"
+    },
+    {
+      "id": "con_117",
+      "hebrew_clean": "נשמה",
+      "hebrew_full": "נשמה",
+      "transliteration": "Neshamah",
+      "category": "conceptos_misticos",
+      "meaning_es": "Alma",
+      "gematria_std": 395,
+      "related": [
+        "רוח"
+      ],
+      "references": [
+        "Génesis 2:7"
+      ],
+      "mystical_desc": "El alma divina insuflada en el ser humano"
+    },
+    {
+      "id": "sef_118",
+      "hebrew_clean": "חכמה",
+      "hebrew_full": "חכמה",
+      "transliteration": "Chokmah",
+      "category": "sefirot",
+      "meaning_es": "Sabiduría",
+      "gematria_std": 73,
+      "related": [
+        "בינה"
+      ],
+      "references": [
+        "Proverbios 1:7"
+      ],
+      "mystical_desc": "Segunda Sefirá del Árbol de la Vida. Sabiduría primordial"
+    },
+    {
+      "id": "sef_119",
+      "hebrew_clean": "בינה",
+      "hebrew_full": "בינה",
+      "transliteration": "Binah",
+      "category": "sefirot",
+      "meaning_es": "Entendimiento, Comprensión",
+      "gematria_std": 67,
+      "related": [
+        "חכמה"
+      ],
+      "references": [],
+      "mystical_desc": "Tercera Sefirá. La madre que da forma a la sabiduría"
+    },
+    {
+      "id": "sef_120",
+      "hebrew_clean": "כתר",
+      "hebrew_full": "כתר",
+      "transliteration": "Keter",
+      "category": "sefirot",
+      "meaning_es": "Corona",
+      "gematria_std": 620,
+      "related": [],
+      "references": [],
+      "mystical_desc": "Primera Sefirá. La corona suprema, voluntad divina"
+    },
+    {
+      "id": "sef_121",
+      "hebrew_clean": "תפארת",
+      "hebrew_full": "תפארת",
+      "transliteration": "Tiferet",
+      "category": "sefirot",
+      "meaning_es": "Belleza, Armonía",
+      "gematria_std": 1081,
+      "related": [],
+      "references": [],
+      "mystical_desc": "Sexta Sefirá. Centro del Árbol, equilibrio perfecto"
+    },
+    {
+      "id": "sef_122",
+      "hebrew_clean": "חסד",
+      "hebrew_full": "חסד",
+      "transliteration": "Chesed",
+      "category": "sefirot",
+      "meaning_es": "Misericordia, Bondad",
+      "gematria_std": 72,
+      "related": [
+        "גבורה"
+      ],
+      "references": [],
+      "mystical_desc": "Cuarta Sefirá. Amor incondicional y generosidad divina"
+    },
+    {
+      "id": "sef_123",
+      "hebrew_clean": "גבורה",
+      "hebrew_full": "גבורה",
+      "transliteration": "Geburah",
+      "category": "sefirot",
+      "meaning_es": "Severidad, Fuerza",
+      "gematria_std": 216,
+      "related": [
+        "חסד"
+      ],
+      "references": [],
+      "mystical_desc": "Quinta Sefirá. Justicia divina y límites necesarios"
+    },
+    {
+      "id": "sef_124",
+      "hebrew_clean": "נצח",
+      "hebrew_full": "נצח",
+      "transliteration": "Netzach",
+      "category": "sefirot",
+      "meaning_es": "Victoria, Eternidad",
+      "gematria_std": 148,
+      "related": [
+        "הוד"
+      ],
+      "references": [],
+      "mystical_desc": "Séptima Sefirá. Perseverancia y victoria espiritual"
+    },
+    {
+      "id": "sef_125",
+      "hebrew_clean": "הוד",
+      "hebrew_full": "הוד",
+      "transliteration": "Hod",
+      "category": "sefirot",
+      "meaning_es": "Esplendor, Gloria",
+      "gematria_std": 15,
+      "related": [
+        "נצח"
+      ],
+      "references": [],
+      "mystical_desc": "Octava Sefirá. Esplendor intelectual y humildad"
+    },
+    {
+      "id": "sef_126",
+      "hebrew_clean": "יסוד",
+      "hebrew_full": "יסוד",
+      "transliteration": "Yesod",
+      "category": "sefirot",
+      "meaning_es": "Fundamento",
+      "gematria_std": 80,
+      "related": [],
+      "references": [],
+      "mystical_desc": "Novena Sefirá. Base de la manifestación, imaginación"
+    },
+    {
+      "id": "sef_127",
+      "hebrew_clean": "מלכות",
+      "hebrew_full": "מלכות",
+      "transliteration": "Malchut",
+      "category": "sefirot",
+      "meaning_es": "Reino",
+      "gematria_std": 496,
+      "related": [],
+      "references": [],
+      "mystical_desc": "Décima Sefirá. El mundo material, la Shekinah"
+    },
+    {
+      "id": "pat_128",
+      "hebrew_clean": "אדם",
+      "hebrew_full": "אדם",
+      "transliteration": "Adam",
+      "category": "patriarcas",
+      "meaning_es": "Hombre, Humanidad, Adán",
+      "gematria_std": 45,
+      "related": [
+        "חוה"
+      ],
+      "references": [
+        "Génesis 2:7"
+      ],
+      "mystical_desc": "El primer hombre. De Adamah (tierra roja)"
+    },
+    {
+      "id": "pat_129",
+      "hebrew_clean": "חוה",
+      "hebrew_full": "חוה",
+      "transliteration": "Chavah",
+      "category": "patriarcas",
+      "meaning_es": "Eva, Vida",
+      "gematria_std": 19,
+      "related": [
+        "אדם"
+      ],
+      "references": [
+        "Génesis 3:20"
+      ],
+      "mystical_desc": "La madre de todos los vivientes"
+    },
+    {
+      "id": "pat_130",
+      "hebrew_clean": "אברהם",
+      "hebrew_full": "אברהם",
+      "transliteration": "Avraham",
+      "category": "patriarcas",
+      "meaning_es": "Abraham",
+      "gematria_std": 248,
+      "related": [],
+      "references": [
+        "Génesis 17:5"
+      ],
+      "mystical_desc": "Padre de muchas naciones. 248 = partes del cuerpo humano"
+    },
+    {
+      "id": "pat_131",
+      "hebrew_clean": "שרה",
+      "hebrew_full": "שרה",
+      "transliteration": "Sarah",
+      "category": "patriarcas",
+      "meaning_es": "Sara, Princesa",
+      "gematria_std": 505,
+      "related": [
+        "אברהם"
+      ],
+      "references": [
+        "Génesis 17:15"
+      ],
+      "mystical_desc": "Esposa de Abraham, matriarca de Israel"
+    },
+    {
+      "id": "pat_132",
+      "hebrew_clean": "יצחק",
+      "hebrew_full": "יצחק",
+      "transliteration": "Yitzchak",
+      "category": "patriarcas",
+      "meaning_es": "Isaac, Reirá",
+      "gematria_std": 208,
+      "related": [],
+      "references": [
+        "Génesis 21:3"
+      ],
+      "mystical_desc": "Hijo del milagro. Geburah manifestada"
+    },
+    {
+      "id": "pat_133",
+      "hebrew_clean": "יעקב",
+      "hebrew_full": "יעקב",
+      "transliteration": "Yaakov",
+      "category": "patriarcas",
+      "meaning_es": "Jacob",
+      "gematria_std": 182,
+      "related": [
+        "ישראל"
+      ],
+      "references": [
+        "Génesis 25:26"
+      ],
+      "mystical_desc": "El que toma del talón. Luego llamado Israel"
+    },
+    {
+      "id": "pat_134",
+      "hebrew_clean": "ישראל",
+      "hebrew_full": "ישראל",
+      "transliteration": "Israel",
+      "category": "patriarcas",
+      "meaning_es": "Israel, El que lucha con Dios",
+      "gematria_std": 541,
+      "related": [
+        "יעקב"
+      ],
+      "references": [
+        "Génesis 32:28"
+      ],
+      "mystical_desc": "Nuevo nombre de Jacob tras luchar con el ángel"
+    },
+    {
+      "id": "pat_135",
+      "hebrew_clean": "משה",
+      "hebrew_full": "משה",
+      "transliteration": "Mosheh",
+      "category": "patriarcas",
+      "meaning_es": "Moisés",
+      "gematria_std": 345,
+      "related": [],
+      "references": [
+        "Éxodo 2:10"
+      ],
+      "mystical_desc": "El libertador de Israel. Sacado de las aguas"
+    },
+    {
+      "id": "pat_136",
+      "hebrew_clean": "דוד",
+      "hebrew_full": "דוד",
+      "transliteration": "David",
+      "category": "patriarcas",
+      "meaning_es": "David, Amado",
+      "gematria_std": 14,
+      "related": [],
+      "references": [
+        "1 Samuel 16:13"
+      ],
+      "mystical_desc": "Rey de Israel, ancestro del Mesías"
+    },
+    {
+      "id": "ang_137",
+      "hebrew_clean": "מיכאל",
+      "hebrew_full": "מיכאל",
+      "transliteration": "Michael",
+      "category": "angeles",
+      "meaning_es": "Miguel (¿Quién como Dios?)",
+      "gematria_std": 101,
+      "related": [],
+      "references": [
+        "Daniel 10:13"
+      ],
+      "mystical_desc": "Arcángel protector de Israel"
+    },
+    {
+      "id": "ang_138",
+      "hebrew_clean": "גבריאל",
+      "hebrew_full": "גבריאל",
+      "transliteration": "Gabriel",
+      "category": "angeles",
+      "meaning_es": "Gabriel (Fuerza de Dios)",
+      "gematria_std": 246,
+      "related": [],
+      "references": [
+        "Daniel 8:16"
+      ],
+      "mystical_desc": "Arcángel mensajero, anuncia nacimientos divinos"
+    },
+    {
+      "id": "ang_139",
+      "hebrew_clean": "רפאל",
+      "hebrew_full": "רפאל",
+      "transliteration": "Rafael",
+      "category": "angeles",
+      "meaning_es": "Rafael (Dios sana)",
+      "gematria_std": 311,
+      "related": [],
+      "references": [
+        "Tobit 12:15"
+      ],
+      "mystical_desc": "Arcángel sanador"
+    },
+    {
+      "id": "ang_140",
+      "hebrew_clean": "אוריאל",
+      "hebrew_full": "אוריאל",
+      "transliteration": "Uriel",
+      "category": "angeles",
+      "meaning_es": "Uriel (Luz de Dios)",
+      "gematria_std": 248,
+      "related": [],
+      "references": [
+        "Libro de Enoc"
+      ],
+      "mystical_desc": "Arcángel de la sabiduría y la luz"
+    },
+    {
+      "id": "con_141",
+      "hebrew_clean": "תורה",
+      "hebrew_full": "תורה",
+      "transliteration": "Torah",
+      "category": "conceptos_misticos",
+      "meaning_es": "Torá, Ley, Enseñanza",
+      "gematria_std": 611,
+      "related": [],
+      "references": [
+        "Deuteronomio 31:9"
+      ],
+      "mystical_desc": "Los cinco libros de Moisés. 611 + 2 (mandamientos de creer en Dios) = 613"
+    },
+    {
+      "id": "con_142",
+      "hebrew_clean": "מצוה",
+      "hebrew_full": "מצוה",
+      "transliteration": "Mitzvah",
+      "category": "conceptos_misticos",
+      "meaning_es": "Mandamiento, Precepto",
+      "gematria_std": 141,
+      "related": [],
+      "references": [],
+      "mystical_desc": "Cada mandamiento conecta con la voluntad divina"
+    },
+    {
+      "id": "con_143",
+      "hebrew_clean": "ברית",
+      "hebrew_full": "ברית",
+      "transliteration": "Brit",
+      "category": "conceptos_misticos",
+      "meaning_es": "Pacto, Alianza",
+      "gematria_std": 612,
+      "related": [
+        "תורה"
+      ],
+      "references": [
+        "Génesis 17:2"
+      ],
+      "mystical_desc": "El pacto eterno entre Dios e Israel"
+    },
+    {
+      "id": "con_144",
+      "hebrew_clean": "שכינה",
+      "hebrew_full": "שכינה",
+      "transliteration": "Shekhinah",
+      "category": "conceptos_misticos",
+      "meaning_es": "Presencia Divina",
+      "gematria_std": 385,
+      "related": [
+        "מלכות"
+      ],
+      "references": [],
+      "mystical_desc": "La presencia femenina de Dios que habita con Israel"
+    },
+    {
+      "id": "con_145",
+      "hebrew_clean": "חיים",
+      "hebrew_full": "חיים",
+      "transliteration": "Chaim",
+      "category": "conceptos_misticos",
+      "meaning_es": "Vida",
+      "gematria_std": 68,
+      "related": [],
+      "references": [],
+      "mystical_desc": "La vida en su plenitud. LeChaim (Por la vida)"
+    },
+    {
+      "id": "con_146",
+      "hebrew_clean": "מות",
+      "hebrew_full": "מות",
+      "transliteration": "Mavet",
+      "category": "conceptos_misticos",
+      "meaning_es": "Muerte",
+      "gematria_std": 446,
+      "related": [
+        "חיים"
+      ],
+      "references": [],
+      "mystical_desc": "El paso a otro plano de existencia"
+    },
+    {
+      "id": "vir_147",
+      "hebrew_clean": "אמת",
+      "hebrew_full": "אמת",
+      "transliteration": "Emet",
+      "category": "virtudes",
+      "meaning_es": "Verdad",
+      "gematria_std": 441,
+      "related": [],
+      "references": [],
+      "mystical_desc": "Compuesta de primera, media y última letra del alfabeto: verdad completa"
+    },
+    {
+      "id": "con_148",
+      "hebrew_clean": "שקר",
+      "hebrew_full": "שקר",
+      "transliteration": "Sheker",
+      "category": "conceptos_misticos",
+      "meaning_es": "Mentira",
+      "gematria_std": 600,
+      "related": [
+        "אמת"
+      ],
+      "references": [],
+      "mystical_desc": "Letras consecutivas y débiles, la mentira no tiene fundamento"
+    },
+    {
+      "id": "vir_149",
+      "hebrew_clean": "חן",
+      "hebrew_full": "חן",
+      "transliteration": "Chen",
+      "category": "virtudes",
+      "meaning_es": "Gracia, Encanto",
+      "gematria_std": 58,
+      "related": [],
+      "references": [],
+      "mystical_desc": "Favor divino y belleza interior"
+    },
+    {
+      "id": "vir_150",
+      "hebrew_clean": "צדק",
+      "hebrew_full": "צדק",
+      "transliteration": "Tzedek",
+      "category": "virtudes",
+      "meaning_es": "Justicia",
+      "gematria_std": 194,
+      "related": [
+        "צדקה"
+      ],
+      "references": [],
+      "mystical_desc": "La rectitud y equidad divina"
+    },
+    {
+      "id": "vir_151",
+      "hebrew_clean": "צדקה",
+      "hebrew_full": "צדקה",
+      "transliteration": "Tzedakah",
+      "category": "virtudes",
+      "meaning_es": "Caridad, Justicia social",
+      "gematria_std": 199,
+      "related": [
+        "צדק"
+      ],
+      "references": [],
+      "mystical_desc": "No es caridad sino justicia: dar lo que le corresponde al prójimo"
+    },
+    {
+      "id": "vir_152",
+      "hebrew_clean": "אמונה",
+      "hebrew_full": "אמונה",
+      "transliteration": "Emunah",
+      "category": "virtudes",
+      "meaning_es": "Fe, Confianza",
+      "gematria_std": 102,
+      "related": [],
+      "references": [],
+      "mystical_desc": "Confianza absoluta en la providencia divina"
+    },
+    {
+      "id": "con_153",
+      "hebrew_clean": "תשובה",
+      "hebrew_full": "תשובה",
+      "transliteration": "Teshuvah",
+      "category": "conceptos_misticos",
+      "meaning_es": "Arrepentimiento, Retorno",
+      "gematria_std": 713,
+      "related": [],
+      "references": [],
+      "mystical_desc": "Literalmente 'retorno' a Dios. El poder de transformar el pasado"
+    },
+    {
+      "id": "nat_154",
+      "hebrew_clean": "שמים",
+      "hebrew_full": "שמים",
+      "transliteration": "Shamayim",
+      "category": "naturaleza",
+      "meaning_es": "Cielos",
+      "gematria_std": 390,
+      "related": [
+        "ארץ"
+      ],
+      "references": [
+        "Génesis 1:1"
+      ],
+      "mystical_desc": "Compuesto de אש (fuego) y מים (agua): cielo como unión de opuestos"
+    },
+    {
+      "id": "nat_155",
+      "hebrew_clean": "ארץ",
+      "hebrew_full": "ארץ",
+      "transliteration": "Eretz",
+      "category": "naturaleza",
+      "meaning_es": "Tierra",
+      "gematria_std": 291,
+      "related": [
+        "שמים"
+      ],
+      "references": [
+        "Génesis 1:1"
+      ],
+      "mystical_desc": "La tierra física y material"
+    },
+    {
+      "id": "nat_156",
+      "hebrew_clean": "מים",
+      "hebrew_full": "מים",
+      "transliteration": "Mayim",
+      "category": "naturaleza",
+      "meaning_es": "Agua",
+      "gematria_std": 90,
+      "related": [],
+      "references": [
+        "Génesis 1:2"
+      ],
+      "mystical_desc": "Símbolo de Chesed, flujo y misericordia"
+    },
+    {
+      "id": "nat_157",
+      "hebrew_clean": "אש",
+      "hebrew_full": "אש",
+      "transliteration": "Esh",
+      "category": "naturaleza",
+      "meaning_es": "Fuego",
+      "gematria_std": 301,
+      "related": [],
+      "references": [],
+      "mystical_desc": "Símbolo de Geburah, poder y transformación"
+    },
+    {
+      "id": "nat_158",
+      "hebrew_clean": "רוח",
+      "hebrew_full": "רוח",
+      "transliteration": "Ruach",
+      "category": "naturaleza",
+      "meaning_es": "Viento, Espíritu",
+      "gematria_std": 214,
+      "related": [],
+      "references": [
+        "Génesis 1:2"
+      ],
+      "mystical_desc": "El aliento divino, uno de los cuatro elementos"
+    },
+    {
+      "id": "con_159",
+      "hebrew_clean": "אור",
+      "hebrew_full": "אור",
+      "transliteration": "Or",
+      "category": "conceptos_misticos",
+      "meaning_es": "Luz",
+      "gematria_std": 207,
+      "related": [
+        "חושך"
+      ],
+      "references": [
+        "Génesis 1:3"
+      ],
+      "mystical_desc": "La primera creación: 'Haya luz'. Símbolo de conocimiento divino"
+    },
+    {
+      "id": "con_160",
+      "hebrew_clean": "חושך",
+      "hebrew_full": "חושך",
+      "transliteration": "Choshech",
+      "category": "conceptos_misticos",
+      "meaning_es": "Oscuridad",
+      "gematria_std": 328,
+      "related": [
+        "אור"
+      ],
+      "references": [
+        "Génesis 1:2"
+      ],
+      "mystical_desc": "No es ausencia de luz sino un estado previo a la revelación"
+    },
+    {
+      "id": "lug_161",
+      "hebrew_clean": "גן",
+      "hebrew_full": "גן",
+      "transliteration": "Gan",
+      "category": "lugares_sagrados",
+      "meaning_es": "Jardín",
+      "gematria_std": 53,
+      "related": [
+        "עדן"
+      ],
+      "references": [
+        "Génesis 2:8"
+      ],
+      "mystical_desc": "El jardín primordial"
+    },
+    {
+      "id": "lug_162",
+      "hebrew_clean": "עדן",
+      "hebrew_full": "עדן",
+      "transliteration": "Eden",
+      "category": "lugares_sagrados",
+      "meaning_es": "Edén, Deleite",
+      "gematria_std": 124,
+      "related": [
+        "גן"
+      ],
+      "references": [
+        "Génesis 2:8"
+      ],
+      "mystical_desc": "Paraíso terrenal, estado de conciencia elevada"
+    },
+    {
+      "id": "lug_163",
+      "hebrew_clean": "ירושלים",
+      "hebrew_full": "ירושלים",
+      "transliteration": "Yerushalayim",
+      "category": "lugares_sagrados",
+      "meaning_es": "Jerusalén",
+      "gematria_std": 586,
+      "related": [],
+      "references": [],
+      "mystical_desc": "Ciudad de paz. Centro espiritual del mundo"
+    },
+    {
+      "id": "lug_164",
+      "hebrew_clean": "ציון",
+      "hebrew_full": "ציון",
+      "transliteration": "Tzion",
+      "category": "lugares_sagrados",
+      "meaning_es": "Sión",
+      "gematria_std": 156,
+      "related": [
+        "ירושלים"
+      ],
+      "references": [],
+      "mystical_desc": "Monte sagrado en Jerusalén, símbolo de redención"
+    },
+    {
+      "id": "lug_165",
+      "hebrew_clean": "בית",
+      "hebrew_full": "בית",
+      "transliteration": "Bayit",
+      "category": "lugares_sagrados",
+      "meaning_es": "Casa",
+      "gematria_std": 412,
+      "related": [],
+      "references": [],
+      "mystical_desc": "Bayit HaMikdash: El Templo Sagrado"
+    },
+    {
+      "id": "lug_166",
+      "hebrew_clean": "היכל",
+      "hebrew_full": "היכל",
+      "transliteration": "Heichal",
+      "category": "lugares_sagrados",
+      "meaning_es": "Palacio, Templo",
+      "gematria_std": 65,
+      "related": [],
+      "references": [],
+      "mystical_desc": "Los palacios celestiales en el misticismo judío"
+    },
+    {
+      "id": "obj_167",
+      "hebrew_clean": "מזבח",
+      "hebrew_full": "מזבח",
+      "transliteration": "Mizbeach",
+      "category": "objetos_rituales",
+      "meaning_es": "Altar",
+      "gematria_std": 57,
+      "related": [],
+      "references": [
+        "Éxodo 20:24"
+      ],
+      "mystical_desc": "Lugar de sacrificio y elevación espiritual"
+    },
+    {
+      "id": "obj_168",
+      "hebrew_clean": "מנורה",
+      "hebrew_full": "מנורה",
+      "transliteration": "Menorah",
+      "category": "objetos_rituales",
+      "meaning_es": "Candelabro de siete brazos",
+      "gematria_std": 301,
+      "related": [],
+      "references": [
+        "Éxodo 25:31"
+      ],
+      "mystical_desc": "Símbolo de luz divina y las siete Sefirot inferiores"
+    },
+    {
+      "id": "obj_169",
+      "hebrew_clean": "ארון",
+      "hebrew_full": "ארון",
+      "transliteration": "Aron",
+      "category": "objetos_rituales",
+      "meaning_es": "Arca",
+      "gematria_std": 257,
+      "related": [],
+      "references": [
+        "Éxodo 25:10"
+      ],
+      "mystical_desc": "Arca de la Alianza, contenía las tablas de la Ley"
+    },
+    {
+      "id": "obj_170",
+      "hebrew_clean": "טלית",
+      "hebrew_full": "טלית",
+      "transliteration": "Talit",
+      "category": "objetos_rituales",
+      "meaning_es": "Manto de oración",
+      "gematria_std": 449,
+      "related": [],
+      "references": [
+        "Números 15:38"
+      ],
+      "mystical_desc": "Envuelve al orante en santidad"
+    },
+    {
+      "id": "obj_171",
+      "hebrew_clean": "תפילין",
+      "hebrew_full": "תפילין",
+      "transliteration": "Tefilin",
+      "category": "objetos_rituales",
+      "meaning_es": "Filacterias",
+      "gematria_std": 570,
+      "related": [],
+      "references": [
+        "Deuteronomio 6:8"
+      ],
+      "mystical_desc": "Atar la mente y el corazón a Dios"
+    },
+    {
+      "id": "obj_172",
+      "hebrew_clean": "מזוזה",
+      "hebrew_full": "מזוזה",
+      "transliteration": "Mezuzah",
+      "category": "objetos_rituales",
+      "meaning_es": "Mezuzá",
+      "gematria_std": 64,
+      "related": [],
+      "references": [
+        "Deuteronomio 6:9"
+      ],
+      "mystical_desc": "Protección en las puertas del hogar"
+    },
+    {
+      "id": "obj_173",
+      "hebrew_clean": "שופר",
+      "hebrew_full": "שופר",
+      "transliteration": "Shofar",
+      "category": "objetos_rituales",
+      "meaning_es": "Cuerno de carnero",
+      "gematria_std": 586,
+      "related": [],
+      "references": [
+        "Levítico 25:9"
+      ],
+      "mystical_desc": "Despierta el alma, usado en Rosh Hashaná"
+    },
+    {
+      "id": "tie_174",
+      "hebrew_clean": "יום",
+      "hebrew_full": "יום",
+      "transliteration": "Yom",
+      "category": "tiempo",
+      "meaning_es": "Día",
+      "gematria_std": 56,
+      "related": [
+        "לילה"
+      ],
+      "references": [],
+      "mystical_desc": "Unidad de tiempo divino"
+    },
+    {
+      "id": "tie_175",
+      "hebrew_clean": "לילה",
+      "hebrew_full": "לילה",
+      "transliteration": "Lailah",
+      "category": "tiempo",
+      "meaning_es": "Noche",
+      "gematria_std": 75,
+      "related": [
+        "יום"
+      ],
+      "references": [
+        "Génesis 1:5"
+      ],
+      "mystical_desc": "Tiempo de ocultamiento divino y misterio"
+    },
+    {
+      "id": "tie_176",
+      "hebrew_clean": "שבת",
+      "hebrew_full": "שבת",
+      "transliteration": "Shabbat",
+      "category": "tiempo",
+      "meaning_es": "Sábado, Descanso",
+      "gematria_std": 702,
+      "related": [],
+      "references": [
+        "Éxodo 20:8"
+      ],
+      "mystical_desc": "Día sagrado de descanso, reflejo del mundo venidero"
+    },
+    {
+      "id": "tie_177",
+      "hebrew_clean": "שנה",
+      "hebrew_full": "שנה",
+      "transliteration": "Shanah",
+      "category": "tiempo",
+      "meaning_es": "Año",
+      "gematria_std": 355,
+      "related": [],
+      "references": [],
+      "mystical_desc": "Ciclo completo de tiempo"
+    },
+    {
+      "id": "tie_178",
+      "hebrew_clean": "עולם",
+      "hebrew_full": "עולם",
+      "transliteration": "Olam",
+      "category": "tiempo",
+      "meaning_es": "Mundo, Eternidad",
+      "gematria_std": 146,
+      "related": [],
+      "references": [],
+      "mystical_desc": "Tanto mundo espacial como temporal (eternidad)"
+    },
+    {
+      "id": "cue_179",
+      "hebrew_clean": "נפש",
+      "hebrew_full": "נפש",
+      "transliteration": "Nefesh",
+      "category": "cuerpo",
+      "meaning_es": "Alma vital, ser",
+      "gematria_std": 430,
+      "related": [
+        "רוח",
+        "נשמה"
+      ],
+      "references": [],
+      "mystical_desc": "Nivel más básico del alma, conectado al cuerpo"
+    },
+    {
+      "id": "cue_180",
+      "hebrew_clean": "גוף",
+      "hebrew_full": "גוף",
+      "transliteration": "Guf",
+      "category": "cuerpo",
+      "meaning_es": "Cuerpo",
+      "gematria_std": 89,
+      "related": [],
+      "references": [],
+      "mystical_desc": "El vehículo físico del alma"
+    }
+  ]
+}

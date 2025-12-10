@@ -1,0 +1,386 @@
+"""
+Script para inicializar los módulos de tests en la base de datos
+"""
+import os
+import django
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
+django.setup()
+
+from api.test_models import TestModule
+
+def initialize_tests():
+    """Crea los módulos de tests iniciales"""
+    
+    tests_data = [
+        {
+            'code': 'basic-analysis',
+            'name': 'Análisis Cabalístico Básico',
+            'description': 'Análisis fundamental de tu nombre y fecha de nacimiento. Descubre tu número de destino, alma y personalidad.',
+            'test_type': 'basic',
+            'required_access_level': 'free',
+            'icon': '📊',
+            'order': 1,
+            'estimated_duration': 5,
+            'available_for_therapists': True,
+            'available_for_personal': True,
+            'uses_per_month': None,  # Ilimitado
+        },
+        {
+            'code': 'complete-numerology',
+            'name': 'Numerología Completa',
+            'description': 'Análisis profundo de todos tus números: destino, alma, personalidad, madurez, karmas y más.',
+            'test_type': 'numerology',
+            'required_access_level': 'personal',
+            'icon': '🔢',
+            'order': 2,
+            'estimated_duration': 15,
+            'available_for_therapists': True,
+            'available_for_personal': True,
+            'uses_per_month': 10,  # 10 usos mensuales para plan personal
+        },
+        {
+            'code': 'couple-compatibility',
+            'name': 'Compatibilidad de Pareja',
+            'description': 'Analiza la compatibilidad numerológica entre dos personas. Ideal para relaciones de pareja.',
+            'test_type': 'compatibility',
+            'required_access_level': 'personal',
+            'icon': '💑',
+            'order': 3,
+            'estimated_duration': 10,
+            'available_for_therapists': True,
+            'available_for_personal': True,
+            'uses_per_month': 5,
+        },
+        {
+            'code': 'career-guidance',
+            'name': 'Orientación Profesional',
+            'description': 'Descubre tus talentos naturales y las profesiones más adecuadas según tu numerología.',
+            'test_type': 'career',
+            'required_access_level': 'personal',
+            'icon': '💼',
+            'order': 4,
+            'estimated_duration': 12,
+            'available_for_therapists': True,
+            'available_for_personal': True,
+            'uses_per_month': 5,
+        },
+        {
+            'code': 'spiritual-path',
+            'name': 'Camino Espiritual',
+            'description': 'Explora tu propósito espiritual y las lecciones de vida que debes aprender.',
+            'test_type': 'spiritual',
+            'required_access_level': 'professional',
+            'icon': '🕉️',
+            'order': 5,
+            'estimated_duration': 20,
+            'available_for_therapists': True,
+            'available_for_personal': False,  # Solo terapeutas
+            'uses_per_month': None,  # Ilimitado para profesionales
+        },
+        {
+            'code': 'professional-pai',
+            'name': 'PAI - Evaluación Profesional',
+            'description': 'Inventario de la personalidad (PAI) para evaluación clínica profesional.',
+            'test_type': 'pai',
+            'required_access_level': 'professional',
+            'icon': '📋',
+            'order': 6,
+            'estimated_duration': 25,
+            'available_for_therapists': True,
+            'available_for_personal': False,
+            'uses_per_month': None,
+        },
+        {
+            'code': 'health-wellness',
+            'name': 'Salud y Bienestar',
+            'description': 'Análisis de aspectos relacionados con tu salud física y emocional según la numerología.',
+            'test_type': 'health',
+            'required_access_level': 'professional',
+            'icon': '🏥',
+            'order': 6,
+            'estimated_duration': 15,
+            'available_for_therapists': True,
+            'available_for_personal': True,
+            'uses_per_month': None,
+        },
+        {
+            'code': 'financial-abundance',
+            'name': 'Abundancia Financiera',
+            'description': 'Descubre tus ciclos financieros y cómo atraer prosperidad según tu numerología.',
+            'test_type': 'financial',
+            'required_access_level': 'professional',
+            'icon': '💰',
+            'order': 7,
+            'estimated_duration': 12,
+            'available_for_therapists': True,
+            'available_for_personal': True,
+            'uses_per_month': 3,
+        },
+        {
+            'code': 'family-relations',
+            'name': 'Relaciones Familiares',
+            'description': 'Análisis de la dinámica familiar y compatibilidad entre miembros de la familia.',
+            'test_type': 'family',
+            'required_access_level': 'premium',
+            'icon': '👨‍👩‍👧‍👦',
+            'order': 8,
+            'estimated_duration': 18,
+            'available_for_therapists': True,
+            'available_for_personal': True,
+            'uses_per_month': None,
+        },
+        {
+            'code': 'life-purpose',
+            'name': 'Propósito de Vida',
+            'description': 'Descubre tu misión de vida y cómo cumplir tu propósito en este plano terrenal.',
+            'test_type': 'purpose',
+            'required_access_level': 'premium',
+            'icon': '🎯',
+            'order': 9,
+            'estimated_duration': 25,
+            'available_for_therapists': True,
+            'available_for_personal': True,
+            'uses_per_month': None,
+        },
+        {
+            'code': 'past-lives',
+            'name': 'Vidas Pasadas',
+            'description': 'Explora las influencias de vidas pasadas en tu existencia actual a través de la numerología kármica.',
+            'test_type': 'past_life',
+            'required_access_level': 'premium',
+            'icon': '🔮',
+            'order': 10,
+            'estimated_duration': 30,
+            'available_for_therapists': True,
+            'available_for_personal': True,
+            'uses_per_month': 2,
+        },
+        # Diagnostic modules (clinical tools for therapists)
+        {
+            'code': 'bdi-ii',
+            'name': 'BDI-II - Inventario de Depresión',
+            'description': 'Inventario de Depresión de Beck (BDI-II) para evaluación clínica. 21 ítems, alertas de riesgo suicida y recomendaciones.',
+            'test_type': 'bdi',
+            'required_access_level': 'professional',
+            'icon': '🧠',
+            'order': 11,
+            'estimated_duration': 10,
+            'available_for_therapists': True,
+            'available_for_personal': False,
+            'uses_per_month': None,
+        },
+        {
+            'code': 'bai',
+            'name': 'BAI - Inventario de Ansiedad de Beck',
+            'description': 'Inventario de Ansiedad de Beck (BAI). Evalúa ansiedad somática y cognitiva, detecta síntomas de pánico.',
+            'test_type': 'bai',
+            'required_access_level': 'professional',
+            'icon': '⚠️',
+            'order': 12,
+            'estimated_duration': 10,
+            'available_for_therapists': True,
+            'available_for_personal': False,
+            'uses_per_month': None,
+        },
+        {
+            'code': 'phq-9',
+            'name': 'PHQ-9',
+            'description': 'PHQ-9 - Screening de depresión para evaluación rápida y seguimiento.',
+            'test_type': 'diagnostic',
+            'required_access_level': 'professional',
+            'icon': '🧾',
+            'order': 13,
+            'estimated_duration': 5,
+            'available_for_therapists': True,
+            'available_for_personal': True,
+            'uses_per_month': None,
+        },
+        {
+            'code': 'gad-7',
+            'name': 'GAD-7',
+            'description': 'GAD-7 - Cuestionario breve para trastorno de ansiedad generalizada.',
+            'test_type': 'diagnostic',
+            'required_access_level': 'professional',
+            'icon': '😰',
+            'order': 14,
+            'estimated_duration': 5,
+            'available_for_therapists': True,
+            'available_for_personal': True,
+            'uses_per_month': None,
+        },
+        {
+            'code': 'ptsd-check',
+            'name': 'PTSD Check',
+            'description': 'Screening para trastorno por estrés postraumático.',
+            'test_type': 'diagnostic',
+            'required_access_level': 'professional',
+            'icon': '🔥',
+            'order': 15,
+            'estimated_duration': 8,
+            'available_for_therapists': True,
+            'available_for_personal': False,
+            'uses_per_month': None,
+        },
+        {
+            'code': 'ocd-screen',
+            'name': 'OCD Screen',
+            'description': 'Cuestionario de cribado para transtorno obsesivo-compulsivo (OCD).',
+            'test_type': 'diagnostic',
+            'required_access_level': 'professional',
+            'icon': '🧩',
+            'order': 16,
+            'estimated_duration': 8,
+            'available_for_therapists': True,
+            'available_for_personal': False,
+            'uses_per_month': None,
+        },
+        {
+            'code': 'insomnia-index',
+            'name': 'Insomnia Index',
+            'description': 'Evaluación del insomnio y calidad del sueño.',
+            'test_type': 'diagnostic',
+            'required_access_level': 'professional',
+            'icon': '🌙',
+            'order': 17,
+            'estimated_duration': 6,
+            'available_for_therapists': True,
+            'available_for_personal': True,
+            'uses_per_month': None,
+        },
+        {
+            'code': 'adhd-adult',
+            'name': 'ADHD - Adult Screening',
+            'description': 'Screening para TDAH en adultos (síntomas actuales y seguimiento).',
+            'test_type': 'diagnostic',
+            'required_access_level': 'professional',
+            'icon': '⚡',
+            'order': 18,
+            'estimated_duration': 8,
+            'available_for_therapists': True,
+            'available_for_personal': False,
+            'uses_per_month': None,
+        },
+        {
+            'code': 'substance-use',
+            'name': 'Substance Use Screening',
+            'description': 'Cribado de consumo de sustancias y riesgo asociado.',
+            'test_type': 'diagnostic',
+            'required_access_level': 'professional',
+            'icon': '🍷',
+            'order': 19,
+            'estimated_duration': 8,
+            'available_for_therapists': True,
+            'available_for_personal': False,
+            'uses_per_month': None,
+        },
+        {
+            'code': 'eating-disorder',
+            'name': 'Eating Disorder Screen',
+            'description': 'Cribado para trastornos de la conducta alimentaria.',
+            'test_type': 'diagnostic',
+            'required_access_level': 'professional',
+            'icon': '🥗',
+            'order': 20,
+            'estimated_duration': 8,
+            'available_for_therapists': True,
+            'available_for_personal': False,
+            'uses_per_month': None,
+        },
+        {
+            'code': 'scl-90',
+            'name': 'SCL-90-R',
+            'description': 'SCL-90-R - Lista de Síntomas Revisada (pantalla amplia) para evaluación de psicopatología.',
+            'test_type': 'scl90',
+            'required_access_level': 'professional',
+            'icon': '📋',
+            'order': 21,
+            'estimated_duration': 15,
+            'available_for_therapists': True,
+            'available_for_personal': False,
+            'uses_per_month': None,
+        },
+        {
+            'code': 'stai',
+            'name': 'STAI - Estado-Rasgo',
+            'description': 'STAI - Inventario de Ansiedad (Estado y Rasgo).',
+            'test_type': 'stai',
+            'required_access_level': 'professional',
+            'icon': '⚖️',
+            'order': 22,
+            'estimated_duration': 8,
+            'available_for_therapists': True,
+            'available_for_personal': True,
+            'uses_per_month': None,
+        },
+        {
+            'code': 'mcmi-iv',
+            'name': 'MCMI-IV - Inventario Multiaxial de Millon',
+            'description': 'MCMI-IV para evaluación de personalidad (placeholder). Use contenido licenciado en producción.',
+            'test_type': 'mcmi-iv',
+            'required_access_level': 'professional',
+            'icon': '🧩',
+            'order': 23,
+            'estimated_duration': 25,
+            'available_for_therapists': True,
+            'available_for_personal': False,
+            'uses_per_month': None,
+            'requires_license': True,
+            'license_info': 'MCMI-IV es un instrumento con derechos de autor. Debes tener licencia válida para administrarlo en esta plataforma.'
+        },
+        {
+            'code': 'scid5',
+            'name': 'SCID-5-RV - Entrevista DSM-5',
+            'description': 'SCID-5-RV - Entrevista clínica estructurada para DSM-5 (se requiere adaptación clínica).',
+            'test_type': 'scid5',
+            'required_access_level': 'professional',
+            'icon': '🔎',
+            'order': 24,
+            'estimated_duration': 60,
+            'available_for_therapists': True,
+            'available_for_personal': False,
+            'uses_per_month': None,
+            'requires_license': True,
+            'license_info': 'SCID-5-RV es un instrumento protegido. Confirmar licencia y capacitación antes de uso.'
+        },
+        {
+            'code': 'cabalistic-astrology',
+            'name': 'Astrología Cabalística',
+            'description': 'Análisis astrológico basado en el Árbol de la Vida. Calcula los 72 Ángeles de Dios y tu ADN Cósmico según tu carta natal.',
+            'test_type': 'astrology',
+            'required_access_level': 'premium',
+            'icon': '⭐',
+            'order': 25,
+            'estimated_duration': 20,
+            'available_for_therapists': True,
+            'available_for_personal': True,
+            'uses_per_month': None,  # Ilimitado para premium
+        },
+    ]
+    
+    created_count = 0
+    updated_count = 0
+    
+    for test_data in tests_data:
+        test, created = TestModule.objects.update_or_create(
+            code=test_data['code'],
+            defaults=test_data
+        )
+        
+        if created:
+            created_count += 1
+            print(f"✓ Creado: {test.name}")
+        else:
+            updated_count += 1
+            print(f"↻ Actualizado: {test.name}")
+    
+    print(f"\n{'='*50}")
+    print(f"Tests creados: {created_count}")
+    print(f"Tests actualizados: {updated_count}")
+    print(f"Total tests: {TestModule.objects.count()}")
+    print(f"{'='*50}\n")
+
+if __name__ == '__main__':
+    print("Inicializando módulos de tests...\n")
+    initialize_tests()
+    print("¡Listo!")

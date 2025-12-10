@@ -112,6 +112,23 @@ export interface Booking {
   created_at: string;
 }
 
+export interface Test {
+  id: number;
+  code: string;
+  name: string;
+  description: string;
+  category: string;
+  target_user_type: string;
+  estimated_time: number;
+  instructions: string;
+  is_free: boolean;
+  is_popular: boolean;
+  is_active: boolean;
+  benefits?: string[];
+  has_access?: boolean;
+  requires_personal_data?: boolean;
+}
+
 // Helper function to get auth token
 export const getAuthToken = (): string | null => {
   if (typeof window !== 'undefined') {
@@ -230,6 +247,11 @@ export const getService = async (slug: string): Promise<Service> => {
   return apiRequest<Service>(`/services/${slug}/`);
 };
 
+export const getTests = async (): Promise<Test[]> => {
+  const response = await apiRequest<{ tests: Test[] }>('/tests/');
+  return response.tests;
+};
+
 // ========== BOOKINGS API ==========
 
 export const createBooking = async (data: {
@@ -294,6 +316,8 @@ export default {
   getServiceCategories,
   getServices,
   getService,
+  // Tests
+  getTests,
   // Bookings
   createBooking,
   getUserBookings,
@@ -315,3 +339,36 @@ export async function calcularAnalisisCabalistico(data: {
     body: JSON.stringify(data),
   });
 }
+
+// ========== PAYMENTS & STRIPE ==========
+
+export interface CheckoutSessionResponse {
+  sessionId: string;
+  url: string;
+}
+
+export const createCheckoutSession = async (data: {
+  planType: 'personal' | 'therapist_professional' | 'therapist_premium';
+  successUrl: string;
+  cancelUrl: string;
+}): Promise<CheckoutSessionResponse> => {
+  return apiRequest<CheckoutSessionResponse>('/payments/create-checkout/', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+};
+
+export const getSubscriptionStatus = async (): Promise<{
+  subscription_status: string;
+  subscription_plan: string;
+  membership_active: boolean;
+  membership_expires: string | null;
+}> => {
+  return apiRequest('/payments/subscription-status/');
+};
+
+export const cancelSubscription = async (): Promise<{ message: string }> => {
+  return apiRequest('/payments/cancel-subscription/', {
+    method: 'POST',
+  });
+};

@@ -74,12 +74,6 @@ export default function TherapistRegister() {
 
   return (
     <div className="min-h-screen bg-black text-white overflow-hidden">
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Spartan:wght@300;400;500&display=swap');
-        .title-font { font-family: 'Cormorant Garamond', serif; }
-        .body-font { font-family: 'Spartan', sans-serif; }
-      `}</style>
-
       <div className="relative z-10 min-h-screen flex items-center justify-center px-4 py-12" style={{ background: 'linear-gradient(to bottom, #000000, #0A0A1F)' }}>
         <div className="w-full max-w-2xl">
           

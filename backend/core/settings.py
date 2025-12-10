@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     
     # --- Mis Apps ---
     'api',              # Tu app de lógica cabalística
+    'courses',          # Sistema LMS de cursos
 ]
 
 MIDDLEWARE = [
@@ -129,6 +130,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# Media files (User uploads)
+MEDIA_URL = 'media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
@@ -139,6 +145,25 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Permite que el frontend (Next.js) haga peticiones a este backend
 CORS_ALLOWED_ORIGINS = config(
     'CORS_ALLOWED_ORIGINS',
+    default='http://localhost:3000,http://localhost:3001',
+    cast=lambda v: [s.strip() for s in v.split(',')]
+)
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
+
+# CSRF - Permitir peticiones del frontend
+CSRF_TRUSTED_ORIGINS = config(
+    'CSRF_TRUSTED_ORIGINS',
     default='http://localhost:3000,http://localhost:3001',
     cast=lambda v: [s.strip() for s in v.split(',')]
 )
@@ -167,3 +192,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # EMAIL_HOST_PASSWORD = 'tu-contraseña-o-app-password'
 DEFAULT_FROM_EMAIL = 'Tony Blanco <noreply@tonyblanco.com>'
 EMAIL_SUBJECT_PREFIX = '[Kabbalah] '
+
+# Gemini AI Configuration
+GEMINI_API_KEY = config('GEMINI_API_KEY', default='')
+GEMINI_MODEL = config('GEMINI_MODEL', default='gemini-1.5-flash')

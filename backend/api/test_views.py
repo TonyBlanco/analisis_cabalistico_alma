@@ -1,0 +1,555 @@
+from rest_framework import status
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from django.shortcuts import get_object_or_404
+from .test_models import TestModule, UserTestAccess, TestResult
+from datetime import datetime
+from .test_serializers import (
+    TestModuleSerializer, 
+    TestResultSerializer, 
+    TestExecutionSerializer
+)
+
+
+class AvailableTestsView(APIView):
+    """Lista todos los tests disponibles para el usuario actual"""
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        user = request.user
+        profile = user.profile
+        
+        # Filtrar tests según tipo de usuario
+        tests = TestModule.objects.filter(is_active=True)
+        
+        if profile.user_type == 'therapist':
+            tests = tests.filter(available_for_therapists=True)
+        else:
+            tests = tests.filter(available_for_personal=True)
+        
+        serializer = TestModuleSerializer(
+            tests, 
+            many=True, 
+            context={'request': request}
+        )
+        
+        return Response({
+            'tests': serializer.data,
+            'user_type': profile.user_type,
+            'subscription_plan': profile.subscription_plan or 'free',
+            'membership_active': profile.membership_active
+        })
+
+
+class TestModuleDetailView(APIView):
+    """Detalle de un módulo de test específico"""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, code):
+        test_module = get_object_or_404(TestModule, code=code, is_active=True)
+
+        # Verificar si el usuario puede ver este test
+        if not test_module.is_available_for_user(request.user):
+            return Response(
+                {
+                    'error': 'No tienes acceso a este test',
+                    'required_level': test_module.required_access_level,
+                    'your_level': request.user.profile.subscription_plan or 'free'
+                },
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        serializer = TestModuleSerializer(test_module, context={'request': request})
+        return Response(serializer.data)
+
+
+class ExecuteTestView(APIView):
+    """Ejecuta un test y guarda el resultado"""
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = TestExecutionSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        data = serializer.validated_data
+        test_code = data['test_module_code']
+        input_data = data['input_data']
+
+        profile = request.user.profile
+        birth_data = None
+        try:
+            birth_data = request.user.birth_data
+        except Exception:
+            birth_data = None
+
+        if profile.user_type == 'personal':
+            if not input_data.get('nombre'):
+                if profile.full_name:
+                    input_data['nombre'] = profile.full_name
+                elif birth_data and birth_data.full_name:
+                    input_data['nombre'] = birth_data.full_name
+            if not input_data.get('fecha_nacimiento'):
+                if profile.birth_date:
+                    input_data['fecha_nacimiento'] = str(profile.birth_date)
+                elif birth_data and birth_data.birth_date:
+                    input_data['fecha_nacimiento'] = str(birth_data.birth_date)
+
+        try:
+            test_module = TestModule.objects.get(code=test_code, is_active=True)
+        except TestModule.DoesNotExist:
+            return Response({
+                'error': f'Test "{test_code}" no encontrado o no está activo',
+                'note': 'Verifica que el test esté registrado en la base de datos ejecutando el script initialize_tests.py'
+            }, status=status.HTTP_404_NOT_FOUND)
+        
+        if not test_module.is_available_for_user(request.user):
+            return Response({'error': 'No tienes acceso a este test'}, status=status.HTTP_403_FORBIDDEN)
+
+        user_access, created = UserTestAccess.objects.get_or_create(user=request.user, test_module=test_module)
+        if not user_access.can_use_test():
+            return Response({'error': 'Has alcanzado el límite mensual de usos para este test', 'current_uses': user_access.current_month_uses, 'limit': test_module.uses_per_month}, status=status.HTTP_429_TOO_MANY_REQUESTS)
+
+        if profile.user_type == 'personal' and test_module.test_type == 'compatibility':
+            if not input_data.get('persona1_nombre'):
+                input_data['persona1_nombre'] = input_data.get('nombre') or profile.full_name or (birth_data.full_name if birth_data else '')
+            if not input_data.get('persona1_fecha_nacimiento'):
+                input_data['persona1_fecha_nacimiento'] = input_data.get('fecha_nacimiento') or (str(profile.birth_date) if profile.birth_date else (str(birth_data.birth_date) if birth_data else None))
+
+        result_data = self._process_test(test_module, input_data)
+        user_access.record_use()
+
+        test_result = None
+        if data.get('save_result', True):
+            patient = None
+            if profile.user_type == 'personal':
+                client_name = profile.full_name or (birth_data.full_name if birth_data else '')
+                client_birth_date = profile.birth_date or (birth_data.birth_date if birth_data else None)
+            else:
+                client_name = data.get('client_name', '')
+                client_birth_date = data.get('client_birth_date')
+                # Si se proporciona patient_id, vincular con el paciente
+                patient_id = data.get('patient_id')
+                if patient_id:
+                    from .models import Patient
+                    try:
+                        patient = Patient.objects.get(id=patient_id, therapist=request.user)
+                        # Usar datos del paciente si no se proporcionaron
+                        if not client_name:
+                            client_name = patient.full_name
+                        if not client_birth_date:
+                            client_birth_date = patient.birth_date
+                    except Patient.DoesNotExist:
+                        pass  # Si no existe, continuar sin vincular
+            
+            test_result = TestResult.objects.create(
+                user=request.user,
+                test_module=test_module,
+                input_data=input_data,
+                result_data=result_data,
+                client_name=client_name,
+                client_birth_date=client_birth_date,
+                patient=patient
+            )
+
+        response_data = {'success': True, 'result': result_data, 'uses_remaining': None}
+        if test_module.uses_per_month:
+            response_data['uses_remaining'] = (test_module.uses_per_month - user_access.current_month_uses)
+        if test_result:
+            response_data['result_id'] = test_result.id
+        return Response(response_data)
+
+    def _process_test(self, test_module, input_data):
+        """Procesa el test según su tipo"""
+        # Lazy import compute functions to avoid import errors when optional SDKs aren't installed
+        compute_bdi = compute_bai = compute_scl90 = compute_stai = compute_mcmi4 = compute_scid5 = None
+        compute_pai = None
+        try:
+            # optional internal modules; if missing, we'll continue with None placeholders
+            from .pai import compute_pai
+        except Exception:
+            compute_pai = None
+        try:
+            from .diagnostics import compute_bdi, compute_bai, compute_scl90, compute_stai, compute_mcmi4, compute_scid5
+        except Exception:
+            compute_bdi = compute_bai = compute_scl90 = compute_stai = compute_mcmi4 = compute_scid5 = None
+
+        test_type = test_module.test_type
+        try:
+            if test_type == 'bdi' or test_module.code == 'bdi-ii':
+                responses = input_data.get('responses', {})
+                if compute_bdi:
+                    result = compute_bdi({'nombre': input_data.get('nombre'), 'edad': input_data.get('edad'), 'fecha': input_data.get('fecha'), 'terapeuta': input_data.get('terapeuta'), 'responses': responses})
+                else:
+                    result = {'note': 'compute_bdi not available; missing module'}
+                return {'test_type': 'bdi', 'result': result, 'timestamp': str(datetime.now())}
+            if test_type == 'scl90' or test_module.code == 'scl-90':
+                responses = input_data.get('responses', {})
+                if compute_scl90:
+                    result = compute_scl90({'nombre': input_data.get('nombre'), 'edad': input_data.get('edad'), 'fecha': input_data.get('fecha'), 'terapeuta': input_data.get('terapeuta'), 'responses': responses})
+                else:
+                    result = {'note': 'compute_scl90 not available; missing module'}
+                return {'test_type': 'scl90', 'result': result, 'timestamp': str(datetime.now())}
+            if test_type == 'stai' or test_module.code == 'stai':
+                responses = input_data.get('responses', {})
+                if compute_stai:
+                    result = compute_stai({'nombre': input_data.get('nombre'), 'edad': input_data.get('edad'), 'fecha': input_data.get('fecha'), 'terapeuta': input_data.get('terapeuta'), 'responses': responses})
+                else:
+                    result = {'note': 'compute_stai not available; missing module'}
+                return {'test_type': 'stai', 'result': result, 'timestamp': str(datetime.now())}
+            if test_type == 'mcmi-iv' or test_module.code == 'mcmi-iv':
+                responses = input_data.get('responses', {})
+                if compute_mcmi4:
+                    result = compute_mcmi4({'nombre': input_data.get('nombre'), 'edad': input_data.get('edad'), 'fecha': input_data.get('fecha'), 'terapeuta': input_data.get('terapeuta'), 'responses': responses})
+                else:
+                    result = {'note': 'compute_mcmi4 not available; missing module'}
+                return {'test_type': 'mcmi-iv', 'result': result, 'timestamp': str(datetime.now())}
+            if test_type == 'scid5' or test_module.code == 'scid5':
+                responses = input_data.get('responses', {})
+                if compute_scid5:
+                    result = compute_scid5({'nombre': input_data.get('nombre'), 'edad': input_data.get('edad'), 'fecha': input_data.get('fecha'), 'terapeuta': input_data.get('terapeuta'), 'responses': responses})
+                else:
+                    result = {'note': 'compute_scid5 not available; missing module'}
+                return {'test_type': 'scid5', 'result': result, 'timestamp': str(datetime.now())}
+            if test_type == 'pai' or test_module.code == 'professional-pai':
+                responses = input_data.get('responses', {})
+                nombre = input_data.get('nombre', '')
+                edad = input_data.get('edad')
+                fecha = input_data.get('fecha') or input_data.get('fecha_evaluacion')
+                terapeuta = input_data.get('terapeuta')
+                if compute_pai:
+                    result = compute_pai({'nombre': nombre, 'edad': edad, 'fecha': fecha, 'terapeuta': terapeuta, 'responses': responses})
+                else:
+                    result = {'note': 'compute_pai not available; missing module'}
+                return {'test_type': 'pai', 'result': result, 'timestamp': str(datetime.now())}
+            if test_type == 'bai' or test_module.code == 'bai':
+                responses = input_data.get('responses', {})
+                if compute_bai:
+                    result = compute_bai({'nombre': input_data.get('nombre'), 'edad': input_data.get('edad'), 'fecha': input_data.get('fecha'), 'terapeuta': input_data.get('terapeuta'), 'responses': responses})
+                else:
+                    result = {'note': 'compute_bai not available; missing module'}
+                return {'test_type': 'bai', 'result': result, 'timestamp': str(datetime.now())}
+            # Astrología Cabalística (se calcula en el frontend con astronomy-engine)
+            if test_type == 'astrology' or test_module.code == 'cabalistic-astrology':
+                nombre = input_data.get('nombre') or input_data.get('full_name') or ''
+                fecha_str = input_data.get('fecha_nacimiento') or input_data.get('birth_date') or ''
+                hora = input_data.get('hora', '12:00')
+                latitud = input_data.get('latitud', input_data.get('lat', 40.4168))
+                longitud = input_data.get('longitud', input_data.get('lng', -3.7038))
+                
+                return {
+                    'test_type': 'astrology',
+                    'processed': True,
+                    'timestamp': str(datetime.now()),
+                    'result': {
+                        'nombre': nombre,
+                        'fecha_nacimiento': fecha_str,
+                        'hora': hora,
+                        'latitud': latitud,
+                        'longitud': longitud,
+                        'note': 'El cálculo astrológico se realiza en el frontend usando astronomy-engine'
+                    },
+                    'message': 'Test de Astrología Cabalística listo para cálculo local'
+                }
+            
+            # Análisis cabalístico básico / numerología completa / abundancia financiera
+            if test_type in ['basic', 'numerology', 'financial', 'career', 'spiritual', 'health', 'family', 'purpose', 'past_life']:
+                from cabala_py.integracion_arbol import generar_mapa_cabalista_completo
+
+                nombre = input_data.get('nombre') or input_data.get('full_name') or ''
+                fecha_str = input_data.get('fecha_nacimiento') or input_data.get('birth_date') or ''
+                try:
+                    # Esperamos YYYY-MM-DD
+                    fecha = datetime.fromisoformat(str(fecha_str)).date()
+                    dia, mes, anio = fecha.day, fecha.month, fecha.year
+                except Exception:
+                    # Si falla el parseo, devolvemos nota y abortamos
+                    return {
+                        'test_type': test_type,
+                        'processed': False,
+                        'timestamp': str(datetime.now()),
+                        'message': 'Fecha de nacimiento inválida o faltante',
+                        'note': 'Provee fecha_nacimiento en formato YYYY-MM-DD'
+                    }
+
+                try:
+                    mapa = generar_mapa_cabalista_completo(nombre, dia, mes, anio)
+                    
+                    # Para tests específicos, agregar análisis adicional según el tipo
+                    if test_type == 'financial':
+                        # Agregar análisis específico de abundancia financiera
+                        # Esto se puede expandir más adelante con cálculos específicos
+                        mapa['analisis_financiero'] = {
+                            'ciclos_financieros': {
+                                'año_personal': mapa.get('numeros_principales', {}).get('destino', {}).get('valor', 'N/A'),
+                                'ciclo_vital': mapa.get('numeros_principales', {}).get('esencia', {}).get('valor', 'N/A'),
+                            },
+                            'numeros_prosperidad': {
+                                'numero_abundancia': mapa.get('numeros_principales', {}).get('expresion', {}).get('valor', 'N/A'),
+                                'numero_riqueza': mapa.get('numeros_principales', {}).get('destino', {}).get('valor', 'N/A'),
+                            },
+                            'recomendaciones': mapa.get('recomendaciones', [])
+                        }
+                    
+                except Exception as calc_error:
+                    return {
+                        'test_type': test_type,
+                        'processed': False,
+                        'timestamp': str(datetime.now()),
+                        'message': 'Error calculando el análisis cabalístico',
+                        'note': str(calc_error)
+                    }
+
+                return {
+                    'test_type': test_type,
+                    'processed': True,
+                    'timestamp': str(datetime.now()),
+                    'result': mapa,
+                    'message': f'Test {test_module.name} calculado correctamente'
+                }
+            # If no specific handler matched, return a default processed message
+            return {'test_type': test_type, 'processed': True, 'timestamp': str(datetime.now()), 'message': f'Test {test_module.name} procesado correctamente', 'note': 'Implementación avanzada en desarrollo'}
+        except Exception as e:
+            return {'error': str(e), 'test_type': test_type, 'timestamp': str(datetime.now())}
+
+
+class TestResultsView(APIView):
+    """Lista y gestión de resultados de tests guardados"""
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        """Lista todos los resultados del usuario"""
+        results = TestResult.objects.filter(
+            user=request.user,
+            is_archived=False
+        )
+        
+        # Filtros opcionales
+        test_code = request.query_params.get('test_code')
+        if test_code:
+            results = results.filter(test_module__code=test_code)
+        
+        favorites_only = request.query_params.get('favorites')
+        if favorites_only == 'true':
+            results = results.filter(is_favorite=True)
+        
+        serializer = TestResultSerializer(results, many=True, context={'request': request})
+        return Response(serializer.data)
+    
+    def post(self, request):
+        """Crea un nuevo resultado manualmente"""
+        serializer = TestResultSerializer(data=request.data)
+        
+        if serializer.is_valid():
+            serializer.save(user=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class TestResultDetailView(APIView):
+    """Detalle, actualización y eliminación de un resultado"""
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, pk):
+        """Obtiene un resultado específico"""
+        result = get_object_or_404(
+            TestResult, 
+            pk=pk, 
+            user=request.user
+        )
+        serializer = TestResultSerializer(result)
+        return Response(serializer.data)
+    
+    def patch(self, request, pk):
+        """Actualiza un resultado (notas, favorito, etc.)"""
+        result = get_object_or_404(
+            TestResult, 
+            pk=pk, 
+            user=request.user
+        )
+        
+        serializer = TestResultSerializer(
+            result, 
+            data=request.data, 
+            partial=True
+        )
+        
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request, pk):
+        """Elimina (archiva) un resultado"""
+        result = get_object_or_404(
+            TestResult, 
+            pk=pk, 
+            user=request.user
+        )
+        
+        # Archivar en lugar de eliminar
+        result.is_archived = True
+        result.save()
+        
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class UserTestStatsView(APIView):
+    """Estadísticas de uso de tests del usuario"""
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        user = request.user
+        
+        # Obtener todos los accesos del usuario
+        accesses = UserTestAccess.objects.filter(user=user).select_related('test_module')
+        
+        # Contar tests disponibles (que el usuario puede usar)
+        available_count = 0
+        for access in accesses:
+            if access.can_use_test() or access.has_special_access:
+                available_count += 1
+        
+        # Contar resultados guardados
+        total_results = TestResult.objects.filter(user=user).count()
+        
+        # Contar usos este mes
+        tests_this_month = sum(access.current_month_uses for access in accesses)
+        
+        stats = {
+            'total_tests': TestModule.objects.filter(is_active=True).count(),
+            'available_tests': available_count,
+            'total_results': total_results,
+            'tests_this_month': tests_this_month,
+            'total_uses': sum(access.uses_count for access in accesses),
+            'tests': []
+        }
+        
+        for access in accesses:
+            if access.uses_count > 0:
+                stats['tests'].append({
+                    'code': access.test_module.code,
+                    'name': access.test_module.name,
+                    'uses_count': access.uses_count,
+                    'current_month_uses': access.current_month_uses,
+                    'last_used': access.last_used,
+                    'can_use_now': access.can_use_test()
+                })
+        
+        return Response(stats)
+
+
+class PatientPreviousTestsView(APIView):
+    """Busca tests previos de un paciente basándose en nombre y fecha de nacimiento"""
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        """Busca tests previos que coincidan con el nombre y fecha de nacimiento del paciente"""
+        patient_id = request.query_params.get('patient_id')
+        patient_name = request.query_params.get('patient_name')
+        patient_birth_date = request.query_params.get('patient_birth_date')
+        
+        if not patient_id and not (patient_name and patient_birth_date):
+            return Response(
+                {'error': 'Se requiere patient_id o patient_name y patient_birth_date'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        profile = request.user.profile
+        
+        # Si se proporciona patient_id, obtener datos del paciente
+        if patient_id:
+            from .models import Patient
+            try:
+                patient = Patient.objects.get(id=patient_id, therapist=request.user)
+                patient_name = patient.full_name
+                patient_birth_date = str(patient.birth_date)
+            except Patient.DoesNotExist:
+                return Response(
+                    {'error': 'Paciente no encontrado'},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+        
+        # Buscar tests que coincidan con nombre y fecha de nacimiento
+        # Buscar en todos los usuarios, no solo del terapeuta actual
+        # (porque el paciente pudo haber hecho el test en modo personal)
+        results = TestResult.objects.filter(
+            client_name__iexact=patient_name,
+            client_birth_date=patient_birth_date
+        ).exclude(
+            patient__isnull=False  # Excluir tests que ya están vinculados a otro paciente
+        ).select_related('test_module', 'user').order_by('-created_at')
+        
+        # Si el usuario es terapeuta, también buscar tests ya vinculados a este paciente
+        if profile.user_type == 'therapist' and patient_id:
+            from .models import Patient
+            try:
+                patient = Patient.objects.get(id=patient_id, therapist=request.user)
+                patient_results = TestResult.objects.filter(patient=patient).select_related('test_module', 'user').order_by('-created_at')
+                # Combinar resultados
+                all_results = list(results) + list(patient_results)
+                # Eliminar duplicados
+                seen_ids = set()
+                unique_results = []
+                for result in all_results:
+                    if result.id not in seen_ids:
+                        seen_ids.add(result.id)
+                        unique_results.append(result)
+                results = unique_results
+            except Patient.DoesNotExist:
+                pass
+        
+        serializer = TestResultSerializer(results, many=True)
+        return Response({
+            'count': len(results),
+            'results': serializer.data
+        })
+
+
+class GrantTestAccessView(APIView):
+    """Otorga acceso especial a un test (solo admin)"""
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        if not request.user.is_staff and not request.user.profile.is_admin:
+            return Response(
+                {'error': 'No tienes permisos para esta acción'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        user_id = request.data.get('user_id')
+        test_code = request.data.get('test_code')
+        special_uses = request.data.get('special_uses')
+        expires_at = request.data.get('expires_at')
+        
+        if not user_id or not test_code:
+            return Response(
+                {'error': 'user_id y test_code son requeridos'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        from django.contrib.auth.models import User
+        user = get_object_or_404(User, id=user_id)
+        test_module = get_object_or_404(TestModule, code=test_code)
+        
+        access, created = UserTestAccess.objects.get_or_create(
+            user=user,
+            test_module=test_module
+        )
+        
+        access.has_special_access = True
+        access.special_access_uses = special_uses
+        if expires_at:
+            from datetime import datetime
+            access.special_access_expires = datetime.fromisoformat(expires_at)
+        access.save()
+        
+        return Response({
+            'success': True,
+            'message': f'Acceso especial otorgado a {user.username} para {test_module.name}'
+        })
+
+
+ 

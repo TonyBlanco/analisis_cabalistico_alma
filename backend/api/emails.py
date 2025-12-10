@@ -403,3 +403,58 @@ def send_welcome_email(user_profile: UserProfile):
     except Exception as e:
         print(f"Error enviando email: {e}")
         return False
+
+
+def send_birthdata_unlock_email(user_profile: UserProfile, token: str):
+    """Enviar link de desbloqueo para birth_data"""
+    subject = '🔓 Solicitud: Desbloquear datos de nacimiento'
+    # URL para confirmar (en producción sería la URL pública). Aquí sólo usamos token.
+    unlock_url = f"http://localhost:3000/unlock-birth-data?token={token}&user={user_profile.user.id}"
+
+    html_message = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body {{ font-family: 'Arial', sans-serif; background-color: #0A0A1F; color: #ffffff; }}
+            .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+            .header {{ text-align: center; padding: 30px 0; }}
+            .header h1 {{ color: #D4AF37; font-size: 28px; margin: 0; }}
+            .content {{ background-color: #1a1a2e; border-radius: 12px; padding: 30px; margin: 20px 0; }}
+            .button {{ display: inline-block; padding: 12px 20px; background-color: #D4AF37; color: #000; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0; }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <div style="font-size: 48px;">🔓</div>
+                <h1>Solicitud de desbloqueo de datos</h1>
+            </div>
+            <div class="content">
+                <p>Hola {user_profile.full_name},</p>
+                <p>Hemos recibido tu solicitud para desbloquear tus datos de nacimiento (nombre, fecha, hora, etc.).</p>
+                <p>Para confirmar la solicitud, pulsa el botón abajo (o copia y pega la URL) y sigue las instrucciones.</p>
+                <p style="text-align:center;"><a class="button" href="{unlock_url}" target="_blank">Confirmar desbloqueo</a></p>
+                <p>Si no solicitaste este desbloqueo, puedes ignorar este email.</p>
+                <p>Con gratitud,</p>
+                <p><strong>Equipo - Análisis Cabalístico del Alma</strong></p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+
+    plain_message = f"Solicitud de desbloqueo - {user_profile.full_name}\n\nConfirma con esta URL: {unlock_url}\n\nSi no solicitaste este desbloqueo, ignora este mensaje."
+    try:
+        email = EmailMultiAlternatives(
+            subject=subject,
+            body=plain_message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[user_profile.user.email]
+        )
+        email.attach_alternative(html_message, "text/html")
+        email.send()
+        return True
+    except Exception as e:
+        print(f"Error enviando unlock email: {e}")
+        return False

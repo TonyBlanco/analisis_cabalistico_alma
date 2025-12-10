@@ -14,6 +14,7 @@ from .models import (
     AvailableSlot,
     BlockedDate
 )
+from .test_models import TestModule, UserTestAccess, TestResult
 
 
 @admin.register(UserProfile)
@@ -150,3 +151,29 @@ class BlockedDateAdmin(admin.ModelAdmin):
     list_filter = ['is_full_day', 'date']
     search_fields = ['reason']
     ordering = ['date']
+
+
+@admin.register(TestModule)
+class TestModuleAdmin(admin.ModelAdmin):
+    list_display = ['name', 'code', 'test_type', 'required_access_level', 'is_active', 'order']
+    list_filter = ['test_type', 'required_access_level', 'is_active', 'available_for_therapists', 'available_for_personal']
+    search_fields = ['name', 'code', 'description']
+    ordering = ['order', 'name']
+    readonly_fields = ['created_at', 'updated_at']
+
+
+@admin.register(UserTestAccess)
+class UserTestAccessAdmin(admin.ModelAdmin):
+    list_display = ['user', 'test_module', 'uses_count', 'current_month_uses', 'has_special_access', 'last_used']
+    list_filter = ['has_special_access', 'test_module']
+    search_fields = ['user__username', 'test_module__name']
+    readonly_fields = ['created_at', 'updated_at']
+    
+
+@admin.register(TestResult)
+class TestResultAdmin(admin.ModelAdmin):
+    list_display = ['user', 'test_module', 'client_name', 'is_favorite', 'is_archived', 'created_at']
+    list_filter = ['test_module', 'is_favorite', 'is_archived', 'created_at']
+    search_fields = ['user__username', 'test_module__name', 'client_name', 'notes']
+    readonly_fields = ['created_at', 'updated_at']
+    ordering = ['-created_at']

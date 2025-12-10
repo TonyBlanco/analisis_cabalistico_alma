@@ -4,6 +4,7 @@ from .models import (
     ServiceCategory, Service, ServicePackage, PackageService, 
     Booking, AvailableSlot, BlockedDate
 )
+from .birth_data_model import UserBirthData
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 from datetime import datetime, timedelta
@@ -20,6 +21,18 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'max_fichas_per_month', 'fichas_created_this_month'
         ]
         read_only_fields = ['subscription_status', 'subscription_start_date', 'subscription_end_date']
+
+
+class UserBirthDataSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserBirthData
+        fields = [
+            'full_name', 'birth_date', 'birth_time', 'birth_city', 'birth_country',
+            'birth_latitude', 'birth_longitude', 'is_locked', 'unlock_requested'
+        ]
+        read_only_fields = []
+    unlock_requested = serializers.BooleanField(read_only=True)
+    unlock_requested = serializers.BooleanField(read_only=True)
 
 
 class UserSerializer(serializers.ModelSerializer):

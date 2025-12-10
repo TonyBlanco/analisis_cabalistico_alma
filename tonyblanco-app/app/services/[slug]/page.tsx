@@ -85,13 +85,7 @@ export default function ServiceDetailPage() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=Spartan:wght@300;400;500;600&display=swap');
-        .title-font { font-family: 'Cormorant Garamond', serif; }
-        .body-font { font-family: 'Spartan', sans-serif; }
-      `}</style>
-
-      {/* Back Button */}
+      {/* Hero Section */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-4 sm:pt-8">
         <button
           onClick={() => router.back()}

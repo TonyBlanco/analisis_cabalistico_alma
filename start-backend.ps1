@@ -22,4 +22,13 @@ Write-Host "Press Ctrl+C to stop the server" -ForegroundColor Yellow
 Write-Host ""
 
 # Run Django server using the virtual environment Python
+# Ensure required packages are installed (only installs if Pillow missing)
+try {
+    & "$PSScriptRoot\.venv\Scripts\python.exe" -c "import PIL; print('Pillow OK')" | Out-Null
+} catch {
+    Write-Host "📦 Installing backend dependencies (Pillow)..." -ForegroundColor Yellow
+    & "$PSScriptRoot\.venv\Scripts\python.exe" -m pip install -r "$PSScriptRoot\backend\requirements.txt"
+}
+
+# Run Django server using the virtual environment Python
 & "$PSScriptRoot\.venv\Scripts\python.exe" manage.py runserver 8000

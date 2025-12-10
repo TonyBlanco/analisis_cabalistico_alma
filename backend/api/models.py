@@ -39,16 +39,21 @@ class UserProfile(models.Model):
     license_number = models.CharField(max_length=100, blank=True)
     years_of_experience = models.IntegerField(null=True, blank=True)
     
-    # Sistema de pagos
+    # Sistema de pagos y membresías
+    membership_active = models.BooleanField(default=True)  # Trial activo por defecto
+    membership_expires = models.DateTimeField(null=True, blank=True)
     subscription_status = models.CharField(
         max_length=20, 
         choices=SUBSCRIPTION_STATUS_CHOICES, 
         default='trial'
     )
+    subscription_plan = models.CharField(max_length=50, blank=True)  # 'personal', 'professional', 'premium'
     subscription_start_date = models.DateTimeField(null=True, blank=True)
     subscription_end_date = models.DateTimeField(null=True, blank=True)
     stripe_customer_id = models.CharField(max_length=255, blank=True)
     stripe_subscription_id = models.CharField(max_length=255, blank=True)
+    last_payment_date = models.DateTimeField(null=True, blank=True)
+    next_billing_date = models.DateTimeField(null=True, blank=True)
     
     # Límites según tipo de usuario
     max_fichas_per_month = models.IntegerField(default=10)  # Personal: 10, Therapist: ilimitado
@@ -70,6 +75,11 @@ class UserProfile(models.Model):
     
     def has_active_subscription(self):
         """Verifica si el usuario tiene una suscripción activa"""
+        from django.utils import timezone
+        if not self.membership_active:
+            return False
+        if self.membership_expires and self.membership_expires < timezone.now():
+            return False
         return self.subscription_status in ['trial', 'active']
     
     def can_create_ficha(self):

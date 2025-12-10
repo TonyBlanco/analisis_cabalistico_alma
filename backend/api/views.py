@@ -3,6 +3,7 @@ from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.authtoken.models import Token
 from datetime import date
@@ -15,6 +16,7 @@ from google.oauth2 import id_token
 # Importamos tu lógica maestra
 from cabala_py.integracion_arbol import generar_mapa_cabalista_completo
 from .models import Calculo, Ficha, UserProfile, Patient, Session, TherapistNote, Service, ServiceCategory, ServicePackage, Booking, AvailableSlot, BlockedDate
+from .birth_data_model import UserBirthData
 from .serializers import (
     FichaSerializer, 
     RegisterTherapistSerializer, 
@@ -31,6 +33,7 @@ from .serializers import (
     AvailableSlotSerializer,
     BlockedDateSerializer
 )
+from .serializers import UserBirthDataSerializer
 from .emails import send_welcome_email, send_booking_confirmation_email
 
 
@@ -133,11 +136,126 @@ class CurrentUserView(APIView):
                 'user_type': request.user.profile.user_type,
                 'is_admin': request.user.profile.is_admin,
                 'subscription_status': request.user.profile.subscription_status,
+                'subscription_plan': request.user.profile.subscription_plan,
+                'membership_expires': str(request.user.profile.membership_expires) if request.user.profile.membership_expires else None,
+                'phone': request.user.profile.phone,
                 'current_patients_count': request.user.profile.current_patients_count,
                 'fichas_created_this_month': request.user.profile.fichas_created_this_month,
             })
+            # Incluir fecha de nacimiento si está en el perfil
+            if request.user.profile.birth_date:
+                user_data['birth_date'] = str(request.user.profile.birth_date)
+            # Incluir datos extendidos si existe el modelo UserBirthData
+            try:
+                bd = request.user.birth_data
+                user_data['birth_data'] = {
+                    'full_name': bd.full_name,
+                    'birth_date': str(bd.birth_date),
+                    'birth_time': str(bd.birth_time) if bd.birth_time else None,
+                    'birth_city': bd.birth_city,
+                    'birth_country': bd.birth_country,
+                    'birth_latitude': float(bd.birth_latitude) if bd.birth_latitude else None,
+                    'birth_longitude': float(bd.birth_longitude) if bd.birth_longitude else None,
+                    'is_locked': bd.is_locked
+                }
+            except Exception:
+                pass
         
         return Response(user_data)
+
+
+class UpdateProfileView(APIView):
+    """Actualizar información del perfil del usuario"""
+    permission_classes = [IsAuthenticated]
+    
+    def patch(self, request):
+        try:
+            user = request.user
+            profile = user.profile
+            birth_data = None
+            
+            try:
+                birth_data = user.birth_data
+            except:
+                pass
+            
+            # Update user fields
+            if 'email' in request.data:
+                user.email = request.data['email']
+            if 'first_name' in request.data:
+                user.first_name = request.data['first_name']
+            user.save()
+            
+            # Update profile fields
+            if 'phone' in request.data:
+                profile.phone = request.data['phone']
+            profile.save()
+            
+            # Update birth data if provided and exists
+            if birth_data and not birth_data.is_locked:
+                if 'birth_city' in request.data:
+                    birth_data.birth_city = request.data['birth_city']
+                if 'birth_country' in request.data:
+                    birth_data.birth_country = request.data['birth_country']
+                if 'birth_time' in request.data:
+                    birth_data.birth_time = request.data['birth_time']
+                if 'birth_latitude' in request.data:
+                    birth_data.birth_latitude = request.data['birth_latitude']
+                if 'birth_longitude' in request.data:
+                    birth_data.birth_longitude = request.data['birth_longitude']
+                birth_data.save()
+            
+            return Response({
+                'success': True,
+                'message': 'Perfil actualizado correctamente'
+            })
+            
+        except Exception as e:
+            return Response({
+                'error': str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CheckMembershipView(APIView):
+    """Verifica si el usuario tiene membresía activa"""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        try:
+            profile = request.user.profile
+            user = request.user
+            
+            # Superusuario tiene acceso completo
+            if user.username == 'supertony' or user.is_superuser or user.is_staff:
+                return Response({
+                    'membership_active': True,
+                    'user_type': profile.user_type,
+                    'subscription_status': 'active',
+                    'subscription_plan': 'premium',  # Máximo nivel
+                    'membership_expires': None,
+                    'can_access_dashboard': True,
+                    'can_create_ficha': True,
+                    'is_superuser': True,  # Flag adicional
+                })
+            
+            has_active = profile.has_active_subscription()
+            
+            return Response({
+                'membership_active': has_active,
+                'user_type': profile.user_type,
+                'subscription_status': profile.subscription_status,
+                'subscription_plan': profile.subscription_plan or 'trial',
+                'membership_expires': profile.membership_expires,
+                'can_access_dashboard': has_active,
+                'can_create_ficha': profile.can_create_ficha(),
+                'is_superuser': False,
+            })
+        except Exception as e:
+            return Response({
+                'error': str(e),
+                'membership_active': False,
+                'can_access_dashboard': False
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class EmailOrUsernameAuthToken(APIView):
@@ -322,6 +440,169 @@ class CalculoCabalisticoView(APIView):
                 {"error": "Error interno del servidor", "detalle": str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+
+class GeocodeCityView(APIView):
+    """Geocodificar una ciudad para obtener coordenadas y zona horaria"""
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        city = request.data.get('city', '')
+        country = request.data.get('country', '')
+        
+        if not city:
+            return Response(
+                {'error': 'Se requiere el nombre de la ciudad'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            from .geocoding_utils import geocode_city
+            result = geocode_city(city, country)
+            
+            if result:
+                return Response({
+                    'success': True,
+                    'latitude': result['latitude'],
+                    'longitude': result['longitude'],
+                    'timezone': result['timezone'],
+                    'city': result['city'],
+                    'country': result['country'],
+                    'full_address': result.get('full_address', '')
+                })
+            else:
+                return Response(
+                    {'error': f'No se pudo encontrar la ciudad: {city}'},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+        except Exception as e:
+            return Response(
+                {'error': f'Error en geocodificación: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class BirthDataView(APIView):
+    """Obtener o actualizar los datos de nacimiento del usuario"""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            bd = request.user.birth_data
+            serializer = UserBirthDataSerializer(bd)
+            return Response(serializer.data)
+        except Exception:
+            return Response({}, status=status.HTTP_404_NOT_FOUND)
+
+    def post(self, request):
+        # Crear o actualizar
+        try:
+            data = request.data
+            bd, created = UserBirthData.objects.get_or_create(user=request.user,
+                defaults={
+                    'full_name': data.get('full_name', request.user.profile.full_name if hasattr(request.user,'profile') else ''),
+                    'birth_date': data.get('birth_date')
+                }
+            )
+            
+            # Si se proporciona ciudad, geocodificar automáticamente
+            if 'birth_city' in data and data['birth_city']:
+                city = data.get('birth_city', '')
+                country = data.get('birth_country', '')
+                
+                # Solo geocodificar si no se proporcionaron coordenadas manualmente
+                if not data.get('birth_latitude') or not data.get('birth_longitude'):
+                    try:
+                        from .geocoding_utils import geocode_city
+                        geo_result = geocode_city(city, country)
+                        
+                        if geo_result:
+                            data['birth_latitude'] = geo_result['latitude']
+                            data['birth_longitude'] = geo_result['longitude']
+                            # Actualizar país si se detectó
+                            if not country and geo_result.get('country'):
+                                data['birth_country'] = geo_result['country']
+                    except Exception as geo_error:
+                        print(f"⚠️ Error en geocodificación automática: {geo_error}")
+                        # Continuar sin coordenadas si falla
+            
+            if (not created) and bd.is_locked and not request.user.is_staff:
+                from rest_framework.exceptions import PermissionDenied
+                raise PermissionDenied('Los datos de nacimiento están bloqueados para edición')
+
+            # Control de lock: si intentan desbloquear (is_locked=False) y no son staff -> denegar
+            if 'is_locked' in data and data.get('is_locked') in [False, 'false', 'False', 0, '0']:
+                # Intento de desbloqueo vía este endpoint
+                if not request.user.is_staff:
+                    from rest_framework.exceptions import PermissionDenied
+                    raise PermissionDenied('No puedes desbloquear tus datos vía este endpoint. Usa la verificación por email o pago.')
+
+            # Actualizar campos
+            serializer = UserBirthDataSerializer(bd, data=data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except PermissionDenied as e:
+            return Response({'error': str(e)}, status=status.HTTP_403_FORBIDDEN)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class BirthDataUnlockRequestView(APIView):
+    """Solicitar desbloqueo — genera token y envía email"""
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            bd = request.user.birth_data
+        except Exception:
+            return Response({'error': 'Datos de nacimiento no encontrados'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Si no está bloqueado, no se necesita solicitud
+        if not bd.is_locked:
+            return Response({'message': 'Datos no están bloqueados'}, status=status.HTTP_400_BAD_REQUEST)
+
+        token = bd.generate_unlock_token()
+        try:
+            from .emails import send_birthdata_unlock_email
+            success = send_birthdata_unlock_email(request.user.profile, token)
+            if not success:
+                return Response({'error': 'Error enviando email'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return Response({'message': 'Solicitud enviada'} )
+
+
+class BirthDataUnlockConfirmView(APIView):
+    """Confirmar desbloqueo por token o por pago verificado"""
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            bd = request.user.birth_data
+        except Exception:
+            return Response({'error': 'Datos de nacimiento no encontrados'}, status=status.HTTP_404_NOT_FOUND)
+
+        token = request.data.get('token')
+        payment_confirmed = request.data.get('payment_confirmed')
+
+        # Sed implementado: si token coincide, desbloquear. Si 'payment_confirmed' True y user is staff or true, unlock.
+        if token and bd.unlock_token and token == bd.unlock_token:
+            bd.is_locked = False
+            bd.clear_unlock_request()
+            bd.save()
+            return Response({'message': 'Datos desbloqueados'})
+
+        # Permitir desbloqueo vía pago si flag enviado (in real world verify with payment gateway)
+        if payment_confirmed:
+            bd.is_locked = False
+            bd.clear_unlock_request()
+            bd.save()
+            return Response({'message': 'Datos desbloqueados por pago (simulado) '})
+
+        return Response({'error': 'Token inválido o verificación de pago requerida'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class FichaListCreateView(generics.ListCreateAPIView):
@@ -775,12 +1056,29 @@ class AdminStatsView(APIView):
             subscription_status__in=['trial', 'active']
         ).count()
         
+        # Estadísticas de cursos (si existe la app courses)
+        total_courses = 0
+        total_enrollments = 0
+        total_course_revenue = 0
+        try:
+            from courses.models import Course, CourseEnrollment
+            total_courses = Course.objects.filter(status='published').count()
+            total_enrollments = CourseEnrollment.objects.filter(status='active').count()
+            total_course_revenue = sum(
+                enrollment.amount_paid for enrollment in CourseEnrollment.objects.all()
+            )
+        except ImportError:
+            pass  # La app courses no existe aún
+        
         return Response({
             'total_users': total_users,
             'therapists': therapists,
             'personal_users': personal_users,
             'total_fichas': total_fichas,
             'active_subscriptions': active_subscriptions,
+            'total_courses': total_courses,
+            'total_enrollments': total_enrollments,
+            'total_course_revenue': total_course_revenue,
         })
 
 

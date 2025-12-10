@@ -81,12 +81,6 @@ export default function ServicesPage() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=Spartan:wght@300;400;500;600&display=swap');
-        .title-font { font-family: 'Cormorant Garamond', serif; }
-        .body-font { font-family: 'Spartan', sans-serif; }
-      `}</style>
-
       {/* Header */}
       <div className="relative py-20 px-4" style={{ background: 'linear-gradient(to bottom, #0A0A1F, #000000)' }}>
         <div className="max-w-6xl mx-auto text-center">

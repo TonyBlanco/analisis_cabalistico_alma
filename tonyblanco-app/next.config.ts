@@ -1,7 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // devIndicators: {} // disabled allowedDevOrigins due to TypeScript definition mismatch
+  experimental: {
+    allowedDevOrigins: ['127.0.0.1'],
+  },
 };
 
 export default nextConfig;

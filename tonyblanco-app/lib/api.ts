@@ -1,5 +1,6 @@
 // API Configuration and Utilities
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+// Default to Render backend in production if env var is missing
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://analisis-cabalistico-alma.onrender.com/api';
 
 // Exportar como API_BASE_URL para compatibilidad
 export const API_BASE_URL = API_URL;

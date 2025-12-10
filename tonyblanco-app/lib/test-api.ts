@@ -1,6 +1,7 @@
 import { TestModule, TestResult, ExecuteTestRequest, ExecuteTestResponse, UserTestStats } from './test-types';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api';
+// Default to Render backend in production if env var is missing
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://analisis-cabalistico-alma.onrender.com/api';
 
 // Obtiene el token de autenticación
 function getAuthToken(): string | null {

@@ -38,26 +38,50 @@ function LoginContent() {
     setIsSubmitting(true);
 
     try {
+      console.log('🔍 Intentando login en:', `${API_BASE_URL}/login/`);
+      console.log('📝 Usuario:', username);
+      
       const res = await fetch(`${API_BASE_URL}/login/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
       });
 
+      console.log('📡 Respuesta HTTP:', res.status, res.statusText);
+
       if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        console.error('❌ Error del servidor:', errorData);
+        
         const newFailedAttempts = failedAttempts + 1;
         setFailedAttempts(newFailedAttempts);
         
+        // Mostrar mensaje específico del servidor si existe
+        let errorMessage = errorData.detail || errorData.error || 'Credenciales incorrectas';
+        
+        if (res.status === 400) {
+          errorMessage = `❌ ${errorMessage}. Verifica tu usuario y contraseña.`;
+        } else if (res.status === 401) {
+          errorMessage = '❌ Usuario o contraseña incorrectos.';
+        } else if (res.status === 403) {
+          errorMessage = '❌ Acceso denegado. Contacta al administrador.';
+        } else if (res.status === 500) {
+          errorMessage = '❌ Error del servidor. Intenta de nuevo en unos momentos.';
+        } else if (res.status === 0 || res.status >= 500) {
+          errorMessage = '❌ No se puede conectar al servidor. Verifica tu conexión.';
+        }
+        
         if (newFailedAttempts >= 3) {
-          setError('❌ Credenciales incorrectas. Has intentado 3 veces.');
+          setError(`${errorMessage}\n\nHas intentado ${newFailedAttempts} veces.`);
           setShowPasswordRecovery(true);
         } else {
-          setError(`❌ Usuario o contraseña incorrectos. Intento ${newFailedAttempts} de 3.`);
+          setError(`${errorMessage}\n\nIntento ${newFailedAttempts} de 3.`);
         }
-        throw new Error('Credenciales incorrectas');
+        throw new Error(errorMessage);
       }
 
       const data = await res.json();
+      console.log('✅ Login exitoso, token recibido');
       const token = data.token;
 
       setAuthToken(token);
@@ -79,7 +103,10 @@ function LoginContent() {
       }
       
     } catch (err) {
-      console.error(err);
+      console.error('🚨 Error en handleLogin:', err);
+      if (!error) {
+        setError('❌ Error inesperado. Verifica tu conexión y vuelve a intentar.');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -215,8 +242,8 @@ function LoginContent() {
               <div className="bg-red-900/20 border border-red-500/50 rounded-lg p-4">
                 <div className="flex items-start gap-2 text-red-300 text-sm body-font">
                   <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p>{error}</p>
+                  <div className="flex-1">
+                    <p className="whitespace-pre-line">{error}</p>
                     {failedAttempts >= 3 && !showPasswordRecovery && (
                       <button
                         onClick={() => setShowPasswordRecovery(true)}

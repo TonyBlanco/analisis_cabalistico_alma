@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,7 +8,6 @@ import { Badge } from '@/components/ui/badge';
 import {
   Sparkles,
   Hash,
-  Calendar,
   Heart,
   Book,
   Target,
@@ -21,16 +20,9 @@ import {
   ArrowLeft,
   Play,
   Lock,
-  Info,
-  Download,
-  CheckCircle,
-  AlertCircle
+  Info
 } from 'lucide-react';
 import Link from 'next/link';
-import { getPatient, updatePatient } from '@/lib/patient-storage';
-import { getTestResults } from '@/lib/test-api';
-import type { PatientInfo } from '@/types/patient';
-import type { TestResult } from '@/lib/test-types';
 
 interface KabbalisticMethod {
   id: string;
@@ -257,6 +249,8 @@ const KABBALAH_METHODS: KabbalisticMethod[] = [
     ],
     calculations: ['Análisis profundo de raíces del alma (Shoresh)', 'Ciclos de reencarnación (cada 7 y 49 años)', 'Identificación de chispas divinas heredadas', 'Mapeo de almas conectadas (Bashert, familia espiritual)'],
     available: false,
+    requiresCourse: true,
+    courseWarning: 'Curso obligatorio de Gilgul y Tikun Profundo para interpretar reencarnaciones y karmas complejos.'
   },
   {
     id: 'shemot',
@@ -353,122 +347,6 @@ export default function KabbalahMethodsPage() {
   
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
   const [expandedMethod, setExpandedMethod] = useState<string | null>(null);
-  const [patient, setPatient] = useState<PatientInfo | null>(null);
-  const [previousAnalyses, setPreviousAnalyses] = useState<TestResult[]>([]);
-  const [loadingAnalyses, setLoadingAnalyses] = useState(false);
-  const [importing, setImporting] = useState<number | null>(null);
-
-  useEffect(() => {
-    const loadedPatient = getPatient(patientId);
-    if (loadedPatient) {
-      setPatient(loadedPatient);
-      loadPreviousAnalyses(loadedPatient);
-    }
-  }, [patientId]);
-
-  const loadPreviousAnalyses = async (patientData: PatientInfo) => {
-    if (!patientData.name || !patientData.birthDate) return;
-    
-    setLoadingAnalyses(true);
-    try {
-      // Buscar análisis cabalísticos básicos del usuario
-      const allResults = await getTestResults({ test_code: 'basic-analysis' });
-      
-      // Filtrar los que coinciden con el nombre y fecha del paciente
-      const matching = allResults.filter(result => {
-        const inputData = result.input_data || {};
-        const resultData = result.result_data || {};
-        
-        // Buscar nombre en input_data, result_data o client_name
-        const nombre = result.client_name || 
-                      inputData.nombre || 
-                      resultData.nombre || 
-                      inputData.name || '';
-        const fechaNac = result.client_birth_date ||
-                        inputData.fecha_nacimiento || 
-                        resultData.fecha_nacimiento || 
-                        inputData.birth_date || 
-                        resultData.birth_date || '';
-        
-        // Comparar nombre (case insensitive, sin espacios extra)
-        const nombreMatch = nombre.toLowerCase().trim() === patientData.name.toLowerCase().trim();
-        
-        // Comparar fecha de nacimiento
-        let fechaMatch = false;
-        if (fechaNac && patientData.birthDate) {
-          const fechaNacDate = new Date(fechaNac);
-          const patientDate = new Date(patientData.birthDate);
-          fechaMatch = fechaNacDate.toDateString() === patientDate.toDateString();
-        }
-        
-        // Si no hay fecha en el resultado, solo comparar por nombre
-        // Si hay fecha en ambos, deben coincidir
-        return nombreMatch && (fechaMatch || !fechaNac || !patientData.birthDate);
-      });
-      
-      setPreviousAnalyses(matching);
-    } catch (error) {
-      console.error('Error loading previous analyses:', error);
-    } finally {
-      setLoadingAnalyses(false);
-    }
-  };
-
-  const handleImportAnalysis = async (testResult: TestResult) => {
-    setImporting(testResult.id);
-    try {
-      const resultData = testResult.result_data || {};
-      const payload = resultData.result || resultData;
-      
-      if (!payload || !payload.numeros_principales) {
-        alert('Este análisis no tiene datos válidos para importar');
-        return;
-      }
-
-      // Extraer datos del resultado
-      const numerosPrincipales = payload.numeros_principales || {};
-      const esencia = numerosPrincipales.esencia?.valor || payload.esencia;
-      const destino = numerosPrincipales.destino?.valor || payload.destino;
-      const expresion = numerosPrincipales.expresion?.valor || payload.expresion;
-      
-      // Normalizar arrays
-      const normalizeArray = (value: any): string[] => {
-        if (Array.isArray(value)) {
-          return value.filter(item => typeof item === 'string' && item.trim() !== '');
-        }
-        if (typeof value === 'string' && value.trim() !== '') {
-          return [value.trim()];
-        }
-        return [];
-      };
-
-      const kabbalisticProfile = {
-        soulNumber: esencia || null,
-        lifePath: destino || null,
-        guardianAngel: payload.angel_guardian || payload.arbol_vida?.angel_guardian || null,
-        weaknesses: normalizeArray(payload.cuentas_pendientes || payload.debilidades),
-        strengths: normalizeArray(payload.dones || payload.fortalezas),
-        calculatedAt: new Date(testResult.created_at).toISOString(),
-        method: 'basic-analysis',
-        fullResult: payload,
-        importedFrom: testResult.id
-      };
-      
-      if (patient) {
-        updatePatient(patientId, {
-          kabbalisticProfile
-        });
-        
-        alert('Análisis importado correctamente al perfil del paciente');
-        router.push(`/patients/${patientId}`);
-      }
-    } catch (error: any) {
-      console.error('Error importing analysis:', error);
-      alert('Error al importar el análisis: ' + (error.message || error));
-    } finally {
-      setImporting(null);
-    }
-  };
 
   const handleStartAnalysis = () => {
     if (!selectedMethod) return;
@@ -480,6 +358,7 @@ export default function KabbalahMethodsPage() {
   };
 
   const selectedMethodData = KABBALAH_METHODS.find(m => m.id === selectedMethod);
+  const SelectedIcon = selectedMethodData?.icon;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-amber-950 py-12 px-4">
@@ -518,103 +397,6 @@ export default function KabbalahMethodsPage() {
             </CardContent>
           </Card>
         </div>
-
-        {/* Análisis Previos Disponibles */}
-        {patient && previousAnalyses.length > 0 && (
-          <Card className="mb-8 bg-blue-900/20 border-blue-700/50">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center">
-                <Download className="w-5 h-5 mr-2" />
-                Análisis Cabalísticos Previos Disponibles
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-300 text-sm mb-4">
-                Se encontraron {previousAnalyses.length} análisis cabalístico{previousAnalyses.length !== 1 ? 's' : ''} 
-                {' '}realizado{previousAnalyses.length !== 1 ? 's' : ''} en modo personal que coinciden con este paciente. 
-                Puedes importarlos al perfil del paciente.
-              </p>
-              <div className="space-y-3">
-                {previousAnalyses.map((analysis) => (
-                  <div
-                    key={analysis.id}
-                    className="bg-slate-800/50 border border-slate-700 rounded-lg p-4 flex items-center justify-between"
-                  >
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <CheckCircle className="w-4 h-4 text-green-400" />
-                        <span className="text-white font-semibold">
-                          Análisis Cabalístico Básico
-                        </span>
-                      </div>
-                      <p className="text-gray-400 text-sm">
-                        Realizado el {new Date(analysis.created_at).toLocaleDateString('es-ES', {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}
-                      </p>
-                      {analysis.client_name && (
-                        <p className="text-gray-500 text-xs mt-1">
-                          Cliente: {analysis.client_name}
-                        </p>
-                      )}
-                    </div>
-                    <div className="flex gap-2">
-                      <Link href={`/tests/results/${analysis.id}`} target="_blank">
-                        <Button variant="outline" size="sm" className="border-slate-700">
-                          Ver
-                        </Button>
-                      </Link>
-                      <Button
-                        onClick={() => handleImportAnalysis(analysis)}
-                        disabled={importing === analysis.id}
-                        size="sm"
-                        className="bg-blue-600 hover:bg-blue-700"
-                      >
-                        {importing === analysis.id ? (
-                          'Importando...'
-                        ) : (
-                          <>
-                            <Download className="w-4 h-4 mr-1" />
-                            Importar
-                          </>
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {patient && loadingAnalyses && (
-          <Card className="mb-8 bg-slate-900/50 border-slate-700">
-            <CardContent className="py-6 text-center">
-              <p className="text-gray-400">Buscando análisis previos...</p>
-            </CardContent>
-          </Card>
-        )}
-
-        {patient && !loadingAnalyses && previousAnalyses.length === 0 && patient.name && (
-          <Card className="mb-8 bg-slate-900/50 border-slate-700">
-            <CardContent className="py-4">
-              <div className="flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
-                <div className="text-gray-300 text-sm">
-                  <p className="font-semibold mb-1">No se encontraron análisis previos</p>
-                  <p className="text-gray-400">
-                    No se encontraron análisis cabalísticos previos en modo personal que coincidan con 
-                    el nombre y fecha de nacimiento de este paciente. Puedes crear un nuevo análisis seleccionando un método abajo.
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
 
         {/* Methods Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
@@ -719,13 +501,13 @@ export default function KabbalahMethodsPage() {
         </div>
 
         {/* Action Panel */}
-        {selectedMethod && selectedMethodData && (
+        {selectedMethod && selectedMethodData && SelectedIcon && (
           <Card className="bg-gradient-to-r from-purple-900/50 to-amber-900/50 border-purple-700/50 sticky bottom-4">
             <CardContent className="py-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div className={`w-14 h-14 rounded-lg bg-gradient-to-br ${selectedMethodData.color} flex items-center justify-center`}>
-                    <selectedMethodData.icon className="w-7 h-7 text-white" />
+                    <SelectedIcon className="w-7 h-7 text-white" />
                   </div>
                   <div>
                     <h3 className="text-white font-bold text-lg">{selectedMethodData.name}</h3>

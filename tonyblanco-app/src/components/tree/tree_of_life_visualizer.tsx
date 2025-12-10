@@ -54,14 +54,24 @@ type UserNumbers = {
 const TreeOfLife: React.FC<{ initial?: Partial<UserNumbers> }> = ({ initial = {} }) => {
   const [selectedSephirah, setSelectedSephirah] = useState<string | null>(null);
   const [userNumbers, setUserNumbers] = useState<UserNumbers>({
-    esencia: '',
-    expresion: '',
-    herencia: '',
-    destino: '',
-    caminoVida: ''
+    esencia: initial?.esencia || '',
+    expresion: initial?.expresion || '',
+    herencia: initial?.herencia || '',
+    destino: initial?.destino || '',
+    caminoVida: initial?.caminoVida || ''
   });
   const [highlightedNumbers, setHighlightedNumbers] = useState(new Set());
   const [showDaat, setShowDaat] = useState(false);
+
+  useEffect(() => {
+    setUserNumbers({
+        esencia: initial?.esencia || '',
+        expresion: initial?.expresion || '',
+        herencia: initial?.herencia || '',
+        destino: initial?.destino || '',
+        caminoVida: initial?.caminoVida || ''
+    });
+  }, [initial]);
 
   // Calcular qué números están presentes en el perfil
   useEffect(() => {

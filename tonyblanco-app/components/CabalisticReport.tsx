@@ -1,6 +1,6 @@
 'use client';
 
-import TreeOfLife from '../src/components/tree/tree_of_life_visualizer';
+import TreeOfLife from '@/src/components/tree/tree_of_life_visualizer';
 import EstructuraEnergeticaDiagram from './EstructuraEnergeticaDiagram';
 import LetrasDelAlma from './LetrasDelAlma';
 import GuardianAngel from './GuardianAngel';

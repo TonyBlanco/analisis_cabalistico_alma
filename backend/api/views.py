@@ -1151,6 +1151,7 @@ class AdminUserDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 
 # TEMPORARY SETUP ENDPOINT - REMOVE AFTER USE
+# Force redeploy trigger
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def setup_admin_user(request):

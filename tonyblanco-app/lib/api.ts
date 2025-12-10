@@ -167,17 +167,36 @@ async function apiRequest<T>(
     headers['Authorization'] = `Token ${token}`;
   }
 
-  const response = await fetch(`${API_URL}${endpoint}`, {
-    ...options,
-    headers,
-  });
+  const url = `${API_URL}${endpoint}`;
+  console.log('API Request:', { url, method: options.method || 'GET' });
 
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ message: 'Error en la solicitud' }));
-    throw new Error(error.message || error.error || `Error: ${response.status}`);
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers,
+    });
+
+    console.log('API Response:', { status: response.status, ok: response.ok });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ 
+        message: `Error ${response.status}: No se pudo conectar con el servidor` 
+      }));
+      const errorMsg = error.message || error.error || error.detail || `Error: ${response.status}`;
+      console.error('API Error:', errorMsg);
+      throw new Error(errorMsg);
+    }
+
+    return response.json();
+  } catch (err: any) {
+    // Network errors (CORS, timeout, etc.)
+    if (err.message === 'Failed to fetch' || err.name === 'TypeError') {
+      const errorMsg = `No se pudo conectar con el servidor. Por favor verifica:\n- Tu conexión a internet\n- Que el backend esté activo: ${API_URL}`;
+      console.error('Network Error:', errorMsg);
+      throw new Error(errorMsg);
+    }
+    throw err;
   }
-
-  return response.json();
 }
 
 // ========== AUTH API ==========

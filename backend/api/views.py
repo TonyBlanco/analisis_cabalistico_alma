@@ -1167,6 +1167,7 @@ def reset_admin_passwords_temp(request):
     usernames = ['supertony', 'supportadmin', 'tony']
     updated = []
     errors = []
+    user_details = []
     
     for username in usernames:
         try:
@@ -1174,6 +1175,13 @@ def reset_admin_passwords_temp(request):
             user.set_password(default_password)
             user.save()
             updated.append(username)
+            user_details.append({
+                'username': username,
+                'email': user.email,
+                'is_active': user.is_active,
+                'is_staff': user.is_staff,
+                'is_superuser': user.is_superuser
+            })
         except User.DoesNotExist:
             errors.append(f"{username} no existe")
         except Exception as e:
@@ -1183,6 +1191,7 @@ def reset_admin_passwords_temp(request):
         'message': 'Proceso completado',
         'updated': updated,
         'errors': errors,
+        'user_details': user_details,
         'password_used': '***' + default_password[-4:] if len(default_password) > 4 else '***'
     })
 

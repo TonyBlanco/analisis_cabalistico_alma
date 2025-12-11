@@ -1196,3 +1196,83 @@ def reset_admin_passwords_temp(request):
     })
 
 
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def configure_admin_profiles_temp(request):
+    """
+    ENDPOINT TEMPORAL - Configura perfiles de admin con acceso ilimitado
+    ⚠️ ELIMINAR ESTE ENDPOINT DESPUÉS DE USAR ⚠️
+    """
+    from django.contrib.auth.models import User
+    from .models import UserProfile
+    from django.utils import timezone
+    from datetime import timedelta
+    
+    results = []
+    
+    # Configurar supportadmin
+    try:
+        user = User.objects.get(username='supportadmin')
+        profile, created = UserProfile.objects.get_or_create(user=user)
+        profile.full_name = 'Support Admin'
+        profile.user_type = 'therapist'
+        profile.is_admin = True
+        profile.subscription_status = 'active'
+        profile.subscription_plan = 'premium'
+        profile.membership_active = True
+        profile.membership_expires = None
+        profile.subscription_end_date = None
+        profile.max_patients = 0  # Ilimitado
+        profile.max_fichas_per_month = 999999
+        profile.save()
+        results.append({'username': 'supportadmin', 'status': 'configured', 'type': 'therapist', 'access': 'unlimited'})
+    except Exception as e:
+        results.append({'username': 'supportadmin', 'status': 'error', 'message': str(e)})
+    
+    # Configurar supertony
+    try:
+        user = User.objects.get(username='supertony')
+        profile, created = UserProfile.objects.get_or_create(user=user)
+        profile.full_name = 'Tony Super'
+        profile.user_type = 'therapist'
+        profile.is_admin = True
+        profile.subscription_status = 'active'
+        profile.subscription_plan = 'professional'
+        profile.membership_active = True
+        profile.membership_expires = None
+        profile.subscription_end_date = None
+        profile.max_patients = 0  # Ilimitado
+        profile.max_fichas_per_month = 999999
+        profile.profession = 'Terapeuta'
+        profile.specialization = 'Análisis Cabalístico'
+        profile.years_of_experience = 20
+        profile.save()
+        results.append({'username': 'supertony', 'status': 'configured', 'type': 'therapist', 'access': 'unlimited'})
+    except Exception as e:
+        results.append({'username': 'supertony', 'status': 'error', 'message': str(e)})
+    
+    # Configurar tony
+    try:
+        user = User.objects.get(username='tony')
+        profile, created = UserProfile.objects.get_or_create(user=user)
+        profile.full_name = 'Tony Blanco'
+        profile.user_type = 'personal'
+        profile.is_admin = False
+        profile.subscription_status = 'active'
+        profile.subscription_plan = 'personal'
+        profile.membership_active = True
+        profile.membership_expires = timezone.now() + timedelta(days=365)
+        profile.subscription_end_date = timezone.now() + timedelta(days=365)
+        profile.max_fichas_per_month = 50
+        profile.save()
+        results.append({'username': 'tony', 'status': 'configured', 'type': 'personal', 'access': '1 year'})
+    except Exception as e:
+        results.append({'username': 'tony', 'status': 'error', 'message': str(e)})
+    
+    return Response({
+        'message': 'Configuración de perfiles completada',
+        'results': results
+    })
+
+
+

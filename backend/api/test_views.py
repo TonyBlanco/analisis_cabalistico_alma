@@ -1,8 +1,11 @@
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.decorators import permission_classes
 from django.shortcuts import get_object_or_404
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 from .test_models import TestModule, UserTestAccess, TestResult
 from datetime import datetime
 from .test_serializers import (
@@ -10,6 +13,8 @@ from .test_serializers import (
     TestResultSerializer, 
     TestExecutionSerializer
 )
+from api.utils import ClinicalScorer, TEST_LINKS
+from .models import Patient
 
 
 class AvailableTestsView(APIView):
@@ -551,5 +556,132 @@ class GrantTestAccessView(APIView):
             'message': f'Acceso especial otorgado a {user.username} para {test_module.name}'
         })
 
+
+@method_decorator(csrf_exempt, name='dispatch')
+class ProcessTestSubmissionView(APIView):
+    """
+    Vista para procesar tests psicométricos con análisis clínico y cabalístico
+    Ruta: POST /api/tests/submit/
+    """
+    permission_classes = [AllowAny]  # Permitir desde frontend (Vercel)
+    
+    def post(self, request):
+        """
+        Procesa un test psicométrico y retorna análisis clínico y cabalístico
+        
+        Body esperado:
+        {
+            "test_id": "phq-9",
+            "answers": [2, 3, 1, 2, 3, 2, 2, 1, 3],
+            "patient_id": 1  # Opcional, para terapeutas
+        }
+        """
+        test_id = request.data.get('test_id')
+        answers = request.data.get('answers', [])
+        patient_id = request.data.get('patient_id')
+        
+        # Validaciones básicas
+        if not test_id:
+            return Response(
+                {'error': 'test_id es requerido'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if not answers or not isinstance(answers, list):
+            return Response(
+                {'error': 'answers debe ser una lista de enteros'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            # 1. Calcular score clínico
+            scorer = ClinicalScorer()
+            clinical_result = scorer.calcular_score(test_id, answers)
+            
+            # 2. Obtener mapeo cabalístico
+            if test_id not in TEST_LINKS:
+                return Response(
+                    {'error': f'Test ID "{test_id}" no tiene mapeo cabalístico'}, 
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+            kabbalah_mapping = TEST_LINKS[test_id]
+            
+            # 3. Obtener nombre del ángel desde el índice
+            # Intentar cargar desde el JSON de ángeles
+            angel_name_en = None
+            try:
+                from cabala_py.data_loader import KabbalahDataLoader
+                loader = KabbalahDataLoader()
+                angel_data = loader.get_angel_by_index(kabbalah_mapping['angel_remedio_idx'])
+                if angel_data and 'name' in angel_data:
+                    angel_name_en = angel_data['name'].get('en', f"Angel_{kabbalah_mapping['angel_remedio_idx']}")
+            except Exception:
+                # Si falla, usar un nombre genérico basado en el índice
+                angel_name_en = f"Angel_{kabbalah_mapping['angel_remedio_idx']}"
+            
+            # 4. Preparar respuesta
+            result = {
+                'score': clinical_result['score_bruto'],
+                'diagnosis': clinical_result['diagnostico_clinico'],
+                'sefira': kabbalah_mapping['sefira_id'],
+                'angel': angel_name_en,
+                'angel_meditation_key': angel_name_en,  # Clave para buscar meditación en frontend
+                'kabbalah': {
+                    'test_name': kabbalah_mapping['test_name'],
+                    'organo_ref_id': kabbalah_mapping['organo_ref_id'],
+                    'concepto_clave_id': kabbalah_mapping['concepto_clave_id'],
+                    'angel_remedio_idx': kabbalah_mapping['angel_remedio_idx'],
+                    'bio_desc': kabbalah_mapping['bio_desc']
+                }
+            }
+            
+            # 5. Guardar resultado en la base de datos (si hay usuario autenticado)
+            if request.user.is_authenticated:
+                patient = None
+                if patient_id:
+                    try:
+                        patient = Patient.objects.get(id=patient_id, therapist=request.user)
+                    except Patient.DoesNotExist:
+                        pass  # Si no existe, continuar sin paciente
+                
+                # Convertir score a int si es float (para SCL-90-R guardamos el promedio como int aproximado)
+                score_value = clinical_result['score_bruto']
+                if isinstance(score_value, float):
+                    score_value = int(round(score_value))
+                elif not isinstance(score_value, int):
+                    score_value = 0
+                
+                test_result = TestResult.objects.create(
+                    user=request.user,
+                    patient=patient,
+                    test_id=test_id,
+                    score=score_value,
+                    clinical_diagnosis=clinical_result['diagnostico_clinico'],
+                    kabbalah_sefira=kabbalah_mapping['sefira_id'],
+                    angel_remedy=angel_name_en or f"Angel_{kabbalah_mapping['angel_remedio_idx']}",
+                    details={
+                        'answers': answers,
+                        'kabbalah_mapping': kabbalah_mapping,
+                        'full_result': result,
+                        'score_bruto_original': clinical_result['score_bruto']  # Guardar el valor original
+                    }
+                )
+                
+                result['test_result_id'] = test_result.id
+            
+            return Response(result, status=status.HTTP_200_OK)
+            
+        except ValueError as e:
+            return Response(
+                {'error': str(e)}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            import traceback
+            return Response(
+                {'error': f'Error al procesar test: {str(e)}', 'traceback': traceback.format_exc()}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
  

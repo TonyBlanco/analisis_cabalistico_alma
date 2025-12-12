@@ -1,6 +1,7 @@
 from django.urls import path
 from rest_framework.authtoken.views import obtain_auth_token
 from .views import (
+    CreatePatientWithAccountView,
     CalculoCabalisticoView, 
     welcome_api, 
     FichaListCreateView, 
@@ -22,6 +23,7 @@ from .views import (
     # Vistas de terapeutas
     PatientListCreateView,
     PatientDetailView,
+    GenerateAIPlanView,
     SessionListCreateView,
     SessionDetailView,
     TherapistNoteListCreateView,
@@ -56,8 +58,11 @@ from .test_views import (
     TestResultDetailView,
     UserTestStatsView,
     GrantTestAccessView,
-    PatientPreviousTestsView
+    PatientPreviousTestsView,
+    ProcessTestSubmissionView
 )
+from .gematria_views import GematriaInterpretationView
+from .tarot_views import TarotAnalysisView
 from .admin_views import (
     AdminCheckView,
     EnhancedAdminStatsView,
@@ -95,9 +100,12 @@ urlpatterns = [
     path('fichas/<int:pk>/', FichaRetrieveView.as_view(), name='ficha_retrieve'),
     
     # Endpoints exclusivos para terapeutas
+    path('therapist/patients/create/', CreatePatientWithAccountView.as_view(), name='create_patient_with_account'),
     path('therapist/dashboard/', TherapistDashboardView.as_view(), name='therapist_dashboard'),
     path('therapist/patients/', PatientListCreateView.as_view(), name='patient_list_create'),
     path('therapist/patients/<int:pk>/', PatientDetailView.as_view(), name='patient_detail'),
+    path('therapist/patients/<int:pk>/generate-ai-plan/', GenerateAIPlanView.as_view(), name='generate_ai_plan'),
+    path('therapist/patients/<int:id>/tarot-analysis/', TarotAnalysisView.as_view(), name='tarot_analysis'),
     path('therapist/sessions/', SessionListCreateView.as_view(), name='session_list_create'),
     path('therapist/sessions/<int:pk>/', SessionDetailView.as_view(), name='session_detail'),
     path('therapist/notes/', TherapistNoteListCreateView.as_view(), name='therapist_note_list_create'),
@@ -145,8 +153,12 @@ urlpatterns = [
     path('admin/users/', EnhancedAdminUsersView.as_view(), name='enhanced_admin_users'),
     path('admin/users/<int:user_id>/', AdminUserManagementView.as_view(), name='admin_user_management'),
     
+    # Gematria AI
+    path('gematria/interpret/', GematriaInterpretationView.as_view(), name='gematria_interpret'),
+    
     # Tests modulares (orden importante: rutas específicas primero)
     path('tests/', AvailableTestsView.as_view(), name='available_tests'),
+    path('tests/submit/', ProcessTestSubmissionView.as_view(), name='process_test_submission'),
     path('tests/execute/', ExecuteTestView.as_view(), name='execute_test'),
     path('tests/results/', TestResultsView.as_view(), name='test_results'),
     path('tests/results/<int:pk>/', TestResultDetailView.as_view(), name='test_result_detail'),

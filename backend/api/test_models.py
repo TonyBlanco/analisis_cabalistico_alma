@@ -213,14 +213,21 @@ class UserTestAccess(models.Model):
 
 
 class TestResult(models.Model):
-    """Resultados guardados de tests realizados"""
+    """Resultados guardados de tests realizados (incluye tests psicométricos con análisis clínico y cabalístico)"""
     
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='test_results')
-    test_module = models.ForeignKey(TestModule, on_delete=models.CASCADE, related_name='results')
+    test_module = models.ForeignKey(TestModule, on_delete=models.CASCADE, related_name='results', null=True, blank=True)
+    
+    # ID del test psicométrico (para tests que no usan TestModule)
+    test_id = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text="ID del test psicométrico (ej: 'phq-9', 'gad-7', 'ptsd', 'scl-90-r', etc.)"
+    )
     
     # Datos del test
-    input_data = models.JSONField()  # Datos ingresados por el usuario
-    result_data = models.JSONField()  # Resultados calculados
+    input_data = models.JSONField(null=True, blank=True)  # Datos ingresados por el usuario
+    result_data = models.JSONField(null=True, blank=True)  # Resultados calculados
     
     # Para terapeutas: a quién se le hizo el test
     client_name = models.CharField(max_length=255, blank=True)
@@ -236,6 +243,35 @@ class TestResult(models.Model):
         help_text='Paciente asociado a este test (si fue ejecutado por un terapeuta)'
     )
     
+    # Campos específicos para tests psicométricos con análisis clínico y cabalístico
+    score = models.IntegerField(
+        null=True,
+        blank=True,
+        help_text="Puntaje numérico del test psicométrico"
+    )
+    clinical_diagnosis = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text="Diagnóstico clínico (ej: 'Ansiedad Severa', 'Depresión Moderada')"
+    )
+    kabbalah_sefira = models.CharField(
+        max_length=100,
+        blank=True,
+        help_text="Sefirá relacionada (ej: 'Netzach', 'Malchut', 'Binah')"
+    )
+    angel_remedy = models.CharField(
+        max_length=100,
+        blank=True,
+        help_text="Ángel remedio (ej: 'Caliel', 'Veuliah', 'Mikael')"
+    )
+    
+    # Datos adicionales (opcional, para guardar respuestas crudas y análisis completo)
+    details = models.JSONField(
+        null=True,
+        blank=True,
+        help_text="Respuestas crudas, análisis completo u otros datos adicionales"
+    )
+    
     # Metadatos
     notes = models.TextField(blank=True)  # Notas del usuario
     is_favorite = models.BooleanField(default=False)
@@ -248,7 +284,13 @@ class TestResult(models.Model):
         ordering = ['-created_at']
         verbose_name = 'Resultado de Test'
         verbose_name_plural = 'Resultados de Tests'
+        indexes = [
+            models.Index(fields=['test_id', 'created_at']),
+            models.Index(fields=['user', 'created_at']),
+            models.Index(fields=['patient', 'created_at']),
+        ]
     
     def __str__(self):
-        client = self.client_name if self.client_name else self.user.username
-        return f"{self.test_module.name} - {client} ({self.created_at.strftime('%Y-%m-%d')})"
+        client = self.client_name if self.client_name else (self.patient.full_name if self.patient else self.user.username)
+        test_name = self.test_module.name if self.test_module else (self.test_id.upper() if self.test_id else 'Test')
+        return f"{test_name} - {client} ({self.created_at.strftime('%Y-%m-%d')})"

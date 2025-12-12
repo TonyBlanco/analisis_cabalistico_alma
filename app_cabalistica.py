@@ -14,9 +14,15 @@ from cabala_py.inclusion import (
 )
 from cabala_py.integracion_arbol import generar_mapa_cabalista_completo
 from cabala_py.data import ALFABETO_ESPANOL_1995
+from cabala_py.soul_analytics import SoulAnalyticsEngine
+from cabala_py.clinical_scorer import ClinicalScorer
 
 app = Flask(__name__)
 CORS(app)  # Habilitar CORS para frontend
+
+# Inicializar motores (Cargarán los JSONs al arrancar)
+soul_engine = SoulAnalyticsEngine()
+clinical_engine = ClinicalScorer()
 
 
 @app.route('/api/ficha-numerologica', methods=['POST'])
@@ -218,10 +224,112 @@ def inicio():
             "/api/calcular-nombre": "POST - Solo cálculos del nombre",
             "/api/calcular-fecha": "POST - Solo cálculos de fecha",
             "/api/inclusion": "POST - Solo Inclusión de Base",
+            "/api/tests/interpretar": "POST - Interpretar test con Sefirá y Ángel Remedio",
             "/api/salud": "GET - Health check"
         },
         "documentacion": "https://github.com/tu-usuario/cabala-py"
     })
+
+
+@app.route('/api/tests/interpretar', methods=['POST'])
+def interpretar_test():
+    """
+    Recibe: { "test_id": "phq-9", "score": 15 }
+    Devuelve: JSON con Sefirá y Ángel Remedio
+    
+    Tests disponibles: phq-9, gad-7, bdi-ii, bai
+    """
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({"error": "No se recibieron datos"}), 400
+        
+        test_id = data.get('test_id')
+        score = data.get('score')
+        
+        # Validación de datos requeridos
+        if not test_id:
+            return jsonify({"error": "El campo 'test_id' es requerido"}), 400
+        
+        if score is None:
+            return jsonify({"error": "El campo 'score' es requerido"}), 400
+        
+        # Validar que score sea un número
+        try:
+            score = float(score)
+        except (ValueError, TypeError):
+            return jsonify({"error": "El campo 'score' debe ser un número"}), 400
+        
+        # Interpretar el test
+        resultado = soul_engine.interpretar_individual(test_id, score)
+        
+        # Si el resultado contiene un error, devolver código 400
+        if resultado.get("error"):
+            return jsonify(resultado), 400
+        
+        return jsonify(resultado), 200
+        
+    except Exception as e:
+        app.logger.error(f"Error interpretando test: {e}")
+        return jsonify({"error": f"Error interno: {str(e)}"}), 500
+
+
+@app.route('/api/tests/procesar-completo', methods=['POST'])
+def procesar_test_completo():
+    """
+    Endpoint que integra el motor clínico y el motor del alma.
+    
+    Recibe: { "test_id": "phq-9", "answers": [0, 1, 2, 3, 0, 1, 2, 0, 1] }
+    Devuelve: { "clinica": {...}, "alma": {...} }
+    
+    Tests disponibles: phq-9, gad-7, bdi-ii, bai
+    """
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({"error": "No se recibieron datos"}), 400
+        
+        test_id = data.get('test_id')
+        answers = data.get('answers')
+        
+        # Validación de datos requeridos
+        if not test_id:
+            return jsonify({"error": "El campo 'test_id' es requerido"}), 400
+        
+        if not answers:
+            return jsonify({"error": "El campo 'answers' es requerido"}), 400
+        
+        if not isinstance(answers, list):
+            return jsonify({"error": "El campo 'answers' debe ser una lista de enteros"}), 400
+        
+        # Paso 1: Calcular score clínico
+        resultado_clinico = clinical_engine.calcular_score(test_id, answers)
+        score_bruto = resultado_clinico["score_bruto"]
+        
+        # Paso 2: Interpretar con el motor del alma
+        resultado_alma = soul_engine.interpretar_individual(test_id, score_bruto)
+        
+        # Si el resultado del alma contiene un error, devolver código 400
+        if resultado_alma.get("error"):
+            return jsonify(resultado_alma), 400
+        
+        # Paso 3: Retornar respuesta unificada
+        respuesta_unificada = {
+            "clinica": resultado_clinico,
+            "alma": resultado_alma
+        }
+        
+        return jsonify(respuesta_unificada), 200
+        
+    except ValueError as ve:
+        app.logger.error(f"Error de validación: {ve}")
+        return jsonify({"error": f"Datos inválidos: {str(ve)}"}), 400
+    
+    except Exception as e:
+        app.logger.error(f"Error procesando test completo: {e}")
+        return jsonify({"error": f"Error interno: {str(e)}"}), 500
 
 
 if __name__ == '__main__':

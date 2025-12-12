@@ -2,7 +2,7 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { API_BASE_URL } from '@/lib/api';
-import { getAuthToken, setAuthToken, checkMembership } from '@/lib/auth';
+import { getAuthToken, saveLoginData, checkMembership, UserRole } from '@/lib/auth';
 import { AlertCircle, Mail } from 'lucide-react';
 
 function LoginContent() {
@@ -83,23 +83,21 @@ function LoginContent() {
       const data = await res.json();
       console.log('✅ Login exitoso, token recibido');
       const token = data.token;
+      const role = (data.role || 'visitor') as UserRole;
+      const userUsername = data.username || username;
 
-      setAuthToken(token);
+      // Guardar token, role y username en localStorage
+      saveLoginData(token, role, userUsername);
 
-      // Verificar membresía para dirigir al tablero correcto sin parpadeos
-      const membership = await checkMembership(token);
-
-      if (!membership || !membership.can_access_dashboard) {
-        router.replace('/membership-expired');
-        return;
-      }
-
-      if (membership.user_type === 'therapist') {
+      // Redirigir según el role
+      if (role === 'therapist') {
         router.replace('/dashboard/therapist');
-      } else if (membership.user_type === 'personal') {
+      } else if (role === 'patient') {
+        router.replace('/dashboard/patient');
+      } else if (role === 'personal') {
         router.replace('/dashboard/personal');
       } else {
-        router.replace('/dashboard');
+        router.replace('/');
       }
       
     } catch (err) {

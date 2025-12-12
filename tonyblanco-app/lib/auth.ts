@@ -2,10 +2,14 @@
 import { API_BASE_URL } from './api';
 
 const AUTH_TOKEN_KEY = 'authToken';
+const USER_ROLE_KEY = 'userRole';
+const USERNAME_KEY = 'username';
+
+export type UserRole = 'therapist' | 'patient' | 'personal' | 'visitor';
 
 export interface MembershipStatus {
   membership_active: boolean;
-  user_type: 'personal' | 'therapist';
+  user_type: 'personal' | 'therapist' | 'patient' | 'visitor';
   subscription_status: 'trial' | 'active' | 'canceled' | 'expired';
   subscription_plan: string;
   membership_expires: string | null;
@@ -27,9 +31,37 @@ export function setAuthToken(token: string): void {
   }
 }
 
+export function setUserRole(role: UserRole): void {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(USER_ROLE_KEY, role);
+  }
+}
+
+export function getUserRole(): UserRole | null {
+  if (typeof window !== 'undefined') {
+    return (localStorage.getItem(USER_ROLE_KEY) as UserRole) || null;
+  }
+  return null;
+}
+
+export function setUsername(username: string): void {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(USERNAME_KEY, username);
+  }
+}
+
+export function getUsername(): string | null {
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem(USERNAME_KEY);
+  }
+  return null;
+}
+
 export function removeAuthToken(): void {
   if (typeof window !== 'undefined') {
     localStorage.removeItem(AUTH_TOKEN_KEY);
+    localStorage.removeItem(USER_ROLE_KEY);
+    localStorage.removeItem(USERNAME_KEY);
   }
 }
 
@@ -82,7 +114,7 @@ export async function requireAuth(redirectTo: string = '/login'): Promise<boolea
 }
 
 export async function requireMembership(
-  allowedTypes?: ('personal' | 'therapist')[],
+  allowedTypes?: ('personal' | 'therapist' | 'patient' | 'visitor')[],
   redirectTo: string = '/membership-expired'
 ): Promise<MembershipStatus | null> {
   const token = getAuthToken();
@@ -119,4 +151,27 @@ export async function requireMembership(
   }
 
   return membership;
+}
+
+// Función para guardar datos de login (token, role, username)
+export function saveLoginData(token: string, role: UserRole, username: string): void {
+  setAuthToken(token);
+  setUserRole(role);
+  setUsername(username);
+}
+
+// Función para verificar si el usuario tiene un rol específico
+export function hasRole(role: UserRole): boolean {
+  const userRole = getUserRole();
+  return userRole === role;
+}
+
+// Función para verificar si el usuario es terapeuta
+export function isTherapist(): boolean {
+  return hasRole('therapist');
+}
+
+// Función para verificar si el usuario es paciente
+export function isPatient(): boolean {
+  return hasRole('patient');
 }

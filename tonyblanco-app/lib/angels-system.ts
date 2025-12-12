@@ -14,8 +14,8 @@ export interface Angel {
   };
   godName: string;
   angelicOrderId: string;
-  presidesOver: [number, number][]; // [mes, día]
-  text: {
+  presidesOver?: [number, number][]; // [mes, día] - Opcional porque puede no estar en el JSON
+  text?: {
     en: string;
     es?: string;
   };
@@ -129,9 +129,11 @@ export function calculateGuardianAngel(birthDate: Date, angels: Angel[]): Angel 
 
   // Buscar el ángel que preside sobre esta fecha
   for (const angel of angels) {
-    for (const [m, d] of angel.presidesOver) {
-      if (m === month && d === day) {
-        return angel;
+    if (angel.presidesOver && Array.isArray(angel.presidesOver)) {
+      for (const [m, d] of angel.presidesOver) {
+        if (m === month && d === day) {
+          return angel;
+        }
       }
     }
   }

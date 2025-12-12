@@ -8,6 +8,8 @@ from django.dispatch import receiver
 USER_TYPE_CHOICES = [
     ('personal', 'Usuario Personal'),
     ('therapist', 'Terapeuta Profesional'),
+    ('patient', 'Paciente'),
+    ('visitor', 'Visitante'),
 ]
 
 # Estados de suscripción
@@ -184,36 +186,88 @@ class Ficha(models.Model):
 
 
 class Patient(models.Model):
-    """Modelo para pacientes de terapeutas"""
+    """Modelo para pacientes de terapeutas - Ficha clínica holística"""
     therapist = models.ForeignKey(
         User, 
         on_delete=models.CASCADE, 
         related_name='patients',
-        limit_choices_to={'profile__user_type': 'therapist'}
+        limit_choices_to={'profile__user_type': 'therapist'},
+        help_text='Terapeuta que creó y gestiona este paciente'
     )
     
-    # Información del paciente
-    full_name = models.CharField(max_length=255)
-    email = models.EmailField(blank=True)
-    phone = models.CharField(max_length=20, blank=True)
-    birth_date = models.DateField()
+    # Vinculación con usuario (para login del paciente)
+    user = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='patient_profile',
+        help_text='Usuario asociado si el paciente tiene cuenta de login'
+    )
     
-    # Notas generales
-    notes = models.TextField(blank=True)
+    # ========== DATOS PERSONALES ==========
+    first_name = models.CharField(max_length=100, blank=True, help_text='Nombre del paciente')
+    last_name = models.CharField(max_length=100, blank=True, help_text='Apellidos del paciente')
+    email = models.EmailField(help_text='Email del paciente')
+    phone = models.CharField(max_length=20, blank=True, help_text='Teléfono de contacto')
+    avatar = models.URLField(blank=True, help_text='URL del avatar del paciente')
+    
+    # Campo legacy para compatibilidad (se calcula automáticamente)
+    full_name = models.CharField(max_length=255, help_text='Nombre completo (calculado automáticamente)')
+    
+    # ========== DATOS ASTROLÓGICOS/CABALÍSTICOS ==========
+    birth_date = models.DateField(help_text='Fecha de nacimiento')
+    birth_time = models.TimeField(null=True, blank=True, help_text='Hora exacta de nacimiento')
+    birth_place = models.CharField(max_length=255, blank=True, help_text='Lugar de nacimiento (ciudad, país)')
+    hebrew_name = models.CharField(max_length=255, blank=True, help_text='Nombre en hebreo (opcional)')
+    
+    # ========== DATOS CLÍNICOS ==========
+    main_complaint = models.TextField(blank=True, help_text='Motivo principal de consulta')
+    clinical_history = models.TextField(blank=True, help_text='Historial clínico del paciente')
+    
+    # ========== PLAN DE TRATAMIENTO (JSON) ==========
+    treatment_plan = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text='Plan de tratamiento holístico en formato JSON: { "meditations": [], "oils": [], "magnetism": [], "biodecoding": [] }'
+    )
+    
+    # ========== NIVEL DE TERAPIA CABALÍSTICA ==========
+    THERAPY_LEVEL_CHOICES = [
+        ('assiyah', 'Nivel 1: Sanación (Assiyah)'),
+        ('yetzirah', 'Nivel 2: Equilibrio (Yetzirah)'),
+        ('beriah', 'Nivel 3: Propósito (Beriah)'),
+    ]
+    therapy_level = models.CharField(
+        max_length=20,
+        choices=THERAPY_LEVEL_CHOICES,
+        blank=True,
+        null=True,
+        help_text='Nivel de terapia cabalística en el que se está trabajando con el paciente'
+    )
+    
+    # Notas generales (legacy)
+    notes = models.TextField(blank=True, help_text='Notas adicionales del terapeuta')
     
     # Status
-    is_active = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=True, help_text='Indica si el paciente está activo')
     
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
+    def save(self, *args, **kwargs):
+        # Calcular full_name automáticamente si no está definido
+        if not self.full_name:
+            self.full_name = f"{self.first_name} {self.last_name}".strip()
+        super().save(*args, **kwargs)
     
     def __str__(self):
         return f"{self.full_name} - Paciente de {self.therapist.username}"
     
     class Meta:
         ordering = ['-created_at']
-        unique_together = ['therapist', 'email']
+        unique_together = [['therapist', 'email'], ['therapist', 'user']]
         verbose_name = 'Paciente'
         verbose_name_plural = 'Pacientes'
 
@@ -561,3 +615,4 @@ class BlockedDate(models.Model):
         ordering = ['date']
         verbose_name = 'Fecha Bloqueada'
         verbose_name_plural = 'Fechas Bloqueadas'
+

@@ -190,17 +190,34 @@ from .models import Patient, Session, TherapistNote
 
 
 class PatientSerializer(serializers.ModelSerializer):
-    """Serializer para pacientes"""
+    """Serializer para pacientes - Ficha clínica holística"""
     therapist = serializers.ReadOnlyField(source='therapist.username')
     total_sessions = serializers.SerializerMethodField()
     total_fichas = serializers.SerializerMethodField()
     
     class Meta:
         model = Patient
-        fields = ['id', 'therapist', 'full_name', 'email', 'phone', 'birth_date',
-                  'notes', 'is_active', 'total_sessions', 'total_fichas',
-                  'created_at', 'updated_at']
-        read_only_fields = ['therapist', 'created_at', 'updated_at']
+        fields = [
+            # Identificación
+            'id', 'therapist', 'user',
+            # Datos personales
+            'first_name', 'last_name', 'full_name', 'email', 'phone', 'avatar',
+            # Datos astrológicos/cabalísticos
+            'birth_date', 'birth_time', 'birth_place', 'hebrew_name',
+            # Datos clínicos
+            'main_complaint', 'clinical_history',
+            # Plan de tratamiento
+            'treatment_plan',
+            # Nivel de terapia cabalística
+            'therapy_level',
+            # Notas y estado
+            'notes', 'is_active',
+            # Estadísticas
+            'total_sessions', 'total_fichas',
+            # Metadata
+            'created_at', 'updated_at'
+        ]
+        read_only_fields = ['therapist', 'user', 'full_name', 'created_at', 'updated_at']
     
     def get_total_sessions(self, obj):
         return obj.sessions.count()

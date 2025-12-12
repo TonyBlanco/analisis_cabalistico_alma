@@ -285,7 +285,17 @@ class EmailOrUsernameAuthToken(APIView):
             return Response({'detail': 'Credenciales inválidas'}, status=status.HTTP_400_BAD_REQUEST)
 
         token, _ = Token.objects.get_or_create(user=user_auth)
-        return Response({'token': token.key})
+        
+        # Obtener el perfil del usuario para determinar el role
+        role = 'visitor'  # Por defecto
+        if hasattr(user_auth, 'profile'):
+            role = user_auth.profile.user_type
+        
+        return Response({
+            'token': token.key,
+            'username': user_auth.username,
+            'role': role
+        })
 
 
 class CalculoCabalisticoView(APIView):
@@ -669,6 +679,442 @@ class PatientDetailView(generics.RetrieveUpdateDestroyAPIView):
         # Soft delete
         instance.is_active = False
         instance.save()
+
+
+class GenerateAIPlanView(APIView):
+    """
+    Genera un plan de tratamiento holístico usando IA (Gemini)
+    Ruta: POST /api/therapist/patients/<int:pk>/generate-ai-plan/
+    Solo para terapeutas
+    """
+    permission_classes = [IsAuthenticated, IsTherapist]
+    
+    def post(self, request, pk):
+        """Genera el plan de tratamiento holístico con IA"""
+        try:
+            # Obtener el paciente
+            patient = Patient.objects.filter(
+                therapist=request.user,
+                id=pk
+            ).first()
+            
+            if not patient:
+                return Response(
+                    {'error': 'Paciente no encontrado o no tienes permisos'},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+            # Obtener historial de tests
+            from .test_models import TestResult
+            # Buscar tests del paciente (pueden estar vinculados al user o al patient)
+            test_results = TestResult.objects.filter(
+                patient=patient
+            )
+            # Si no hay tests vinculados al patient, buscar por user
+            if not test_results.exists() and patient.user:
+                test_results = TestResult.objects.filter(user=patient.user)
+            test_results = test_results.order_by('-created_at')
+            
+            # Convertir a formato para el servicio AI
+            test_history = []
+            for test in test_results:
+                # Obtener el nombre del test (puede ser del módulo o del test_id)
+                test_name = test.test_module.name if test.test_module else (test.test_id.upper() if test.test_id else 'Test Desconocido')
+                
+                test_history.append({
+                    'test_id': test.test_id or '',
+                    'test_name': test_name,
+                    'score': test.score,
+                    'clinical_diagnosis': test.clinical_diagnosis or 'Sin diagnóstico',
+                    'angel_remedy': test.angel_remedy or 'No asignado'
+                })
+            
+            # Preparar datos del paciente
+            from .serializers import PatientSerializer
+            patient_serializer = PatientSerializer(patient)
+            patient_data = patient_serializer.data
+            
+            # Generar el plan con IA
+            from .utils.holistic_ai import holistic_ai
+            
+            if not holistic_ai.enabled:
+                error_msg = getattr(holistic_ai, 'error_message', 'Servicio de IA no disponible. Verifica la configuración de GEMINI_API_KEY.')
+                return Response(
+                    {'error': error_msg},
+                    status=status.HTTP_503_SERVICE_UNAVAILABLE
+                )
+            
+            ai_plan = holistic_ai.generate_report(patient_data, test_history)
+            
+            # Verificar si hay error en la respuesta
+            if 'error' in ai_plan:
+                return Response(
+                    {'error': ai_plan['error']},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+            
+            # Guardar el plan en el treatment_plan del paciente
+            # Combinar con el plan existente si hay uno
+            current_plan = patient.treatment_plan or {}
+            
+            # Actualizar con el nuevo plan de IA
+            updated_plan = {
+                **current_plan,
+                'ai_generated_plan': ai_plan,
+                'ai_generated_at': timezone.now().isoformat()
+            }
+            
+            patient.treatment_plan = updated_plan
+            patient.save()
+            
+            # Retornar el plan generado
+            return Response({
+                'success': True,
+                'plan': ai_plan,
+                'message': 'Plan de tratamiento holístico generado exitosamente'
+            }, status=status.HTTP_200_OK)
+        
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return Response(
+                {'error': f'Error al generar el plan: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class CreatePatientWithAccountView(APIView):
+    """
+    Crear un paciente con cuenta de usuario (login)
+    Ruta: POST /api/therapist/patients/create/
+    Solo para terapeutas
+    
+    Genera automáticamente username y password temporal
+    """
+    permission_classes = [IsAuthenticated, IsTherapist]
+    
+    def _generate_username(self, first_name: str) -> str:
+        """
+        Genera un username único con prefijo 'pat_'
+        Formato: pat_juan_1234
+        """
+        import re
+        import secrets
+        
+        # Normalizar nombre: minúsculas, sin acentos, sin espacios
+        def normalize(text):
+            # Remover acentos básicos
+            replacements = {
+                'á': 'a', 'é': 'e', 'í': 'i', 'ó': 'o', 'ú': 'u',
+                'ñ': 'n', 'ü': 'u'
+            }
+            text = text.lower().strip()
+            for old, new in replacements.items():
+                text = text.replace(old, new)
+            # Remover caracteres especiales, solo letras y números
+            text = re.sub(r'[^a-z0-9]', '', text)
+            return text
+        
+        first_normalized = normalize(first_name) if first_name else 'user'
+        # Limitar a 15 caracteres
+        name_part = first_normalized[:15]
+        if not name_part:
+            name_part = 'user'
+        
+        # Generar 4 dígitos aleatorios
+        random_digits = secrets.randbelow(10000)
+        random_digits_str = f"{random_digits:04d}"  # Asegurar 4 dígitos con ceros a la izquierda
+        
+        # Generar username base
+        base_username = f"pat_{name_part}_{random_digits_str}"
+        
+        # Asegurar que sea único (si existe, generar nuevos dígitos)
+        username = base_username
+        attempts = 0
+        while User.objects.filter(username=username).exists() and attempts < 10:
+            random_digits = secrets.randbelow(10000)
+            random_digits_str = f"{random_digits:04d}"
+            username = f"pat_{name_part}_{random_digits_str}"
+            attempts += 1
+        
+        # Si aún existe después de 10 intentos, agregar contador
+        if User.objects.filter(username=username).exists():
+            counter = 1
+            while User.objects.filter(username=username).exists():
+                username = f"{base_username}_{counter}"
+                counter += 1
+        
+        return username
+    
+    def _generate_temp_password(self) -> str:
+        """
+        Genera una contraseña temporal segura
+        Formato: Alma2025! (o similar)
+        """
+        import secrets
+        from datetime import datetime as dt
+        
+        # Generar una contraseña con: mayúsculas, minúsculas, números, símbolos
+        # Formato: Palabra + Año + Símbolo
+        words = ['Alma', 'Salud', 'Bienestar', 'Crecimiento', 'Armonia', 'Luz', 'Vida']
+        word = secrets.choice(words)
+        year = dt.now().year
+        symbols = ['!', '@', '#', '$', '%']
+        symbol = secrets.choice(symbols)
+        
+        password = f"{word}{year}{symbol}"
+        return password
+    
+    def post(self, request):
+        """
+        Crea un nuevo paciente con cuenta de usuario y ficha clínica holística
+        
+        Body esperado:
+        {
+            "first_name": "Juan",
+            "last_name": "Pérez",
+            "email": "juan@example.com",
+            "phone": "123456789",  # Opcional
+            "avatar": "https://...",  # Opcional
+            "birth_date": "1990-01-01",  # Requerido
+            "birth_time": "14:30:00",  # Opcional
+            "birth_place": "Madrid, España",  # Opcional
+            "hebrew_name": "יוחנן",  # Opcional
+            "main_complaint": "Ansiedad y estrés",  # Opcional
+            "clinical_history": "Historial clínico...",  # Opcional
+            "treatment_plan": {  # Opcional
+                "meditations": [],
+                "oils": [],
+                "magnetism": [],
+                "biodecoding": []
+            }
+        }
+        
+        Retorna:
+        {
+            "patient": { ... datos del paciente ... },
+            "credentials": {
+                "username": "pat_juan_1234",
+                "password": "Alma2025!"
+            },
+            "message": "Paciente creado exitosamente"
+        }
+        """
+        # ========== DATOS PERSONALES ==========
+        first_name = request.data.get('first_name', '').strip()
+        last_name = request.data.get('last_name', '').strip()
+        email = request.data.get('email', '').strip()
+        phone = request.data.get('phone', '').strip()
+        avatar = request.data.get('avatar', '').strip()
+        
+        # ========== DATOS ASTROLÓGICOS/CABALÍSTICOS ==========
+        birth_date = request.data.get('birth_date')
+        birth_time = request.data.get('birth_time', '').strip()
+        birth_place = request.data.get('birth_place', '').strip()
+        hebrew_name = request.data.get('hebrew_name', '').strip()
+        
+        # ========== DATOS CLÍNICOS ==========
+        main_complaint = request.data.get('main_complaint', '').strip()
+        clinical_history = request.data.get('clinical_history', '').strip()
+        
+        # ========== PLAN DE TRATAMIENTO ==========
+        treatment_plan = request.data.get('treatment_plan', {})
+        if not isinstance(treatment_plan, dict):
+            treatment_plan = {}
+        # Asegurar estructura del plan de tratamiento
+        if 'meditations' not in treatment_plan:
+            treatment_plan['meditations'] = []
+        if 'oils' not in treatment_plan:
+            treatment_plan['oils'] = []
+        if 'magnetism' not in treatment_plan:
+            treatment_plan['magnetism'] = []
+        if 'biodecoding' not in treatment_plan:
+            treatment_plan['biodecoding'] = []
+        
+        # Validaciones
+        if not first_name:
+            return Response(
+                {'error': 'first_name es requerido'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if not last_name:
+            return Response(
+                {'error': 'last_name es requerido'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if not email:
+            return Response(
+                {'error': 'email es requerido'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if not birth_date:
+            return Response(
+                {'error': 'birth_date es requerido'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Verificar que el email no esté en uso
+        if User.objects.filter(email=email).exists():
+            return Response(
+                {'error': 'Este email ya está registrado'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Verificar límite de pacientes del terapeuta
+        therapist_profile = request.user.profile
+        can_add, message = therapist_profile.can_add_patient()
+        if not can_add:
+            return Response(
+                {'error': message},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        try:
+            # Generar username automático (solo con first_name)
+            username = self._generate_username(first_name)
+            
+            # Generar password temporal seguro
+            temp_password = self._generate_temp_password()
+            
+            # Construir full_name
+            full_name = f"{first_name} {last_name}".strip()
+            
+            # Crear usuario con rol 'patient'
+            user = User.objects.create_user(
+                username=username,
+                email=email,
+                password=temp_password,
+                first_name=first_name,
+                last_name=last_name
+            )
+            
+            # Crear perfil con rol 'patient'
+            user_profile = UserProfile.objects.get(user=user)
+            user_profile.user_type = 'patient'
+            user_profile.full_name = full_name
+            user_profile.phone = phone
+            if birth_date:
+                try:
+                    from datetime import datetime as dt
+                    if isinstance(birth_date, str):
+                        birth_date_obj = dt.strptime(birth_date, '%Y-%m-%d').date()
+                    else:
+                        birth_date_obj = birth_date
+                    user_profile.birth_date = birth_date_obj
+                except (ValueError, TypeError):
+                    pass  # Si hay error, dejar birth_date vacío
+            user_profile.save()
+            
+            # Procesar birth_time si está presente
+            birth_time_obj = None
+            if birth_time:
+                try:
+                    from datetime import datetime as dt
+                    if isinstance(birth_time, str):
+                        # Intentar diferentes formatos
+                        for fmt in ['%H:%M:%S', '%H:%M']:
+                            try:
+                                birth_time_obj = dt.strptime(birth_time, fmt).time()
+                                break
+                            except ValueError:
+                                continue
+                except (ValueError, TypeError):
+                    pass
+            
+            # Procesar birth_date para Patient
+            if isinstance(birth_date, str):
+                from datetime import datetime as dt
+                birth_date_obj = dt.strptime(birth_date, '%Y-%m-%d').date()
+            else:
+                birth_date_obj = birth_date
+            
+            # Crear entrada de Patient con todos los campos
+            patient = Patient.objects.create(
+                therapist=request.user,
+                user=user,
+                first_name=first_name,
+                last_name=last_name,
+                full_name=full_name,  # Se calculará automáticamente en save()
+                email=email,
+                phone=phone,
+                avatar=avatar,
+                birth_date=birth_date_obj,
+                birth_time=birth_time_obj,
+                birth_place=birth_place,
+                hebrew_name=hebrew_name,
+                main_complaint=main_complaint,
+                clinical_history=clinical_history,
+                treatment_plan=treatment_plan,
+                is_active=True
+            )
+            
+            # Actualizar contador de pacientes del terapeuta
+            therapist_profile.current_patients_count = Patient.objects.filter(
+                therapist=request.user,
+                is_active=True
+            ).count()
+            therapist_profile.save()
+            
+            # Notificación simulada (preparada para send_mail más adelante)
+            email_body = f"""
+Hola {first_name},
+
+Bienvenido/a a Mi Camino del Alma.
+
+Tu cuenta de paciente ha sido creada por tu terapeuta.
+
+Credenciales de acceso:
+- Usuario: {username}
+- Contraseña: {temp_password}
+
+Por favor, cambia tu contraseña después de tu primer inicio de sesión.
+
+Puedes acceder a tu cuenta en: https://app.tonyblanco.com/login
+
+Saludos,
+Equipo Mi Camino del Alma
+            """.strip()
+            
+            # Imprimir en consola (simulación)
+            print("=" * 60)
+            print("EMAIL DE BIENVENIDA (SIMULADO)")
+            print("=" * 60)
+            print(f"Para: {email}")
+            print(f"Asunto: Bienvenido/a a Mi Camino del Alma - Credenciales de Acceso")
+            print("-" * 60)
+            print(email_body)
+            print("=" * 60)
+            print(f"\n[NOTA: En producción, esto se enviará con send_mail de Django]")
+            print("=" * 60)
+            
+            # Serializar respuesta con datos del paciente
+            from .serializers import PatientSerializer
+            patient_serializer = PatientSerializer(patient)
+            
+            # Retornar datos del paciente Y credenciales
+            return Response({
+                'patient': patient_serializer.data,
+                'credentials': {
+                    'username': username,
+                    'password': temp_password
+                },
+                'message': 'Paciente creado exitosamente'
+            }, status=status.HTTP_201_CREATED)
+            
+        except Exception as e:
+            # Si hay error, limpiar usuario creado si existe
+            if 'user' in locals():
+                try:
+                    user.delete()
+                except:
+                    pass
+            return Response(
+                {'error': f'Error al crear paciente: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 class SessionListCreateView(generics.ListCreateAPIView):

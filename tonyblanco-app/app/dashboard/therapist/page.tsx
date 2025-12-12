@@ -6,7 +6,8 @@ import {
   Users, Calendar, FileText, Activity, 
   Settings, Bell, Search, Menu, X,
   Plus, TrendingUp, Clock,
-  UserPlus, ClipboardList, BarChart3, Archive
+  UserPlus, ClipboardList, BarChart3, Archive,
+  Star, Scroll, Hexagon, Sparkles
 } from 'lucide-react';
 
 export default function TherapistDashboard() {
@@ -137,6 +138,26 @@ export default function TherapistDashboard() {
             </a>
 
             <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider mt-6">
+              Alta Cábala
+            </div>
+            <a href="/dashboard/tools/soul-map" className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100">
+              <Sparkles className="mr-3 h-5 w-5" />
+              Mapa del Alma
+            </a>
+            <a href="/dashboard/tools/gematria" className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100">
+              <Scroll className="mr-3 h-5 w-5" />
+              Calculadora Gematria
+            </a>
+            <a href="/dashboard/tools/astrology" className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100">
+              <Star className="mr-3 h-5 w-5" />
+              Carta Astral Cabalística
+            </a>
+            <a href="/dashboard/tools/tikun" className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100">
+              <Hexagon className="mr-3 h-5 w-5" />
+              Análisis de Tikún
+            </a>
+
+            <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider mt-6">
               Configuración
             </div>
             <a href="/settings" className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100">
@@ -200,34 +221,30 @@ export default function TherapistDashboard() {
             <div className="p-6 border-b border-gray-200">
               <h2 className="text-lg font-semibold text-gray-900">Acciones Rápidas</h2>
             </div>
-            <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <button
-                onClick={() => router.push('/tests')}
-                className="flex items-center justify-center px-4 py-3 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-medium rounded-lg shadow-sm transition-all"
-              >
-                <ClipboardList className="h-5 w-5 mr-2" />
-                📊 Tests Modulares
-              </button>
+            <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-4">
               <button
                 onClick={() => router.push('/therapist/patients/new')}
-                className="flex items-center justify-center px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium rounded-lg shadow-sm transition-all"
+                className="flex flex-col items-center justify-center px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-lg shadow-sm transition-all transform hover:scale-105"
               >
-                <UserPlus className="h-5 w-5 mr-2" />
-                + Nuevo Paciente
+                <UserPlus className="h-8 w-8 mb-2" />
+                <span>Crear Nuevo Paciente</span>
+                <span className="text-xs text-blue-100 mt-1">Con cuenta de acceso</span>
               </button>
               <button
-                onClick={() => router.push('/therapist/sessions/new')}
-                className="flex items-center justify-center px-4 py-3 bg-white hover:bg-gray-50 text-gray-700 font-medium rounded-lg border-2 border-gray-300 transition-all"
+                onClick={() => router.push('/therapist/patients')}
+                className="flex flex-col items-center justify-center px-6 py-4 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold rounded-lg shadow-sm transition-all transform hover:scale-105"
               >
-                <Plus className="h-5 w-5 mr-2" />
-                + Registrar Sesión
+                <Users className="h-8 w-8 mb-2" />
+                <span>Ver Lista de Pacientes</span>
+                <span className="text-xs text-green-100 mt-1">Gestionar pacientes</span>
               </button>
               <button
-                onClick={() => router.push('/calcular')}
-                className="flex items-center justify-center px-4 py-3 bg-white hover:bg-gray-50 text-gray-700 font-medium rounded-lg border-2 border-gray-300 transition-all"
+                onClick={() => router.push('/tests')}
+                className="flex flex-col items-center justify-center px-6 py-4 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold rounded-lg shadow-sm transition-all transform hover:scale-105"
               >
-                <FileText className="h-5 w-5 mr-2" />
-                + Nuevo Análisis
+                <ClipboardList className="h-8 w-8 mb-2" />
+                <span>Catálogo de Tests</span>
+                <span className="text-xs text-purple-100 mt-1">15 tests disponibles</span>
               </button>
             </div>
           </div>

@@ -119,18 +119,22 @@ export function scheduleAngelNotification(
 
 // Verificar y mostrar notificaciones del día actual
 export function checkTodayNotifications(angels: Angel[]): void {
+  if (!angels || !Array.isArray(angels)) return;
+  
   const today = new Date();
   const month = today.getMonth() + 1;
   const day = today.getDate();
 
   const todayAngel = angels.find(angel => 
+    angel?.presidesOver && 
+    Array.isArray(angel.presidesOver) &&
     angel.presidesOver.some(([m, d]) => m === month && d === day)
   );
 
   if (todayAngel) {
     const notifications = loadNotifications();
     const hasNotification = notifications.some(n => 
-      n.angel.name.en === todayAngel.name.en &&
+      n.angel?.name?.en === todayAngel.name?.en &&
       n.enabled &&
       new Date(n.date).toDateString() === today.toDateString()
     );
@@ -143,6 +147,10 @@ export function checkTodayNotifications(angels: Angel[]): void {
 
 // Obtener próximas fechas de presidencia de un ángel
 export function getUpcomingPresidingDates(angel: Angel, count: number = 5): Date[] {
+  if (!angel?.presidesOver || !Array.isArray(angel.presidesOver)) {
+    return [];
+  }
+
   const today = new Date();
   const currentYear = today.getFullYear();
   const dates: Date[] = [];
@@ -232,6 +240,11 @@ export function getNotificationStats(): {
 
 // Inicializar sistema de notificaciones
 export async function initNotificationSystem(angels: Angel[]): Promise<boolean> {
+  if (!angels || !Array.isArray(angels) || angels.length === 0) {
+    console.warn('initNotificationSystem: No se proporcionaron ángeles válidos');
+    return false;
+  }
+
   const hasPermission = await requestNotificationPermission();
   
   if (hasPermission) {

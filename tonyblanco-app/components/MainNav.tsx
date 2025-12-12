@@ -71,23 +71,42 @@ export default function MainNav() {
     { icon: CreditCard, label: 'Suscripción', path: '/pricing', color: 'text-yellow-400' },
   ];
 
+  // Determine if we're on landing page or dashboard
+  const isLanding = pathname === '/';
+  const isDashboard = pathname?.startsWith('/dashboard');
+  const isLoginOrRegister = pathname === '/login' || pathname === '/register';
+
   // Don't show nav on login/register pages
-  if (pathname === '/login' || pathname === '/register' || pathname === '/') {
+  if (isLoginOrRegister) {
+    return null;
+  }
+
+  // On dashboard pages, hide nav (they have their own navigation)
+  if (isDashboard) {
     return null;
   }
 
   return (
     <>
       {/* Desktop Navigation */}
-      <nav className="hidden md:block border-b border-slate-800 bg-slate-900/95 backdrop-blur-md sticky top-0 z-50">
+      <nav 
+        className={`hidden md:block fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+          isLanding 
+            ? 'bg-black/50 backdrop-blur-md border-b border-white/10' 
+            : 'border-b border-slate-800 bg-slate-900/95 backdrop-blur-md sticky'
+        }`}
+      >
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <button
-              onClick={() => router.push('/dashboard/personal')}
+              onClick={() => router.push(isLanding ? '/' : '/dashboard/personal')}
               className="flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
-              <span className="text-2xl font-light title-font" style={{ color: '#D4AF37' }}>
+              <span 
+                className={`text-2xl font-light title-font ${isLanding ? 'text-white' : ''}`}
+                style={{ color: isLanding ? '#D4AF37' : '#D4AF37' }}
+              >
                 ✨ Mi Camino del Alma
               </span>
             </button>
@@ -100,11 +119,15 @@ export default function MainNav() {
                   onClick={() => router.push(item.path)}
                   className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${
                     pathname === item.path
-                      ? 'bg-slate-800 text-white'
-                      : 'text-gray-400 hover:text-white hover:bg-slate-800/50'
+                      ? isLanding 
+                        ? 'bg-white/10 text-white' 
+                        : 'bg-slate-800 text-white'
+                      : isLanding
+                        ? 'text-white/70 hover:text-white hover:bg-white/10'
+                        : 'text-gray-400 hover:text-white hover:bg-slate-800/50'
                   }`}
                 >
-                  <item.icon className={`w-4 h-4 ${pathname === item.path ? item.color : ''}`} />
+                  <item.icon className={`w-4 h-4 ${pathname === item.path ? item.color : isLanding ? 'text-white/70' : ''}`} />
                   <span className="text-sm font-medium">{item.label}</span>
                 </button>
               ))}
@@ -264,11 +287,18 @@ export default function MainNav() {
       </nav>
 
       {/* Mobile Navigation */}
-      <nav className="md:hidden border-b border-slate-800 bg-slate-900/95 backdrop-blur-md sticky top-0 z-50">
+      <nav 
+        className={`md:hidden fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+          isLanding 
+            ? 'bg-black/50 backdrop-blur-md border-b border-white/10' 
+            : 'border-b border-slate-800 bg-slate-900/95 backdrop-blur-md sticky'
+        }`}
+      >
         <div className="flex items-center justify-between px-4 h-14">
           <button
-            onClick={() => router.push('/dashboard/personal')}
-            className="text-lg font-light title-font" style={{ color: '#D4AF37' }}
+            onClick={() => router.push(isLanding ? '/' : '/dashboard/personal')}
+            className={`text-lg font-light title-font ${isLanding ? 'text-white' : ''}`}
+            style={{ color: '#D4AF37' }}
           >
             ✨ Mi Camino
           </button>

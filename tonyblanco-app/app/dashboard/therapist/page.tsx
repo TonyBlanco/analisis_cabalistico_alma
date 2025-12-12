@@ -156,6 +156,10 @@ export default function TherapistDashboard() {
               <Star className="mr-3 h-5 w-5" />
               Carta Astral Cabalística
             </a>
+            <a href="/dashboard/tools/astrology-kerykeion" className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100">
+              <Star className="mr-3 h-5 w-5" />
+              Astrología Técnica (Kerykeion)
+            </a>
             <a href="/dashboard/tools/tikun" className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100">
               <Hexagon className="mr-3 h-5 w-5" />
               Análisis de Tikún
@@ -163,6 +167,10 @@ export default function TherapistDashboard() {
             <a href="/tests/complete-numerology" className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100">
               <Hash className="mr-3 h-5 w-5" />
               Numerología Completa
+            </a>
+            <a href="/dashboard/tools/shekinah" className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100">
+              <Sparkles className="mr-3 h-5 w-5" />
+              Análisis Shejinah
             </a>
 
             <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider mt-6">

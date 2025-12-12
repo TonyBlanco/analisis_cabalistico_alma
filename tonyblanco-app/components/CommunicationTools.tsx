@@ -13,7 +13,13 @@ import {
 import type { PatientInfo } from '@/types/patient';
 
 interface CommunicationToolsProps {
-  patient: PatientInfo;
+  patient: PatientInfo | {
+    id?: string;
+    name: string;
+    email?: string;
+    phone?: string;
+    birthDate?: string;
+  };
 }
 
 export default function CommunicationTools({ patient }: CommunicationToolsProps) {

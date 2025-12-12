@@ -628,6 +628,8 @@ class CabalisticAnalysis(models.Model):
         ('soul-map', 'Mapa del Alma'),
         ('astrology', 'Carta Astral Cabalística'),
         ('tikun', 'Análisis de Tikún'),
+        ('shekinah', 'Análisis Shejinah Moderno Pitagórico'),
+        ('astrology-kerykeion', 'Astrología Técnica (Kerykeion)'),
     ]
     
     # Relaciones

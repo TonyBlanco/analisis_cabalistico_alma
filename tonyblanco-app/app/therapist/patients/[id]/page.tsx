@@ -13,6 +13,9 @@ import { getAuthToken } from '@/lib/auth';
 import TherapistRoute from '@/components/TherapistRoute';
 import { TESTS_DB } from '@/data/tests-questions';
 import TherapyLevelSelector, { TherapyLevel } from '@/components/TherapyLevelSelector';
+import PatientAnalysesSidebar from '@/components/PatientAnalysesSidebar';
+import AnalysisSelector from '@/components/AnalysisSelector';
+import CommunicationTools from '@/components/CommunicationTools';
 
 interface PatientData {
   id: number;
@@ -91,6 +94,7 @@ export default function PatientDetailPage() {
   const [testResults, setTestResults] = useState<TestResult[]>([]);
   const [error, setError] = useState('');
   const [showAssignTestModal, setShowAssignTestModal] = useState(false);
+  const [showAssignAnalysisModal, setShowAssignAnalysisModal] = useState(false);
   const [nextAppointment, setNextAppointment] = useState('');
   const [generatingTarotAnalysis, setGeneratingTarotAnalysis] = useState(false);
   const [tarotAnalysis, setTarotAnalysis] = useState<any>(null);
@@ -584,19 +588,59 @@ export default function PatientDetailPage() {
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          {/* Selector de Nivel Terapéutico */}
-          <TherapyLevelSelector
-            selectedLevel={therapyLevel}
-            onLevelChange={setTherapyLevel}
-            patientId={patient ? parseInt(patientId) : undefined}
+        {/* Herramientas de Comunicación Rápida */}
+        <div className="bg-white border-b border-gray-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                <Zap className="h-4 w-4 text-amber-500" />
+                Herramientas de Comunicación Rápida
+              </h3>
+            </div>
+            <CommunicationTools 
+              patient={{
+                id: patient.id.toString(),
+                name: patient.full_name || `${patient.first_name} ${patient.last_name}`,
+                email: patient.email,
+                phone: patient.phone,
+                birthDate: patient.birth_date
+              }}
+            />
+          </div>
+        </div>
+
+        <div className="flex h-[calc(100vh-4rem)]">
+          {/* Sidebar Izquierdo - Análisis */}
+          <PatientAnalysesSidebar
+            patientId={patientId}
+            patientName={patient.full_name || `${patient.first_name} ${patient.last_name}`}
+            analyses={cabalisticAnalyses}
+            onAnalysisSelect={(analysisId) => {
+              const analysis = cabalisticAnalyses.find(a => a.analysis_type === analysisId);
+              if (analysis) {
+                if (analysisId === 'tarot') {
+                  setTarotAnalysis(analysis.result_data);
+                  setActiveTab('soul');
+                }
+              }
+            }}
           />
 
-          <div className="flex gap-6">
-            {/* Main Content */}
-            <div className="flex-1">
-              {/* Tabs */}
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+          {/* Main Content Area */}
+          <div className="flex-1 overflow-y-auto">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+              {/* Selector de Nivel Terapéutico */}
+              <TherapyLevelSelector
+                selectedLevel={therapyLevel}
+                onLevelChange={setTherapyLevel}
+                patientId={patient ? parseInt(patientId) : undefined}
+              />
+
+              <div className="flex gap-6">
+                {/* Main Content */}
+                <div className="flex-1">
+                  {/* Tabs */}
+                  <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
                 <div className="border-b border-gray-200">
                   <nav className="flex -mb-px">
                     <button
@@ -773,6 +817,15 @@ export default function PatientDetailPage() {
                             </button>
                             
                             <button
+                              onClick={() => router.push(`/dashboard/tools/astrology-kerykeion?patientId=${patientId}`)}
+                              className="flex flex-col items-center justify-center p-4 bg-gradient-to-br from-indigo-50 to-blue-50 border-2 border-indigo-200 rounded-lg hover:border-indigo-400 transition-all"
+                            >
+                              <Star className="h-8 w-8 text-indigo-600 mb-2" />
+                              <span className="font-semibold text-gray-900 text-sm">Kerykeion</span>
+                              <span className="text-xs text-gray-600 mt-1">Astrología Técnica</span>
+                            </button>
+                            
+                            <button
                               onClick={() => router.push(`/dashboard/tools/tikun?patient_id=${patientId}`)}
                               className="flex flex-col items-center justify-center p-4 bg-gradient-to-br from-emerald-50 to-teal-50 border-2 border-emerald-200 rounded-lg hover:border-emerald-400 transition-all"
                             >
@@ -788,6 +841,15 @@ export default function PatientDetailPage() {
                               <Hash className="h-8 w-8 text-rose-600 mb-2" />
                               <span className="font-semibold text-gray-900 text-sm">Numerología</span>
                               <span className="text-xs text-gray-600 mt-1">Análisis Completo</span>
+                            </button>
+                            
+                            <button
+                              onClick={() => router.push(`/dashboard/tools/shekinah?patientId=${patientId}`)}
+                              className="flex flex-col items-center justify-center p-4 bg-gradient-to-br from-amber-50 to-yellow-50 border-2 border-amber-200 rounded-lg hover:border-amber-400 transition-all"
+                            >
+                              <Sparkles className="h-8 w-8 text-amber-600 mb-2" />
+                              <span className="font-semibold text-gray-900 text-sm">Shejinah</span>
+                              <span className="text-xs text-gray-600 mt-1">Método Atlantis</span>
                             </button>
                           </div>
                         )}
@@ -818,7 +880,9 @@ export default function PatientDetailPage() {
                                     {analysis.analysis_type === 'gematria' && <Scroll className="h-5 w-5 text-blue-600" />}
                                     {analysis.analysis_type === 'soul-map' && <Sparkles className="h-5 w-5 text-purple-600" />}
                                     {analysis.analysis_type === 'astrology' && <Star className="h-5 w-5 text-amber-600" />}
+                                    {analysis.analysis_type === 'astrology-kerykeion' && <Star className="h-5 w-5 text-indigo-600" />}
                                     {analysis.analysis_type === 'tikun' && <Hexagon className="h-5 w-5 text-emerald-600" />}
+                                    {analysis.analysis_type === 'shekinah' && <Sparkles className="h-5 w-5 text-amber-600" />}
                                     <div>
                                       <p className="font-semibold text-gray-900">{analysis.analysis_type_display}</p>
                                       {analysis.summary && (
@@ -1190,68 +1254,68 @@ export default function PatientDetailPage() {
                         <div className="space-y-6">
                           {/* Meditación */}
                           <div className="border border-gray-200 rounded-lg p-6">
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 bg-purple-100 rounded-lg">
-                              <span className="text-2xl">🧘</span>
-                            </div>
-                            <div>
-                              <h3 className="font-semibold text-gray-900">Meditación / 72 Nombres</h3>
-                              <p className="text-xs text-gray-500">Prácticas de meditación y nombres divinos</p>
-                            </div>
-                          </div>
-                          {editingTreatment === 'meditations' ? (
-                            <div className="flex gap-2">
-                              <input
-                                type="text"
-                                value={newTreatmentItem}
-                                onChange={(e) => setNewTreatmentItem(e.target.value)}
-                                onKeyPress={(e) => e.key === 'Enter' && addTreatmentItem('meditations')}
-                                placeholder="Agregar meditación..."
-                                className="px-3 py-1 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white placeholder:text-gray-400"
-                                autoFocus
-                              />
-                              <button
-                                onClick={() => addTreatmentItem('meditations')}
-                                className="px-3 py-1 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700"
-                              >
-                                Agregar
-                              </button>
-                              <button
-                                onClick={() => { setEditingTreatment(null); setNewTreatmentItem(''); }}
-                                className="px-3 py-1 border border-gray-300 rounded-lg text-sm hover:bg-gray-50"
-                              >
-                                Cancelar
-                              </button>
-                            </div>
-                          ) : (
-                            <button
-                              onClick={() => setEditingTreatment('meditations')}
-                              className="px-3 py-1 text-sm text-purple-600 hover:bg-purple-50 rounded-lg border border-purple-200"
-                            >
-                              <Plus className="h-4 w-4 inline mr-1" />
-                              Agregar
-                            </button>
-                          )}
-                        </div>
-                        <ul className="space-y-2">
-                          {treatmentPlan.meditations.length === 0 ? (
-                            <li className="text-sm text-gray-400 italic">No hay meditaciones asignadas</li>
-                          ) : (
-                            treatmentPlan.meditations.map((item, index) => (
-                              <li key={index} className="flex items-center justify-between p-2 bg-purple-50 rounded-lg">
-                                <span className="text-sm text-gray-700">{item}</span>
+                            <div className="flex items-center justify-between mb-4">
+                              <div className="flex items-center gap-3">
+                                <div className="p-2 bg-purple-100 rounded-lg">
+                                  <span className="text-2xl">🧘</span>
+                                </div>
+                                <div>
+                                  <h3 className="font-semibold text-gray-900">Meditación / 72 Nombres</h3>
+                                  <p className="text-xs text-gray-500">Prácticas de meditación y nombres divinos</p>
+                                </div>
+                              </div>
+                              {editingTreatment === 'meditations' ? (
+                                <div className="flex gap-2">
+                                  <input
+                                    type="text"
+                                    value={newTreatmentItem}
+                                    onChange={(e) => setNewTreatmentItem(e.target.value)}
+                                    onKeyPress={(e) => e.key === 'Enter' && addTreatmentItem('meditations')}
+                                    placeholder="Agregar meditación..."
+                                    className="px-3 py-1 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white placeholder:text-gray-400"
+                                    autoFocus
+                                  />
+                                  <button
+                                    onClick={() => addTreatmentItem('meditations')}
+                                    className="px-3 py-1 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700"
+                                  >
+                                    Agregar
+                                  </button>
+                                  <button
+                                    onClick={() => { setEditingTreatment(null); setNewTreatmentItem(''); }}
+                                    className="px-3 py-1 border border-gray-300 rounded-lg text-sm hover:bg-gray-50"
+                                  >
+                                    Cancelar
+                                  </button>
+                                </div>
+                              ) : (
                                 <button
-                                  onClick={() => removeTreatmentItem('meditations', index)}
-                                  className="text-red-500 hover:text-red-700"
+                                  onClick={() => setEditingTreatment('meditations')}
+                                  className="px-3 py-1 text-sm text-purple-600 hover:bg-purple-50 rounded-lg border border-purple-200"
                                 >
-                                  <X className="h-4 w-4" />
+                                  <Plus className="h-4 w-4 inline mr-1" />
+                                  Agregar
                                 </button>
-                              </li>
-                            ))
-                          )}
-                        </ul>
-                      </div>
+                              )}
+                            </div>
+                            <ul className="space-y-2">
+                              {treatmentPlan.meditations.length === 0 ? (
+                                <li className="text-sm text-gray-400 italic">No hay meditaciones asignadas</li>
+                              ) : (
+                                treatmentPlan.meditations.map((item, index) => (
+                                  <li key={index} className="flex items-center justify-between p-2 bg-purple-50 rounded-lg">
+                                    <span className="text-sm text-gray-700">{item}</span>
+                                    <button
+                                      onClick={() => removeTreatmentItem('meditations', index)}
+                                      className="text-red-500 hover:text-red-700"
+                                    >
+                                      <X className="h-4 w-4" />
+                                    </button>
+                                  </li>
+                                ))
+                              )}
+                            </ul>
+                          </div>
 
                       {/* Aceites Esenciales */}
                       <div className="border border-gray-200 rounded-lg p-6">
@@ -1467,26 +1531,35 @@ export default function PatientDetailPage() {
                           )}
                         </button>
                       </div>
-                        </div>
                       </div>
                     </div>
                   )}
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* Sidebar Derecho */}
             <div className="w-80 space-y-6">
-              {/* Asignar Test */}
+              {/* Acciones Rápidas */}
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Acciones Rápidas</h3>
-                <button
-                  onClick={() => setShowAssignTestModal(true)}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium mb-4"
-                >
-                  <Plus className="h-5 w-5" />
-                  Asignar Test
-                </button>
+                <div className="space-y-3">
+                  <button
+                    onClick={() => setShowAssignTestModal(true)}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium"
+                  >
+                    <TestTube className="h-5 w-5" />
+                    Asignar Test
+                  </button>
+                  <button
+                    onClick={() => setShowAssignAnalysisModal(true)}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-lg transition-colors font-medium"
+                  >
+                    <Sparkles className="h-5 w-5" />
+                    Asignar Análisis
+                  </button>
+                </div>
 
                 {/* Próxima Cita */}
                 <div className="mt-6">
@@ -1590,6 +1663,15 @@ export default function PatientDetailPage() {
               </div>
             </div>
           </div>
+        )}
+
+        {/* Modal Asignar Análisis */}
+        {showAssignAnalysisModal && patient && (
+          <AnalysisSelector
+            patientId={patientId}
+            patientName={patient.full_name || `${patient.first_name} ${patient.last_name}`}
+            onClose={() => setShowAssignAnalysisModal(false)}
+          />
         )}
       </div>
     </TherapistRoute>

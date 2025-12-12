@@ -90,79 +90,79 @@ export default function CommunicationTools({ patient }: CommunicationToolsProps)
   };
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+    <div className="flex flex-wrap gap-2">
       {/* Zoom */}
-      <Button
+      <button
         onClick={handleZoom}
-        className="bg-blue-600 hover:bg-blue-700 flex-col h-auto py-3"
+        className="flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors shadow-sm"
         title="Iniciar reunión en Zoom"
       >
-        <Video className="w-5 h-5 mb-1" />
-        <span className="text-xs">Zoom</span>
-      </Button>
+        <Video className="w-4 h-4" />
+        <span>Zoom</span>
+      </button>
 
       {/* Google Meet */}
-      <Button
+      <button
         onClick={handleGoogleMeet}
-        className="bg-green-600 hover:bg-green-700 flex-col h-auto py-3"
+        className="flex items-center gap-2 px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors shadow-sm"
         title="Crear reunión en Google Meet"
       >
-        <Video className="w-5 h-5 mb-1" />
-        <span className="text-xs">Meet</span>
-      </Button>
+        <Video className="w-4 h-4" />
+        <span>Meet</span>
+      </button>
 
       {/* WhatsApp */}
-      <Button
+      <button
         onClick={handleWhatsApp}
-        className="bg-emerald-600 hover:bg-emerald-700 flex-col h-auto py-3"
+        className="flex items-center gap-2 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition-colors shadow-sm disabled:bg-gray-300 disabled:cursor-not-allowed"
         title="Enviar WhatsApp"
         disabled={!patient.phone}
       >
-        <MessageCircle className="w-5 h-5 mb-1" />
-        <span className="text-xs">WhatsApp</span>
-      </Button>
+        <MessageCircle className="w-4 h-4" />
+        <span>WhatsApp</span>
+      </button>
 
       {/* Google Chat */}
-      <Button
+      <button
         onClick={handleGoogleChat}
-        className="bg-purple-600 hover:bg-purple-700 flex-col h-auto py-3"
+        className="flex items-center gap-2 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium transition-colors shadow-sm"
         title="Abrir Google Chat"
       >
-        <MessageSquare className="w-5 h-5 mb-1" />
-        <span className="text-xs">Chat</span>
-      </Button>
+        <MessageSquare className="w-4 h-4" />
+        <span>Chat</span>
+      </button>
 
       {/* Email */}
-      <Button
+      <button
         onClick={handleEmail}
-        className="bg-red-600 hover:bg-red-700 flex-col h-auto py-3"
+        className="flex items-center gap-2 px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors shadow-sm disabled:bg-gray-300 disabled:cursor-not-allowed"
         title="Enviar Email"
         disabled={!patient.email}
       >
-        <Mail className="w-5 h-5 mb-1" />
-        <span className="text-xs">Email</span>
-      </Button>
+        <Mail className="w-4 h-4" />
+        <span>Email</span>
+      </button>
 
       {/* Llamada */}
-      <Button
+      <button
         onClick={handlePhone}
-        className="bg-cyan-600 hover:bg-cyan-700 flex-col h-auto py-3"
+        className="flex items-center gap-2 px-3 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg text-sm font-medium transition-colors shadow-sm disabled:bg-gray-300 disabled:cursor-not-allowed"
         title="Llamar por teléfono"
         disabled={!patient.phone}
       >
-        <Phone className="w-5 h-5 mb-1" />
-        <span className="text-xs">Llamar</span>
-      </Button>
+        <Phone className="w-4 h-4" />
+        <span>Llamar</span>
+      </button>
 
       {/* Agendar */}
-      <Button
+      <button
         onClick={handleCalendar}
-        className="bg-amber-600 hover:bg-amber-700 flex-col h-auto py-3"
+        className="flex items-center gap-2 px-3 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-sm font-medium transition-colors shadow-sm"
         title="Agendar en calendario"
       >
-        <Calendar className="w-5 h-5 mb-1" />
-        <span className="text-xs">Agendar</span>
-      </Button>
+        <Calendar className="w-4 h-4" />
+        <span>Agendar</span>
+      </button>
     </div>
   );
 }

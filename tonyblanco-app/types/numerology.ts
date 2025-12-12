@@ -66,3 +66,4 @@ export interface NumerologyResult {
   [key: string]: any; // Para campos adicionales que puedan venir del backend
 }
 
+

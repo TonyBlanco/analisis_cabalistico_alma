@@ -74,10 +74,11 @@ export default function MainNav() {
   // Determine if we're on landing page or dashboard
   const isLanding = pathname === '/';
   const isDashboard = pathname?.startsWith('/dashboard');
+  const isTherapist = pathname?.startsWith('/therapist');
   const isLoginOrRegister = pathname === '/login' || pathname === '/register';
 
-  // Don't show nav on login/register pages
-  if (isLoginOrRegister) {
+  // Don't show nav on login/register pages or therapist pages (they have their own layout)
+  if (isLoginOrRegister || isTherapist) {
     return null;
   }
 

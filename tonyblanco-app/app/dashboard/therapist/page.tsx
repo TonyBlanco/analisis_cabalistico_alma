@@ -7,8 +7,10 @@ import {
   Settings, Bell, Search, Menu, X,
   Plus, TrendingUp, Clock,
   UserPlus, ClipboardList, BarChart3, Archive,
-  Star, Scroll, Hexagon, Sparkles, BookOpen, Hash
+  Star, Scroll, Hexagon, Sparkles, BookOpen, Hash,
+  LogOut
 } from 'lucide-react';
+import { logout } from '@/lib/auth';
 
 export default function TherapistDashboard() {
   const router = useRouter();
@@ -84,6 +86,27 @@ export default function TherapistDashboard() {
 
               {/* User Menu */}
               <div className="flex items-center space-x-3 border-l border-gray-200 pl-4">
+                <button
+                  onClick={() => router.push('/dashboard/account')}
+                  className="flex items-center gap-2 px-3 py-2 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors text-sm font-medium"
+                  title="Mi Perfil"
+                >
+                  <Settings className="w-4 h-4" />
+                  <span className="hidden sm:inline">Mi Perfil</span>
+                </button>
+                <button
+                  onClick={() => {
+                    if (confirm('¿Estás seguro de que deseas cerrar sesión?')) {
+                      logout();
+                      router.push('/login?force_login=true');
+                    }
+                  }}
+                  className="flex items-center gap-2 px-3 py-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors text-sm font-medium"
+                  title="Cerrar Sesión"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span className="hidden sm:inline">Salir</span>
+                </button>
                 <div className="text-right hidden sm:block">
                   <p className="text-sm font-medium text-gray-900">Usuario</p>
                   <p className="text-xs text-gray-500 capitalize">{membership.subscription_plan || 'premium'}</p>

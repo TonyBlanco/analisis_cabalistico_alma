@@ -9,8 +9,16 @@ from rest_framework.permissions import IsAuthenticated
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.shortcuts import get_object_or_404
+import logging
 from .models import Patient, CabalisticAnalysis
 from .utils.tarot_service import analyze_archetype_vs_clinical
+from .astrology_kerykeion.service import execute_kerykeion
+from .astrology_kerykeion.schemas import KerykeionInputSchema
+from .permissions import IsTherapist
+from .synthesis_engine import SynthesisEngine
+from pydantic import ValidationError
+
+logger = logging.getLogger(__name__)
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -220,4 +228,245 @@ class GenerateAndSaveTarotAnalysisView(APIView):
                 {'error': f'Error al generar y guardar el análisis: {str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class KerykeionAnalysisView(APIView):
+    """
+    Endpoint para calcular y guardar análisis Kerykeion
+    Ruta: POST /api/therapist/patients/<id>/astrology-kerykeion/
+    """
+    permission_classes = [IsAuthenticated, IsTherapist]
+    
+    def post(self, request, id):
+        """
+        Calcula carta natal técnica Kerykeion y la guarda en CabalisticAnalysis
+        
+        Flujo:
+        1. Validar input
+        2. Ejecutar Kerykeion
+        3. Guardar en CabalisticAnalysis
+        4. Retornar analysis_id
+        """
+        try:
+            # Obtener el paciente (solo si es del terapeuta actual)
+            try:
+                patient = Patient.objects.get(
+                    id=id,
+                    therapist=request.user
+                )
+            except Patient.DoesNotExist:
+                return Response(
+                    {'error': 'Paciente no encontrado o no tienes acceso'},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+            # Validar datos de entrada
+            try:
+                input_schema = KerykeionInputSchema(**request.data)
+            except ValidationError as e:
+                # Loggear error completo internamente
+                logger.error(f"Error validando input Kerykeion para paciente {id}: {e}", exc_info=True)
+                # Formatear errores de Pydantic
+                error_details = []
+                for error in e.errors():
+                    field = '.'.join(str(loc) for loc in error.get('loc', []))
+                    msg = error.get('msg', 'Error de validación')
+                    error_details.append(f"{field}: {msg}")
+                return Response(
+                    {'error': 'Datos de entrada inválidos', 'details': '; '.join(error_details)},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            except Exception as e:
+                logger.error(f"Error inesperado validando input Kerykeion para paciente {id}: {str(e)}", exc_info=True)
+                return Response(
+                    {'error': 'Datos de entrada inválidos'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Ejecutar Kerykeion
+            try:
+                result = execute_kerykeion(input_schema)
+            except Exception as e:
+                # Loggear error completo internamente
+                logger.error(f"Error ejecutando Kerykeion para paciente {id}: {str(e)}", exc_info=True)
+                # Retornar mensaje genérico al cliente
+                return Response(
+                    {'error': 'Error al calcular carta natal. Por favor, verifica los datos de entrada.'},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+            
+            # Guardar en CabalisticAnalysis
+            try:
+                result_dict = result.model_dump()
+                houses_dict = result_dict.get('houses', {})
+                asc_sign = houses_dict.get('1', {}).get('sign', 'N/A') if houses_dict else 'N/A'
+                mc_sign = houses_dict.get('10', {}).get('sign', 'N/A') if houses_dict else 'N/A'
+                
+                analysis = CabalisticAnalysis.objects.create(
+                    therapist=request.user,
+                    patient=patient,
+                    analysis_type='astrology-kerykeion',
+                    input_data=input_schema.model_dump(),
+                    result_data=result_dict,
+                    summary=f"Kerykeion {result.engine_version}: ASC {asc_sign} - MC {mc_sign}",
+                    therapist_notes='Generado automáticamente por Módulo Kerykeion - Fuente técnica objetiva'
+                )
+                
+                logger.info(f"Análisis Kerykeion creado: ID {analysis.id} para paciente {patient.id} por terapeuta {request.user.id}")
+                
+            except Exception as e:
+                logger.error(f"Error guardando análisis Kerykeion para paciente {id}: {str(e)}", exc_info=True)
+                return Response(
+                    {'error': 'Error al guardar el análisis'},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+            
+            # Retornar analysis_id (formato limpio)
+            return Response(
+                {
+                    'analysis_id': analysis.id,
+                    'status': 'ok'
+                },
+                status=status.HTTP_201_CREATED
+            )
+            
+        except Exception as e:
+            # Catch-all para errores inesperados
+            logger.error(f"Error inesperado en KerykeionAnalysisView para paciente {id}: {str(e)}", exc_info=True)
+            return Response(
+                {'error': 'Error interno del servidor'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class CrossoverSynthesisView(APIView):
+    """
+    Endpoint para generar y guardar síntesis cruzada
+    Ruta: POST /api/therapist/patients/<id>/crossover/generate-and-save/
+    """
+    permission_classes = [IsAuthenticated, IsTherapist]
+    
+    def post(self, request, id):
+        """
+        Genera síntesis cruzada de TestResult y CabalisticAnalysis
+        y la guarda como nuevo CabalisticAnalysis con analysis_type='crossover'
+        
+        Flujo:
+        1. Validar acceso al paciente
+        2. Ejecutar motor de síntesis
+        3. Guardar en CabalisticAnalysis
+        4. Retornar analysis_id
+        """
+        try:
+            # Obtener el paciente (solo si es del terapeuta actual)
+            try:
+                patient = Patient.objects.get(
+                    id=id,
+                    therapist=request.user
+                )
+            except Patient.DoesNotExist:
+                logger.warning(f"Paciente {id} no encontrado o sin acceso para usuario {request.user.id}")
+                return Response(
+                    {'error': 'Paciente no encontrado o no tienes acceso'},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+            # Ejecutar motor de síntesis
+            try:
+                engine = SynthesisEngine(patient=patient, therapist=request.user)
+                synthesis_result = engine.generate_synthesis()
+            except ValueError as e:
+                # Error de validación (sin fuentes, etc.)
+                logger.warning(f"Error de validación en síntesis para paciente {id}: {str(e)}")
+                return Response(
+                    {'error': str(e)},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            except Exception as e:
+                # Error en motor de síntesis
+                logger.error(f"Error ejecutando síntesis cruzada para paciente {id}: {str(e)}", exc_info=True)
+                return Response(
+                    {'error': 'Error al generar síntesis cruzada'},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+            
+            # Guardar en CabalisticAnalysis
+            try:
+                result_data = synthesis_result.to_result_data()
+                
+                # Construir summary
+                signals = result_data.get('signals', {})
+                primary_clinical = signals.get('primary_clinical', {})
+                primary_symbolic = signals.get('primary_symbolic', {})
+                
+                summary_parts = []
+                if primary_clinical:
+                    summary_parts.append(f"{primary_clinical.get('test_name', 'Test')}: {primary_clinical.get('severity', 'N/A')}")
+                if primary_symbolic:
+                    summary_parts.append(f"{primary_symbolic.get('analysis_type', 'Análisis')}")
+                
+                summary = " | ".join(summary_parts) if summary_parts else "Síntesis cruzada"
+                
+                # Construir input_data con trazabilidad
+                input_data = {
+                    'sources_count': len(synthesis_result.sources),
+                    'clinical_sources': len([s for s in synthesis_result.sources if s.type == 'clinical']),
+                    'symbolic_sources': len([s for s in synthesis_result.sources if s.type == 'symbolic']),
+                    'source_ids': {
+                        'test_results': [
+                            s.signal.source_id for s in synthesis_result.sources
+                            if s.type == 'clinical'
+                        ],
+                        'cabalistic_analyses': [
+                            s.signal.source_id for s in synthesis_result.sources
+                            if s.type == 'symbolic'
+                        ]
+                    }
+                }
+                
+                analysis = CabalisticAnalysis.objects.create(
+                    therapist=request.user,
+                    patient=patient,
+                    analysis_type='crossover',
+                    input_data=input_data,
+                    result_data=result_data,
+                    summary=summary,
+                    therapist_notes='Generado automáticamente por Motor de Síntesis Cruzada'
+                )
+                
+                logger.info(
+                    f"Síntesis cruzada creada: ID {analysis.id} para paciente {patient.id} "
+                    f"por terapeuta {request.user.id} con {len(synthesis_result.sources)} fuentes"
+                )
+                
+            except Exception as e:
+                logger.error(f"Error guardando síntesis cruzada para paciente {id}: {str(e)}", exc_info=True)
+                return Response(
+                    {'error': 'Error al guardar la síntesis'},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+            
+            # Retornar analysis_id
+            return Response(
+                {
+                    'analysis_id': analysis.id,
+                    'status': 'ok',
+                    'sources_count': len(synthesis_result.sources),
+                    'conflicts_count': len(synthesis_result.conflicts),
+                    'strengths_count': len(synthesis_result.strengths),
+                    'recommendations_count': len(synthesis_result.recommendations)
+                },
+                status=status.HTTP_201_CREATED
+            )
+            
+        except Exception as e:
+            # Catch-all para errores inesperados
+            logger.error(f"Error inesperado en CrossoverSynthesisView para paciente {id}: {str(e)}", exc_info=True)
+            return Response(
+                {'error': 'Error interno del servidor'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
 

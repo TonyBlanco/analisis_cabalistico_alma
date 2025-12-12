@@ -650,7 +650,7 @@ from .permissions import IsTherapist
 
 
 class PatientListCreateView(generics.ListCreateAPIView):
-    """Listar y crear pacientes (solo terapeutas)"""
+    """Listar y crear pacientes"""
     permission_classes = [IsAuthenticated, IsTherapist]
     
     def get_serializer_class(self):
@@ -661,7 +661,51 @@ class PatientListCreateView(generics.ListCreateAPIView):
         return Patient.objects.filter(therapist=self.request.user, is_active=True)
     
     def perform_create(self, serializer):
-        serializer.save(therapist=self.request.user)
+        """Crear paciente y calcular coordenadas si se proporciona ciudad"""
+        instance = serializer.save(therapist=self.request.user)
+        
+        # Determinar ciudad y país desde diferentes fuentes
+        city = None
+        country = None
+        
+        # Prioridad 1: birth_city y birth_country explícitos
+        if 'birth_city' in self.request.data and self.request.data.get('birth_city'):
+            city = self.request.data.get('birth_city', '').strip()
+            country = self.request.data.get('birth_country', '').strip() if self.request.data.get('birth_country') else None
+        
+        # Prioridad 2: Parsear birth_place si no hay birth_city
+        elif 'birth_place' in self.request.data and self.request.data.get('birth_place'):
+            birth_place = self.request.data.get('birth_place', '').strip()
+            if birth_place:
+                # Intentar parsear "Ciudad, País"
+                parts = [p.strip() for p in birth_place.split(',')]
+                if len(parts) >= 2:
+                    city = parts[0]
+                    country = parts[1]
+                elif len(parts) == 1:
+                    city = parts[0]
+        
+        # Si tenemos ciudad, calcular coordenadas automáticamente
+        if city:
+            # Solo geocodificar si no se proporcionaron coordenadas manualmente
+            if not self.request.data.get('birth_latitude') or not self.request.data.get('birth_longitude'):
+                try:
+                    from .geocoding_utils import geocode_city
+                    geo_result = geocode_city(city, country if country else None)
+                    
+                    if geo_result:
+                        instance.birth_latitude = geo_result['latitude']
+                        instance.birth_longitude = geo_result['longitude']
+                        instance.birth_timezone = geo_result.get('timezone', '')
+                        # Actualizar birth_city y birth_country con los valores normalizados
+                        if geo_result.get('city'):
+                            instance.birth_city = geo_result['city']
+                        if geo_result.get('country'):
+                            instance.birth_country = geo_result['country']
+                        instance.save(update_fields=['birth_latitude', 'birth_longitude', 'birth_timezone', 'birth_city', 'birth_country'])
+                except Exception as geo_error:
+                    print(f"⚠️ Error en geocodificación automática para nuevo paciente: {geo_error}")
+                    # No fallar la creación si la geocodificación falla
 
 
 class PatientDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -674,6 +718,53 @@ class PatientDetailView(generics.RetrieveUpdateDestroyAPIView):
     
     def get_queryset(self):
         return Patient.objects.filter(therapist=self.request.user)
+    
+    def perform_update(self, serializer):
+        """Actualizar paciente y calcular coordenadas si se proporciona ciudad"""
+        instance = serializer.save()
+        
+        # Determinar ciudad y país desde diferentes fuentes
+        city = None
+        country = None
+        
+        # Prioridad 1: birth_city y birth_country explícitos
+        if 'birth_city' in self.request.data and self.request.data.get('birth_city'):
+            city = self.request.data.get('birth_city', '').strip()
+            country = self.request.data.get('birth_country', '').strip() if self.request.data.get('birth_country') else None
+        
+        # Prioridad 2: Parsear birth_place si no hay birth_city
+        elif 'birth_place' in self.request.data and self.request.data.get('birth_place') and not instance.birth_city:
+            birth_place = self.request.data.get('birth_place', '').strip()
+            if birth_place:
+                # Intentar parsear "Ciudad, País"
+                parts = [p.strip() for p in birth_place.split(',')]
+                if len(parts) >= 2:
+                    city = parts[0]
+                    country = parts[1]
+                elif len(parts) == 1:
+                    city = parts[0]
+        
+        # Si tenemos ciudad, calcular coordenadas automáticamente
+        if city:
+            # Solo geocodificar si no se proporcionaron coordenadas manualmente
+            if not self.request.data.get('birth_latitude') or not self.request.data.get('birth_longitude'):
+                try:
+                    from .geocoding_utils import geocode_city
+                    geo_result = geocode_city(city, country if country else None)
+                    
+                    if geo_result:
+                        instance.birth_latitude = geo_result['latitude']
+                        instance.birth_longitude = geo_result['longitude']
+                        instance.birth_timezone = geo_result.get('timezone', '')
+                        # Actualizar birth_city y birth_country con los valores normalizados
+                        if geo_result.get('city'):
+                            instance.birth_city = geo_result['city']
+                        if geo_result.get('country'):
+                            instance.birth_country = geo_result['country']
+                        instance.save(update_fields=['birth_latitude', 'birth_longitude', 'birth_timezone', 'birth_city', 'birth_country'])
+                except Exception as geo_error:
+                    print(f"⚠️ Error en geocodificación automática para paciente {instance.id}: {geo_error}")
+                    # No fallar la actualización si la geocodificación falla
     
     def perform_destroy(self, instance):
         # Soft delete

@@ -219,6 +219,23 @@ class Patient(models.Model):
     birth_date = models.DateField(help_text='Fecha de nacimiento')
     birth_time = models.TimeField(null=True, blank=True, help_text='Hora exacta de nacimiento')
     birth_place = models.CharField(max_length=255, blank=True, help_text='Lugar de nacimiento (ciudad, país)')
+    birth_city = models.CharField(max_length=200, blank=True, help_text='Ciudad de nacimiento')
+    birth_country = models.CharField(max_length=100, blank=True, help_text='País de nacimiento')
+    birth_latitude = models.DecimalField(
+        max_digits=9, 
+        decimal_places=6, 
+        null=True, 
+        blank=True,
+        help_text='Latitud del lugar de nacimiento'
+    )
+    birth_longitude = models.DecimalField(
+        max_digits=9, 
+        decimal_places=6, 
+        null=True, 
+        blank=True,
+        help_text='Longitud del lugar de nacimiento'
+    )
+    birth_timezone = models.CharField(max_length=100, blank=True, help_text='Zona horaria del lugar de nacimiento')
     hebrew_name = models.CharField(max_length=255, blank=True, help_text='Nombre en hebreo (opcional)')
     
     # ========== DATOS CLÍNICOS ==========
@@ -630,6 +647,7 @@ class CabalisticAnalysis(models.Model):
         ('tikun', 'Análisis de Tikún'),
         ('shekinah', 'Análisis Shejinah Moderno Pitagórico'),
         ('astrology-kerykeion', 'Astrología Técnica (Kerykeion)'),
+        ('crossover', 'Síntesis Cruzada'),
     ]
     
     # Relaciones

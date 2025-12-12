@@ -32,7 +32,9 @@ export default function NewPatientPage() {
     phone: '',
     birth_date: '',
     birth_time: '',
-    birth_place: ''
+    birth_place: '',
+    birth_city: '',
+    birth_country: ''
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -114,6 +116,13 @@ export default function NewPatientPage() {
       }
       if (formData.birth_place.trim()) {
         payload.birth_place = formData.birth_place.trim();
+      }
+      // Agregar birth_city y birth_country si están disponibles
+      if (formData.birth_city.trim()) {
+        payload.birth_city = formData.birth_city.trim();
+      }
+      if (formData.birth_country.trim()) {
+        payload.birth_country = formData.birth_country.trim();
       }
 
       const response = await fetch(`${apiURL}/therapist/patients/create/`, {
@@ -391,24 +400,39 @@ export default function NewPatientPage() {
                   </div>
 
                   {/* Lugar de Nacimiento */}
-                  <div>
-                    <label htmlFor="birth_place" className="block text-sm font-medium text-gray-700 mb-2">
+                  <div className="space-y-3">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <MapPin className="h-4 w-4 inline mr-1" />
                       Lugar de Nacimiento
                     </label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <MapPin className="h-5 w-5 text-gray-400" />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div>
+                        <input
+                          type="text"
+                          id="birth_city"
+                          name="birth_city"
+                          value={formData.birth_city}
+                          onChange={handleChange}
+                          className="block w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-gray-400"
+                          placeholder="Ciudad (ej: Madrid)"
+                        />
                       </div>
-                      <input
-                        type="text"
-                        id="birth_place"
-                        name="birth_place"
-                        value={formData.birth_place}
-                        onChange={handleChange}
-                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-gray-400"
-                        placeholder="Madrid, España"
-                      />
+                      <div>
+                        <input
+                          type="text"
+                          id="birth_country"
+                          name="birth_country"
+                          value={formData.birth_country}
+                          onChange={handleChange}
+                          className="block w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-gray-400"
+                          placeholder="País (ej: España)"
+                        />
+                      </div>
                     </div>
+                    <p className="text-xs text-gray-500 flex items-center gap-1">
+                      <span className="text-amber-500">💡</span>
+                      Ingresa la ciudad y las coordenadas se calcularán automáticamente. Puedes editarlas manualmente si lo necesitas.
+                    </p>
                   </div>
                 </div>
               </div>

@@ -21,7 +21,11 @@ function LoginContent() {
 
   useEffect(() => {
     const token = getAuthToken();
-    if (token) router.replace('/dashboard');
+    const forceLogin = searchParams.get('force_login');
+    // Solo redirigir si hay token Y no se está forzando el login
+    if (token && !forceLogin) {
+      router.replace('/dashboard');
+    }
 
     // Check for registration success message
     const registered = searchParams.get('registered');

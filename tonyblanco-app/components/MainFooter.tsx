@@ -18,9 +18,13 @@ export default function MainFooter() {
     }
   }, []);
 
-  // Don't show footer on dashboard pages
+  // Don't show footer on dashboard, therapist, or personal pages
   const isDashboard = pathname?.startsWith('/dashboard');
-  if (isDashboard) {
+  const isTherapist = pathname?.startsWith('/therapist');
+  const isPersonal = pathname?.startsWith('/personal') || pathname?.startsWith('/account');
+  const isTest = pathname?.startsWith('/tests');
+  
+  if (isDashboard || isTherapist || isPersonal || isTest) {
     return null;
   }
 

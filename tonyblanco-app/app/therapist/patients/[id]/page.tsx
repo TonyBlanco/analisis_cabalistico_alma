@@ -7,9 +7,9 @@ import {
   FileText, Sparkles, ClipboardList, TestTube, Star, Wand2,
   Plus, CheckCircle, AlertCircle, X, Copy, Send, Calendar as CalendarIcon,
   Brain, Heart, Shield, Zap, Moon, Activity, TrendingUp, Pill, UtensilsCrossed, Leaf, Loader2,
-  BookOpen, Scroll, Hexagon
+  BookOpen, Scroll, Hexagon, LogOut, Settings, Hash
 } from 'lucide-react';
-import { getAuthToken } from '@/lib/auth';
+import { getAuthToken, logout } from '@/lib/auth';
 import TherapistRoute from '@/components/TherapistRoute';
 import { TESTS_DB } from '@/data/tests-questions';
 import TherapyLevelSelector, { TherapyLevel } from '@/components/TherapyLevelSelector';
@@ -528,60 +528,42 @@ export default function PatientDetailPage() {
   const age = patient.birth_date ? calculateAge(patient.birth_date) : null;
   const zodiacSign = patient.birth_date ? getZodiacSign(patient.birth_date) : null;
 
+  const handleLogout = () => {
+    if (confirm('¿Estás seguro de que deseas cerrar sesión?')) {
+      logout();
+      router.push('/login?force_login=true');
+    }
+  };
+
   return (
     <TherapistRoute>
       <div className="min-h-screen bg-gray-50">
-        {/* Header */}
+        {/* Header del Terapeuta */}
         <div className="bg-white border-b border-gray-200 shadow-sm">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                {/* Avatar */}
-                <div className="h-16 w-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white text-xl font-semibold">
-                  {getInitials(patient.full_name || `${patient.first_name} ${patient.last_name}`)}
-                </div>
-                
-                <div>
-                  <h1 className="text-2xl font-semibold text-gray-900">
-                    {patient.full_name || `${patient.first_name} ${patient.last_name}`}
-                  </h1>
-                  <div className="flex items-center gap-4 mt-1 text-sm text-gray-500">
-                    {age && <span>{age} años</span>}
-                    {zodiacSign && <span>{zodiacSign}</span>}
-                    {patient.email && (
-                      <div className="flex items-center gap-1">
-                        <Mail className="h-4 w-4" />
-                        <span>{patient.email}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                <button
+                  onClick={() => router.push('/dashboard/therapist')}
+                  className="text-gray-600 hover:text-gray-900 font-medium"
+                >
+                  ← Volver al Dashboard
+                </button>
               </div>
-
               <div className="flex items-center gap-3">
                 <button
-                  onClick={() => router.push(`/therapist/patients/${patientId}/edit`)}
-                  className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+                  onClick={() => router.push('/dashboard/account')}
+                  className="flex items-center gap-2 px-3 py-2 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors text-sm font-medium"
                 >
-                  <Edit className="h-4 w-4" />
-                  Editar Datos
+                  <Settings className="w-4 h-4" />
+                  <span>Mi Perfil</span>
                 </button>
                 <button
-                  onClick={handleGenerateReport}
-                  disabled={generatingAIReport}
-                  className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={handleLogout}
+                  className="flex items-center gap-2 px-3 py-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors text-sm font-medium"
                 >
-                  {generatingAIReport ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      Generando...
-                    </>
-                  ) : (
-                    <>
-                      <Wand2 className="h-4 w-4" />
-                      Generar Reporte IA
-                    </>
-                  )}
+                  <LogOut className="w-4 h-4" />
+                  <span>Cerrar Sesión</span>
                 </button>
               </div>
             </div>
@@ -1533,6 +1515,7 @@ export default function PatientDetailPage() {
                       </div>
                       </div>
                     </div>
+                  </div>
                   )}
                   </div>
                 </div>
@@ -1620,6 +1603,7 @@ export default function PatientDetailPage() {
                 </div>
               </div>
             </div>
+          </div>
           </div>
         </div>
 

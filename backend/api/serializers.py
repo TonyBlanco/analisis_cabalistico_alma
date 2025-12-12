@@ -203,7 +203,8 @@ class PatientSerializer(serializers.ModelSerializer):
             # Datos personales
             'first_name', 'last_name', 'full_name', 'email', 'phone', 'avatar',
             # Datos astrológicos/cabalísticos
-            'birth_date', 'birth_time', 'birth_place', 'hebrew_name',
+            'birth_date', 'birth_time', 'birth_place', 'birth_city', 'birth_country',
+            'birth_latitude', 'birth_longitude', 'birth_timezone', 'hebrew_name',
             # Datos clínicos
             'main_complaint', 'clinical_history',
             # Plan de tratamiento

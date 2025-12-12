@@ -17,7 +17,8 @@ import {
   Target,
   Star,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  BookOpen
 } from 'lucide-react';
 import Link from 'next/link';
 import { executeTest } from '@/lib/test-api';
@@ -25,18 +26,27 @@ import { ExecuteTestRequest } from '@/lib/test-types';
 import { getPatient } from '@/lib/patient-storage';
 import type { PatientInfo } from '@/types/patient';
 import CabalisticReport from '@/components/CabalisticReport';
+import { useToast, ToastContainer } from '@/components/ui/toast';
+import type { NumerologyResult } from '@/types/numerology';
+import InterpretationModal from '@/components/InterpretationModal';
+import { isTherapist } from '@/lib/auth';
 
 export default function CompleteNumerologyPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const patientId = searchParams.get('patientId');
+  const patientId = searchParams.get('patientId') || searchParams.get('patient_id');
+  
+  // Detectar si es terapeuta (si viene desde ficha de paciente o si el usuario es terapeuta)
+  const isTherapistView = !!patientId || isTherapist();
 
   const [patient, setPatient] = useState<PatientInfo | null>(null);
   const [loading, setLoading] = useState(false);
   const [calculating, setCalculating] = useState(false);
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<NumerologyResult | null>(null);
   const [error, setError] = useState<string>('');
   const [resultId, setResultId] = useState<number | null>(null);
+  const [showGuide, setShowGuide] = useState(false);
+  const { toasts, showToast, removeToast } = useToast();
 
   const [formData, setFormData] = useState({
     nombre: '',
@@ -82,16 +92,39 @@ export default function CompleteNumerologyPage() {
     }
   }, [patientId]);
 
+  const validateDate = (dateString: string): { valid: boolean; error?: string } => {
+    const fecha = new Date(dateString);
+    const today = new Date();
+    const minDate = new Date('1900-01-01');
+
+    if (isNaN(fecha.getTime())) {
+      return { valid: false, error: 'Fecha de nacimiento inválida' };
+    }
+
+    if (fecha > today) {
+      return { valid: false, error: 'La fecha de nacimiento no puede ser futura' };
+    }
+
+    if (fecha < minDate) {
+      return { valid: false, error: 'La fecha de nacimiento debe ser posterior a 1900' };
+    }
+
+    return { valid: true };
+  };
+
   const handleCalculate = async () => {
     if (!formData.nombre || !formData.fecha_nacimiento) {
-      setError('Por favor completa todos los campos requeridos');
+      const errorMsg = 'Por favor completa todos los campos requeridos';
+      setError(errorMsg);
+      showToast(errorMsg, 'error');
       return;
     }
 
-    // Validar formato de fecha
-    const fecha = new Date(formData.fecha_nacimiento);
-    if (isNaN(fecha.getTime())) {
-      setError('Fecha de nacimiento inválida');
+    // Validar fecha con validación mejorada
+    const dateValidation = validateDate(formData.fecha_nacimiento);
+    if (!dateValidation.valid) {
+      setError(dateValidation.error || 'Fecha inválida');
+      showToast(dateValidation.error || 'Fecha inválida', 'error');
       return;
     }
 
@@ -130,25 +163,29 @@ export default function CompleteNumerologyPage() {
 
       // Extraer el mapa cabalístico del resultado
       // La estructura es: response.result.result contiene el mapa
+      let finalResult: NumerologyResult;
       if (resultData.result) {
-        setResult(resultData.result);
+        finalResult = resultData.result as NumerologyResult;
       } else if (resultData.numeros_principales) {
         // Si ya tiene numeros_principales, es el mapa directo
-        setResult(resultData);
+        finalResult = resultData as NumerologyResult;
       } else {
         // Fallback: usar todo el resultData
-        setResult(resultData);
+        finalResult = resultData as NumerologyResult;
       }
+      setResult(finalResult);
 
       if (response.result_id) {
         setResultId(response.result_id);
       }
 
-      alert('Análisis de Numerología Completa calculado y guardado correctamente');
+      showToast('Análisis de Numerología Completa calculado y guardado correctamente', 'success');
+      setError('');
     } catch (err: any) {
       console.error('Error calculating:', err);
       const errorMessage = err.message || err.error || 'Error al calcular el análisis de numerología completa';
       setError(errorMessage);
+      showToast(errorMessage, 'error');
       
       // Mostrar más detalles en consola para debugging
       if (err.response) {
@@ -171,45 +208,80 @@ export default function CompleteNumerologyPage() {
     }
   };
 
+  // Estilos condicionales según si es terapeuta o usuario personal
+  const containerClasses = isTherapistView
+    ? "min-h-screen bg-gray-50 py-12 px-4"
+    : "min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-amber-950 py-12 px-4 text-white";
+  
+  const textPrimaryClasses = isTherapistView ? "text-gray-900" : "text-white";
+  const textSecondaryClasses = isTherapistView ? "text-gray-600" : "text-slate-300";
+  const textAccentClasses = isTherapistView ? "text-purple-600" : "text-amber-400";
+  const cardClasses = isTherapistView
+    ? "bg-white border-gray-200 shadow-md"
+    : "bg-slate-900/50 border-slate-700";
+  const cardTitleClasses = isTherapistView ? "text-gray-900" : "text-white";
+  const inputClasses = isTherapistView
+    ? "w-full px-4 py-2.5 bg-white border-2 border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+    : "w-full px-4 py-2.5 bg-slate-800 border-2 border-slate-600 rounded-sm text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500";
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-amber-950 py-12 px-4 text-white">
+    <div className={containerClasses}>
+      <ToastContainer toasts={toasts} onClose={removeToast} />
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <Link href={patientId ? `/patients/${patientId}` : '/tests'}>
-            <Button variant="outline" className="mb-4 border-slate-700">
+          <Link href={patientId ? `/therapist/patients/${patientId}` : '/dashboard/therapist'}>
+            <Button 
+              variant="outline" 
+              className={isTherapistView 
+                ? "mb-4 border-gray-300 hover:bg-gray-100 text-gray-700" 
+                : "mb-4 border-slate-700 hover:bg-slate-800 text-white"
+              }
+            >
               <ArrowLeft className="w-4 h-4 mr-2" />
-              {patientId ? 'Volver al Paciente' : 'Volver a Tests'}
+              {patientId ? 'Volver al Paciente' : 'Volver al Dashboard'}
             </Button>
           </Link>
 
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-500 to-purple-500 flex items-center justify-center">
+            <div className={`w-16 h-16 rounded-full flex items-center justify-center ${
+              isTherapistView 
+                ? "bg-gradient-to-br from-purple-500 to-purple-600" 
+                : "bg-gradient-to-br from-amber-500 to-purple-500"
+            }`}>
               <Hash className="w-8 h-8 text-white" />
             </div>
             <div>
-              <h1 className="text-4xl font-bold text-white mb-2">
+              <h1 className={`text-4xl font-bold mb-2 ${textPrimaryClasses}`}>
                 Numerología Completa
               </h1>
-              <p className="text-amber-400 text-lg">
+              <p className={`${textAccentClasses} text-lg`}>
                 Análisis profundo de todos tus números: destino, alma, personalidad, madurez, karmas y más
               </p>
               {patient && (
-                <p className="text-gray-300 text-sm mt-2">Paciente: {patient.name}</p>
+                <p className={`${textSecondaryClasses} text-sm mt-2`}>
+                  Paciente: {patient.name}
+                </p>
               )}
             </div>
           </div>
         </div>
 
         {!result ? (
-          <Card className="bg-slate-900/50 border-slate-700">
+          <Card className={cardClasses}>
             <CardHeader>
-              <CardTitle className="text-white">Datos para el Análisis</CardTitle>
+              <CardTitle className={cardTitleClasses}>Datos para el Análisis</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {patient && (
-                <div className="bg-blue-900/30 border-l-4 border-blue-500 p-3 rounded-sm mb-4">
-                  <p className="text-sm text-blue-200">
+                <div className={`border-l-4 p-3 rounded-lg mb-4 ${
+                  isTherapistView 
+                    ? "bg-blue-50 border-blue-500" 
+                    : "bg-blue-900/30 border-blue-500"
+                }`}>
+                  <p className={`text-sm flex items-center ${
+                    isTherapistView ? "text-blue-900" : "text-blue-200"
+                  }`}>
                     <User className="inline-block w-4 h-4 mr-2" />
                     <strong>Paciente:</strong> {patient.name}
                     {patient.birthDate && (
@@ -224,27 +296,31 @@ export default function CompleteNumerologyPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wide">
+                  <label className={`block text-xs font-semibold mb-1.5 uppercase tracking-wide ${
+                    isTherapistView ? "text-gray-700" : "text-slate-300"
+                  }`}>
                     Nombre Completo *
                   </label>
                   <input
                     type="text"
                     value={formData.nombre}
                     onChange={(e) => setFormData({...formData, nombre: e.target.value})}
-                    className="w-full px-4 py-2.5 bg-slate-800 border-2 border-slate-600 rounded-sm text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                    className={inputClasses}
                     placeholder="Nombre completo"
                     disabled={!!patient?.name}
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase tracking-wide">
+                  <label className={`block text-xs font-semibold mb-1.5 uppercase tracking-wide ${
+                    isTherapistView ? "text-gray-700" : "text-slate-300"
+                  }`}>
                     Fecha de Nacimiento *
                   </label>
                   <input
                     type="date"
                     value={formData.fecha_nacimiento}
                     onChange={(e) => setFormData({...formData, fecha_nacimiento: e.target.value})}
-                    className="w-full px-4 py-2.5 bg-slate-800 border-2 border-slate-600 rounded-sm text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                    className={inputClasses}
                     disabled={!!patient?.birthDate}
                     max={new Date().toISOString().split('T')[0]}
                   />
@@ -252,10 +328,16 @@ export default function CompleteNumerologyPage() {
               </div>
 
               {error && (
-                <div className="bg-red-900/30 border-l-4 border-red-500 p-3 rounded-sm">
-                  <p className="text-red-400 text-sm flex items-center">
-                    <AlertCircle className="w-4 h-4 mr-2" />
-                    {error}
+                <div className={`border-l-4 p-3 rounded-lg animate-in fade-in ${
+                  isTherapistView 
+                    ? "bg-red-50 border-red-500" 
+                    : "bg-red-900/30 border-red-500"
+                }`}>
+                  <p className={`text-sm flex items-center ${
+                    isTherapistView ? "text-red-700" : "text-red-400"
+                  }`}>
+                    <AlertCircle className="w-4 h-4 mr-2 flex-shrink-0" />
+                    <span>{error}</span>
                   </p>
                 </div>
               )}
@@ -263,7 +345,11 @@ export default function CompleteNumerologyPage() {
               <Button
                 onClick={handleCalculate}
                 disabled={calculating || !formData.nombre || !formData.fecha_nacimiento}
-                className="w-full bg-gradient-to-r from-amber-500 to-purple-500 hover:from-amber-600 hover:to-purple-600 disabled:opacity-50"
+                className={`w-full disabled:opacity-50 ${
+                  isTherapistView
+                    ? "bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white"
+                    : "bg-gradient-to-r from-amber-500 to-purple-500 hover:from-amber-600 hover:to-purple-600"
+                }`}
               >
                 {calculating ? (
                   <>
@@ -281,29 +367,42 @@ export default function CompleteNumerologyPage() {
           </Card>
         ) : (
           <div className="space-y-6">
-            <Card className="bg-slate-900/50 border-slate-700">
+            <Card className={cardClasses}>
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-white">Resultado del Análisis</CardTitle>
-                  <div className="flex gap-2">
+                  <CardTitle className={cardTitleClasses}>Resultado del Análisis</CardTitle>
+                  <div className="flex gap-2 flex-wrap">
+                    <Button
+                      onClick={() => setShowGuide(true)}
+                      className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white"
+                    >
+                      <BookOpen className="w-4 h-4 mr-2" />
+                      Guía de Interpretación
+                    </Button>
                     <Button
                       onClick={handleDownload}
                       variant="outline"
-                      className="border-slate-700"
+                      className={isTherapistView 
+                        ? "border-gray-300 hover:bg-gray-100 text-gray-700" 
+                        : "border-slate-700 hover:bg-slate-800 text-white"
+                      }
                     >
                       <Download className="w-4 h-4 mr-2" />
                       Descargar JSON
                     </Button>
                     {resultId && (
                       <Link href={`/tests/results/${resultId}`}>
-                        <Button className="bg-blue-600 hover:bg-blue-700">
+                        <Button className="bg-blue-600 hover:bg-blue-700 text-white">
                           Ver Resultado Completo
                         </Button>
                       </Link>
                     )}
                     {patientId && (
-                      <Link href={`/patients/${patientId}`}>
-                        <Button className="bg-amber-600 hover:bg-amber-700">
+                      <Link href={`/therapist/patients/${patientId}`}>
+                        <Button className={isTherapistView 
+                          ? "bg-purple-600 hover:bg-purple-700 text-white" 
+                          : "bg-amber-600 hover:bg-amber-700 text-white"
+                        }>
                           Volver al Paciente
                         </Button>
                       </Link>
@@ -318,6 +417,7 @@ export default function CompleteNumerologyPage() {
                     mapa={result} 
                     clientName={formData.nombre}
                     birthDate={formData.fecha_nacimiento}
+                    isTherapistView={isTherapistView}
                   />
                 ) : (
                   <div className="space-y-4">
@@ -379,6 +479,9 @@ export default function CompleteNumerologyPage() {
           </div>
         )}
       </div>
+      
+      {/* Modal de Guía de Interpretación */}
+      <InterpretationModal isOpen={showGuide} onClose={() => setShowGuide(false)} />
     </div>
   );
 }

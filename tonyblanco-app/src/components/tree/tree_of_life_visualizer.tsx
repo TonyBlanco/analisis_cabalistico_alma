@@ -5,13 +5,13 @@ import { Circle, Moon, Sun, Star, Zap } from 'lucide-react';
 type SephiraData = { x: number; y: number; color: string; label: string; number: number; hidden?: boolean };
 const SEPHIROT_DATA: Record<string, SephiraData> = {
   keter: { x: 250, y: 50, color: '#ffffff', label: 'Keter\nCorona', number: 1 },
-  chochmah: { x: 150, y: 120, color: '#87CEEB', label: 'Chochmah\nSabiduría', number: 2 },
-  binah: { x: 350, y: 120, color: '#8B008B', label: 'Binah\nComprensión', number: 3 },
-  chesed: { x: 150, y: 220, color: '#4169E1', label: 'Chesed\nMisericordia', number: 4 },
-  gevurah: { x: 350, y: 220, color: '#DC143C', label: 'Gevurah\nSeveridad', number: 5 },
+  chochmah: { x: 350, y: 120, color: '#87CEEB', label: 'Chochmah\nSabiduría', number: 2 }, // DERECHA (corregido)
+  binah: { x: 150, y: 120, color: '#8B008B', label: 'Binah\nComprensión', number: 3 }, // IZQUIERDA (corregido)
+  chesed: { x: 350, y: 220, color: '#4169E1', label: 'Chesed\nMisericordia', number: 4 }, // DERECHA (corregido)
+  gevurah: { x: 150, y: 220, color: '#DC143C', label: 'Gevurah\nSeveridad', number: 5 }, // IZQUIERDA (corregido)
   tiferet: { x: 250, y: 280, color: '#FFD700', label: 'Tiferet\nBelleza', number: 6 },
-  netzach: { x: 150, y: 380, color: '#50C878', label: 'Netzach\nVictoria', number: 7 },
-  hod: { x: 350, y: 380, color: '#FF8C00', label: 'Hod\nEsplendor', number: 8 },
+  netzach: { x: 350, y: 380, color: '#50C878', label: 'Netzach\nVictoria', number: 7 }, // DERECHA (corregido)
+  hod: { x: 150, y: 380, color: '#FF8C00', label: 'Hod\nEsplendor', number: 8 }, // IZQUIERDA (corregido)
   yesod: { x: 250, y: 480, color: '#9370DB', label: 'Yesod\nFundamento', number: 9 },
   malchut: { x: 250, y: 580, color: '#DAA520', label: 'Malchut\nReino', number: 10 },
   daat: { x: 250, y: 180, color: '#E6E6FA', label: 'Da\'at\n(Oculto)', number: 11, hidden: true }

@@ -14,9 +14,10 @@ interface CabalisticReportProps {
   mapa: any; // El objeto completo del mapa cabalista
   clientName?: string;
   birthDate?: string;
+  isTherapistView?: boolean; // Si es true, usa tema claro (blanco)
 }
 
-export default function CabalisticReport({ mapa, clientName, birthDate }: CabalisticReportProps) {
+export default function CabalisticReport({ mapa, clientName, birthDate, isTherapistView = false }: CabalisticReportProps) {
   if (!mapa) return null;
 
   const { 
@@ -33,14 +34,27 @@ export default function CabalisticReport({ mapa, clientName, birthDate }: Cabali
     secuencia_principal
   } = mapa;
 
+  // Clases condicionales para tema claro/oscuro
+  const getCardClasses = () => isTherapistView 
+    ? "bg-white border-gray-200 shadow-sm rounded-xl p-6"
+    : "bg-gray-900 border border-gray-800 rounded-xl p-6";
+  
+  const getHeaderClasses = () => isTherapistView
+    ? "bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-xl p-6"
+    : "bg-gradient-to-r from-purple-900/30 to-indigo-900/30 border border-purple-500/30 rounded-xl p-6";
+  
+  const getTextPrimary = () => isTherapistView ? "text-gray-900" : "text-white";
+  const getTextSecondary = () => isTherapistView ? "text-gray-600" : "text-gray-400";
+  const getTextTertiary = () => isTherapistView ? "text-gray-500" : "text-gray-500";
+
   return (
     <div className="space-y-6">
       {/* Identidad */}
-      <div className="bg-gradient-to-r from-purple-900/30 to-indigo-900/30 border border-purple-500/30 rounded-xl p-6">
-        <h2 className="text-2xl font-bold mb-2">
+      <div className={getHeaderClasses()}>
+        <h2 className={`text-2xl font-bold mb-2 ${getTextPrimary()}`}>
           🌟 Mapa del Alma de {clientName || mapa.identidad?.nombre}
         </h2>
-        <p className="text-gray-400">
+        <p className={getTextSecondary()}>
           Nacido el {mapa.identidad?.fecha_nacimiento || (birthDate ? new Date(birthDate).toLocaleDateString('es-ES', { 
             year: 'numeric', 
             month: 'long', 
@@ -51,8 +65,8 @@ export default function CabalisticReport({ mapa, clientName, birthDate }: Cabali
 
       {/* Números Principales (Tarot) */}
       {numeros_principales && (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-          <h3 className="text-xl font-bold mb-4">🎴 Cartas del Alma (Tarot)</h3>
+        <div className={getCardClasses()}>
+          <h3 className={`text-xl font-bold mb-4 ${getTextPrimary()}`}>🎴 Cartas del Alma (Tarot)</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {/* Esencia */}
             {numeros_principales.esencia && (
@@ -61,10 +75,10 @@ export default function CabalisticReport({ mapa, clientName, birthDate }: Cabali
                 <p className="text-2xl font-bold mb-1">{numeros_principales.esencia.valor}</p>
                 {numeros_principales.esencia.arbol && (
                   <>
-                    <p className="text-sm text-gray-400 mb-1">
+                    <p className={`text-sm mb-1 ${getTextSecondary()}`}>
                       {numeros_principales.esencia.arbol.nombre_es || numeros_principales.esencia.arbol.nombre_tarot}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className={`text-xs ${getTextTertiary()}`}>
                       {numeros_principales.esencia.arbol.significado}
                     </p>
                   </>
@@ -79,10 +93,10 @@ export default function CabalisticReport({ mapa, clientName, birthDate }: Cabali
                 <p className="text-2xl font-bold mb-1">{numeros_principales.expresion.valor}</p>
                 {numeros_principales.expresion.arbol && (
                   <>
-                    <p className="text-sm text-gray-400 mb-1">
+                    <p className={`text-sm mb-1 ${getTextSecondary()}`}>
                       {numeros_principales.expresion.arbol.nombre_es || numeros_principales.expresion.arbol.nombre_tarot}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className={`text-xs ${getTextTertiary()}`}>
                       {numeros_principales.expresion.arbol.significado}
                     </p>
                   </>
@@ -97,10 +111,10 @@ export default function CabalisticReport({ mapa, clientName, birthDate }: Cabali
                 <p className="text-2xl font-bold mb-1">{numeros_principales.herencia.valor}</p>
                 {numeros_principales.herencia.arbol && (
                   <>
-                    <p className="text-sm text-gray-400 mb-1">
+                    <p className={`text-sm mb-1 ${getTextSecondary()}`}>
                       {numeros_principales.herencia.arbol.nombre_es || numeros_principales.herencia.arbol.nombre_tarot}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className={`text-xs ${getTextTertiary()}`}>
                       {numeros_principales.herencia.arbol.significado}
                     </p>
                   </>
@@ -115,10 +129,10 @@ export default function CabalisticReport({ mapa, clientName, birthDate }: Cabali
                 <p className="text-2xl font-bold mb-1">{numeros_principales.destino.valor}</p>
                 {numeros_principales.destino.arbol && (
                   <>
-                    <p className="text-sm text-gray-400 mb-1">
+                    <p className={`text-sm mb-1 ${getTextSecondary()}`}>
                       {numeros_principales.destino.arbol.nombre_es || numeros_principales.destino.arbol.nombre_tarot}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className={`text-xs ${getTextTertiary()}`}>
                       {numeros_principales.destino.arbol.significado}
                     </p>
                   </>
@@ -131,7 +145,7 @@ export default function CabalisticReport({ mapa, clientName, birthDate }: Cabali
               <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-4">
                 <h4 className="font-bold text-red-400 mb-2">⏳ Edad de Transformación</h4>
                 <p className="text-2xl font-bold mb-1">{numeros_principales.camino_vida.valor}</p>
-                <p className="text-xs text-gray-500">{numeros_principales.camino_vida.descripcion}</p>
+                <p className={`text-xs ${getTextTertiary()}`}>{numeros_principales.camino_vida.descripcion}</p>
               </div>
             )}
           </div>
@@ -140,20 +154,28 @@ export default function CabalisticReport({ mapa, clientName, birthDate }: Cabali
 
       {/* Inclusión de Base (Casas 1-9) */}
       {inclusion_base && (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-          <h3 className="text-xl font-bold mb-4">🏠 Inclusión de Base (Casas 1-9)</h3>
+        <div className={getCardClasses()}>
+          <h3 className={`text-xl font-bold mb-4 ${getTextPrimary()}`}>🏠 Inclusión de Base (Casas 1-9)</h3>
           <div className="grid grid-cols-3 gap-3 mb-4">
             {Object.entries(inclusion_base.casas || {}).map(([num, freq]: [string, any]) => (
               <div 
                 key={num}
                 className={`p-3 rounded-lg text-center ${
-                  freq === 0 ? 'bg-red-900/20 border border-red-500/30' :
-                  freq >= 3 ? 'bg-green-900/20 border border-green-500/30' :
-                  'bg-gray-800 border border-gray-700'
+                  freq === 0 
+                    ? isTherapistView 
+                      ? 'bg-red-50 border border-red-300' 
+                      : 'bg-red-900/20 border border-red-500/30' :
+                  freq >= 3 
+                    ? isTherapistView 
+                      ? 'bg-green-50 border border-green-300' 
+                      : 'bg-green-900/20 border border-green-500/30' :
+                  isTherapistView
+                    ? 'bg-gray-50 border border-gray-300'
+                    : 'bg-gray-800 border border-gray-700'
                 }`}
               >
-                <p className="text-lg font-bold">{num}</p>
-                <p className="text-sm text-gray-400">× {freq}</p>
+                <p className={`text-lg font-bold ${getTextPrimary()}`}>{num}</p>
+                <p className={`text-sm ${getTextSecondary()}`}>× {freq}</p>
               </div>
             ))}
           </div>
@@ -180,8 +202,8 @@ export default function CabalisticReport({ mapa, clientName, birthDate }: Cabali
 
       {/* Árbol de la Vida Interactivo */}
       {numeros_principales && (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-          <h3 className="text-xl font-bold mb-4 text-center">🌳 Árbol de la Vida - Tu Mapa del Alma</h3>
+        <div className={getCardClasses()}>
+          <h3 className={`text-xl font-bold mb-4 text-center ${getTextPrimary()}`}>🌳 Árbol de la Vida - Tu Mapa del Alma</h3>
           <TreeOfLife
             initial={{
               esencia: String(numeros_principales.esencia?.numero || ''),
@@ -217,8 +239,8 @@ export default function CabalisticReport({ mapa, clientName, birthDate }: Cabali
 
       {/* Análisis Cabalista */}
       {analisis_cabalista && analisis_cabalista.length > 0 && (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-          <h3 className="text-xl font-bold mb-4">🌳 Análisis del Árbol de la Vida</h3>
+        <div className={getCardClasses()}>
+          <h3 className={`text-xl font-bold mb-4 ${getTextPrimary()}`}>🌳 Análisis del Árbol de la Vida</h3>
           <div className="space-y-3">
             {analisis_cabalista.map((item: any, idx: number) => (
               <div key={idx} className="bg-black/50 rounded-lg p-4">
@@ -236,7 +258,7 @@ export default function CabalisticReport({ mapa, clientName, birthDate }: Cabali
       {/* Recomendaciones */}
       {recomendaciones && recomendaciones.length > 0 && (
         <div className="bg-gradient-to-r from-blue-900/20 to-purple-900/20 border border-blue-500/30 rounded-xl p-6">
-          <h3 className="text-xl font-bold mb-4">💎 Recomendaciones Espirituales</h3>
+          <h3 className={`text-xl font-bold mb-4 ${getTextPrimary()}`}>💎 Recomendaciones Espirituales</h3>
           <ul className="space-y-2">
             {recomendaciones.map((rec: any, idx: number) => {
               // Si es un objeto, renderizar campos estructurados
@@ -264,12 +286,12 @@ export default function CabalisticReport({ mapa, clientName, birthDate }: Cabali
 
       {/* Días de Fuerza */}
       {dias_fuerza && (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-          <h3 className="text-xl font-bold mb-4">📅 Días de Fuerza Personal</h3>
+        <div className={getCardClasses()}>
+          <h3 className={`text-xl font-bold mb-4 ${getTextPrimary()}`}>📅 Días de Fuerza Personal</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {typeof dias_fuerza === 'object' && Object.entries(dias_fuerza).map(([key, value]: [string, any]) => (
               <div key={key} className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-3 text-center">
-                <p className="text-xs text-gray-400 mb-1">{key.replace(/_/g, ' ')}</p>
+                <p className={`text-xs mb-1 ${getTextSecondary()}`}>{key.replace(/_/g, ' ')}</p>
                 <p className="text-lg font-bold text-blue-400">{value}</p>
               </div>
             ))}
@@ -280,8 +302,8 @@ export default function CabalisticReport({ mapa, clientName, birthDate }: Cabali
       {/* Cuentas Pendientes (Árbol Kármico) */}
       {cuentas_pendientes && Object.keys(cuentas_pendientes).length > 0 && (
         <div className="bg-red-900/10 border border-red-500/30 rounded-xl p-6">
-          <h3 className="text-xl font-bold mb-4">♾️ Árbol de Cuentas Kármicas</h3>
-          <p className="text-sm text-gray-400 mb-4">
+          <h3 className={`text-xl font-bold mb-4 ${getTextPrimary()}`}>♾️ Árbol de Cuentas Kármicas</h3>
+          <p className={`text-sm mb-4 ${getTextSecondary()}`}>
             Estos números representan lecciones del alma no resueltas. No son castigos, son espejos para sanar.
           </p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
@@ -289,7 +311,7 @@ export default function CabalisticReport({ mapa, clientName, birthDate }: Cabali
               <div key={num} className="bg-red-900/20 border border-red-500/30 rounded p-2 text-center">
                 <p className="font-bold text-red-400">{num}</p>
                 {data && typeof data === 'object' && data.descripcion && (
-                  <p className="text-xs text-gray-400 mt-1">{data.descripcion}</p>
+                  <p className={`text-xs mt-1 ${getTextSecondary()}`}>{data.descripcion}</p>
                 )}
               </div>
             ))}
@@ -299,8 +321,8 @@ export default function CabalisticReport({ mapa, clientName, birthDate }: Cabali
 
       {/* Turbulencias */}
       {turbulencias && (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-          <h3 className="text-xl font-bold mb-4">⚡ Años de Turbulencias Espirituales</h3>
+        <div className={getCardClasses()}>
+          <h3 className={`text-xl font-bold mb-4 ${getTextPrimary()}`}>⚡ Años de Turbulencias Espirituales</h3>
           {typeof turbulencias === 'object' ? (
             <div className="space-y-3">
               {Object.entries(turbulencias).map(([key, value]: [string, any]) => (
@@ -322,12 +344,12 @@ export default function CabalisticReport({ mapa, clientName, birthDate }: Cabali
 
       {/* Vibraciones */}
       {vibraciones && typeof vibraciones === 'object' && (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-          <h3 className="text-xl font-bold mb-4">🎵 Números de Vibración</h3>
+        <div className={getCardClasses()}>
+          <h3 className={`text-xl font-bold mb-4 ${getTextPrimary()}`}>🎵 Números de Vibración</h3>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {Object.entries(vibraciones).map(([key, value]: [string, any]) => (
               <div key={key} className="bg-indigo-900/20 border border-indigo-500/30 rounded-lg p-3">
-                <p className="text-xs text-gray-400 mb-1">{key.replace(/_/g, ' ')}</p>
+                <p className={`text-xs mb-1 ${getTextSecondary()}`}>{key.replace(/_/g, ' ')}</p>
                 <p className="text-lg font-bold text-indigo-400">{value}</p>
               </div>
             ))}
@@ -337,8 +359,8 @@ export default function CabalisticReport({ mapa, clientName, birthDate }: Cabali
 
       {/* Secuencia Principal */}
       {secuencia_principal && Array.isArray(secuencia_principal) && secuencia_principal.length > 0 && (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-          <h3 className="text-xl font-bold mb-4">🔢 Secuencia Principal</h3>
+        <div className={getCardClasses()}>
+          <h3 className={`text-xl font-bold mb-4 ${getTextPrimary()}`}>🔢 Secuencia Principal</h3>
           <div className="flex flex-wrap gap-2">
             {secuencia_principal.map((item: any, idx: number) => (
               <div key={idx} className="bg-purple-900/20 border border-purple-500/30 rounded-lg px-4 py-2">
@@ -352,8 +374,8 @@ export default function CabalisticReport({ mapa, clientName, birthDate }: Cabali
 
       {/* Temas Clave */}
       {temas_clave && (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-          <h3 className="text-xl font-bold mb-4">🗝️ Temas Clave del Alma</h3>
+        <div className={getCardClasses()}>
+          <h3 className={`text-xl font-bold mb-4 ${getTextPrimary()}`}>🗝️ Temas Clave del Alma</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {temas_clave.tema_origen && (
               <div className="bg-purple-900/20 border border-purple-500/30 rounded-lg p-4">

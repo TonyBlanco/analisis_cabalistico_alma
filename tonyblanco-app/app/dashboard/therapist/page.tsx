@@ -7,7 +7,7 @@ import {
   Settings, Bell, Search, Menu, X,
   Plus, TrendingUp, Clock,
   UserPlus, ClipboardList, BarChart3, Archive,
-  Star, Scroll, Hexagon, Sparkles
+  Star, Scroll, Hexagon, Sparkles, BookOpen, Hash
 } from 'lucide-react';
 
 export default function TherapistDashboard() {
@@ -148,6 +148,10 @@ export default function TherapistDashboard() {
               <Scroll className="mr-3 h-5 w-5" />
               Calculadora Gematria
             </a>
+            <a href="/dashboard/tools/tarot" className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100">
+              <BookOpen className="mr-3 h-5 w-5" />
+              Tarot Terapéutico
+            </a>
             <a href="/dashboard/tools/astrology" className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100">
               <Star className="mr-3 h-5 w-5" />
               Carta Astral Cabalística
@@ -155,6 +159,10 @@ export default function TherapistDashboard() {
             <a href="/dashboard/tools/tikun" className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100">
               <Hexagon className="mr-3 h-5 w-5" />
               Análisis de Tikún
+            </a>
+            <a href="/tests/complete-numerology" className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100">
+              <Hash className="mr-3 h-5 w-5" />
+              Numerología Completa
             </a>
 
             <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider mt-6">

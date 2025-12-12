@@ -616,3 +616,80 @@ class BlockedDate(models.Model):
         verbose_name = 'Fecha Bloqueada'
         verbose_name_plural = 'Fechas Bloqueadas'
 
+
+class CabalisticAnalysis(models.Model):
+    """
+    Análisis de Alta Cábala realizados para pacientes
+    Guarda Gematria, Tarot, Mapa del Alma, Astrología, Tikún
+    """
+    ANALYSIS_TYPE_CHOICES = [
+        ('gematria', 'Gematria'),
+        ('tarot', 'Tarot Terapéutico'),
+        ('soul-map', 'Mapa del Alma'),
+        ('astrology', 'Carta Astral Cabalística'),
+        ('tikun', 'Análisis de Tikún'),
+    ]
+    
+    # Relaciones
+    patient = models.ForeignKey(
+        Patient,
+        on_delete=models.CASCADE,
+        related_name='cabalistic_analyses',
+        help_text='Paciente para el que se realizó el análisis'
+    )
+    therapist = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='cabalistic_analyses',
+        help_text='Terapeuta que ejecutó el análisis'
+    )
+    
+    # Tipo de análisis
+    analysis_type = models.CharField(
+        max_length=20,
+        choices=ANALYSIS_TYPE_CHOICES,
+        help_text='Tipo de análisis cabalístico realizado'
+    )
+    
+    # Datos de entrada (lo que se usó para generar el análisis)
+    input_data = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text='Datos de entrada del análisis (ej: palabra para Gematria, fecha para Tarot)'
+    )
+    
+    # Resultados completos
+    result_data = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text='Resultados completos del análisis en formato JSON'
+    )
+    
+    # Resumen para visualización rápida
+    summary = models.TextField(
+        blank=True,
+        help_text='Resumen breve del análisis para visualización rápida'
+    )
+    
+    # Notas del terapeuta
+    therapist_notes = models.TextField(
+        blank=True,
+        help_text='Notas adicionales del terapeuta sobre este análisis'
+    )
+    
+    # Metadata
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"{self.get_analysis_type_display()} - {self.patient.full_name} ({self.created_at.strftime('%Y-%m-%d')})"
+    
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Análisis Cabalístico'
+        verbose_name_plural = 'Análisis Cabalísticos'
+        indexes = [
+            models.Index(fields=['patient', 'analysis_type', '-created_at']),
+            models.Index(fields=['therapist', '-created_at']),
+        ]
+

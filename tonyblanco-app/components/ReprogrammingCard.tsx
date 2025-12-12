@@ -77,3 +77,6 @@ export default function ReprogrammingCard({ code, aiAnalysis }: ReprogrammingCar
   );
 }
 
+
+
+

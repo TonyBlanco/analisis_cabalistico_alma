@@ -91,3 +91,6 @@ export function getAngelName(number: number): AngelName {
   return ANGELS_DB[number - 1] || { id: number, hebrew: "???", name: "Desconocido" };
 }
 
+
+
+

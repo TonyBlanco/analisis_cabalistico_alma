@@ -1,107 +1,74 @@
 [
-  {
-    "name": {
-      "he": "והויה",
-      "en": "Vehuiah"
-    },
-    "attribute": {
-      "en": "God is High and Exalted above all things."
-    },
-    "godName": "Jehovah",
-    "angelicOrderId": "seraphim",
-    "presidesOver": [
-      [
-        3,
-        20
-      ],
-      [
-        4,
-        30
-      ],
-      [
-        8,
-        11
-      ],
-      [
-        10,
-        22
-      ],
-      [
-        1,
-        2
-      ]
-    ],
-    "text": {
-      "en": "I'r, genius, Vehuiah והויה. Its attribute is interpreted (God high and “exalted above all things). He does-mine on the Hebrews. The name of God, according to this language, is named Jehovah. He governs the first ray of the East in the spring season, that is to say the five first degrees of, the sphere which begin on March 20 at midnight until the 24th, inclusive, corresponding to the first decade of the sacred calendar, and at the first genius, named Chontaré, under the influence of Mars: this genius, and those which follow, up to the 8th, belong to the first order of angels that the Orthodox call the choir of seraphim. He lives in the region of fire; his sign is the ram, and he presides over the following five days: March 20, April 31, August II, October 22 and January 2; the invocation is made towards the Orient, from precisely midnight until 20 minutes past midnight, to get lights. It is by virtue of these names divine that one becomes illuminated with the spirit of God; we must pronounce them at midnight precisely until midnight 20 mid-nut:s, reciting 16 third verse of the 3rd psalm. (And you Domine susceplor meus et gloria mea 61 exallans caput meum). You must have your talisman prepared according to the principles principles of cabalistic art. (See chapter 8 on this subject.) The person who is born under the influence of this genius has the took subtle; she is gifted with great sagacity, passion- born for the sciences and the arts, capable of undertaking and to perform the most difficult things; she will love the state military, because of the influence of Mars; she will have burst of energy being damaged by fire. The evil genius influences turbulent men; he quickness and anger dominate.\n(1) See the book entitled Tbrezcze, or the only Way of Divine and human sciences, edition of year 7, page 226."
-    }
-  },
-  {
-    "name": {
-      "he": "יליאל",
-      "en": "Jeliel"
-    },
-    "attribute": {
-      "en": "Helpful God"
-    },
-    "godName": "Aydy",
-    "presidesOver": [
-      [
-        3,
-        21
-      ],
-      [
-        6,
-        1
-      ],
-      [
-        8,
-        12
-      ],
-      [
-        10,
-        23
-      ],
-      [
-        1,
-        3
-      ]
-    ],
-    "text": {
-      "en": "2° Jeliel יליאל. His attribute (helpful God). 11 do- sure mine Turkey (these people give God the name Aydy). Its radius starts from 16 6* degree up to . 10%, inclusive, corresponding to the influence of genius . named Asican (see the sacred calendar), and at the first first decade. He presides over the following 165 days: March 21, June 1, August 12, October 23, January 3*. \nThis genius is invoked to appease popular seditions. laries, and to obtain victory against those who attack you attack unfairly. The request must be pronounced with the name of the genius, and recite 16 20° verse of Psalm 21. (Tu autem Domine ne eldngaveris auxillum tuum a me ad defenseem meam conspice). The favorable hour includes starts from midnight 20 minutes until midnight 40. \nThis genius dominates over kings and princes; he maintains their subjects in obedience; it influences the generation of all 165 beings that exist in 16 animal kingdoms; he restores peace among spouses and marital fidelity. Those who are born under this influence have a cheerful spirit, ma- pleasant and gallant manners; they will be passionate about it sex.\nThe contrary genius dominates everything that is harmful to   animated beings; he likes to separate spouses by pushing them aside . 06 their duties; he inspires a taste for celibacy and the bad ‘good morals."
-    }
-  },
-  {
-    "name": {
-      "en": "Sitael",
-      "he": "סיטאל"
-    },
-    "attribute": {
-      "en": "God, the hope of all creatures."
-    },
-    "presidesOver": [
-      [
-        3,
-        22
-      ],
-      [
-        6,
-        2
-      ],
-      [
-        8,
-        13
-      ],
-      [
-        10,
-        24
-      ],
-      [
-        1,
-        4
-      ]
-    ],
-    "text": {
-      "en": "Sitael סיטאל. His attribute (God, the hope all creatures.) Its radius starts from 16 5 degree of .1 500616 up to 15°., inclusively corres- laying in the second decade and the genius named Chon- stained, under the influence of the sun; he presides over the following days: March 22, June 2, August 13, October 24, January 4. We invoke this genius against 165 adversities; we pronounce the request with the divine names and the 2nd verse of the psalm 90. (Dicet Domino: suceblor meus es tu et refugium meum: Deus meus, sperabo in eum.) The favorable hour starts from midnight 40 minutes until one o'clock. He dominates over nobility, magnanimity and great em- plows; it protects against weapons and ferocious beasts. There no one born under this influence loves the truth; she will keep her word, and she will be happy to oblige those who will need its services. The contrary genius dominates hypocrisy, ingratitude and perjury."
-    }
-  }
+  { "name": { "he": "והויה", "en": "Vehuiah" }, "attribute": { "en": "God exalted above all things" }, "godName": "Jehovah", "angelicOrderId": "seraphim" },
+  { "name": { "he": "יליאל", "en": "Jeliel" }, "attribute": { "en": "Helpful God" }, "godName": "Aydy", "angelicOrderId": "seraphim" },
+  { "name": { "he": "סיטאל", "en": "Sitael" }, "attribute": { "en": "God the hope of all creatures" }, "godName": "Alohat", "angelicOrderId": "seraphim" },
+  { "name": { "he": "עלמיה", "en": "Elemiah" }, "attribute": { "en": "Hidden God" }, "godName": "Allah", "angelicOrderId": "seraphim" },
+  { "name": { "he": "מהשיה", "en": "Mahasiah" }, "attribute": { "en": "Savior God" }, "godName": "Tehuti", "angelicOrderId": "seraphim" },
+  { "name": { "he": "ללהאל", "en": "Lelahel" }, "attribute": { "en": "Praiseworthy God" }, "godName": "Abgd", "angelicOrderId": "seraphim" },
+  { "name": { "he": "אכאיה", "en": "Achaiah" }, "attribute": { "en": "Good and Patient God" }, "godName": "Agzi", "angelicOrderId": "seraphim" },
+  { "name": { "he": "כהתאל", "en": "Cahetel" }, "attribute": { "en": "Adorable God" }, "godName": "Moti", "angelicOrderId": "seraphim" },
+  { "name": { "he": "הזיאל", "en": "Haziel" }, "attribute": { "en": "Merciful God" }, "godName": "Agzi", "angelicOrderId": "cherubim" },
+  { "name": { "he": "אלדיה", "en": "Aladiah" }, "attribute": { "en": "Propitious God" }, "godName": "Sire & Eipi", "angelicOrderId": "cherubim" },
+  { "name": { "he": "לאויה", "en": "Lauviah" }, "attribute": { "en": "Praised and Exalted God" }, "godName": "Deus", "angelicOrderId": "cherubim" },
+  { "name": { "he": "ההעיה", "en": "Hahaiah" }, "attribute": { "en": "God of Refuge" }, "godName": "Theos", "angelicOrderId": "cherubim" },
+  { "name": { "he": "יזלאל", "en": "Yezalel" }, "attribute": { "en": "God Glorified in All Things" }, "godName": "Boog", "angelicOrderId": "cherubim" },
+  { "name": { "he": "מבהאל", "en": "Mebahel" }, "attribute": { "en": "Conservative God" }, "godName": "Dios", "angelicOrderId": "cherubim" },
+  { "name": { "he": "הריאל", "en": "Hariel" }, "attribute": { "en": "Creator God" }, "godName": "Idio", "angelicOrderId": "cherubim" },
+  { "name": { "he": "הקמיה", "en": "Hakamiah" }, "attribute": { "en": "God who builds the Universe" }, "godName": "Dieh", "angelicOrderId": "cherubim" },
+  { "name": { "he": "לאויה", "en": "Lauviah" }, "attribute": { "en": "Admirable God" }, "godName": "Goth", "angelicOrderId": "thrones" },
+  { "name": { "he": "כליאל", "en": "Caliel" }, "attribute": { "en": "God ready to rescue" }, "godName": "Boog", "angelicOrderId": "thrones" },
+  { "name": { "he": "לוויה", "en": "Leuviah" }, "attribute": { "en": "God who sinners" }, "godName": "Bogy", "angelicOrderId": "thrones" },
+  { "name": { "he": "פהליה", "en": "Pahaliah" }, "attribute": { "en": "Redeemer God" }, "godName": "Tios", "angelicOrderId": "thrones" },
+  { "name": { "he": "נלכאל", "en": "Nelchael" }, "attribute": { "en": "Only and Unique God" }, "godName": "Bueg", "angelicOrderId": "thrones" },
+  { "name": { "he": "ייייאל", "en": "Yeiayel" }, "attribute": { "en": "The Right Hand of God" }, "godName": "Good", "angelicOrderId": "thrones" },
+  { "name": { "he": "מלהאל", "en": "Melahel" }, "attribute": { "en": "God who delivers from evil" }, "godName": "Dieh", "angelicOrderId": "thrones" },
+  { "name": { "he": "חהויה", "en": "Haheuiah" }, "attribute": { "en": "God good in himself" }, "godName": "Esar", "angelicOrderId": "thrones" },
+  { "name": { "he": "נתהיה", "en": "Nith-Haiah" }, "attribute": { "en": "God who gives wisdom" }, "godName": "Orsy", "angelicOrderId": "dominations" },
+  { "name": { "he": "האאיה", "en": "Haaiah" }, "attribute": { "en": "Hidden God" }, "godName": "Agdi", "angelicOrderId": "dominations" },
+  { "name": { "he": "ירתאל", "en": "Yerathel" }, "attribute": { "en": "God who punishes the wicked" }, "godName": "Teos", "angelicOrderId": "dominations" },
+  { "name": { "he": "שאהיה", "en": "Seheiah" }, "attribute": { "en": "God who heals the sick" }, "godName": "Adad", "angelicOrderId": "dominations" },
+  { "name": { "he": "רייאל", "en": "Reiyel" }, "attribute": { "en": "God ready to rescue" }, "godName": "Zimi", "angelicOrderId": "dominations" },
+  { "name": { "he": "אומאל", "en": "Omael" }, "attribute": { "en": "Patient God" }, "godName": "Tura", "angelicOrderId": "dominations" },
+  { "name": { "he": "לכבאל", "en": "Lecabel" }, "attribute": { "en": "Inspiring God" }, "godName": "Teli", "angelicOrderId": "dominations" },
+  { "name": { "he": "ושריה", "en": "Vasariah" }, "attribute": { "en": "Just God" }, "godName": "Anot", "angelicOrderId": "dominations" },
+  { "name": { "he": "יחויה", "en": "Yehuiah" }, "attribute": { "en": "God who knows all things" }, "godName": "Agad", "angelicOrderId": "powers" },
+  { "name": { "he": "להחיה", "en": "Lehahiah" }, "attribute": { "en": "Clement God" }, "godName": "Aneb", "angelicOrderId": "powers" },
+  { "name": { "he": "כוקאל", "en": "Chavakiah" }, "attribute": { "en": "God who gives joy" }, "godName": "Anup", "angelicOrderId": "powers" },
+  { "name": { "he": "מנדאל", "en": "Menadel" }, "attribute": { "en": "Honorable God" }, "godName": "Alla", "angelicOrderId": "powers" },
+  { "name": { "he": "אניאל", "en": "Aniel" }, "attribute": { "en": "God of Virtues" }, "godName": "Abda", "angelicOrderId": "powers" },
+  { "name": { "he": "חעמיה", "en": "Haamiah" }, "attribute": { "en": "God the hope of all the earth" }, "godName": "Agla", "angelicOrderId": "powers" },
+  { "name": { "he": "רהעאל", "en": "Rehael" }, "attribute": { "en": "God who receives sinners" }, "godName": "Goot", "angelicOrderId": "powers" },
+  { "name": { "he": "ייזאל", "en": "Yeiazel" }, "attribute": { "en": "God who rejoices" }, "godName": "Goed", "angelicOrderId": "powers" },
+  { "name": { "he": "הההאל", "en": "Hahahel" }, "attribute": { "en": "God in three persons" }, "godName": "Gudi", "angelicOrderId": "virtues" },
+  { "name": { "he": "מיכאל", "en": "Mikael" }, "attribute": { "en": "Like unto God" }, "godName": "Biud", "angelicOrderId": "virtues" },
+  { "name": { "he": "ווליה", "en": "Veuliah" }, "attribute": { "en": "Dominating King God" }, "godName": "Solu", "angelicOrderId": "virtues" },
+  { "name": { "he": "ילהיה", "en": "Yelahiah" }, "attribute": { "en": "Eternal God" }, "godName": "Bosa", "angelicOrderId": "virtues" },
+  { "name": { "he": "סאלייה", "en": "Sealiah" }, "attribute": { "en": "Mover of all things" }, "godName": "Hobo", "angelicOrderId": "virtues" },
+  { "name": { "he": "עריאל", "en": "Ariel" }, "attribute": { "en": "Revealing God" }, "godName": "Pino", "angelicOrderId": "virtues" },
+  { "name": { "he": "עשליה", "en": "Asaliah" }, "attribute": { "en": "Just God" }, "godName": "Hana", "angelicOrderId": "virtues" },
+  { "name": { "he": "מיהאל", "en": "Mihael" }, "attribute": { "en": "God, succoring father" }, "godName": "Zaca", "angelicOrderId": "virtues" },
+  { "name": { "he": "והואל", "en": "Vehuel" }, "attribute": { "en": "Great and High God" }, "godName": "Mara", "angelicOrderId": "principalities" },
+  { "name": { "he": "דניאל", "en": "Daniel" }, "attribute": { "en": "Sign of Mercy" }, "godName": "Pola", "angelicOrderId": "principalities" },
+  { "name": { "he": "החשיה", "en": "Hahasiah" }, "attribute": { "en": "Concealed God" }, "godName": "Bila", "angelicOrderId": "principalities" },
+  { "name": { "he": "עממיה", "en": "Imamiah" }, "attribute": { "en": "Elevated above all things" }, "godName": "Abag", "angelicOrderId": "principalities" },
+  { "name": { "he": "ננאאל", "en": "Nanael" }, "attribute": { "en": "God who humbles the proud" }, "godName": "Obra", "angelicOrderId": "principalities" },
+  { "name": { "he": "ניתאל", "en": "Nithael" }, "attribute": { "en": "King of Heavens" }, "godName": "Bora", "angelicOrderId": "principalities" },
+  { "name": { "he": "מבהיה", "en": "Mebahiah" }, "attribute": { "en": "Eternal God" }, "godName": "Alay", "angelicOrderId": "principalities" },
+  { "name": { "he": "פויאל", "en": "Poyel" }, "attribute": { "en": "God who supports the universe" }, "godName": "Illi", "angelicOrderId": "principalities" },
+  { "name": { "he": "נממיה", "en": "Nemamiah" }, "attribute": { "en": "Praiseworthy God" }, "godName": "Popa", "angelicOrderId": "archangels" },
+  { "name": { "he": "יילאל", "en": "Yeialel" }, "attribute": { "en": "God who hears generations" }, "godName": "Para", "angelicOrderId": "archangels" },
+  { "name": { "he": "הרחאל", "en": "Harahel" }, "attribute": { "en": "God who knows all things" }, "godName": "Ella", "angelicOrderId": "archangels" },
+  { "name": { "he": "מצראל", "en": "Mitzrael" }, "attribute": { "en": "God who comforts the oppressed" }, "godName": "Gena", "angelicOrderId": "archangels" },
+  { "name": { "he": "ומבאל", "en": "Umabel" }, "attribute": { "en": "God above all things" }, "godName": "Sila", "angelicOrderId": "archangels" },
+  { "name": { "he": "יההאל", "en": "Iahhel" }, "attribute": { "en": "Being Supreme" }, "godName": "Suna", "angelicOrderId": "archangels" },
+  { "name": { "he": "ענואל", "en": "Anauel" }, "attribute": { "en": "Infinitely Good God" }, "godName": "Miri", "angelicOrderId": "archangels" },
+  { "name": { "he": "מחיאל", "en": "Mehiel" }, "attribute": { "en": "God who vivifies all things" }, "godName": "Alli", "angelicOrderId": "archangels" },
+  { "name": { "he": "דמביה", "en": "Damabiah" }, "attribute": { "en": "God the Fountain of Wisdom" }, "godName": "Tara", "angelicOrderId": "angels" },
+  { "name": { "he": "מנקאל", "en": "Manakel" }, "attribute": { "en": "God who supports and maintains" }, "godName": "Pora", "angelicOrderId": "angels" },
+  { "name": { "he": "איעאל", "en": "Eyael" }, "attribute": { "en": "God delight of children" }, "godName": "Bogo", "angelicOrderId": "angels" },
+  { "name": { "he": "חבויה", "en": "Habuhiah" }, "attribute": { "en": "God who gives freely" }, "godName": "Depos", "angelicOrderId": "angels" },
+  { "name": { "he": "ראהאל", "en": "Rochel" }, "attribute": { "en": "God who sees all" }, "godName": "Deos", "angelicOrderId": "angels" },
+  { "name": { "he": "יבמיה", "en": "Jabamiah" }, "attribute": { "en": "Word which produces all things" }, "godName": "Aris", "angelicOrderId": "angels" },
+  { "name": { "he": "הייאל", "en": "Haiaiel" }, "attribute": { "en": "God master of the universe" }, "godName": "Zeut", "angelicOrderId": "angels" },
+  { "name": { "he": "מומיה", "en": "Mumiah" }, "attribute": { "en": "God end of the universe" }, "godName": "Kalo", "angelicOrderId": "angels" }
 ]

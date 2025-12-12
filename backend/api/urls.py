@@ -63,6 +63,11 @@ from .test_views import (
 )
 from .gematria_views import GematriaInterpretationView
 from .tarot_views import TarotAnalysisView
+from .cabalistic_views import (
+    SaveCabalisticAnalysisView,
+    ListCabalisticAnalysesView,
+    GenerateAndSaveTarotAnalysisView
+)
 from .admin_views import (
     AdminCheckView,
     EnhancedAdminStatsView,
@@ -106,6 +111,9 @@ urlpatterns = [
     path('therapist/patients/<int:pk>/', PatientDetailView.as_view(), name='patient_detail'),
     path('therapist/patients/<int:pk>/generate-ai-plan/', GenerateAIPlanView.as_view(), name='generate_ai_plan'),
     path('therapist/patients/<int:id>/tarot-analysis/', TarotAnalysisView.as_view(), name='tarot_analysis'),
+    path('therapist/patients/<int:id>/tarot-analysis/generate-and-save/', GenerateAndSaveTarotAnalysisView.as_view(), name='tarot_analysis_generate_and_save'),
+    path('therapist/patients/<int:id>/cabalistic-analysis/', SaveCabalisticAnalysisView.as_view(), name='save_cabalistic_analysis'),
+    path('therapist/patients/<int:id>/cabalistic-analyses/', ListCabalisticAnalysesView.as_view(), name='list_cabalistic_analyses'),
     path('therapist/sessions/', SessionListCreateView.as_view(), name='session_list_create'),
     path('therapist/sessions/<int:pk>/', SessionDetailView.as_view(), name='session_detail'),
     path('therapist/notes/', TherapistNoteListCreateView.as_view(), name='therapist_note_list_create'),

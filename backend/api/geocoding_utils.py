@@ -99,3 +99,6 @@ def geocode_city_simple(city: str, country: str = None) -> Optional[Tuple[float,
         return (result['latitude'], result['longitude'])
     return None
 
+
+
+

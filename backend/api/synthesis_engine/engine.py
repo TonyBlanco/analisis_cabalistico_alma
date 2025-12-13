@@ -255,6 +255,24 @@ class SynthesisEngine:
                     arcana_set.add(arcana_name)
         signals['arcana_mentioned'] = list(arcana_set)
         
+        # Domain signals de SCDF
+        scdf_source = next(
+            (s for s in sources 
+             if isinstance(s.signal, ClinicalSignal) and s.signal.test_id == 'scdf'),
+            None
+        )
+        if scdf_source and isinstance(scdf_source.signal, ClinicalSignal):
+            scdf_diagnosis = scdf_source.signal.clinical_diagnosis
+            if "Señales:" in scdf_diagnosis:
+                signals_part = scdf_diagnosis.split("Señales:")[-1].strip()
+                # Parsear domain signals
+                domain_signals = {}
+                for item in signals_part.split(", "):
+                    if ":" in item:
+                        domain, signal = item.split(":", 1)
+                        domain_signals[domain.strip()] = signal.strip()
+                signals['scdf_domain_signals'] = domain_signals
+        
         return signals
     
     def _generate_narrative(
@@ -327,6 +345,26 @@ class SynthesisEngine:
             narrative_parts.append(
                 f"Total de recomendaciones: {len(recommendations)}."
             )
+        
+        # Convergencias e inconsistencias con SCDF
+        scdf_source = next(
+            (s for s in sources 
+             if s.type == 'clinical' and isinstance(s.signal, ClinicalSignal) and s.signal.test_id == 'scdf'),
+            None
+        )
+        if scdf_source:
+            # Buscar convergencias e inconsistencias relacionadas con SCDF
+            scdf_conflicts = [c for c in conflicts if scdf_source.signal.source_id in c.sources and 'scdf' in c.type]
+            scdf_strengths = [s for s in strengths if scdf_source.signal.source_id in s.sources and 'scdf' in s.type]
+            
+            if scdf_strengths:
+                narrative_parts.append(
+                    f"SCDF converge con {len(scdf_strengths)} fuente(s) clínica(s), reforzando evidencia."
+                )
+            if scdf_conflicts:
+                narrative_parts.append(
+                    f"SCDF muestra {len(scdf_conflicts)} inconsistencia(s) con otros tests que requieren revisión."
+                )
         
         return " ".join(narrative_parts)
     

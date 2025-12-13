@@ -3,17 +3,11 @@ Servicio de Análisis de Tarot Terapéutico Cruzado
 Combina el Arcano de Vida del paciente con su estado clínico actual
 """
 import json
+import re
 from typing import Dict, Any, Optional
 from django.conf import settings
 from datetime import datetime
-
-# Importar Gemini
-genai = None
-try:
-    import google.generativeai as genai_local
-    genai = genai_local
-except ImportError:
-    genai = None
+from .gemini_rest import call_gemini_api, parse_gemini_json
 
 
 def calculate_life_arcana(birth_date: str) -> int:
@@ -89,7 +83,7 @@ class TarotTherapeuticAI:
         model_name = getattr(settings, 'GEMINI_MODEL', 'gemini-1.5-flash')
         
         self.enabled = False
-        self.model = None
+        self.model_name = model_name
         self.error_message = None
         
         if not api_key:
@@ -97,20 +91,8 @@ class TarotTherapeuticAI:
             print(f"[WARNING] {self.error_message}")
             return
         
-        if not genai:
-            self.error_message = "Módulo google.generativeai no está instalado. Ejecuta: pip install google-generativeai"
-            print(f"[WARNING] {self.error_message}")
-            return
-        
-        try:
-            genai.configure(api_key=api_key)
-            self.model = genai.GenerativeModel(model_name)
-            self.enabled = True
-            print(f"[OK] TarotTherapeuticAI configurado con modelo: {model_name}")
-        except Exception as e:
-            self.error_message = f"Error configurando Gemini: {str(e)}"
-            print(f"[ERROR] {self.error_message}")
-            self.enabled = False
+        self.enabled = True
+        print(f"[OK] TarotTherapeuticAI configurado con modelo: {model_name} (Google GenAI SDK)")
     
     def analyze_archetype_vs_clinical(
         self,
@@ -188,42 +170,25 @@ IMPORTANTE:
 """
         
         try:
-            # Generar respuesta con Gemini
-            response = self.model.generate_content(
-                prompt,
-                generation_config={
-                    "temperature": 0.8,
-                    "top_p": 0.9,
-                    "top_k": 40,
-                    "max_output_tokens": 2048,
-                }
+            # Generar respuesta con Gemini usando API REST
+            response_text = call_gemini_api(
+                prompt=prompt,
+                model_name=self.model_name,
+                temperature=0.8,
+                top_p=0.9,
+                top_k=40,
+                max_output_tokens=2048
             )
             
-            # Extraer el texto de la respuesta
-            response_text = response.text.strip()
-            
-            # Limpiar el texto si tiene markdown code blocks
-            if response_text.startswith('```json'):
-                response_text = response_text.replace('```json', '').replace('```', '').strip()
-            elif response_text.startswith('```'):
-                response_text = response_text.replace('```', '').strip()
-            
-            # Parsear el JSON
+            # Parsear el JSON usando la función helper robusta
             try:
-                analysis = json.loads(response_text)
+                analysis = parse_gemini_json(response_text)
                 return analysis
-            except json.JSONDecodeError as e:
-                # Si falla el parseo, intentar extraer JSON del texto
-                import re
-                json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
-                if json_match:
-                    analysis = json.loads(json_match.group())
-                    return analysis
-                else:
-                    return {
-                        "error": f"Error al parsear la respuesta de Gemini: {str(e)}",
-                        "raw_response": response_text[:500]
-                    }
+            except ValueError as e:
+                return {
+                    "error": f"Error al parsear la respuesta de Gemini: {str(e)}",
+                    "raw_response": response_text[:500]
+                }
         
         except Exception as e:
             return {

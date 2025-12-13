@@ -53,6 +53,11 @@ class SynthesisRules:
             )
         )
         
+        # 4. Conflicto: SCDF vs otros tests clínicos (inconsistencias)
+        conflicts.extend(
+            SynthesisRules._check_scdf_clinical_conflicts(clinical_sources)
+        )
+        
         return conflicts
     
     @staticmethod
@@ -218,6 +223,10 @@ class SynthesisRules:
         harmonic_aspects = SynthesisRules._check_harmonic_aspects(sources)
         strengths.extend(harmonic_aspects)
         
+        # 4. Convergencia SCDF con otros tests clínicos
+        scdf_convergence = SynthesisRules._check_scdf_clinical_convergence(sources)
+        strengths.extend(scdf_convergence)
+        
         return strengths
     
     @staticmethod
@@ -311,6 +320,71 @@ class SynthesisRules:
         return strengths
     
     @staticmethod
+    def _check_scdf_clinical_convergence(sources: List[NormalizedSource]) -> List[Strength]:
+        """Detecta convergencia entre SCDF y otros tests clínicos"""
+        strengths = []
+        
+        # Buscar SCDF
+        scdf_source = next(
+            (s for s in sources 
+             if isinstance(s.signal, ClinicalSignal) and s.signal.test_id == 'scdf'),
+            None
+        )
+        
+        if not scdf_source:
+            return strengths
+        
+        # Extraer domain signals de SCDF
+        scdf_diagnosis = scdf_source.signal.clinical_diagnosis if isinstance(scdf_source.signal, ClinicalSignal) else ""
+        scdf_signals = {}
+        if "Señales:" in scdf_diagnosis:
+            signals_part = scdf_diagnosis.split("Señales:")[-1].strip()
+            for item in signals_part.split(", "):
+                if ":" in item:
+                    domain, signal = item.split(":", 1)
+                    scdf_signals[domain.strip()] = signal.strip()
+        
+        # Buscar convergencias con otros tests
+        clinical_sources = [s for s in sources if s.type == 'clinical' and s != scdf_source]
+        convergence_count = 0
+        converging_tests = []
+        
+        for source in clinical_sources:
+            if not isinstance(source.signal, ClinicalSignal):
+                continue
+            
+            test_name = source.signal.test_name.lower()
+            test_severity = source.signal.severity
+            diagnosis = source.signal.clinical_diagnosis.lower()
+            
+            # Verificar convergencias específicas
+            if 'stai' in test_name or 'bai' in test_name:
+                if test_severity in ['Severa', 'Moderada'] and scdf_signals.get('anxiety_signal') in ['positive', 'partial']:
+                    convergence_count += 1
+                    converging_tests.append(source.signal.test_name)
+            
+            if 'bdi' in test_name or 'depresión' in diagnosis or 'depression' in diagnosis:
+                if test_severity in ['Severa', 'Moderada'] and scdf_signals.get('mood_signal') in ['positive', 'partial']:
+                    convergence_count += 1
+                    converging_tests.append(source.signal.test_name)
+            
+            if 'scl-90' in test_name or 'scl90' in test_name:
+                scdf_positive_count = sum(1 for s in scdf_signals.values() if s in ['positive', 'partial'])
+                if test_severity in ['Severa', 'Moderada'] and scdf_positive_count >= 2:
+                    convergence_count += 1
+                    converging_tests.append(source.signal.test_name)
+        
+        if convergence_count >= 1:
+            strengths.append(Strength(
+                type="scdf_clinical_convergence",
+                description=f"SCDF converge con {convergence_count} test(s) clínico(s): {', '.join(converging_tests)}",
+                sources=[scdf_source.signal.source_id] + [s.signal.source_id for s in clinical_sources if s.signal.test_name in converging_tests],
+                confidence=min(0.9, 0.6 + convergence_count * 0.1)
+            ))
+        
+        return strengths
+    
+    @staticmethod
     def generate_recommendations(
         sources: List[NormalizedSource],
         conflicts: List[Conflict],
@@ -371,6 +445,57 @@ class SynthesisRules:
                 related_sources=[s.signal.source_id for s in sources]
             ))
         
+        # 5. Recomendaciones específicas para SCDF
+        scdf_source = next(
+            (s for s in sources 
+             if isinstance(s.signal, ClinicalSignal) and s.signal.test_id == 'scdf'),
+            None
+        )
+        
+        if scdf_source:
+            scdf_result = None
+            if hasattr(scdf_source, 'signal') and isinstance(scdf_source.signal, ClinicalSignal):
+                # Intentar extraer quality_checks del TestResult original
+                # (necesitaríamos pasar el test_result completo, pero por ahora usamos el diagnóstico)
+                scdf_diagnosis = scdf_source.signal.clinical_diagnosis
+                
+                # Verificar si hay módulos faltantes o inconsistencias
+                if "Inconsistencias detectadas" in scdf_diagnosis:
+                    recommendations.append(Recommendation(
+                        category="evaluation",
+                        priority="high",
+                        action="Revisar inconsistencias detectadas en SCDF y considerar re-evaluación de módulos específicos",
+                        rationale="SCDF reporta inconsistencias que requieren atención clínica",
+                        related_sources=[scdf_source.signal.source_id]
+                    ))
+                
+                # Recomendación para módulos no evaluados
+                scdf_signals = {}
+                if "Señales:" in scdf_diagnosis:
+                    signals_part = scdf_diagnosis.split("Señales:")[-1].strip()
+                    for item in signals_part.split(", "):
+                        if ":" in item:
+                            domain, signal = item.split(":", 1)
+                            scdf_signals[domain.strip()] = signal.strip()
+                
+                # Si hay pocos módulos positivos pero otros tests indican severidad, sugerir evaluar módulos faltantes
+                scdf_positive_count = sum(1 for s in scdf_signals.values() if s in ['positive', 'partial'])
+                if scdf_positive_count == 0:
+                    high_severity_tests = [
+                        s for s in clinical_sources
+                        if isinstance(s.signal, ClinicalSignal) and 
+                        s.signal.severity in ['Severa', 'Moderada'] and
+                        s != scdf_source
+                    ]
+                    if high_severity_tests:
+                        recommendations.append(Recommendation(
+                            category="evaluation",
+                            priority="medium",
+                            action="Considerar evaluar módulos SCDF adicionales dado que otros tests indican severidad",
+                            rationale=f"SCDF no detecta evidencia significativa pero {len(high_severity_tests)} test(s) indican severidad",
+                            related_sources=[scdf_source.signal.source_id] + [s.signal.source_id for s in high_severity_tests]
+                        ))
+        
         return recommendations
     
     @staticmethod
@@ -384,4 +509,6 @@ class SynthesisRules:
             'No especificada': 1
         }
         return ranks.get(severity, 1)
+
+
 

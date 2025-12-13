@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React from 'react';
 import {
   Dialog,
   DialogContent,
@@ -10,320 +10,326 @@ import {
 } from '@/components/ui/dialog';
 import {
   Tabs,
+  TabsContent,
   TabsList,
   TabsTrigger,
-  TabsContent,
 } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Heart, Activity, AlertTriangle, Sparkles, BookOpen } from 'lucide-react';
+import { BookOpen, Heart, Lock, Activity, Sparkles } from 'lucide-react';
 
 interface ShekinahGuideModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  isOpen?: boolean; // Compatibilidad con versión anterior
+  onClose?: () => void; // Compatibilidad con versión anterior
 }
 
-export default function ShekinahGuideModal({ open, onOpenChange }: ShekinahGuideModalProps) {
-  const [activeTab, setActiveTab] = useState('concepts');
+export default function ShekinahGuideModal({ 
+  open, 
+  onOpenChange, 
+  isOpen, 
+  onClose 
+}: ShekinahGuideModalProps) {
+  // Compatibilidad con ambas versiones de props
+  const isOpenState = open !== undefined ? open : (isOpen !== undefined ? isOpen : false);
+  const handleOpenChange = (newOpen: boolean) => {
+    if (onOpenChange) {
+      onOpenChange(newOpen);
+    } else if (onClose && !newOpen) {
+      onClose();
+    }
+  };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-slate-950 border-slate-800 text-slate-300">
-        <DialogHeader className="border-b border-slate-800 pb-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-amber-500/20 rounded-lg">
-                <BookOpen className="h-6 w-6 text-amber-400" />
-              </div>
-              <DialogTitle className="text-2xl font-bold text-white">
-                Guía de Interpretación: Método Atlantis
-              </DialogTitle>
-            </div>
-            <DialogClose />
-          </div>
-          
-          {/* Declaración de Principios */}
-          <div className="mt-4 p-4 bg-gradient-to-r from-amber-500/10 via-purple-500/10 to-amber-500/10 border-l-4 border-amber-500 rounded-r-lg">
-            <p className="text-sm text-amber-200 italic leading-relaxed">
-              <strong className="text-amber-400 font-semibold">Filosofía del Método:</strong> "Este módulo no interpreta el alma: 
-              construye el mapa exacto para que la conciencia pueda leerlo."
-            </p>
-          </div>
+    <Dialog open={isOpenState} onOpenChange={handleOpenChange}>
+      <DialogContent className="max-w-2xl bg-slate-950 border-slate-800 text-slate-100">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-2xl text-amber-400">
+            <BookOpen className="w-6 h-6" /> Guía Shejinah
+          </DialogTitle>
+          <p className="text-slate-400 text-sm mt-1">
+            Claves del Método Atlantis
+          </p>
         </DialogHeader>
-
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
-          <TabsList className="bg-slate-900 border border-slate-800 mb-6">
-            <TabsTrigger value="concepts">Conceptos Clave</TabsTrigger>
-            <TabsTrigger value="otd">Trilogía OTD</TabsTrigger>
-            <TabsTrigger value="karmas">Karmas y Bloqueos</TabsTrigger>
+        
+        <Tabs defaultValue="basics" className="w-full mt-4">
+          <TabsList className="grid grid-cols-5 bg-slate-900 border border-slate-800">
+            <TabsTrigger value="basics">Conceptos</TabsTrigger>
+            <TabsTrigger value="otd">OTD</TabsTrigger>
+            <TabsTrigger value="karmas">Bloqueos</TabsTrigger>
+            <TabsTrigger value="times">Tiempos</TabsTrigger>
+            <TabsTrigger value="shields">Escudos</TabsTrigger>
           </TabsList>
-
-          <ScrollArea className="max-h-[60vh] pr-4">
-            {/* Tab 1: Conceptos Clave */}
-            <TabsContent value="concepts" className="space-y-6">
-              {/* Introducción */}
-              <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-6 mb-4">
-                <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-amber-400" />
-                  Sobre el Método Atlantis
-                </h3>
-                <p className="text-slate-300 leading-relaxed text-sm mb-3">
-                  El <strong className="text-amber-400">Análisis Shejinah</strong> no es una interpretación subjetiva. 
-                  Es un <strong className="text-white">sistema matemático preciso</strong> que calcula las vibraciones 
-                  numéricas exactas de tu nombre y fecha de nacimiento para construir un mapa objetivo de tu diseño energético.
-                </p>
-                <div className="bg-slate-950/50 border-l-4 border-amber-500 pl-4 py-2 rounded-r">
-                  <p className="text-xs text-amber-200 italic">
-                    "Este módulo no interpreta el alma: construye el mapa exacto para que la conciencia pueda leerlo."
+          
+          <div className="mt-4 h-[400px] pr-2">
+            <ScrollArea className="h-full">
+              <TabsContent value="basics" className="space-y-4 mt-4">
+                <div className="p-4 border border-indigo-500/30 rounded-lg bg-indigo-900/10">
+                  <h4 className="font-bold text-indigo-300 flex items-center gap-2 mb-2">
+                    <Heart className="w-4 h-4" /> El PIN (Número del Corazón)
+                  </h4>
+                  <p className="text-sm text-slate-300 leading-relaxed">
+                    Vibración Total. Suma exacta de <strong className="text-white">Nombre + Fecha</strong> sin reducir.
+                  </p>
+                  <p className="text-xs text-slate-400 mt-2 italic">
+                    El método usa números altos (ej. 33, 108) para ver la "Estructura Fina" del alma.
                   </p>
                 </div>
-              </div>
-
-              <div className="space-y-4">
-                <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-6">
-                  <div className="flex items-start gap-4 mb-4">
-                    <div className="p-3 bg-indigo-500/20 rounded-lg">
-                      <Heart className="h-6 w-6 text-indigo-400" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
-                        PIN: Número del Corazón
-                        <span className="text-sm font-normal text-amber-400">(Vibración Total)</span>
-                      </h3>
-                      <p className="text-slate-300 leading-relaxed mb-3">
-                        El <strong className="text-white">PIN (Número del Corazón)</strong> es la suma de tu 
-                        <strong className="text-amber-400"> Gematría del Nombre</strong> más la 
-                        <strong className="text-amber-400"> Suma de Cifras de tu Fecha de Nacimiento (SCF)</strong>.
-                      </p>
-                      <div className="bg-slate-950/50 border-l-4 border-amber-500 pl-4 py-2 rounded-r">
-                        <p className="text-sm text-slate-400 italic">
-                          <strong className="text-amber-400">Fórmula:</strong> PIN = Gematría Total + SCF
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="mt-4 p-4 bg-amber-500/10 border border-amber-500/30 rounded-lg">
-                    <p className="text-sm text-amber-200 leading-relaxed">
-                      <strong className="text-amber-400">¿Por qué no reducimos?</strong> A diferencia de la numerología 
-                      tradicional, el Método Atlantis mantiene los números altos (ej: 33, 108, 144) porque cada vibración 
-                      numérica tiene un significado específico. Reducir todo a un dígito perdería información valiosa sobre 
-                      la energía que el alma está trabajando.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-6">
-                  <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
-                    <Sparkles className="h-5 w-5 text-purple-400" />
-                    Números Altos vs. Reducción
-                  </h3>
-                  <div className="space-y-3 text-slate-300">
-                    <p>
-                      En el <strong className="text-amber-400">Método Atlantis</strong>, trabajamos con la vibración completa 
-                      del número porque:
-                    </p>
-                    <ul className="list-disc list-inside space-y-2 ml-4 text-sm">
-                      <li>Cada número alto (33, 44, 55, etc.) tiene una energía específica que se pierde al reducir</li>
-                      <li>Los números maestros y sus múltiplos portan información sobre el nivel de evolución del alma</li>
-                      <li>La vibración completa permite identificar patrones kármicos más precisos</li>
-                      <li>Facilita el cruce con otros sistemas (Tarot, Árbol de la Vida, Astrología)</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </TabsContent>
-
-            {/* Tab 2: Trilogía OTD */}
-            <TabsContent value="otd" className="space-y-6">
-              <div className="space-y-4">
-                <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-6">
-                  <div className="flex items-start gap-4 mb-4">
-                    <div className="p-3 bg-slate-700/50 rounded-lg">
-                      <span className="text-2xl">🏛️</span>
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-xl font-bold text-white mb-2">
-                        Tema de Origen (TO)
-                      </h3>
-                      <p className="text-slate-300 leading-relaxed mb-3">
-                        El <strong className="text-amber-400">Tema de Origen</strong> representa la 
-                        <strong className="text-white"> Base Estructural</strong> o los cimientos que el alma trae 
-                        de vidas pasadas. Es la energía con la que naciste, tu "hardware" espiritual.
-                      </p>
-                      <div className="bg-slate-950/50 border-l-4 border-slate-600 pl-4 py-2 rounded-r">
-                        <p className="text-sm text-slate-400">
-                          <strong className="text-slate-300">Se calcula:</strong> Aplicando el algoritmo del sendero 
-                          a la Gematría Total del nombre completo.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-6">
-                  <div className="flex items-start gap-4 mb-4">
-                    <div className="p-3 bg-purple-500/20 rounded-lg">
-                      <Activity className="h-6 w-6 text-purple-400" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-xl font-bold text-white mb-2">
-                        Principio de Transformación (PT)
-                      </h3>
-                      <p className="text-slate-300 leading-relaxed mb-3">
-                        El <strong className="text-amber-400">Principio de Transformación</strong> es el 
-                        <strong className="text-white"> Estilo de Gestión de Crisis</strong> o la "salsa" con la que 
-                        vives los cambios. Representa cómo procesas los desafíos y las transiciones en tu vida.
-                      </p>
-                      <div className="bg-slate-950/50 border-l-4 border-purple-500 pl-4 py-2 rounded-r">
-                        <p className="text-sm text-slate-400">
-                          <strong className="text-slate-300">Se calcula:</strong> Reduciendo la Suma de Cifras de la Fecha (SCF) 
-                          a un Arcano (1-21).
-                        </p>
-                      </div>
-                      <div className="mt-3 p-3 bg-purple-500/10 border border-purple-500/30 rounded-lg">
-                        <p className="text-xs text-purple-200 italic">
-                          Es la energía que activas cuando enfrentas crisis, cambios o momentos de transformación profunda.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-6">
-                  <div className="flex items-start gap-4 mb-4">
-                    <div className="p-3 bg-cyan-500/20 rounded-lg">
-                      <Sparkles className="h-6 w-6 text-cyan-400" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-xl font-bold text-white mb-2">
-                        Tema de Destino (TD)
-                      </h3>
-                      <p className="text-slate-300 leading-relaxed mb-3">
-                        El <strong className="text-amber-400">Tema de Destino</strong> es la 
-                        <strong className="text-white"> Nueva Misión</strong> que el alma viene a manifestar en esta 
-                        encarnación. Es hacia dónde te diriges, tu propósito evolutivo en esta vida.
-                      </p>
-                      <div className="bg-slate-950/50 border-l-4 border-cyan-500 pl-4 py-2 rounded-r">
-                        <p className="text-sm text-slate-400">
-                          <strong className="text-slate-300">Se calcula:</strong> Aplicando el algoritmo del sendero 
-                          al PIN (Número del Corazón).
-                        </p>
-                      </div>
-                      <div className="mt-3 p-3 bg-cyan-500/10 border border-cyan-500/30 rounded-lg">
-                        <p className="text-xs text-cyan-200 italic">
-                          Representa la energía que estás llamada a integrar y manifestar como parte de tu evolución espiritual.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-gradient-to-br from-amber-500/10 to-purple-500/10 border border-amber-500/30 rounded-lg p-6">
-                  <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
-                    <Activity className="h-5 w-5 text-amber-400" />
-                    La Trilogía como Viaje del Alma
-                  </h3>
-                  <p className="text-slate-300 leading-relaxed text-sm">
-                    La <strong className="text-amber-400">Trilogía OTD</strong> describe el viaje completo del alma: 
-                    desde dónde vienes (Origen), cómo procesas los cambios (Transformación), y hacia dónde vas (Destino). 
-                    Esta estructura te permite entender no solo quién eres, sino también cómo estás diseñado para evolucionar.
-                  </p>
-                </div>
-              </div>
-            </TabsContent>
-
-            {/* Tab 3: Karmas y Bloqueos */}
-            <TabsContent value="karmas" className="space-y-6">
-              <div className="space-y-4">
-                <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-6">
-                  <div className="flex items-start gap-4 mb-4">
-                    <div className="p-3 bg-red-500/20 rounded-lg">
-                      <AlertTriangle className="h-6 w-6 text-red-400" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-xl font-bold text-white mb-2">
-                        Cuentas Pendientes (Karmas)
-                      </h3>
-                      <p className="text-slate-300 leading-relaxed mb-3">
-                        Los <strong className="text-amber-400">Karmas</strong> no son castigos ni deudas que debes pagar. 
-                        Son <strong className="text-white">asignaturas pendientes</strong> o 
-                        <strong className="text-white"> llamados a despertar</strong> que el alma trae para trabajar en esta encarnación.
-                      </p>
-                      <div className="bg-slate-950/50 border-l-4 border-red-500 pl-4 py-2 rounded-r mb-3">
-                        <p className="text-sm text-slate-400">
-                          <strong className="text-slate-300">Se identifican cuando:</strong> Un número se repite en posiciones 
-                          de tensión o desafío dentro de la Trilogía OTD, o cuando aparece en ejes de tensión específicos.
-                        </p>
-                      </div>
-                      <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
-                        <p className="text-xs text-red-200 italic">
-                          <strong className="text-red-400">Perspectiva del Método Atlantis:</strong> Los karmas son oportunidades 
-                          de crecimiento, no condenas. Indican áreas donde el alma necesita integrar lecciones específicas para 
-                          avanzar en su evolución.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-slate-900/50 border border-slate-800 rounded-lg p-6">
-                  <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
-                    <Activity className="h-5 w-5 text-orange-400" />
-                    Ejes de Tensión
-                  </h3>
-                  <p className="text-slate-300 leading-relaxed mb-3 text-sm">
-                    Los <strong className="text-amber-400">Ejes de Tensión</strong> son pares de números que representan 
-                    polaridades que el alma está trabajando para equilibrar. Por ejemplo, un eje "3-9" indica que hay una 
-                    tensión entre la expresión creativa (3) y la sabiduría universal (9).
-                  </p>
-                  <div className="bg-slate-950/50 border-l-4 border-orange-500 pl-4 py-2 rounded-r">
-                    <p className="text-sm text-slate-400">
-                      Estos ejes no son problemas, sino <strong className="text-orange-400">áreas de integración</strong> 
-                      donde el alma está aprendiendo a encontrar el equilibrio entre dos energías complementarias.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="bg-gradient-to-br from-red-500/10 to-orange-500/10 border border-red-500/30 rounded-lg p-6">
-                  <h3 className="text-lg font-semibold text-white mb-3">
-                    Trabajando con los Karmas
-                  </h3>
-                  <ul className="space-y-2 text-slate-300 text-sm">
-                    <li className="flex items-start gap-2">
-                      <span className="text-amber-400 mt-1">•</span>
-                      <span>
-                        <strong className="text-white">Identifica el patrón:</strong> ¿Qué número o eje se repite?
-                      </span>
+                
+                <div className="p-4 border border-purple-500/30 rounded-lg bg-purple-900/10">
+                  <h4 className="font-bold text-purple-300 flex items-center gap-2 mb-2">
+                    <Sparkles className="w-4 h-4" /> Vibraciones del Ser
+                  </h4>
+                  <ul className="text-sm text-slate-300 space-y-2">
+                    <li>
+                      <strong className="text-purple-300">Espíritu:</strong> Suma normal de la fecha de nacimiento
                     </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-amber-400 mt-1">•</span>
-                      <span>
-                        <strong className="text-white">Consulta el Arcano correspondiente:</strong> Cada número (1-21) 
-                        tiene un significado específico en el Tarot y el Árbol de la Vida.
-                      </span>
+                    <li>
+                      <strong className="text-purple-300">Alma:</strong> Fecha convertida con tabla SOUL_IMAGE
                     </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-amber-400 mt-1">•</span>
-                      <span>
-                        <strong className="text-white">Integra la lección:</strong> Los karmas se resuelven cuando 
-                        comprendes y vives la energía del Arcano de manera consciente.
-                      </span>
+                    <li>
+                      <strong className="text-purple-300">Cuerpo:</strong> Fecha convertida con tabla ENERGETIC_STRUCTURE
                     </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-amber-400 mt-1">•</span>
-                      <span>
-                        <strong className="text-white">No es para siempre:</strong> Los karmas son temporales. 
-                        Una vez integrada la lección, el patrón se disuelve.
-                      </span>
+                    <li>
+                      <strong className="text-purple-300">Efecto Sanador:</strong> Suma de las tres vibraciones
                     </li>
                   </ul>
                 </div>
-              </div>
-            </TabsContent>
-          </ScrollArea>
+                
+                <div className="p-4 border border-cyan-500/30 rounded-lg bg-cyan-900/10">
+                  <h4 className="font-bold text-cyan-300 mb-2">
+                    Los 10 Portales
+                  </h4>
+                  <p className="text-sm text-slate-300 leading-relaxed">
+                    Estructura energética que muestra el estado de apertura o bloqueo de cada portal de conciencia.
+                    Cada portal tiene un número, un nombre y un estado (Activo, Bloqueo, Potencial).
+                  </p>
+                </div>
+                
+                <div className="p-4 border border-green-500/30 rounded-lg bg-green-900/10">
+                  <h4 className="font-bold text-green-300 mb-2">
+                    Planos de Conciencia
+                  </h4>
+                  <p className="text-sm text-slate-300 leading-relaxed">
+                    Cuatro niveles de vibración que representan diferentes dimensiones de la experiencia:
+                    Espiritual, Causal, Activación y Subconsciente.
+                  </p>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="otd" className="space-y-4 mt-4">
+                <div className="p-4 border border-amber-500/30 rounded-lg bg-amber-900/10">
+                  <h4 className="font-bold text-amber-400 mb-3">La Trilogía OTD</h4>
+                  <ul className="space-y-3 text-sm text-slate-300">
+                    <li>
+                      <strong className="text-amber-400">Origen (TO):</strong> Base estructural de vidas pasadas. 
+                      Se calcula aplicando el algoritmo del sendero a la Gematría del nombre completo.
+                    </li>
+                    <li>
+                      <strong className="text-purple-400">Transformación (PT):</strong> Estilo de gestión de crisis. 
+                      Se calcula reduciendo directamente la Suma de Cifras de la Fecha (SCF) a un Arcano (0-21).
+                    </li>
+                    <li>
+                      <strong className="text-cyan-400">Destino (TD):</strong> Nueva misión a manifestar. 
+                      Se calcula aplicando el algoritmo del sendero al PIN (Número del Corazón).
+                    </li>
+                  </ul>
+                </div>
+                
+                <div className="p-4 border border-orange-500/30 rounded-lg bg-orange-900/10">
+                  <h4 className="font-bold text-orange-400 mb-2 flex items-center gap-2">
+                    <Activity className="w-4 h-4" /> Ejes y Polos
+                  </h4>
+                  <p className="text-sm text-slate-300 leading-relaxed mb-2">
+                    Los <strong className="text-orange-300">Ejes</strong> son tensiones Yin-Yang que aparecen cuando 
+                    dos números opuestos están presentes en la Trilogía OTD.
+                  </p>
+                  <p className="text-sm text-slate-300 leading-relaxed">
+                    Los <strong className="text-blue-300">Polos</strong> son polaridades causales o mentales que 
+                    indican áreas de integración entre energías complementarias.
+                  </p>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="karmas" className="space-y-4 mt-4">
+                <div className="p-4 border border-red-500/30 rounded-lg bg-red-900/10">
+                  <h4 className="font-bold text-red-400 flex items-center gap-2 mb-2">
+                    <Lock className="w-4 h-4" /> Cuentas Pendientes
+                  </h4>
+                  <p className="text-sm text-slate-300 leading-relaxed mb-2">
+                    Las <strong className="text-red-300">Razones Kármicas</strong> no son castigos ni deudas que debes pagar. 
+                    Son <strong className="text-white">asignaturas pendientes</strong> o 
+                    <strong className="text-white"> llamados a despertar</strong> que el alma trae para trabajar en esta encarnación.
+                  </p>
+                  <p className="text-xs text-slate-400 italic">
+                    Son oportunidades de crecimiento, no condenas. Indican áreas donde el alma necesita integrar 
+                    lecciones específicas para avanzar en su evolución.
+                  </p>
+                </div>
+                
+                <div className="p-4 border border-yellow-500/30 rounded-lg bg-yellow-900/10">
+                  <h4 className="font-bold text-yellow-400 mb-2">
+                    Potenciales Arcaicos
+                  </h4>
+                  <p className="text-sm text-slate-300 leading-relaxed">
+                    También conocidos como <strong className="text-yellow-300">Tesoros Olvidados</strong>, son 
+                    números que representan dones y capacidades que el alma trae pero que pueden estar dormidos 
+                    o no completamente activados.
+                  </p>
+                </div>
+                
+                <div className="p-4 border border-slate-700 rounded-lg bg-slate-900/50">
+                  <h4 className="font-bold text-slate-300 mb-2">
+                    Tipos de Karmas
+                  </h4>
+                  <ul className="text-sm text-slate-300 space-y-2">
+                    <li>
+                      <strong className="text-red-400">Karmas Clásicos:</strong> 13, 14, 16, 19 (Transformación profunda)
+                    </li>
+                    <li>
+                      <strong className="text-orange-400">Karmas Específicos:</strong> 23, 28, 29, 80 (Lecciones del Método Atlantis)
+                    </li>
+                    <li>
+                      <strong className="text-yellow-400">Números Ausentes:</strong> 1-9 (Vacíos energéticos a llenar)
+                    </li>
+                  </ul>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="times" className="space-y-4 mt-4">
+                <div className="p-4 border border-blue-500/30 rounded-lg bg-blue-900/10">
+                  <h4 className="font-bold text-blue-400 flex items-center gap-2 mb-2">
+                    <Calendar className="w-4 h-4" /> Edad de Transformación (ET)
+                  </h4>
+                  <p className="text-sm text-slate-300 leading-relaxed mb-2">
+                    La <strong className="text-blue-300">Edad de Transformación</strong> es igual a la 
+                    <strong className="text-white"> Suma de Cifras de la Fecha (SCF)</strong> de nacimiento.
+                  </p>
+                  <p className="text-xs text-slate-400 italic">
+                    Esta edad marca un momento clave en la vida donde las lecciones kármicas se intensifican 
+                    y el alma está lista para integrar transformaciones profundas. Es el momento en que el 
+                    diseño energético alcanza su punto de máxima activación.
+                  </p>
+                </div>
+                
+                <div className="p-4 border border-orange-500/30 rounded-lg bg-orange-900/10">
+                  <h4 className="font-bold text-orange-400 flex items-center gap-2 mb-2">
+                    <Activity className="w-4 h-4" /> Turbulencias (Ceros en Fecha)
+                  </h4>
+                  <p className="text-sm text-slate-300 leading-relaxed mb-2">
+                    Las <strong className="text-orange-300">Turbulencias</strong> se detectan cuando hay 
+                    <strong className="text-white"> ceros (0) en la fecha de nacimiento</strong>.
+                  </p>
+                  <p className="text-xs text-slate-400 italic mb-2">
+                    Cada cero en la fecha activa un período de <strong className="text-orange-300">10 años de corrección concentrada</strong>. 
+                    Estos son momentos donde las lecciones kármicas se intensifican y requieren atención especial.
+                  </p>
+                  <div className="mt-3 p-2 bg-orange-500/10 border border-orange-500/30 rounded">
+                    <p className="text-xs text-orange-200">
+                      <strong className="text-orange-300">Ejemplo:</strong> Si tu fecha tiene 2 ceros (ej: 2000-05-15), 
+                      tendrás 20 años de turbulencias. Estos períodos no son negativos, sino oportunidades 
+                      aceleradas de crecimiento y corrección kármica.
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="p-4 border border-purple-500/30 rounded-lg bg-purple-900/10">
+                  <h4 className="font-bold text-purple-300 mb-2">
+                    Vibración "Hoy"
+                  </h4>
+                  <p className="text-sm text-slate-300 leading-relaxed">
+                    La <strong className="text-purple-300">Vibración del Día</strong> combina tu vibración del 
+                    espíritu con la energía del día actual. Te indica qué energía estás trabajando hoy y cómo 
+                    puedes alinearte con el flujo temporal.
+                  </p>
+                </div>
+                
+                <div className="p-4 border border-indigo-500/30 rounded-lg bg-indigo-900/10">
+                  <h4 className="font-bold text-indigo-300 mb-2">
+                    Lema de Vida
+                  </h4>
+                  <p className="text-sm text-slate-300 leading-relaxed">
+                    El <strong className="text-indigo-300">Lema de Vida</strong> es un número que representa 
+                    la frase o principio que guía tu existencia. Se calcula combinando tu Gematría con tus 
+                    vibraciones fundamentales.
+                  </p>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="shields" className="space-y-4 mt-4">
+                <div className="p-4 border border-purple-500/30 rounded-lg bg-purple-900/10">
+                  <h4 className="font-bold text-purple-400 flex items-center gap-2 mb-2">
+                    <Shield className="w-4 h-4" /> Escudos Protectores
+                  </h4>
+                  <p className="text-sm text-slate-300 leading-relaxed mb-2">
+                    Los <strong className="text-purple-300">Escudos Protectores</strong> son bloqueos energéticos 
+                    que se forman cuando hay una tensión entre el Origen (Tarea) y el Destino (Portal) según la 
+                    topología de Ejes de Tensión (Tipo 6).
+                  </p>
+                  <p className="text-xs text-slate-400 italic">
+                    Se calculan usando los dígitos transformados de la Estructura Energética (EE) de la fecha de nacimiento.
+                  </p>
+                </div>
+                
+                <div className="p-4 border border-red-500/30 rounded-lg bg-red-900/10">
+                  <h4 className="font-bold text-red-400 mb-2">
+                    Regla de Exclusión (Regla de la Luz)
+                  </h4>
+                  <p className="text-sm text-slate-300 leading-relaxed mb-2">
+                    Los portales <strong className="text-red-300">1 (Keter), 2 (Jojmá) y 10 (Maljut)</strong> 
+                    <strong className="text-white"> NO pueden tener escudos</strong>.
+                  </p>
+                  <p className="text-xs text-slate-400 italic">
+                    "Dios no quiere obstáculos en estos canales". Estos son los portales de luz divina que 
+                    siempre permanecen abiertos.
+                  </p>
+                </div>
+                
+                <div className="p-4 border border-blue-500/30 rounded-lg bg-blue-900/10">
+                  <h4 className="font-bold text-blue-400 mb-2">
+                    Mapa de Flujo (Ejes de Tensión)
+                  </h4>
+                  <ul className="text-sm text-slate-300 space-y-2">
+                    <li><strong className="text-blue-300">1 → 6:</strong> Espíritu → Materia</li>
+                    <li><strong className="text-blue-300">2 → 7:</strong> Yang → Yin</li>
+                    <li><strong className="text-blue-300">3 → 8:</strong> Dar → Recibir/Forma</li>
+                    <li><strong className="text-blue-300">4 → 9:</strong> Amor → Sabiduría</li>
+                    <li><strong className="text-blue-300">5 → 10:</strong> Rigor → Identidad (excluido)</li>
+                    <li><strong className="text-blue-300">6 → 1:</strong> Materia → Espíritu (excluido)</li>
+                    <li><strong className="text-blue-300">7 → 2:</strong> Yin → Yang (excluido)</li>
+                    <li><strong className="text-blue-300">8 → 3:</strong> Forma → Dar</li>
+                    <li><strong className="text-blue-300">9 → 4:</strong> Sabiduría → Amor</li>
+                    <li><strong className="text-blue-300">10 → 5:</strong> Identidad → Rigor</li>
+                  </ul>
+                </div>
+                
+                <div className="p-4 border border-orange-500/30 rounded-lg bg-orange-900/10">
+                  <h4 className="font-bold text-orange-400 mb-2">
+                    Interpretación de Escudos
+                  </h4>
+                  <p className="text-sm text-slate-300 leading-relaxed mb-2">
+                    Cada escudo activo muestra:
+                  </p>
+                  <ul className="text-sm text-slate-300 space-y-2">
+                    <li>
+                      <strong className="text-orange-300">Síntomas Físicos:</strong> Manifestaciones corporales 
+                      del bloqueo energético.
+                    </li>
+                    <li>
+                      <strong className="text-orange-300">Psicología:</strong> Patrones mentales y emocionales 
+                      asociados al escudo.
+                    </li>
+                  </ul>
+                  <p className="text-xs text-slate-400 italic mt-2">
+                    Los escudos no son negativos, sino indicadores de áreas donde el alma está trabajando 
+                    para integrar polaridades y encontrar equilibrio.
+                  </p>
+                </div>
+              </TabsContent>
+            </ScrollArea>
+          </div>
         </Tabs>
       </DialogContent>
     </Dialog>
   );
 }
-

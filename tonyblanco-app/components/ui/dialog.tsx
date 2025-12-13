@@ -48,14 +48,19 @@ export function DialogContent({ children, className = '' }: DialogContentProps) 
   const { onOpenChange } = React.useContext(DialogContext);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div 
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+      style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
+    >
       <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9998]"
         onClick={() => onOpenChange(false)}
+        style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
       />
       <div
-        className={`relative z-50 w-full max-w-2xl max-h-[90vh] overflow-hidden rounded-lg shadow-xl ${className}`}
+        className={`relative z-[9999] w-full max-w-2xl max-h-[90vh] overflow-hidden rounded-lg shadow-xl bg-white ${className}`}
         onClick={(e) => e.stopPropagation()}
+        style={{ position: 'relative' }}
       >
         {children}
       </div>

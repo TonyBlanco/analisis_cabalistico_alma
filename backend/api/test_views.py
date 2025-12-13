@@ -6,6 +6,7 @@ from rest_framework.decorators import permission_classes
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
+from django.db.models import Q
 from .test_models import TestModule, UserTestAccess, TestResult
 from datetime import datetime
 from .test_serializers import (
@@ -28,10 +29,22 @@ class AvailableTestsView(APIView):
         # Filtrar tests según tipo de usuario
         tests = TestModule.objects.filter(is_active=True)
         
+        user_level = profile.subscription_plan or 'free'
+        
         if profile.user_type == 'therapist':
+            # Para therapists: incluir tests disponibles para therapists
             tests = tests.filter(available_for_therapists=True)
         else:
-            tests = tests.filter(available_for_personal=True)
+            # Para usuarios personales: incluir tests disponibles para personal
+            # Y también tests profesionales si el usuario tiene subscription_plan='professional'
+            # (esto permite que SCDF aparezca para usuarios personales con plan professional)
+            if user_level == 'professional':
+                tests = tests.filter(
+                    Q(available_for_personal=True) |
+                    (Q(required_access_level='professional') & Q(available_for_therapists=True))
+                )
+            else:
+                tests = tests.filter(available_for_personal=True)
         
         serializer = TestModuleSerializer(
             tests, 
@@ -124,6 +137,34 @@ class ExecuteTestView(APIView):
         result_data = self._process_test(test_module, input_data)
         user_access.record_use()
 
+        # Generar análisis de IA para tests clínicos (SCDF)
+        ai_interpretation = None
+        if test_module.code == 'scdf' and result_data.get('result'):
+            try:
+                from api.ai_interpreter import gemini_interpreter
+                scdf_result = result_data.get('result', {})
+                patient_data = None
+                if data.get('patient_id'):
+                    try:
+                        from .models import Patient
+                        patient = Patient.objects.get(id=data.get('patient_id'), therapist=request.user)
+                        patient_data = {
+                            'id': patient.id,
+                            'full_name': patient.full_name,
+                            'birth_date': str(patient.birth_date) if patient.birth_date else None
+                        }
+                    except Exception:
+                        pass
+                
+                ai_interpretation = gemini_interpreter.generate_clinical_analysis(
+                    test_module_code='scdf',
+                    result_data=scdf_result,
+                    patient_data=patient_data
+                )
+            except Exception as e:
+                print(f"Error generando análisis de IA para SCDF: {e}")
+                # Continuar sin análisis de IA si falla
+
         test_result = None
         if data.get('save_result', True):
             patient = None
@@ -147,6 +188,13 @@ class ExecuteTestView(APIView):
                     except Patient.DoesNotExist:
                         pass  # Si no existe, continuar sin vincular
             
+            # Agregar análisis de IA al result_data si existe
+            if ai_interpretation:
+                if isinstance(result_data, dict) and 'result' in result_data:
+                    result_data['result']['ai_interpretation'] = ai_interpretation
+                elif isinstance(result_data, dict):
+                    result_data['ai_interpretation'] = ai_interpretation
+            
             test_result = TestResult.objects.create(
                 user=request.user,
                 test_module=test_module,
@@ -169,6 +217,7 @@ class ExecuteTestView(APIView):
         # Lazy import compute functions to avoid import errors when optional SDKs aren't installed
         compute_bdi = compute_bai = compute_scl90 = compute_stai = compute_mcmi4 = compute_scid5 = None
         compute_pai = None
+        compute_scdf = None
         try:
             # optional internal modules; if missing, we'll continue with None placeholders
             from .pai import compute_pai
@@ -178,6 +227,10 @@ class ExecuteTestView(APIView):
             from .diagnostics import compute_bdi, compute_bai, compute_scl90, compute_stai, compute_mcmi4, compute_scid5
         except Exception:
             compute_bdi = compute_bai = compute_scl90 = compute_stai = compute_mcmi4 = compute_scid5 = None
+        try:
+            from .clinical_frameworks import compute_scdf
+        except Exception:
+            compute_scdf = None
 
         test_type = test_module.test_type
         try:
@@ -234,6 +287,12 @@ class ExecuteTestView(APIView):
                 else:
                     result = {'note': 'compute_bai not available; missing module'}
                 return {'test_type': 'bai', 'result': result, 'timestamp': str(datetime.now())}
+            if test_type == 'clinical' or test_module.code == 'scdf':
+                if compute_scdf:
+                    result = compute_scdf(input_data)
+                else:
+                    result = {'note': 'compute_scdf not available; missing module'}
+                return {'test_type': 'clinical', 'result': result, 'timestamp': str(datetime.now())}
             # Astrología Cabalística (se calcula en el frontend con astronomy-engine)
             if test_type == 'astrology' or test_module.code == 'cabalistic-astrology':
                 nombre = input_data.get('nombre') or input_data.get('full_name') or ''

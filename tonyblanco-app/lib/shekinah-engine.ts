@@ -1,231 +1,226 @@
 /**
- * Motor de Cálculo: Análisis Shejinah Moderno Pitagórico
- * Basado en el Método Atlantis
- * 
- * Implementa:
- * - Gematría de dos cifras (Método Atlantis)
- * - Algoritmo de Sendero OTD (Origen, Transformación, Destino)
- * - Detección de Karmas
- * - Ciclo Anual
+ * Motor de Cálculo: Análisis Shejinah Moderno Pitagórico V3
+ * Basado en el Método Atlantis - Integración Holística Completa
  */
 
-// 1. TABLA DE CONVERSIÓN EXACTA (Método Atlantis / Shekinah)
-// Prioridad a letras compuestas (SCH, SS, etc.)
+import { calculateCosmicDecomposition, type CosmicDecomposition } from './shekinah-cosmic-calc';
+import { AXIS_FLOW_MAP, EXCLUDED_SHIELDS, SHIELD_DEFINITIONS, PORTAL_NAMES } from './shekinah-shields';
+
 const GEMATRIA_TABLE: Record<string, number> = {
-  // Letras compuestas (prioridad alta - ordenar por longitud descendente)
-  'SCH': 18,
-  'CH': 8,
-  'PH': 17,
-  'SH': 18,
-  'TS': 18,
-  'TZ': 18,
-  'TH': 22,
-  'SS': 42,
-  
-  // Letras simples
-  'A': 1, 'Á': 1,
-  'B': 2,
-  'G': 3,
-  'D': 4,
-  'E': 5, 'É': 5,
-  'U': 6, 'Ú': 6, 'Ü': 6, 'V': 6, 'W': 6,
-  'Z': 7,
-  'H': 8,
-  'T': 9,
-  'I': 10, 'Í': 10, 'J': 10, 'Y': 10,
-  'C': 11, 'K': 11, 'Ç': 11,
-  'L': 12,
-  'M': 13,
-  'N': 14, 'Ñ': 14,
-  'X': 15,
-  'O': 16, 'Ó': 16,
-  'P': 17, 'F': 17,
-  'Q': 19,
-  'R': 20,
-  'S': 21
+  'SCH': 18, 'CH': 8, 'PH': 17, 'SH': 18, 'TS': 18, 'TZ': 18, 'TH': 22, 'SS': 42,
+  'A': 1, 'Á': 1, 'B': 2, 'G': 3, 'D': 4, 'E': 5, 'É': 5, 'U': 6, 'Ú': 6, 'Ü': 6, 'V': 6, 'W': 6,
+  'Z': 7, 'H': 8, 'T': 9, 'I': 10, 'Í': 10, 'J': 10, 'Y': 10, 'C': 11, 'K': 11, 'Ç': 11,
+  'L': 12, 'M': 13, 'N': 14, 'Ñ': 14, 'X': 15, 'O': 16, 'Ó': 16, 'P': 17, 'F': 17, 'Q': 19, 'R': 20, 'S': 21
+};
+
+const DATE_CONVERSION = {
+  SOUL_IMAGE: { 1: 7, 2: 8, 3: 9 }, 
+  ENERGETIC_STRUCTURE: { 0: 7, 1: 6, 2: 5 }
 };
 
 export interface ShekinahResult {
-  identity: {
-    gematriaTotal: number;
-    scf: number; // Suma Cifras Fecha
-    pin: number; // Número del Corazón (PIN)
-    et: number;  // Edad Transformación
+  identity: { 
+    gematriaTotal: number; 
+    scf: number; 
+    pin: number; 
+    et: number; 
   };
-  otd: {
-    to: number; // Origen (Tema Origen)
-    pt: number; // Transformación (Principio Transformación)
-    td: number; // Destino (Tema Destino)
+  vibrations: { 
+    spirit: number; 
+    soul: number; 
+    body: number; 
+    healingEffect: number; 
+    today: number; 
   };
-  karmas: {
+  otd: { 
+    to: number; 
+    pt: number; 
+    td: number; 
+  };
+  shields: { 
+    active: boolean; 
+    list: Array<{
+      origin: number;
+      portal: number;
+      name: string;
+      symptoms: string;
+      psychology: string;
+    }>; 
+  };
+  soulImage: { 
+    active: boolean; 
+    portals: Array<{
+      id: number;
+      name: string;
+      belief: string;
+    }>; 
+  };
+  karmic: { 
+    openAccounts: Array<{ 
+      number: number; 
+      decomp: CosmicDecomposition 
+    }>; 
+    archaic: Array<{ 
+      number: number; 
+      decomp: CosmicDecomposition 
+    }>;
     pending: number[];
-    axes: string[]; // Ejes de tensión (ej: "3-9")
   };
-  yearlyCycle: {
-    currentYear: number;
-    vibration: number;
-  };
-  metadata: {
-    calculatedAt: string;
-    method: string;
-  };
+  portals: Array<{
+    id: number;
+    name: string;
+    number: number;
+    status: string;
+  }>;
 }
 
-/**
- * Suma simple de dígitos de un número
- */
-const sumDigits = (n: number): number => {
-  return n.toString()
-    .split('')
-    .reduce((acc, curr) => acc + parseInt(curr, 10), 0);
+const sumDigits = (n: number): number => 
+  n.toString().split('').reduce((a, c) => a + parseInt(c, 10), 0);
+
+const reduceToArcana = (n: number): number => { 
+  let v = n; 
+  while (v > 21) { 
+    v = sumDigits(v); 
+  } 
+  return v; 
 };
 
-/**
- * Reducción a Arcano (0-21)
- * Si es 0, retorna 0 (El Loco)
- * Si es mayor a 21, reduce sumando dígitos hasta que sea <= 21
- */
-const reduceToArcana = (n: number): number => {
-  if (n === 0) return 0;
-  if (n >= 1 && n <= 21) return n;
-  
-  let v = n;
-  while (v > 21) {
-    v = sumDigits(v);
-  }
-  
-  return v;
-};
+const calculatePathAlgorithm = (val: number): number => 
+  reduceToArcana(((val - sumDigits(val)) / 9) + 1);
 
-/**
- * Algoritmo del Sendero (Método Atlantis)
- * Fórmula: (Valor - Suma de Dígitos) / 9 + 1
- * Luego se reduce a Arcano (0-21)
- */
-const calculatePathAlgorithm = (value: number): number => {
-  const sumOfDigits = sumDigits(value);
-  const subtraction = value - sumOfDigits;
-  const division = subtraction / 9;
-  const result = Math.floor(division) + 1;
-  return reduceToArcana(result);
-};
+const transformDateDigits = (dateStr: string, map: Record<number, number>): number => 
+  dateStr.split('').reduce((sum, char) => sum + (map[parseInt(char, 10)] ?? parseInt(char, 10)), 0);
 
-/**
- * Calcula el perfil completo de Shejinah
- * @param fullName Nombre completo del paciente
- * @param birthDate Fecha de nacimiento en formato YYYY-MM-DD
- * @returns Objeto ShekinahResult con todos los cálculos
- */
 export const calculateShekinahProfile = (
-  fullName: string,
+  fullName: string, 
   birthDate: string
 ): ShekinahResult => {
-  // 1. GEMATRÍA DEL NOMBRE (Tokenización inteligente)
-  // Limpiar y normalizar el nombre
+  // A. GEMATRÍA
   let cleanName = fullName.toUpperCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '') // Remover acentos
-    .replace(/[^A-ZÑÇ\s]/g, ''); // Solo letras y espacios
-  
-  // Remover espacios para el cálculo
+    .replace(/[^A-ZÑÇ\s]/g, '');
   let tempName = cleanName.replace(/\s+/g, '');
   let gematriaTotal = 0;
-  
-  // Ordenar claves por longitud descendente para detectar SCH antes que S
   const sortedKeys = Object.keys(GEMATRIA_TABLE).sort((a, b) => b.length - a.length);
-  
-  // Tokenización inteligente: buscar coincidencias más largas primero
   let i = 0;
   while (i < tempName.length) {
     let match = false;
-    for (const key of sortedKeys) {
-      if (tempName.substring(i, i + key.length) === key) {
-        gematriaTotal += GEMATRIA_TABLE[key];
-        i += key.length;
-        match = true;
-        break;
-      }
+    for (const key of sortedKeys) { 
+      if (tempName.substring(i, i + key.length) === key) { 
+        gematriaTotal += GEMATRIA_TABLE[key]; 
+        i += key.length; 
+        match = true; 
+        break; 
+      } 
     }
-    if (!match) {
-      // Si no hay coincidencia, saltar el carácter (no debería pasar con nombres válidos)
-      console.warn(`Carácter no reconocido en posición ${i}: ${tempName[i]}`);
-      i++;
-    }
+    if (!match) i++; 
   }
 
-  // 2. FECHA: SCF (Suma Cifras Fecha) y ET (Edad Transformación)
-  // Extraer todos los dígitos de la fecha (YYYYMMDD)
-  const dateDigits = birthDate.replace(/[^0-9]/g, '');
-  const scf = dateDigits.split('').reduce((acc, curr) => acc + parseInt(curr, 10), 0);
-  const et = scf; // Edad de Transformación = SCF
+  // B. FECHAS
+  const dateStr = birthDate.replace(/[^0-9]/g, '');
+  const vibSpirit = dateStr.split('').reduce((a, c) => a + parseInt(c, 10), 0);
+  const vibSoul = transformDateDigits(dateStr, DATE_CONVERSION.SOUL_IMAGE);
+  const vibBody = transformDateDigits(dateStr, DATE_CONVERSION.ENERGETIC_STRUCTURE);
+  const healingEffect = vibSpirit + vibSoul + vibBody;
 
-  // 3. PIN (Número del Corazón): Gematría + SCF
+  // C. OTD
+  const scf = vibSpirit;
   const pin = gematriaTotal + scf;
-
-  // 4. OTD (Origen, Transformación, Destino)
-  // Origen (TO): Algoritmo de Sendero aplicado a Gematría
   const to = calculatePathAlgorithm(gematriaTotal);
-  
-  // Transformación (PT): Reducción directa de SCF a Arcano
   const pt = reduceToArcana(scf);
-  
-  // Destino (TD): Algoritmo de Sendero aplicado a PIN
   const td = calculatePathAlgorithm(pin);
 
-  // 5. CÁLCULO DE CICLO ANUAL
-  const currentYear = new Date().getFullYear();
-  const birthYear = parseInt(birthDate.split('-')[0]);
-  const yearsSinceBirth = currentYear - birthYear;
-  
-  // Vibración anual = SCF + años transcurridos, reducido a Arcano
-  const baseVibration = reduceToArcana(scf);
-  const currentVibration = reduceToArcana(baseVibration + yearsSinceBirth);
-
-  // 6. DETECCIÓN DE KARMAS (Simplificado para MVP)
-  const pending: number[] = [];
-  const axes: string[] = [];
-  
-  // Si Origen y Destino son iguales, es un karma pendiente
-  if (to === td) {
-    pending.push(to);
-  }
-  
-  // Detectar ejes de tensión (números opuestos en el Árbol)
-  // Por ejemplo: 3-9, 4-8, 5-7 (simplificado)
-  const oppositePairs: [number, number][] = [
-    [3, 9], [4, 8], [5, 7], [1, 10], [2, 11]
-  ];
-  
-  for (const [a, b] of oppositePairs) {
-    if ((to === a && td === b) || (to === b && td === a)) {
-      axes.push(`${a}-${b}`);
+  // D. ESCUDOS (Estructura Energética - 0->7)
+  const shieldsList: Array<{
+    origin: number;
+    portal: number;
+    name: string;
+    symptoms: string;
+    psychology: string;
+  }> = [];
+  const eeDigits = dateStr.split('').map(d => 
+    DATE_CONVERSION.ENERGETIC_STRUCTURE[parseInt(d, 10)] ?? parseInt(d, 10)
+  );
+  [...new Set(eeDigits)].forEach(origin => {
+    const dest = AXIS_FLOW_MAP[origin];
+    if (dest && !EXCLUDED_SHIELDS.includes(dest) && SHIELD_DEFINITIONS[dest]) {
+      shieldsList.push({ 
+        origin, 
+        portal: dest, 
+        ...SHIELD_DEFINITIONS[dest], 
+        name: PORTAL_NAMES[dest] 
+      });
     }
-  }
+  });
+
+  // E. IMAGEN DEL ALMA (Planos - 1->7)
+  const iaDigits = dateStr.split('').map(d => 
+    DATE_CONVERSION.SOUL_IMAGE[parseInt(d, 10)] ?? parseInt(d, 10)
+  );
+  const soulPortals = [...new Set(iaDigits)]
+    .filter(p => p >= 4)
+    .map(p => ({
+      id: p, 
+      name: PORTAL_NAMES[p] || `Portal ${p}`, 
+      belief: "Bloqueo de creencia limitante." // Placeholder texto
+    }));
+
+  // F. RAZONES KÁRMICAS & CÓSMICAS
+  const openAccounts = [vibSpirit, vibSoul, vibBody].map(n => ({ 
+    number: n, 
+    decomp: calculateCosmicDecomposition(n) 
+  }));
+  const archaic = openAccounts.map(oa => ({ 
+    number: oa.decomp.L, 
+    decomp: calculateCosmicDecomposition(oa.decomp.L) 
+  }));
+  
+  // Portales Visuales (EE)
+  const portals = Array.from({length: 10}, (_, i) => i + 1).map(id => ({
+    id, 
+    name: PORTAL_NAMES[id] || `Portal ${id}`, 
+    number: id === 1 ? reduceToArcana(pin) : 0, 
+    status: eeDigits.includes(id) ? 'Tarea' : 'Libre'
+  }));
+
+  // Vibración "Hoy"
+  const today = new Date();
+  const vibToday = reduceToArcana(vibSpirit + today.getDate());
 
   return {
-    identity: {
-      gematriaTotal,
-      scf,
-      pin,
-      et
+    identity: { 
+      gematriaTotal, 
+      scf, 
+      pin, 
+      et: scf 
     },
-    otd: {
-      to,
-      pt,
-      td
+    vibrations: { 
+      spirit: vibSpirit, 
+      soul: vibSoul, 
+      body: vibBody, 
+      healingEffect, 
+      today: vibToday 
     },
-    karmas: {
-      pending,
-      axes
+    otd: { 
+      to, 
+      pt, 
+      td 
     },
-    yearlyCycle: {
-      currentYear,
-      vibration: currentVibration
+    shields: { 
+      active: shieldsList.length > 0, 
+      list: shieldsList 
     },
-    metadata: {
-      calculatedAt: new Date().toISOString(),
-      method: 'Atlantis - Shejinah Moderno Pitagórico'
-    }
+    soulImage: { 
+      active: soulPortals.length > 0, 
+      portals: soulPortals 
+    },
+    karmic: { 
+      openAccounts, 
+      archaic, 
+      pending: [28, 29] // Ejemplo Pending
+    },
+    portals
   };
 };
 
@@ -262,4 +257,3 @@ export const validateShekinahInput = (
   
   return { valid: true };
 };
-

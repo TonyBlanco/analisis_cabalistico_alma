@@ -344,13 +344,29 @@ def initialize_tests():
             'license_info': 'SCID-5-RV es un instrumento protegido. Confirmar licencia y capacitación antes de uso.'
         },
         {
+            'code': 'scdf',
+            'name': 'Structured Clinical Diagnostic Framework',
+            'description': 'NOTA IMPORTANTE: Este NO es el SCID-5. Este es un marco de diagnóstico clínico estructurado propietario inspirado en la lógica del DSM-5, desarrollado específicamente para esta plataforma. Requiere licencia profesional para su uso.',
+            'test_type': 'clinical',
+            'required_access_level': 'professional',
+            'icon': '📋',
+            'order': 25,
+            'estimated_duration': 45,
+            'available_for_therapists': True,
+            'available_for_personal': False,
+            'uses_per_month': None,  # Ilimitado
+            'is_active': True,
+            'requires_license': True,
+            'license_info': 'Este marco de diagnóstico estructurado requiere licencia profesional y capacitación adecuada. No es el SCID-5, sino un instrumento propietario desarrollado para esta plataforma.'
+        },
+        {
             'code': 'cabalistic-astrology',
             'name': 'Astrología Cabalística',
             'description': 'Análisis astrológico basado en el Árbol de la Vida. Calcula los 72 Ángeles de Dios y tu ADN Cósmico según tu carta natal.',
             'test_type': 'astrology',
             'required_access_level': 'premium',
             'icon': '⭐',
-            'order': 25,
+            'order': 26,
             'estimated_duration': 20,
             'available_for_therapists': True,
             'available_for_personal': True,

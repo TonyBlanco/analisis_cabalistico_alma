@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { getAvailableTests } from '@/lib/test-api';
 import { TestModule } from '@/lib/test-types';
 import { TestDomain, getTestsByDomain, getTestDomain } from '@/lib/test-domains';
+import { isPatientSelfAdministered, getTestExecutionMode } from '@/lib/test-execution-modes';
 import { 
   Sparkles, Brain, Star, 
   Filter, Search, ArrowRight,
@@ -27,7 +28,23 @@ export default function TestsCatalogPage() {
     try {
       setLoading(true);
       const data = await getAvailableTests();
-      setTests(data.tests || []);
+      const allTests = data.tests || [];
+      
+      // Enriquecer tests con execution_mode
+      const enrichedTests = allTests.map(test => ({
+        ...test,
+        execution_mode: getTestExecutionMode(test.code)
+      }));
+      
+      // Si es terapeuta, mostrar todos los tests
+      // Si es personal, filtrar solo tests auto-administrados
+      if (data.user_type === 'therapist') {
+        setTests(enrichedTests);
+      } else {
+        // Usuarios personales solo ven tests que pueden auto-administrarse
+        setTests(enrichedTests.filter(test => isPatientSelfAdministered(test.code)));
+      }
+      
       setUserType(data.user_type || null);
     } catch (error) {
       console.error('Error loading tests:', error);
@@ -139,15 +156,21 @@ export default function TestsCatalogPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredTests.map(test => {
             const domain = getTestDomain(test.code);
+            const executionMode = test.execution_mode || getTestExecutionMode(test.code);
+            
             // Tests con páginas dedicadas
             let testUrl: string;
             if (test.code === 'scdf') {
               testUrl = '/dashboard/tools/scdf';
             } else if (test.code === 'scid5') {
-              testUrl = '/tests/scid5';
+              // Entrevista integrativa - requiere paciente activo
+              testUrl = '/tests/psicologia/scid5';
             } else {
               testUrl = `/tests/${domain || 'cabala'}/${test.code}`;
             }
+            
+            // Para evaluaciones clínicas, validar que hay paciente activo
+            const isClinicalEvaluation = executionMode === 'therapist_clinical';
             return (
               <div
                 key={test.code}
@@ -167,12 +190,27 @@ export default function TestsCatalogPage() {
                     <span className="inline-block px-2 py-1 text-xs font-medium rounded bg-gray-100 text-gray-700">
                       {getDomainLabel(domain)}
                     </span>
+                    {isClinicalEvaluation && (
+                      <span className="inline-block px-2 py-1 text-xs font-medium rounded bg-red-100 text-red-700 ml-2">
+                        Evaluación Clínica
+                      </span>
+                    )}
+                    {!isClinicalEvaluation && userType === 'therapist' && (
+                      <span className="inline-block px-2 py-1 text-xs font-medium rounded bg-blue-100 text-blue-700 ml-2">
+                        Asignable
+                      </span>
+                    )}
                   </div>
                 </div>
 
                 <p className="text-gray-600 text-sm mb-4 line-clamp-2">
                   {test.description}
                 </p>
+                {isClinicalEvaluation && (
+                  <p className="text-xs text-amber-600 mb-2 font-medium">
+                    ⚠️ Solo para terapeutas. Requiere paciente activo.
+                  </p>
+                )}
 
                 <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
                   <div className="flex items-center gap-4">

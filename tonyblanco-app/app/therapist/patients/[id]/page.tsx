@@ -16,6 +16,13 @@ import TherapyLevelSelector, { TherapyLevel } from '@/components/TherapyLevelSel
 import PatientAnalysesSidebar from '@/components/PatientAnalysesSidebar';
 import AnalysisSelector from '@/components/AnalysisSelector';
 import CommunicationTools from '@/components/CommunicationTools';
+import PatientClinicalOverview from '@/components/PatientClinicalOverview';
+import AssignedTestsSection from '@/components/AssignedTestsSection';
+import ClinicalEvaluationsSection from '@/components/ClinicalEvaluationsSection';
+import TherapeuticPlanSection from '@/components/TherapeuticPlanSection';
+import { isPatientSelfAdministered, isTherapistClinicalEvaluation } from '@/lib/test-execution-modes';
+import RoleBadge from '@/components/RoleBadge';
+import ActivePatientIndicator from '@/components/ActivePatientIndicator';
 
 interface PatientData {
   id: number;
@@ -202,14 +209,22 @@ export default function PatientDetailPage() {
         }
       }
       
-      // Load test results
+      // Load test results (todos los resultados)
       const testsResponse = await fetch(`${apiURL}/tests/results/?patient_id=${patientId}`, {
         headers: { 'Authorization': `Token ${token}` }
       });
 
       if (testsResponse.ok) {
         const testsData = await testsResponse.json();
-        setTestResults(testsData.results || testsData || []);
+        const allResults = testsData.results || testsData || [];
+        setAllTestResults(allResults);
+        
+        // Separar: tests patient_self vs evaluaciones clínicas
+        const patientSelfResults = allResults.filter((r: any) => {
+          const code = r.test_module?.code || r.test_module_code || r.test_id || '';
+          return isPatientSelfAdministered(code);
+        });
+        setTestResults(patientSelfResults);
       }
 
     } catch (err: any) {
@@ -608,20 +623,144 @@ export default function PatientDetailPage() {
             }}
           />
 
-          {/* Main Content Area */}
+          {/* Main Content Area - Clinical Workspace */}
           <div className="flex-1 overflow-y-auto">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-              {/* Selector de Nivel Terapéutico */}
-              <TherapyLevelSelector
-                selectedLevel={therapyLevel}
-                onLevelChange={setTherapyLevel}
-                patientId={patient ? parseInt(patientId) : undefined}
+              {/* 1️⃣ PATIENT CLINICAL OVERVIEW - Siempre visible */}
+              <PatientClinicalOverview
+                patient={{
+                  id: patient.id,
+                  first_name: patient.first_name,
+                  last_name: patient.last_name,
+                  full_name: patient.full_name,
+                  birth_date: patient.birth_date,
+                  email: patient.email,
+                  phone: patient.phone,
+                  therapy_level: patient.therapy_level || therapyLevel,
+                  is_active: patient.is_active
+                }}
+                lastEvaluationDate={
+                  allTestResults
+                    .filter((r: any) => {
+                      const code = r.test_module?.code || r.test_module_code || '';
+                      return isTherapistClinicalEvaluation(code);
+                    })
+                    .sort((a: any, b: any) => 
+                      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+                    )[0]?.created_at || null
+                }
+                testResultsCount={testResults.length}
+                clinicalEvaluationsCount={
+                  allTestResults.filter((r: any) => {
+                    const code = r.test_module?.code || r.test_module_code || '';
+                    return isTherapistClinicalEvaluation(code);
+                  }).length
+                }
               />
 
+              {/* 2️⃣ ASSIGNED TESTS SECTION */}
+              <AssignedTestsSection
+                tests={testResults.map((r: any) => ({
+                  id: r.id,
+                  test_module_code: r.test_module?.code || r.test_module_code,
+                  test_id: r.test_id,
+                  test_name: r.test_module?.name || r.test_name || r.test_id,
+                  status: 'completed' as const, // Por ahora todos están completados
+                  completed_date: r.created_at,
+                  score: r.score,
+                  result_id: r.id
+                }))}
+                onViewResult={(resultId) => router.push(`/tests/results/${resultId}`)}
+                onAssignNew={() => setShowAssignTestModal(true)}
+              />
+
+              {/* 3️⃣ CLINICAL EVALUATIONS SECTION */}
+              <ClinicalEvaluationsSection
+                evaluations={allTestResults
+                  .filter((r: any) => {
+                    const code = r.test_module?.code || r.test_module_code || '';
+                    return isTherapistClinicalEvaluation(code);
+                  })
+                  .map((r: any) => ({
+                    id: r.id,
+                    test_module_code: r.test_module?.code || r.test_module_code || '',
+                    test_name: r.test_module?.name || 'Evaluación Clínica',
+                    status: 'saved' as const, // Por ahora todos están guardados
+                    created_at: r.created_at,
+                    updated_at: r.updated_at,
+                    result_id: r.id
+                  }))}
+                patientId={patientId}
+                onView={(evaluationId) => {
+                  const evaluation = allTestResults.find((r: any) => r.id === evaluationId);
+                  if (evaluation) {
+                    router.push(`/tests/results/${evaluationId}`);
+                  }
+                }}
+              />
+
+              {/* 4️⃣ THERAPEUTIC PLAN & NEXT STEPS */}
+              <TherapeuticPlanSection
+                nextAppointment={nextAppointment}
+                therapeuticObjectives={clinicalData.session_notes}
+                recommendations={patient.notes || ''}
+                onEditObjectives={(objectives) => 
+                  setClinicalData(prev => ({ ...prev, session_notes: objectives }))
+                }
+                onEditRecommendations={(recommendations) => {
+                  // Guardar en patient.notes
+                }}
+              />
+
+              {/* 5️⃣ QUICK ACTIONS (Secundario) */}
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Acciones Rápidas</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <Button
+                    onClick={() => setShowAssignTestModal(true)}
+                    className="bg-blue-600 hover:bg-blue-700"
+                    disabled={!patient}
+                  >
+                    <ClipboardList className="h-4 w-4 mr-2" />
+                    Asignar Test al Paciente
+                  </Button>
+                  <Button
+                    onClick={() => router.push(`/dashboard/tools/scdf?patientId=${patientId}`)}
+                    variant="outline"
+                    className="border-red-600 text-red-600 hover:bg-red-50"
+                    disabled={!patient}
+                  >
+                    <FileText className="h-4 w-4 mr-2" />
+                    Iniciar SCDF
+                  </Button>
+                  <Button
+                    onClick={() => router.push(`/tests/psicologia/scid5?patientId=${patientId}`)}
+                    variant="outline"
+                    className="border-red-600 text-red-600 hover:bg-red-50"
+                    disabled={!patient}
+                  >
+                    <Brain className="h-4 w-4 mr-2" />
+                    Iniciar Entrevista Integrativa
+                  </Button>
+                  <Button
+                    onClick={() => setShowAssignAnalysisModal(true)}
+                    variant="outline"
+                    disabled={!patient}
+                  >
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    Asignar Análisis Cabalístico
+                  </Button>
+                </div>
+              </div>
+
+              {/* Separador Visual */}
+              <div className="border-t border-gray-300 my-6"></div>
+
+              {/* Secciones Legacy (mantener para compatibilidad) */}
               <div className="flex gap-6">
                 {/* Main Content */}
                 <div className="flex-1">
-                  {/* Tabs */}
+                  {/* Tabs para secciones adicionales */}
                   <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
                 <div className="border-b border-gray-200">
                   <nav className="flex -mb-px">
@@ -1625,25 +1764,44 @@ export default function PatientDetailPage() {
                 <p className="text-sm text-gray-600 mb-4">
                   Selecciona un test para asignar a {patient.first_name}. Se generará un link que puedes compartir.
                 </p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {Object.keys(TESTS_DB).map((testId) => {
-                    const test = TESTS_DB[testId];
-                    const IconComponent = getTestIcon(testId);
-                    return (
-                      <button
-                        key={testId}
-                        onClick={() => handleAssignTest(testId)}
-                        className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors text-left"
-                      >
-                        <IconComponent className="h-5 w-5 text-blue-600 flex-shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900 truncate">{test.title}</p>
-                          <p className="text-xs text-gray-500">{test.questions.length} preguntas</p>
-                        </div>
-                      </button>
-                    );
-                  })}
+                <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="text-sm text-blue-800">
+                    <strong>Nota:</strong> Solo puedes asignar tests que el paciente completará por sí mismo.
+                    Las evaluaciones clínicas (SCDF, Entrevista Integrativa) se realizan directamente desde el dashboard.
+                  </p>
                 </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {Object.keys(TESTS_DB)
+                    .filter(testId => {
+                      // SOLO mostrar tests que pueden ser auto-administrados por el paciente
+                      return isPatientSelfAdministered(testId);
+                    })
+                    .map((testId) => {
+                      const test = TESTS_DB[testId];
+                      const IconComponent = getTestIcon(testId);
+                      return (
+                        <button
+                          key={testId}
+                          onClick={() => handleAssignTest(testId)}
+                          className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors text-left"
+                        >
+                          <IconComponent className="h-5 w-5 text-blue-600 flex-shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-gray-900 truncate">{test.title}</p>
+                            <p className="text-xs text-gray-500">{test.questions.length} preguntas</p>
+                          </div>
+                        </button>
+                      );
+                    })}
+                </div>
+                {Object.keys(TESTS_DB).filter(testId => !isPatientSelfAdministered(testId)).length > 0 && (
+                  <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                    <p className="text-xs text-amber-800">
+                      <strong>Evaluaciones clínicas no mostradas:</strong> Las evaluaciones clínicas (SCDF, Entrevista Integrativa) 
+                      no pueden ser asignadas. Deben ser realizadas directamente por el terapeuta desde el dashboard.
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </div>

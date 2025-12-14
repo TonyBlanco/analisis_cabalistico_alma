@@ -93,16 +93,9 @@ function LoginContent() {
       // Guardar token, role y username en localStorage
       saveLoginData(token, role, userUsername);
 
-      // Redirigir según el role
-      if (role === 'therapist') {
-        router.replace('/dashboard/therapist');
-      } else if (role === 'patient') {
-        router.replace('/dashboard/patient');
-      } else if (role === 'personal') {
-        router.replace('/dashboard/personal');
-      } else {
-        router.replace('/');
-      }
+      // Redirigir al dashboard raíz que determinará el rol estricto y redirigirá correctamente
+      // Esto asegura consistencia con la lógica de getUserStrictRole
+      router.replace('/dashboard');
       
     } catch (err) {
       console.error('🚨 Error en handleLogin:', err);

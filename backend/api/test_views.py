@@ -93,6 +93,22 @@ class ExecuteTestView(APIView):
         data = serializer.validated_data
         test_code = data['test_module_code']
         input_data = data['input_data']
+        
+        # SECURITY VALIDATION: Enforce test execution architecture
+        # Extract execution_mode from request (if provided) for validation
+        request_execution_mode = request.data.get('execution_mode')
+        patient_id = data.get('patient_id')
+        
+        # Validate security rules
+        is_valid, error_response = validate_test_execution_security(
+            user=request.user,
+            test_code=test_code,
+            patient_id=patient_id,
+            request_execution_mode=request_execution_mode
+        )
+        
+        if not is_valid:
+            return error_response
 
         profile = request.user.profile
         birth_data = None
@@ -168,6 +184,9 @@ class ExecuteTestView(APIView):
         test_result = None
         if data.get('save_result', True):
             patient = None
+            # Get patient_id from validated data (already validated by security)
+            patient_id = data.get('patient_id')
+            
             if profile.user_type == 'personal':
                 client_name = profile.full_name or (birth_data.full_name if birth_data else '')
                 client_birth_date = profile.birth_date or (birth_data.birth_date if birth_data else None)
@@ -175,7 +194,7 @@ class ExecuteTestView(APIView):
                 client_name = data.get('client_name', '')
                 client_birth_date = data.get('client_birth_date')
                 # Si se proporciona patient_id, vincular con el paciente
-                patient_id = data.get('patient_id')
+                # Security validation already ensured patient belongs to therapist
                 if patient_id:
                     from .models import Patient
                     try:
@@ -186,7 +205,8 @@ class ExecuteTestView(APIView):
                         if not client_birth_date:
                             client_birth_date = patient.birth_date
                     except Patient.DoesNotExist:
-                        pass  # Si no existe, continuar sin vincular
+                        # This should never happen due to security validation, but handle gracefully
+                        pass
             
             # Agregar análisis de IA al result_data si existe
             if ai_interpretation:

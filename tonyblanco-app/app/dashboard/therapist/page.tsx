@@ -2,6 +2,9 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { requireMembership, MembershipStatus } from '@/lib/auth';
+import { useRoleGuard } from '@/lib/role-guards';
+import RoleBadge from '@/components/RoleBadge';
+import ActivePatientIndicator from '@/components/ActivePatientIndicator';
 import { 
   Users, Calendar, FileText, Activity, 
   Settings, Bell, Search, Menu, X,
@@ -12,22 +15,30 @@ import {
 } from 'lucide-react';
 import { logout } from '@/lib/auth';
 
+/**
+ * Dashboard Terapeuta - SOLO para usuarios con rol 'therapist'
+ * 
+ * REGLAS:
+ * - Solo terapeutas pueden acceder
+ * - Debe mostrar paciente activo si hay uno seleccionado
+ * - Tests clínicos requieren paciente seleccionado
+ */
 export default function TherapistDashboard() {
   const router = useRouter();
   const [membership, setMembership] = useState<MembershipStatus | null>(null);
-  const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
+  // Guard estricto: solo terapeutas
+  const { loading, authorized, membership: guardMembership } = useRoleGuard({
+    allowedRoles: ['therapist'],
+    redirectTo: '/dashboard'
+  });
+
   useEffect(() => {
-    const checkAccess = async () => {
-      const membershipData = await requireMembership(['therapist'], '/membership-expired');
-      if (membershipData) {
-        setMembership(membershipData);
-      }
-      setLoading(false);
-    };
-    checkAccess();
-  }, []);
+    if (guardMembership) {
+      setMembership(guardMembership);
+    }
+  }, [guardMembership]);
 
   if (loading) {
     return (
@@ -40,7 +51,7 @@ export default function TherapistDashboard() {
     );
   }
 
-  if (!membership) {
+  if (!authorized || !membership) {
     return null;
   }
 
@@ -66,6 +77,12 @@ export default function TherapistDashboard() {
             </div>
 
             <div className="flex items-center space-x-4">
+              {/* Role Badge - MANDATORY */}
+              <RoleBadge />
+              
+              {/* Active Patient Indicator - MANDATORY */}
+              <ActivePatientIndicator />
+
               {/* Search Bar */}
               <div className="hidden md:block relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -145,11 +162,23 @@ export default function TherapistDashboard() {
             </a>
 
             <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider mt-6">
-              Herramientas
+              Tests Asignables al Paciente
             </div>
             <a href="/tests" className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100">
               <ClipboardList className="mr-3 h-5 w-5" />
-              Tests Modulares
+              Catálogo de Tests
+            </a>
+            
+            <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider mt-6">
+              Evaluaciones Clínicas del Terapeuta
+            </div>
+            <a href="/dashboard/tools/scdf" className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100">
+              <FileText className="mr-3 h-5 w-5" />
+              SCDF - Framework Clínico
+            </a>
+            <a href="/tests/psicologia/scid5" className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100">
+              <Brain className="mr-3 h-5 w-5" />
+              Entrevista Clínica Integrativa
             </a>
             <a href="/therapist/reports" className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100">
               <BarChart3 className="mr-3 h-5 w-5" />

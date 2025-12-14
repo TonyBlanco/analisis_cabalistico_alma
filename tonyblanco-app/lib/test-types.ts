@@ -57,6 +57,8 @@ export interface TestModule {
   is_available: boolean;
   requires_license?: boolean;
   user_access: UserTestAccess | null;
+  // Clasificación de modo de ejecución (derivado del código)
+  execution_mode?: 'patient_self' | 'therapist_clinical';
 }
 
 // Interface para acceso de usuario a un test

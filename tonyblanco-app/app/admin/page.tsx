@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { BarChart3, Users, TrendingUp, LogOut, Eye, EyeOff, Download, GraduationCap, BookOpen, Package, Settings } from 'lucide-react';
 import { API_BASE_URL } from '@/lib/api';
 import { getAuthToken } from '@/lib/auth';
+import { useRoleGuard } from '@/lib/role-guards';
+import RoleBadge from '@/components/RoleBadge';
 
 interface User {
   id: number;
@@ -39,6 +41,15 @@ interface AdminStats {
   total_test_results?: number;
 }
 
+/**
+ * Panel de Administración - SOLO para usuarios con rol 'admin'
+ * 
+ * REGLAS:
+ * - Solo admins pueden acceder
+ * - NO pueden ejecutar tests clínicos
+ * - NO pueden actuar como pacientes
+ * - Acceso de solo lectura a datos clínicos
+ */
 export default function AdminDashboard() {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -51,9 +62,18 @@ export default function AdminDashboard() {
   const [showPassword, setShowPassword] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'courses' | 'tests'>('overview');
 
+  // Guard estricto: solo admins
+  const { loading: guardLoading, authorized } = useRoleGuard({
+    allowedRoles: ['admin'],
+    redirectTo: '/dashboard',
+    show403: true
+  });
+
   useEffect(() => {
-    checkAuth();
-  }, []);
+    if (authorized) {
+      checkAuth();
+    }
+  }, [authorized]);
 
   const checkAuth = async () => {
     try {
@@ -251,7 +271,7 @@ export default function AdminDashboard() {
     return matchesSearch && matchesFilter;
   });
 
-  if (loading) {
+  if (guardLoading || loading) {
     return (
       <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
         <div className="text-center">
@@ -262,7 +282,7 @@ export default function AdminDashboard() {
     );
   }
 
-  if (!isAuthenticated || !isAdmin) {
+  if (!authorized || !isAuthenticated || !isAdmin) {
     return (
       <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
         <div className="text-center">
@@ -280,6 +300,8 @@ export default function AdminDashboard() {
           <div className="flex items-center gap-3">
             <BarChart3 className="w-8 h-8 text-purple-500" />
             <h1 className="text-2xl font-bold">Panel de Administración</h1>
+            {/* Role Badge - MANDATORY */}
+            <RoleBadge />
           </div>
           <button
             onClick={handleLogout}

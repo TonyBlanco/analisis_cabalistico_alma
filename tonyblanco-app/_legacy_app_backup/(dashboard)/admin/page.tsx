@@ -27,10 +27,10 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
 
   // Guard estricto: solo admins
-  const { loading: guardLoading, authorized } = useRoleGuard({
+  const { authorized } = useRoleGuard({
+    currentUserRole: getUserRole() as 'admin' | 'therapist' | 'personal' | 'patient' | null,
     allowedRoles: ['admin'],
-    redirectTo: '/dashboard',
-    show403: true
+    redirectTo: '/dashboard'
   });
 
   useEffect(() => {
@@ -60,7 +60,7 @@ export default function AdminDashboard() {
     }
   }, [authorized, router]);
 
-  if (guardLoading || loading) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">

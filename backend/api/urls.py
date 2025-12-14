@@ -58,6 +58,7 @@ from .test_views import (
     TestResultDetailView,
     UserTestStatsView,
     GrantTestAccessView,
+    AssignTestToPatientView,
     PatientPreviousTestsView,
     ProcessTestSubmissionView
 )
@@ -176,6 +177,7 @@ urlpatterns = [
     path('tests/results/<int:pk>/', TestResultDetailView.as_view(), name='test_result_detail'),
     path('tests/stats/', UserTestStatsView.as_view(), name='test_stats'),
     path('tests/grant-access/', GrantTestAccessView.as_view(), name='grant_test_access'),
+    path('tests/assign-to-patient/', AssignTestToPatientView.as_view(), name='assign_test_to_patient'),
     path('tests/patient-previous/', PatientPreviousTestsView.as_view(), name='patient_previous_tests'),
     path('tests/<str:code>/', TestModuleDetailView.as_view(), name='test_detail'),
 ]

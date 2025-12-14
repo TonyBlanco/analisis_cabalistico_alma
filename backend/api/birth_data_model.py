@@ -46,6 +46,22 @@ class UserBirthData(models.Model):
     unlock_requested = models.BooleanField(default=False, help_text='Se ha solicitado desbloqueo')
     unlock_token = models.CharField(max_length=128, blank=True, null=True, help_text='Token para desbloquear por email')
     
+    # Name change tracking
+    full_name_change_count = models.IntegerField(
+        default=0,
+        help_text="Número de veces que se ha cambiado el nombre completo"
+    )
+    full_name_locked = models.BooleanField(
+        default=False,
+        help_text="Si está bloqueado, el usuario no puede cambiar el nombre completo"
+    )
+    birth_place_label = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="Etiqueta formateada del lugar de nacimiento (ej: 'La Habana, Cuba')"
+    )
+    
     class Meta:
         verbose_name = "Datos de Nacimiento"
         verbose_name_plural = "Datos de Nacimiento"

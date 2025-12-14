@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useRoleGuard } from '@/lib/role-guards';
 import { Settings, LogOut } from 'lucide-react';
-import { logout } from '@/lib/auth';
+import { logout, getUserRole } from '@/lib/auth';
 
 /**
  * Layout Aislado para Admin Dashboard
@@ -20,10 +20,10 @@ export default function AdminLayout({
   const router = useRouter();
 
   // Guard estricto: solo admins
-  const { loading, authorized } = useRoleGuard({
+  const { authorized } = useRoleGuard({
+    currentUserRole: getUserRole() as 'admin' | 'therapist' | 'personal' | 'patient' | null,
     allowedRoles: ['admin'],
-    redirectTo: '/dashboard',
-    show403: true
+    redirectTo: '/dashboard'
   });
 
   const handleLogout = () => {
@@ -32,17 +32,6 @@ export default function AdminLayout({
       router.push('/login?force_login=true');
     }
   };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 font-medium">Verificando acceso...</p>
-        </div>
-      </div>
-    );
-  }
 
   if (!authorized) {
     return null;

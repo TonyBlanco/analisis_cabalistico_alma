@@ -99,6 +99,7 @@ export interface ExecuteTestRequest {
   input_data: Record<string, any>;
   client_name?: string;
   client_birth_date?: string;
+  patient_id?: number; // Required for therapist_clinical mode
   save_result?: boolean;
 }
 

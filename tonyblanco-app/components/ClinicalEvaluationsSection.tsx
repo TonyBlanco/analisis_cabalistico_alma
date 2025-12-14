@@ -1,0 +1,324 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { getAvailableTests, executeTest } from '@/lib/test-api';
+import { TestModule, ExecuteTestRequest } from '@/lib/test-types';
+import { getActivePatientId, getActivePatientName } from '@/lib/active-patient';
+import { getPatientDetail } from '@/lib/assignment-api';
+import { validateProfileForAnalysis } from '@/lib/profile-validation';
+import ProfileCompletionModal from './ProfileCompletionModal';
+
+/**
+ * Clinical Evaluations Section Component
+ * 
+ * Displays therapist_clinical tests with "Execute" button.
+ * Only executes when active patient is selected.
+ * Opens a modal/form to collect input data for the test execution.
+ */
+export default function ClinicalEvaluationsSection() {
+  const [tests, setTests] = useState<TestModule[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [executingTestCode, setExecutingTestCode] = useState<string | null>(null);
+  const [showExecuteModal, setShowExecuteModal] = useState(false);
+  const [testToExecute, setTestToExecute] = useState<TestModule | null>(null);
+  const [patientData, setPatientData] = useState<any>(null);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [profileValidationResult, setProfileValidationResult] = useState<{ missingFields: string[] } | null>(null);
+
+  const activePatientId = getActivePatientId();
+  const activePatientName = getActivePatientName();
+
+  useEffect(() => {
+    fetchTests();
+  }, []);
+
+  useEffect(() => {
+    // Load patient data when modal opens
+    if (showExecuteModal && testToExecute && activePatientId) {
+      loadPatientData();
+    }
+  }, [showExecuteModal, testToExecute, activePatientId]);
+
+  const fetchTests = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await getAvailableTests();
+      // Filter only therapist_clinical tests
+      const clinicalTests = (response.tests || []).filter(
+        (test: TestModule) => test.available_for_therapists === true && test.available_for_personal === false
+      );
+      setTests(clinicalTests);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Error al cargar evaluaciones clínicas';
+      setError(errorMessage);
+      console.error('Error fetching clinical tests:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadPatientData = async () => {
+    if (!activePatientId) return;
+
+    try {
+      const patient = await getPatientDetail(activePatientId);
+      setPatientData(patient);
+    } catch (err) {
+      console.error('Error loading patient data:', err);
+      setPatientData(null);
+    }
+  };
+
+  const handleExecuteTest = async (test: TestModule) => {
+    if (!activePatientId) {
+      alert('Por favor, selecciona un paciente activo antes de ejecutar una evaluación clínica.');
+      return;
+    }
+
+    // VALIDATION: Check profile before allowing clinical evaluation
+    const validation = await validateProfileForAnalysis();
+    if (!validation.isValid) {
+      setProfileValidationResult({ missingFields: validation.missingFields });
+      setShowProfileModal(true);
+      return;
+    }
+
+    setTestToExecute(test);
+    setShowExecuteModal(true);
+  };
+
+  const handleConfirmExecute = async () => {
+    if (!testToExecute || !activePatientId || !patientData) return;
+
+    setExecutingTestCode(testToExecute.code);
+
+    try {
+      // Prepare input_data based on test type
+      const inputData: Record<string, any> = {
+        nombre: patientData.full_name || patientData.first_name || '',
+        fecha_nacimiento: patientData.birth_date || '',
+        fecha: new Date().toISOString().split('T')[0],
+        terapeuta: 'Terapeuta', // TODO: Get actual therapist name from session
+      };
+
+      // For clinical tests, we typically need responses/responses data
+      // This will vary by test type - for now, we'll use a minimal structure
+      if (testToExecute.test_type === 'bdi' || testToExecute.test_type === 'bai') {
+        // These tests require responses - but we'll let the backend handle validation
+        inputData.responses = {};
+      }
+
+      const request: ExecuteTestRequest = {
+        test_module_code: testToExecute.code,
+        input_data: inputData,
+        patient_id: activePatientId,
+        client_name: patientData.full_name || patientData.first_name || '',
+        client_birth_date: patientData.birth_date || '',
+        save_result: true,
+      };
+
+      const result = await executeTest(request);
+
+      // Show success message
+      alert(`Evaluación "${testToExecute.name}" ejecutada correctamente.`);
+      
+      // Close modal and refresh
+      setShowExecuteModal(false);
+      setTestToExecute(null);
+      setPatientData(null);
+
+      // Trigger refresh event for results list
+      window.dispatchEvent(new Event('assignedTestsChanged'));
+
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Error al ejecutar evaluación';
+      alert(errorMessage);
+      console.error('Error executing clinical test:', error);
+    } finally {
+      setExecutingTestCode(null);
+    }
+  };
+
+  const handleCancelExecute = () => {
+    setShowExecuteModal(false);
+    setTestToExecute(null);
+    setPatientData(null);
+  };
+
+  if (loading) {
+    return (
+      <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Evaluaciones Clínicas</h2>
+        <div className="text-center py-12">
+          <div className="inline-block animate-pulse">
+            <div className="h-2 w-40 bg-gray-200 rounded mb-2"></div>
+            <p className="text-sm text-gray-500 mt-2">Cargando evaluaciones clínicas...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-white border border-gray-200 rounded-lg p-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Evaluaciones Clínicas</h2>
+        <div className="bg-red-50 border border-red-200 rounded-md p-4">
+          <p className="text-sm text-red-800">{error}</p>
+          <button
+            onClick={fetchTests}
+            className="mt-2 text-sm text-red-600 hover:text-red-800 underline"
+          >
+            Reintentar
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+        <div className="mb-4">
+          <h2 className="text-lg font-semibold text-gray-900">Evaluaciones Clínicas</h2>
+          {activePatientName && (
+            <p className="text-sm text-gray-500 mt-1">Paciente activo: <span className="font-medium">{activePatientName}</span></p>
+          )}
+        </div>
+
+        {tests.length === 0 ? (
+          <div className="border border-gray-200 border-dashed rounded-lg p-12 text-center">
+            <p className="text-sm text-gray-500">No hay evaluaciones clínicas disponibles.</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {tests.map((test) => (
+              <div
+                key={test.code}
+                className="border border-gray-200 rounded-md p-4 hover:border-gray-300 hover:shadow-sm transition-all"
+              >
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-medium text-gray-900">{test.name}</h3>
+                    {test.description && (
+                      <p className="text-sm text-gray-600 mt-1">{test.description}</p>
+                    )}
+                    <div className="flex items-center gap-3 mt-2">
+                      <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded">
+                        Evaluación clínica
+                      </span>
+                      {test.test_type && (
+                        <span className="text-xs text-gray-500">{test.test_type}</span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex-shrink-0">
+                    <ExecuteTestButton
+                      test={test}
+                      onExecute={() => handleExecuteTest(test)}
+                      disabled={executingTestCode === test.code || !activePatientId}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Profile Completion Modal */}
+      <ProfileCompletionModal
+        open={showProfileModal}
+        onClose={() => {
+          setShowProfileModal(false);
+          setProfileValidationResult(null);
+        }}
+        missingFields={profileValidationResult?.missingFields}
+      />
+
+      {/* Execute Confirmation Modal */}
+      {showExecuteModal && testToExecute && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={handleCancelExecute}>
+          <div
+            className="bg-white rounded-lg shadow-lg max-w-md w-full mx-4 p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Ejecutar Evaluación Clínica</h3>
+            
+            {patientData ? (
+              <>
+                <div className="mb-4 space-y-2">
+                  <p className="text-sm text-gray-600">
+                    <strong>Paciente:</strong> {patientData.full_name || patientData.first_name || 'N/A'}
+                  </p>
+                  {patientData.birth_date && (
+                    <p className="text-sm text-gray-600">
+                      <strong>Fecha de nacimiento:</strong> {new Date(patientData.birth_date).toLocaleDateString('es-ES')}
+                    </p>
+                  )}
+                </div>
+                <p className="text-sm text-gray-600 mb-4">
+                  ¿Deseas ejecutar la evaluación <strong>"{testToExecute.name}"</strong> para este paciente?
+                </p>
+                <p className="text-xs text-gray-500 mb-4">
+                  Nota: Los datos del paciente se utilizarán para la evaluación. Los resultados se guardarán automáticamente.
+                </p>
+              </>
+            ) : (
+              <p className="text-sm text-gray-600 mb-4">
+                Cargando datos del paciente...
+              </p>
+            )}
+
+            <div className="flex items-center gap-3 justify-end">
+              <button
+                onClick={handleCancelExecute}
+                disabled={executingTestCode === testToExecute.code}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleConfirmExecute}
+                disabled={executingTestCode === testToExecute.code || !patientData}
+                className="px-4 py-2 text-sm font-medium text-white rounded-md hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ backgroundColor: 'var(--accent-color)' }}
+              >
+                {executingTestCode === testToExecute.code ? 'Ejecutando...' : 'Ejecutar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+// Helper component for execute button
+function ExecuteTestButton({ test, onExecute, disabled }: { test: TestModule; onExecute: () => void; disabled: boolean }) {
+  if (!disabled && !getActivePatientId()) {
+    return (
+      <button
+        disabled
+        className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-400 bg-gray-100 rounded-md cursor-not-allowed"
+        title="Selecciona un paciente activo para ejecutar evaluaciones"
+      >
+        Ejecutar
+      </button>
+    );
+  }
+
+  return (
+    <button
+      onClick={onExecute}
+      disabled={disabled}
+      className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-white rounded-md hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+      style={{ backgroundColor: 'var(--accent-color)' }}
+    >
+      {disabled ? 'Ejecutando...' : 'Ejecutar'}
+    </button>
+  );
+}

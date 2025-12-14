@@ -1,53 +1,40 @@
 'use client';
 
-import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
-
 interface RoleBadgeProps {
-  userType?: string;
-  className?: string;
+  realUserRole: string | null;
+  activeDashboardRole?: string | null;
 }
 
-export default function RoleBadge({ userType, className }: RoleBadgeProps) {
-  if (!userType) {
-    return null;
-  }
+const roleLabels: Record<string, string> = {
+  admin: 'Administrador',
+  therapist: 'Terapeuta',
+  personal: 'Personal',
+  patient: 'Paciente',
+};
 
-  const roleConfig = {
-    personal: {
-      label: '👤 Personal',
-      variant: 'default' as const,
-      className: 'bg-blue-100 text-blue-800 border-blue-200'
-    },
-    therapist: {
-      label: '👨‍⚕️ Terapeuta',
-      variant: 'secondary' as const,
-      className: 'bg-purple-100 text-purple-800 border-purple-200'
-    },
-    patient: {
-      label: '🏥 Paciente',
-      variant: 'outline' as const,
-      className: 'bg-green-100 text-green-800 border-green-200'
-    },
-    visitor: {
-      label: '👋 Visitante',
-      variant: 'outline' as const,
-      className: 'bg-gray-100 text-gray-800 border-gray-200'
-    }
-  };
+export default function RoleBadge({ realUserRole, activeDashboardRole }: RoleBadgeProps) {
+  if (!realUserRole) return null;
 
-  const config = roleConfig[userType as keyof typeof roleConfig] || {
-    label: userType,
-    variant: 'outline' as const,
-    className: 'bg-gray-100 text-gray-800 border-gray-200'
-  };
+  // If admin is viewing a different dashboard, show simulation info
+  const isSimulating = realUserRole === 'admin' && activeDashboardRole && activeDashboardRole !== 'admin';
 
   return (
-    <Badge 
-      variant={config.variant}
-      className={cn(config.className, className)}
-    >
-      {config.label}
-    </Badge>
+    <div className="flex flex-col items-end gap-1">
+      <span
+        className="px-2 py-1 rounded text-xs font-medium text-white"
+        style={{ backgroundColor: 'var(--accent-color)' }}
+      >
+        {isSimulating 
+          ? `Vista activa: ${roleLabels[activeDashboardRole] || activeDashboardRole}`
+          : `Rol real: ${roleLabels[realUserRole] || realUserRole}`
+        }
+      </span>
+      {isSimulating && (
+        <span className="text-xs text-gray-500 italic">
+          Rol real: {roleLabels[realUserRole]}
+        </span>
+      )}
+    </div>
   );
 }
+

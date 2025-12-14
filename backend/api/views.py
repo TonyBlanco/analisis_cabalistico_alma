@@ -142,6 +142,20 @@ class CurrentUserView(APIView):
                 'current_patients_count': request.user.profile.current_patients_count,
                 'fichas_created_this_month': request.user.profile.fichas_created_this_month,
             })
+            
+            # Si es paciente, incluir patient_id y referencia al therapist
+            if request.user.profile.user_type == 'patient':
+                try:
+                    patient = request.user.patient_profile
+                    user_data['patient_id'] = patient.id
+                    user_data['therapist'] = {
+                        'id': patient.therapist.id,
+                        'username': patient.therapist.username,
+                        'full_name': patient.therapist.profile.full_name if hasattr(patient.therapist, 'profile') else patient.therapist.username,
+                    }
+                except Exception:
+                    # Si no tiene patient_profile vinculado, no incluir estos campos
+                    pass
             # Incluir fecha de nacimiento si está en el perfil
             if request.user.profile.birth_date:
                 user_data['birth_date'] = str(request.user.profile.birth_date)
@@ -156,7 +170,10 @@ class CurrentUserView(APIView):
                     'birth_country': bd.birth_country,
                     'birth_latitude': float(bd.birth_latitude) if bd.birth_latitude else None,
                     'birth_longitude': float(bd.birth_longitude) if bd.birth_longitude else None,
-                    'is_locked': bd.is_locked
+                    'birth_place_label': bd.birth_place_label,
+                    'is_locked': bd.is_locked,
+                    'full_name_change_count': bd.full_name_change_count,
+                    'full_name_locked': bd.full_name_locked
                 }
             except Exception:
                 pass
@@ -189,9 +206,68 @@ class UpdateProfileView(APIView):
             # Update profile fields
             if 'phone' in request.data:
                 profile.phone = request.data['phone']
+            if 'full_name' in request.data:
+                profile.full_name = request.data['full_name']
+            if 'birth_date' in request.data and request.data['birth_date']:
+                try:
+                    from datetime import datetime as dt
+                    birth_date_str = request.data['birth_date']
+                    if isinstance(birth_date_str, str):
+                        profile.birth_date = dt.strptime(birth_date_str, '%Y-%m-%d').date()
+                    else:
+                        profile.birth_date = birth_date_str
+                except (ValueError, TypeError) as e:
+                    pass  # Skip if date format is invalid
             profile.save()
             
+            # Handle full_name changes with validation
+            new_full_name = request.data.get('full_name')
+            if new_full_name and birth_data:
+                old_full_name = birth_data.full_name
+                if new_full_name.strip() != old_full_name.strip():
+                    # Name is changing - validate lock status
+                    if birth_data.full_name_locked:
+                        return Response(
+                            {
+                                'error': 'Cambios de nombre bloqueados',
+                                'message': 'Name changes locked. Contact support@tonyblanco.es'
+                            },
+                            status=status.HTTP_403_FORBIDDEN
+                        )
+                    
+                    # Check change count
+                    if birth_data.full_name_change_count >= 2:
+                        # Lock the name and reject
+                        birth_data.full_name_locked = True
+                        birth_data.save(update_fields=['full_name_locked'])
+                        # Log audit event (could use a logging system here)
+                        return Response(
+                            {
+                                'error': 'Cambios de nombre bloqueados',
+                                'message': 'Name changes locked. Contact support@tonyblanco.es'
+                            },
+                            status=status.HTTP_403_FORBIDDEN
+                        )
+                    
+                    # Increment change count
+                    birth_data.full_name_change_count += 1
+                    # Log audit event (could use a logging system here)
+            
             # Update birth data if provided and exists
+            # Also create birth_data if it doesn't exist but birth_city/country are provided
+            if 'birth_city' in request.data or 'birth_country' in request.data or 'birth_latitude' in request.data or 'birth_longitude' in request.data:
+                if not birth_data:
+                    # Try to create birth_data if it doesn't exist
+                    try:
+                        from .birth_data_model import UserBirthData
+                        birth_data = UserBirthData.objects.create(
+                            user=user,
+                            full_name=profile.full_name or user.get_full_name() or user.username,
+                            birth_date=profile.birth_date if profile.birth_date else None,
+                        )
+                    except Exception:
+                        pass  # If creation fails, continue without birth_data
+            
             if birth_data and not birth_data.is_locked:
                 if 'birth_city' in request.data:
                     birth_data.birth_city = request.data['birth_city']
@@ -200,9 +276,29 @@ class UpdateProfileView(APIView):
                 if 'birth_time' in request.data:
                     birth_data.birth_time = request.data['birth_time']
                 if 'birth_latitude' in request.data:
-                    birth_data.birth_latitude = request.data['birth_latitude']
+                    try:
+                        birth_data.birth_latitude = float(request.data['birth_latitude'])
+                    except (ValueError, TypeError):
+                        pass
                 if 'birth_longitude' in request.data:
-                    birth_data.birth_longitude = request.data['birth_longitude']
+                    try:
+                        birth_data.birth_longitude = float(request.data['birth_longitude'])
+                    except (ValueError, TypeError):
+                        pass
+                if 'birth_place_label' in request.data:
+                    birth_data.birth_place_label = request.data['birth_place_label']
+                if 'full_name' in request.data and not birth_data.full_name_locked:
+                    birth_data.full_name = request.data['full_name']
+                if 'birth_date' in request.data and request.data['birth_date']:
+                    try:
+                        from datetime import datetime as dt
+                        birth_date_str = request.data['birth_date']
+                        if isinstance(birth_date_str, str):
+                            birth_data.birth_date = dt.strptime(birth_date_str, '%Y-%m-%d').date()
+                        else:
+                            birth_data.birth_date = birth_date_str
+                    except (ValueError, TypeError):
+                        pass  # Skip if date format is invalid
                 birth_data.save()
             
             return Response({

@@ -58,16 +58,38 @@ export async function getTestDetail(code: string): Promise<TestModule> {
 
 /**
  * Ejecuta un test
+ * 
+ * IMPORTANT: This function should check profile completion before executing
+ * if the test requires birth data (astrology, cabalistic analysis).
+ * Use checkProfileBeforeAnalysis() from profile-validation.ts
  */
 export async function executeTest(data: ExecuteTestRequest): Promise<ExecuteTestResponse> {
   const url = `${API_BASE_URL}/tests/execute/`;
   console.log('🔍 Ejecutando test en:', url);
-  console.log('📦 Payload:', JSON.stringify(data, null, 2));
+  
+  // Prepare payload - include patient_id if provided
+  const payload: any = {
+    test_module_code: data.test_module_code,
+    input_data: data.input_data,
+    save_result: data.save_result !== false, // Default to true
+  };
+  
+  if (data.patient_id) {
+    payload.patient_id = data.patient_id;
+  }
+  if (data.client_name) {
+    payload.client_name = data.client_name;
+  }
+  if (data.client_birth_date) {
+    payload.client_birth_date = data.client_birth_date;
+  }
+  
+  console.log('📦 Payload:', JSON.stringify(payload, null, 2));
   
   const response = await fetch(url, {
     method: 'POST',
     headers: getAuthHeaders(),
-    body: JSON.stringify(data),
+    body: JSON.stringify(payload),
   });
 
   console.log('📡 Respuesta del servidor:', response.status, response.statusText);

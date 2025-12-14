@@ -878,6 +878,130 @@ class GrantTestAccessView(APIView):
         })
 
 
+class AssignTestToPatientView(APIView):
+    """
+    Permite a terapeutas asignar tests patient_self a sus propios pacientes.
+    
+    Solo terapeutas pueden usar este endpoint (no admins).
+    Solo se pueden asignar tests patient_self (no therapist_clinical).
+    El paciente debe pertenecer al terapeuta.
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        user = request.user
+        profile = user.profile
+        
+        # SECURITY: Only therapists can assign tests (not admins)
+        if profile.user_type != 'therapist':
+            return Response(
+                {
+                    'error': 'No autorizado',
+                    'message': 'Solo los terapeutas pueden asignar tests a pacientes. Los administradores no pueden realizar esta acción por razones de seguridad.'
+                },
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        # SECURITY: Explicitly block admins even if user_type is 'therapist'
+        is_admin = (
+            profile.is_admin or 
+            user.is_staff or 
+            user.is_superuser
+        )
+        if is_admin:
+            return Response(
+                {
+                    'error': 'No autorizado',
+                    'message': 'Los administradores no pueden asignar tests a pacientes por razones de seguridad. Solo los terapeutas pueden gestionar sus propios pacientes.'
+                },
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        patient_id = request.data.get('patient_id')
+        test_code = request.data.get('test_code')
+        
+        if not patient_id or not test_code:
+            return Response(
+                {
+                    'error': 'Datos incompletos',
+                    'message': 'patient_id y test_code son requeridos'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Validate patient exists and belongs to therapist
+        try:
+            patient = Patient.objects.get(id=patient_id, therapist=user)
+        except Patient.DoesNotExist:
+            return Response(
+                {
+                    'error': 'Paciente no encontrado',
+                    'message': f'El paciente con ID {patient_id} no existe o no pertenece a este terapeuta'
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Validate patient has linked User account
+        if not patient.user:
+            return Response(
+                {
+                    'error': 'Paciente sin cuenta de usuario',
+                    'message': 'El paciente debe tener una cuenta de usuario vinculada para poder asignarle tests'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Validate test module exists
+        try:
+            test_module = TestModule.objects.get(code=test_code, is_active=True)
+        except TestModule.DoesNotExist:
+            return Response(
+                {
+                    'error': 'Test no encontrado',
+                    'message': f'El test con código {test_code} no existe o no está activo'
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # SECURITY: Only allow patient_self tests (not therapist_clinical)
+        if test_module.available_for_therapists and not test_module.available_for_personal:
+            return Response(
+                {
+                    'error': 'Test no asignable',
+                    'message': 'Solo se pueden asignar tests de tipo patient_self a pacientes. Los tests clínicos (therapist_clinical) no pueden ser asignados.'
+                },
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        # Ensure test is available for personal/patient execution
+        if not test_module.available_for_personal:
+            return Response(
+                {
+                    'error': 'Test no disponible',
+                    'message': 'Este test no está disponible para ejecución por pacientes'
+                },
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        # Create or update UserTestAccess for the patient's user account
+        access, created = UserTestAccess.objects.get_or_create(
+            user=patient.user,
+            test_module=test_module
+        )
+        
+        # Mark as special access (assigned by therapist)
+        access.has_special_access = True
+        access.save()
+        
+        return Response({
+            'success': True,
+            'message': f'Test "{test_module.name}" asignado exitosamente al paciente {patient.full_name}',
+            'patient_id': patient.id,
+            'test_code': test_code,
+            'created': created
+        })
+
+
 @method_decorator(csrf_exempt, name='dispatch')
 class ProcessTestSubmissionView(APIView):
     """

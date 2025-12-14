@@ -1,7 +1,7 @@
 'use client';
 
 import { AdminStats } from '@/lib/admin-api';
-import { Users, Activity, FileText, TrendingUp, Calendar } from 'lucide-react';
+import { Users, Activity, FileText, TrendingUp, Calendar, GraduationCap } from 'lucide-react';
 
 interface AdminSystemOverviewProps {
   stats: AdminStats | null;
@@ -148,3 +148,4 @@ export default function AdminSystemOverview({ stats }: AdminSystemOverviewProps)
     </div>
   );
 }
+

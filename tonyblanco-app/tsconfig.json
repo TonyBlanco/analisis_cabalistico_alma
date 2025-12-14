@@ -32,5 +32,5 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules", "src/_archive"]
+  "exclude": ["node_modules", "src/_archive", "_legacy_app_backup", "_legacy_components_backup", "data", "components/admin", "lib/kerykeion-engine.ts"]
 }

@@ -1,10 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import "./mobile-responsive.css";
-import MainNav from "@/components/MainNav";
-import MainFooter from "@/components/MainFooter";
-import NotificationInitializer from "@/components/NotificationInitializer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,19 +35,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning style={{ backgroundColor: '#000000' }}>
+    <html lang="es" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black flex flex-col min-h-screen`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen app-shell`}
         suppressHydrationWarning
-        style={{ backgroundColor: '#000000' }}
       >
-        <NotificationInitializer />
-        <MainNav />
         <main className="flex-1">
           {children}
         </main>
-        <MainFooter />
       </body>
     </html>
   );
 }
+

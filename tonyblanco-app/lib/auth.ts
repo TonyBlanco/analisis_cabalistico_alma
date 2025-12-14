@@ -78,10 +78,31 @@ export function loginForTesting(): void {
 
 export function logout(): void {
   removeAuthToken();
+  clearMembershipCache();
 }
 
+// Cache para evitar llamadas repetidas a check-membership
+let membershipCache: {
+  token: string;
+  data: MembershipStatus;
+  timestamp: number;
+} | null = null;
+
+const CACHE_DURATION = 5000; // 5 segundos de caché
+
 // Nuevas funciones de verificación de membresía
-export async function checkMembership(token: string): Promise<MembershipStatus | null> {
+export async function checkMembership(token: string, useCache: boolean = true): Promise<MembershipStatus | null> {
+  // Verificar caché si está disponible y válido
+  if (useCache && membershipCache) {
+    const now = Date.now();
+    if (
+      membershipCache.token === token &&
+      (now - membershipCache.timestamp) < CACHE_DURATION
+    ) {
+      return membershipCache.data;
+    }
+  }
+
   try {
     const response = await fetch(`${API_BASE_URL}/check-membership/`, {
       method: 'GET',
@@ -95,11 +116,25 @@ export async function checkMembership(token: string): Promise<MembershipStatus |
       return null;
     }
 
-    return await response.json();
+    const data = await response.json();
+    
+    // Guardar en caché
+    membershipCache = {
+      token,
+      data,
+      timestamp: Date.now()
+    };
+
+    return data;
   } catch (error) {
     console.error('Error checking membership:', error);
     return null;
   }
+}
+
+// Función para limpiar el caché (útil después de logout o cambios de membresía)
+export function clearMembershipCache(): void {
+  membershipCache = null;
 }
 
 export async function requireAuth(redirectTo: string = '/login'): Promise<boolean> {

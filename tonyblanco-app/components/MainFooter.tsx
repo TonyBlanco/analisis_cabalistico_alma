@@ -143,7 +143,7 @@ export default function MainFooter() {
                 </li>
                 <li>
                   <button
-                    onClick={() => router.push('/register/personal')}
+                    onClick={() => router.push('/register/user')}
                     className="flex items-center gap-2 text-sm body-font hover:text-[#D4AF37] transition-colors"
                     style={{ color: '#E2E8F0', opacity: 0.7 }}
                   >

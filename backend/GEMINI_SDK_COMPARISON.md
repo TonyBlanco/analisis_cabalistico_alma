@@ -342,3 +342,4 @@ El nuevo SDK `google-genai` ofrece **ventajas significativas** sobre la API REST
 - ✅ **Futuro-proof** (el SDK antiguo se depreca)
 
 **Recomendación:** Migrar al nuevo SDK para aprovechar todas las ventajas y estar preparado para el futuro.
+

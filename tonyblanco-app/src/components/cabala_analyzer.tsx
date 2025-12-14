@@ -381,6 +381,7 @@ const CabalaAnalyzer = () => {
                   <a
                     href="/admin"
                     className="flex items-center gap-2 bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition-colors"
+                    // TODO: Actualizar cuando se implemente nuevo Admin Dashboard
                   >
                     👑 Panel Admin
                   </a>

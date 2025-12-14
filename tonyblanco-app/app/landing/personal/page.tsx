@@ -28,7 +28,7 @@ export default function PersonalLanding() {
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
               <button
-                onClick={() => router.push('/register/personal')}
+                onClick={() => router.push('/register/user')}
                 className="px-8 py-4 bg-gradient-to-r from-[#D4AF37] via-[#B8941F] to-[#8B6914] hover:from-[#B8941F] hover:to-[#D4AF37] text-black font-bold rounded-lg transition-all duration-500 shadow-lg shadow-[#D4AF37]/20 body-font"
               >
                 Comenzar mi Análisis
@@ -171,7 +171,7 @@ export default function PersonalLanding() {
               </ul>
               
               <button
-                onClick={() => router.push('/register/personal')}
+                onClick={() => router.push('/register/user')}
                 className="w-full px-6 py-4 bg-gradient-to-r from-[#D4AF37] via-[#B8941F] to-[#8B6914] hover:from-[#B8941F] hover:to-[#D4AF37] text-black font-bold rounded-lg transition-all text-lg body-font"
               >
                 Obtener mi Análisis
@@ -226,7 +226,7 @@ export default function PersonalLanding() {
               Descubre las respuestas que tu alma ha estado buscando
             </p>
             <button
-              onClick={() => router.push('/register/personal')}
+                onClick={() => router.push('/register/user')}
               className="px-12 py-5 bg-gradient-to-r from-[#D4AF37] via-[#B8941F] to-[#8B6914] hover:from-[#B8941F] hover:to-[#D4AF37] text-black font-bold rounded-lg transition-all duration-500 shadow-lg shadow-[#D4AF37]/20 text-lg body-font"
             >
               Comenzar mi Análisis

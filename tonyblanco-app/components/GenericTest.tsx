@@ -265,7 +265,7 @@ export default function GenericTest({ testId }: GenericTestProps) {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
-                onClick={() => router.push('/register/personal')}
+                onClick={() => router.push('/register/user')}
                 className="px-8 py-4 bg-black text-[#D4AF37] font-bold rounded-lg hover:bg-gray-900 transition-all shadow-lg text-lg"
               >
                 Crear Cuenta Gratis

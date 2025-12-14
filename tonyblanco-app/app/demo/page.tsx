@@ -33,7 +33,7 @@ export default function DemoPage() {
   };
 
   const handleRegister = () => {
-    router.push('/register/user');
+    router.push('/register/personal');
   };
 
   return (

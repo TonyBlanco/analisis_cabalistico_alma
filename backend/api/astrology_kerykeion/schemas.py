@@ -4,7 +4,7 @@ Input y Output estructurados
 """
 from typing import Optional, Dict, List, Any
 from datetime import datetime
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 
 
 class LocationSchema(BaseModel):
@@ -32,7 +32,8 @@ class KerykeionInputSchema(BaseModel):
     engine: str = Field(default="kerykeion", description="Motor de cálculo")
     engine_version: Optional[str] = Field(default="1.0.0", description="Versión del motor")
 
-    @validator('birth_date')
+    @field_validator('birth_date')
+    @classmethod
     def validate_birth_date(cls, v):
         """Validar formato de fecha"""
         try:
@@ -41,7 +42,8 @@ class KerykeionInputSchema(BaseModel):
         except ValueError:
             raise ValueError('birth_date debe estar en formato YYYY-MM-DD')
 
-    @validator('birth_time')
+    @field_validator('birth_time')
+    @classmethod
     def validate_birth_time(cls, v):
         """Validar formato de hora"""
         try:
@@ -50,7 +52,8 @@ class KerykeionInputSchema(BaseModel):
         except ValueError:
             raise ValueError('birth_time debe estar en formato HH:MM')
 
-    @validator('house_system')
+    @field_validator('house_system')
+    @classmethod
     def validate_house_system(cls, v):
         """Validar sistema de casas"""
         valid_systems = ['placidus', 'equal', 'koch', 'whole_sign', 'regiomontanus', 'campanus']
@@ -58,7 +61,8 @@ class KerykeionInputSchema(BaseModel):
             raise ValueError(f'house_system debe ser uno de: {", ".join(valid_systems)}')
         return v
 
-    @validator('zodiac_system')
+    @field_validator('zodiac_system')
+    @classmethod
     def validate_zodiac_system(cls, v):
         """Validar sistema zodiacal"""
         valid_systems = ['tropical', 'sidereal']
@@ -81,13 +85,12 @@ class HouseOutputSchema(BaseModel):
 
 class AspectOutputSchema(BaseModel):
     """Aspecto entre planetas"""
+    model_config = ConfigDict(populate_by_name=True)
+    
     from_planet: str = Field(..., alias="from", description="Planeta origen")
     to_planet: str = Field(..., alias="to", description="Planeta destino")
     type: str = Field(..., description="Tipo de aspecto: conjunction, opposition, trine, square, sextile, quincunx, semisextile")
     orb: float = Field(..., ge=0, description="Orbe del aspecto en grados")
-
-    class Config:
-        allow_population_by_field_name = True
 
 
 class CabalisticMappingSchema(BaseModel):
@@ -105,9 +108,4 @@ class KerykeionOutputSchema(BaseModel):
     aspects: List[AspectOutputSchema] = Field(..., description="Aspectos calculados")
     chart_svg: str = Field(..., description="SVG de la carta natal")
     cabalistic_mapping: Dict[str, CabalisticMappingSchema] = Field(..., description="Mapeo cabalístico planetas → Sefirot/Senderos")
-
-    class Config:
-        json_encoders = {
-            datetime: lambda v: v.isoformat()
-        }
 

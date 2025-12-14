@@ -33,24 +33,24 @@ export const viewport: Viewport = {
   themeColor: '#D4AF37',
 };
 
-/**
- * Root Layout - Layout base sin navbar ni footer
- * 
- * Los route groups (public) y (dashboard) tienen sus propios layouts
- * que heredan de este layout raíz.
- */
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning style={{ backgroundColor: '#000000' }}>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black flex flex-col min-h-screen`}
         suppressHydrationWarning
+        style={{ backgroundColor: '#000000' }}
       >
-        {children}
+        <NotificationInitializer />
+        <MainNav />
+        <main className="flex-1">
+          {children}
+        </main>
+        <MainFooter />
       </body>
     </html>
   );

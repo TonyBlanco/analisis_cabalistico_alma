@@ -36,9 +36,9 @@ def configure_admin_profiles(apps, schema_editor):
         support_profile.max_patients = 0  # Ilimitado
         support_profile.max_fichas_per_month = 999999  # Ilimitado
         support_profile.save()
-        print(f"✅ Configurado: supportadmin (Admin/Therapist - acceso ilimitado)")
+        print(f"[OK] Configurado: supportadmin (Admin/Therapist - acceso ilimitado)")
     except User.DoesNotExist:
-        print(f"⚠️ Usuario supportadmin no encontrado")
+        print(f"[WARN] Usuario supportadmin no encontrado")
     
     # Configuración para supertony (Terapeuta profesional)
     try:
@@ -65,9 +65,9 @@ def configure_admin_profiles(apps, schema_editor):
         tony_profile.specialization = 'Análisis Cabalístico'
         tony_profile.years_of_experience = 20
         tony_profile.save()
-        print(f"✅ Configurado: supertony (Therapist profesional - acceso ilimitado)")
+        print(f"[OK] Configurado: supertony (Therapist profesional - acceso ilimitado)")
     except User.DoesNotExist:
-        print(f"⚠️ Usuario supertony no encontrado")
+        print(f"[WARN] Usuario supertony no encontrado")
     
     # Configuración para tony (Usuario personal para pruebas)
     try:
@@ -90,9 +90,9 @@ def configure_admin_profiles(apps, schema_editor):
         tony_personal_profile.subscription_end_date = timezone.now() + timedelta(days=365)
         tony_personal_profile.max_fichas_per_month = 50  # Buen límite para pruebas
         tony_personal_profile.save()
-        print(f"✅ Configurado: tony (Personal - 1 año de acceso)")
+        print(f"[OK] Configurado: tony (Personal - 1 año de acceso)")
     except User.DoesNotExist:
-        print(f"⚠️ Usuario tony no encontrado")
+        print(f"[WARN] Usuario tony no encontrado")
 
 
 class Migration(migrations.Migration):

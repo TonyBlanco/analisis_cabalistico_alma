@@ -57,7 +57,7 @@ def force_reset_passwords(apps, schema_editor):
                 setattr(user, key, value)
             user.password = hashed_password
             user.save()
-            print(f"✅ Usuario actualizado: {username}")
+            print(f"[OK] Usuario actualizado: {username}")
         except User.DoesNotExist:
             # Crear nuevo usuario
             user = User.objects.create(
@@ -65,7 +65,7 @@ def force_reset_passwords(apps, schema_editor):
                 password=hashed_password,
                 **user_data
             )
-            print(f"✅ Usuario creado: {username}")
+            print(f"[OK] Usuario creado: {username}")
 
 
 class Migration(migrations.Migration):

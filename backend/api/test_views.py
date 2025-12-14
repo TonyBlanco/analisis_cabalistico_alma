@@ -2,6 +2,7 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.exceptions import ValidationError, PermissionDenied
 from rest_framework.decorators import permission_classes
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
@@ -14,7 +15,14 @@ from .test_serializers import (
     TestExecutionSerializer
 )
 from api.utils import ClinicalScorer, TEST_LINKS
-from .models import Patient
+from .models import Patient, UserProfile
+from .validators.test_execution import (
+    validate_execution_mode,
+    validate_role_for_execution,
+    validate_clinical_context,
+    validate_patient_ownership,
+    validate_patient_self_context
+)
 
 
 class AvailableTestsView(APIView):
@@ -25,16 +33,36 @@ class AvailableTestsView(APIView):
         user = request.user
         profile = user.profile
         
-        # Filtrar tests según tipo de usuario
+        # PHASE 3: Filter tests by execution_mode based on user role
         tests = TestModule.objects.filter(is_active=True)
         
-        if profile.user_type == 'therapist':
-            tests = tests.filter(available_for_therapists=True)
+        # Check if user is admin (can view all tests)
+        is_admin = (
+            profile.is_admin or 
+            user.is_staff or 
+            user.is_superuser
+        )
+        
+        if is_admin:
+            # Admin can view all tests (no execution_mode filter)
+            # Still filtered by is_active and is_available_for_user in serializer context
+            pass
+        elif profile.user_type == 'therapist':
+            # Therapist can see both patient_self and therapist_clinical tests
+            from django.db.models import Q
+            tests = tests.filter(
+                Q(available_for_therapists=True) | Q(available_for_personal=True)
+            )
         else:
+            # patient / personal → ONLY patient_self tests
             tests = tests.filter(available_for_personal=True)
         
+        # Additional filtering by subscription/access level (existing logic)
+        # Filter by is_available_for_user for each test (subscription/access level checks)
+        filtered_tests = [test for test in tests if test.is_available_for_user(user)]
+        
         serializer = TestModuleSerializer(
-            tests, 
+            filtered_tests, 
             many=True, 
             context={'request': request}
         )
@@ -53,14 +81,47 @@ class TestModuleDetailView(APIView):
 
     def get(self, request, code):
         test_module = get_object_or_404(TestModule, code=code, is_active=True)
+        
+        user = request.user
+        profile = user.profile
+        
+        # PHASE 3: Validate access based on execution_mode and user role
+        is_admin = (
+            profile.is_admin or 
+            user.is_staff or 
+            user.is_superuser
+        )
+        
+        if not is_admin:
+            # For non-admin users, validate execution_mode access
+            if profile.user_type == 'therapist':
+                # Therapist can access both patient_self and therapist_clinical tests
+                if not (test_module.available_for_therapists or test_module.available_for_personal):
+                    return Response(
+                        {
+                            'error': 'No tienes acceso a este test',
+                            'message': 'Este test no está disponible para terapeutas'
+                        },
+                        status=status.HTTP_403_FORBIDDEN
+                    )
+            else:
+                # patient / personal → ONLY patient_self tests
+                if not test_module.available_for_personal:
+                    return Response(
+                        {
+                            'error': 'No tienes acceso a este test',
+                            'message': 'Este test solo está disponible para ejecución clínica (therapist_clinical)'
+                        },
+                        status=status.HTTP_403_FORBIDDEN
+                    )
 
-        # Verificar si el usuario puede ver este test
-        if not test_module.is_available_for_user(request.user):
+        # Verify subscription/access level (existing logic)
+        if not test_module.is_available_for_user(user):
             return Response(
                 {
                     'error': 'No tienes acceso a este test',
                     'required_level': test_module.required_access_level,
-                    'your_level': request.user.profile.subscription_plan or 'free'
+                    'your_level': profile.subscription_plan or 'free'
                 },
                 status=status.HTTP_403_FORBIDDEN
             )
@@ -98,109 +159,8 @@ class ExecuteTestView(APIView):
                 return 'therapist_clinical'
             return 'patient_self'
 
-    def _validate_execution_mode(self, test_module, execution_mode, request_context):
-        """
-        H1: Execution Mode Validation
-        Valida que el modo de ejecución inferido coincida con el contexto de la request
-        """
-        # Validar que el modo inferido es compatible con la request
-        if execution_mode == 'patient_self':
-            # En patient_self, NO debe haber patient_id
-            if request_context.get('patient_id'):
-                return False, {
-                    'error': 'Este test está configurado para ejecución personal (patient_self)',
-                    'message': 'No se puede proporcionar patient_id en modo patient_self',
-                    'execution_mode': execution_mode
-                }, status.HTTP_400_BAD_REQUEST
-        elif execution_mode == 'therapist_clinical':
-            # En therapist_clinical, DEBE haber patient_id
-            if not request_context.get('patient_id'):
-                return False, {
-                    'error': 'Este test está configurado para ejecución clínica (therapist_clinical)',
-                    'message': 'patient_id es requerido para tests en modo therapist_clinical',
-                    'execution_mode': execution_mode
-                }, status.HTTP_400_BAD_REQUEST
-        
-        return True, None, None
-
-    def _validate_role(self, execution_mode, profile, patient_id):
-        """
-        H2: Role Validation
-        Valida que el rol del usuario coincida con el modo de ejecución
-        """
-        if execution_mode == 'patient_self':
-            # En patient_self, el usuario NO debe ser terapeuta ni admin
-            if profile.user_type == 'therapist':
-                return False, {
-                    'error': 'No autorizado para ejecución personal',
-                    'message': 'Los terapeutas no pueden ejecutar tests en modo patient_self',
-                    'execution_mode': execution_mode,
-                    'user_role': profile.user_type
-                }, status.HTTP_403_FORBIDDEN
-            
-            if profile.is_admin or profile.user.is_staff or profile.user.is_superuser:
-                return False, {
-                    'error': 'No autorizado para ejecución personal',
-                    'message': 'Los administradores no pueden ejecutar tests en modo patient_self',
-                    'execution_mode': execution_mode,
-                    'user_role': 'admin'
-                }, status.HTTP_403_FORBIDDEN
-            
-            # NO debe haber patient_id
-            if patient_id:
-                return False, {
-                    'error': 'patient_id no permitido en modo patient_self',
-                    'message': 'No se puede proporcionar patient_id cuando el usuario es personal',
-                    'execution_mode': execution_mode
-                }, status.HTTP_400_BAD_REQUEST
-        
-        elif execution_mode == 'therapist_clinical':
-            # En therapist_clinical, el usuario DEBE ser terapeuta
-            if profile.user_type != 'therapist':
-                return False, {
-                    'error': 'No autorizado para ejecución clínica',
-                    'message': 'Solo los terapeutas pueden ejecutar tests en modo therapist_clinical',
-                    'execution_mode': execution_mode,
-                    'user_role': profile.user_type
-                }, status.HTTP_403_FORBIDDEN
-            
-            # patient_id es REQUERIDO
-            if not patient_id:
-                return False, {
-                    'error': 'patient_id requerido',
-                    'message': 'patient_id es obligatorio para ejecución en modo therapist_clinical',
-                    'execution_mode': execution_mode
-                }, status.HTTP_400_BAD_REQUEST
-        
-        return True, None, None
-
-    def _validate_therapist_patient_ownership(self, therapist_user, patient_id):
-        """
-        H3: Therapist-Patient Ownership Validation
-        Valida que el paciente pertenezca al terapeuta autenticado
-        """
-        if not patient_id:
-            return True, None, None
-        
-        try:
-            patient = Patient.objects.get(id=patient_id, therapist=therapist_user)
-            
-            # Validar que el terapeuta NO esté evaluándose a sí mismo
-            if patient.user == therapist_user:
-                return False, {
-                    'error': 'Auto-evaluación no permitida',
-                    'message': 'Un terapeuta no puede ejecutar tests clínicos para sí mismo',
-                    'patient_id': patient_id
-                }, status.HTTP_403_FORBIDDEN
-            
-            return True, patient, None
-            
-        except Patient.DoesNotExist:
-            return False, {
-                'error': 'Paciente no encontrado o no autorizado',
-                'message': f'El paciente con ID {patient_id} no existe o no pertenece a este terapeuta',
-                'patient_id': patient_id
-            }, status.HTTP_403_FORBIDDEN
+    # Legacy validation methods removed - now using centralized validators from api.validators.test_execution
+    # This improves code reuse, testability, and ensures consistent validation across all endpoints
 
     def post(self, request):
         serializer = TestExecutionSerializer(data=request.data)
@@ -227,35 +187,35 @@ class ExecuteTestView(APIView):
                 'note': 'Verifica que el test esté registrado en la base de datos ejecutando el script initialize_tests.py'
             }, status=status.HTTP_404_NOT_FOUND)
         
-        # H1: Execution Mode Validation
+        # Infer execution mode
         request_context = {
             'patient_id': patient_id,
             'user_type': profile.user_type
         }
         execution_mode = self._infer_execution_mode(test_module, request_context)
         
-        valid, error_response, error_status = self._validate_execution_mode(
-            test_module, execution_mode, request_context
-        )
-        if not valid:
-            return Response(error_response, status=error_status)
-        
-        # H2: Role Validation
-        valid, error_response, error_status = self._validate_role(
-            execution_mode, profile, patient_id
-        )
-        if not valid:
-            return Response(error_response, status=error_status)
-        
-        # H3: Therapist-Patient Ownership Validation
-        patient = None
-        if execution_mode == 'therapist_clinical' and patient_id:
-            valid, error_response_or_patient, error_status = self._validate_therapist_patient_ownership(
-                request.user, patient_id
-            )
-            if not valid:
-                return Response(error_response_or_patient, status=error_status)
-            patient = error_response_or_patient
+        # PHASE 2: Apply hardened validators (using centralized validators)
+        try:
+            # 1. Validate execution mode compatibility with test_module
+            validate_execution_mode(test_module, execution_mode)
+            
+            # 2. Validate role for execution mode
+            validate_role_for_execution(request.user, execution_mode)
+            
+            # 3. Validate context (patient_id requirements based on mode)
+            patient = None
+            if execution_mode == 'therapist_clinical':
+                # Validate patient_id is provided and valid
+                validate_clinical_context(request.user, patient_id)
+                # Validate ownership and prevent self-evaluation
+                patient = validate_patient_ownership(request.user, patient_id)
+            elif execution_mode == 'patient_self':
+                # Validate patient_id is NOT provided
+                validate_patient_self_context(patient_id)
+        except ValidationError as e:
+            return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
+        except PermissionDenied as e:
+            return Response(e.detail, status=status.HTTP_403_FORBIDDEN)
         
         # Verificar disponibilidad del test para el usuario (validación existente)
         if not test_module.is_available_for_user(request.user):
@@ -499,11 +459,35 @@ class TestResultsView(APIView):
     permission_classes = [IsAuthenticated]
     
     def get(self, request):
-        """Lista todos los resultados del usuario"""
-        results = TestResult.objects.filter(
-            user=request.user,
-            is_archived=False
+        """Lista resultados accesibles según el rol del usuario"""
+        user = request.user
+        profile = user.profile
+        
+        # PHASE 4: Filter results based on user role and ownership
+        is_admin = (
+            profile.is_admin or 
+            user.is_staff or 
+            user.is_superuser
         )
+        
+        if is_admin:
+            # Admin can view all results (read-only access to all)
+            results = TestResult.objects.filter(is_archived=False)
+        elif profile.user_type == 'therapist':
+            # Therapist can view own results + results of their patients
+            from django.db.models import Q
+            results = TestResult.objects.filter(
+                Q(is_archived=False) & (
+                    Q(user=user) |  # Own results
+                    Q(patient__therapist=user)  # Results of their patients
+                )
+            )
+        else:
+            # patient / personal → only own results
+            results = TestResult.objects.filter(
+                user=user,
+                is_archived=False
+            )
         
         # Filtros opcionales
         test_code = request.query_params.get('test_code')
@@ -532,23 +516,90 @@ class TestResultDetailView(APIView):
     """Detalle, actualización y eliminación de un resultado"""
     permission_classes = [IsAuthenticated]
     
+    def _can_access_result(self, user, result):
+        """
+        PHASE 4: Check if user can access a specific result based on role and ownership
+        
+        Returns:
+            bool: True if user can access the result
+        """
+        try:
+            profile = user.profile
+        except (AttributeError, UserProfile.DoesNotExist):
+            return False
+        
+        is_admin = (
+            profile.is_admin or 
+            user.is_staff or 
+            user.is_superuser
+        )
+        
+        if is_admin:
+            # Admin can view all results (read-only)
+            return True
+        elif profile.user_type == 'therapist':
+            # Therapist can view own results + results of their patients
+            return (
+                result.user == user or  # Own result
+                (result.patient and result.patient.therapist == user)  # Result of their patient
+            )
+        else:
+            # patient / personal → only own results
+            return result.user == user
+    
     def get(self, request, pk):
         """Obtiene un resultado específico"""
-        result = get_object_or_404(
-            TestResult, 
-            pk=pk, 
-            user=request.user
-        )
+        result = get_object_or_404(TestResult, pk=pk)
+        
+        # PHASE 4: Validate access based on role and ownership
+        if not self._can_access_result(request.user, result):
+            return Response(
+                {
+                    'error': 'No tienes acceso a este resultado',
+                    'message': 'Este resultado no pertenece a tu cuenta o a tus pacientes'
+                },
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
         serializer = TestResultSerializer(result)
         return Response(serializer.data)
     
     def patch(self, request, pk):
         """Actualiza un resultado (notas, favorito, etc.)"""
-        result = get_object_or_404(
-            TestResult, 
-            pk=pk, 
-            user=request.user
-        )
+        result = get_object_or_404(TestResult, pk=pk)
+        
+        # PHASE 4: Only owner can modify (not patients of therapist, not admin)
+        # Admin is read-only for results
+        try:
+            profile = request.user.profile
+            is_admin = (
+                profile.is_admin or 
+                request.user.is_staff or 
+                request.user.is_superuser
+            )
+            if is_admin:
+                return Response(
+                    {
+                        'error': 'No autorizado',
+                        'message': 'Los administradores tienen acceso de solo lectura a los resultados'
+                    },
+                    status=status.HTTP_403_FORBIDDEN
+                )
+        except (AttributeError, UserProfile.DoesNotExist):
+            return Response(
+                {'error': 'Perfil de usuario no encontrado'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        # Only the user who created the result can modify it
+        if result.user != request.user:
+            return Response(
+                {
+                    'error': 'No autorizado',
+                    'message': 'Solo el usuario que creó este resultado puede modificarlo'
+                },
+                status=status.HTTP_403_FORBIDDEN
+            )
         
         serializer = TestResultSerializer(
             result, 
@@ -564,11 +615,40 @@ class TestResultDetailView(APIView):
     
     def delete(self, request, pk):
         """Elimina (archiva) un resultado"""
-        result = get_object_or_404(
-            TestResult, 
-            pk=pk, 
-            user=request.user
-        )
+        result = get_object_or_404(TestResult, pk=pk)
+        
+        # PHASE 4: Only owner can delete (not patients of therapist, not admin)
+        # Admin is read-only for results
+        try:
+            profile = request.user.profile
+            is_admin = (
+                profile.is_admin or 
+                request.user.is_staff or 
+                request.user.is_superuser
+            )
+            if is_admin:
+                return Response(
+                    {
+                        'error': 'No autorizado',
+                        'message': 'Los administradores tienen acceso de solo lectura a los resultados'
+                    },
+                    status=status.HTTP_403_FORBIDDEN
+                )
+        except (AttributeError, UserProfile.DoesNotExist):
+            return Response(
+                {'error': 'Perfil de usuario no encontrado'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        # Only the user who created the result can delete it
+        if result.user != request.user:
+            return Response(
+                {
+                    'error': 'No autorizado',
+                    'message': 'Solo el usuario que creó este resultado puede eliminarlo'
+                },
+                status=status.HTTP_403_FORBIDDEN
+            )
         
         # Archivar en lugar de eliminar
         result.is_archived = True
@@ -627,31 +707,69 @@ class PatientPreviousTestsView(APIView):
     permission_classes = [IsAuthenticated]
     
     def get(self, request):
-        """Busca tests previos que coincidan con el nombre y fecha de nacimiento del paciente"""
+        """
+        PHASE 5: Busca tests previos de un paciente.
+        Solo terapeutas pueden buscar tests de sus pacientes.
+        """
+        user = request.user
+        profile = user.profile
+        
+        # PHASE 5: Only therapist can search patient tests
+        is_admin = (
+            profile.is_admin or 
+            user.is_staff or 
+            user.is_superuser
+        )
+        
+        if not is_admin and profile.user_type != 'therapist':
+            return Response(
+                {
+                    'error': 'No autorizado',
+                    'message': 'Solo los terapeutas pueden buscar tests de pacientes'
+                },
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
         patient_id = request.query_params.get('patient_id')
         patient_name = request.query_params.get('patient_name')
         patient_birth_date = request.query_params.get('patient_birth_date')
         
-        if not patient_id and not (patient_name and patient_birth_date):
-            return Response(
-                {'error': 'Se requiere patient_id o patient_name y patient_birth_date'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        profile = request.user.profile
-        
-        # Si se proporciona patient_id, obtener datos del paciente
-        if patient_id:
-            from .models import Patient
+        # PHASE 5: patient_id is required for therapist searches (ensures ownership validation)
+        if not is_admin:
+            if not patient_id:
+                return Response(
+                    {
+                        'error': 'patient_id requerido',
+                        'message': 'Se requiere patient_id para buscar tests de pacientes'
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # PHASE 5: Validate patient ownership using hardened validator
             try:
-                patient = Patient.objects.get(id=patient_id, therapist=request.user)
+                patient = validate_patient_ownership(user, patient_id)
                 patient_name = patient.full_name
                 patient_birth_date = str(patient.birth_date)
-            except Patient.DoesNotExist:
+            except PermissionDenied as e:
+                return Response(e.detail, status=status.HTTP_403_FORBIDDEN)
+        else:
+            # Admin can search without patient_id (for administrative purposes)
+            if not patient_id and not (patient_name and patient_birth_date):
                 return Response(
-                    {'error': 'Paciente no encontrado'},
-                    status=status.HTTP_404_NOT_FOUND
+                    {'error': 'Se requiere patient_id o patient_name y patient_birth_date'},
+                    status=status.HTTP_400_BAD_REQUEST
                 )
+            
+            if patient_id:
+                try:
+                    patient = Patient.objects.get(id=patient_id)
+                    patient_name = patient.full_name
+                    patient_birth_date = str(patient.birth_date)
+                except Patient.DoesNotExist:
+                    return Response(
+                        {'error': 'Paciente no encontrado'},
+                        status=status.HTTP_404_NOT_FOUND
+                    )
         
         # Buscar tests que coincidan con nombre y fecha de nacimiento
         # Buscar en todos los usuarios, no solo del terapeuta actual
@@ -663,11 +781,14 @@ class PatientPreviousTestsView(APIView):
             patient__isnull=False  # Excluir tests que ya están vinculados a otro paciente
         ).select_related('test_module', 'user').order_by('-created_at')
         
-        # Si el usuario es terapeuta, también buscar tests ya vinculados a este paciente
-        if profile.user_type == 'therapist' and patient_id:
-            from .models import Patient
+        # Si el usuario es terapeuta (o admin con patient_id), también buscar tests ya vinculados a este paciente
+        if (profile.user_type == 'therapist' or is_admin) and patient_id:
             try:
-                patient = Patient.objects.get(id=patient_id, therapist=request.user)
+                if is_admin:
+                    patient = Patient.objects.get(id=patient_id)
+                else:
+                    patient = Patient.objects.get(id=patient_id, therapist=user)
+                
                 patient_results = TestResult.objects.filter(patient=patient).select_related('test_module', 'user').order_by('-created_at')
                 # Combinar resultados
                 all_results = list(results) + list(patient_results)
@@ -694,6 +815,7 @@ class GrantTestAccessView(APIView):
     permission_classes = [IsAuthenticated]
     
     def post(self, request):
+        # Only admin can grant test access
         if not request.user.is_staff and not request.user.profile.is_admin:
             return Response(
                 {'error': 'No tienes permisos para esta acción'},
@@ -712,11 +834,34 @@ class GrantTestAccessView(APIView):
             )
         
         from django.contrib.auth.models import User
-        user = get_object_or_404(User, id=user_id)
+        target_user = get_object_or_404(User, id=user_id)
         test_module = get_object_or_404(TestModule, code=test_code)
         
+        # PHASE 5: Prevent granting access to therapist_clinical tests to non-therapists
+        # Check if test is therapist_clinical only
+        if test_module.available_for_therapists and not test_module.available_for_personal:
+            # This is a therapist_clinical only test
+            try:
+                target_profile = target_user.profile
+                if target_profile.user_type != 'therapist':
+                    return Response(
+                        {
+                            'error': 'No autorizado',
+                            'message': f'No se puede otorgar acceso a tests clínicos (therapist_clinical) a usuarios que no son terapeutas. El usuario {target_user.username} tiene rol {target_profile.user_type}'
+                        },
+                        status=status.HTTP_403_FORBIDDEN
+                    )
+            except (AttributeError, UserProfile.DoesNotExist):
+                return Response(
+                    {
+                        'error': 'Perfil de usuario no encontrado',
+                        'message': f'El usuario {target_user.username} no tiene un perfil válido'
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        
         access, created = UserTestAccess.objects.get_or_create(
-            user=user,
+            user=target_user,
             test_module=test_module
         )
         
@@ -729,7 +874,7 @@ class GrantTestAccessView(APIView):
         
         return Response({
             'success': True,
-            'message': f'Acceso especial otorgado a {user.username} para {test_module.name}'
+            'message': f'Acceso especial otorgado a {target_user.username} para {test_module.name}'
         })
 
 
@@ -813,13 +958,22 @@ class ProcessTestSubmissionView(APIView):
             }
             
             # 5. Guardar resultado en la base de datos (si hay usuario autenticado)
+            patient = None
             if request.user.is_authenticated:
-                patient = None
                 if patient_id:
+                    # PHASE 2: Apply hardened validators for authenticated requests with patient_id
                     try:
-                        patient = Patient.objects.get(id=patient_id, therapist=request.user)
-                    except Patient.DoesNotExist:
-                        pass  # Si no existe, continuar sin paciente
+                        # Validate that user is therapist (only therapists can link results to patients)
+                        validate_role_for_execution(request.user, 'therapist_clinical')
+                        # Validate patient ownership and prevent self-evaluation
+                        patient = validate_patient_ownership(request.user, patient_id)
+                    except (ValidationError, PermissionDenied) as e:
+                        # If validation fails, return error (don't silently continue)
+                        return Response(
+                            e.detail if hasattr(e, 'detail') else {'error': str(e)},
+                            status=status.HTTP_403_FORBIDDEN
+                        )
+            # Note: If patient_id provided but user not authenticated, it's ignored (don't link to patient)
                 
                 # Convertir score a int si es float (para SCL-90-R guardamos el promedio como int aproximado)
                 score_value = clinical_result['score_bruto']

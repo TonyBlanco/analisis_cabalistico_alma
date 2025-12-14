@@ -58,7 +58,7 @@ def create_all_admins(apps, schema_editor):
                 setattr(user, key, value)
             user.password = make_password(password)
             user.save()
-            print(f"✓ Updated existing user: {username}")
+            print(f"[OK] Updated existing user: {username}")
         except User.DoesNotExist:
             # Create new user
             user = User.objects.create(
@@ -66,7 +66,7 @@ def create_all_admins(apps, schema_editor):
                 password=make_password(password),
                 **user_data
             )
-            print(f"✓ Created new user: {username}")
+            print(f"[OK] Created new user: {username}")
 
 
 class Migration(migrations.Migration):

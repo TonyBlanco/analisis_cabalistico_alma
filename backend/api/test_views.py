@@ -73,6 +73,135 @@ class ExecuteTestView(APIView):
     """Ejecuta un test y guarda el resultado"""
     permission_classes = [IsAuthenticated]
 
+    def _infer_execution_mode(self, test_module, request_context):
+        """
+        Infiere el modo de ejecución basándose en los campos del test_module.
+        H1: Execution Mode Validation helper
+        """
+        # Si solo está disponible para terapeutas, es therapist_clinical
+        if test_module.available_for_therapists and not test_module.available_for_personal:
+            return 'therapist_clinical'
+        # Si solo está disponible para personal, es patient_self
+        elif test_module.available_for_personal and not test_module.available_for_therapists:
+            return 'patient_self'
+        # Si está disponible para ambos, inferir del contexto
+        elif test_module.available_for_therapists and test_module.available_for_personal:
+            # Si hay patient_id en el request, es therapist_clinical
+            if request_context.get('patient_id'):
+                return 'therapist_clinical'
+            else:
+                return 'patient_self'
+        # Por defecto, basarse en el tipo de usuario actual
+        else:
+            # Fallback: si el usuario es terapeuta y hay patient_id, es therapist_clinical
+            if request_context.get('user_type') == 'therapist' and request_context.get('patient_id'):
+                return 'therapist_clinical'
+            return 'patient_self'
+
+    def _validate_execution_mode(self, test_module, execution_mode, request_context):
+        """
+        H1: Execution Mode Validation
+        Valida que el modo de ejecución inferido coincida con el contexto de la request
+        """
+        # Validar que el modo inferido es compatible con la request
+        if execution_mode == 'patient_self':
+            # En patient_self, NO debe haber patient_id
+            if request_context.get('patient_id'):
+                return False, {
+                    'error': 'Este test está configurado para ejecución personal (patient_self)',
+                    'message': 'No se puede proporcionar patient_id en modo patient_self',
+                    'execution_mode': execution_mode
+                }, status.HTTP_400_BAD_REQUEST
+        elif execution_mode == 'therapist_clinical':
+            # En therapist_clinical, DEBE haber patient_id
+            if not request_context.get('patient_id'):
+                return False, {
+                    'error': 'Este test está configurado para ejecución clínica (therapist_clinical)',
+                    'message': 'patient_id es requerido para tests en modo therapist_clinical',
+                    'execution_mode': execution_mode
+                }, status.HTTP_400_BAD_REQUEST
+        
+        return True, None, None
+
+    def _validate_role(self, execution_mode, profile, patient_id):
+        """
+        H2: Role Validation
+        Valida que el rol del usuario coincida con el modo de ejecución
+        """
+        if execution_mode == 'patient_self':
+            # En patient_self, el usuario NO debe ser terapeuta ni admin
+            if profile.user_type == 'therapist':
+                return False, {
+                    'error': 'No autorizado para ejecución personal',
+                    'message': 'Los terapeutas no pueden ejecutar tests en modo patient_self',
+                    'execution_mode': execution_mode,
+                    'user_role': profile.user_type
+                }, status.HTTP_403_FORBIDDEN
+            
+            if profile.is_admin or profile.user.is_staff or profile.user.is_superuser:
+                return False, {
+                    'error': 'No autorizado para ejecución personal',
+                    'message': 'Los administradores no pueden ejecutar tests en modo patient_self',
+                    'execution_mode': execution_mode,
+                    'user_role': 'admin'
+                }, status.HTTP_403_FORBIDDEN
+            
+            # NO debe haber patient_id
+            if patient_id:
+                return False, {
+                    'error': 'patient_id no permitido en modo patient_self',
+                    'message': 'No se puede proporcionar patient_id cuando el usuario es personal',
+                    'execution_mode': execution_mode
+                }, status.HTTP_400_BAD_REQUEST
+        
+        elif execution_mode == 'therapist_clinical':
+            # En therapist_clinical, el usuario DEBE ser terapeuta
+            if profile.user_type != 'therapist':
+                return False, {
+                    'error': 'No autorizado para ejecución clínica',
+                    'message': 'Solo los terapeutas pueden ejecutar tests en modo therapist_clinical',
+                    'execution_mode': execution_mode,
+                    'user_role': profile.user_type
+                }, status.HTTP_403_FORBIDDEN
+            
+            # patient_id es REQUERIDO
+            if not patient_id:
+                return False, {
+                    'error': 'patient_id requerido',
+                    'message': 'patient_id es obligatorio para ejecución en modo therapist_clinical',
+                    'execution_mode': execution_mode
+                }, status.HTTP_400_BAD_REQUEST
+        
+        return True, None, None
+
+    def _validate_therapist_patient_ownership(self, therapist_user, patient_id):
+        """
+        H3: Therapist-Patient Ownership Validation
+        Valida que el paciente pertenezca al terapeuta autenticado
+        """
+        if not patient_id:
+            return True, None, None
+        
+        try:
+            patient = Patient.objects.get(id=patient_id, therapist=therapist_user)
+            
+            # Validar que el terapeuta NO esté evaluándose a sí mismo
+            if patient.user == therapist_user:
+                return False, {
+                    'error': 'Auto-evaluación no permitida',
+                    'message': 'Un terapeuta no puede ejecutar tests clínicos para sí mismo',
+                    'patient_id': patient_id
+                }, status.HTTP_403_FORBIDDEN
+            
+            return True, patient, None
+            
+        except Patient.DoesNotExist:
+            return False, {
+                'error': 'Paciente no encontrado o no autorizado',
+                'message': f'El paciente con ID {patient_id} no existe o no pertenece a este terapeuta',
+                'patient_id': patient_id
+            }, status.HTTP_403_FORBIDDEN
+
     def post(self, request):
         serializer = TestExecutionSerializer(data=request.data)
         if not serializer.is_valid():
@@ -80,6 +209,7 @@ class ExecuteTestView(APIView):
         data = serializer.validated_data
         test_code = data['test_module_code']
         input_data = data['input_data']
+        patient_id = data.get('patient_id')
 
         profile = request.user.profile
         birth_data = None
@@ -88,7 +218,55 @@ class ExecuteTestView(APIView):
         except Exception:
             birth_data = None
 
-        if profile.user_type == 'personal':
+        # Obtener el test_module
+        try:
+            test_module = TestModule.objects.get(code=test_code, is_active=True)
+        except TestModule.DoesNotExist:
+            return Response({
+                'error': f'Test "{test_code}" no encontrado o no está activo',
+                'note': 'Verifica que el test esté registrado en la base de datos ejecutando el script initialize_tests.py'
+            }, status=status.HTTP_404_NOT_FOUND)
+        
+        # H1: Execution Mode Validation
+        request_context = {
+            'patient_id': patient_id,
+            'user_type': profile.user_type
+        }
+        execution_mode = self._infer_execution_mode(test_module, request_context)
+        
+        valid, error_response, error_status = self._validate_execution_mode(
+            test_module, execution_mode, request_context
+        )
+        if not valid:
+            return Response(error_response, status=error_status)
+        
+        # H2: Role Validation
+        valid, error_response, error_status = self._validate_role(
+            execution_mode, profile, patient_id
+        )
+        if not valid:
+            return Response(error_response, status=error_status)
+        
+        # H3: Therapist-Patient Ownership Validation
+        patient = None
+        if execution_mode == 'therapist_clinical' and patient_id:
+            valid, error_response_or_patient, error_status = self._validate_therapist_patient_ownership(
+                request.user, patient_id
+            )
+            if not valid:
+                return Response(error_response_or_patient, status=error_status)
+            patient = error_response_or_patient
+        
+        # Verificar disponibilidad del test para el usuario (validación existente)
+        if not test_module.is_available_for_user(request.user):
+            return Response({'error': 'No tienes acceso a este test'}, status=status.HTTP_403_FORBIDDEN)
+
+        user_access, created = UserTestAccess.objects.get_or_create(user=request.user, test_module=test_module)
+        if not user_access.can_use_test():
+            return Response({'error': 'Has alcanzado el límite mensual de usos para este test', 'current_uses': user_access.current_month_uses, 'limit': test_module.uses_per_month}, status=status.HTTP_429_TOO_MANY_REQUESTS)
+
+        # Completar input_data con información del perfil si es necesario
+        if execution_mode == 'patient_self':
             if not input_data.get('nombre'):
                 if profile.full_name:
                     input_data['nombre'] = profile.full_name
@@ -99,54 +277,51 @@ class ExecuteTestView(APIView):
                     input_data['fecha_nacimiento'] = str(profile.birth_date)
                 elif birth_data and birth_data.birth_date:
                     input_data['fecha_nacimiento'] = str(birth_data.birth_date)
-
-        try:
-            test_module = TestModule.objects.get(code=test_code, is_active=True)
-        except TestModule.DoesNotExist:
-            return Response({
-                'error': f'Test "{test_code}" no encontrado o no está activo',
-                'note': 'Verifica que el test esté registrado en la base de datos ejecutando el script initialize_tests.py'
-            }, status=status.HTTP_404_NOT_FOUND)
         
-        if not test_module.is_available_for_user(request.user):
-            return Response({'error': 'No tienes acceso a este test'}, status=status.HTTP_403_FORBIDDEN)
-
-        user_access, created = UserTestAccess.objects.get_or_create(user=request.user, test_module=test_module)
-        if not user_access.can_use_test():
-            return Response({'error': 'Has alcanzado el límite mensual de usos para este test', 'current_uses': user_access.current_month_uses, 'limit': test_module.uses_per_month}, status=status.HTTP_429_TOO_MANY_REQUESTS)
-
-        if profile.user_type == 'personal' and test_module.test_type == 'compatibility':
+        # Manejar casos especiales de compatibilidad
+        if execution_mode == 'patient_self' and test_module.test_type == 'compatibility':
             if not input_data.get('persona1_nombre'):
                 input_data['persona1_nombre'] = input_data.get('nombre') or profile.full_name or (birth_data.full_name if birth_data else '')
             if not input_data.get('persona1_fecha_nacimiento'):
                 input_data['persona1_fecha_nacimiento'] = input_data.get('fecha_nacimiento') or (str(profile.birth_date) if profile.birth_date else (str(birth_data.birth_date) if birth_data else None))
 
+        # Procesar el test
         result_data = self._process_test(test_module, input_data)
         user_access.record_use()
 
         test_result = None
         if data.get('save_result', True):
-            patient = None
-            if profile.user_type == 'personal':
+            # Preparar datos del cliente
+            if execution_mode == 'patient_self':
                 client_name = profile.full_name or (birth_data.full_name if birth_data else '')
                 client_birth_date = profile.birth_date or (birth_data.birth_date if birth_data else None)
-            else:
+            else:  # therapist_clinical
                 client_name = data.get('client_name', '')
                 client_birth_date = data.get('client_birth_date')
-                # Si se proporciona patient_id, vincular con el paciente
-                patient_id = data.get('patient_id')
-                if patient_id:
-                    from .models import Patient
-                    try:
-                        patient = Patient.objects.get(id=patient_id, therapist=request.user)
-                        # Usar datos del paciente si no se proporcionaron
-                        if not client_name:
-                            client_name = patient.full_name
-                        if not client_birth_date:
-                            client_birth_date = patient.birth_date
-                    except Patient.DoesNotExist:
-                        pass  # Si no existe, continuar sin vincular
+                # Usar datos del paciente si están disponibles
+                if patient:
+                    if not client_name:
+                        client_name = patient.full_name
+                    if not client_birth_date:
+                        client_birth_date = patient.birth_date
             
+            # H4: Audit Metadata - almacenar en details JSONField
+            # Preparar metadata de auditoría
+            audit_metadata = {
+                'executed_by_user_id': request.user.id,
+                'executed_by_role': profile.user_type,
+                'execution_mode': execution_mode,
+                'patient_id': patient.id if patient else None,
+                'execution_timestamp': datetime.now().isoformat()
+            }
+            
+            # Inicializar details_dict vacío (details es un campo JSONField independiente de result_data)
+            # Si hay datos previos en details que queramos preservar, se pueden añadir aquí
+            details_dict = {
+                'audit': audit_metadata
+            }
+            
+            # Crear TestResult con metadata de auditoría
             test_result = TestResult.objects.create(
                 user=request.user,
                 test_module=test_module,
@@ -154,7 +329,8 @@ class ExecuteTestView(APIView):
                 result_data=result_data,
                 client_name=client_name,
                 client_birth_date=client_birth_date,
-                patient=patient
+                patient=patient,
+                details=details_dict  # H4: Audit metadata stored in details JSONField
             )
 
         response_data = {'success': True, 'result': result_data, 'uses_remaining': None}

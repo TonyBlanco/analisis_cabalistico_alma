@@ -70,10 +70,13 @@ export default function AdminDashboard() {
   });
 
   useEffect(() => {
-    if (authorized) {
+    // Solo ejecutar en cliente y cuando esté autorizado
+    if (typeof window === 'undefined') return;
+    
+    if (authorized && !loading && !guardLoading) {
       checkAuth();
     }
-  }, [authorized]);
+  }, [authorized, loading, guardLoading]);
 
   const checkAuth = async () => {
     try {
@@ -271,7 +274,8 @@ export default function AdminDashboard() {
     return matchesSearch && matchesFilter;
   });
 
-  if (guardLoading || loading) {
+  // Mostrar loading mientras se verifica el acceso
+  if (typeof window === 'undefined' || guardLoading || loading) {
     return (
       <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
         <div className="text-center">
@@ -282,7 +286,8 @@ export default function AdminDashboard() {
     );
   }
 
-  if (!authorized || !isAuthenticated || !isAdmin) {
+  // Verificar acceso solo en cliente
+  if (typeof window !== 'undefined' && (!authorized || (!isAuthenticated && !isAdmin))) {
     return (
       <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
         <div className="text-center">

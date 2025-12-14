@@ -142,3 +142,8 @@ export abstract class KabbalisticAIAnalyzer {
 
 
 
+
+
+
+
+

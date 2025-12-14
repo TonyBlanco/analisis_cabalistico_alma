@@ -18,13 +18,9 @@ export default function MainFooter() {
     }
   }, []);
 
-  // Don't show footer on dashboard, therapist, or personal pages
+  // Don't show footer on dashboard pages
   const isDashboard = pathname?.startsWith('/dashboard');
-  const isTherapist = pathname?.startsWith('/therapist');
-  const isPersonal = pathname?.startsWith('/personal') || pathname?.startsWith('/account');
-  const isTest = pathname?.startsWith('/tests');
-  
-  if (isDashboard || isTherapist || isPersonal || isTest) {
+  if (isDashboard) {
     return null;
   }
 
@@ -143,7 +139,7 @@ export default function MainFooter() {
                 </li>
                 <li>
                   <button
-                    onClick={() => router.push('/register/user')}
+                    onClick={() => router.push('/register/personal')}
                     className="flex items-center gap-2 text-sm body-font hover:text-[#D4AF37] transition-colors"
                     style={{ color: '#E2E8F0', opacity: 0.7 }}
                   >

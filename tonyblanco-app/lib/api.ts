@@ -226,7 +226,7 @@ export const registerPersonal = async (data: {
   phone?: string;
   birth_date?: string;
 }): Promise<RegisterResponse> => {
-  return apiRequest<RegisterResponse>('/register/user/', {
+  return apiRequest<RegisterResponse>('/register/personal/', {
     method: 'POST',
     body: JSON.stringify(data),
   });

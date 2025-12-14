@@ -55,10 +55,7 @@ export interface TestModule {
   order: number;
   estimated_duration: number;
   is_available: boolean;
-  requires_license?: boolean;
   user_access: UserTestAccess | null;
-  // Clasificación de modo de ejecución (derivado del código)
-  execution_mode?: 'patient_self' | 'therapist_clinical';
 }
 
 // Interface para acceso de usuario a un test
@@ -89,8 +86,6 @@ export interface TestResult {
   result_data: Record<string, any>;
   client_name?: string;
   client_birth_date?: string;
-  patient_id?: number | null;  // ID del paciente si está vinculado
-  patient_name?: string | null;  // Nombre del paciente si está vinculado
   notes?: string;
   is_favorite: boolean;
   is_archived: boolean;
@@ -104,7 +99,6 @@ export interface ExecuteTestRequest {
   input_data: Record<string, any>;
   client_name?: string;
   client_birth_date?: string;
-  patient_id?: number;  // ID del paciente si se ejecuta desde la página del paciente
   save_result?: boolean;
 }
 

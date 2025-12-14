@@ -5,7 +5,6 @@ import { TESTS_DB } from '@/data/tests-questions';
 import { ANGELS_SPANISH } from '@/data/angels-translations';
 import { getAuthToken, isAuthenticated } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
-import TherapeuticConsentModal from '@/components/TherapeuticConsentModal';
 
 interface GenericTestProps {
   testId: string;
@@ -34,33 +33,10 @@ export default function GenericTest({ testId }: GenericTestProps) {
   const [result, setResult] = useState<TestResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [showConsent, setShowConsent] = useState(false);
-  const [consentAccepted, setConsentAccepted] = useState(false);
   
   // Verificar si el usuario está logueado
   useEffect(() => {
     setIsLoggedIn(isAuthenticated());
-    
-    // Verificar si ya aceptó el consentimiento
-    const consent = localStorage.getItem('therapeuticConsent');
-    if (consent) {
-      try {
-        const consentData = JSON.parse(consent);
-        // Verificar que el consentimiento no sea muy antiguo (30 días)
-        const consentDate = new Date(consentData.timestamp);
-        const daysSinceConsent = (Date.now() - consentDate.getTime()) / (1000 * 60 * 60 * 24);
-        if (daysSinceConsent < 30) {
-          setConsentAccepted(true);
-        }
-      } catch (e) {
-        // Si hay error parseando, mostrar consentimiento
-      }
-    }
-    
-    // Si no hay consentimiento, mostrarlo cuando se monte el componente
-    if (!consent && !result) {
-      setShowConsent(true);
-    }
   }, []);
 
   // Cargar configuración del test
@@ -265,7 +241,7 @@ export default function GenericTest({ testId }: GenericTestProps) {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
-                onClick={() => router.push('/register/user')}
+                onClick={() => router.push('/register/personal')}
                 className="px-8 py-4 bg-black text-[#D4AF37] font-bold rounded-lg hover:bg-gray-900 transition-all shadow-lg text-lg"
               >
                 Crear Cuenta Gratis
@@ -476,23 +452,6 @@ export default function GenericTest({ testId }: GenericTestProps) {
           </button>
         </div>
       </div>
-    );
-  }
-
-  // Mostrar modal de consentimiento si no ha sido aceptado
-  if (showConsent && !consentAccepted) {
-    return (
-      <TherapeuticConsentModal
-        isOpen={showConsent}
-        onAccept={() => {
-          setConsentAccepted(true);
-          setShowConsent(false);
-        }}
-        onClose={() => {
-          router.push('/tests');
-        }}
-        type="test"
-      />
     );
   }
 

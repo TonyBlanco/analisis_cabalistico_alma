@@ -157,3 +157,8 @@ def build_cabalistic_mapping(planets_data: Dict[str, Dict[str, any]]) -> Dict[st
     
     return mapping
 
+
+
+
+
+

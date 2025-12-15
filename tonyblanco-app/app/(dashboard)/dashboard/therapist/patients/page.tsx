@@ -5,7 +5,10 @@ import { useRouter } from 'next/navigation';
 import { getUserRole } from '@/lib/getUserRole';
 import { useRoleGuard } from '@/lib/role-guards';
 import { getTherapistPatients, Patient } from '@/lib/patient-api';
+import { getActivePatient, setActivePatientId } from '@/lib/active-patient';
 import CreatePatientModal from '@/components/CreatePatientModal';
+import ContextualSlideMenu from '@/components/ContextualSlideMenu';
+import { User, FileText, ClipboardList, StickyNote, Clock } from 'lucide-react';
 
 /**
  * Therapist Patients Management Page
@@ -22,6 +25,8 @@ export default function TherapistPatientsPage() {
   const [loadingPatients, setLoadingPatients] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [slideOpen, setSlideOpen] = useState(false);
+  const [activePatient, setActivePatient] = useState<{ id: number; name: string | null } | null>(null);
 
   useEffect(() => {
     getUserRole().then((userRole) => {
@@ -66,6 +71,14 @@ export default function TherapistPatientsPage() {
     // Refresh patient list
     fetchPatients();
     setShowCreateModal(false);
+  };
+
+  const handlePatientSelect = (patient: Patient) => {
+    // Set as active patient
+    setActivePatientId(patient.id, patient.full_name);
+    window.dispatchEvent(new Event('activePatientChanged'));
+    // Open slide menu
+    setSlideOpen(true);
   };
 
   if (loading) {

@@ -458,3 +458,86 @@ def send_birthdata_unlock_email(user_profile: UserProfile, token: str):
     except Exception as e:
         print(f"Error enviando unlock email: {e}")
         return False
+
+
+def send_password_reset_email(user, token: str, uid: str):
+    """Enviar email para restablecer contraseña"""
+    from django.conf import settings
+    from django.utils.http import urlsafe_base64_decode
+    from django.contrib.auth import get_user_model
+    
+    UserModel = get_user_model()
+    
+    # Decodificar uid para obtener el user_id
+    try:
+        user_id = int(urlsafe_base64_decode(uid).decode())
+        user_obj = UserModel.objects.get(pk=user_id)
+    except (ValueError, TypeError, UserModel.DoesNotExist):
+        print(f"Error: No se pudo decodificar uid o usuario no encontrado")
+        return False
+    
+    # Construir URL de reset (ajustar según tu frontend)
+    reset_url = f"{settings.FRONTEND_URL or 'http://localhost:3000'}/reset-password?uid={uid}&token={token}"
+    
+    subject = f"{settings.EMAIL_SUBJECT_PREFIX}Restablecer tu contraseña"
+    
+    html_message = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <style>
+            body {{ font-family: 'Arial', sans-serif; background-color: #0A0A1F; color: #ffffff; line-height: 1.6; }}
+            .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+            .header {{ text-align: center; padding: 30px 0; }}
+            .header h1 {{ color: #D4AF37; font-size: 28px; margin: 0; }}
+            .content {{ background-color: #1a1a2e; border-radius: 12px; padding: 30px; margin: 20px 0; }}
+            .button {{ display: inline-block; padding: 15px 30px; background-color: #D4AF37; color: #000; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0; }}
+            .footer {{ text-align: center; padding: 20px; color: #666; font-size: 12px; }}
+            .warning {{ color: #ff6b6b; font-size: 14px; margin-top: 20px; }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <div style="font-size: 48px;">🔐</div>
+                <h1>Restablecer Contraseña</h1>
+            </div>
+            
+            <div class="content">
+                <p>Hola {user_obj.get_full_name() or user_obj.username},</p>
+                <p>Recibimos una solicitud para restablecer la contraseña de tu cuenta.</p>
+                <p>Haz clic en el botón siguiente para crear una nueva contraseña:</p>
+                <div style="text-align: center;">
+                    <a href="{reset_url}" class="button">Restablecer Contraseña</a>
+                </div>
+                <p class="warning">⚠️ Este enlace expirará en 24 horas por seguridad.</p>
+                <p>Si no solicitaste este cambio, puedes ignorar este email y tu contraseña permanecerá sin cambios.</p>
+                <p>Con gratitud,</p>
+                <p><strong>Equipo - Análisis Cabalístico del Alma</strong></p>
+            </div>
+            
+            <div class="footer">
+                <p>Si el botón no funciona, copia y pega este enlace en tu navegador:</p>
+                <p style="word-break: break-all; color: #888;">{reset_url}</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    
+    plain_message = f"Restablecer Contraseña\n\nHaz clic en este enlace para crear una nueva contraseña:\n{reset_url}\n\nEste enlace expirará en 24 horas.\n\nSi no solicitaste este cambio, ignora este mensaje."
+    
+    try:
+        email = EmailMultiAlternatives(
+            subject=subject,
+            body=plain_message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[user_obj.email]
+        )
+        email.attach_alternative(html_message, "text/html")
+        email.send()
+        return True
+    except Exception as e:
+        print(f"Error enviando email de reset de contraseña: {e}")
+        return False

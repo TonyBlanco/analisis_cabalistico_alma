@@ -15,11 +15,26 @@ from google.oauth2 import id_token
 
 # Importamos tu lógica maestra
 from cabala_py.integracion_arbol import generar_mapa_cabalista_completo
-from .models import Calculo, Ficha, UserProfile, Patient, Session, TherapistNote, Service, ServiceCategory, ServicePackage, Booking, AvailableSlot, BlockedDate
+from .models import (
+    Calculo,
+    Ficha,
+    UserProfile,
+    Patient,
+    Session,
+    TherapistNote,
+    Service,
+    ServiceCategory,
+    ServicePackage,
+    Booking,
+    AvailableSlot,
+    BlockedDate,
+    Resource,
+    UserResourceAccess,
+)
 from .birth_data_model import UserBirthData
 from .serializers import (
-    FichaSerializer, 
-    RegisterTherapistSerializer, 
+    FichaSerializer,
+    RegisterTherapistSerializer,
     RegisterPersonalSerializer,
     UserSerializer,
     PatientSerializer,
@@ -31,7 +46,11 @@ from .serializers import (
     BookingSerializer,
     BookingCreateSerializer,
     AvailableSlotSerializer,
-    BlockedDateSerializer
+    BlockedDateSerializer,
+    UserProfileDetailSerializer,
+    UserProfileSerializer,
+    MyResourceSerializer,
+    UserResourceAccessSerializer,
 )
 from .serializers import UserBirthDataSerializer
 from .emails import send_welcome_email, send_booking_confirmation_email
@@ -127,24 +146,37 @@ class CurrentUserView(APIView):
             'username': request.user.username,
             'email': request.user.email,
             'first_name': request.user.first_name,
+            'last_name': request.user.last_name,
         }
         
         # Agregar datos del perfil si existe
         if hasattr(request.user, 'profile'):
+            profile = request.user.profile
             user_data.update({
-                'full_name': request.user.profile.full_name,
-                'user_type': request.user.profile.user_type,
-                'is_admin': request.user.profile.is_admin,
-                'subscription_status': request.user.profile.subscription_status,
-                'subscription_plan': request.user.profile.subscription_plan,
-                'membership_expires': str(request.user.profile.membership_expires) if request.user.profile.membership_expires else None,
-                'phone': request.user.profile.phone,
-                'current_patients_count': request.user.profile.current_patients_count,
-                'fichas_created_this_month': request.user.profile.fichas_created_this_month,
+                'full_name': profile.full_name,
+                'legal_full_name': profile.legal_full_name or profile.full_name,
+                'user_type': profile.user_type,
+                'is_admin': profile.is_admin,
+                'subscription_status': profile.subscription_status,
+                'subscription_plan': profile.subscription_plan,
+                'membership_expires': str(profile.membership_expires) if profile.membership_expires else None,
+                'phone': profile.phone,
+                'current_patients_count': profile.current_patients_count,
+                'fichas_created_this_month': profile.fichas_created_this_month,
+                'profile_version': profile.profile_version,
+                'name_change_count': profile.name_change_count,
+                'consent_accepted_at': profile.consent_accepted_at.isoformat() if profile.consent_accepted_at else None,
+                'birth_date': str(profile.birth_date) if profile.birth_date else None,
+                'birth_time': str(profile.birth_time) if profile.birth_time else None,
+                'birth_city': profile.birth_city,
+                'birth_country': profile.birth_country,
+                'birth_latitude': float(profile.birth_latitude) if profile.birth_latitude is not None else None,
+                'birth_longitude': float(profile.birth_longitude) if profile.birth_longitude is not None else None,
+                'birth_timezone': profile.birth_timezone,
             })
             
             # Si es paciente, incluir patient_id y referencia al therapist
-            if request.user.profile.user_type == 'patient':
+            if profile.user_type == 'patient':
                 try:
                     patient = request.user.patient_profile
                     user_data['patient_id'] = patient.id
@@ -156,9 +188,7 @@ class CurrentUserView(APIView):
                 except Exception:
                     # Si no tiene patient_profile vinculado, no incluir estos campos
                     pass
-            # Incluir fecha de nacimiento si está en el perfil
-            if request.user.profile.birth_date:
-                user_data['birth_date'] = str(request.user.profile.birth_date)
+
             # Incluir datos extendidos si existe el modelo UserBirthData
             try:
                 bd = request.user.birth_data
@@ -175,10 +205,118 @@ class CurrentUserView(APIView):
                     'full_name_change_count': bd.full_name_change_count,
                     'full_name_locked': bd.full_name_locked
                 }
+                # Sincronizar suavemente ciertos campos de perfil si faltan
+                if not profile.birth_date and bd.birth_date:
+                    profile.birth_date = bd.birth_date
+                if not profile.birth_city and bd.birth_city:
+                    profile.birth_city = bd.birth_city
+                if not profile.birth_country and bd.birth_country:
+                    profile.birth_country = bd.birth_country
+                if profile.birth_latitude is None and bd.birth_latitude is not None:
+                    profile.birth_latitude = bd.birth_latitude
+                if profile.birth_longitude is None and bd.birth_longitude is not None:
+                    profile.birth_longitude = bd.birth_longitude
+                if not profile.legal_full_name and bd.full_name:
+                    profile.legal_full_name = bd.full_name
+                # No forzamos timezone aquí: lo gestiona geocoding/birth_data directamente
+                profile.save(update_fields=[
+                    'birth_date',
+                    'birth_city',
+                    'birth_country',
+                    'birth_latitude',
+                    'birth_longitude',
+                    'legal_full_name',
+                ])
             except Exception:
                 pass
         
         return Response(user_data)
+
+
+class UserProfileMeView(APIView):
+    """
+    Perfil del usuario autenticado.
+
+    Endpoints:
+    - GET  /api/profile/me/         → Lee el núcleo de UserProfile
+    - PATCH /api/profile/me/        → Actualiza datos básicos de identidad/nacimiento
+
+    NOTA:
+    - Admin no tiene capacidades especiales aquí: siempre actúa sobre su propio perfil.
+    - No toca AnalysisRecord ni lógica clínica.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        profile = request.user.profile
+        serializer = UserProfileDetailSerializer(profile)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def patch(self, request):
+        profile = request.user.profile
+        serializer = UserProfileDetailSerializer(profile, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+
+        # Guardamos cambios de perfil (incluye control de cambios de nombre)
+        profile = serializer.save()
+
+        # Incrementar versión de perfil SI hubo cambios significativos en los campos manejados aquí
+        fields_touched = set(request.data.keys())
+        relevant_fields = {
+            "legal_full_name",
+            "birth_date",
+            "birth_time",
+            "birth_city",
+            "birth_country",
+            "birth_latitude",
+            "birth_longitude",
+        }
+        if fields_touched.intersection(relevant_fields):
+            try:
+                profile.profile_version = (profile.profile_version or 1) + 1
+            except Exception:
+                profile.profile_version = 1
+            profile.save(update_fields=["profile_version"])
+
+        return Response(UserProfileDetailSerializer(profile).data, status=status.HTTP_200_OK)
+
+
+class UserProfileConsentView(APIView):
+    """
+    Aceptación de consentimiento terapéutico / tratamiento de datos.
+
+    Endpoint:
+    - POST /api/profile/me/consent/
+
+    Reglas:
+    - `consent_accepted_at` solo se puede establecer una vez.
+    - Idempotente: si ya estaba aceptado, devuelve 400 sin modificar la marca.
+    - Incrementa `profile_version` al aceptar consentimiento por primera vez.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        profile = request.user.profile
+
+        if profile.consent_accepted_at:
+            return Response(
+                {
+                    "detail": "El consentimiento ya había sido aceptado.",
+                    "consent_accepted_at": profile.consent_accepted_at,
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        profile.consent_accepted_at = timezone.now()
+        try:
+            profile.profile_version = (profile.profile_version or 1) + 1
+        except Exception:
+            profile.profile_version = 1
+
+        profile.save(update_fields=["consent_accepted_at", "profile_version"])
+        return Response(UserProfileDetailSerializer(profile).data, status=status.HTTP_200_OK)
 
 
 class UpdateProfileView(APIView):
@@ -190,6 +328,7 @@ class UpdateProfileView(APIView):
             user = request.user
             profile = user.profile
             birth_data = None
+            profile_fields_changed = False
             
             try:
                 birth_data = user.birth_data
@@ -201,13 +340,20 @@ class UpdateProfileView(APIView):
                 user.email = request.data['email']
             if 'first_name' in request.data:
                 user.first_name = request.data['first_name']
+            if 'last_name' in request.data:
+                user.last_name = request.data['last_name']
             user.save()
             
             # Update profile fields
             if 'phone' in request.data:
                 profile.phone = request.data['phone']
+                profile_fields_changed = True
             if 'full_name' in request.data:
                 profile.full_name = request.data['full_name']
+                profile_fields_changed = True
+            if 'legal_full_name' in request.data:
+                profile.legal_full_name = request.data['legal_full_name']
+                profile_fields_changed = True
             if 'birth_date' in request.data and request.data['birth_date']:
                 try:
                     from datetime import datetime as dt
@@ -216,8 +362,18 @@ class UpdateProfileView(APIView):
                         profile.birth_date = dt.strptime(birth_date_str, '%Y-%m-%d').date()
                     else:
                         profile.birth_date = birth_date_str
+                    profile_fields_changed = True
                 except (ValueError, TypeError) as e:
                     pass  # Skip if date format is invalid
+            if 'birth_city' in request.data:
+                profile.birth_city = request.data['birth_city']
+                profile_fields_changed = True
+            if 'birth_country' in request.data:
+                profile.birth_country = request.data['birth_country']
+                profile_fields_changed = True
+            if 'birth_time' in request.data:
+                profile.birth_time = request.data['birth_time'] or None
+                profile_fields_changed = True
             profile.save()
             
             # Handle full_name changes with validation
@@ -240,6 +396,9 @@ class UpdateProfileView(APIView):
                         # Lock the name and reject
                         birth_data.full_name_locked = True
                         birth_data.save(update_fields=['full_name_locked'])
+                        # Sincronizar contador en UserProfile
+                        profile.name_change_count = birth_data.full_name_change_count
+                        profile.save(update_fields=['name_change_count'])
                         # Log audit event (could use a logging system here)
                         return Response(
                             {
@@ -251,6 +410,8 @@ class UpdateProfileView(APIView):
                     
                     # Increment change count
                     birth_data.full_name_change_count += 1
+                    profile.name_change_count = birth_data.full_name_change_count
+                    profile_fields_changed = True
                     # Log audit event (could use a logging system here)
             
             # Update birth data if provided and exists
@@ -300,6 +461,33 @@ class UpdateProfileView(APIView):
                     except (ValueError, TypeError):
                         pass  # Skip if date format is invalid
                 birth_data.save()
+
+            # Lógica de consentimiento: aceptar solo si nunca se había aceptado
+            accept_consent = request.data.get('accept_consent')
+            if accept_consent and not profile.consent_accepted_at:
+                from django.utils import timezone
+                profile.consent_accepted_at = timezone.now()
+                profile_fields_changed = True
+
+            # Incrementar versión de perfil si hubo cambios significativos
+            if profile_fields_changed:
+                try:
+                    profile.profile_version = (profile.profile_version or 1) + 1
+                except Exception:
+                    # Fallback defensivo
+                    profile.profile_version = 1
+                profile.save(update_fields=[
+                    'phone',
+                    'full_name',
+                    'legal_full_name',
+                    'birth_date',
+                    'birth_city',
+                    'birth_country',
+                    'birth_time',
+                    'name_change_count',
+                    'consent_accepted_at',
+                    'profile_version',
+                ])
             
             return Response({
                 'success': True,
@@ -363,7 +551,10 @@ class EmailOrUsernameAuthToken(APIView):
         password = request.data.get('password')
 
         if not username_or_email or not password:
-            return Response({'detail': 'Usuario/email y contraseña son requeridos'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({
+                'error': 'validation',
+                'message': 'Usuario/email y contraseña son requeridos'
+            }, status=status.HTTP_400_BAD_REQUEST)
 
         UserModel = get_user_model()
 
@@ -372,13 +563,23 @@ class EmailOrUsernameAuthToken(APIView):
             or UserModel.objects.filter(email=username_or_email).first()
         )
 
+        # Usuario no existe
         if not user:
-            return Response({'detail': 'Credenciales inválidas'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({
+                'error': 'user_not_found',
+                'message': 'El usuario o email no está registrado. Verifica que esté escrito correctamente.'
+            }, status=status.HTTP_400_BAD_REQUEST)
 
+        # Usuario existe, verificar contraseña
         user_auth = authenticate(username=user.username, password=password)
 
         if not user_auth:
-            return Response({'detail': 'Credenciales inválidas'}, status=status.HTTP_400_BAD_REQUEST)
+            # Contraseña incorrecta - devolver email para recuperación
+            return Response({
+                'error': 'invalid_password',
+                'message': 'La contraseña es incorrecta.',
+                'email': user.email  # Enviar email para permitir recuperación
+            }, status=status.HTTP_400_BAD_REQUEST)
 
         token, _ = Token.objects.get_or_create(user=user_auth)
         
@@ -392,6 +593,53 @@ class EmailOrUsernameAuthToken(APIView):
             'username': user_auth.username,
             'role': role
         })
+
+
+class PasswordResetRequestView(APIView):
+    """
+    POST /api/password-reset/request/
+    
+    Solicita un cambio de contraseña. Envía un email con un token de reset.
+    """
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email = request.data.get('email')
+        
+        if not email:
+            return Response({
+                'error': 'El email es requerido'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        UserModel = get_user_model()
+        
+        try:
+            user = UserModel.objects.get(email=email)
+        except UserModel.DoesNotExist:
+            # Por seguridad, no revelamos si el email existe o no
+            return Response({
+                'message': 'Si el email está registrado, recibirás un enlace para restablecer tu contraseña.'
+            }, status=status.HTTP_200_OK)
+
+        # Generar token de reset (usando el sistema de tokens de Django)
+        from django.contrib.auth.tokens import default_token_generator
+        from django.utils.encoding import force_bytes
+        from django.utils.http import urlsafe_base64_encode
+        
+        token = default_token_generator.make_token(user)
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        
+        # Enviar email con el token
+        try:
+            from .emails import send_password_reset_email
+            send_password_reset_email(user, token, uid)
+        except Exception as e:
+            print(f"Error enviando email de reset: {e}")
+            # Aún así devolvemos éxito por seguridad
+
+        return Response({
+            'message': 'Si el email está registrado, recibirás un enlace para restablecer tu contraseña.'
+        }, status=status.HTTP_200_OK)
 
 
 class CalculoCabalisticoView(APIView):
@@ -866,6 +1114,149 @@ class PatientDetailView(generics.RetrieveUpdateDestroyAPIView):
         # Soft delete
         instance.is_active = False
         instance.save()
+
+
+class TherapistPatientProfileView(APIView):
+    """
+    Perfil básico de paciente en contexto de terapeuta.
+
+    Endpoint:
+    - GET /api/therapist/patients/<int:pk>/profile/
+
+    Reglas:
+    - Solo el terapeuta propietario puede ver el perfil.
+    - NO modifica nada (read-only).
+    - No toca AnalysisRecord ni lógica clínica.
+    """
+
+    permission_classes = [IsAuthenticated, IsTherapist]
+
+    def get(self, request, pk):
+        try:
+            patient = Patient.objects.select_related("user").get(
+                therapist=request.user,
+                id=pk,
+                is_active=True,
+            )
+        except Patient.DoesNotExist:
+            return Response(
+                {"error": "Paciente no encontrado o no te pertenece."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        # Datos base desde Patient
+        profile_data = {
+            "patient_id": patient.id,
+            "birth_date": patient.birth_date,
+            "birth_city": patient.birth_city,
+            "birth_country": patient.birth_country,
+            "birth_latitude": patient.birth_latitude,
+            "birth_longitude": patient.birth_longitude,
+            "birth_timezone": patient.birth_timezone,
+            "legal_full_name": None,
+            "consent_accepted_at": None,
+            "profile_version": None,
+            "name_change_count": None,
+        }
+
+        # Si el paciente tiene cuenta de usuario vinculada, enriquecemos con UserProfile
+        if patient.user and hasattr(patient.user, "profile"):
+            up = patient.user.profile
+            profile_data["legal_full_name"] = up.legal_full_name or up.full_name
+            profile_data["consent_accepted_at"] = up.consent_accepted_at
+            profile_data["profile_version"] = up.profile_version
+            profile_data["name_change_count"] = up.name_change_count
+
+        return Response(profile_data, status=status.HTTP_200_OK)
+
+
+class PatientProfileUpdateView(APIView):
+    """
+    Permite a un terapeuta editar el perfil del paciente que le pertenece.
+
+    Endpoint:
+    - PATCH /api/patients/<int:pk>/profile/
+
+    Reglas:
+    - Solo el terapeuta propietario puede editar (`patient.therapist == request.user`).
+    - Usa `UserProfileSerializer` sobre `patient.user.profile`.
+    - Misma lógica de validación de cambios de nombre (name_change_count) que perfil propio.
+    - No toca AnalysisRecord ni lógica clínica.
+    """
+
+    permission_classes = [IsAuthenticated, IsTherapist]
+
+    def patch(self, request, pk):
+        try:
+            patient = Patient.objects.select_related("user").get(
+                therapist=request.user,
+                id=pk,
+                is_active=True,
+            )
+        except Patient.DoesNotExist:
+            return Response(
+                {"error": "Paciente no encontrado o no te pertenece."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        if not patient.user or not hasattr(patient.user, "profile"):
+            return Response(
+                {"error": "Este paciente no tiene un perfil de usuario asociado."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        profile = patient.user.profile
+
+        # Copia mutable de los datos para aplicar reglas específicas
+        data = request.data.copy()
+
+        # Regla de bloqueo suave de coordenadas:
+        # - Si se envían lat/lng pero NO hay flag explícito de reescritura, ignorar lat/lng.
+        rewrite_flag = data.get("rewrite_coordinates")
+        allow_rewrite = str(rewrite_flag).lower() in ("1", "true", "yes", "on")
+        if not allow_rewrite:
+            for coord_field in ("birth_latitude", "birth_longitude"):
+                if coord_field in data:
+                    data.pop(coord_field)
+        # El flag nunca se pasa al serializer
+        data.pop("rewrite_coordinates", None)
+
+        serializer = UserProfileSerializer(
+            instance=profile,
+            data=data,
+            partial=True,
+            context={"request": request},
+        )
+
+        if not serializer.is_valid():
+            # Debug temporal para entender fallos de validación
+            print("❌ PatientProfileUpdateView serializer errors:", serializer.errors)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        # Guardar cambios aplicando reglas de nombre/cambios ya codificadas en el serializer
+        profile = serializer.save()
+
+        # Incrementar versión de perfil si se tocaron campos relevantes
+        fields_touched = set(data.keys())
+        relevant_fields = {
+            "legal_full_name",
+            "full_name",
+            "birth_date",
+            "birth_time",
+            "birth_city",
+            "birth_country",
+            "birth_latitude",
+            "birth_longitude",
+        }
+        if fields_touched.intersection(relevant_fields):
+            try:
+                profile.profile_version = (profile.profile_version or 1) + 1
+            except Exception:
+                profile.profile_version = 1
+            profile.save(update_fields=["profile_version"])
+
+        # Para respuesta usamos el serializer detallado usado en /api/profile/me
+        return Response(UserProfileDetailSerializer(profile).data, status=status.HTTP_200_OK)
 
 
 class GenerateAIPlanView(APIView):
@@ -1906,6 +2297,204 @@ def configure_admin_profiles_temp(request):
         'message': 'Configuración de perfiles completada',
         'results': results
     })
+
+
+# ========== RESOURCE ACCESS CORE VIEWS ==========
+
+class MyResourcesView(APIView):
+    """
+    GET /api/resources/my/
+    
+    Retorna todos los recursos accesibles para el usuario actual.
+    Incluye recursos gratuitos, asignados por terapeuta y auto-adquiridos.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        
+        # Admin no es consumidor de recursos
+        profile = getattr(user, 'profile', None)
+        if profile and (profile.is_admin or user.is_staff or user.is_superuser):
+            return Response(
+                {'error': 'Los administradores no pueden acceder a recursos como consumidores.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        # Obtener todos los accesos del usuario
+        accesses = UserResourceAccess.objects.filter(user=user).select_related('resource', 'assigned_by')
+        
+        # Incluir también recursos gratuitos que aún no tienen acceso explícito
+        free_resources = Resource.objects.filter(
+            access_level='free',
+            is_active=True
+        ).exclude(
+            user_accesses__user=user
+        )
+        
+        # Crear accesos implícitos para recursos gratuitos
+        serializer = MyResourceSerializer(accesses, many=True)
+        free_data = []
+        for resource in free_resources:
+            free_data.append({
+                'id': None,
+                'resource': {
+                    'id': str(resource.id),
+                    'title': resource.title,
+                    'description': resource.description,
+                    'resource_type': resource.resource_type,
+                    'content_url': resource.content_url,
+                    'thumbnail_url': resource.thumbnail_url,
+                    'access_level': resource.access_level,
+                    'is_active': resource.is_active,
+                    'created_at': resource.created_at.isoformat(),
+                    'updated_at': resource.updated_at.isoformat(),
+                },
+                'access_source': 'free',
+                'assigned_by_username': None,
+                'created_at': resource.created_at.isoformat(),
+            })
+        
+        return Response({
+            'resources': serializer.data + free_data
+        }, status=status.HTTP_200_OK)
+
+
+class AssignResourceToPatientView(APIView):
+    """
+    POST /api/patients/{id}/resources/assign
+    
+    Permite a un terapeuta asignar un recurso a su paciente.
+    Requiere:
+    - Usuario autenticado es terapeuta
+    - El paciente pertenece al terapeuta (ownership)
+    - resource_id en el body
+    """
+    permission_classes = [IsAuthenticated, IsTherapist]
+
+    def post(self, request, pk):
+        therapist = request.user
+        
+        # Obtener paciente y validar ownership
+        try:
+            patient = Patient.objects.get(pk=pk, therapist=therapist)
+        except Patient.DoesNotExist:
+            return Response(
+                {'error': 'Paciente no encontrado o no tienes permisos para gestionarlo.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Validar que el paciente tiene usuario asociado
+        if not patient.user:
+            return Response(
+                {'error': 'El paciente no tiene cuenta de usuario asociada.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Obtener resource_id del body
+        resource_id = request.data.get('resource_id')
+        if not resource_id:
+            return Response(
+                {'error': 'resource_id es requerido.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Obtener recurso
+        try:
+            resource = Resource.objects.get(pk=resource_id, is_active=True)
+        except Resource.DoesNotExist:
+            return Response(
+                {'error': 'Recurso no encontrado o no está activo.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Crear o actualizar acceso
+        access, created = UserResourceAccess.objects.get_or_create(
+            user=patient.user,
+            resource=resource,
+            defaults={
+                'source': 'assigned_by_therapist',
+                'assigned_by': therapist,
+            }
+        )
+        
+        if not created:
+            # Si ya existe, actualizar source y assigned_by
+            access.source = 'assigned_by_therapist'
+            access.assigned_by = therapist
+            access.save()
+        
+        serializer = MyResourceSerializer(access)
+        return Response(
+            {
+                'message': 'Recurso asignado correctamente al paciente.',
+                'access': serializer.data
+            },
+            status=status.HTTP_201_CREATED if created else status.HTTP_200_OK
+        )
+
+
+class AcquireResourceView(APIView):
+    """
+    POST /api/resources/{id}/acquire
+    
+    Simula auto-adquisición de un recurso (sin pagos).
+    Permitido para roles: patient, personal
+    Admin no puede adquirir recursos.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        user = request.user
+        
+        # Admin no es consumidor
+        profile = getattr(user, 'profile', None)
+        if profile and (profile.is_admin or user.is_staff or user.is_superuser):
+            return Response(
+                {'error': 'Los administradores no pueden adquirir recursos.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        # Validar que el usuario es patient o personal
+        if not profile or profile.user_type not in ['patient', 'personal']:
+            return Response(
+                {'error': 'Solo usuarios patient y personal pueden auto-adquirir recursos.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        # Obtener recurso
+        try:
+            resource = Resource.objects.get(pk=pk, is_active=True)
+        except Resource.DoesNotExist:
+            return Response(
+                {'error': 'Recurso no encontrado o no está activo.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Crear o actualizar acceso
+        access, created = UserResourceAccess.objects.get_or_create(
+            user=user,
+            resource=resource,
+            defaults={
+                'source': 'self_purchased',
+            }
+        )
+        
+        if not created:
+            # Si ya existe con otro source, actualizar a self_purchased
+            if access.source != 'self_purchased':
+                access.source = 'self_purchased'
+                access.assigned_by = None
+                access.save()
+        
+        serializer = MyResourceSerializer(access)
+        return Response(
+            {
+                'message': 'Recurso adquirido correctamente.',
+                'access': serializer.data
+            },
+            status=status.HTTP_201_CREATED if created else status.HTTP_200_OK
+        )
 
 
 

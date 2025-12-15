@@ -62,7 +62,7 @@ export default function PersonalTestsSection() {
   if (loading) {
     return (
       <div className="bg-white border border-gray-200 rounded-lg p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Herramientas de auto-reflexión</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Exploraciones personales</h2>
         <div className="text-center py-8">
           <p className="text-sm text-gray-500">Cargando herramientas...</p>
         </div>
@@ -73,7 +73,7 @@ export default function PersonalTestsSection() {
   if (error) {
     return (
       <div className="bg-white border border-gray-200 rounded-lg p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Herramientas de auto-reflexión</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Exploraciones personales</h2>
         <div className="bg-red-50 border border-red-200 rounded-md p-4">
           <p className="text-sm text-red-800">{error}</p>
           <button
@@ -90,9 +90,9 @@ export default function PersonalTestsSection() {
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-6">
       <div className="mb-4">
-        <h2 className="text-lg font-semibold text-gray-900">Herramientas de auto-reflexión</h2>
+        <h2 className="text-lg font-semibold text-gray-900">Exploraciones personales</h2>
         <p className="text-sm text-gray-600 mt-1">
-          Herramientas cabalísticas para exploración personal y crecimiento espiritual
+          Tests simbólicos y cabalísticos orientados al autoconocimiento y al crecimiento personal.
         </p>
       </div>
 
@@ -115,6 +115,16 @@ export default function PersonalTestsSection() {
                   {test.description && (
                     <p className="text-sm text-gray-600 mt-1">{test.description}</p>
                   )}
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <span className="text-xs px-2 py-1 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
+                      Exploración personal
+                    </span>
+                    {test.test_type && (
+                      <span className="text-xs text-gray-500">
+                        Tipo: {test.test_type}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <Link
                   href={`/dashboard/personal/${test.code}`}
@@ -128,7 +138,7 @@ export default function PersonalTestsSection() {
 
           {completedTests.length > 0 && (
             <div className="mt-6 pt-6 border-t border-gray-200">
-              <h3 className="text-sm font-medium text-gray-700 mb-3">Completadas</h3>
+              <h3 className="text-sm font-medium text-gray-700 mb-3">Mis exploraciones recientes</h3>
               {completedTests.map((test) => (
                 <div
                   key={test.code}

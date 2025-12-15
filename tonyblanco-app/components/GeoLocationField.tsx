@@ -12,6 +12,16 @@ interface GeoLocationFieldProps {
   onCountryChange: (country: string) => void;
   onCoordinatesChange: (lat: number | null, lng: number | null) => void;
   disabled?: boolean;
+  /**
+   * Cuando es true, permite reescribir manualmente lat/lng.
+   * El parent controla esta bandera (ej: checkbox "Reescribir coordenadas").
+   */
+  allowManualCoordinates?: boolean;
+  /**
+   * Cuando es true, aplica estilos de resaltado azul claro a campos críticos
+   * para análisis cabalísticos/astrológicos.
+   */
+  highlightCriticalFields?: boolean;
   errors?: {
     city?: string;
     country?: string;
@@ -46,6 +56,8 @@ export default function GeoLocationField({
   onCountryChange,
   onCoordinatesChange,
   disabled = false,
+  allowManualCoordinates = false,
+  highlightCriticalFields = false,
   errors = {},
 }: GeoLocationFieldProps) {
   // Separate input state from geo result
@@ -221,8 +233,16 @@ export default function GeoLocationField({
     <div className="space-y-3">
       {/* City Input */}
       <div>
-        <label htmlFor="birth_city" className="block text-sm font-medium text-gray-700 mb-2">
-          Ciudad de nacimiento <span className="text-red-500">*</span>
+        <label htmlFor="birth_city" className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+          <span>Ciudad de nacimiento <span className="text-red-500">*</span></span>
+          {highlightCriticalFields && (
+            <span
+              className="text-xs text-blue-600 cursor-help"
+              title="Este dato se usa para análisis cabalísticos y astrológicos"
+            >
+              ⓘ
+            </span>
+          )}
         </label>
         <div className="relative">
           <input
@@ -232,8 +252,14 @@ export default function GeoLocationField({
             onChange={(e) => handleCityChange(e.target.value)}
             onBlur={handleCityBlur}
             disabled={disabled}
-            className={`w-full px-4 py-2 bg-white border rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition-colors disabled:bg-gray-50 disabled:cursor-not-allowed ${
-              errors.city ? 'border-red-300' : 'border-gray-300'
+            className={`w-full px-4 py-2 border rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed ${
+              highlightCriticalFields && !disabled
+                ? 'bg-blue-50 border-blue-200'
+                : disabled
+                  ? 'bg-gray-100'
+                  : 'bg-white'
+            } ${
+              errors.city ? 'border-red-300' : ''
             }`}
             placeholder="Ciudad de nacimiento"
           />
@@ -276,8 +302,16 @@ export default function GeoLocationField({
 
       {/* Country Input */}
       <div>
-        <label htmlFor="birth_country" className="block text-sm font-medium text-gray-700 mb-2">
-          País de nacimiento <span className="text-red-500">*</span>
+        <label htmlFor="birth_country" className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+          <span>País de nacimiento <span className="text-red-500">*</span></span>
+          {highlightCriticalFields && (
+            <span
+              className="text-xs text-blue-600 cursor-help"
+              title="Este dato se usa para análisis cabalísticos y astrológicos"
+            >
+              ⓘ
+            </span>
+          )}
         </label>
         <input
           id="birth_country"
@@ -286,36 +320,126 @@ export default function GeoLocationField({
           onChange={(e) => handleCountryChange(e.target.value)}
           onBlur={handleCountryBlur}
           disabled={disabled}
-          className={`w-full px-4 py-2 bg-white border rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition-colors disabled:bg-gray-50 disabled:cursor-not-allowed ${
-            errors.country ? 'border-red-300' : 'border-gray-300'
+          className={`w-full px-4 py-2 border rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed ${
+            highlightCriticalFields && !disabled
+              ? 'bg-blue-50 border-blue-200'
+              : disabled
+                ? 'bg-gray-100'
+                : 'bg-white'
+          } ${
+            errors.country ? 'border-red-300' : ''
           }`}
           placeholder="País de nacimiento"
         />
         {errors.country && <p className="mt-1 text-xs text-red-600">{errors.country}</p>}
       </div>
 
-      {/* Coordinates Display - Note: Editing is controlled by parent component via checkbox */}
-      {/* This component always shows coordinates as read-only; parent handles unlock logic */}
+      {/* Coordenadas: por defecto solo lectura.
+          Si allowManualCoordinates=true → se permite reescritura manual controlada. */}
       {geoResult && geoResult.latitude !== 0 && geoResult.longitude !== 0 && (
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs text-gray-500 mb-1">Latitud</label>
+            <label className="block text-xs text-gray-500 mb-1 flex items-center gap-1">
+              <span>Latitud</span>
+              {highlightCriticalFields && (
+                <span
+                  className="text-xs text-blue-600 cursor-help"
+                  title="Este dato se usa para análisis cabalísticos y astrológicos"
+                >
+                  ⓘ
+                </span>
+              )}
+            </label>
             <input
               type="number"
               step="0.0001"
               value={geoResult.latitude}
-              readOnly
-              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-md text-gray-600 text-sm cursor-not-allowed"
+              readOnly={!allowManualCoordinates}
+              onChange={(e) => {
+                if (!allowManualCoordinates) return;
+                const next = parseFloat(e.target.value);
+                if (isNaN(next)) {
+                  onCoordinatesChange(null, geoResult.longitude);
+                  setGeoResult((prev) =>
+                    prev
+                      ? {
+                          ...prev,
+                          latitude: 0,
+                        }
+                      : prev,
+                  );
+                  return;
+                }
+                const clamped = Math.max(-90, Math.min(90, next));
+                setGeoResult((prev) =>
+                  prev
+                    ? {
+                        ...prev,
+                        latitude: clamped,
+                      }
+                    : prev,
+                );
+                onCoordinatesChange(clamped, geoResult.longitude);
+              }}
+              className={`w-full px-3 py-2 border rounded-md text-sm ${
+                allowManualCoordinates
+                  ? highlightCriticalFields
+                    ? 'bg-blue-50 border-blue-200 text-gray-900'
+                    : 'bg-white border-gray-300 text-gray-900'
+                  : 'bg-gray-100 border-gray-200 text-gray-600 cursor-not-allowed'
+              }`}
             />
           </div>
           <div>
-            <label className="block text-xs text-gray-500 mb-1">Longitud</label>
+            <label className="block text-xs text-gray-500 mb-1 flex items-center gap-1">
+              <span>Longitud</span>
+              {highlightCriticalFields && (
+                <span
+                  className="text-xs text-blue-600 cursor-help"
+                  title="Este dato se usa para análisis cabalísticos y astrológicos"
+                >
+                  ⓘ
+                </span>
+              )}
+            </label>
             <input
               type="number"
               step="0.0001"
               value={geoResult.longitude}
-              readOnly
-              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-md text-gray-600 text-sm cursor-not-allowed"
+              readOnly={!allowManualCoordinates}
+              onChange={(e) => {
+                if (!allowManualCoordinates) return;
+                const next = parseFloat(e.target.value);
+                if (isNaN(next)) {
+                  onCoordinatesChange(geoResult.latitude, null);
+                  setGeoResult((prev) =>
+                    prev
+                      ? {
+                          ...prev,
+                          longitude: 0,
+                        }
+                      : prev,
+                  );
+                  return;
+                }
+                const clamped = Math.max(-180, Math.min(180, next));
+                setGeoResult((prev) =>
+                  prev
+                    ? {
+                        ...prev,
+                        longitude: clamped,
+                      }
+                    : prev,
+                );
+                onCoordinatesChange(geoResult.latitude, clamped);
+              }}
+              className={`w-full px-3 py-2 border rounded-md text-sm ${
+                allowManualCoordinates
+                  ? highlightCriticalFields
+                    ? 'bg-blue-50 border-blue-200 text-gray-900'
+                    : 'bg-white border-gray-300 text-gray-900'
+                  : 'bg-gray-100 border-gray-200 text-gray-600 cursor-not-allowed'
+              }`}
             />
           </div>
         </div>

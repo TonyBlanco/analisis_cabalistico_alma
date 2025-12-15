@@ -40,6 +40,20 @@ export interface Patient {
   [key: string]: any;
 }
 
+export interface PatientProfileSummary {
+  patient_id: number;
+  legal_full_name: string | null;
+  birth_date: string | null;
+  birth_city: string | null;
+  birth_country: string | null;
+  birth_latitude: number | null;
+  birth_longitude: number | null;
+  birth_timezone: string | null;
+  consent_accepted_at: string | null;
+  profile_version?: number | null;
+  name_change_count?: number | null;
+}
+
 /**
  * Fetch list of patients assigned to the current therapist
  * 
@@ -62,6 +76,60 @@ export async function getTherapistPatients(): Promise<Patient[]> {
     
     const errorData = await response.json().catch(() => ({}));
     throw new Error(errorData.error || errorData.message || 'Error al obtener lista de pacientes');
+  }
+
+  return response.json();
+}
+
+/**
+ * Obtiene el perfil básico de un paciente (vista terapeuta).
+ */
+export async function getPatientProfileSummary(
+  patientId: number,
+): Promise<PatientProfileSummary> {
+  const response = await fetch(`${API_BASE_URL}/therapist/patients/${patientId}/profile/`, {
+    method: 'GET',
+    headers: getAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(
+      errorData.error || errorData.message || 'Error al obtener el perfil del paciente',
+    );
+  }
+
+  return response.json();
+}
+
+export interface PatientProfileUpdatePayload {
+  legal_full_name?: string | null;
+  birth_date?: string | null;
+  birth_time?: string | null;
+  birth_city?: string | null;
+  birth_country?: string | null;
+  birth_latitude?: number | null;
+  birth_longitude?: number | null;
+}
+
+/**
+ * Actualiza el perfil de UserProfile del paciente (contexto terapeuta).
+ */
+export async function updatePatientProfile(
+  patientId: number,
+  payload: PatientProfileUpdatePayload,
+): Promise<PatientProfileSummary> {
+  const response = await fetch(`${API_BASE_URL}/patients/${patientId}/profile/`, {
+    method: 'PATCH',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(
+      errorData.error || errorData.message || 'Error al actualizar el perfil del paciente',
+    );
   }
 
   return response.json();

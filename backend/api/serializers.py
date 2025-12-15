@@ -1,8 +1,21 @@
 from rest_framework import serializers
 from .models import (
-    Calculo, Ficha, UserProfile, Patient, Session, TherapistNote,
-    ServiceCategory, Service, ServicePackage, PackageService, 
-    Booking, AvailableSlot, BlockedDate
+    Calculo,
+    Ficha,
+    UserProfile,
+    Patient,
+    Session,
+    TherapistNote,
+    ServiceCategory,
+    Service,
+    ServicePackage,
+    PackageService,
+    Booking,
+    AvailableSlot,
+    BlockedDate,
+    AnalysisRecord,
+    Resource,
+    UserResourceAccess,
 )
 from .birth_data_model import UserBirthData
 from django.contrib.auth.models import User
@@ -11,16 +24,254 @@ from datetime import datetime, timedelta
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
-    """Serializer para el perfil de usuario"""
+    """
+    Serializer para UserProfile reutilizable en contexto admin/backend y edición controlada.
+
+    NOTA:
+    - Para edición de perfil de paciente (contexto terapeuta) solo se usan los campos
+      de identidad y nacimiento; el resto permanece de solo lectura.
+    """
+
     class Meta:
         model = UserProfile
         fields = [
-            'user_type', 'full_name', 'phone', 'birth_date',
-            'profession', 'specialization', 'license_number', 'years_of_experience',
-            'subscription_status', 'subscription_start_date', 'subscription_end_date',
-            'max_fichas_per_month', 'fichas_created_this_month'
+            # Campos básicos / admin
+            "user_type",
+            "full_name",
+            "phone",
+            "birth_date",
+            "profession",
+            "specialization",
+            "license_number",
+            "years_of_experience",
+            "subscription_status",
+            "subscription_start_date",
+            "subscription_end_date",
+            "max_fichas_per_month",
+            "fichas_created_this_month",
+            # Núcleo de identidad / nacimiento
+            "legal_full_name",
+            "birth_time",
+            "birth_city",
+            "birth_country",
+            "birth_latitude",
+            "birth_longitude",
+            "birth_timezone",
+            "profile_version",
+            "name_change_count",
+            "consent_accepted_at",
         ]
-        read_only_fields = ['subscription_status', 'subscription_start_date', 'subscription_end_date']
+        read_only_fields = [
+            "subscription_status",
+            "subscription_start_date",
+            "subscription_end_date",
+            "max_fichas_per_month",
+            "fichas_created_this_month",
+            "birth_timezone",
+            "profile_version",
+            "name_change_count",
+            "consent_accepted_at",
+        ]
+
+    def validate_legal_full_name(self, value: str) -> str:
+        """
+        Validación del nombre legal:
+        - Requerido cuando se establece por primera vez.
+        - Debe contener al menos 2 palabras.
+        """
+        name = (value or "").strip()
+        instance: UserProfile = self.instance
+
+        if not name:
+            # Permitimos vacío solo si ya existía uno (no se está cambiando)
+            if instance and instance.legal_full_name:
+                return instance.legal_full_name
+            raise serializers.ValidationError("El nombre legal completo es obligatorio.")
+
+        words = [w for w in name.split() if w]
+        if len(words) < 2:
+            raise serializers.ValidationError(
+                "El nombre legal debe contener al menos 2 palabras (nombre y apellidos)."
+            )
+        return name
+
+    def validate(self, attrs):
+        """
+        Control de cambios de nombre:
+        - Si el nombre legal cambia y se alcanzó el máximo → error claro.
+        - Si cambia y aún hay margen → marcar bandera interna para incrementar contador.
+        """
+        instance: UserProfile = self.instance
+        if not instance:
+            return attrs
+
+        new_name = attrs.get("legal_full_name")
+        if new_name is None:
+            return attrs
+
+        current_name = (instance.legal_full_name or "").strip()
+        candidate = new_name.strip()
+
+        if current_name and candidate and candidate != current_name:
+            if instance.name_change_count is not None and instance.name_change_count >= 2:
+                raise serializers.ValidationError(
+                    {
+                        "legal_full_name": (
+                            "Cambios de nombre bloqueados (máximo 2 cambios alcanzado). "
+                            "Contacta con soporte si necesitas ayuda adicional."
+                        )
+                    }
+                )
+            attrs["_increment_name_change_count"] = True
+
+        return attrs
+
+    def update(self, instance: UserProfile, validated_data):
+        increment_name_change = validated_data.pop("_increment_name_change_count", False)
+
+        for field in [
+            "legal_full_name",
+            "full_name",
+            "phone",
+            "birth_date",
+            "birth_time",
+            "birth_city",
+            "birth_country",
+            "birth_latitude",
+            "birth_longitude",
+        ]:
+            if field in validated_data:
+                setattr(instance, field, validated_data[field])
+
+        if increment_name_change:
+            current_count = instance.name_change_count or 0
+            instance.name_change_count = current_count + 1
+
+        instance.save()
+        return instance
+
+
+class UserProfileDetailSerializer(serializers.ModelSerializer):
+    """
+    Serializer para el endpoint público de perfil `/api/profile/me/`.
+
+    Reglas:
+    - `legal_full_name` requerido cuando se establece por primera vez.
+    - Debe contener al menos 2 palabras.
+    - Máximo 2 cambios de nombre controlados por `name_change_count`.
+    - `profile_version` se incrementa en cada actualización válida (se gestiona en la vista).
+    """
+
+    email = serializers.EmailField(source="user.email", read_only=True)
+
+    class Meta:
+        model = UserProfile
+        fields = [
+            "legal_full_name",
+            "full_name",
+            "birth_date",
+            "birth_time",
+            "birth_city",
+            "birth_country",
+            "birth_latitude",
+            "birth_longitude",
+            "birth_timezone",
+            "profile_version",
+            "name_change_count",
+            "consent_accepted_at",
+            "user_type",
+            "email",
+        ]
+        read_only_fields = [
+            "profile_version",
+            "name_change_count",
+            "consent_accepted_at",
+            "user_type",
+            "email",
+            "birth_timezone",
+        ]
+
+    def validate_legal_full_name(self, value: str) -> str:
+        """
+        Validación estricta del nombre legal:
+        - Requerido si se envía por primera vez.
+        - Mínimo 2 palabras.
+        """
+        name = (value or "").strip()
+        if not name:
+            # Permitimos vacío solo si ya existe uno almacenado (no se está cambiando)
+            instance: UserProfile = self.instance
+            if instance and instance.legal_full_name:
+                return instance.legal_full_name
+            raise serializers.ValidationError("El nombre legal completo es obligatorio.")
+
+        words = [w for w in name.split() if w]
+        if len(words) < 2:
+            raise serializers.ValidationError(
+                "El nombre legal debe contener al menos 2 palabras (nombre y apellidos)."
+            )
+        return name
+
+    def validate(self, attrs):
+        """
+        Control de cambios de nombre:
+        - Si el nombre legal cambia → incrementar contador.
+        - Si ya se alcanzaron 2 cambios → bloquear cambios adicionales.
+        """
+        instance: UserProfile = self.instance
+        if not instance:
+            return attrs
+
+        new_name = attrs.get("legal_full_name")
+        if new_name is None:
+            # No se está intentando cambiar el nombre legal
+            return attrs
+
+        current_name = (instance.legal_full_name or "").strip()
+        candidate = new_name.strip()
+
+        if current_name and candidate and candidate != current_name:
+            # Nombre está cambiando
+            if instance.name_change_count is not None and instance.name_change_count >= 2:
+                raise serializers.ValidationError(
+                    {
+                        "legal_full_name": (
+                            "Cambios de nombre bloqueados (máximo 2 cambios alcanzado). "
+                            "Contacta con soporte si necesitas ayuda adicional."
+                        )
+                    }
+                )
+
+            # Marcamos que debemos incrementar el contador en update()
+            attrs["_increment_name_change_count"] = True
+
+        return attrs
+
+    def update(self, instance: UserProfile, validated_data):
+        # Bandera interna para incrementar contador de cambios de nombre
+        increment_name_change = validated_data.pop("_increment_name_change_count", False)
+
+        # Asignar campos simples
+        for field in [
+            "legal_full_name",
+            "full_name",
+            "birth_date",
+            "birth_time",
+            "birth_city",
+            "birth_country",
+            "birth_latitude",
+            "birth_longitude",
+        ]:
+            if field in validated_data:
+                setattr(instance, field, validated_data[field])
+
+        # Incrementar contador de cambios de nombre si aplica
+        if increment_name_change:
+            current_count = instance.name_change_count or 0
+            instance.name_change_count = current_count + 1
+
+        instance.save()
+        return instance
 
 
 class UserBirthDataSerializer(serializers.ModelSerializer):
@@ -453,4 +704,235 @@ class BlockedDateSerializer(serializers.ModelSerializer):
     class Meta:
         model = BlockedDate
         fields = ['id', 'date', 'reason', 'is_full_day', 'start_time', 'end_time']
+
+
+from api.test_models import TestModule
+from api.validators.test_execution import (
+    validate_execution_mode,
+    validate_role_for_execution,
+    validate_clinical_context,
+    validate_patient_ownership,
+)
+
+
+class AnalysisRecordSerializer(serializers.ModelSerializer):
+    """
+    Serializer para AnalysisRecord con validaciones defensivas.
+
+    Reglas clave:
+    - Admin nunca es actor.
+    - execution_mode no se acepta desde el request: se deriva desde module_code + contexto.
+    - therapist_clinical requiere patient_id + therapist_id + ownership + no auto-evaluación.
+    """
+
+    class Meta:
+        model = AnalysisRecord
+        fields = [
+            'id',
+            'kind',
+            'module_code',
+            'subject_user',
+            'created_by_user',
+            'role_context',
+            'execution_mode',
+            'patient',
+            'therapist',
+            'birth_data_snapshot',
+            'algorithm_snapshot',
+            'raw_input',
+            'computed_result',
+            'legacy_output',
+            'visibility',
+            'therapist_annotations',
+            'created_at',
+            'test_result',
+            'cabalistic_analysis',
+        ]
+        read_only_fields = [
+            'id',
+            'created_at',
+            'execution_mode',
+            'therapist',
+            'created_by_user',
+            'computed_result',
+            'legacy_output',
+            'test_result',
+            'cabalistic_analysis',
+        ]
+
+    def validate(self, data):
+        """
+        Validaciones cruzadas a nivel de objeto.
+        """
+        request = self.context.get('request')
+        user = getattr(request, 'user', None)
+
+        if not user or not user.is_authenticated:
+            raise serializers.ValidationError("Usuario no autenticado.")
+
+        profile = getattr(user, 'profile', None)
+        if not profile:
+            raise serializers.ValidationError("Perfil de usuario inválido.")
+
+        # Admin nunca es actor
+        if profile.is_admin or user.is_staff or user.is_superuser:
+            raise serializers.ValidationError("Admin no puede ser actor de AnalysisRecord.")
+
+        kind = data.get('kind')
+        module_code = data.get('module_code')
+        patient = data.get('patient')
+
+        # Derivar execution_mode solo para clinical_test
+        execution_mode = None
+        if kind == 'clinical_test':
+            try:
+                test_module = TestModule.objects.get(code=module_code)
+            except TestModule.DoesNotExist:
+                raise serializers.ValidationError({"module_code": "TestModule no encontrado para este código."})
+
+            # Regla de derivación:
+            # - Si hay patient --> therapist_clinical
+            # - Si no hay patient --> patient_self
+            execution_mode = 'therapist_clinical' if patient else 'patient_self'
+
+            # Validar contra reglas globales ya existentes
+            validate_execution_mode(test_module, execution_mode)
+            validate_role_for_execution(user, execution_mode)
+
+            if execution_mode == 'therapist_clinical':
+                # patient_id requerido
+                validate_clinical_context(user, patient_id=patient.id if patient else None)
+                # ownership + no auto-evaluación
+                validate_patient_ownership(therapist_user=user, patient_id=patient.id)
+
+        data['execution_mode'] = execution_mode
+        data['created_by_user'] = user
+
+        if kind == 'clinical_test' and execution_mode == 'therapist_clinical':
+            data['therapist'] = user
+
+        # Validar snapshots mínimos
+        birth = data.get('birth_data_snapshot') or {}
+        required_birth_fields = [
+            'legal_name',
+            'birth_date',
+            'birth_time',
+            'city',
+            'country',
+            'lat',
+            'lng',
+            'timezone',
+            'geocode_source',
+        ]
+        missing_birth = [f for f in required_birth_fields if f not in birth]
+        if missing_birth:
+            raise serializers.ValidationError({
+                'birth_data_snapshot': f"Faltan campos requeridos en birth_data_snapshot: {', '.join(missing_birth)}"
+            })
+
+        algo = data.get('algorithm_snapshot') or {}
+        required_algo = ['engine', 'version', 'params']
+        missing_algo = [f for f in required_algo if f not in algo]
+        if missing_algo:
+            raise serializers.ValidationError({
+                'algorithm_snapshot': f"Faltan campos requeridos en algorithm_snapshot: {', '.join(missing_algo)}"
+            })
+
+        return data
+
+    def to_representation(self, instance):
+        """Filtrar therapist_annotations según rol del usuario."""
+        representation = super().to_representation(instance)
+        request = self.context.get('request')
+        
+        if request and hasattr(request, 'user'):
+            user = request.user
+            profile = getattr(user, 'profile', None)
+            
+            # Si es paciente, ocultar annotations a menos que visible_to_patient = true
+            if profile and profile.user_type == 'patient':
+                annotations = representation.get('therapist_annotations', {})
+                if isinstance(annotations, dict) and not annotations.get('visible_to_patient', False):
+                    representation['therapist_annotations'] = None
+        
+        return representation
+
+
+# ========== RESOURCE ACCESS CORE SERIALIZERS ==========
+
+class ResourceSerializer(serializers.ModelSerializer):
+    """Serializer para Resource (solo lectura para consumidores)"""
+    
+    class Meta:
+        model = Resource
+        fields = [
+            'id',
+            'title',
+            'description',
+            'resource_type',
+            'content_url',
+            'thumbnail_url',
+            'access_level',
+            'is_active',
+            'created_at',
+            'updated_at',
+        ]
+        read_only_fields = '__all__'
+
+
+class UserResourceAccessSerializer(serializers.ModelSerializer):
+    """Serializer para UserResourceAccess"""
+    resource = ResourceSerializer(read_only=True)
+    resource_id = serializers.UUIDField(write_only=True, required=False)
+    
+    class Meta:
+        model = UserResourceAccess
+        fields = [
+            'id',
+            'user',
+            'resource',
+            'resource_id',
+            'source',
+            'assigned_by',
+            'created_at',
+        ]
+        read_only_fields = ['id', 'user', 'created_at']
+
+    def validate(self, attrs):
+        """Validación: assigned_by solo si source = assigned_by_therapist"""
+        source = attrs.get('source')
+        assigned_by = attrs.get('assigned_by')
+        
+        if source == 'assigned_by_therapist' and not assigned_by:
+            raise serializers.ValidationError({
+                'assigned_by': 'assigned_by es obligatorio cuando source="assigned_by_therapist".'
+            })
+        if source != 'assigned_by_therapist' and assigned_by:
+            raise serializers.ValidationError({
+                'assigned_by': 'assigned_by solo puede estar presente cuando source="assigned_by_therapist".'
+            })
+        
+        return attrs
+
+
+class MyResourceSerializer(serializers.ModelSerializer):
+    """Serializer para recursos accesibles por el usuario actual (con info de acceso)"""
+    resource = ResourceSerializer(read_only=True)
+    access_source = serializers.CharField(source='source', read_only=True)
+    assigned_by_username = serializers.CharField(
+        source='assigned_by.username',
+        read_only=True,
+        allow_null=True
+    )
+    
+    class Meta:
+        model = UserResourceAccess
+        fields = [
+            'id',
+            'resource',
+            'access_source',
+            'assigned_by_username',
+            'created_at',
+        ]
+        read_only_fields = '__all__'
 

@@ -11,7 +11,6 @@ import AssignedTestsSection from '@/components/AssignedTestsSection';
 import ClinicalEvaluationsSection from '@/components/ClinicalEvaluationsSection';
 import PatientResultsSection from '@/components/PatientResultsSection';
 import { Patient } from '@/lib/patient-api';
-import TherapistPatientProfileForm from '@/components/TherapistPatientProfileForm';
 
 export default function TherapistDashboard() {
   const router = useRouter();
@@ -146,9 +145,6 @@ export default function TherapistDashboard() {
             </a>
           </div>
         </div>
-
-        {/* Section 2.75: Patient Profile (Therapist Context) */}
-        <TherapistPatientProfileForm />
 
         {/* Section 3: Assigned Tests (patient_self) */}
         {/* Shows tests assigned to active patient with status: pending / completed */}

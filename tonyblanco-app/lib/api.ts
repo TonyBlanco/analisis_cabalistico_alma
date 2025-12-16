@@ -184,11 +184,7 @@ async function apiRequest<T>(
       }));
       const errorMsg = error.message || error.error || error.detail || `Error: ${response.status}`;
       console.error('API Error:', errorMsg);
-      // Crear un error con la respuesta completa para que el frontend pueda acceder a error.error, error.email, etc.
-      const apiError: any = new Error(errorMsg);
-      apiError.response = { json: async () => error };
-      apiError.errorData = error;
-      throw apiError;
+      throw new Error(errorMsg);
     }
 
     return response.json();
@@ -240,13 +236,6 @@ export const login = async (username: string, password: string): Promise<LoginRe
   return apiRequest<LoginResponse>('/login/', {
     method: 'POST',
     body: JSON.stringify({ username, password }),
-  });
-};
-
-export const requestPasswordReset = async (email: string): Promise<{ message: string }> => {
-  return apiRequest<{ message: string }>('/password-reset/request/', {
-    method: 'POST',
-    body: JSON.stringify({ email }),
   });
 };
 

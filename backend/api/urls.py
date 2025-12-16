@@ -89,6 +89,11 @@ from .analysis_views import (
     PatientMyResultsView,
     UpdateAnalysisAnnotationsView,
 )
+from .resource_views import (
+    MyResourcesView,
+    AssignResourceToPatientView,
+    AcquireResourceView,
+)
 
 urlpatterns = [
     # ⚠️ ENDPOINTS TEMPORALES - ELIMINAR DESPUÉS DE USAR ⚠️
@@ -202,4 +207,9 @@ urlpatterns = [
     path('analysis-records/<uuid:pk>/', AnalysisRecordDetailView.as_view(), name='analysisrecord_detail'),
     path('analysis-records/<uuid:pk>/annotations/', UpdateAnalysisAnnotationsView.as_view(), name='analysisrecord_annotations'),
     path('analysis-records/my-results/', PatientMyResultsView.as_view(), name='analysisrecord_my_results'),
+    
+    # Resource Access Core (FASE SELLADA)
+    path('resources/my/', MyResourcesView.as_view(), name='my_resources'),
+    path('patients/<int:id>/resources/assign/', AssignResourceToPatientView.as_view(), name='assign_resource_to_patient'),
+    path('resources/<uuid:id>/acquire/', AcquireResourceView.as_view(), name='acquire_resource'),
 ]

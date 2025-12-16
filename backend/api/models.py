@@ -908,3 +908,136 @@ class AnalysisRecord(models.Model):
     def __str__(self):
         return f"{self.kind}::{self.module_code} ({self.id})"
 
+
+# ========== RESOURCE ACCESS CORE (FASE SELLADA) ==========
+
+class Resource(models.Model):
+    """
+    Recurso compartido (audio, video, curso, etc.)
+    Existe una sola vez físicamente. El acceso se gestiona via UserResourceAccess.
+    """
+    RESOURCE_TYPE_CHOICES = [
+        ('audio', 'Audio'),
+        ('video', 'Video'),
+        ('book', 'Libro'),
+        ('curso', 'Curso'),
+        ('clase', 'Clase'),
+        ('meditacion', 'Meditación'),
+        ('pdf', 'PDF'),
+        ('otro', 'Otro'),
+    ]
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    title = models.CharField(max_length=255, help_text='Título del recurso')
+    description = models.TextField(blank=True, help_text='Descripción del recurso')
+    resource_type = models.CharField(
+        max_length=20,
+        choices=RESOURCE_TYPE_CHOICES,
+        help_text='Tipo de recurso'
+    )
+    category = models.CharField(
+        max_length=100,
+        blank=True,
+        help_text='Categoría libre (ej: "cabala", "desarrollo-personal", "clínica")'
+    )
+    level = models.CharField(
+        max_length=20,
+        choices=[
+            ('free', 'Gratuito'),
+            ('basic', 'Básico'),
+            ('advanced', 'Avanzado'),
+            ('premium', 'Premium'),
+        ],
+        default='free',
+        help_text='Nivel de acceso base'
+    )
+    content_url = models.URLField(blank=True, help_text='URL del contenido del recurso')
+    thumbnail_url = models.URLField(blank=True, help_text='URL de la miniatura')
+    is_active = models.BooleanField(default=True, help_text='Indica si el recurso está activo')
+    is_featured = models.BooleanField(default=False, help_text='Recurso destacado')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = 'Recurso'
+        verbose_name_plural = 'Recursos'
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['resource_type', 'category']),
+            models.Index(fields=['is_active', 'level']),
+        ]
+    
+    def __str__(self):
+        return self.title
+
+
+class UserResourceAccess(models.Model):
+    """
+    Modelo de acceso a recursos - FASE SELLADA
+    Define cómo un usuario accedió a un recurso específico.
+    El recurso existe una sola vez. El acceso se rastrea aquí.
+    """
+    SOURCE_CHOICES = [
+        ('free', 'Gratuito'),
+        ('assigned_by_therapist', 'Asignado por terapeuta'),
+        ('self_purchased', 'Comprado por el usuario'),
+    ]
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='resource_accesses',
+        help_text='Usuario que tiene acceso al recurso'
+    )
+    resource = models.ForeignKey(
+        Resource,
+        on_delete=models.CASCADE,
+        related_name='user_accesses',
+        help_text='Recurso al que se tiene acceso'
+    )
+    source = models.CharField(
+        max_length=32,
+        choices=SOURCE_CHOICES,
+        help_text='Origen del acceso'
+    )
+    assigned_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='assigned_resources',
+        help_text='Terapeuta que asignó el recurso (solo si source=assigned_by_therapist)'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        verbose_name = 'Acceso a Recurso'
+        verbose_name_plural = 'Accesos a Recursos'
+        unique_together = ['user', 'resource']
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user', 'source']),
+            models.Index(fields=['resource', 'source']),
+            models.Index(fields=['user', 'created_at']),
+        ]
+    
+    def clean(self):
+        """Validación de integridad"""
+        from django.core.exceptions import ValidationError
+        
+        # assigned_by solo se rellena si source = assigned_by_therapist
+        if self.source != 'assigned_by_therapist' and self.assigned_by is not None:
+            raise ValidationError("assigned_by solo puede tener valor si source='assigned_by_therapist'")
+        
+        # Si source = assigned_by_therapist, assigned_by es obligatorio
+        if self.source == 'assigned_by_therapist' and self.assigned_by is None:
+            raise ValidationError("assigned_by es obligatorio si source='assigned_by_therapist'")
+    
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return f"{self.user.username} -> {self.resource.title} ({self.source})"
+

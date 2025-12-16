@@ -28,6 +28,8 @@ from .models import (
     Booking,
     AvailableSlot,
     BlockedDate,
+    Resource,
+    UserResourceAccess,
 )
 from .birth_data_model import UserBirthData
 from .serializers import (
@@ -1112,50 +1114,169 @@ class TherapistPatientProfileView(APIView):
     """
     Perfil básico de paciente en contexto de terapeuta.
 
-    Endpoint:
-    - GET /api/therapist/patients/<int:pk>/profile/
+    Endpoints:
+    - GET  /api/therapist/patients/<int:pk>/profile/  → Lee perfil del paciente
+    - PATCH /api/therapist/patients/<int:pk>/profile/  → Actualiza perfil del paciente
 
     Reglas:
-    - Solo el terapeuta propietario puede ver el perfil.
-    - NO modifica nada (read-only).
+    - Solo el terapeuta propietario puede ver/editar el perfil.
+    - Ownership check: patient.therapist == request.user
+    - Usa mismo serializer que /api/profile/me/ (UserProfileDetailSerializer)
+    - Enforce name_change_count y profile_version rules
+    - Coordinates locked unless explicit re-write flag
     - No toca AnalysisRecord ni lógica clínica.
     """
 
     permission_classes = [IsAuthenticated, IsTherapist]
 
-    def get(self, request, pk):
+    def get_patient(self, pk, therapist):
+        """Helper para obtener paciente con ownership check"""
         try:
-            patient = Patient.objects.select_related("user").get(
-                therapist=request.user,
+            return Patient.objects.select_related("user", "user__profile").get(
+                therapist=therapist,
                 id=pk,
                 is_active=True,
             )
         except Patient.DoesNotExist:
+            return None
+
+    def get(self, request, pk):
+        patient = self.get_patient(pk, request.user)
+        if not patient:
             return Response(
                 {"error": "Paciente no encontrado o no te pertenece."},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        # Datos base desde Patient
-        profile_data = {
-            "patient_id": patient.id,
-            "birth_date": patient.birth_date,
-            "birth_city": patient.birth_city,
-            "birth_country": patient.birth_country,
-            "birth_latitude": patient.birth_latitude,
-            "birth_longitude": patient.birth_longitude,
-            "birth_timezone": patient.birth_timezone,
-            "legal_full_name": None,
-            "consent_accepted_at": None,
-        }
-
-        # Si el paciente tiene cuenta de usuario vinculada, enriquecemos con UserProfile
+        # Si el paciente tiene cuenta de usuario vinculada, usar UserProfile como fuente de verdad
         if patient.user and hasattr(patient.user, "profile"):
             up = patient.user.profile
-            profile_data["legal_full_name"] = up.legal_full_name or up.full_name
-            profile_data["consent_accepted_at"] = up.consent_accepted_at
+            serializer = UserProfileDetailSerializer(up)
+            profile_data = serializer.data
+            profile_data["patient_id"] = patient.id
+        else:
+            # Si no tiene user, usar datos del modelo Patient directamente
+            profile_data = {
+                "patient_id": patient.id,
+                "legal_full_name": patient.full_name,
+                "full_name": patient.full_name,
+                "birth_date": patient.birth_date.strftime("%Y-%m-%d") if patient.birth_date else None,
+                "birth_time": str(patient.birth_time) if patient.birth_time else None,
+                "birth_city": patient.birth_city,
+                "birth_country": patient.birth_country,
+                "birth_latitude": float(patient.birth_latitude) if patient.birth_latitude is not None else None,
+                "birth_longitude": float(patient.birth_longitude) if patient.birth_longitude is not None else None,
+                "birth_timezone": patient.birth_timezone,
+                "consent_accepted_at": None,
+                "profile_version": 0,
+                "name_change_count": 0,
+                "user_type": "patient",
+                "email": patient.email,
+            }
 
         return Response(profile_data, status=status.HTTP_200_OK)
+
+    def patch(self, request, pk):
+        """
+        Actualiza el perfil del paciente.
+        
+        Ownership check: patient.therapist == request.user
+        Usa UserProfileDetailSerializer si el paciente tiene user vinculado.
+        """
+        patient = self.get_patient(pk, request.user)
+        if not patient:
+            return Response(
+                {"error": "Paciente no encontrado o no te pertenece."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        # Si el paciente tiene cuenta de usuario vinculada, actualizar UserProfile
+        if patient.user and hasattr(patient.user, "profile"):
+            profile = patient.user.profile
+            
+            # Preparar datos para el serializer
+            update_data = request.data.copy()
+            
+            # Si no se envía flag de reescribir coordenadas, no incluir lat/lng
+            rewrite_coordinates = update_data.pop('rewrite_coordinates', False)
+            if not rewrite_coordinates:
+                # No permitir modificar coordenadas si no hay flag explícito
+                update_data.pop('birth_latitude', None)
+                update_data.pop('birth_longitude', None)
+            
+            # Usar el mismo serializer que /api/profile/me/
+            serializer = UserProfileDetailSerializer(profile, data=update_data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            
+            # Guardar cambios
+            profile = serializer.save()
+            
+            # Incrementar versión de perfil si hubo cambios significativos
+            fields_touched = set(update_data.keys())
+            relevant_fields = {
+                "legal_full_name",
+                "birth_date",
+                "birth_time",
+                "birth_city",
+                "birth_country",
+                "birth_latitude",
+                "birth_longitude",
+            }
+            if fields_touched.intersection(relevant_fields):
+                try:
+                    profile.profile_version = (profile.profile_version or 1) + 1
+                except Exception:
+                    profile.profile_version = 1
+                profile.save(update_fields=["profile_version"])
+            
+            # Retornar perfil actualizado
+            return Response(UserProfileDetailSerializer(profile).data, status=status.HTTP_200_OK)
+        
+        else:
+            # Si no tiene user vinculado, actualizar directamente el modelo Patient
+            # (caso menos común, pero necesario para pacientes sin cuenta)
+            update_data = request.data.copy()
+            
+            # Campos editables en Patient
+            if 'legal_full_name' in update_data:
+                patient.full_name = update_data['legal_full_name']
+            if 'birth_date' in update_data:
+                patient.birth_date = update_data['birth_date']
+            if 'birth_time' in update_data:
+                patient.birth_time = update_data['birth_time']
+            if 'birth_city' in update_data:
+                patient.birth_city = update_data['birth_city']
+            if 'birth_country' in update_data:
+                patient.birth_country = update_data['birth_country']
+            
+            # Coordinates solo si hay flag explícito
+            rewrite_coordinates = update_data.pop('rewrite_coordinates', False)
+            if rewrite_coordinates:
+                if 'birth_latitude' in update_data:
+                    patient.birth_latitude = update_data['birth_latitude']
+                if 'birth_longitude' in update_data:
+                    patient.birth_longitude = update_data['birth_longitude']
+            
+            if 'birth_timezone' in update_data:
+                patient.birth_timezone = update_data['birth_timezone']
+            
+            patient.save()
+            
+            # Retornar datos actualizados
+            return Response({
+                "patient_id": patient.id,
+                "legal_full_name": patient.full_name,
+                "birth_date": patient.birth_date.strftime("%Y-%m-%d") if patient.birth_date else None,
+                "birth_time": str(patient.birth_time) if patient.birth_time else None,
+                "birth_city": patient.birth_city,
+                "birth_country": patient.birth_country,
+                "birth_latitude": float(patient.birth_latitude) if patient.birth_latitude is not None else None,
+                "birth_longitude": float(patient.birth_longitude) if patient.birth_longitude is not None else None,
+                "birth_timezone": patient.birth_timezone,
+                "consent_accepted_at": None,
+                "profile_version": 0,
+                "name_change_count": 0,
+            }, status=status.HTTP_200_OK)
 
 
 class GenerateAIPlanView(APIView):

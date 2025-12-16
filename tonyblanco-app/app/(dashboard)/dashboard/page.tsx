@@ -3,24 +3,41 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { getUserRole } from '@/lib/getUserRole';
+import { fetchSession } from '@/lib/session';
 
 /**
  * Dashboard Root - Role-based redirector
- * 
- * This page does NOT render content.
- * It redirects users to their role-specific dashboard:
+ *
+ * Esta página NO renderiza contenido.
+ * Siempre obtiene el rol desde /api/me y redirige a:
  * - admin     → /dashboard/admin
  * - therapist → /dashboard/therapist
  * - personal  → /dashboard/personal
  * - patient   → /dashboard/patient
- * 
- * If role cannot be determined, redirects to /login
+ *
+ * Seguridad adicional:
+ * - Fuerza fetchSession() en montaje para validar token con backend.
+ * - Limpia estado específico de rol susceptible a contaminación entre dashboards.
  */
 export default function DashboardRoot() {
   const router = useRouter();
 
   useEffect(() => {
     const handleRedirect = async () => {
+      // Siempre validar sesión primero (sin confiar en caché local)
+      await fetchSession();
+
+      // Limpieza defensiva de estado específico de rol (sin tocar authToken)
+      if (typeof window !== 'undefined') {
+        try {
+          const ls = window.localStorage;
+          ls.removeItem('therapist_active_patient_id');
+          ls.removeItem('therapist_active_patient_name');
+        } catch {
+          // ignore
+        }
+      }
+
       const userRole = await getUserRole();
 
       switch (userRole) {
@@ -37,14 +54,7 @@ export default function DashboardRoot() {
           router.replace('/dashboard/patient');
           break;
         default:
-          // Role cannot be determined
-          if (process.env.NODE_ENV === 'development') {
-            // In development, redirect to admin dashboard for dev bypass
-            router.replace('/dashboard/admin');
-          } else {
-            // In production, redirect to login
-            router.replace('/login');
-          }
+          router.replace('/login');
           break;
       }
     };
@@ -52,7 +62,6 @@ export default function DashboardRoot() {
     handleRedirect();
   }, [router]);
 
-  // Return null - this page should never render
+  // Esta página nunca debería renderizar contenido visible
   return null;
 }
-

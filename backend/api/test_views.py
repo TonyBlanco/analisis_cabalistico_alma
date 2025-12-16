@@ -293,6 +293,73 @@ class ExecuteTestView(APIView):
                 details=details_dict  # H4: Audit metadata stored in details JSONField
             )
 
+            # Crear AnalysisRecord para que el paciente pueda ver el resultado
+            # Solo si execution_mode es patient_self (paciente ejecutando su propio test)
+            if execution_mode == 'patient_self':
+                from api.models import AnalysisRecord, Patient
+                from django.utils import timezone
+                
+                # Preparar birth_data_snapshot desde el perfil
+                birth_snapshot = {}
+                if profile:
+                    birth_snapshot = {
+                        'legal_name': profile.legal_full_name or profile.full_name or '',
+                        'birth_date': str(profile.birth_date) if profile.birth_date else None,
+                        'birth_time': str(profile.birth_time) if hasattr(profile, 'birth_time') and profile.birth_time else None,
+                        'city': profile.birth_city or '',
+                        'country': profile.birth_country or '',
+                        'lat': float(profile.birth_latitude) if profile.birth_latitude else None,
+                        'lng': float(profile.birth_longitude) if profile.birth_longitude else None,
+                        'timezone': profile.timezone or 'UTC',
+                        'geocode_source': 'profile'
+                    }
+                
+                # Si hay birth_data, usar esos datos
+                if birth_data:
+                    birth_snapshot.update({
+                        'legal_name': birth_data.full_name or birth_snapshot.get('legal_name', ''),
+                        'birth_date': str(birth_data.birth_date) if birth_data.birth_date else birth_snapshot.get('birth_date'),
+                        'birth_time': str(birth_data.birth_time) if birth_data.birth_time else birth_snapshot.get('birth_time'),
+                    })
+                
+                # Preparar algorithm_snapshot
+                algorithm_snapshot = {
+                    'engine': 'test_module',
+                    'version': '1.0',
+                    'test_module_code': test_module.code,
+                    'test_module_name': test_module.name,
+                    'test_type': test_module.test_type,
+                }
+                
+                # Determinar visibility: 'patient' para que el paciente lo vea
+                visibility = 'patient'
+                
+                # Obtener Patient si el usuario es paciente
+                patient_obj = None
+                if profile.user_type == 'patient':
+                    try:
+                        patient_obj = Patient.objects.get(user=request.user)
+                    except Patient.DoesNotExist:
+                        pass
+                
+                # Crear AnalysisRecord
+                analysis_record = AnalysisRecord.objects.create(
+                    kind='clinical_test',
+                    module_code=test_module.code,
+                    subject_user=request.user,
+                    created_by_user=request.user,
+                    role_context='patient',
+                    execution_mode='patient_self',
+                    patient=patient_obj,
+                    therapist=None,
+                    birth_data_snapshot=birth_snapshot,
+                    algorithm_snapshot=algorithm_snapshot,
+                    raw_input=input_data,
+                    computed_result=result_data,
+                    visibility=visibility,
+                    test_result=test_result,
+                )
+
         response_data = {'success': True, 'result': result_data, 'uses_remaining': None}
         if test_module.uses_per_month:
             response_data['uses_remaining'] = (test_module.uses_per_month - user_access.current_month_uses)

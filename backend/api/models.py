@@ -989,11 +989,15 @@ class AnalysisRecord(models.Model):
         una vez creado el registro.
         """
         if self.pk:
-            original = AnalysisRecord.objects.get(pk=self.pk)
-            if original.birth_data_snapshot != self.birth_data_snapshot:
-                raise ValidationError("birth_data_snapshot es inmutable y no puede cambiarse.")
-            if original.algorithm_snapshot != self.algorithm_snapshot:
-                raise ValidationError("algorithm_snapshot es inmutable y no puede cambiarse.")
+            try:
+                original = AnalysisRecord.objects.get(pk=self.pk)
+                if original.birth_data_snapshot != self.birth_data_snapshot:
+                    raise ValidationError("birth_data_snapshot es inmutable y no puede cambiarse.")
+                if original.algorithm_snapshot != self.algorithm_snapshot:
+                    raise ValidationError("algorithm_snapshot es inmutable y no puede cambiarse.")
+            except AnalysisRecord.DoesNotExist:
+                # Es un nuevo objeto, no hay original para comparar
+                pass
 
         super().save(*args, **kwargs)
 

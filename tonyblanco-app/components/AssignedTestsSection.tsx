@@ -17,9 +17,16 @@ export default function AssignedTestsSection() {
   const [assignedTests, setAssignedTests] = useState<TestResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [activePatientId, setActivePatientIdState] = useState<number | null>(null);
+  const [activePatientName, setActivePatientNameState] = useState<string | null>(null);
 
-  const activePatientId = getActivePatientId();
-  const activePatientName = getActivePatientName();
+  // Cargar paciente activo solo en cliente para evitar mismatches SSR/CSR
+  useEffect(() => {
+    const id = getActivePatientId();
+    const name = getActivePatientName();
+    setActivePatientIdState(id);
+    setActivePatientNameState(name);
+  }, []);
 
   useEffect(() => {
     if (activePatientId) {

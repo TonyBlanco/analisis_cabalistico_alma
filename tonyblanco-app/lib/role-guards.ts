@@ -1,33 +1,75 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { getUserRole, UserRole as SessionUserRole } from '@/lib/getUserRole';
 
 type Role = 'admin' | 'therapist' | 'personal' | 'patient';
 
 interface RoleGuardOptions {
-  currentUserRole: Role | null | undefined;
   allowedRoles: Role[];
   redirectTo?: string;
 }
 
-export function useRoleGuard({
-  currentUserRole,
-  allowedRoles,
-  redirectTo = '/dashboard',
-}: RoleGuardOptions) {
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!currentUserRole) return;
-
-    if (!allowedRoles.includes(currentUserRole)) {
-      router.replace(redirectTo);
-    }
-  }, [currentUserRole, allowedRoles, redirectTo, router]);
-
-  return {
-    authorized: !!currentUserRole && allowedRoles.includes(currentUserRole),
-  };
+interface RoleGuardResult {
+  role: SessionUserRole;
+  loading: boolean;
+  authorized: boolean;
 }
 
+/**
+ * useRoleGuard
+ *
+ * Seguridad:
+ * - Siempre obtiene el rol desde /api/me vía getUserRole() (nunca de props, storage ni caché manual).
+ * - No renderiza contenido autorizado hasta que la llamada se resuelve.
+ * - Si el rol no está permitido o no existe, redirige a redirectTo.
+ */
+export function useRoleGuard({
+  allowedRoles,
+  redirectTo = '/login',
+}: RoleGuardOptions): RoleGuardResult {
+  const router = useRouter();
+  const [role, setRole] = useState<SessionUserRole>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const checkRole = async () => {
+      try {
+        const userRole = await getUserRole();
+        if (cancelled) return;
+
+        setRole(userRole);
+        setLoading(false);
+
+        // Si no hay rol o no está permitido, redirigir
+        if (!userRole || !allowedRoles.includes(userRole as Role)) {
+          router.replace(redirectTo);
+        }
+      } catch (error) {
+        console.error('Error checking user role:', error);
+        if (!cancelled) {
+          setRole(null);
+          setLoading(false);
+          router.replace(redirectTo);
+        }
+      }
+    };
+
+    checkRole();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [allowedRoles, redirectTo, router]);
+
+  const authorized = !!role && allowedRoles.includes(role as Role);
+
+  return {
+    role,
+    loading,
+    authorized,
+  };
+}

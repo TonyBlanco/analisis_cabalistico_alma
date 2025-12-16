@@ -25,9 +25,16 @@ export default function ClinicalEvaluationsSection() {
   const [patientData, setPatientData] = useState<any>(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [profileValidationResult, setProfileValidationResult] = useState<{ missingFields: string[] } | null>(null);
+  const [activePatientId, setActivePatientIdState] = useState<number | null>(null);
+  const [activePatientName, setActivePatientNameState] = useState<string | null>(null);
 
-  const activePatientId = getActivePatientId();
-  const activePatientName = getActivePatientName();
+  // Cargar paciente activo solo en cliente para evitar mismatches SSR/CSR
+  useEffect(() => {
+    const id = getActivePatientId();
+    const name = getActivePatientName();
+    setActivePatientIdState(id);
+    setActivePatientNameState(name);
+  }, []);
 
   useEffect(() => {
     fetchTests();
@@ -185,7 +192,10 @@ export default function ClinicalEvaluationsSection() {
         <div className="mb-4">
           <h2 className="text-lg font-semibold text-gray-900">Evaluaciones Clínicas</h2>
           {activePatientName && (
-            <p className="text-sm text-gray-500 mt-1">Paciente activo: <span className="font-medium">{activePatientName}</span></p>
+            <p className="text-sm text-gray-500 mt-1">
+              Paciente activo:{' '}
+              <span className="font-medium">{activePatientName}</span>
+            </p>
           )}
         </div>
 
@@ -220,6 +230,7 @@ export default function ClinicalEvaluationsSection() {
                       test={test}
                       onExecute={() => handleExecuteTest(test)}
                       disabled={executingTestCode === test.code || !activePatientId}
+                      hasActivePatient={!!activePatientId}
                     />
                   </div>
                 </div>
@@ -298,8 +309,18 @@ export default function ClinicalEvaluationsSection() {
 }
 
 // Helper component for execute button
-function ExecuteTestButton({ test, onExecute, disabled }: { test: TestModule; onExecute: () => void; disabled: boolean }) {
-  if (!disabled && !getActivePatientId()) {
+function ExecuteTestButton({
+  test,
+  onExecute,
+  disabled,
+  hasActivePatient,
+}: {
+  test: TestModule;
+  onExecute: () => void;
+  disabled: boolean;
+  hasActivePatient: boolean;
+}) {
+  if (!disabled && !hasActivePatient) {
     return (
       <button
         disabled

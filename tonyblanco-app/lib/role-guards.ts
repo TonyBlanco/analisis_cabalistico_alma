@@ -81,10 +81,20 @@ export function useRoleGuard({
           setRole(userRole);
           setAuthorized(true);
         } else if (userRole) {
-          // Rol existe pero no está permitido - redirigir
+          // Rol existe pero no está permitido - redirigir al dashboard correcto
           setRole(userRole);
           setAuthorized(false);
-          router.replace(redirectTo);
+          
+          // Determine correct dashboard based on role
+          const roleDashboardMap: Record<Role, string> = {
+            admin: '/dashboard/admin',
+            therapist: '/dashboard/therapist',
+            personal: '/dashboard/personal',
+            patient: '/dashboard/patient',
+          };
+          
+          const correctDashboard = roleDashboardMap[userRole] || redirectTo;
+          router.replace(correctDashboard);
         } else {
           // No se pudo determinar el rol
           setRole(null);

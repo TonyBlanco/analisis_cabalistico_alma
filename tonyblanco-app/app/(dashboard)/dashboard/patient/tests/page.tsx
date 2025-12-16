@@ -178,7 +178,7 @@ export default function PatientTestsPage() {
       {assignedTests.length === 0 ? (
         <div className="bg-white border border-gray-200 rounded-lg p-12 text-center">
           <p className="text-gray-500 text-sm">
-            No tienes tests asignados actualmente.
+            No tienes tests asignados.
           </p>
           <p className="text-gray-400 text-xs mt-2">
             Tu terapeuta te notificará cuando te asigne nuevos tests.

@@ -1,9 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { getTestResults } from '@/lib/test-api';
-import { TestResult } from '@/lib/test-types';
+import { getMyResults, AnalysisRecord } from '@/lib/api';
 import { FileText, Calendar, Eye } from 'lucide-react';
 
 /**
@@ -38,12 +37,14 @@ export default function PersonalResultsSection() {
     }
   };
 
-  const handleViewResult = (resultId: number, testCode?: string) => {
+  const handleViewResult = (result: AnalysisRecord) => {
+    // Use AnalysisRecord UUID for navigation
+    const testCode = result.test_module?.code;
     if (testCode) {
-      router.push(`/dashboard/personal/${testCode}?resultId=${resultId}`);
+      router.push(`/dashboard/personal/${testCode}?resultId=${result.id}`);
     } else {
       // Fallback: navigate to results page if available
-      router.push(`/dashboard/personal/explorations?resultId=${resultId}`);
+      router.push(`/dashboard/personal/explorations?resultId=${result.id}`);
     }
   };
 
@@ -135,7 +136,7 @@ export default function PersonalResultsSection() {
                   )}
                 </div>
                 <button
-                  onClick={() => handleViewResult(result.id, result.test_module?.code)}
+                  onClick={() => handleViewResult(result)}
                   className="flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors flex items-center gap-2"
                 >
                   <Eye className="w-4 h-4" />

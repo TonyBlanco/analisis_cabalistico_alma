@@ -10,12 +10,16 @@ import GeoLocationField from '@/components/GeoLocationField';
 import NameVerificationModal from '@/components/NameVerificationModal';
 
 /**
- * Account Page (User Profile)
+ * Patient Account Page (User Profile)
+ * 
+ * Route: /dashboard/patient/account
+ * 
+ * Patient-only access to edit their profile.
  */
-export default function AccountPage() {
+export default function PatientAccountPage() {
   const router = useRouter();
   const { role, loading: roleLoading, authorized } = useRoleGuard({
-    allowedRoles: ['admin', 'therapist', 'personal', 'patient'],
+    allowedRoles: ['patient'],
     redirectTo: '/login',
   });
 
@@ -358,13 +362,6 @@ export default function AccountPage() {
     }
   };
 
-  // Redirect patients to their specific account page
-  useEffect(() => {
-    if (!roleLoading && role === 'patient') {
-      router.replace('/dashboard/patient/account');
-    }
-  }, [role, roleLoading, router]);
-
   if (roleLoading || loading) {
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -375,21 +372,15 @@ export default function AccountPage() {
     );
   }
 
-  // If patient, don't render (redirect will happen)
-  if (role === 'patient') {
-    return null;
+  if (!authorized || role !== 'patient') {
+    return (
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="bg-white border border-gray-200 rounded-lg p-6">
+          <p className="text-sm text-red-500">No tienes acceso a esta sección.</p>
+        </div>
+      </div>
+    );
   }
-
-  if (!authorized || !role) {
-    return null;
-  }
-
-  const roleLabels: Record<string, string> = {
-    admin: 'Administrador',
-    therapist: 'Terapeuta',
-    personal: 'Usuario Personal',
-    patient: 'Paciente',
-  };
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">

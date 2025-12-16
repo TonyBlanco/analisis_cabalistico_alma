@@ -187,19 +187,74 @@ async function apiRequest<T>(
     console.log('API Response:', { status: response.status, ok: response.ok });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ 
-        message: `Error ${response.status}: No se pudo conectar con el servidor` 
-      }));
-      const errorMsg = error.message || error.error || error.detail || `Error: ${response.status}`;
-      console.error('API Error:', error);
+      // Try to parse error body, but handle empty/invalid JSON gracefully
+      let error: any = {};
       
-      // Return error object instead of throwing
+      try {
+        // Read response as text first (can only read body once)
+        const errorBodyText = await response.text();
+        
+        if (errorBodyText && errorBodyText.trim()) {
+          try {
+            // Try to parse as JSON
+            error = JSON.parse(errorBodyText);
+          } catch {
+            // Not valid JSON, use text as message
+            error = { message: errorBodyText };
+          }
+        } else {
+          // Empty body - create meaningful error message
+          error = { message: `Error ${response.status}: ${response.statusText || 'Respuesta vacía del servidor'}` };
+        }
+      } catch (readError) {
+        // Fallback if reading response fails
+        error = { message: `Error ${response.status}: No se pudo leer la respuesta del servidor` };
+      }
+      
+      const errorMsg = error.message || error.error || error.detail || `Error ${response.status}: ${response.statusText || 'Error desconocido'}`;
+      
+      // Log full backend error for debugging (only if there's useful info beyond status)
+      // Check if error object has meaningful content (not just empty object or default message)
+      const errorKeys = Object.keys(error).filter(key => {
+        const value = error[key];
+        // Skip empty strings, null, undefined, or empty objects
+        if (value === null || value === undefined || value === '') return false;
+        if (typeof value === 'object' && Object.keys(value).length === 0) return false;
+        // Skip default messages that don't add value
+        if (key === 'message' && value === `Error ${response.status}: ${response.statusText || 'Respuesta vacía del servidor'}`) return false;
+        return true;
+      });
+      
+      const hasErrorInfo = errorKeys.length > 0;
+      
+      if (hasErrorInfo) {
+        // Only log if we have meaningful error content
+        const errorBodyToLog: Record<string, any> = {};
+        errorKeys.forEach(key => {
+          errorBodyToLog[key] = error[key];
+        });
+        
+        console.error('API Error Response:', {
+          status: response.status,
+          statusText: response.statusText,
+          url: url,
+          errorBody: errorBodyToLog,
+        });
+      } else {
+        // Minimal log for empty responses to avoid "API Error Response: {}"
+        console.warn(`API Error ${response.status} (${response.statusText || 'Unknown'}): ${url}`);
+      }
+      
+      // Return error object with full backend error body for validation errors
       return {
         error: true,
         message: errorMsg,
         status: response.status,
         networkError: false,
-      } as ApiErrorResponse;
+        // Include full backend error body for validation errors (400, 422, etc.)
+        // Only include if error has actual content (not just empty object or default message)
+        ...(response.status >= 400 && response.status < 500 && hasErrorInfo ? error : {}),
+      } as ApiErrorResponse & Record<string, any>;
     }
 
     return response.json();
@@ -377,6 +432,116 @@ export const getMyResults = async (): Promise<AnalysisRecord[]> => {
  */
 export const getAnalysisRecord = async (uuid: string): Promise<AnalysisRecord | ApiErrorResponse> => {
   return apiRequest<AnalysisRecord>(`/analysis-records/${uuid}/`);
+};
+
+// ========== USER PROFILE API ==========
+
+export interface UserProfileData {
+  legal_full_name?: string;
+  full_name?: string;
+  birth_date?: string;
+  birth_time?: string;
+  birth_city?: string;
+  birth_country?: string;
+  birth_latitude?: number | string | null;
+  birth_longitude?: number | string | null;
+  birth_timezone?: string;
+  profile_version?: number;
+  name_change_count?: number;
+  consent_accepted_at?: string | null;
+  user_type?: string;
+  email?: string;
+  [key: string]: any;
+}
+
+/**
+ * Get current user profile
+ * Uses GET /api/profile/me/
+ */
+export const getProfile = async (): Promise<UserProfileData | ApiErrorResponse> => {
+  return apiRequest<UserProfileData>('/profile/me/');
+};
+
+/**
+ * Update current user profile
+ * Uses PATCH /api/profile/me/
+ */
+export const updateProfile = async (data: Partial<UserProfileData>): Promise<UserProfileData | ApiErrorResponse> => {
+  const response = await apiRequest<UserProfileData>('/profile/me/', {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+  
+  // Enhanced logging for debugging
+  if (response && typeof response === 'object' && 'error' in response && response.error) {
+    const errorResponse = response as ApiErrorResponse;
+    console.error('Profile update error:', {
+      status: errorResponse.status,
+      message: errorResponse.message,
+      networkError: errorResponse.networkError,
+      fullResponse: response,
+    });
+  }
+  
+  return response;
+};
+
+/**
+ * Accept therapeutic consent
+ * Uses POST /api/profile/me/consent/
+ */
+export const acceptConsent = async (): Promise<UserProfileData | ApiErrorResponse> => {
+  return apiRequest<UserProfileData>('/profile/me/consent/', {
+    method: 'POST',
+  });
+};
+
+/**
+ * Get patient profile (therapist view)
+ * Uses GET /api/therapist/patients/<id>/profile/
+ */
+export const getPatientProfile = async (patientId: number): Promise<UserProfileData | ApiErrorResponse> => {
+  return apiRequest<UserProfileData>(`/therapist/patients/${patientId}/profile/`);
+};
+
+/**
+ * Update patient profile (therapist view)
+ * Uses PATCH /api/therapist/patients/<id>/profile/
+ */
+export const updatePatientProfile = async (
+  patientId: number,
+  data: Partial<UserProfileData> & { rewrite_coordinates?: boolean }
+): Promise<UserProfileData | ApiErrorResponse> => {
+  // Extract rewrite_coordinates flag and include it in payload if true
+  const { rewrite_coordinates, ...profileData } = data;
+  const payload = { ...profileData };
+  
+  // Only include coordinates if rewrite_coordinates is true
+  if (rewrite_coordinates) {
+    // Coordinates are already in profileData if rewrite_coordinates was true
+  } else {
+    // Remove coordinates from payload if rewrite flag is not set
+    delete payload.birth_latitude;
+    delete payload.birth_longitude;
+  }
+  
+  const response = await apiRequest<UserProfileData>(`/therapist/patients/${patientId}/profile/`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload),
+  });
+  
+  // Enhanced logging for debugging
+  if (response && typeof response === 'object' && 'error' in response && response.error) {
+    const errorResponse = response as ApiErrorResponse;
+    console.error('Patient profile update error:', {
+      status: errorResponse.status,
+      message: errorResponse.message,
+      networkError: errorResponse.networkError,
+      fullResponse: response,
+    });
+  }
+  
+  return response;
 };
 
 // ========== BOOKINGS API ==========

@@ -116,6 +116,11 @@ Incluye:
 | **Clínica end-to-end** | ✅ Operativa | Terapeuta → Paciente → Resultados |
 | **Recursos / LMS** | 🟡 Pendiente | Estructura prevista, no activa |
 
+### Pendiente
+
+- 🔜 **Therapist Patient Profile Editor**  
+  (paused until UserProfile "me" consumer is fully closed)
+
 ---
 
 ## 5. REGLAS OBLIGATORIAS DE IMPLEMENTACIÓN FRONTEND

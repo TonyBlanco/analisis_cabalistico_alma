@@ -16,7 +16,6 @@ from .views import (
     GeocodeCityView,
     CheckMembershipView,
     EmailOrUsernameAuthToken,
-    PasswordResetRequestView,
     GoogleOAuthView,
     AdminStatsView,
     AdminUsersView,
@@ -32,7 +31,6 @@ from .views import (
     TherapistNoteListCreateView,
     TherapistDashboardView,
     TherapistPatientProfileView,
-    PatientProfileUpdateView,
     # Vistas de servicios
     ServiceCategoryListView,
     ServiceListView,
@@ -44,10 +42,6 @@ from .views import (
     AvailableSlotsView,
     BlockedDatesView,
     service_stats,
-    # Resource Access Core
-    MyResourcesView,
-    AssignResourceToPatientView,
-    AcquireResourceView,
 )
 from .payment_views import (
     CreateCheckoutSessionView,
@@ -90,9 +84,6 @@ from .views import reset_admin_passwords_temp, configure_admin_profiles_temp
 from .analysis_views import (
     AnalysisRecordListCreateView,
     AnalysisRecordDetailView,
-    TherapistPatientResultsView,
-    UpdateAnalysisAnnotationsView,
-    PatientMyResultsView,
 )
 
 urlpatterns = [
@@ -106,7 +97,6 @@ urlpatterns = [
     # Autenticación
     path('login/', EmailOrUsernameAuthToken.as_view(), name='api_token_auth'),
     path('login/google/', GoogleOAuthView.as_view(), name='google_oauth'),
-    path('password-reset/request/', PasswordResetRequestView.as_view(), name='password_reset_request'),
     path('register/therapist/', RegisterTherapistView.as_view(), name='register_therapist'),
     path('register/personal/', RegisterPersonalView.as_view(), name='register_personal'),
     path('me/', CurrentUserView.as_view(), name='current_user'),
@@ -142,8 +132,6 @@ urlpatterns = [
     path('therapist/sessions/', SessionListCreateView.as_view(), name='session_list_create'),
     path('therapist/sessions/<int:pk>/', SessionDetailView.as_view(), name='session_detail'),
     path('therapist/notes/', TherapistNoteListCreateView.as_view(), name='therapist_note_list_create'),
-    # Perfil de paciente (edición de UserProfile en contexto terapeuta)
-    path('patients/<int:pk>/profile/', PatientProfileUpdateView.as_view(), name='patient_profile_update'),
     
     # Pagos y suscripciones
     path('payments/create-checkout/', CreateCheckoutSessionView.as_view(), name='create_checkout'),
@@ -204,14 +192,6 @@ urlpatterns = [
     path('tests/<str:code>/', TestModuleDetailView.as_view(), name='test_detail'),
     
     # AnalysisRecord core (núcleo normalizado de análisis)
-    # IMPORTANTE: my-results debe ir ANTES de <uuid:pk> para evitar conflictos de routing
-    path('analysis-records/my-results/', PatientMyResultsView.as_view(), name='analysisrecord_my_results'),
     path('analysis-records/', AnalysisRecordListCreateView.as_view(), name='analysisrecord_list_create'),
-    path('analysis-records/<uuid:pk>/annotations/', UpdateAnalysisAnnotationsView.as_view(), name='analysisrecord_annotations'),
     path('analysis-records/<uuid:pk>/', AnalysisRecordDetailView.as_view(), name='analysisrecord_detail'),
-    
-    # ========== RESOURCE ACCESS CORE ==========
-    path('resources/my/', MyResourcesView.as_view(), name='my_resources'),
-    path('patients/<int:pk>/resources/assign/', AssignResourceToPatientView.as_view(), name='assign_resource_to_patient'),
-    path('resources/<uuid:pk>/acquire/', AcquireResourceView.as_view(), name='acquire_resource'),
 ]

@@ -50,8 +50,6 @@ export interface PatientProfileSummary {
   birth_longitude: number | null;
   birth_timezone: string | null;
   consent_accepted_at: string | null;
-  profile_version?: number | null;
-  name_change_count?: number | null;
 }
 
 /**
@@ -96,39 +94,6 @@ export async function getPatientProfileSummary(
     const errorData = await response.json().catch(() => ({}));
     throw new Error(
       errorData.error || errorData.message || 'Error al obtener el perfil del paciente',
-    );
-  }
-
-  return response.json();
-}
-
-export interface PatientProfileUpdatePayload {
-  legal_full_name?: string | null;
-  birth_date?: string | null;
-  birth_time?: string | null;
-  birth_city?: string | null;
-  birth_country?: string | null;
-  birth_latitude?: number | null;
-  birth_longitude?: number | null;
-}
-
-/**
- * Actualiza el perfil de UserProfile del paciente (contexto terapeuta).
- */
-export async function updatePatientProfile(
-  patientId: number,
-  payload: PatientProfileUpdatePayload,
-): Promise<PatientProfileSummary> {
-  const response = await fetch(`${API_BASE_URL}/patients/${patientId}/profile/`, {
-    method: 'PATCH',
-    headers: getAuthHeaders(),
-    body: JSON.stringify(payload),
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(
-      errorData.error || errorData.message || 'Error al actualizar el perfil del paciente',
     );
   }
 

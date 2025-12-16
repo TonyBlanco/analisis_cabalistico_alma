@@ -194,7 +194,7 @@ export default function PatientDashboard() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-      {/* Header - Bienvenida */}
+      {/* Header */}
       <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div>
@@ -216,13 +216,10 @@ export default function PatientDashboard() {
         </div>
       </div>
 
-      {/* Estado del proceso */}
+      {/* Section 1: Información */}
       <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Estado del proceso</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Tu información</h2>
         <div className="space-y-4">
-          <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-            En acompañamiento
-          </div>
           {therapist && (
             <div>
               <p className="text-sm font-medium text-gray-700 mb-1">Tu terapeuta</p>
@@ -230,47 +227,18 @@ export default function PatientDashboard() {
                 {therapist.full_name || therapist.username || 'No disponible'}
               </p>
               <p className="text-xs text-gray-500 mt-1">
-                Contacta a tu terapeuta si tienes preguntas sobre tu proceso.
+                Contacta a tu terapeuta si tienes preguntas sobre tus tests o resultados.
               </p>
             </div>
           )}
         </div>
       </div>
 
-      {/* Avisos rápidos */}
-      <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Avisos</h2>
-        <div className="space-y-3">
-          {/* Perfil incompleto - placeholder */}
-          {/* Tests pendientes - placeholder */}
-          {/* Nuevos resultados - placeholder */}
-          <p className="text-sm text-gray-500">
-            No hay avisos pendientes en este momento.
-          </p>
-        </div>
-      </div>
+      {/* Section 2: Tests asignados */}
+      <PatientAssignedTestsSection />
 
-      {/* Accesos rápidos */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <a
-          href="/dashboard/patient/tests"
-          className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow"
-        >
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Tests</h3>
-          <p className="text-sm text-gray-600">
-            Ver y ejecutar tests asignados
-          </p>
-        </a>
-        <a
-          href="/dashboard/patient/results"
-          className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow"
-        >
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Resultados</h3>
-          <p className="text-sm text-gray-600">
-            Consultar resultados de análisis
-          </p>
-        </a>
-      </div>
+      {/* Section 3: Resultados */}
+      <PatientResultsSection />
     </div>
   );
 }

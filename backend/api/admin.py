@@ -12,9 +12,7 @@ from .models import (
     PackageService,
     Booking,
     AvailableSlot,
-    BlockedDate,
-    Resource,
-    UserResourceAccess,
+    BlockedDate
 )
 from .test_models import TestModule, UserTestAccess, TestResult
 
@@ -178,24 +176,4 @@ class TestResultAdmin(admin.ModelAdmin):
     list_filter = ['test_module', 'is_favorite', 'is_archived', 'created_at']
     search_fields = ['user__username', 'test_module__name', 'client_name', 'notes']
     readonly_fields = ['created_at', 'updated_at']
-    ordering = ['-created_at']
-
-
-# ========== RESOURCE ACCESS CORE ADMIN ==========
-
-@admin.register(Resource)
-class ResourceAdmin(admin.ModelAdmin):
-    list_display = ['title', 'resource_type', 'access_level', 'is_active', 'created_at']
-    list_filter = ['resource_type', 'access_level', 'is_active', 'created_at']
-    search_fields = ['title', 'description']
-    readonly_fields = ['created_at', 'updated_at']
-    ordering = ['-created_at']
-
-
-@admin.register(UserResourceAccess)
-class UserResourceAccessAdmin(admin.ModelAdmin):
-    list_display = ['user', 'resource', 'source', 'assigned_by', 'created_at']
-    list_filter = ['source', 'created_at']
-    search_fields = ['user__username', 'resource__title', 'assigned_by__username']
-    readonly_fields = ['created_at']
     ordering = ['-created_at']

@@ -9,23 +9,6 @@ interface ActivePatientIndicatorProps {
 }
 
 /**
- * Determina si un perfil está completo basándose en los campos críticos para análisis cabalísticos
- */
-function isProfileComplete(profile: PatientProfileSummary | null): boolean {
-  if (!profile) return false;
-  return !!(
-    profile.legal_full_name &&
-    profile.birth_date &&
-    profile.birth_city &&
-    profile.birth_country &&
-    profile.birth_latitude !== null &&
-    profile.birth_longitude !== null &&
-    profile.birth_latitude !== 0 &&
-    profile.birth_longitude !== 0
-  );
-}
-
-/**
  * Active Patient Indicator Component
  *
  * Muestra el paciente activo y un resumen de identidad/consentimiento.
@@ -121,25 +104,13 @@ export default function ActivePatientIndicator({ onSelectPatient }: ActivePatien
           profile.consent_accepted_at,
         ).toLocaleString('es-ES')}`
       : 'Consentimiento pendiente de aceptación';
-  
-  const profileComplete = isProfileComplete(profile);
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-4 sm:p-6 shadow-sm">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <p className="text-sm font-medium text-gray-700 mb-1">Paciente activo</p>
-          <div className="flex items-center gap-2">
-            <p className="text-base text-gray-900 font-semibold">{displayName}</p>
-            {profileComplete && (
-              <span
-                className="text-green-600 text-lg cursor-help"
-                title="Perfil validado para análisis"
-              >
-                ✔
-              </span>
-            )}
-          </div>
+          <p className="text-base text-gray-900 font-semibold">{displayName}</p>
           <div className="mt-2 space-y-1">
             {loadingProfile && (
               <p className="text-xs text-gray-500">Cargando perfil del paciente...</p>

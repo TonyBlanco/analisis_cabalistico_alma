@@ -14,8 +14,6 @@ from .models import (
     AvailableSlot,
     BlockedDate,
     AnalysisRecord,
-    Resource,
-    UserResourceAccess,
 )
 from .birth_data_model import UserBirthData
 from django.contrib.auth.models import User
@@ -24,18 +22,11 @@ from datetime import datetime, timedelta
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
-    """
-    Serializer para UserProfile reutilizable en contexto admin/backend y edición controlada.
-
-    NOTA:
-    - Para edición de perfil de paciente (contexto terapeuta) solo se usan los campos
-      de identidad y nacimiento; el resto permanece de solo lectura.
-    """
+    """Serializer básico para el perfil de usuario (uso admin/backend)."""
 
     class Meta:
         model = UserProfile
         fields = [
-            # Campos básicos / admin
             "user_type",
             "full_name",
             "phone",
@@ -49,106 +40,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "subscription_end_date",
             "max_fichas_per_month",
             "fichas_created_this_month",
-            # Núcleo de identidad / nacimiento
-            "legal_full_name",
-            "birth_time",
-            "birth_city",
-            "birth_country",
-            "birth_latitude",
-            "birth_longitude",
-            "birth_timezone",
-            "profile_version",
-            "name_change_count",
-            "consent_accepted_at",
         ]
-        read_only_fields = [
-            "subscription_status",
-            "subscription_start_date",
-            "subscription_end_date",
-            "max_fichas_per_month",
-            "fichas_created_this_month",
-            "birth_timezone",
-            "profile_version",
-            "name_change_count",
-            "consent_accepted_at",
-        ]
-
-    def validate_legal_full_name(self, value: str) -> str:
-        """
-        Validación del nombre legal:
-        - Requerido cuando se establece por primera vez.
-        - Debe contener al menos 2 palabras.
-        """
-        name = (value or "").strip()
-        instance: UserProfile = self.instance
-
-        if not name:
-            # Permitimos vacío solo si ya existía uno (no se está cambiando)
-            if instance and instance.legal_full_name:
-                return instance.legal_full_name
-            raise serializers.ValidationError("El nombre legal completo es obligatorio.")
-
-        words = [w for w in name.split() if w]
-        if len(words) < 2:
-            raise serializers.ValidationError(
-                "El nombre legal debe contener al menos 2 palabras (nombre y apellidos)."
-            )
-        return name
-
-    def validate(self, attrs):
-        """
-        Control de cambios de nombre:
-        - Si el nombre legal cambia y se alcanzó el máximo → error claro.
-        - Si cambia y aún hay margen → marcar bandera interna para incrementar contador.
-        """
-        instance: UserProfile = self.instance
-        if not instance:
-            return attrs
-
-        new_name = attrs.get("legal_full_name")
-        if new_name is None:
-            return attrs
-
-        current_name = (instance.legal_full_name or "").strip()
-        candidate = new_name.strip()
-
-        if current_name and candidate and candidate != current_name:
-            if instance.name_change_count is not None and instance.name_change_count >= 2:
-                raise serializers.ValidationError(
-                    {
-                        "legal_full_name": (
-                            "Cambios de nombre bloqueados (máximo 2 cambios alcanzado). "
-                            "Contacta con soporte si necesitas ayuda adicional."
-                        )
-                    }
-                )
-            attrs["_increment_name_change_count"] = True
-
-        return attrs
-
-    def update(self, instance: UserProfile, validated_data):
-        increment_name_change = validated_data.pop("_increment_name_change_count", False)
-
-        for field in [
-            "legal_full_name",
-            "full_name",
-            "phone",
-            "birth_date",
-            "birth_time",
-            "birth_city",
-            "birth_country",
-            "birth_latitude",
-            "birth_longitude",
-        ]:
-            if field in validated_data:
-                setattr(instance, field, validated_data[field])
-
-        if increment_name_change:
-            current_count = instance.name_change_count or 0
-            instance.name_change_count = current_count + 1
-
-        instance.save()
-        return instance
+        read_only_fields = ["subscription_status", "subscription_start_date", "subscription_end_date"]
 
 
 class UserProfileDetailSerializer(serializers.ModelSerializer):
@@ -743,7 +636,6 @@ class AnalysisRecordSerializer(serializers.ModelSerializer):
             'computed_result',
             'legacy_output',
             'visibility',
-            'therapist_annotations',
             'created_at',
             'test_result',
             'cabalistic_analysis',
@@ -839,100 +731,4 @@ class AnalysisRecordSerializer(serializers.ModelSerializer):
             })
 
         return data
-
-    def to_representation(self, instance):
-        """Filtrar therapist_annotations según rol del usuario."""
-        representation = super().to_representation(instance)
-        request = self.context.get('request')
-        
-        if request and hasattr(request, 'user'):
-            user = request.user
-            profile = getattr(user, 'profile', None)
-            
-            # Si es paciente, ocultar annotations a menos que visible_to_patient = true
-            if profile and profile.user_type == 'patient':
-                annotations = representation.get('therapist_annotations', {})
-                if isinstance(annotations, dict) and not annotations.get('visible_to_patient', False):
-                    representation['therapist_annotations'] = None
-        
-        return representation
-
-
-# ========== RESOURCE ACCESS CORE SERIALIZERS ==========
-
-class ResourceSerializer(serializers.ModelSerializer):
-    """Serializer para Resource (solo lectura para consumidores)"""
-    
-    class Meta:
-        model = Resource
-        fields = [
-            'id',
-            'title',
-            'description',
-            'resource_type',
-            'content_url',
-            'thumbnail_url',
-            'access_level',
-            'is_active',
-            'created_at',
-            'updated_at',
-        ]
-        read_only_fields = '__all__'
-
-
-class UserResourceAccessSerializer(serializers.ModelSerializer):
-    """Serializer para UserResourceAccess"""
-    resource = ResourceSerializer(read_only=True)
-    resource_id = serializers.UUIDField(write_only=True, required=False)
-    
-    class Meta:
-        model = UserResourceAccess
-        fields = [
-            'id',
-            'user',
-            'resource',
-            'resource_id',
-            'source',
-            'assigned_by',
-            'created_at',
-        ]
-        read_only_fields = ['id', 'user', 'created_at']
-
-    def validate(self, attrs):
-        """Validación: assigned_by solo si source = assigned_by_therapist"""
-        source = attrs.get('source')
-        assigned_by = attrs.get('assigned_by')
-        
-        if source == 'assigned_by_therapist' and not assigned_by:
-            raise serializers.ValidationError({
-                'assigned_by': 'assigned_by es obligatorio cuando source="assigned_by_therapist".'
-            })
-        if source != 'assigned_by_therapist' and assigned_by:
-            raise serializers.ValidationError({
-                'assigned_by': 'assigned_by solo puede estar presente cuando source="assigned_by_therapist".'
-            })
-        
-        return attrs
-
-
-class MyResourceSerializer(serializers.ModelSerializer):
-    """Serializer para recursos accesibles por el usuario actual (con info de acceso)"""
-    resource = ResourceSerializer(read_only=True)
-    access_source = serializers.CharField(source='source', read_only=True)
-    assigned_by_username = serializers.CharField(
-        source='assigned_by.username',
-        read_only=True,
-        allow_null=True
-    )
-    
-    class Meta:
-        model = UserResourceAccess
-        fields = [
-            'id',
-            'resource',
-            'access_source',
-            'assigned_by_username',
-            'created_at',
-        ]
-        read_only_fields = '__all__'
 

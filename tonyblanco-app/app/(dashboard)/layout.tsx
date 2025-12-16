@@ -92,14 +92,10 @@ export default function DashboardLayout({
           { href: '/dashboard/patient', label: 'Paciente' },
         ];
       case 'therapist':
-        // Therapist: Navegación macro definitiva (6 ítems máximo)
+        // Therapist: ONLY therapist dashboard + patients management
         return [
-          { href: '/dashboard/therapist', label: 'Workspace' },
+          { href: '/dashboard/therapist', label: 'Workspace Clínico' },
           { href: '/dashboard/therapist/patients', label: 'Pacientes' },
-          { href: '/dashboard/therapist/analyses', label: 'Análisis' },
-          { href: '/dashboard/therapist/results', label: 'Resultados' },
-          { href: '/dashboard/therapist/resources', label: 'Recursos' },
-          { href: '/dashboard/therapist/account', label: 'Cuenta' },
         ];
       case 'personal':
         // Personal: ONLY personal dashboard
@@ -107,14 +103,9 @@ export default function DashboardLayout({
           { href: '/dashboard/personal', label: 'Panel Personal' },
         ];
       case 'patient':
-        // Patient: Navegación definitiva (6 ítems máximo)
+        // Patient: ONLY patient dashboard
         return [
-          { href: '/dashboard/patient', label: 'Inicio' },
-          { href: '/dashboard/patient/tests', label: 'Tests' },
-          { href: '/dashboard/patient/results', label: 'Resultados' },
-          { href: '/dashboard/patient/resources', label: 'Recursos' },
-          { href: '/dashboard/patient/process', label: 'Proceso' },
-          { href: '/dashboard/patient/account', label: 'Cuenta' },
+          { href: '/dashboard/patient', label: 'Panel de Paciente' },
         ];
       default:
         return [];

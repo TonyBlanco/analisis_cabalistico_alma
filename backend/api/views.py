@@ -28,8 +28,6 @@ from .models import (
     Booking,
     AvailableSlot,
     BlockedDate,
-    Resource,
-    UserResourceAccess,
 )
 from .birth_data_model import UserBirthData
 from .serializers import (
@@ -48,9 +46,6 @@ from .serializers import (
     AvailableSlotSerializer,
     BlockedDateSerializer,
     UserProfileDetailSerializer,
-    UserProfileSerializer,
-    MyResourceSerializer,
-    UserResourceAccessSerializer,
 )
 from .serializers import UserBirthDataSerializer
 from .emails import send_welcome_email, send_booking_confirmation_email
@@ -551,10 +546,7 @@ class EmailOrUsernameAuthToken(APIView):
         password = request.data.get('password')
 
         if not username_or_email or not password:
-            return Response({
-                'error': 'validation',
-                'message': 'Usuario/email y contraseña son requeridos'
-            }, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'Usuario/email y contraseña son requeridos'}, status=status.HTTP_400_BAD_REQUEST)
 
         UserModel = get_user_model()
 
@@ -563,23 +555,13 @@ class EmailOrUsernameAuthToken(APIView):
             or UserModel.objects.filter(email=username_or_email).first()
         )
 
-        # Usuario no existe
         if not user:
-            return Response({
-                'error': 'user_not_found',
-                'message': 'El usuario o email no está registrado. Verifica que esté escrito correctamente.'
-            }, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'Credenciales inválidas'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Usuario existe, verificar contraseña
         user_auth = authenticate(username=user.username, password=password)
 
         if not user_auth:
-            # Contraseña incorrecta - devolver email para recuperación
-            return Response({
-                'error': 'invalid_password',
-                'message': 'La contraseña es incorrecta.',
-                'email': user.email  # Enviar email para permitir recuperación
-            }, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'Credenciales inválidas'}, status=status.HTTP_400_BAD_REQUEST)
 
         token, _ = Token.objects.get_or_create(user=user_auth)
         
@@ -593,53 +575,6 @@ class EmailOrUsernameAuthToken(APIView):
             'username': user_auth.username,
             'role': role
         })
-
-
-class PasswordResetRequestView(APIView):
-    """
-    POST /api/password-reset/request/
-    
-    Solicita un cambio de contraseña. Envía un email con un token de reset.
-    """
-    permission_classes = [AllowAny]
-
-    def post(self, request):
-        email = request.data.get('email')
-        
-        if not email:
-            return Response({
-                'error': 'El email es requerido'
-            }, status=status.HTTP_400_BAD_REQUEST)
-
-        UserModel = get_user_model()
-        
-        try:
-            user = UserModel.objects.get(email=email)
-        except UserModel.DoesNotExist:
-            # Por seguridad, no revelamos si el email existe o no
-            return Response({
-                'message': 'Si el email está registrado, recibirás un enlace para restablecer tu contraseña.'
-            }, status=status.HTTP_200_OK)
-
-        # Generar token de reset (usando el sistema de tokens de Django)
-        from django.contrib.auth.tokens import default_token_generator
-        from django.utils.encoding import force_bytes
-        from django.utils.http import urlsafe_base64_encode
-        
-        token = default_token_generator.make_token(user)
-        uid = urlsafe_base64_encode(force_bytes(user.pk))
-        
-        # Enviar email con el token
-        try:
-            from .emails import send_password_reset_email
-            send_password_reset_email(user, token, uid)
-        except Exception as e:
-            print(f"Error enviando email de reset: {e}")
-            # Aún así devolvemos éxito por seguridad
-
-        return Response({
-            'message': 'Si el email está registrado, recibirás un enlace para restablecer tu contraseña.'
-        }, status=status.HTTP_200_OK)
 
 
 class CalculoCabalisticoView(APIView):
@@ -1155,8 +1090,6 @@ class TherapistPatientProfileView(APIView):
             "birth_timezone": patient.birth_timezone,
             "legal_full_name": None,
             "consent_accepted_at": None,
-            "profile_version": None,
-            "name_change_count": None,
         }
 
         # Si el paciente tiene cuenta de usuario vinculada, enriquecemos con UserProfile
@@ -1164,99 +1097,8 @@ class TherapistPatientProfileView(APIView):
             up = patient.user.profile
             profile_data["legal_full_name"] = up.legal_full_name or up.full_name
             profile_data["consent_accepted_at"] = up.consent_accepted_at
-            profile_data["profile_version"] = up.profile_version
-            profile_data["name_change_count"] = up.name_change_count
 
         return Response(profile_data, status=status.HTTP_200_OK)
-
-
-class PatientProfileUpdateView(APIView):
-    """
-    Permite a un terapeuta editar el perfil del paciente que le pertenece.
-
-    Endpoint:
-    - PATCH /api/patients/<int:pk>/profile/
-
-    Reglas:
-    - Solo el terapeuta propietario puede editar (`patient.therapist == request.user`).
-    - Usa `UserProfileSerializer` sobre `patient.user.profile`.
-    - Misma lógica de validación de cambios de nombre (name_change_count) que perfil propio.
-    - No toca AnalysisRecord ni lógica clínica.
-    """
-
-    permission_classes = [IsAuthenticated, IsTherapist]
-
-    def patch(self, request, pk):
-        try:
-            patient = Patient.objects.select_related("user").get(
-                therapist=request.user,
-                id=pk,
-                is_active=True,
-            )
-        except Patient.DoesNotExist:
-            return Response(
-                {"error": "Paciente no encontrado o no te pertenece."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-
-        if not patient.user or not hasattr(patient.user, "profile"):
-            return Response(
-                {"error": "Este paciente no tiene un perfil de usuario asociado."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        profile = patient.user.profile
-
-        # Copia mutable de los datos para aplicar reglas específicas
-        data = request.data.copy()
-
-        # Regla de bloqueo suave de coordenadas:
-        # - Si se envían lat/lng pero NO hay flag explícito de reescritura, ignorar lat/lng.
-        rewrite_flag = data.get("rewrite_coordinates")
-        allow_rewrite = str(rewrite_flag).lower() in ("1", "true", "yes", "on")
-        if not allow_rewrite:
-            for coord_field in ("birth_latitude", "birth_longitude"):
-                if coord_field in data:
-                    data.pop(coord_field)
-        # El flag nunca se pasa al serializer
-        data.pop("rewrite_coordinates", None)
-
-        serializer = UserProfileSerializer(
-            instance=profile,
-            data=data,
-            partial=True,
-            context={"request": request},
-        )
-
-        if not serializer.is_valid():
-            # Debug temporal para entender fallos de validación
-            print("❌ PatientProfileUpdateView serializer errors:", serializer.errors)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        # Guardar cambios aplicando reglas de nombre/cambios ya codificadas en el serializer
-        profile = serializer.save()
-
-        # Incrementar versión de perfil si se tocaron campos relevantes
-        fields_touched = set(data.keys())
-        relevant_fields = {
-            "legal_full_name",
-            "full_name",
-            "birth_date",
-            "birth_time",
-            "birth_city",
-            "birth_country",
-            "birth_latitude",
-            "birth_longitude",
-        }
-        if fields_touched.intersection(relevant_fields):
-            try:
-                profile.profile_version = (profile.profile_version or 1) + 1
-            except Exception:
-                profile.profile_version = 1
-            profile.save(update_fields=["profile_version"])
-
-        # Para respuesta usamos el serializer detallado usado en /api/profile/me
-        return Response(UserProfileDetailSerializer(profile).data, status=status.HTTP_200_OK)
 
 
 class GenerateAIPlanView(APIView):
@@ -2297,204 +2139,6 @@ def configure_admin_profiles_temp(request):
         'message': 'Configuración de perfiles completada',
         'results': results
     })
-
-
-# ========== RESOURCE ACCESS CORE VIEWS ==========
-
-class MyResourcesView(APIView):
-    """
-    GET /api/resources/my/
-    
-    Retorna todos los recursos accesibles para el usuario actual.
-    Incluye recursos gratuitos, asignados por terapeuta y auto-adquiridos.
-    """
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        user = request.user
-        
-        # Admin no es consumidor de recursos
-        profile = getattr(user, 'profile', None)
-        if profile and (profile.is_admin or user.is_staff or user.is_superuser):
-            return Response(
-                {'error': 'Los administradores no pueden acceder a recursos como consumidores.'},
-                status=status.HTTP_403_FORBIDDEN
-            )
-        
-        # Obtener todos los accesos del usuario
-        accesses = UserResourceAccess.objects.filter(user=user).select_related('resource', 'assigned_by')
-        
-        # Incluir también recursos gratuitos que aún no tienen acceso explícito
-        free_resources = Resource.objects.filter(
-            access_level='free',
-            is_active=True
-        ).exclude(
-            user_accesses__user=user
-        )
-        
-        # Crear accesos implícitos para recursos gratuitos
-        serializer = MyResourceSerializer(accesses, many=True)
-        free_data = []
-        for resource in free_resources:
-            free_data.append({
-                'id': None,
-                'resource': {
-                    'id': str(resource.id),
-                    'title': resource.title,
-                    'description': resource.description,
-                    'resource_type': resource.resource_type,
-                    'content_url': resource.content_url,
-                    'thumbnail_url': resource.thumbnail_url,
-                    'access_level': resource.access_level,
-                    'is_active': resource.is_active,
-                    'created_at': resource.created_at.isoformat(),
-                    'updated_at': resource.updated_at.isoformat(),
-                },
-                'access_source': 'free',
-                'assigned_by_username': None,
-                'created_at': resource.created_at.isoformat(),
-            })
-        
-        return Response({
-            'resources': serializer.data + free_data
-        }, status=status.HTTP_200_OK)
-
-
-class AssignResourceToPatientView(APIView):
-    """
-    POST /api/patients/{id}/resources/assign
-    
-    Permite a un terapeuta asignar un recurso a su paciente.
-    Requiere:
-    - Usuario autenticado es terapeuta
-    - El paciente pertenece al terapeuta (ownership)
-    - resource_id en el body
-    """
-    permission_classes = [IsAuthenticated, IsTherapist]
-
-    def post(self, request, pk):
-        therapist = request.user
-        
-        # Obtener paciente y validar ownership
-        try:
-            patient = Patient.objects.get(pk=pk, therapist=therapist)
-        except Patient.DoesNotExist:
-            return Response(
-                {'error': 'Paciente no encontrado o no tienes permisos para gestionarlo.'},
-                status=status.HTTP_404_NOT_FOUND
-            )
-        
-        # Validar que el paciente tiene usuario asociado
-        if not patient.user:
-            return Response(
-                {'error': 'El paciente no tiene cuenta de usuario asociada.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        # Obtener resource_id del body
-        resource_id = request.data.get('resource_id')
-        if not resource_id:
-            return Response(
-                {'error': 'resource_id es requerido.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        # Obtener recurso
-        try:
-            resource = Resource.objects.get(pk=resource_id, is_active=True)
-        except Resource.DoesNotExist:
-            return Response(
-                {'error': 'Recurso no encontrado o no está activo.'},
-                status=status.HTTP_404_NOT_FOUND
-            )
-        
-        # Crear o actualizar acceso
-        access, created = UserResourceAccess.objects.get_or_create(
-            user=patient.user,
-            resource=resource,
-            defaults={
-                'source': 'assigned_by_therapist',
-                'assigned_by': therapist,
-            }
-        )
-        
-        if not created:
-            # Si ya existe, actualizar source y assigned_by
-            access.source = 'assigned_by_therapist'
-            access.assigned_by = therapist
-            access.save()
-        
-        serializer = MyResourceSerializer(access)
-        return Response(
-            {
-                'message': 'Recurso asignado correctamente al paciente.',
-                'access': serializer.data
-            },
-            status=status.HTTP_201_CREATED if created else status.HTTP_200_OK
-        )
-
-
-class AcquireResourceView(APIView):
-    """
-    POST /api/resources/{id}/acquire
-    
-    Simula auto-adquisición de un recurso (sin pagos).
-    Permitido para roles: patient, personal
-    Admin no puede adquirir recursos.
-    """
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request, pk):
-        user = request.user
-        
-        # Admin no es consumidor
-        profile = getattr(user, 'profile', None)
-        if profile and (profile.is_admin or user.is_staff or user.is_superuser):
-            return Response(
-                {'error': 'Los administradores no pueden adquirir recursos.'},
-                status=status.HTTP_403_FORBIDDEN
-            )
-        
-        # Validar que el usuario es patient o personal
-        if not profile or profile.user_type not in ['patient', 'personal']:
-            return Response(
-                {'error': 'Solo usuarios patient y personal pueden auto-adquirir recursos.'},
-                status=status.HTTP_403_FORBIDDEN
-            )
-        
-        # Obtener recurso
-        try:
-            resource = Resource.objects.get(pk=pk, is_active=True)
-        except Resource.DoesNotExist:
-            return Response(
-                {'error': 'Recurso no encontrado o no está activo.'},
-                status=status.HTTP_404_NOT_FOUND
-            )
-        
-        # Crear o actualizar acceso
-        access, created = UserResourceAccess.objects.get_or_create(
-            user=user,
-            resource=resource,
-            defaults={
-                'source': 'self_purchased',
-            }
-        )
-        
-        if not created:
-            # Si ya existe con otro source, actualizar a self_purchased
-            if access.source != 'self_purchased':
-                access.source = 'self_purchased'
-                access.assigned_by = None
-                access.save()
-        
-        serializer = MyResourceSerializer(access)
-        return Response(
-            {
-                'message': 'Recurso adquirido correctamente.',
-                'access': serializer.data
-            },
-            status=status.HTTP_201_CREATED if created else status.HTTP_200_OK
-        )
 
 
 

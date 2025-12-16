@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { getMyResults, getAnalysisRecord, AnalysisRecord } from '@/lib/api';
-import { TestResult } from '@/lib/test-types';
 
 /**
  * Patient Results Section Component

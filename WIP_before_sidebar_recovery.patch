@@ -1,0 +1,1326 @@
+diff --git a/backend/LOCAL_LOGIN_GUIDE.md b/backend/LOCAL_LOGIN_GUIDE.md
+index 25605983..b06cae6f 100644
+--- a/backend/LOCAL_LOGIN_GUIDE.md
++++ b/backend/LOCAL_LOGIN_GUIDE.md
+@@ -105,3 +105,4 @@ Debes crear el usuario manualmente en ambos lugares, ya que las bases de datos s
+ 
+ 
+ 
++
+diff --git a/backend/api/adapters/__init__.py b/backend/api/adapters/__init__.py
+index ba89a908..98cd9d75 100644
+--- a/backend/api/adapters/__init__.py
++++ b/backend/api/adapters/__init__.py
+@@ -30,3 +30,4 @@ def get_adapter_for_record(record):
+     adapter_cls = ADAPTER_REGISTRY.get(record.kind, LegacyAdapter)
+     return adapter_cls(record)
+ 
++
+diff --git a/backend/api/adapters/astrology_adapter.py b/backend/api/adapters/astrology_adapter.py
+index 6509bd98..07d6594e 100644
+--- a/backend/api/adapters/astrology_adapter.py
++++ b/backend/api/adapters/astrology_adapter.py
+@@ -45,3 +45,4 @@ class AstrologyAdapter(BaseAnalysisAdapter):
+             "legacy_output": legacy_output,
+         }
+ 
++
+diff --git a/backend/api/adapters/base.py b/backend/api/adapters/base.py
+index 079dec21..a12c1dfa 100644
+--- a/backend/api/adapters/base.py
++++ b/backend/api/adapters/base.py
+@@ -27,3 +27,4 @@ class BaseAnalysisAdapter:
+         """
+         raise NotImplementedError("Subclasses must implement execute()")
+ 
++
+diff --git a/backend/api/adapters/clinical_test_adapter.py b/backend/api/adapters/clinical_test_adapter.py
+index 6730130e..fffc6ebe 100644
+--- a/backend/api/adapters/clinical_test_adapter.py
++++ b/backend/api/adapters/clinical_test_adapter.py
+@@ -103,3 +103,4 @@ class ClinicalTestAdapter(BaseAnalysisAdapter):
+             "legacy_output": legacy_output,
+         }
+ 
++
+diff --git a/backend/api/adapters/kabbalah_adapter.py b/backend/api/adapters/kabbalah_adapter.py
+index fca98884..982bfb1f 100644
+--- a/backend/api/adapters/kabbalah_adapter.py
++++ b/backend/api/adapters/kabbalah_adapter.py
+@@ -61,3 +61,4 @@ class KabbalahAdapter(BaseAnalysisAdapter):
+             "legacy_output": legacy_output,
+         }
+ 
++
+diff --git a/backend/api/adapters/legacy_adapter.py b/backend/api/adapters/legacy_adapter.py
+index 1bdf3287..e951ebfe 100644
+--- a/backend/api/adapters/legacy_adapter.py
++++ b/backend/api/adapters/legacy_adapter.py
+@@ -31,3 +31,4 @@ class LegacyAdapter(BaseAnalysisAdapter):
+             "legacy_output": legacy_output,
+         }
+ 
++
+diff --git a/backend/api/analysis_views.py b/backend/api/analysis_views.py
+index 74d02717..89f7e387 100644
+--- a/backend/api/analysis_views.py
++++ b/backend/api/analysis_views.py
+@@ -1,8 +1,15 @@
+-    def get_serializer_context(self):
+-        """Añadir contexto para filtrar therapist_annotations según rol."""
+-        context = super().get_serializer_context()
+-        context['request'] = self.request
+-        return context
++from rest_framework import status, generics
++from rest_framework.views import APIView
++from rest_framework.response import Response
++from rest_framework.permissions import IsAuthenticated
++from django.db.models import Q
++import logging
++
++from .models import AnalysisRecord, Patient
++from .serializers import AnalysisRecordSerializer
++from .permissions import IsTherapist
++
++logger = logging.getLogger(__name__)
+ 
+ 
+ class TherapistPatientResultsView(APIView):
+@@ -54,10 +61,21 @@ class UpdateAnalysisAnnotationsView(APIView):
+ 
+     def patch(self, request, pk):
+         therapist = request.user
++        logger.info(
++            "UpdateAnalysisAnnotationsView.patch called",
++            extra={
++                "user_id": getattr(therapist, "id", None),
++                "record_id": str(pk),
++            },
++        )
+ 
+         try:
+             record = AnalysisRecord.objects.get(pk=pk)
+         except AnalysisRecord.DoesNotExist:
++            logger.warning(
++                "AnalysisRecord not found for annotations",
++                extra={"user_id": therapist.id, "record_id": str(pk)},
++            )
+             return Response(
+                 {'error': 'Resultado no encontrado.'},
+                 status=status.HTTP_404_NOT_FOUND
+@@ -65,6 +83,14 @@ class UpdateAnalysisAnnotationsView(APIView):
+ 
+         # Validar ownership: el terapeuta debe ser el propietario del resultado
+         if record.therapist_id != therapist.id:
++            logger.warning(
++                "Therapist tried to edit annotations without ownership",
++                extra={
++                    "user_id": therapist.id,
++                    "record_id": str(record.id),
++                    "record_therapist_id": record.therapist_id,
++                },
++            )
+             return Response(
+                 {'error': 'No tienes permisos para editar este resultado.'},
+                 status=status.HTTP_403_FORBIDDEN
+@@ -92,6 +118,15 @@ class UpdateAnalysisAnnotationsView(APIView):
+         record.therapist_annotations = updated_annotations
+         record.save(update_fields=['therapist_annotations'])
+ 
++        logger.info(
++            "Therapist annotations updated successfully",
++            extra={
++                "user_id": therapist.id,
++                "record_id": str(record.id),
++                "visible_to_patient": updated_annotations.get('visible_to_patient', False),
++            },
++        )
++
+         serializer = AnalysisRecordSerializer(record, context={'request': request})
+         return Response(serializer.data, status=status.HTTP_200_OK)
+ 
+@@ -138,11 +173,67 @@ class PatientMyResultsView(APIView):
+ 
+             return Response({'results': results_data}, status=status.HTTP_200_OK)
+         except Exception as e:
+-            import traceback
+-            print(f"Error en PatientMyResultsView: {e}")
+-            print(traceback.format_exc())
++            logger.exception("Error en PatientMyResultsView.get")
+             return Response(
+                 {'error': f'Error interno del servidor: {str(e)}'},
+-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
++                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+             )
+ 
++
++class AnalysisRecordListCreateView(generics.ListCreateAPIView):
++    """
++    GET: Lista AnalysisRecords visibles para el usuario autenticado.
++    POST: Crea un nuevo AnalysisRecord (validaciones en el serializer).
++    """
++
++    serializer_class = AnalysisRecordSerializer
++    permission_classes = [IsAuthenticated]
++
++    def get_queryset(self):
++        user = self.request.user
++        qs = AnalysisRecord.objects.all()
++
++        # Soportar GET /api/analysis-records/?patient_id={id} para terapeutas
++        patient_id = self.request.query_params.get('patient_id')
++        if patient_id:
++            profile = getattr(user, 'profile', None)
++            if not profile or profile.user_type != 'therapist':
++                # Usuario sin rol terapeuta: no ve nada en este modo
++                return AnalysisRecord.objects.none()
++
++            return qs.filter(
++                patient__id=patient_id,
++                therapist=user,
++            ).order_by('-created_at')
++
++        # Filtro general por ownership/relación
++        return qs.filter(
++            Q(created_by_user=user)
++            | Q(subject_user=user)
++            | Q(patient__therapist=user)
++            | Q(patient__user=user)
++        ).order_by('-created_at')
++
++    def perform_create(self, serializer):
++        # El serializer ya fija created_by_user y execution_mode en validate()
++        serializer.save()
++
++
++class AnalysisRecordDetailView(generics.RetrieveAPIView):
++    """
++    GET: Detalle de un AnalysisRecord concreto, validando permisos básicos.
++    """
++
++    serializer_class = AnalysisRecordSerializer
++    permission_classes = [IsAuthenticated]
++    lookup_field = 'pk'
++    queryset = AnalysisRecord.objects.all()
++
++    def get_queryset(self):
++        user = self.request.user
++        return AnalysisRecord.objects.filter(
++            Q(created_by_user=user)
++            | Q(subject_user=user)
++            | Q(patient__therapist=user)
++            | Q(patient__user=user)
++        )
+diff --git a/backend/api/astrology_kerykeion/__init__.py b/backend/api/astrology_kerykeion/__init__.py
+index bb1d8b4f..ca43c168 100644
+--- a/backend/api/astrology_kerykeion/__init__.py
++++ b/backend/api/astrology_kerykeion/__init__.py
+@@ -13,3 +13,4 @@ __version__ = "1.0.0"
+ 
+ 
+ 
++
+diff --git a/backend/api/astrology_kerykeion/mapper_cabala.py b/backend/api/astrology_kerykeion/mapper_cabala.py
+index ee765d57..70d65d8a 100644
+--- a/backend/api/astrology_kerykeion/mapper_cabala.py
++++ b/backend/api/astrology_kerykeion/mapper_cabala.py
+@@ -165,3 +165,4 @@ def build_cabalistic_mapping(planets_data: Dict[str, Dict[str, any]]) -> Dict[st
+ 
+ 
+ 
++
+diff --git a/backend/api/geocoding_utils.py b/backend/api/geocoding_utils.py
+index 20413cb0..194016e7 100644
+--- a/backend/api/geocoding_utils.py
++++ b/backend/api/geocoding_utils.py
+@@ -111,3 +111,4 @@ def geocode_city_simple(city: str, country: str = None) -> Optional[Tuple[float,
+ 
+ 
+ 
++
+diff --git a/backend/api/models.py b/backend/api/models.py
+index 33d41019..890c215a 100644
+--- a/backend/api/models.py
++++ b/backend/api/models.py
+@@ -3,6 +3,8 @@ from datetime import date
+ from django.contrib.auth.models import User
+ from django.db.models.signals import post_save
+ from django.dispatch import receiver
++from django.conf import settings
++import uuid
+ 
+ # Tipos de usuario
+ USER_TYPE_CHOICES = [
+@@ -20,34 +22,67 @@ SUBSCRIPTION_STATUS_CHOICES = [
+     ('expired', 'Expirada'),
+ ]
+ 
++
+ class UserProfile(models.Model):
+     """Perfil extendido del usuario con información adicional"""
++
+     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+     user_type = models.CharField(max_length=20, choices=USER_TYPE_CHOICES, default='personal')
+-    
++
+     # Campos comunes
+     # display_name: El nombre que usa para login (username de Django)
+     # full_name: El nombre que se usa para los cálculos cabalísticos (para particulares)
+     full_name = models.CharField(max_length=255)  # Nombre para cálculos cabalísticos
++    legal_full_name = models.CharField(max_length=255, blank=True)
+     phone = models.CharField(max_length=20, blank=True)
+     birth_date = models.DateField(null=True, blank=True)
+-    
++    birth_time = models.TimeField(null=True, blank=True)
++    birth_city = models.CharField(max_length=200, blank=True)
++    birth_country = models.CharField(max_length=100, blank=True)
++    birth_latitude = models.DecimalField(
++        max_digits=9,
++        decimal_places=6,
++        null=True,
++        blank=True,
++        help_text='Latitud del lugar de nacimiento (núcleo perfil)',
++    )
++    birth_longitude = models.DecimalField(
++        max_digits=9,
++        decimal_places=6,
++        null=True,
++        blank=True,
++        help_text='Longitud del lugar de nacimiento (núcleo perfil)',
++    )
++    birth_timezone = models.CharField(
++        max_length=100,
++        blank=True,
++        help_text='Zona horaria del lugar de nacimiento (núcleo perfil)',
++    )
++
++    consent_accepted_at = models.DateTimeField(
++        null=True,
++        blank=True,
++        help_text='Marca de tiempo de aceptación de consentimiento terapéutico',
++    )
++    profile_version = models.IntegerField(default=1)
++    name_change_count = models.IntegerField(default=0)
++
+     # Sistema de roles y permisos
+     is_admin = models.BooleanField(default=False)  # Admin puede ver estadísticas y mantener usuarios
+-    
++
+     # Campos para terapeutas
+     profession = models.CharField(max_length=100, blank=True)
+     specialization = models.CharField(max_length=200, blank=True)
+     license_number = models.CharField(max_length=100, blank=True)
+     years_of_experience = models.IntegerField(null=True, blank=True)
+-    
++
+     # Sistema de pagos y membresías
+     membership_active = models.BooleanField(default=True)  # Trial activo por defecto
+     membership_expires = models.DateTimeField(null=True, blank=True)
+     subscription_status = models.CharField(
+-        max_length=20, 
+-        choices=SUBSCRIPTION_STATUS_CHOICES, 
+-        default='trial'
++        max_length=20,
++        choices=SUBSCRIPTION_STATUS_CHOICES,
++        default='trial',
+     )
+     subscription_plan = models.CharField(max_length=50, blank=True)  # 'personal', 'professional', 'premium'
+     subscription_start_date = models.DateTimeField(null=True, blank=True)
+@@ -56,34 +91,35 @@ class UserProfile(models.Model):
+     stripe_subscription_id = models.CharField(max_length=255, blank=True)
+     last_payment_date = models.DateTimeField(null=True, blank=True)
+     next_billing_date = models.DateTimeField(null=True, blank=True)
+-    
++
+     # Límites según tipo de usuario
+     max_fichas_per_month = models.IntegerField(default=10)  # Personal: 10, Therapist: ilimitado
+     fichas_created_this_month = models.IntegerField(default=0)
+-    
++
+     # Para terapeutas: número de clientes
+     max_patients = models.IntegerField(default=0)  # 0=ilimitado en trial, 100=plan básico
+     current_patients_count = models.IntegerField(default=0)
+-    
++
+     # OAuth (Google)
+     google_id = models.CharField(max_length=255, blank=True, null=True)
+-    
++
+     # Metadata
+     created_at = models.DateTimeField(auto_now_add=True)
+     updated_at = models.DateTimeField(auto_now=True)
+-    
++
+     def __str__(self):
+         return f"{self.full_name} ({self.get_user_type_display()})"
+-    
++
+     def has_active_subscription(self):
+         """Verifica si el usuario tiene una suscripción activa"""
+         from django.utils import timezone
++
+         if not self.membership_active:
+             return False
+         if self.membership_expires and self.membership_expires < timezone.now():
+             return False
+         return self.subscription_status in ['trial', 'active']
+-    
++
+     def can_create_ficha(self):
+         """Verifica si el usuario puede crear más fichas este mes"""
+         if self.user_type == 'therapist':
+@@ -93,20 +129,20 @@ class UserProfile(models.Model):
+             return self.current_patients_count < self.max_patients
+         # Para particulares: verificar límite mensual
+         return self.fichas_created_this_month < self.max_fichas_per_month
+-    
++
+     def can_add_patient(self):
+         """Verifica si el usuario puede agregar un nuevo paciente (solo para terapeutas)"""
+         if self.user_type != 'therapist':
+             return False, "Solo los terapeutas pueden agregar pacientes"
+-        
++
+         if self.max_patients == 0:  # Trial sin límite
+             return True, "OK"
+-        
++
+         if self.current_patients_count >= self.max_patients:
+             return False, f"Límite de {self.max_patients} clientes alcanzado. Necesitas un upgrade"
+-        
++
+         return True, "OK"
+-    
++
+     def get_remaining_capacity(self):
+         """Obtiene la capacidad restante (para terapeutas) o fichas restantes (para particulares)"""
+         if self.user_type == 'therapist':
+@@ -115,7 +151,7 @@ class UserProfile(models.Model):
+             return max(0, self.max_patients - self.current_patients_count)
+         else:
+             return max(0, self.max_fichas_per_month - self.fichas_created_this_month)
+-    
++
+     class Meta:
+         verbose_name = 'Perfil de Usuario'
+         verbose_name_plural = 'Perfiles de Usuarios'
+@@ -219,6 +255,35 @@ class Patient(models.Model):
+     birth_date = models.DateField(help_text='Fecha de nacimiento')
+     birth_time = models.TimeField(null=True, blank=True, help_text='Hora exacta de nacimiento')
+     birth_place = models.CharField(max_length=255, blank=True, help_text='Lugar de nacimiento (ciudad, país)')
++    birth_city = models.CharField(
++        max_length=200,
++        blank=True,
++        help_text='Ciudad de nacimiento',
++    )
++    birth_country = models.CharField(
++        max_length=100,
++        blank=True,
++        help_text='País de nacimiento',
++    )
++    birth_latitude = models.DecimalField(
++        max_digits=9,
++        decimal_places=6,
++        null=True,
++        blank=True,
++        help_text='Latitud del lugar de nacimiento',
++    )
++    birth_longitude = models.DecimalField(
++        max_digits=9,
++        decimal_places=6,
++        null=True,
++        blank=True,
++        help_text='Longitud del lugar de nacimiento',
++    )
++    birth_timezone = models.CharField(
++        max_length=100,
++        blank=True,
++        help_text='Zona horaria del lugar de nacimiento',
++    )
+     hebrew_name = models.CharField(max_length=255, blank=True, help_text='Nombre en hebreo (opcional)')
+     
+     # ========== DATOS CLÍNICOS ==========
+@@ -616,3 +681,230 @@ class BlockedDate(models.Model):
+         verbose_name = 'Fecha Bloqueada'
+         verbose_name_plural = 'Fechas Bloqueadas'
+ 
++
++class CabalisticAnalysis(models.Model):
++    """Análisis de Alta Cábala asociados a un paciente"""
++
++    ANALYSIS_TYPE_CHOICES = [
++        ('gematria', 'Gematria'),
++        ('tarot', 'Tarot Terapéutico'),
++        ('soul-map', 'Mapa del Alma'),
++        ('astrology', 'Carta Astral Cabalística'),
++        ('tikun', 'Análisis de Tikún'),
++        ('shekinah', 'Análisis Shejinah Moderno Pitagórico'),
++        ('astrology-kerykeion', 'Astrología Técnica (Kerykeion)'),
++        ('crossover', 'Síntesis Cruzada'),
++    ]
++
++    patient = models.ForeignKey(
++        Patient,
++        on_delete=models.CASCADE,
++        related_name='cabalistic_analyses',
++        help_text='Paciente para el que se realizó el análisis',
++    )
++    therapist = models.ForeignKey(
++        User,
++        on_delete=models.CASCADE,
++        related_name='cabalistic_analyses',
++        help_text='Terapeuta que ejecutó el análisis',
++    )
++    analysis_type = models.CharField(
++        max_length=20,
++        choices=ANALYSIS_TYPE_CHOICES,
++        help_text='Tipo de análisis cabalístico realizado',
++    )
++    input_data = models.JSONField(
++        default=dict,
++        blank=True,
++        help_text='Datos de entrada del análisis (ej: palabra para Gematria, fecha para Tarot)',
++    )
++    result_data = models.JSONField(
++        default=dict,
++        blank=True,
++        help_text='Resultados completos del análisis en formato JSON',
++    )
++    summary = models.TextField(
++        blank=True,
++        help_text='Resumen breve del análisis para visualización rápida',
++    )
++    therapist_notes = models.TextField(
++        blank=True,
++        help_text='Notas adicionales del terapeuta sobre este análisis',
++    )
++    created_at = models.DateTimeField(auto_now_add=True)
++    updated_at = models.DateTimeField(auto_now=True)
++
++    class Meta:
++        ordering = ['-created_at']
++        verbose_name = 'Análisis Cabalístico'
++        verbose_name_plural = 'Análisis Cabalísticos'
++        indexes = [
++            models.Index(fields=['patient', 'analysis_type', '-created_at'], name='api_cabalis_patient_9d1192_idx'),
++            models.Index(fields=['therapist', '-created_at'], name='api_cabalis_therapi_be0633_idx'),
++        ]
++
++    def __str__(self):
++        return f"{self.get_analysis_type_display()} - {self.patient.full_name} ({self.created_at.date()})"
++
++
++class AnalysisRecord(models.Model):
++    """
++    Núcleo normalizado de ejecuciones de análisis (tests clínicos, cábala, astrología, legacy).
++    Mantiene snapshots inmutables de datos y algoritmo.
++    """
++
++    KIND_CHOICES = [
++        ('clinical_test', 'Clinical Test'),
++        ('kabbalah', 'Kabbalah'),
++        ('astrology', 'Astrology'),
++        ('legacy', 'Legacy'),
++    ]
++
++    ROLE_CONTEXT_CHOICES = [
++        ('therapist', 'Therapist'),
++        ('personal', 'Personal'),
++        ('patient', 'Patient'),
++    ]
++
++    EXECUTION_MODE_CHOICES = [
++        ('patient_self', 'Patient Self'),
++        ('therapist_clinical', 'Therapist Clinical'),
++    ]
++
++    VISIBILITY_CHOICES = [
++        ('therapist', 'Therapist only'),
++        ('patient', 'Patient only'),
++        ('both', 'Therapist and Patient'),
++    ]
++
++    id = models.UUIDField(
++        primary_key=True,
++        default=uuid.uuid4,
++        editable=False,
++        help_text='Identificador estable de la ejecución de análisis (UUID).',
++    )
++    kind = models.CharField(
++        max_length=32,
++        choices=KIND_CHOICES,
++        help_text='Tipo de análisis ejecutado.',
++    )
++    module_code = models.CharField(
++        max_length=64,
++        help_text='Identificador estable del módulo (ej: PHQ9, SCDF, KERYKEION_NATAL).',
++    )
++    role_context = models.CharField(
++        max_length=16,
++        choices=ROLE_CONTEXT_CHOICES,
++        help_text='Contexto de rol en el momento de la ejecución.',
++    )
++    execution_mode = models.CharField(
++        max_length=32,
++        choices=EXECUTION_MODE_CHOICES,
++        null=True,
++        blank=True,
++        help_text='Derivado en backend desde module_code + contexto. Nunca confiado desde request.',
++    )
++    subject_user = models.ForeignKey(
++        settings.AUTH_USER_MODEL,
++        on_delete=models.CASCADE,
++        related_name='analysis_subject_records',
++        null=True,
++        blank=True,
++        help_text='Usuario sujeto del análisis (si existe cuenta).',
++    )
++    created_by_user = models.ForeignKey(
++        settings.AUTH_USER_MODEL,
++        on_delete=models.CASCADE,
++        related_name='analysis_created_records',
++        help_text='Usuario que dispara la ejecución (terapeuta, personal o paciente).',
++    )
++    patient = models.ForeignKey(
++        Patient,
++        on_delete=models.SET_NULL,
++        related_name='analysis_records',
++        null=True,
++        blank=True,
++        help_text='Paciente clínico asociado (obligatorio en therapist_clinical).',
++    )
++    therapist = models.ForeignKey(
++        settings.AUTH_USER_MODEL,
++        on_delete=models.SET_NULL,
++        related_name='therapist_analysis_records',
++        null=True,
++        blank=True,
++        help_text='Terapeuta propietario (ownership clínico).',
++    )
++    birth_data_snapshot = models.JSONField(
++        help_text=(
++            'Snapshot inmutable de datos de nacimiento en el momento del análisis. '
++            'Debe incluir: legal_name, birth_date, birth_time, city, country, lat, lng, timezone, geocode_source.'
++        ),
++    )
++    algorithm_snapshot = models.JSONField(
++        help_text=(
++            'Snapshot inmutable de motor/versión/parámetros. '
++            'Campos esperados: engine, version, build_hash (opcional), params.'
++        ),
++    )
++    raw_input = models.JSONField(
++        null=True,
++        blank=True,
++        help_text='Input crudo recibido desde frontend / capa de orquestación.',
++    )
++    computed_result = models.JSONField(
++        null=True,
++        blank=True,
++        help_text='Resultado normalizado final del análisis (JSON).',
++    )
++    legacy_output = models.JSONField(
++        null=True,
++        blank=True,
++        help_text='Salida original del módulo legacy (JSON serializado, opcional).',
++    )
++    visibility = models.CharField(
++        max_length=16,
++        choices=VISIBILITY_CHOICES,
++        default='therapist',
++        help_text='Quién puede ver este AnalysisRecord en dashboards.',
++    )
++    created_at = models.DateTimeField(auto_now_add=True)
++    test_result = models.ForeignKey(
++        'api.TestResult',
++        on_delete=models.SET_NULL,
++        related_name='analysis_records',
++        null=True,
++        blank=True,
++        help_text='Resultado de test relacionado, si existe.',
++    )
++    cabalistic_analysis = models.ForeignKey(
++        CabalisticAnalysis,
++        on_delete=models.SET_NULL,
++        related_name='analysis_records',
++        null=True,
++        blank=True,
++        help_text='Análisis cabalístico relacionado, si existe.',
++    )
++    therapist_annotations = models.JSONField(
++        null=True,
++        blank=True,
++        default=dict,
++        help_text=(
++            'Anotaciones del terapeuta sobre este resultado. '
++            'Estructura: {summary: string, notes: string, visible_to_patient: boolean}. '
++            'Editable solo por el terapeuta propietario.'
++        ),
++    )
++
++    class Meta:
++        verbose_name = 'Analysis Record'
++        verbose_name_plural = 'Analysis Records'
++        indexes = [
++            models.Index(fields=['subject_user', 'created_at'], name='api_analysi_subject_05aeed_idx'),
++            models.Index(fields=['created_by_user', 'created_at'], name='api_analysi_created_cac56c_idx'),
++            models.Index(fields=['kind', 'module_code'], name='api_analysi_kind_a20a7b_idx'),
++            models.Index(fields=['created_at'], name='api_analysi_created_624740_idx'),
++        ]
++
++    def __str__(self):
++        return f"{self.kind}::{self.module_code} ({self.id})"
++
+diff --git a/backend/api/serializers.py b/backend/api/serializers.py
+index 978b2568..6b68db85 100644
+--- a/backend/api/serializers.py
++++ b/backend/api/serializers.py
+@@ -635,6 +635,7 @@ class AnalysisRecordSerializer(serializers.ModelSerializer):
+             'raw_input',
+             'computed_result',
+             'legacy_output',
++            'therapist_annotations',
+             'visibility',
+             'created_at',
+             'test_result',
+diff --git a/backend/api/services/analysis_service.py b/backend/api/services/analysis_service.py
+index db3d3f44..300d2936 100644
+--- a/backend/api/services/analysis_service.py
++++ b/backend/api/services/analysis_service.py
+@@ -52,3 +52,4 @@ def create_and_execute_analysis(validated_data: Dict[str, Any]) -> AnalysisRecor
+     record = create_analysis_record(validated_data)
+     return execute_analysis_record(record)
+ 
++
+diff --git a/backend/api/urls.py b/backend/api/urls.py
+index 8827e950..6b1f5230 100644
+--- a/backend/api/urls.py
++++ b/backend/api/urls.py
+@@ -84,6 +84,8 @@ from .views import reset_admin_passwords_temp, configure_admin_profiles_temp
+ from .analysis_views import (
+     AnalysisRecordListCreateView,
+     AnalysisRecordDetailView,
++    PatientMyResultsView,
++    UpdateAnalysisAnnotationsView,
+ )
+ 
+ urlpatterns = [
+@@ -194,4 +196,6 @@ urlpatterns = [
+     # AnalysisRecord core (núcleo normalizado de análisis)
+     path('analysis-records/', AnalysisRecordListCreateView.as_view(), name='analysisrecord_list_create'),
+     path('analysis-records/<uuid:pk>/', AnalysisRecordDetailView.as_view(), name='analysisrecord_detail'),
++    path('analysis-records/<uuid:pk>/annotations/', UpdateAnalysisAnnotationsView.as_view(), name='analysisrecord_annotations'),
++    path('analysis-records/my-results/', PatientMyResultsView.as_view(), name='analysisrecord_my_results'),
+ ]
+\ No newline at end of file
+diff --git a/backend/create_local_user.py b/backend/create_local_user.py
+index de39c569..a1e6dfc8 100644
+--- a/backend/create_local_user.py
++++ b/backend/create_local_user.py
+@@ -108,3 +108,4 @@ if __name__ == '__main__':
+ 
+ 
+ 
++
+diff --git a/backend/list_users.py b/backend/list_users.py
+index ddeb8571..0ff5b82c 100644
+--- a/backend/list_users.py
++++ b/backend/list_users.py
+@@ -63,3 +63,4 @@ print("=" * 70)
+ 
+ 
+ 
++
+diff --git a/backend/setup_local_login.py b/backend/setup_local_login.py
+index 9b3b5755..18efd4ef 100644
+--- a/backend/setup_local_login.py
++++ b/backend/setup_local_login.py
+@@ -150,3 +150,4 @@ if __name__ == '__main__':
+ 
+ 
+ 
++
+diff --git a/docs/SESSION_RESULTS_VISUALIZATION_AND_LOGIN_IMPROVEMENTS.md b/docs/SESSION_RESULTS_VISUALIZATION_AND_LOGIN_IMPROVEMENTS.md
+deleted file mode 100644
+index 5e1459ae..00000000
+--- a/docs/SESSION_RESULTS_VISUALIZATION_AND_LOGIN_IMPROVEMENTS.md
++++ /dev/null
+@@ -1,329 +0,0 @@
+-# Sesión: Visualización de Resultados y Mejoras de Login
+-
+-**Fecha:** 15 de Diciembre, 2025  
+-**Fases Implementadas:** Results Visualization, Login Improvements, Password Reset, TestResult Migration
+-
+----
+-
+-## Resumen Ejecutivo
+-
+-Esta sesión implementó la visualización completa de resultados de análisis para terapeutas y pacientes, mejoras significativas en el sistema de login con mensajes de error específicos, funcionalidad de recuperación de contraseña, y migración de datos históricos de `TestResult` a `AnalysisRecord`.
+-
+----
+-
+-## 1. PHASE: RESULTS VISUALIZATION (READ-ONLY + NOTES)
+-
+-### Objetivo
+-Exponer resultados de `AnalysisRecord` de forma profesional y segura por roles, permitiendo a terapeutas agregar anotaciones interpretativas y a pacientes ver solo lo permitido.
+-
+-### Implementación Backend
+-
+-#### 1.1 Extensión del Modelo AnalysisRecord
+-- **Archivo:** `backend/api/models.py`
+-- **Cambio:** Agregado campo `therapist_annotations` (JSONField)
+-  ```python
+-  therapist_annotations = models.JSONField(
+-      null=True,
+-      blank=True,
+-      default=dict,
+-      help_text=(
+-          "Anotaciones del terapeuta sobre este resultado. "
+-          "Estructura: {summary: string, notes: string, visible_to_patient: boolean}. "
+-          "Editable solo por el terapeuta propietario."
+-      ),
+-  )
+-  ```
+-- **Migración:** `0029_add_therapist_annotations.py` (aplicada)
+-
+-#### 1.2 Endpoints Implementados
+-
+-**A) Terapeuta:**
+-- `GET /api/analysis-records/?patient_id={id}` - Lista resultados del paciente activo
+-  - **Vista:** `TherapistPatientResultsView`
+-  - **Validaciones:** Role therapist, ownership therapist → patient
+-  - **Ubicación:** `backend/api/analysis_views.py` (líneas 138-167)
+-
+-- `PATCH /api/analysis-records/{uuid}/annotations/` - Actualiza anotaciones
+-  - **Vista:** `UpdateAnalysisAnnotationsView`
+-  - **Validaciones:** Role therapist, ownership del resultado
+-  - **Restricción:** Solo permite modificar `therapist_annotations`, NO `computed_result` ni snapshots
+-  - **Ubicación:** `backend/api/analysis_views.py` (líneas 170-221)
+-
+-**B) Paciente:**
+-- `GET /api/analysis-records/my-results/` - Lista resultados propios
+-  - **Vista:** `PatientMyResultsView`
+-  - **Filtros:** `subject_user = request.user`, `visibility in (patient, both)`
+-  - **Seguridad:** Oculta `therapist_annotations` a menos que `visible_to_patient = true`
+-  - **Ubicación:** `backend/api/analysis_views.py` (líneas 224-272)
+-
+-#### 1.3 Serializer - Filtrado por Rol
+-- **Archivo:** `backend/api/serializers.py`
+-- **Método:** `AnalysisRecordSerializer.to_representation` (líneas 843-858)
+-- **Lógica:** Filtra `therapist_annotations` para pacientes según `visible_to_patient`
+-
+-### Implementación Frontend
+-
+-#### 1.4 Vista del Terapeuta
+-- **Ruta:** `/dashboard/therapist/results`
+-- **Archivo:** `tonyblanco-app/app/(dashboard)/dashboard/therapist/results/page.tsx`
+-- **Funcionalidades:**
+-  - Requiere paciente activo seleccionado
+-  - Lista resultados cronológicamente (fecha, kind, module_code, visibility)
+-  - Botón "Ver resultado" abre vista de detalle
+-  - Vista de detalle incluye:
+-    - Renderizado estructurado del resultado
+-    - Caja de anotaciones editable:
+-      - Textarea para "Resumen"
+-      - Textarea para "Notas"
+-      - Checkbox "Visible para el paciente"
+-      - Botón "Guardar anotaciones"
+-    - NO muestra JSON raw dump
+-
+-#### 1.5 Vista del Paciente
+-- **Ruta:** `/dashboard/patient/results`
+-- **Archivo:** `tonyblanco-app/app/(dashboard)/dashboard/patient/results/page.tsx`
+-- **Funcionalidades:**
+-  - Lista resultados propios
+-  - Mismo renderizado que terapeuta
+-  - Sin controles de edición
+-  - Muestra notas del terapeuta solo si `visible_to_patient = true`
+-  - Estado "Nuevo/Visto" persistido en localStorage
+-
+-#### 1.6 API Client
+-- **Archivo:** `tonyblanco-app/lib/analysis-api.ts`
+-- **Funciones:**
+-  - `getPatientResults(patientId)` - Obtiene resultados del paciente (therapist)
+-  - `getMyResults()` - Obtiene resultados propios (patient)
+-  - `getAnalysisRecordDetail(recordId)` - Obtiene detalle de un resultado
+-  - `updateAnalysisAnnotations(recordId, annotations)` - Actualiza anotaciones (therapist)
+-
+----
+-
+-## 2. PHASE: LOGIN IMPROVEMENTS - Mensajes de Error Específicos
+-
+-### Objetivo
+-Reemplazar el mensaje genérico "Credenciales inválidas" con mensajes específicos que indiquen exactamente qué está mal (usuario no existe, contraseña incorrecta, etc.).
+-
+-### Implementación Backend
+-
+-#### 2.1 Modificación de EmailOrUsernameAuthToken
+-- **Archivo:** `backend/api/views.py` (líneas 545-583)
+-- **Cambios:**
+-  - **Usuario no existe:** Devuelve `error: 'user_not_found'` con mensaje específico
+-  - **Contraseña incorrecta:** Devuelve `error: 'invalid_password'` con email del usuario para recuperación
+-  - **Validación:** Devuelve `error: 'validation'` para campos faltantes
+-
+-#### 2.2 Endpoint de Recuperación de Contraseña
+-- **Ruta:** `POST /api/password-reset/request/`
+-- **Vista:** `PasswordResetRequestView`
+-- **Funcionalidad:**
+-  - Genera token de reset usando sistema de Django
+-  - Envía email con enlace para restablecer contraseña
+-  - Por seguridad, siempre devuelve éxito (no revela si el email existe)
+-- **Email:** Función `send_password_reset_email` en `backend/api/emails.py`
+-
+-### Implementación Frontend
+-
+-#### 2.3 Mejoras en Página de Login
+-- **Archivo:** `tonyblanco-app/app/(public)/login/page.tsx`
+-- **Cambios:**
+-  - Mensajes de error específicos con colores:
+-    - **Amarillo:** Usuario no encontrado
+-    - **Naranja:** Contraseña incorrecta
+-    - **Rojo:** Otros errores
+-  - Formulario de recuperación de contraseña:
+-    - Se muestra automáticamente cuando la contraseña es incorrecta
+-    - Campo de email prellenado con el email del usuario
+-    - Botón "Enviar enlace de recuperación"
+-    - Mensaje de confirmación después de enviar
+-
+-#### 2.4 API Client
+-- **Archivo:** `tonyblanco-app/lib/api.ts`
+-- **Función:** `requestPasswordReset(email)` - Solicita cambio de contraseña
+-
+----
+-
+-## 3. PHASE: TestResult to AnalysisRecord Migration
+-
+-### Problema Identificado
+-Los pacientes que ejecutaban tests veían "Aún no has completado ningún test" porque:
+-- `ExecuteTestView` creaba `TestResult` pero NO `AnalysisRecord`
+-- El endpoint `/api/analysis-records/my-results/` solo busca `AnalysisRecord`
+-- Los resultados antiguos no aparecían en la página del paciente
+-
+-### Solución Implementada
+-
+-#### 3.1 Creación Automática de AnalysisRecord
+-- **Archivo:** `backend/api/test_views.py` (líneas 296-361)
+-- **Lógica:** Cuando un paciente ejecuta un test en modo `patient_self`, ahora también se crea un `AnalysisRecord` asociado con:
+-  - `subject_user` = usuario paciente
+-  - `patient` = objeto Patient si existe
+-  - `visibility` = 'patient' (visible para el paciente)
+-  - `kind` = 'clinical_test'
+-  - `module_code` = código del test ejecutado
+-  - `test_result` = referencia al TestResult creado
+-  - `computed_result` = resultados del test
+-  - Snapshots de birth_data y algorithm
+-
+-#### 3.2 Script de Migración
+-- **Archivo:** `backend/scripts/migrate_test_results_to_analysis_records.py`
+-- **Funcionalidad:**
+-  - Busca todos los `TestResult` que no tienen `AnalysisRecord` asociado
+-  - Crea `AnalysisRecord` para cada uno preservando:
+-    - Fecha original (`created_at`)
+-    - Datos de nacimiento (snapshots)
+-    - Resultados (`computed_result`)
+-    - Contexto de ejecución (`execution_mode`, `role_context`)
+-  - **Idempotente:** Solo migra registros que no tienen `AnalysisRecord`
+-  - **Resultado:** 1 TestResult migrado exitosamente
+-
+-#### 3.3 Corrección en AnalysisRecord.save()
+-- **Archivo:** `backend/api/models.py` (líneas 986-998)
+-- **Problema:** El método `save()` intentaba obtener el objeto original incluso para objetos nuevos
+-- **Solución:** Agregado `try/except` para manejar objetos nuevos correctamente
+-
+----
+-
+-## 4. Archivos Creados/Modificados
+-
+-### Backend
+-
+-**Nuevos Archivos:**
+-- `backend/api/analysis_views.py` - Vistas para AnalysisRecord
+-- `backend/api/migrations/0029_add_therapist_annotations.py` - Migración del campo
+-- `backend/api/services/analysis_service.py` - Servicios de análisis
+-- `backend/api/adapters/` - Adapters para motores legacy
+-- `backend/scripts/migrate_test_results_to_analysis_records.py` - Script de migración
+-
+-**Archivos Modificados:**
+-- `backend/api/models.py` - Campo `therapist_annotations`, corrección en `save()`
+-- `backend/api/serializers.py` - `to_representation` para filtrar annotations
+-- `backend/api/views.py` - Mensajes de error específicos, `PasswordResetRequestView`
+-- `backend/api/test_views.py` - Creación automática de `AnalysisRecord`
+-- `backend/api/urls.py` - Nuevos endpoints
+-- `backend/api/emails.py` - Función `send_password_reset_email`
+-- `backend/core/settings.py` - `FRONTEND_URL` para emails
+-
+-### Frontend
+-
+-**Nuevos Archivos:**
+-- `tonyblanco-app/app/(dashboard)/dashboard/therapist/results/page.tsx` - Vista terapeuta
+-- `tonyblanco-app/app/(dashboard)/dashboard/patient/results/page.tsx` - Vista paciente
+-- `tonyblanco-app/lib/analysis-api.ts` - Cliente API para AnalysisRecord
+-
+-**Archivos Modificados:**
+-- `tonyblanco-app/app/(public)/login/page.tsx` - Mensajes específicos, recuperación de contraseña
+-- `tonyblanco-app/lib/api.ts` - Función `requestPasswordReset`, mejor manejo de errores
+-
+----
+-
+-## 5. Reglas de Seguridad Implementadas
+-
+-### 5.1 Anotaciones del Terapeuta
+-- ✅ Solo editable por el terapeuta propietario del resultado
+-- ✅ Paciente solo puede leer si `visible_to_patient = true`
+-- ✅ Serializer filtra automáticamente según rol
+-- ✅ No se puede modificar `computed_result` ni snapshots desde el endpoint de anotaciones
+-
+-### 5.2 Visibilidad de Resultados
+-- ✅ Terapeuta: Ve todos los resultados de sus pacientes
+-- ✅ Paciente: Solo ve resultados con `visibility in (patient, both)`
+-- ✅ Filtrado automático en serializer y views
+-
+-### 5.3 Recuperación de Contraseña
+-- ✅ Por seguridad, siempre devuelve éxito (no revela si el email existe)
+-- ✅ Token de reset con expiración de 24 horas
+-- ✅ Email HTML con diseño profesional
+-
+----
+-
+-## 6. Problemas Resueltos
+-
+-### 6.1 Error: "no such column: api_analysisrecord.therapist_annotations"
+-- **Causa:** Migración no aplicada
+-- **Solución:** Ejecutado `python manage.py migrate api`
+-
+-### 6.2 Error: "AnalysisRecord matching query does not exist" en save()
+-- **Causa:** Método `save()` intentaba obtener objeto original para objetos nuevos
+-- **Solución:** Agregado `try/except` para manejar objetos nuevos
+-
+-### 6.3 Error: Routing conflict con "my-results"
+-- **Causa:** Ruta `my-results` estaba después de `<uuid:pk>`
+-- **Solución:** Reordenadas las rutas, `my-results` antes de rutas con parámetros
+-
+-### 6.4 Pacientes no veían resultados de tests ejecutados
+-- **Causa:** `ExecuteTestView` solo creaba `TestResult`, no `AnalysisRecord`
+-- **Solución:** Creación automática de `AnalysisRecord` en modo `patient_self`
+-
+----
+-
+-## 7. Testing y Validación
+-
+-### 7.1 Endpoints Verificados
+-- ✅ `GET /api/analysis-records/my-results/` - Retorna resultados del paciente
+-- ✅ `GET /api/analysis-records/?patient_id={id}` - Retorna resultados del paciente (therapist)
+-- ✅ `PATCH /api/analysis-records/{uuid}/annotations/` - Actualiza anotaciones
+-- ✅ `POST /api/password-reset/request/` - Solicita reset de contraseña
+-
+-### 7.2 Migración Verificada
+-- ✅ Script ejecutado exitosamente
+-- ✅ 1 TestResult migrado a AnalysisRecord
+-- ✅ Fechas originales preservadas
+-- ✅ Datos completos migrados
+-
+-### 7.3 Frontend Verificado
+-- ✅ Página de resultados del terapeuta muestra lista y permite anotar
+-- ✅ Página de resultados del paciente muestra lista y detalles
+-- ✅ Login muestra mensajes específicos
+-- ✅ Formulario de recuperación de contraseña funciona
+-
+----
+-
+-## 8. Próximos Pasos Sugeridos
+-
+-1. **Implementar página de reset de contraseña** (`/reset-password`) para completar el flujo
+-2. **Agregar filtros funcionales** en la página de resultados del terapeuta
+-3. **Mejorar renderizado de resultados** estructurados (no solo JSON)
+-4. **Agregar exportación de resultados** (PDF, CSV)
+-5. **Implementar notificaciones** cuando el terapeuta marca notas como visibles
+-
+----
+-
+-## 9. Notas Técnicas
+-
+-### 9.1 Orden de URLs
+-Las rutas de `analysis-records` deben estar en este orden:
+-1. `my-results/` (antes de rutas con parámetros)
+-2. `{uuid}/annotations/` (antes de `{uuid}/`)
+-3. `{uuid}/` (ruta genérica al final)
+-
+-### 9.2 Migración de Datos
+-El script de migración es idempotente y puede ejecutarse múltiples veces sin problemas. Solo migra `TestResult` que no tienen `AnalysisRecord` asociado.
+-
+-### 9.3 Compatibilidad
+-- ✅ No rompe funcionalidad existente
+-- ✅ Compatible con `TestResult` legacy
+-- ✅ Mantiene snapshots inmutables
+-- ✅ Preserva fechas originales
+-
+----
+-
+-## 10. Commit Information
+-
+-**Commit:** `ed9a1169`  
+-**Mensaje:** "feat: Results visualization with therapist annotations + TestResult migration"  
+-**Archivos:** 52 archivos modificados/creados  
+-**Líneas:** +4,789 insertions, -303 deletions
+-
+----
+-
+-## Conclusión
+-
+-Esta sesión implementó exitosamente:
+-- ✅ Sistema completo de visualización de resultados con anotaciones
+-- ✅ Mejoras significativas en UX de login
+-- ✅ Funcionalidad de recuperación de contraseña
+-- ✅ Migración de datos históricos
+-- ✅ Creación automática de `AnalysisRecord` para nuevos tests
+-
+-Todo el código está commitado y pusheado a `main`. El sistema está listo para producción con estas mejoras.
+diff --git a/tonyblanco-app/app/(public)/login/page.tsx b/tonyblanco-app/app/(public)/login/page.tsx
+index d5c2a93e..fcfe0047 100644
+--- a/tonyblanco-app/app/(public)/login/page.tsx
++++ b/tonyblanco-app/app/(public)/login/page.tsx
+@@ -2,23 +2,52 @@
+ 
+ import { useState } from 'react';
+ import { useRouter } from 'next/navigation';
++import { login, getCurrentUser } from '@/lib/api';
++import { setAuthToken } from '@/lib/auth';
++import { getUserRole } from '@/lib/getUserRole';
+ 
+ export default function LoginPage() {
+   const router = useRouter();
+   const [email, setEmail] = useState('');
+   const [password, setPassword] = useState('');
+   const [loading, setLoading] = useState(false);
++  const [error, setError] = useState<string | null>(null);
+ 
+   const handleSubmit = async (e: React.FormEvent) => {
+     e.preventDefault();
+     setLoading(true);
++    setError(null);
+     
+-    // Placeholder login logic
+-    // In real implementation, this would call the auth API
+-    setTimeout(() => {
++    try {
++      // Login con email o username (el backend acepta ambos en el campo 'username')
++      const loginResponse = await login(email, password);
++      
++      // Guardar token
++      setAuthToken(loginResponse.token);
++      
++      // Obtener usuario actual para determinar rol y redirigir
++      // Nota: getCurrentUser requiere el token que acabamos de guardar
++      const user = await getCurrentUser();
++      const role = await getUserRole();
++      
++      // Redirigir según rol
++      if (role === 'admin') {
++        router.push('/dashboard/admin');
++      } else if (role === 'therapist') {
++        router.push('/dashboard/therapist');
++      } else if (role === 'personal') {
++        router.push('/dashboard/personal');
++      } else if (role === 'patient') {
++        router.push('/dashboard/patient');
++      } else {
++        router.push('/dashboard');
++      }
++    } catch (err) {
++      console.error('Login error:', err);
++      const errorMessage = err instanceof Error ? err.message : 'Error al iniciar sesión. Verifica tus credenciales.';
++      setError(errorMessage);
+       setLoading(false);
+-      router.push('/dashboard');
+-    }, 500);
++    }
+   };
+ 
+   return (
+@@ -54,6 +83,11 @@ export default function LoginPage() {
+               className="w-full px-4 py-2 bg-white border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition-colors"
+             />
+           </div>
++          {error && (
++            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
++              {error}
++            </div>
++          )}
+           <button
+             type="submit"
+             disabled={loading}
+diff --git a/tonyblanco-app/components/TherapeuticConsentModal.tsx b/tonyblanco-app/components/TherapeuticConsentModal.tsx
+index dae1a368..cbaf706b 100644
+--- a/tonyblanco-app/components/TherapeuticConsentModal.tsx
++++ b/tonyblanco-app/components/TherapeuticConsentModal.tsx
+@@ -147,3 +147,4 @@ export default function TherapeuticConsentModal({
+   );
+ }
+ 
++
+diff --git a/tonyblanco-app/components/ui/dialog.tsx b/tonyblanco-app/components/ui/dialog.tsx
+index d0028be0..78adb1d2 100644
+--- a/tonyblanco-app/components/ui/dialog.tsx
++++ b/tonyblanco-app/components/ui/dialog.tsx
+@@ -11,3 +11,4 @@ export {
+   DialogClose,
+ } from '../../_legacy_components_backup/ui/dialog';
+ 
++
+diff --git a/tonyblanco-app/lib/admin-api.ts b/tonyblanco-app/lib/admin-api.ts
+index 9f311583..82670afd 100644
+--- a/tonyblanco-app/lib/admin-api.ts
++++ b/tonyblanco-app/lib/admin-api.ts
+@@ -256,3 +256,4 @@ export async function getAdminPatients(): Promise<Patient[]> {
+ 
+ 
+ 
++
+diff --git a/tonyblanco-app/lib/angels_db.ts b/tonyblanco-app/lib/angels_db.ts
+index 560535cf..da437ec4 100644
+--- a/tonyblanco-app/lib/angels_db.ts
++++ b/tonyblanco-app/lib/angels_db.ts
+@@ -103,3 +103,4 @@ export function getAngelName(number: number): AngelName {
+ 
+ 
+ 
++
+diff --git a/tonyblanco-app/lib/gemini-config.ts b/tonyblanco-app/lib/gemini-config.ts
+index 910a49c2..98d8f594 100644
+--- a/tonyblanco-app/lib/gemini-config.ts
++++ b/tonyblanco-app/lib/gemini-config.ts
+@@ -128,3 +128,4 @@ export function parseGeminiJSON<T>(text: string): T | null {
+ 
+ 
+ 
++
+diff --git a/tonyblanco-app/lib/kabbalistic-ai-base.ts b/tonyblanco-app/lib/kabbalistic-ai-base.ts
+index 1847958c..58ed114e 100644
+--- a/tonyblanco-app/lib/kabbalistic-ai-base.ts
++++ b/tonyblanco-app/lib/kabbalistic-ai-base.ts
+@@ -150,3 +150,4 @@ export abstract class KabbalisticAIAnalyzer {
+ 
+ 
+ 
++
+diff --git a/tonyblanco-app/lib/role-guards.ts b/tonyblanco-app/lib/role-guards.ts
+index 08b3e1b8..a51ea0ab 100644
+--- a/tonyblanco-app/lib/role-guards.ts
++++ b/tonyblanco-app/lib/role-guards.ts
+@@ -1,75 +1,32 @@
+-'use client';
+-
+-import { useEffect, useState } from 'react';
+-import { useRouter } from 'next/navigation';
+-import { getUserRole, UserRole as SessionUserRole } from '@/lib/getUserRole';
+-
+-type Role = 'admin' | 'therapist' | 'personal' | 'patient';
+-
+-interface RoleGuardOptions {
+-  allowedRoles: Role[];
+-  redirectTo?: string;
+-}
+-
+-interface RoleGuardResult {
+-  role: SessionUserRole;
+-  loading: boolean;
+-  authorized: boolean;
+-}
+-
+-/**
+- * useRoleGuard
+- *
+- * Seguridad:
+- * - Siempre obtiene el rol desde /api/me vía getUserRole() (nunca de props, storage ni caché manual).
+- * - No renderiza contenido autorizado hasta que la llamada se resuelve.
+- * - Si el rol no está permitido o no existe, redirige a redirectTo.
+- */
+-export function useRoleGuard({
+-  allowedRoles,
+-  redirectTo = '/login',
+-}: RoleGuardOptions): RoleGuardResult {
+-  const router = useRouter();
+-  const [role, setRole] = useState<SessionUserRole>(null);
+-  const [loading, setLoading] = useState(true);
+-
+-  useEffect(() => {
+-    let cancelled = false;
+-
+-    const checkRole = async () => {
+-      try {
+-        const userRole = await getUserRole();
+-        if (cancelled) return;
+-
+-        setRole(userRole);
+-        setLoading(false);
+-
+-        // Si no hay rol o no está permitido, redirigir
+-        if (!userRole || !allowedRoles.includes(userRole as Role)) {
+-          router.replace(redirectTo);
+-        }
+-      } catch (error) {
+-        console.error('Error checking user role:', error);
+-        if (!cancelled) {
+-          setRole(null);
+-          setLoading(false);
+-          router.replace(redirectTo);
+-        }
+-      }
+-    };
+-
+-    checkRole();
+-
+-    return () => {
+-      cancelled = true;
+-    };
+-  }, [allowedRoles, redirectTo, router]);
+-
+-  const authorized = !!role && allowedRoles.includes(role as Role);
+-
+-  return {
+-    role,
+-    loading,
+-    authorized,
+-  };
+-}
++ 'use client';
++
++ import { useEffect } from 'react';
++ import { useRouter } from 'next/navigation';
++
++ type Role = 'admin' | 'therapist' | 'personal' | 'patient';
++
++ interface RoleGuardOptions {
++   currentUserRole: Role | null | undefined;
++   allowedRoles: Role[];
++   redirectTo?: string;
++ }
++
++ export function useRoleGuard({
++   currentUserRole,
++   allowedRoles,
++   redirectTo = '/dashboard',
++ }: RoleGuardOptions) {
++   const router = useRouter();
++
++   useEffect(() => {
++     if (!currentUserRole) return;
++
++     if (!allowedRoles.includes(currentUserRole)) {
++       router.replace(redirectTo);
++     }
++   }, [currentUserRole, allowedRoles, redirectTo, router]);
++
++   return {
++     authorized: !!currentUserRole && allowedRoles.includes(currentUserRole),
++   };
++ }
+diff --git a/tonyblanco-app/test-gemini-rest.js b/tonyblanco-app/test-gemini-rest.js
+index 565f8c03..7e21b491 100644
+--- a/tonyblanco-app/test-gemini-rest.js
++++ b/tonyblanco-app/test-gemini-rest.js
+@@ -104,3 +104,4 @@ async function testWithFetch(modelName) {
+ 
+ 
+ 
++

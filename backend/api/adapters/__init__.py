@@ -30,3 +30,4 @@ def get_adapter_for_record(record):
     adapter_cls = ADAPTER_REGISTRY.get(record.kind, LegacyAdapter)
     return adapter_cls(record)
 
+

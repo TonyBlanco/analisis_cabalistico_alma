@@ -635,6 +635,7 @@ class AnalysisRecordSerializer(serializers.ModelSerializer):
             'raw_input',
             'computed_result',
             'legacy_output',
+            'therapist_annotations',
             'visibility',
             'created_at',
             'test_result',

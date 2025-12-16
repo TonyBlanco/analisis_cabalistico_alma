@@ -3,6 +3,8 @@ from datetime import date
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.conf import settings
+import uuid
 
 # Tipos de usuario
 USER_TYPE_CHOICES = [
@@ -20,34 +22,67 @@ SUBSCRIPTION_STATUS_CHOICES = [
     ('expired', 'Expirada'),
 ]
 
+
 class UserProfile(models.Model):
     """Perfil extendido del usuario con información adicional"""
+
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     user_type = models.CharField(max_length=20, choices=USER_TYPE_CHOICES, default='personal')
-    
+
     # Campos comunes
     # display_name: El nombre que usa para login (username de Django)
     # full_name: El nombre que se usa para los cálculos cabalísticos (para particulares)
     full_name = models.CharField(max_length=255)  # Nombre para cálculos cabalísticos
+    legal_full_name = models.CharField(max_length=255, blank=True)
     phone = models.CharField(max_length=20, blank=True)
     birth_date = models.DateField(null=True, blank=True)
-    
+    birth_time = models.TimeField(null=True, blank=True)
+    birth_city = models.CharField(max_length=200, blank=True)
+    birth_country = models.CharField(max_length=100, blank=True)
+    birth_latitude = models.DecimalField(
+        max_digits=9,
+        decimal_places=6,
+        null=True,
+        blank=True,
+        help_text='Latitud del lugar de nacimiento (núcleo perfil)',
+    )
+    birth_longitude = models.DecimalField(
+        max_digits=9,
+        decimal_places=6,
+        null=True,
+        blank=True,
+        help_text='Longitud del lugar de nacimiento (núcleo perfil)',
+    )
+    birth_timezone = models.CharField(
+        max_length=100,
+        blank=True,
+        help_text='Zona horaria del lugar de nacimiento (núcleo perfil)',
+    )
+
+    consent_accepted_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text='Marca de tiempo de aceptación de consentimiento terapéutico',
+    )
+    profile_version = models.IntegerField(default=1)
+    name_change_count = models.IntegerField(default=0)
+
     # Sistema de roles y permisos
     is_admin = models.BooleanField(default=False)  # Admin puede ver estadísticas y mantener usuarios
-    
+
     # Campos para terapeutas
     profession = models.CharField(max_length=100, blank=True)
     specialization = models.CharField(max_length=200, blank=True)
     license_number = models.CharField(max_length=100, blank=True)
     years_of_experience = models.IntegerField(null=True, blank=True)
-    
+
     # Sistema de pagos y membresías
     membership_active = models.BooleanField(default=True)  # Trial activo por defecto
     membership_expires = models.DateTimeField(null=True, blank=True)
     subscription_status = models.CharField(
-        max_length=20, 
-        choices=SUBSCRIPTION_STATUS_CHOICES, 
-        default='trial'
+        max_length=20,
+        choices=SUBSCRIPTION_STATUS_CHOICES,
+        default='trial',
     )
     subscription_plan = models.CharField(max_length=50, blank=True)  # 'personal', 'professional', 'premium'
     subscription_start_date = models.DateTimeField(null=True, blank=True)
@@ -56,34 +91,35 @@ class UserProfile(models.Model):
     stripe_subscription_id = models.CharField(max_length=255, blank=True)
     last_payment_date = models.DateTimeField(null=True, blank=True)
     next_billing_date = models.DateTimeField(null=True, blank=True)
-    
+
     # Límites según tipo de usuario
     max_fichas_per_month = models.IntegerField(default=10)  # Personal: 10, Therapist: ilimitado
     fichas_created_this_month = models.IntegerField(default=0)
-    
+
     # Para terapeutas: número de clientes
     max_patients = models.IntegerField(default=0)  # 0=ilimitado en trial, 100=plan básico
     current_patients_count = models.IntegerField(default=0)
-    
+
     # OAuth (Google)
     google_id = models.CharField(max_length=255, blank=True, null=True)
-    
+
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     def __str__(self):
         return f"{self.full_name} ({self.get_user_type_display()})"
-    
+
     def has_active_subscription(self):
         """Verifica si el usuario tiene una suscripción activa"""
         from django.utils import timezone
+
         if not self.membership_active:
             return False
         if self.membership_expires and self.membership_expires < timezone.now():
             return False
         return self.subscription_status in ['trial', 'active']
-    
+
     def can_create_ficha(self):
         """Verifica si el usuario puede crear más fichas este mes"""
         if self.user_type == 'therapist':
@@ -93,20 +129,20 @@ class UserProfile(models.Model):
             return self.current_patients_count < self.max_patients
         # Para particulares: verificar límite mensual
         return self.fichas_created_this_month < self.max_fichas_per_month
-    
+
     def can_add_patient(self):
         """Verifica si el usuario puede agregar un nuevo paciente (solo para terapeutas)"""
         if self.user_type != 'therapist':
             return False, "Solo los terapeutas pueden agregar pacientes"
-        
+
         if self.max_patients == 0:  # Trial sin límite
             return True, "OK"
-        
+
         if self.current_patients_count >= self.max_patients:
             return False, f"Límite de {self.max_patients} clientes alcanzado. Necesitas un upgrade"
-        
+
         return True, "OK"
-    
+
     def get_remaining_capacity(self):
         """Obtiene la capacidad restante (para terapeutas) o fichas restantes (para particulares)"""
         if self.user_type == 'therapist':
@@ -115,7 +151,7 @@ class UserProfile(models.Model):
             return max(0, self.max_patients - self.current_patients_count)
         else:
             return max(0, self.max_fichas_per_month - self.fichas_created_this_month)
-    
+
     class Meta:
         verbose_name = 'Perfil de Usuario'
         verbose_name_plural = 'Perfiles de Usuarios'
@@ -219,6 +255,35 @@ class Patient(models.Model):
     birth_date = models.DateField(help_text='Fecha de nacimiento')
     birth_time = models.TimeField(null=True, blank=True, help_text='Hora exacta de nacimiento')
     birth_place = models.CharField(max_length=255, blank=True, help_text='Lugar de nacimiento (ciudad, país)')
+    birth_city = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text='Ciudad de nacimiento',
+    )
+    birth_country = models.CharField(
+        max_length=100,
+        blank=True,
+        help_text='País de nacimiento',
+    )
+    birth_latitude = models.DecimalField(
+        max_digits=9,
+        decimal_places=6,
+        null=True,
+        blank=True,
+        help_text='Latitud del lugar de nacimiento',
+    )
+    birth_longitude = models.DecimalField(
+        max_digits=9,
+        decimal_places=6,
+        null=True,
+        blank=True,
+        help_text='Longitud del lugar de nacimiento',
+    )
+    birth_timezone = models.CharField(
+        max_length=100,
+        blank=True,
+        help_text='Zona horaria del lugar de nacimiento',
+    )
     hebrew_name = models.CharField(max_length=255, blank=True, help_text='Nombre en hebreo (opcional)')
     
     # ========== DATOS CLÍNICOS ==========
@@ -615,4 +680,231 @@ class BlockedDate(models.Model):
         ordering = ['date']
         verbose_name = 'Fecha Bloqueada'
         verbose_name_plural = 'Fechas Bloqueadas'
+
+
+class CabalisticAnalysis(models.Model):
+    """Análisis de Alta Cábala asociados a un paciente"""
+
+    ANALYSIS_TYPE_CHOICES = [
+        ('gematria', 'Gematria'),
+        ('tarot', 'Tarot Terapéutico'),
+        ('soul-map', 'Mapa del Alma'),
+        ('astrology', 'Carta Astral Cabalística'),
+        ('tikun', 'Análisis de Tikún'),
+        ('shekinah', 'Análisis Shejinah Moderno Pitagórico'),
+        ('astrology-kerykeion', 'Astrología Técnica (Kerykeion)'),
+        ('crossover', 'Síntesis Cruzada'),
+    ]
+
+    patient = models.ForeignKey(
+        Patient,
+        on_delete=models.CASCADE,
+        related_name='cabalistic_analyses',
+        help_text='Paciente para el que se realizó el análisis',
+    )
+    therapist = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='cabalistic_analyses',
+        help_text='Terapeuta que ejecutó el análisis',
+    )
+    analysis_type = models.CharField(
+        max_length=20,
+        choices=ANALYSIS_TYPE_CHOICES,
+        help_text='Tipo de análisis cabalístico realizado',
+    )
+    input_data = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text='Datos de entrada del análisis (ej: palabra para Gematria, fecha para Tarot)',
+    )
+    result_data = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text='Resultados completos del análisis en formato JSON',
+    )
+    summary = models.TextField(
+        blank=True,
+        help_text='Resumen breve del análisis para visualización rápida',
+    )
+    therapist_notes = models.TextField(
+        blank=True,
+        help_text='Notas adicionales del terapeuta sobre este análisis',
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Análisis Cabalístico'
+        verbose_name_plural = 'Análisis Cabalísticos'
+        indexes = [
+            models.Index(fields=['patient', 'analysis_type', '-created_at'], name='api_cabalis_patient_9d1192_idx'),
+            models.Index(fields=['therapist', '-created_at'], name='api_cabalis_therapi_be0633_idx'),
+        ]
+
+    def __str__(self):
+        return f"{self.get_analysis_type_display()} - {self.patient.full_name} ({self.created_at.date()})"
+
+
+class AnalysisRecord(models.Model):
+    """
+    Núcleo normalizado de ejecuciones de análisis (tests clínicos, cábala, astrología, legacy).
+    Mantiene snapshots inmutables de datos y algoritmo.
+    """
+
+    KIND_CHOICES = [
+        ('clinical_test', 'Clinical Test'),
+        ('kabbalah', 'Kabbalah'),
+        ('astrology', 'Astrology'),
+        ('legacy', 'Legacy'),
+    ]
+
+    ROLE_CONTEXT_CHOICES = [
+        ('therapist', 'Therapist'),
+        ('personal', 'Personal'),
+        ('patient', 'Patient'),
+    ]
+
+    EXECUTION_MODE_CHOICES = [
+        ('patient_self', 'Patient Self'),
+        ('therapist_clinical', 'Therapist Clinical'),
+    ]
+
+    VISIBILITY_CHOICES = [
+        ('therapist', 'Therapist only'),
+        ('patient', 'Patient only'),
+        ('both', 'Therapist and Patient'),
+    ]
+
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False,
+        help_text='Identificador estable de la ejecución de análisis (UUID).',
+    )
+    kind = models.CharField(
+        max_length=32,
+        choices=KIND_CHOICES,
+        help_text='Tipo de análisis ejecutado.',
+    )
+    module_code = models.CharField(
+        max_length=64,
+        help_text='Identificador estable del módulo (ej: PHQ9, SCDF, KERYKEION_NATAL).',
+    )
+    role_context = models.CharField(
+        max_length=16,
+        choices=ROLE_CONTEXT_CHOICES,
+        help_text='Contexto de rol en el momento de la ejecución.',
+    )
+    execution_mode = models.CharField(
+        max_length=32,
+        choices=EXECUTION_MODE_CHOICES,
+        null=True,
+        blank=True,
+        help_text='Derivado en backend desde module_code + contexto. Nunca confiado desde request.',
+    )
+    subject_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='analysis_subject_records',
+        null=True,
+        blank=True,
+        help_text='Usuario sujeto del análisis (si existe cuenta).',
+    )
+    created_by_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='analysis_created_records',
+        help_text='Usuario que dispara la ejecución (terapeuta, personal o paciente).',
+    )
+    patient = models.ForeignKey(
+        Patient,
+        on_delete=models.SET_NULL,
+        related_name='analysis_records',
+        null=True,
+        blank=True,
+        help_text='Paciente clínico asociado (obligatorio en therapist_clinical).',
+    )
+    therapist = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name='therapist_analysis_records',
+        null=True,
+        blank=True,
+        help_text='Terapeuta propietario (ownership clínico).',
+    )
+    birth_data_snapshot = models.JSONField(
+        help_text=(
+            'Snapshot inmutable de datos de nacimiento en el momento del análisis. '
+            'Debe incluir: legal_name, birth_date, birth_time, city, country, lat, lng, timezone, geocode_source.'
+        ),
+    )
+    algorithm_snapshot = models.JSONField(
+        help_text=(
+            'Snapshot inmutable de motor/versión/parámetros. '
+            'Campos esperados: engine, version, build_hash (opcional), params.'
+        ),
+    )
+    raw_input = models.JSONField(
+        null=True,
+        blank=True,
+        help_text='Input crudo recibido desde frontend / capa de orquestación.',
+    )
+    computed_result = models.JSONField(
+        null=True,
+        blank=True,
+        help_text='Resultado normalizado final del análisis (JSON).',
+    )
+    legacy_output = models.JSONField(
+        null=True,
+        blank=True,
+        help_text='Salida original del módulo legacy (JSON serializado, opcional).',
+    )
+    visibility = models.CharField(
+        max_length=16,
+        choices=VISIBILITY_CHOICES,
+        default='therapist',
+        help_text='Quién puede ver este AnalysisRecord en dashboards.',
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    test_result = models.ForeignKey(
+        'api.TestResult',
+        on_delete=models.SET_NULL,
+        related_name='analysis_records',
+        null=True,
+        blank=True,
+        help_text='Resultado de test relacionado, si existe.',
+    )
+    cabalistic_analysis = models.ForeignKey(
+        CabalisticAnalysis,
+        on_delete=models.SET_NULL,
+        related_name='analysis_records',
+        null=True,
+        blank=True,
+        help_text='Análisis cabalístico relacionado, si existe.',
+    )
+    therapist_annotations = models.JSONField(
+        null=True,
+        blank=True,
+        default=dict,
+        help_text=(
+            'Anotaciones del terapeuta sobre este resultado. '
+            'Estructura: {summary: string, notes: string, visible_to_patient: boolean}. '
+            'Editable solo por el terapeuta propietario.'
+        ),
+    )
+
+    class Meta:
+        verbose_name = 'Analysis Record'
+        verbose_name_plural = 'Analysis Records'
+        indexes = [
+            models.Index(fields=['subject_user', 'created_at'], name='api_analysi_subject_05aeed_idx'),
+            models.Index(fields=['created_by_user', 'created_at'], name='api_analysi_created_cac56c_idx'),
+            models.Index(fields=['kind', 'module_code'], name='api_analysi_kind_a20a7b_idx'),
+            models.Index(fields=['created_at'], name='api_analysi_created_624740_idx'),
+        ]
+
+    def __str__(self):
+        return f"{self.kind}::{self.module_code} ({self.id})"
 

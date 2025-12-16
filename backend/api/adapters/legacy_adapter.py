@@ -31,3 +31,4 @@ class LegacyAdapter(BaseAnalysisAdapter):
             "legacy_output": legacy_output,
         }
 
+

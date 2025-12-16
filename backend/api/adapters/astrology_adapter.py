@@ -45,3 +45,4 @@ class AstrologyAdapter(BaseAnalysisAdapter):
             "legacy_output": legacy_output,
         }
 
+

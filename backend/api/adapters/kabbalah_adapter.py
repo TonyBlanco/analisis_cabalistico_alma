@@ -61,3 +61,4 @@ class KabbalahAdapter(BaseAnalysisAdapter):
             "legacy_output": legacy_output,
         }
 
+

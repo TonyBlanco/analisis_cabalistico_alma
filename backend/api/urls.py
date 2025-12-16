@@ -84,6 +84,8 @@ from .views import reset_admin_passwords_temp, configure_admin_profiles_temp
 from .analysis_views import (
     AnalysisRecordListCreateView,
     AnalysisRecordDetailView,
+    PatientMyResultsView,
+    UpdateAnalysisAnnotationsView,
 )
 
 urlpatterns = [
@@ -194,4 +196,6 @@ urlpatterns = [
     # AnalysisRecord core (núcleo normalizado de análisis)
     path('analysis-records/', AnalysisRecordListCreateView.as_view(), name='analysisrecord_list_create'),
     path('analysis-records/<uuid:pk>/', AnalysisRecordDetailView.as_view(), name='analysisrecord_detail'),
+    path('analysis-records/<uuid:pk>/annotations/', UpdateAnalysisAnnotationsView.as_view(), name='analysisrecord_annotations'),
+    path('analysis-records/my-results/', PatientMyResultsView.as_view(), name='analysisrecord_my_results'),
 ]

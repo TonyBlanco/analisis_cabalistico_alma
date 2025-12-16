@@ -2,23 +2,52 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { login, getCurrentUser } from '@/lib/api';
+import { setAuthToken } from '@/lib/auth';
+import { getUserRole } from '@/lib/getUserRole';
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError(null);
     
-    // Placeholder login logic
-    // In real implementation, this would call the auth API
-    setTimeout(() => {
+    try {
+      // Login con email o username (el backend acepta ambos en el campo 'username')
+      const loginResponse = await login(email, password);
+      
+      // Guardar token
+      setAuthToken(loginResponse.token);
+      
+      // Obtener usuario actual para determinar rol y redirigir
+      // Nota: getCurrentUser requiere el token que acabamos de guardar
+      const user = await getCurrentUser();
+      const role = await getUserRole();
+      
+      // Redirigir según rol
+      if (role === 'admin') {
+        router.push('/dashboard/admin');
+      } else if (role === 'therapist') {
+        router.push('/dashboard/therapist');
+      } else if (role === 'personal') {
+        router.push('/dashboard/personal');
+      } else if (role === 'patient') {
+        router.push('/dashboard/patient');
+      } else {
+        router.push('/dashboard');
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Error al iniciar sesión. Verifica tus credenciales.';
+      setError(errorMessage);
       setLoading(false);
-      router.push('/dashboard');
-    }, 500);
+    }
   };
 
   return (
@@ -54,6 +83,11 @@ export default function LoginPage() {
               className="w-full px-4 py-2 bg-white border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition-colors"
             />
           </div>
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
+              {error}
+            </div>
+          )}
           <button
             type="submit"
             disabled={loading}

@@ -1,8 +1,15 @@
-    def get_serializer_context(self):
-        """Añadir contexto para filtrar therapist_annotations según rol."""
-        context = super().get_serializer_context()
-        context['request'] = self.request
-        return context
+from rest_framework import status, generics
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from django.db.models import Q
+import logging
+
+from .models import AnalysisRecord, Patient
+from .serializers import AnalysisRecordSerializer
+from .permissions import IsTherapist
+
+logger = logging.getLogger(__name__)
 
 
 class TherapistPatientResultsView(APIView):
@@ -54,10 +61,21 @@ class UpdateAnalysisAnnotationsView(APIView):
 
     def patch(self, request, pk):
         therapist = request.user
+        logger.info(
+            "UpdateAnalysisAnnotationsView.patch called",
+            extra={
+                "user_id": getattr(therapist, "id", None),
+                "record_id": str(pk),
+            },
+        )
 
         try:
             record = AnalysisRecord.objects.get(pk=pk)
         except AnalysisRecord.DoesNotExist:
+            logger.warning(
+                "AnalysisRecord not found for annotations",
+                extra={"user_id": therapist.id, "record_id": str(pk)},
+            )
             return Response(
                 {'error': 'Resultado no encontrado.'},
                 status=status.HTTP_404_NOT_FOUND
@@ -65,6 +83,14 @@ class UpdateAnalysisAnnotationsView(APIView):
 
         # Validar ownership: el terapeuta debe ser el propietario del resultado
         if record.therapist_id != therapist.id:
+            logger.warning(
+                "Therapist tried to edit annotations without ownership",
+                extra={
+                    "user_id": therapist.id,
+                    "record_id": str(record.id),
+                    "record_therapist_id": record.therapist_id,
+                },
+            )
             return Response(
                 {'error': 'No tienes permisos para editar este resultado.'},
                 status=status.HTTP_403_FORBIDDEN
@@ -91,6 +117,15 @@ class UpdateAnalysisAnnotationsView(APIView):
         # Actualizar solo therapist_annotations
         record.therapist_annotations = updated_annotations
         record.save(update_fields=['therapist_annotations'])
+
+        logger.info(
+            "Therapist annotations updated successfully",
+            extra={
+                "user_id": therapist.id,
+                "record_id": str(record.id),
+                "visible_to_patient": updated_annotations.get('visible_to_patient', False),
+            },
+        )
 
         serializer = AnalysisRecordSerializer(record, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -138,11 +173,67 @@ class PatientMyResultsView(APIView):
 
             return Response({'results': results_data}, status=status.HTTP_200_OK)
         except Exception as e:
-            import traceback
-            print(f"Error en PatientMyResultsView: {e}")
-            print(traceback.format_exc())
+            logger.exception("Error en PatientMyResultsView.get")
             return Response(
                 {'error': f'Error interno del servidor: {str(e)}'},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
+
+class AnalysisRecordListCreateView(generics.ListCreateAPIView):
+    """
+    GET: Lista AnalysisRecords visibles para el usuario autenticado.
+    POST: Crea un nuevo AnalysisRecord (validaciones en el serializer).
+    """
+
+    serializer_class = AnalysisRecordSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        qs = AnalysisRecord.objects.all()
+
+        # Soportar GET /api/analysis-records/?patient_id={id} para terapeutas
+        patient_id = self.request.query_params.get('patient_id')
+        if patient_id:
+            profile = getattr(user, 'profile', None)
+            if not profile or profile.user_type != 'therapist':
+                # Usuario sin rol terapeuta: no ve nada en este modo
+                return AnalysisRecord.objects.none()
+
+            return qs.filter(
+                patient__id=patient_id,
+                therapist=user,
+            ).order_by('-created_at')
+
+        # Filtro general por ownership/relación
+        return qs.filter(
+            Q(created_by_user=user)
+            | Q(subject_user=user)
+            | Q(patient__therapist=user)
+            | Q(patient__user=user)
+        ).order_by('-created_at')
+
+    def perform_create(self, serializer):
+        # El serializer ya fija created_by_user y execution_mode en validate()
+        serializer.save()
+
+
+class AnalysisRecordDetailView(generics.RetrieveAPIView):
+    """
+    GET: Detalle de un AnalysisRecord concreto, validando permisos básicos.
+    """
+
+    serializer_class = AnalysisRecordSerializer
+    permission_classes = [IsAuthenticated]
+    lookup_field = 'pk'
+    queryset = AnalysisRecord.objects.all()
+
+    def get_queryset(self):
+        user = self.request.user
+        return AnalysisRecord.objects.filter(
+            Q(created_by_user=user)
+            | Q(subject_user=user)
+            | Q(patient__therapist=user)
+            | Q(patient__user=user)
+        )

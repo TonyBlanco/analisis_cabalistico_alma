@@ -22,6 +22,7 @@ export default function DashboardLayout({
   const router = useRouter();
   const [realUserRole, setRealUserRole] = useState<string | null>(null);
   const [themeRole, setThemeRole] = useState<string | null>(null);
+  const [roleLoading, setRoleLoading] = useState<boolean>(true);
 
   useEffect(() => {
     // Get real user role from backend
@@ -34,6 +35,9 @@ export default function DashboardLayout({
           setActiveRole(role);
         }
       }
+      setRoleLoading(false);
+    }).catch(() => {
+      setRoleLoading(false);
     });
   }, []);
 
@@ -98,9 +102,16 @@ export default function DashboardLayout({
           { href: '/dashboard/therapist/patients', label: 'Pacientes' },
         ];
       case 'personal':
-        // Personal: ONLY personal dashboard
+        // Personal: Complete navigation menu
         return [
-          { href: '/dashboard/personal', label: 'Panel Personal' },
+          { href: '/dashboard/personal', label: 'Exploraciones' },
+          { href: '/dashboard/personal/tests', label: 'Tests personales' },
+          { href: '/dashboard/personal/explorations', label: 'Mis exploraciones' },
+          { href: '/dashboard/resources', label: 'Recursos' },
+          { href: '/dashboard/personal/audios', label: 'Audios' },
+          { href: '/dashboard/personal/videos', label: 'Videos' },
+          { href: '/dashboard/personal/courses', label: 'Cursos' },
+          { href: '/dashboard/personal/premium', label: 'Premium' },
         ];
       case 'patient':
         // Patient: ONLY patient dashboard

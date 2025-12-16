@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { getTestResults, getTestResult } from '@/lib/test-api';
+import { useState, useEffect, useRef } from 'react';
+import { getMyResults, getAnalysisRecord, AnalysisRecord } from '@/lib/api';
 import { TestResult } from '@/lib/test-types';
 
 /**
@@ -11,46 +11,66 @@ import { TestResult } from '@/lib/test-types';
  * READ-ONLY: No editing, no regeneration, just viewing.
  */
 export default function PatientResultsSection() {
-  const [results, setResults] = useState<TestResult[]>([]);
+  const [results, setResults] = useState<AnalysisRecord[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [selectedResult, setSelectedResult] = useState<TestResult | null>(null);
+  const [selectedResult, setSelectedResult] = useState<AnalysisRecord | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [loadingDetail, setLoadingDetail] = useState(false);
+  
+  // CRITICAL: useRef to ensure fetchResults runs ONLY ONCE on mount
+  const hasFetchedRef = useRef(false);
 
   useEffect(() => {
+    // CRITICAL: Only run once on mount
+    if (hasFetchedRef.current) {
+      return;
+    }
+    hasFetchedRef.current = true;
+    
     fetchResults();
-  }, []);
+  }, []); // CRITICAL: Empty deps - run ONLY on mount
 
   const fetchResults = async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const resultsData = await getTestResults();
+      // Use GET /api/analysis-records/my-results/ endpoint
+      // getMyResults never throws - returns [] on network errors or 404
+      const resultsData = await getMyResults();
       // Sort by created_at descending (most recent first)
-      const sortedResults = resultsData.sort((a: TestResult, b: TestResult) => {
+      const sortedResults = resultsData.sort((a: AnalysisRecord, b: AnalysisRecord) => {
         return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
       });
       setResults(sortedResults);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al cargar resultados';
-      setError(errorMessage);
-      console.error('Error fetching patient results:', err);
+      // Extra safety: should never reach here since getMyResults never throws
+      console.warn('Unexpected error in fetchResults:', err);
+      setResults([]); // Set empty array instead of showing error
+      setError(null); // Don't show error - render empty state instead
     } finally {
       setLoading(false);
     }
   };
 
-  const handleViewDetails = async (result: TestResult) => {
+  const handleViewDetails = async (result: AnalysisRecord) => {
     setSelectedResult(result);
     setShowDetailModal(true);
     setLoadingDetail(true);
 
     try {
-      // Fetch full result details
-      const fullResult = await getTestResult(result.id);
-      setSelectedResult(fullResult);
+      // Fetch full result details using UUID
+      // CRITICAL: Use AnalysisRecord UUID, not numeric ID
+      const fullResult = await getAnalysisRecord(result.id);
+      
+      // Check if response is an error object
+      if (fullResult && typeof fullResult === 'object' && 'error' in fullResult && fullResult.error) {
+        console.warn('Error fetching analysis record:', (fullResult as any).message);
+        // Continue with the partial result we already have
+      } else {
+        setSelectedResult(fullResult as AnalysisRecord);
+      }
     } catch (err) {
       console.error('Error fetching result details:', err);
       // Continue with the partial result we already have

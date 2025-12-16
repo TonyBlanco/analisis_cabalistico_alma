@@ -16,6 +16,7 @@ from .views import (
     GeocodeCityView,
     CheckMembershipView,
     EmailOrUsernameAuthToken,
+    PasswordResetRequestView,
     GoogleOAuthView,
     AdminStatsView,
     AdminUsersView,
@@ -63,7 +64,8 @@ from .test_views import (
     GrantTestAccessView,
     AssignTestToPatientView,
     PatientPreviousTestsView,
-    ProcessTestSubmissionView
+    ProcessTestSubmissionView,
+    AssignedTestsView,
 )
 from .gematria_views import GematriaInterpretationView
 from .tarot_views import TarotAnalysisView
@@ -98,6 +100,7 @@ urlpatterns = [
     
     # Autenticación
     path('login/', EmailOrUsernameAuthToken.as_view(), name='api_token_auth'),
+    path('password-reset/request/', PasswordResetRequestView.as_view(), name='password_reset_request'),
     path('login/google/', GoogleOAuthView.as_view(), name='google_oauth'),
     path('register/therapist/', RegisterTherapistView.as_view(), name='register_therapist'),
     path('register/personal/', RegisterPersonalView.as_view(), name='register_personal'),
@@ -183,6 +186,7 @@ urlpatterns = [
     
     # Tests modulares (orden importante: rutas específicas primero)
     path('tests/', AvailableTestsView.as_view(), name='available_tests'),
+    path('tests/assigned/', AssignedTestsView.as_view(), name='assigned_tests'),
     path('tests/submit/', ProcessTestSubmissionView.as_view(), name='process_test_submission'),
     path('tests/execute/', ExecuteTestView.as_view(), name='execute_test'),
     path('tests/results/', TestResultsView.as_view(), name='test_results'),

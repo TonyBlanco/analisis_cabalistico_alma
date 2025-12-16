@@ -546,7 +546,10 @@ class EmailOrUsernameAuthToken(APIView):
         password = request.data.get('password')
 
         if not username_or_email or not password:
-            return Response({'detail': 'Usuario/email y contraseña son requeridos'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({
+                'error': 'validation',
+                'message': 'Usuario/email y contraseña son requeridos'
+            }, status=status.HTTP_400_BAD_REQUEST)
 
         UserModel = get_user_model()
 
@@ -556,12 +559,19 @@ class EmailOrUsernameAuthToken(APIView):
         )
 
         if not user:
-            return Response({'detail': 'Credenciales inválidas'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({
+                'error': 'user_not_found',
+                'message': 'El usuario o email no está registrado. Verifica que esté escrito correctamente.'
+            }, status=status.HTTP_400_BAD_REQUEST)
 
         user_auth = authenticate(username=user.username, password=password)
 
         if not user_auth:
-            return Response({'detail': 'Credenciales inválidas'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({
+                'error': 'invalid_password',
+                'message': 'La contraseña es incorrecta.',
+                'email': user.email
+            }, status=status.HTTP_400_BAD_REQUEST)
 
         token, _ = Token.objects.get_or_create(user=user_auth)
         
@@ -575,6 +585,53 @@ class EmailOrUsernameAuthToken(APIView):
             'username': user_auth.username,
             'role': role
         })
+
+
+class PasswordResetRequestView(APIView):
+    """Solicita reset de contraseña enviando email con token."""
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        from django.contrib.auth.tokens import default_token_generator
+        from django.utils.http import urlsafe_base64_encode
+        from django.utils.encoding import force_bytes
+        from django.conf import settings
+        from .emails import send_password_reset_email
+        
+        email = request.data.get('email')
+        
+        if not email:
+            return Response({
+                'error': 'validation',
+                'message': 'El email es requerido'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        UserModel = get_user_model()
+        
+        try:
+            user = UserModel.objects.get(email=email)
+        except UserModel.DoesNotExist:
+            # Por seguridad, siempre devolvemos éxito aunque el email no exista
+            return Response({
+                'message': 'Si el email existe, recibirás un enlace para restablecer tu contraseña.'
+            }, status=status.HTTP_200_OK)
+        
+        # Generar token de reset
+        token = default_token_generator.make_token(user)
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        
+        # Enviar email
+        try:
+            send_password_reset_email(user, token, uid)
+            return Response({
+                'message': 'Si el email existe, recibirás un enlace para restablecer tu contraseña.'
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            # Por seguridad, siempre devolvemos éxito
+            print(f"Error enviando email de reset: {e}")
+            return Response({
+                'message': 'Si el email existe, recibirás un enlace para restablecer tu contraseña.'
+            }, status=status.HTTP_200_OK)
 
 
 class CalculoCabalisticoView(APIView):

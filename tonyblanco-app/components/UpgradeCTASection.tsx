@@ -22,19 +22,19 @@ export default function UpgradeCTASection() {
           <ul className="text-sm text-gray-700 space-y-1 mb-4">
             <li className="flex items-start gap-2">
               <span className="text-blue-600 mt-1">•</span>
-              <span>Interpretación personalizada de tus análisis</span>
+              <span>Interpretación personalizada de tus exploraciones</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-blue-600 mt-1">•</span>
-              <span>Seguimiento continuo de tu proceso</span>
+              <span>Seguimiento continuo de tu crecimiento personal</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-blue-600 mt-1">•</span>
-              <span>Herramientas clínicas avanzadas</span>
+              <span>Herramientas avanzadas de autoconocimiento</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-blue-600 mt-1">•</span>
-              <span>Plan terapéutico personalizado</span>
+              <span>Guía personalizada en tu camino de crecimiento</span>
             </li>
           </ul>
         </div>

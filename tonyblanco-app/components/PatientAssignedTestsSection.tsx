@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { getAvailableTests, getTestResults, executeTest } from '@/lib/test-api';
+import { getAssignedTests } from '@/lib/api';
+import { getTestResults, executeTest } from '@/lib/test-api';
 import { TestModule, ExecuteTestRequest } from '@/lib/test-types';
 
 /**
@@ -21,30 +22,31 @@ export default function PatientAssignedTestsSection() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [executingTestCode, setExecutingTestCode] = useState<string | null>(null);
+  
+  // CRITICAL: useRef to ensure fetchAssignedTests runs ONLY ONCE on mount
+  const hasFetchedRef = useRef(false);
 
   useEffect(() => {
+    // CRITICAL: Only run once on mount
+    if (hasFetchedRef.current) {
+      return;
+    }
+    hasFetchedRef.current = true;
+    
     fetchAssignedTests();
-  }, []);
+  }, []); // CRITICAL: Empty deps - run ONLY on mount
 
   const fetchAssignedTests = async () => {
     setLoading(true);
     setError(null);
 
     try {
-      // Fetch available tests (includes user_access info)
-      const response = await getAvailableTests();
-      const allTests = response.tests || [];
+      // Use GET /api/tests/assigned/ endpoint
+      // getAssignedTests never throws - returns [] on network errors or 404
+      const assigned = await getAssignedTests();
+      setAssignedTests(assigned as TestModule[]);
 
-      // Filter: Only patient_self tests that are assigned (has_special_access)
-      const assigned = allTests.filter((test: TestModule) => {
-        const isAssigned = test.user_access?.has_special_access === true;
-        const isPatientSelf = test.available_for_personal === true;
-        return isAssigned && isPatientSelf;
-      });
-
-      setAssignedTests(assigned);
-
-      // Fetch completed results to determine status
+      // Fetch completed results to determine status (optional - don't break if fails)
       try {
         const results = await getTestResults();
         const completedIds = new Set(
@@ -52,13 +54,14 @@ export default function PatientAssignedTestsSection() {
         );
         setCompletedTestIds(completedIds);
       } catch (err) {
-        console.warn('Error fetching results for status check:', err);
-        // Continue without status info
+        console.warn('Error fetching results for status check (non-critical):', err);
+        // Continue without status info - don't break render
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al cargar tests asignados';
-      setError(errorMessage);
-      console.error('Error fetching assigned tests:', err);
+      // Extra safety: should never reach here since getAssignedTests never throws
+      console.warn('Unexpected error in fetchAssignedTests:', err);
+      setAssignedTests([]); // Set empty array instead of showing error
+      setError(null); // Don't show error - render empty state instead
     } finally {
       setLoading(false);
     }

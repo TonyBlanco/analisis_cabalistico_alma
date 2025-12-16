@@ -405,6 +405,89 @@ def send_welcome_email(user_profile: UserProfile):
         return False
 
 
+def send_password_reset_email(user, token: str, uid: str):
+    """Enviar email de recuperación de contraseña"""
+    from django.conf import settings
+    from django.utils.http import urlsafe_base64_decode
+    from django.utils.encoding import force_str
+    
+    subject = '🔐 Restablecer tu contraseña'
+    
+    # Construir URL de reset (el frontend debe tener una ruta /reset-password?token=...&uid=...)
+    frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:3000')
+    reset_url = f"{frontend_url}/reset-password?token={token}&uid={uid}"
+    
+    html_message = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body {{ font-family: 'Arial', sans-serif; background-color: #0A0A1F; color: #ffffff; }}
+            .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+            .header {{ text-align: center; padding: 30px 0; }}
+            .header h1 {{ color: #D4AF37; font-size: 32px; margin: 0; }}
+            .content {{ background-color: #1a1a2e; border-radius: 12px; padding: 30px; margin: 20px 0; }}
+            .button {{ display: inline-block; padding: 15px 30px; background-color: #D4AF37; color: #000; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0; }}
+            .footer {{ text-align: center; padding: 20px; color: #666; font-size: 12px; }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <div style="font-size: 48px;">🔐</div>
+                <h1>Restablecer Contraseña</h1>
+            </div>
+            
+            <div class="content">
+                <p>Hola {user.username},</p>
+                <p>Hemos recibido una solicitud para restablecer la contraseña de tu cuenta.</p>
+                <p>Haz clic en el botón siguiente para crear una nueva contraseña:</p>
+                <p style="text-align:center;"><a class="button" href="{reset_url}" target="_blank">Restablecer Contraseña</a></p>
+                <p>O copia y pega este enlace en tu navegador:</p>
+                <p style="word-break: break-all; color: #D4AF37;">{reset_url}</p>
+                <p><strong>Este enlace expirará en 24 horas.</strong></p>
+                <p>Si no solicitaste este cambio, puedes ignorar este email. Tu contraseña permanecerá sin cambios.</p>
+            </div>
+            
+            <div class="footer">
+                <p>Este es un email automático, por favor no respondas a este mensaje.</p>
+                <p>Si tienes preguntas, contáctanos en info@tonyblanco.com</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    
+    plain_message = f"""
+    Restablecer Contraseña
+    
+    Hola {user.username},
+    
+    Hemos recibido una solicitud para restablecer la contraseña de tu cuenta.
+    
+    Usa este enlace para crear una nueva contraseña:
+    {reset_url}
+    
+    Este enlace expirará en 24 horas.
+    
+    Si no solicitaste este cambio, puedes ignorar este email.
+    """
+    
+    try:
+        email = EmailMultiAlternatives(
+            subject=subject,
+            body=plain_message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[user.email]
+        )
+        email.attach_alternative(html_message, "text/html")
+        email.send()
+        return True
+    except Exception as e:
+        print(f"Error enviando email de reset: {e}")
+        return False
+
+
 def send_birthdata_unlock_email(user_profile: UserProfile, token: str):
     """Enviar link de desbloqueo para birth_data"""
     subject = '🔓 Solicitud: Desbloquear datos de nacimiento'

@@ -6,7 +6,8 @@ import { fetchSession } from '@/lib/session';
 import { getUserRole } from '@/lib/getUserRole';
 import { useRoleGuard } from '@/lib/role-guards';
 import { getAvailableTests } from '@/lib/test-api';
-import PersonalTestsSection from '@/components/PersonalTestsSection';
+import PersonalExplorationsSection from '@/components/PersonalExplorationsSection';
+import PersonalResultsSection from '@/components/PersonalResultsSection';
 import UpgradeCTASection from '@/components/UpgradeCTASection';
 
 export default function PersonalDashboard() {
@@ -117,10 +118,13 @@ export default function PersonalDashboard() {
         </div>
       </div>
 
-      {/* Section 2: Personal Tests */}
-      <PersonalTestsSection />
+      {/* Section 2: Available Explorations */}
+      <PersonalExplorationsSection />
 
-      {/* Section 3: Upgrade CTA */}
+      {/* Section 3: My Explorations (Results) */}
+      <PersonalResultsSection />
+
+      {/* Section 4: Upgrade CTA */}
       <UpgradeCTASection />
     </div>
   );

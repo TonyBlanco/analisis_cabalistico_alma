@@ -878,6 +878,57 @@ class GrantTestAccessView(APIView):
         })
 
 
+class AssignedTestsView(APIView):
+    """
+    Endpoint para pacientes: retorna tests asignados por su terapeuta.
+    
+    GET /api/tests/assigned/
+    - Solo para rol 'patient'
+    - Retorna SOLO tests con has_special_access=True para el usuario autenticado
+    - Solo tests patient_self (available_for_personal=True)
+    - Ownership forzado en backend (solo tests del usuario autenticado)
+    - Retorna [] si no hay tests asignados (200 OK)
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        user = request.user
+        profile = user.profile
+        
+        # SECURITY: Solo pacientes pueden acceder
+        if profile.user_type != 'patient':
+            return Response(
+                {
+                    'error': 'No autorizado',
+                    'message': 'Este endpoint solo está disponible para pacientes'
+                },
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        # Obtener tests asignados: UserTestAccess con has_special_access=True
+        # y que sean patient_self (available_for_personal=True)
+        assigned_accesses = UserTestAccess.objects.filter(
+            user=user,
+            has_special_access=True,
+            test_module__is_active=True,
+            test_module__available_for_personal=True
+        ).select_related('test_module')
+        
+        # Convertir a lista de TestModule
+        assigned_tests = [access.test_module for access in assigned_accesses]
+        
+        # Serializar usando el mismo serializer que AvailableTestsView
+        serializer = TestModuleSerializer(
+            assigned_tests,
+            many=True,
+            context={'request': request}
+        )
+        
+        return Response({
+            'tests': serializer.data
+        })
+
+
 class AssignTestToPatientView(APIView):
     """
     Permite a terapeutas asignar tests patient_self a sus propios pacientes.

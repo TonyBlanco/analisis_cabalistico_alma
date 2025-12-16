@@ -2,9 +2,11 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { login, getCurrentUser } from '@/lib/api';
+import { login, getCurrentUser, requestPasswordReset } from '@/lib/api';
 import { setAuthToken } from '@/lib/auth';
 import { getUserRole } from '@/lib/getUserRole';
+
+type ErrorType = 'user_not_found' | 'invalid_password' | 'validation' | 'other';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -12,6 +14,11 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errorType, setErrorType] = useState<ErrorType | null>(null);
+  const [showResetForm, setShowResetForm] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,10 +49,30 @@ export default function LoginPage() {
       } else {
         router.push('/dashboard');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Login error:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Error al iniciar sesión. Verifica tus credenciales.';
-      setError(errorMessage);
+      
+      // Check for structured error from backend
+      const errorData = err?.errorData || {};
+      const backendError = errorData.error;
+      const backendMessage = errorData.message || err.message || 'Error al iniciar sesión. Verifica tus credenciales.';
+      
+      setError(backendMessage);
+      
+      if (backendError === 'user_not_found') {
+        setErrorType('user_not_found');
+      } else if (backendError === 'invalid_password') {
+        setErrorType('invalid_password');
+        // Show reset form and prefill email
+        const userEmail = errorData.email || email;
+        setResetEmail(userEmail);
+        setShowResetForm(true);
+      } else if (backendError === 'validation') {
+        setErrorType('validation');
+      } else {
+        setErrorType('other');
+      }
+      
       setLoading(false);
     }
   };
@@ -84,8 +111,59 @@ export default function LoginPage() {
             />
           </div>
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
+            <div className={`px-4 py-3 rounded-md text-sm ${
+              errorType === 'user_not_found' 
+                ? 'bg-yellow-50 border border-yellow-200 text-yellow-800'
+                : errorType === 'invalid_password'
+                ? 'bg-orange-50 border border-orange-200 text-orange-800'
+                : 'bg-red-50 border border-red-200 text-red-700'
+            }`}>
               {error}
+            </div>
+          )}
+          
+          {showResetForm && !resetSent && (
+            <div className="bg-blue-50 border border-blue-200 rounded-md p-4 space-y-3">
+              <p className="text-sm text-blue-800 font-medium">
+                ¿Olvidaste tu contraseña?
+              </p>
+              <div>
+                <label htmlFor="reset-email" className="block text-sm font-medium text-blue-700 mb-2">
+                  Email
+                </label>
+                <input
+                  id="reset-email"
+                  type="email"
+                  value={resetEmail}
+                  onChange={(e) => setResetEmail(e.target.value)}
+                  className="w-full px-4 py-2 bg-white border border-blue-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-colors"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={async () => {
+                  setResetLoading(true);
+                  try {
+                    await requestPasswordReset(resetEmail);
+                    setResetSent(true);
+                  } catch (err) {
+                    console.error('Reset error:', err);
+                    setError('Error al enviar el enlace de recuperación. Intenta de nuevo.');
+                  } finally {
+                    setResetLoading(false);
+                  }
+                }}
+                disabled={resetLoading || !resetEmail}
+                className="w-full px-4 py-2 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+              >
+                {resetLoading ? 'Enviando...' : 'Enviar enlace de recuperación'}
+              </button>
+            </div>
+          )}
+          
+          {resetSent && (
+            <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-md text-sm">
+              Si el email existe, recibirás un enlace para restablecer tu contraseña.
             </div>
           )}
           <button

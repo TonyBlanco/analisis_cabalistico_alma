@@ -152,11 +152,19 @@ export const removeAuthToken = (): void => {
   }
 };
 
-// Generic fetch wrapper with auth
+// Error response type for network failures
+export interface ApiErrorResponse {
+  error: true;
+  message: string;
+  status?: number;
+  networkError: boolean;
+}
+
+// Generic fetch wrapper with auth - NEVER throws on network errors
 async function apiRequest<T>(
   endpoint: string,
   options: RequestInit = {}
-): Promise<T> {
+): Promise<T | ApiErrorResponse> {
   const token = getAuthToken();
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -183,19 +191,33 @@ async function apiRequest<T>(
         message: `Error ${response.status}: No se pudo conectar con el servidor` 
       }));
       const errorMsg = error.message || error.error || error.detail || `Error: ${response.status}`;
-      console.error('API Error:', errorMsg);
-      throw new Error(errorMsg);
+      console.error('API Error:', error);
+      
+      // Return error object instead of throwing
+      return {
+        error: true,
+        message: errorMsg,
+        status: response.status,
+        networkError: false,
+      } as ApiErrorResponse;
     }
 
     return response.json();
   } catch (err: any) {
-    // Network errors (CORS, timeout, etc.)
-    if (err.message === 'Failed to fetch' || err.name === 'TypeError') {
-      const errorMsg = `No se pudo conectar con el servidor. Por favor verifica:\n- Tu conexión a internet\n- Que el backend esté activo: ${API_URL}`;
-      console.error('Network Error:', errorMsg);
-      throw new Error(errorMsg);
-    }
-    throw err;
+    // Network errors (CORS, timeout, etc.) - NEVER throw, return error object
+    const isNetworkError = err.message === 'Failed to fetch' || err.name === 'TypeError' || !err.response;
+    const errorMsg = isNetworkError
+      ? `No se pudo conectar con el servidor. Verifica tu conexión o que el backend esté activo.`
+      : (err.message || 'Error desconocido');
+    
+    console.error('Network Error:', errorMsg);
+    
+    // Return error object instead of throwing
+    return {
+      error: true,
+      message: errorMsg,
+      networkError: true,
+    } as ApiErrorResponse;
   }
 }
 
@@ -239,8 +261,15 @@ export const login = async (username: string, password: string): Promise<LoginRe
   });
 };
 
-export const getCurrentUser = async (): Promise<User> => {
+export const getCurrentUser = async (): Promise<User | ApiErrorResponse> => {
   return apiRequest<User>('/me/');
+};
+
+export const requestPasswordReset = async (email: string): Promise<{ message: string }> => {
+  return apiRequest<{ message: string }>('/password-reset/request/', {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  });
 };
 
 // ========== SERVICES API ==========
@@ -270,6 +299,84 @@ export const getService = async (slug: string): Promise<Service> => {
 export const getTests = async (): Promise<Test[]> => {
   const response = await apiRequest<{ tests: Test[] }>('/tests/');
   return response.tests;
+};
+
+// ========== PATIENT API ==========
+
+export interface AssignedTest {
+  id: number;
+  code: string;
+  name: string;
+  description?: string;
+  test_type?: string;
+  available_for_personal?: boolean;
+  [key: string]: any;
+}
+
+export const getAssignedTests = async (): Promise<AssignedTest[]> => {
+  const response = await apiRequest<{ tests: AssignedTest[] } | AssignedTest[]>('/tests/assigned/');
+  
+  // Check if response is an error object
+  if (response && typeof response === 'object' && 'error' in response && response.error) {
+    console.warn('getAssignedTests error:', (response as ApiErrorResponse).message);
+    return []; // Return empty array on error (404, network failure, etc.)
+  }
+  
+  // Handle both response formats: { tests: [...] } or [...]
+  if (Array.isArray(response)) {
+    return response;
+  }
+  if (response && typeof response === 'object' && 'tests' in response) {
+    return (response as { tests: AssignedTest[] }).tests || [];
+  }
+  return [];
+};
+
+export interface AnalysisRecord {
+  id: string; // UUID, not numeric ID
+  test_module?: {
+    id: number;
+    code: string;
+    name: string;
+    description?: string;
+    test_type?: string;
+  };
+  test_module_name?: string;
+  created_at: string;
+  result_data?: any;
+  input_data?: any;
+  notes?: string;
+  visible_to_patient?: boolean;
+  therapist_notes?: string;
+  is_favorite?: boolean;
+  [key: string]: any;
+}
+
+export const getMyResults = async (): Promise<AnalysisRecord[]> => {
+  const response = await apiRequest<{ results: AnalysisRecord[] } | AnalysisRecord[]>('/analysis-records/my-results/');
+  
+  // Check if response is an error object
+  if (response && typeof response === 'object' && 'error' in response && response.error) {
+    console.warn('getMyResults error:', (response as ApiErrorResponse).message);
+    return []; // Return empty array on error (404, network failure, etc.)
+  }
+  
+  // Handle both response formats: { results: [...] } or [...]
+  if (Array.isArray(response)) {
+    return response;
+  }
+  if (response && typeof response === 'object' && 'results' in response) {
+    return (response as { results: AnalysisRecord[] }).results || [];
+  }
+  return [];
+};
+
+/**
+ * Get a specific AnalysisRecord by UUID
+ * Uses GET /api/analysis-records/<uuid>/
+ */
+export const getAnalysisRecord = async (uuid: string): Promise<AnalysisRecord | ApiErrorResponse> => {
+  return apiRequest<AnalysisRecord>(`/analysis-records/${uuid}/`);
 };
 
 // ========== BOOKINGS API ==========

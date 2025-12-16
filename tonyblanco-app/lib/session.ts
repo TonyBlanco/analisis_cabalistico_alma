@@ -96,10 +96,12 @@ export async function fetchSession(): Promise<SessionResponse> {
     return { isAuthenticated: false, user: null };
   } catch (error) {
     // Network errors, etc.
-    // IMPORTANT: If we have a token, this is a REAL network error - don't bypass!
-    console.error('❌ Session fetch error (network):', error);
+    // NEVER throw - always return safe response
+    console.warn('⚠️ Session fetch error (network):', error);
     
-    // Only use bypass if NO token was provided (already handled above)
+    // Return safe response - don't break render
+    // If we have a token but network fails, assume session might still be valid
+    // Let components handle the "not authenticated" state gracefully
     return { isAuthenticated: false, user: null };
   }
 }

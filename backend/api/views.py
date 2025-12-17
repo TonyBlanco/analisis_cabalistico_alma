@@ -132,7 +132,11 @@ class RegisterPersonalView(APIView):
 
 
 class CurrentUserView(APIView):
-    """Obtener información del usuario actual"""
+    """
+    Obtener información del usuario actual.
+    
+    CORE RULE: Si hay ciudad/país pero no coordenadas, se intenta resolver automáticamente.
+    """
     permission_classes = [IsAuthenticated]
     
     def get(self, request):
@@ -147,6 +151,28 @@ class CurrentUserView(APIView):
         # Agregar datos del perfil si existe
         if hasattr(request.user, 'profile'):
             profile = request.user.profile
+            
+            # Obtener datos de ubicación
+            birth_city = getattr(profile, 'birth_city', None)
+            birth_country = getattr(profile, 'birth_country', None)
+            birth_lat = getattr(profile, 'birth_latitude', None)
+            birth_lng = getattr(profile, 'birth_longitude', None)
+            birth_timezone = getattr(profile, 'birth_timezone', None)
+            
+            # CORE RULE: Si hay ciudad/país pero no coordenadas, intentar resolver
+            if (birth_city or birth_country) and (birth_lat is None or birth_lng is None):
+                from .geocoding_utils import geocode_city
+                geo_result = geocode_city(birth_city, birth_country)
+                if geo_result:
+                    birth_lat = geo_result['latitude']
+                    birth_lng = geo_result['longitude']
+                    birth_timezone = geo_result.get('timezone', birth_timezone)
+                    # Actualizar el perfil con las coordenadas resueltas
+                    profile.birth_latitude = birth_lat
+                    profile.birth_longitude = birth_lng
+                    profile.birth_timezone = birth_timezone or ''
+                    profile.save(update_fields=['birth_latitude', 'birth_longitude', 'birth_timezone'])
+            
             user_data.update({
                 'full_name': getattr(profile, 'full_name', None),
                 'legal_full_name': getattr(profile, 'legal_full_name', None) or getattr(profile, 'full_name', None),
@@ -175,17 +201,13 @@ class CurrentUserView(APIView):
                     str(getattr(profile, 'birth_time', None))
                     if getattr(profile, 'birth_time', None) else None
                 ),
-                'birth_city': getattr(profile, 'birth_city', None),
-                'birth_country': getattr(profile, 'birth_country', None),
-                'birth_latitude': (
-                    float(getattr(profile, 'birth_latitude', None))
-                    if getattr(profile, 'birth_latitude', None) is not None else None
-                ),
-                'birth_longitude': (
-                    float(getattr(profile, 'birth_longitude', None))
-                    if getattr(profile, 'birth_longitude', None) is not None else None
-                ),
-                'birth_timezone': getattr(profile, 'birth_timezone', None),
+                'birth_city': birth_city,
+                'birth_country': birth_country,
+                'birth_latitude': float(birth_lat) if birth_lat is not None else None,
+                'birth_longitude': float(birth_lng) if birth_lng is not None else None,
+                'birth_timezone': birth_timezone,
+                # Validación de completitud de coordenadas
+                'coordinates_valid': birth_lat is not None and birth_lng is not None,
             })
             
             # Si es paciente, incluir patient_id y referencia al therapist
@@ -205,41 +227,67 @@ class CurrentUserView(APIView):
             # Incluir datos extendidos si existe el modelo UserBirthData
             try:
                 bd = request.user.birth_data
+                
+                # CORE RULE: Sincronizar coordenadas a birth_data si faltan
+                bd_lat = bd.birth_latitude
+                bd_lng = bd.birth_longitude
+                bd_city = bd.birth_city
+                bd_country = bd.birth_country
+                
+                if (bd_city or bd_country) and (bd_lat is None or bd_lng is None):
+                    from .geocoding_utils import geocode_city
+                    geo_result = geocode_city(bd_city, bd_country)
+                    if geo_result:
+                        bd_lat = geo_result['latitude']
+                        bd_lng = geo_result['longitude']
+                        bd.birth_latitude = bd_lat
+                        bd.birth_longitude = bd_lng
+                        bd.save(update_fields=['birth_latitude', 'birth_longitude'])
+                
                 user_data['birth_data'] = {
                     'full_name': bd.full_name,
                     'birth_date': str(bd.birth_date),
                     'birth_time': str(bd.birth_time) if bd.birth_time else None,
-                    'birth_city': bd.birth_city,
-                    'birth_country': bd.birth_country,
-                    'birth_latitude': float(bd.birth_latitude) if bd.birth_latitude else None,
-                    'birth_longitude': float(bd.birth_longitude) if bd.birth_longitude else None,
+                    'birth_city': bd_city,
+                    'birth_country': bd_country,
+                    'birth_latitude': float(bd_lat) if bd_lat else None,
+                    'birth_longitude': float(bd_lng) if bd_lng else None,
                     'birth_place_label': bd.birth_place_label,
                     'is_locked': bd.is_locked,
                     'full_name_change_count': bd.full_name_change_count,
-                    'full_name_locked': bd.full_name_locked
+                    'full_name_locked': bd.full_name_locked,
+                    'coordinates_valid': bd_lat is not None and bd_lng is not None,
                 }
                 # Sincronizar suavemente ciertos campos de perfil si faltan
+                sync_needed = False
                 if not profile.birth_date and bd.birth_date:
                     profile.birth_date = bd.birth_date
-                if not profile.birth_city and bd.birth_city:
-                    profile.birth_city = bd.birth_city
-                if not profile.birth_country and bd.birth_country:
-                    profile.birth_country = bd.birth_country
-                if profile.birth_latitude is None and bd.birth_latitude is not None:
-                    profile.birth_latitude = bd.birth_latitude
-                if profile.birth_longitude is None and bd.birth_longitude is not None:
-                    profile.birth_longitude = bd.birth_longitude
+                    sync_needed = True
+                if not profile.birth_city and bd_city:
+                    profile.birth_city = bd_city
+                    sync_needed = True
+                if not profile.birth_country and bd_country:
+                    profile.birth_country = bd_country
+                    sync_needed = True
+                if profile.birth_latitude is None and bd_lat is not None:
+                    profile.birth_latitude = bd_lat
+                    sync_needed = True
+                if profile.birth_longitude is None and bd_lng is not None:
+                    profile.birth_longitude = bd_lng
+                    sync_needed = True
                 if not profile.legal_full_name and bd.full_name:
                     profile.legal_full_name = bd.full_name
-                # No forzamos timezone aquí: lo gestiona geocoding/birth_data directamente
-                profile.save(update_fields=[
-                    'birth_date',
-                    'birth_city',
-                    'birth_country',
-                    'birth_latitude',
-                    'birth_longitude',
-                    'legal_full_name',
-                ])
+                    sync_needed = True
+                    
+                if sync_needed:
+                    profile.save(update_fields=[
+                        'birth_date',
+                        'birth_city',
+                        'birth_country',
+                        'birth_latitude',
+                        'birth_longitude',
+                        'legal_full_name',
+                    ])
             except Exception:
                 pass
         
@@ -333,7 +381,12 @@ class UserProfileConsentView(APIView):
 
 
 class UpdateProfileView(APIView):
-    """Actualizar información del perfil del usuario"""
+    """
+    Actualizar información del perfil del usuario.
+    
+    CORE RULE: Si se actualiza birth_city o birth_country, SE RESUELVEN coordenadas automáticamente.
+    Perfiles con ciudad/país pero sin coordenadas son INVÁLIDOS y serán rechazados.
+    """
     permission_classes = [IsAuthenticated]
     
     def patch(self, request):
@@ -378,15 +431,71 @@ class UpdateProfileView(APIView):
                     profile_fields_changed = True
                 except (ValueError, TypeError) as e:
                     pass  # Skip if date format is invalid
-            if 'birth_city' in request.data:
-                profile.birth_city = request.data['birth_city']
-                profile_fields_changed = True
-            if 'birth_country' in request.data:
-                profile.birth_country = request.data['birth_country']
-                profile_fields_changed = True
             if 'birth_time' in request.data:
                 profile.birth_time = request.data['birth_time'] or None
                 profile_fields_changed = True
+            
+            # === GEO-RESOLUTION CORE LOGIC ===
+            # Si se actualiza birth_city o birth_country, resolver coordenadas
+            # force_geocode=true permite forzar re-geocodificación aunque la ciudad no cambie
+            new_city = request.data.get('birth_city')
+            new_country = request.data.get('birth_country')
+            force_geocode = request.data.get('force_geocode', False)
+            city_changing = new_city is not None and new_city != (profile.birth_city or "")
+            country_changing = new_country is not None and new_country != (profile.birth_country or "")
+            location_changing = city_changing or country_changing or force_geocode
+            
+            if location_changing:
+                final_city = new_city if new_city is not None else profile.birth_city
+                final_country = new_country if new_country is not None else profile.birth_country
+                
+                if final_city or final_country:
+                    # Verificar si el usuario proporcionó coordenadas manualmente
+                    manual_lat = request.data.get('birth_latitude')
+                    manual_lng = request.data.get('birth_longitude')
+                    
+                    if manual_lat is None or manual_lng is None:
+                        # Resolver coordenadas automáticamente
+                        from .geocoding_utils import geocode_city, GeoResolutionError
+                        
+                        geo_result = geocode_city(final_city, final_country)
+                        
+                        if geo_result:
+                            profile.birth_city = geo_result.get('city', final_city)
+                            profile.birth_country = geo_result.get('country', final_country)
+                            profile.birth_latitude = geo_result['latitude']
+                            profile.birth_longitude = geo_result['longitude']
+                            profile.birth_timezone = geo_result['timezone']
+                            profile_fields_changed = True
+                        else:
+                            # FALLO DE RESOLUCIÓN - error crítico
+                            location_str = f"{final_city}, {final_country}" if final_country else final_city
+                            return Response({
+                                'error': 'Error de geo-resolución',
+                                'message': f"No se pudieron resolver las coordenadas para: {location_str}. "
+                                           f"Verifica que el nombre de la ciudad y país sean correctos."
+                            }, status=status.HTTP_400_BAD_REQUEST)
+                    else:
+                        # Usar coordenadas manuales
+                        profile.birth_city = final_city
+                        profile.birth_country = final_country
+                        profile.birth_latitude = float(manual_lat)
+                        profile.birth_longitude = float(manual_lng)
+                        if 'birth_timezone' in request.data:
+                            profile.birth_timezone = request.data['birth_timezone']
+                        profile_fields_changed = True
+                else:
+                    # Ciudad/país vacíos - limpiar coordenadas también
+                    profile.birth_city = ""
+                    profile.birth_country = ""
+                    profile.birth_latitude = None
+                    profile.birth_longitude = None
+                    profile.birth_timezone = ""
+                    profile_fields_changed = True
+            elif 'birth_city' in request.data or 'birth_country' in request.data:
+                # Se enviaron pero no cambiaron - mantener valores existentes
+                pass
+            
             profile.save()
             
             # Handle full_name changes with validation
@@ -412,7 +521,6 @@ class UpdateProfileView(APIView):
                         # Sincronizar contador en UserProfile
                         profile.name_change_count = birth_data.full_name_change_count
                         profile.save(update_fields=['name_change_count'])
-                        # Log audit event (could use a logging system here)
                         return Response(
                             {
                                 'error': 'Cambios de nombre bloqueados',
@@ -425,7 +533,6 @@ class UpdateProfileView(APIView):
                     birth_data.full_name_change_count += 1
                     profile.name_change_count = birth_data.full_name_change_count
                     profile_fields_changed = True
-                    # Log audit event (could use a logging system here)
             
             # Update birth data if provided and exists
             # Also create birth_data if it doesn't exist but birth_city/country are provided
@@ -443,22 +550,17 @@ class UpdateProfileView(APIView):
                         pass  # If creation fails, continue without birth_data
             
             if birth_data and not birth_data.is_locked:
-                if 'birth_city' in request.data:
-                    birth_data.birth_city = request.data['birth_city']
-                if 'birth_country' in request.data:
-                    birth_data.birth_country = request.data['birth_country']
+                # Sincronizar datos geo-resueltos a birth_data
+                if profile.birth_city:
+                    birth_data.birth_city = profile.birth_city
+                if profile.birth_country:
+                    birth_data.birth_country = profile.birth_country
+                if profile.birth_latitude is not None:
+                    birth_data.birth_latitude = profile.birth_latitude
+                if profile.birth_longitude is not None:
+                    birth_data.birth_longitude = profile.birth_longitude
                 if 'birth_time' in request.data:
                     birth_data.birth_time = request.data['birth_time']
-                if 'birth_latitude' in request.data:
-                    try:
-                        birth_data.birth_latitude = float(request.data['birth_latitude'])
-                    except (ValueError, TypeError):
-                        pass
-                if 'birth_longitude' in request.data:
-                    try:
-                        birth_data.birth_longitude = float(request.data['birth_longitude'])
-                    except (ValueError, TypeError):
-                        pass
                 if 'birth_place_label' in request.data:
                     birth_data.birth_place_label = request.data['birth_place_label']
                 if 'full_name' in request.data and not birth_data.full_name_locked:
@@ -496,6 +598,9 @@ class UpdateProfileView(APIView):
                     'birth_date',
                     'birth_city',
                     'birth_country',
+                    'birth_latitude',
+                    'birth_longitude',
+                    'birth_timezone',
                     'birth_time',
                     'name_change_count',
                     'consent_accepted_at',
@@ -504,7 +609,14 @@ class UpdateProfileView(APIView):
             
             return Response({
                 'success': True,
-                'message': 'Perfil actualizado correctamente'
+                'message': 'Perfil actualizado correctamente',
+                'profile': {
+                    'birth_city': profile.birth_city,
+                    'birth_country': profile.birth_country,
+                    'birth_latitude': float(profile.birth_latitude) if profile.birth_latitude else None,
+                    'birth_longitude': float(profile.birth_longitude) if profile.birth_longitude else None,
+                    'birth_timezone': profile.birth_timezone,
+                }
             })
             
         except Exception as e:
@@ -556,41 +668,77 @@ class CheckMembershipView(APIView):
 
 
 class EmailOrUsernameAuthToken(APIView):
-    """Permite login con username o email y devuelve un token."""
+    """
+    Permite login con username o email y devuelve un token.
+    
+    Respuestas de error específicas:
+    - error: 'validation' - Campos requeridos faltantes
+    - error: 'user_not_found' - Usuario/email no existe
+    - error: 'invalid_password' - Contraseña incorrecta
+    - error: 'account_inactive' - Cuenta desactivada
+    """
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
         username_or_email = request.data.get('username') or request.data.get('email')
         password = request.data.get('password')
 
+        # Validación de campos requeridos
         if not username_or_email or not password:
-            return Response({'detail': 'Usuario/email y contraseña son requeridos'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({
+                'error': 'validation',
+                'message': 'Usuario/email y contraseña son requeridos',
+                'detail': 'Usuario/email y contraseña son requeridos'
+            }, status=status.HTTP_400_BAD_REQUEST)
 
         UserModel = get_user_model()
 
+        # Buscar usuario por username o email
         user = (
-            UserModel.objects.filter(username=username_or_email).first()
-            or UserModel.objects.filter(email=username_or_email).first()
+            UserModel.objects.filter(username__iexact=username_or_email).first()
+            or UserModel.objects.filter(email__iexact=username_or_email).first()
         )
 
+        # Usuario no encontrado
         if not user:
-            return Response({'detail': 'Credenciales inválidas'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({
+                'error': 'user_not_found',
+                'message': 'No existe una cuenta con ese usuario o email',
+                'detail': 'No existe una cuenta con ese usuario o email'
+            }, status=status.HTTP_404_NOT_FOUND)
 
+        # Verificar si la cuenta está activa
+        if not user.is_active:
+            return Response({
+                'error': 'account_inactive',
+                'message': 'Esta cuenta ha sido desactivada. Contacta soporte.',
+                'detail': 'Esta cuenta ha sido desactivada'
+            }, status=status.HTTP_403_FORBIDDEN)
+
+        # Autenticar con contraseña
         user_auth = authenticate(username=user.username, password=password)
 
+        # Contraseña incorrecta
         if not user_auth:
-            return Response({'detail': 'Credenciales inválidas'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({
+                'error': 'invalid_password',
+                'message': 'La contraseña es incorrecta',
+                'detail': 'La contraseña es incorrecta',
+                'email': user.email  # Para facilitar recuperación
+            }, status=status.HTTP_401_UNAUTHORIZED)
 
+        # Login exitoso - generar token
         token, _ = Token.objects.get_or_create(user=user_auth)
-        
+
         # Obtener el perfil del usuario para determinar el role
         role = 'visitor'  # Por defecto
         if hasattr(user_auth, 'profile'):
             role = user_auth.profile.user_type
-        
+
         return Response({
             'token': token.key,
             'username': user_auth.username,
+            'email': user_auth.email,
             'role': role
         })
 
@@ -790,7 +938,12 @@ class GeocodeCityView(APIView):
 
 
 class BirthDataView(APIView):
-    """Obtener o actualizar los datos de nacimiento del usuario"""
+    """
+    Obtener o actualizar los datos de nacimiento del usuario.
+    
+    CORE RULE: Si se actualiza birth_city o birth_country, SE RESUELVEN coordenadas automáticamente.
+    La actualización FALLARÁ si las coordenadas no pueden ser resueltas.
+    """
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -804,34 +957,13 @@ class BirthDataView(APIView):
     def post(self, request):
         # Crear o actualizar
         try:
-            data = request.data
+            data = request.data.copy()  # Copia mutable
             bd, created = UserBirthData.objects.get_or_create(user=request.user,
                 defaults={
                     'full_name': data.get('full_name', request.user.profile.full_name if hasattr(request.user,'profile') else ''),
                     'birth_date': data.get('birth_date')
                 }
             )
-            
-            # Si se proporciona ciudad, geocodificar automáticamente
-            if 'birth_city' in data and data['birth_city']:
-                city = data.get('birth_city', '')
-                country = data.get('birth_country', '')
-                
-                # Solo geocodificar si no se proporcionaron coordenadas manualmente
-                if not data.get('birth_latitude') or not data.get('birth_longitude'):
-                    try:
-                        from .geocoding_utils import geocode_city
-                        geo_result = geocode_city(city, country)
-                        
-                        if geo_result:
-                            data['birth_latitude'] = geo_result['latitude']
-                            data['birth_longitude'] = geo_result['longitude']
-                            # Actualizar país si se detectó
-                            if not country and geo_result.get('country'):
-                                data['birth_country'] = geo_result['country']
-                    except Exception as geo_error:
-                        print(f"⚠️ Error en geocodificación automática: {geo_error}")
-                        # Continuar sin coordenadas si falla
             
             if (not created) and bd.is_locked and not request.user.is_staff:
                 from rest_framework.exceptions import PermissionDenied
@@ -844,10 +976,69 @@ class BirthDataView(APIView):
                     from rest_framework.exceptions import PermissionDenied
                     raise PermissionDenied('No puedes desbloquear tus datos vía este endpoint. Usa la verificación por email o pago.')
 
+            # === GEO-RESOLUTION CORE LOGIC ===
+            new_city = data.get('birth_city')
+            new_country = data.get('birth_country')
+            city_changing = new_city is not None and new_city != (bd.birth_city or "")
+            country_changing = new_country is not None and new_country != (bd.birth_country or "")
+            location_changing = city_changing or country_changing
+            
+            if location_changing or (new_city and (not bd.birth_latitude or not bd.birth_longitude)):
+                final_city = new_city if new_city is not None else bd.birth_city
+                final_country = new_country if new_country is not None else bd.birth_country
+                
+                if final_city or final_country:
+                    # Verificar si el usuario proporcionó coordenadas manualmente
+                    manual_lat = data.get('birth_latitude')
+                    manual_lng = data.get('birth_longitude')
+                    
+                    if manual_lat is None or manual_lng is None:
+                        # Resolver coordenadas automáticamente
+                        from .geocoding_utils import geocode_city
+                        
+                        geo_result = geocode_city(final_city, final_country)
+                        
+                        if geo_result:
+                            data['birth_latitude'] = geo_result['latitude']
+                            data['birth_longitude'] = geo_result['longitude']
+                            # Normalizar ciudad/país
+                            if geo_result.get('city'):
+                                data['birth_city'] = geo_result['city']
+                            if geo_result.get('country'):
+                                data['birth_country'] = geo_result['country']
+                        else:
+                            # FALLO DE RESOLUCIÓN - error crítico
+                            location_str = f"{final_city}, {final_country}" if final_country else final_city
+                            return Response({
+                                'error': 'Error de geo-resolución',
+                                'message': f"No se pudieron resolver las coordenadas para: {location_str}. "
+                                           f"Verifica que el nombre de la ciudad y país sean correctos."
+                            }, status=status.HTTP_400_BAD_REQUEST)
+
             # Actualizar campos
             serializer = UserBirthDataSerializer(bd, data=data, partial=True)
             if serializer.is_valid():
-                serializer.save()
+                bd_saved = serializer.save()
+                
+                # Sincronizar a UserProfile si existe
+                if hasattr(request.user, 'profile'):
+                    profile = request.user.profile
+                    sync_fields = False
+                    if bd_saved.birth_city:
+                        profile.birth_city = bd_saved.birth_city
+                        sync_fields = True
+                    if bd_saved.birth_country:
+                        profile.birth_country = bd_saved.birth_country
+                        sync_fields = True
+                    if bd_saved.birth_latitude is not None:
+                        profile.birth_latitude = bd_saved.birth_latitude
+                        sync_fields = True
+                    if bd_saved.birth_longitude is not None:
+                        profile.birth_longitude = bd_saved.birth_longitude
+                        sync_fields = True
+                    if sync_fields:
+                        profile.save(update_fields=['birth_city', 'birth_country', 'birth_latitude', 'birth_longitude'])
+                
                 return Response(serializer.data)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except PermissionDenied as e:
@@ -947,7 +1138,12 @@ from .permissions import IsTherapist
 
 
 class PatientListCreateView(generics.ListCreateAPIView):
-    """Listar y crear pacientes"""
+    """
+    Listar y crear pacientes.
+    
+    CORE RULE: Si se proporciona birth_city o birth_country, SE RESUELVEN coordenadas automáticamente.
+    La creación FALLARÁ si las coordenadas no pueden ser resueltas.
+    """
     permission_classes = [IsAuthenticated, IsTherapist]
     
     def get_serializer_class(self):
@@ -957,22 +1153,22 @@ class PatientListCreateView(generics.ListCreateAPIView):
     def get_queryset(self):
         return Patient.objects.filter(therapist=self.request.user, is_active=True)
     
-    def perform_create(self, serializer):
-        """Crear paciente y calcular coordenadas si se proporciona ciudad"""
-        instance = serializer.save(therapist=self.request.user)
+    def create(self, request, *args, **kwargs):
+        """Override create para aplicar geo-resolución ANTES de guardar"""
+        from .geocoding_utils import geocode_city
         
         # Determinar ciudad y país desde diferentes fuentes
         city = None
         country = None
         
         # Prioridad 1: birth_city y birth_country explícitos
-        if 'birth_city' in self.request.data and self.request.data.get('birth_city'):
-            city = self.request.data.get('birth_city', '').strip()
-            country = self.request.data.get('birth_country', '').strip() if self.request.data.get('birth_country') else None
+        if 'birth_city' in request.data and request.data.get('birth_city'):
+            city = request.data.get('birth_city', '').strip()
+            country = request.data.get('birth_country', '').strip() if request.data.get('birth_country') else None
         
         # Prioridad 2: Parsear birth_place si no hay birth_city
-        elif 'birth_place' in self.request.data and self.request.data.get('birth_place'):
-            birth_place = self.request.data.get('birth_place', '').strip()
+        elif 'birth_place' in request.data and request.data.get('birth_place'):
+            birth_place = request.data.get('birth_place', '').strip()
             if birth_place:
                 # Intentar parsear "Ciudad, País"
                 parts = [p.strip() for p in birth_place.split(',')]
@@ -982,31 +1178,49 @@ class PatientListCreateView(generics.ListCreateAPIView):
                 elif len(parts) == 1:
                     city = parts[0]
         
-        # Si tenemos ciudad, calcular coordenadas automáticamente
+        # Si hay ciudad, resolver coordenadas ANTES de crear
         if city:
-            # Solo geocodificar si no se proporcionaron coordenadas manualmente
-            if not self.request.data.get('birth_latitude') or not self.request.data.get('birth_longitude'):
-                try:
-                    from .geocoding_utils import geocode_city
-                    geo_result = geocode_city(city, country if country else None)
-                    
-                    if geo_result:
-                        instance.birth_latitude = geo_result['latitude']
-                        instance.birth_longitude = geo_result['longitude']
-                        instance.birth_timezone = geo_result.get('timezone', '')
-                        # Actualizar birth_city y birth_country con los valores normalizados
-                        if geo_result.get('city'):
-                            instance.birth_city = geo_result['city']
-                        if geo_result.get('country'):
-                            instance.birth_country = geo_result['country']
-                        instance.save(update_fields=['birth_latitude', 'birth_longitude', 'birth_timezone', 'birth_city', 'birth_country'])
-                except Exception as geo_error:
-                    print(f"⚠️ Error en geocodificación automática para nuevo paciente: {geo_error}")
-                    # No fallar la creación si la geocodificación falla
+            manual_lat = request.data.get('birth_latitude')
+            manual_lng = request.data.get('birth_longitude')
+            
+            if manual_lat is None or manual_lng is None:
+                geo_result = geocode_city(city, country if country else None)
+                
+                if geo_result:
+                    # Modificar request.data con las coordenadas resueltas
+                    mutable_data = request.data.copy()
+                    mutable_data['birth_latitude'] = geo_result['latitude']
+                    mutable_data['birth_longitude'] = geo_result['longitude']
+                    mutable_data['birth_timezone'] = geo_result.get('timezone', '')
+                    if geo_result.get('city'):
+                        mutable_data['birth_city'] = geo_result['city']
+                    if geo_result.get('country'):
+                        mutable_data['birth_country'] = geo_result['country']
+                    request._full_data = mutable_data
+                else:
+                    # FALLO DE RESOLUCIÓN - error crítico
+                    location_str = f"{city}, {country}" if country else city
+                    return Response({
+                        'error': 'Error de geo-resolución',
+                        'message': f"No se pudieron resolver las coordenadas para: {location_str}. "
+                                   f"Verifica que el nombre de la ciudad y país sean correctos."
+                    }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Llamar al create original
+        return super().create(request, *args, **kwargs)
+    
+    def perform_create(self, serializer):
+        """Crear paciente con coordenadas ya resueltas"""
+        serializer.save(therapist=self.request.user)
 
 
 class PatientDetailView(generics.RetrieveUpdateDestroyAPIView):
-    """Ver, editar o eliminar un paciente específico"""
+    """
+    Ver, editar o eliminar un paciente específico.
+    
+    CORE RULE: Si se actualiza birth_city o birth_country, SE RESUELVEN coordenadas automáticamente.
+    La actualización FALLARÁ si las coordenadas no pueden ser resueltas.
+    """
     permission_classes = [IsAuthenticated, IsTherapist]
     
     def get_serializer_class(self):
@@ -1016,52 +1230,98 @@ class PatientDetailView(generics.RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
         return Patient.objects.filter(therapist=self.request.user)
     
-    def perform_update(self, serializer):
-        """Actualizar paciente y calcular coordenadas si se proporciona ciudad"""
-        instance = serializer.save()
+    def update(self, request, *args, **kwargs):
+        """Override update para aplicar geo-resolución ANTES de guardar"""
+        from .geocoding_utils import geocode_city
         
-        # Determinar ciudad y país desde diferentes fuentes
-        city = None
-        country = None
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
         
-        # Prioridad 1: birth_city y birth_country explícitos
-        if 'birth_city' in self.request.data and self.request.data.get('birth_city'):
-            city = self.request.data.get('birth_city', '').strip()
-            country = self.request.data.get('birth_country', '').strip() if self.request.data.get('birth_country') else None
+        # Determinar si la ubicación está cambiando
+        new_city = request.data.get('birth_city')
+        new_country = request.data.get('birth_country')
+        city_changing = new_city is not None and new_city != (instance.birth_city or "")
+        country_changing = new_country is not None and new_country != (instance.birth_country or "")
+        location_changing = city_changing or country_changing
         
-        # Prioridad 2: Parsear birth_place si no hay birth_city
-        elif 'birth_place' in self.request.data and self.request.data.get('birth_place') and not instance.birth_city:
-            birth_place = self.request.data.get('birth_place', '').strip()
+        # También verificar birth_place
+        if not location_changing and 'birth_place' in request.data and request.data.get('birth_place'):
+            birth_place = request.data.get('birth_place', '').strip()
             if birth_place:
-                # Intentar parsear "Ciudad, País"
                 parts = [p.strip() for p in birth_place.split(',')]
                 if len(parts) >= 2:
-                    city = parts[0]
-                    country = parts[1]
+                    new_city = parts[0]
+                    new_country = parts[1]
                 elif len(parts) == 1:
-                    city = parts[0]
+                    new_city = parts[0]
+                location_changing = True
         
-        # Si tenemos ciudad, calcular coordenadas automáticamente
-        if city:
-            # Solo geocodificar si no se proporcionaron coordenadas manualmente
-            if not self.request.data.get('birth_latitude') or not self.request.data.get('birth_longitude'):
-                try:
-                    from .geocoding_utils import geocode_city
-                    geo_result = geocode_city(city, country if country else None)
+        if location_changing:
+            final_city = new_city if new_city is not None else instance.birth_city
+            final_country = new_country if new_country is not None else instance.birth_country
+            
+            if final_city or final_country:
+                manual_lat = request.data.get('birth_latitude')
+                manual_lng = request.data.get('birth_longitude')
+                
+                if manual_lat is None or manual_lng is None:
+                    geo_result = geocode_city(final_city, final_country if final_country else None)
                     
                     if geo_result:
-                        instance.birth_latitude = geo_result['latitude']
-                        instance.birth_longitude = geo_result['longitude']
-                        instance.birth_timezone = geo_result.get('timezone', '')
-                        # Actualizar birth_city y birth_country con los valores normalizados
+                        # Modificar request.data con las coordenadas resueltas
+                        mutable_data = request.data.copy()
+                        mutable_data['birth_latitude'] = geo_result['latitude']
+                        mutable_data['birth_longitude'] = geo_result['longitude']
+                        mutable_data['birth_timezone'] = geo_result.get('timezone', '')
                         if geo_result.get('city'):
-                            instance.birth_city = geo_result['city']
+                            mutable_data['birth_city'] = geo_result['city']
                         if geo_result.get('country'):
-                            instance.birth_country = geo_result['country']
-                        instance.save(update_fields=['birth_latitude', 'birth_longitude', 'birth_timezone', 'birth_city', 'birth_country'])
-                except Exception as geo_error:
-                    print(f"⚠️ Error en geocodificación automática para paciente {instance.id}: {geo_error}")
-                    # No fallar la actualización si la geocodificación falla
+                            mutable_data['birth_country'] = geo_result['country']
+                        request._full_data = mutable_data
+                    else:
+                        # FALLO DE RESOLUCIÓN - error crítico
+                        location_str = f"{final_city}, {final_country}" if final_country else final_city
+                        return Response({
+                            'error': 'Error de geo-resolución',
+                            'message': f"No se pudieron resolver las coordenadas para: {location_str}. "
+                                       f"Verifica que el nombre de la ciudad y país sean correctos."
+                        }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Llamar al update original
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            instance._prefetched_objects_cache = {}
+
+        return Response(serializer.data)
+    
+    def perform_update(self, serializer):
+        """Actualizar paciente con coordenadas ya resueltas"""
+        instance = serializer.save()
+        
+        # Sincronizar a UserProfile del paciente si existe
+        if instance.user and hasattr(instance.user, 'profile'):
+            user_profile = instance.user.profile
+            sync_fields = []
+            if instance.birth_city:
+                user_profile.birth_city = instance.birth_city
+                sync_fields.append('birth_city')
+            if instance.birth_country:
+                user_profile.birth_country = instance.birth_country
+                sync_fields.append('birth_country')
+            if instance.birth_latitude is not None:
+                user_profile.birth_latitude = instance.birth_latitude
+                sync_fields.append('birth_latitude')
+            if instance.birth_longitude is not None:
+                user_profile.birth_longitude = instance.birth_longitude
+                sync_fields.append('birth_longitude')
+            if hasattr(instance, 'birth_timezone') and instance.birth_timezone:
+                user_profile.birth_timezone = instance.birth_timezone
+                sync_fields.append('birth_timezone')
+            if sync_fields:
+                user_profile.save(update_fields=sync_fields)
     
     def perform_destroy(self, instance):
         # Soft delete
@@ -1080,6 +1340,7 @@ class TherapistPatientProfileView(APIView):
     - Solo el terapeuta propietario puede ver el perfil.
     - NO modifica nada (read-only).
     - No toca AnalysisRecord ni lógica clínica.
+    - SIEMPRE retorna lat/lng si hay ciudad/país.
     """
 
     permission_classes = [IsAuthenticated, IsTherapist]
@@ -1098,16 +1359,40 @@ class TherapistPatientProfileView(APIView):
             )
 
         # Datos base desde Patient
+        birth_lat = getattr(patient, "birth_latitude", None)
+        birth_lng = getattr(patient, "birth_longitude", None)
+        birth_city = getattr(patient, "birth_city", None)
+        birth_country = getattr(patient, "birth_country", None)
+        birth_timezone = getattr(patient, "birth_timezone", None)
+        
+        # CORE RULE: Si hay ciudad/país pero no coordenadas, intentar resolver
+        if (birth_city or birth_country) and (birth_lat is None or birth_lng is None):
+            from .geocoding_utils import geocode_city
+            geo_result = geocode_city(birth_city, birth_country)
+            if geo_result:
+                birth_lat = geo_result['latitude']
+                birth_lng = geo_result['longitude']
+                birth_timezone = geo_result.get('timezone', birth_timezone)
+                # Actualizar el paciente con las coordenadas resueltas
+                patient.birth_latitude = birth_lat
+                patient.birth_longitude = birth_lng
+                patient.birth_timezone = birth_timezone or ''
+                patient.save(update_fields=['birth_latitude', 'birth_longitude', 'birth_timezone'])
+
         profile_data = {
             "patient_id": patient.id,
+            "full_name": patient.full_name,
             "birth_date": getattr(patient, "birth_date", None),
-            "birth_city": getattr(patient, "birth_city", None),
-            "birth_country": getattr(patient, "birth_country", None),
-            "birth_latitude": getattr(patient, "birth_latitude", None),
-            "birth_longitude": getattr(patient, "birth_longitude", None),
-            "birth_timezone": getattr(patient, "birth_timezone", None),
+            "birth_time": str(patient.birth_time) if patient.birth_time else None,
+            "birth_city": birth_city,
+            "birth_country": birth_country,
+            "birth_latitude": float(birth_lat) if birth_lat is not None else None,
+            "birth_longitude": float(birth_lng) if birth_lng is not None else None,
+            "birth_timezone": birth_timezone,
             "legal_full_name": None,
             "consent_accepted_at": None,
+            # Validación de completitud
+            "coordinates_valid": birth_lat is not None and birth_lng is not None,
         }
 
         # Si el paciente tiene cuenta de usuario vinculada, enriquecemos con UserProfile
@@ -1471,7 +1756,56 @@ class CreatePatientWithAccountView(APIView):
             else:
                 birth_date_obj = birth_date
             
-            # Crear entrada de Patient con todos los campos
+            # === GEO-RESOLUTION CORE LOGIC ===
+            # Determinar ciudad y país desde birth_place o campos explícitos
+            birth_city = request.data.get('birth_city', '').strip()
+            birth_country = request.data.get('birth_country', '').strip()
+            birth_latitude = None
+            birth_longitude = None
+            birth_timezone = ''
+            
+            # Si no hay birth_city pero hay birth_place, parsear
+            if not birth_city and birth_place:
+                parts = [p.strip() for p in birth_place.split(',')]
+                if len(parts) >= 2:
+                    birth_city = parts[0]
+                    birth_country = parts[1]
+                elif len(parts) == 1:
+                    birth_city = parts[0]
+            
+            # Si hay ciudad/país, resolver coordenadas
+            if birth_city or birth_country:
+                manual_lat = request.data.get('birth_latitude')
+                manual_lng = request.data.get('birth_longitude')
+                
+                if manual_lat is not None and manual_lng is not None:
+                    # Usar coordenadas manuales
+                    birth_latitude = float(manual_lat)
+                    birth_longitude = float(manual_lng)
+                    birth_timezone = request.data.get('birth_timezone', '')
+                else:
+                    # Resolver coordenadas automáticamente
+                    from .geocoding_utils import geocode_city
+                    geo_result = geocode_city(birth_city, birth_country if birth_country else None)
+                    
+                    if geo_result:
+                        birth_city = geo_result.get('city', birth_city)
+                        birth_country = geo_result.get('country', birth_country)
+                        birth_latitude = geo_result['latitude']
+                        birth_longitude = geo_result['longitude']
+                        birth_timezone = geo_result.get('timezone', '')
+                    else:
+                        # FALLO DE RESOLUCIÓN - error crítico
+                        # Limpiar usuario creado
+                        user.delete()
+                        location_str = f"{birth_city}, {birth_country}" if birth_country else birth_city
+                        return Response({
+                            'error': 'Error de geo-resolución',
+                            'message': f"No se pudieron resolver las coordenadas para: {location_str}. "
+                                       f"Verifica que el nombre de la ciudad y país sean correctos."
+                        }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Crear entrada de Patient con todos los campos incluyendo coordenadas
             patient = Patient.objects.create(
                 therapist=request.user,
                 user=user,
@@ -1484,12 +1818,25 @@ class CreatePatientWithAccountView(APIView):
                 birth_date=birth_date_obj,
                 birth_time=birth_time_obj,
                 birth_place=birth_place,
+                birth_city=birth_city,
+                birth_country=birth_country,
+                birth_latitude=birth_latitude,
+                birth_longitude=birth_longitude,
+                birth_timezone=birth_timezone,
                 hebrew_name=hebrew_name,
                 main_complaint=main_complaint,
                 clinical_history=clinical_history,
                 treatment_plan=treatment_plan,
                 is_active=True
             )
+            
+            # Sincronizar coordenadas a UserProfile del paciente
+            user_profile.birth_city = birth_city
+            user_profile.birth_country = birth_country
+            user_profile.birth_latitude = birth_latitude
+            user_profile.birth_longitude = birth_longitude
+            user_profile.birth_timezone = birth_timezone
+            user_profile.save(update_fields=['birth_city', 'birth_country', 'birth_latitude', 'birth_longitude', 'birth_timezone'])
             
             # Actualizar contador de pacientes del terapeuta
             therapist_profile.current_patients_count = Patient.objects.filter(

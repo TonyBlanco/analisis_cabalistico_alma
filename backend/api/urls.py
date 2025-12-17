@@ -81,7 +81,7 @@ from .admin_views import (
     AdminUserManagementView
 )
 from .views import (
-    reset_admin_passwords_temp, 
+    reset_admin_passwords_temp,
     configure_admin_profiles_temp,
     MyResourcesView,
     AssignResourceToPatientView,
@@ -90,6 +90,15 @@ from .views import (
 from .analysis_views import (
     AnalysisRecordListCreateView,
     AnalysisRecordDetailView,
+)
+from .patient_profile_views import (
+    TherapistUpdatePatientProfileView,
+    PatientProfileValidationView,
+    ProfileUpdateAcknowledgeView,
+)
+from .patient_status_views import (
+    PatientStatusUpdateView,
+    PatientArchiveView,
 )
 
 urlpatterns = [
@@ -109,6 +118,9 @@ urlpatterns = [
     path('me/profile/', UpdateProfileView.as_view(), name='update_profile'),
     path('profile/me/', UserProfileMeView.as_view(), name='profile_me'),
     path('profile/me/consent/', UserProfileConsentView.as_view(), name='profile_me_consent'),
+    path('profile/me/acknowledge-update/', ProfileUpdateAcknowledgeView.as_view(), name='profile_acknowledge_update'),
+    # Alias para cuenta de paciente (usa el mismo endpoint que profile/me/)
+    path('account/profile/', UserProfileMeView.as_view(), name='account_profile'),
     path('me/birth-data/', BirthDataView.as_view(), name='birth_data'),
     path('me/birth-data/send-unlock-email/', BirthDataUnlockRequestView.as_view(), name='birth_data_send_unlock'),
     path('me/birth-data/unlock/', BirthDataUnlockConfirmView.as_view(), name='birth_data_unlock_confirm'),
@@ -128,6 +140,10 @@ urlpatterns = [
     path('therapist/patients/', PatientListCreateView.as_view(), name='patient_list_create'),
     path('therapist/patients/<int:pk>/', PatientDetailView.as_view(), name='patient_detail'),
     path('therapist/patients/<int:pk>/profile/', TherapistPatientProfileView.as_view(), name='therapist_patient_profile'),
+    path('therapist/patients/<int:pk>/profile/update/', TherapistUpdatePatientProfileView.as_view(), name='therapist_update_patient_profile'),
+    path('therapist/patients/<int:pk>/profile/validation/', PatientProfileValidationView.as_view(), name='patient_profile_validation'),
+    path('therapist/patients/<int:pk>/status/', PatientStatusUpdateView.as_view(), name='patient_status_update'),
+    path('therapist/patients/<int:pk>/archive/', PatientArchiveView.as_view(), name='patient_archive'),
     path('therapist/patients/<int:id>/tarot-analysis/', TarotAnalysisView.as_view(), name='tarot_analysis'),
     path('therapist/patients/<int:id>/tarot-analysis/generate-and-save/', GenerateAndSaveTarotAnalysisView.as_view(), name='tarot_analysis_generate_and_save'),
     path('therapist/patients/<int:id>/cabalistic-analysis/', SaveCabalisticAnalysisView.as_view(), name='save_cabalistic_analysis'),

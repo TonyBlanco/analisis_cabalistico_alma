@@ -33,6 +33,12 @@ export interface Patient {
   therapist: number;
   created_at: string;
   updated_at: string;
+  // Therapy status (ownership management)
+  therapy_status: 'active' | 'paused' | 'inactive' | 'archived';
+  pause_reason?: string;
+  status_changed_at?: string | null;
+  status_changed_by?: number | null;
+  is_active: boolean;
   // Additional fields that may be present
   phone?: string;
   birth_city?: string;
@@ -95,6 +101,74 @@ export async function getPatientProfileSummary(
     throw new Error(
       errorData.error || errorData.message || 'Error al obtener el perfil del paciente',
     );
+  }
+
+  return response.json();
+}
+
+// ========================================
+// PATIENT STATUS MANAGEMENT (Therapist Ownership)
+// ========================================
+
+export interface PatientStatusUpdatePayload {
+  therapy_status: 'active' | 'paused' | 'inactive' | 'archived';
+  pause_reason?: string;
+}
+
+export interface PatientStatusUpdateResponse {
+  message: string;
+  patient_id: number;
+  patient_name: string;
+  therapy_status: string;
+  pause_reason: string;
+  status_changed_at: string;
+  status_changed_by: string;
+  is_active: boolean;
+}
+
+/**
+ * Updates patient therapy status.
+ * 
+ * Endpoint: PATCH /api/therapist/patients/<id>/status/
+ * 
+ * Ownership: Therapist can only update their own patients.
+ */
+export async function updatePatientStatus(
+  patientId: number,
+  payload: PatientStatusUpdatePayload
+): Promise<PatientStatusUpdateResponse> {
+  const response = await fetch(`${API_BASE_URL}/therapist/patients/${patientId}/status/`, {
+    method: 'PATCH',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || errorData.message || 'Error al actualizar estado del paciente');
+  }
+
+  return response.json();
+}
+
+/**
+ * Archives patient (soft delete).
+ * 
+ * Endpoint: DELETE /api/therapist/patients/<id>/archive/
+ * 
+ * Ownership: Therapist can only archive their own patients.
+ */
+export async function archivePatient(
+  patientId: number
+): Promise<{ message: string; patient_id: number; therapy_status: string; can_restore: boolean }> {
+  const response = await fetch(`${API_BASE_URL}/therapist/patients/${patientId}/archive/`, {
+    method: 'DELETE',
+    headers: getAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || errorData.message || 'Error al archivar paciente');
   }
 
   return response.json();

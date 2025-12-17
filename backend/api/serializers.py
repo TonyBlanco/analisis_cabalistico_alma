@@ -55,6 +55,7 @@ class UserProfileDetailSerializer(serializers.ModelSerializer):
     - Debe contener al menos 2 palabras.
     - Máximo 2 cambios de nombre controlados por `name_change_count`.
     - `profile_version` se incrementa en cada actualización válida (se gestiona en la vista).
+    - CORE RULE: Si se proporciona birth_city/birth_country, SE RESUELVEN coordenadas automáticamente.
     """
 
     email = serializers.EmailField(source="user.email", read_only=True)
@@ -64,6 +65,7 @@ class UserProfileDetailSerializer(serializers.ModelSerializer):
         fields = [
             "legal_full_name",
             "full_name",
+            "phone",
             "birth_date",
             "birth_time",
             "birth_city",
@@ -83,7 +85,7 @@ class UserProfileDetailSerializer(serializers.ModelSerializer):
             "consent_accepted_at",
             "user_type",
             "email",
-            "birth_timezone",
+            # birth_timezone es manejado por geo-resolución, no por el usuario
         ]
 
     def validate_legal_full_name(self, value: str) -> str:
@@ -109,36 +111,80 @@ class UserProfileDetailSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         """
-        Control de cambios de nombre:
-        - Si el nombre legal cambia → incrementar contador.
-        - Si ya se alcanzaron 2 cambios → bloquear cambios adicionales.
+        Control de cambios de nombre y geo-resolución de coordenadas.
+        
+        REGLA CORE: Si hay birth_city o birth_country, DEBEN resolverse coordenadas.
         """
         instance: UserProfile = self.instance
         if not instance:
             return attrs
 
+        # === Control de cambios de nombre ===
         new_name = attrs.get("legal_full_name")
-        if new_name is None:
-            # No se está intentando cambiar el nombre legal
-            return attrs
+        if new_name is not None:
+            current_name = (instance.legal_full_name or "").strip()
+            candidate = new_name.strip()
 
-        current_name = (instance.legal_full_name or "").strip()
-        candidate = new_name.strip()
+            if current_name and candidate and candidate != current_name:
+                # Nombre está cambiando
+                if instance.name_change_count is not None and instance.name_change_count >= 2:
+                    raise serializers.ValidationError(
+                        {
+                            "legal_full_name": (
+                                "Cambios de nombre bloqueados (máximo 2 cambios alcanzado). "
+                                "Contacta con soporte si necesitas ayuda adicional."
+                            )
+                        }
+                    )
+                # Marcamos que debemos incrementar el contador en update()
+                attrs["_increment_name_change_count"] = True
 
-        if current_name and candidate and candidate != current_name:
-            # Nombre está cambiando
-            if instance.name_change_count is not None and instance.name_change_count >= 2:
-                raise serializers.ValidationError(
-                    {
-                        "legal_full_name": (
-                            "Cambios de nombre bloqueados (máximo 2 cambios alcanzado). "
-                            "Contacta con soporte si necesitas ayuda adicional."
-                        )
-                    }
-                )
-
-            # Marcamos que debemos incrementar el contador en update()
-            attrs["_increment_name_change_count"] = True
+        # === Geo-resolución de coordenadas (CORE RULE) ===
+        # Si se proporciona city o country, resolver coordenadas
+        new_city = attrs.get("birth_city")
+        new_country = attrs.get("birth_country")
+        
+        # Detectar si la ubicación está cambiando
+        city_changing = new_city is not None and new_city != (instance.birth_city or "")
+        country_changing = new_country is not None and new_country != (instance.birth_country or "")
+        location_changing = city_changing or country_changing
+        
+        # Si la ubicación cambia, necesitamos resolver coordenadas
+        if location_changing:
+            # Determinar ciudad/país final
+            final_city = new_city if new_city is not None else instance.birth_city
+            final_country = new_country if new_country is not None else instance.birth_country
+            
+            # Si hay ciudad o país, resolver coordenadas
+            if final_city or final_country:
+                # El usuario no proporcionó coordenadas manualmente?
+                manual_lat = attrs.get("birth_latitude")
+                manual_lng = attrs.get("birth_longitude")
+                
+                if manual_lat is None or manual_lng is None:
+                    # Resolver coordenadas automáticamente
+                    from .geocoding_utils import geocode_city, GeoResolutionError
+                    
+                    geo_result = geocode_city(final_city, final_country)
+                    
+                    if geo_result:
+                        attrs["birth_latitude"] = geo_result["latitude"]
+                        attrs["birth_longitude"] = geo_result["longitude"]
+                        attrs["birth_timezone"] = geo_result["timezone"]
+                        # Normalizar ciudad/país si es posible
+                        if geo_result.get("city"):
+                            attrs["birth_city"] = geo_result["city"]
+                        if geo_result.get("country"):
+                            attrs["birth_country"] = geo_result["country"]
+                    else:
+                        # FALLO DE RESOLUCIÓN - error crítico
+                        location_str = f"{final_city}, {final_country}" if final_country else final_city
+                        raise serializers.ValidationError({
+                            "birth_city": (
+                                f"No se pudieron resolver las coordenadas para: {location_str}. "
+                                f"Verifica que el nombre de la ciudad y país sean correctos."
+                            )
+                        })
 
         return attrs
 
@@ -156,6 +202,7 @@ class UserProfileDetailSerializer(serializers.ModelSerializer):
             "birth_country",
             "birth_latitude",
             "birth_longitude",
+            "birth_timezone",
         ]:
             if field in validated_data:
                 setattr(instance, field, validated_data[field])
@@ -340,7 +387,8 @@ class PatientSerializer(serializers.ModelSerializer):
     therapist = serializers.ReadOnlyField(source='therapist.username')
     total_sessions = serializers.SerializerMethodField()
     total_fichas = serializers.SerializerMethodField()
-    
+    coordinates_valid = serializers.SerializerMethodField()
+
     class Meta:
         model = Patient
         fields = [
@@ -350,6 +398,9 @@ class PatientSerializer(serializers.ModelSerializer):
             'first_name', 'last_name', 'full_name', 'email', 'phone', 'avatar',
             # Datos astrológicos/cabalísticos
             'birth_date', 'birth_time', 'birth_place', 'hebrew_name',
+            # Coordenadas geográficas (CORE FIELDS para astrología)
+            'birth_city', 'birth_country', 'birth_latitude', 'birth_longitude', 'birth_timezone',
+            'coordinates_valid',
             # Datos clínicos
             'main_complaint', 'clinical_history',
             # Plan de tratamiento
@@ -358,18 +409,24 @@ class PatientSerializer(serializers.ModelSerializer):
             'therapy_level',
             # Notas y estado
             'notes', 'is_active',
+            # Therapy status (ownership management)
+            'therapy_status', 'pause_reason', 'status_changed_at', 'status_changed_by',
             # Estadísticas
             'total_sessions', 'total_fichas',
             # Metadata
             'created_at', 'updated_at'
         ]
-        read_only_fields = ['therapist', 'user', 'full_name', 'created_at', 'updated_at']
-    
+        read_only_fields = ['therapist', 'user', 'full_name', 'created_at', 'updated_at', 'status_changed_at', 'status_changed_by', 'coordinates_valid']
+
     def get_total_sessions(self, obj):
         return obj.sessions.count()
-    
+
     def get_total_fichas(self, obj):
         return Ficha.objects.filter(patient_of=obj.therapist, nombre__icontains=obj.full_name).count()
+    
+    def get_coordinates_valid(self, obj):
+        """Indica si el paciente tiene coordenadas válidas para análisis astrológicos"""
+        return obj.birth_latitude is not None and obj.birth_longitude is not None
 
 
 class SessionSerializer(serializers.ModelSerializer):

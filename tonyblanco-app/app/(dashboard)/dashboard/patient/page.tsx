@@ -1,14 +1,95 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { AlertCircle, CheckCircle, Clock, MessageSquare } from 'lucide-react';
+import { getUserProfile, acceptConsent, acknowledgeProfileUpdate } from '@/lib/api';
+import TherapeuticConsentModal from '@/components/TherapeuticConsentModal';
+import ProfileUpdateNotice from '@/components/ProfileUpdateNotice';
 
 export default function PatientHome() {
   const [profileComplete, setProfileComplete] = useState(true);
   const [pendingTests, setPendingTests] = useState(2);
   const [newResults, setNewResults] = useState(1);
+  const [showConsentModal, setShowConsentModal] = useState(false);
+  const [consentLoading, setConsentLoading] = useState(true);
+  const [showProfileUpdateNotice, setShowProfileUpdateNotice] = useState(false);
+  const [lastTherapistUpdate, setLastTherapistUpdate] = useState<string | null>(null);
+  const fetchedConsentRef = useRef(false);
+
+  // Check consent status (once)
+  useEffect(() => {
+    if (fetchedConsentRef.current) return;
+    fetchedConsentRef.current = true;
+
+    const checkConsent = async () => {
+      try {
+        const profile = await getUserProfile();
+        
+        // Show consent modal if not accepted
+        if (!profile.consent_accepted_at) {
+          setShowConsentModal(true);
+        }
+        
+        // Show profile update notice if therapist updated profile
+        if (profile.profile_updated_by_therapist) {
+          setShowProfileUpdateNotice(true);
+          setLastTherapistUpdate(profile.last_therapist_update || null);
+        }
+      } catch (error: any) {
+        console.error('Error checking consent:', error);
+        
+        // Handle 401 - user not authenticated, but don't block dashboard
+        if (error.status === 401) {
+          console.warn('Usuario no autenticado. Modales no se mostrarán.');
+        }
+        // Non-blocking: allow dashboard to load even if consent check fails
+      } finally {
+        setConsentLoading(false);
+      }
+    };
+
+    checkConsent();
+  }, []);
+
+  const handleConsentAccept = async () => {
+    try {
+      await acceptConsent();
+      setShowConsentModal(false);
+    } catch (error) {
+      console.error('Error accepting consent:', error);
+      // Still close modal - user can retry from profile page if needed
+      setShowConsentModal(false);
+    }
+  };
+
+  const handleProfileUpdateAcknowledge = async () => {
+    try {
+      await acknowledgeProfileUpdate();
+      setShowProfileUpdateNotice(false);
+    } catch (error) {
+      console.error('Error acknowledging profile update:', error);
+      // Still close modal - non-critical
+      setShowProfileUpdateNotice(false);
+    }
+  };
 
   return (
+    <>
+      {/* Consent Modal (patient only, shown once if not accepted) */}
+      <TherapeuticConsentModal
+        isOpen={showConsentModal}
+        onAccept={handleConsentAccept}
+        onClose={() => setShowConsentModal(false)}
+        type="test"
+      />
+
+      {/* Profile Update Notice (shown once if therapist updated profile) */}
+      <ProfileUpdateNotice
+        isOpen={showProfileUpdateNotice}
+        onAcknowledge={handleProfileUpdateAcknowledge}
+        lastUpdate={lastTherapistUpdate}
+      />
+      
     <div className="max-w-5xl mx-auto space-y-6">
       {/* Bienvenida */}
       <div className="bg-white border border-gray-200 rounded-lg p-6">
@@ -98,5 +179,6 @@ export default function PatientHome() {
         </p>
       </div>
     </div>
+    </>
   );
 }

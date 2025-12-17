@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { getAvailableTests } from '@/lib/test-api';
 import { TestModule } from '@/lib/test-types';
 import { getActivePatientId } from '@/lib/active-patient';
+import { useToast } from '@/components/ui/Toast';
+import { Mail, CheckCircle } from 'lucide-react';
 
 interface TestCatalogSectionProps {
   onTestAssigned?: () => void; // Callback when a test is assigned (to refresh assigned list)
@@ -26,6 +28,9 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
   const [assigningTestCode, setAssigningTestCode] = useState<string | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [testToAssign, setTestToAssign] = useState<TestModule | null>(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [lastAssignedTest, setLastAssignedTest] = useState<string | null>(null);
+  const toast = useToast();
 
   useEffect(() => {
     fetchTests();
@@ -64,7 +69,10 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
 
   const handleAssignTest = (test: TestModule) => {
     if (!activePatientId) {
-      alert('Por favor, selecciona un paciente activo antes de asignar un test.');
+      toast.warning(
+        'Selecciona un paciente',
+        'Debes seleccionar un paciente activo antes de asignar un test.'
+      );
       return;
     }
     setTestToAssign(test);
@@ -84,8 +92,9 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
       // New endpoint uses patient_id directly, backend validates patient has linked User account
       await assignTestToPatient(activePatientId, testToAssign.code);
       
-      // Show success message
-      alert(`Test "${testToAssign.name}" asignado correctamente al paciente.`);
+      // Show success modal with professional UX
+      setLastAssignedTest(testToAssign.name);
+      setShowSuccessModal(true);
       
       // Refresh assigned tests list
       if (onTestAssigned) {
@@ -94,7 +103,7 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
       
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error al asignar test';
-      alert(errorMessage);
+      toast.error('Error al asignar test', errorMessage);
       console.error('Error assigning test:', error);
     } finally {
       setAssigningTestCode(null);
@@ -265,7 +274,7 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
           >
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Confirmar asignación</h3>
             <p className="text-sm text-gray-600 mb-4">
-              ¿Deseas asignar el test <strong>"{testToAssign.name}"</strong> al paciente activo?
+              ¿Deseas asignar el test <strong>&quot;{testToAssign.name}&quot;</strong> al paciente activo?
             </p>
             <div className="flex items-center gap-3 justify-end">
               <button
@@ -282,6 +291,54 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
                 Confirmar
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Success Modal - Professional UX */}
+      {showSuccessModal && lastAssignedTest && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" 
+          onClick={() => setShowSuccessModal(false)}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-xl max-w-md w-full mx-4 p-8 text-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Success Icon */}
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 flex items-center justify-center">
+              <CheckCircle className="w-10 h-10 text-green-600" />
+            </div>
+            
+            {/* Title */}
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              ¡Test asignado correctamente!
+            </h3>
+            
+            {/* Test Name */}
+            <p className="text-gray-600 mb-4">
+              <strong>&quot;{lastAssignedTest}&quot;</strong> ha sido asignado al paciente.
+            </p>
+            
+            {/* Email Notification Info */}
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
+              <div className="flex items-center justify-center gap-2 text-blue-700 mb-1">
+                <Mail className="w-5 h-5" />
+                <span className="font-medium">Notificación enviada</span>
+              </div>
+              <p className="text-sm text-blue-600">
+                El paciente ha recibido un email con las instrucciones para completar el test.
+              </p>
+            </div>
+            
+            {/* Action Button */}
+            <button
+              onClick={() => setShowSuccessModal(false)}
+              className="w-full px-6 py-3 text-white font-medium rounded-xl transition-opacity hover:opacity-90"
+              style={{ backgroundColor: 'var(--accent-color)' }}
+            >
+              Entendido
+            </button>
           </div>
         </div>
       )}

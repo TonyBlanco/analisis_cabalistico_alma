@@ -168,7 +168,7 @@ async function apiRequest<T>(
   }
 
   const url = `${API_URL}${endpoint}`;
-  console.log('API Request:', { url, method: options.method || 'GET' });
+  console.log('🌐 API Request:', { url, method: options.method || 'GET', hasToken: !!token });
 
   try {
     const response = await fetch(url, {
@@ -176,24 +176,38 @@ async function apiRequest<T>(
       headers,
     });
 
-    console.log('API Response:', { status: response.status, ok: response.ok });
+    console.log('✅ API Response:', { status: response.status, ok: response.ok });
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({ 
         message: `Error ${response.status}: No se pudo conectar con el servidor` 
       }));
-      const errorMsg = error.message || error.error || error.detail || `Error: ${response.status}`;
-      console.error('API Error:', errorMsg);
-      throw new Error(errorMsg);
+      
+      // Log para debugging
+      console.error('❌ API Error:', { status: response.status, error });
+      
+      // Crear error con toda la información del backend
+      const errorMsg = error.message || error.detail || error.error || `Error: ${response.status}`;
+      const errorWithResponse = new Error(errorMsg);
+      (errorWithResponse as any).status = response.status;
+      (errorWithResponse as any).response = error;
+      throw errorWithResponse;
     }
 
     return response.json();
   } catch (err: any) {
+    // Already handled errors
+    if (err.status) {
+      throw err;
+    }
+    
     // Network errors (CORS, timeout, etc.)
     if (err.message === 'Failed to fetch' || err.name === 'TypeError') {
-      const errorMsg = `No se pudo conectar con el servidor. Por favor verifica:\n- Tu conexión a internet\n- Que el backend esté activo: ${API_URL}`;
-      console.error('Network Error:', errorMsg);
-      throw new Error(errorMsg);
+      const errorMsg = `No se pudo conectar con el servidor. Verifica tu conexión.`;
+      console.error('🔌 Network Error:', errorMsg);
+      const networkError = new Error(errorMsg);
+      (networkError as any).status = 0;
+      throw networkError;
     }
     throw err;
   }
@@ -402,4 +416,85 @@ export const cancelSubscription = async (): Promise<{ message: string }> => {
   return apiRequest('/payments/cancel-subscription/', {
     method: 'POST',
   });
+};
+
+// ========================================
+// USER PROFILE ENDPOINTS
+// ========================================
+
+export interface UserProfileData {
+  legal_full_name: string;
+  birth_date: string;
+  birth_time?: string;
+  birth_city?: string;
+  birth_country?: string;
+  birth_latitude?: number | null;
+  birth_longitude?: number | null;
+  birth_timezone?: string;
+  name_change_count?: number;
+  profile_version?: number;
+  consent_accepted_at?: string | null;
+  email?: string;
+  phone?: string;
+  profile_updated_by_therapist?: boolean;
+  last_therapist_update?: string | null;
+  // Para forzar re-geocodificación de coordenadas
+  force_geocode?: boolean;
+}
+
+export interface ProfileValidationStatus {
+  is_complete: boolean;
+  missing_fields: string[];
+  warnings: string[];
+  profile_updated_by_therapist: boolean;
+  last_therapist_update?: string | null;
+}
+
+export const getUserProfile = async (): Promise<UserProfileData> => {
+  return apiRequest<UserProfileData>('/profile/me/');
+};
+
+export const updateUserProfile = async (data: Partial<UserProfileData>): Promise<UserProfileData> => {
+  return apiRequest<UserProfileData>('/profile/me/', {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+};
+
+export const acceptConsent = async (): Promise<{ message: string; consent_accepted_at: string }> => {
+  return apiRequest<{ message: string; consent_accepted_at: string }>('/profile/me/consent/', {
+    method: 'POST',
+  });
+};
+
+export const acknowledgeProfileUpdate = async (): Promise<{ message: string; profile_updated_by_therapist: boolean }> => {
+  return apiRequest<{ message: string; profile_updated_by_therapist: boolean }>('/profile/me/acknowledge-update/', {
+    method: 'POST',
+  });
+};
+
+// ========================================
+// PATIENT PROFILE MANAGEMENT (Therapist)
+// ========================================
+
+export const updatePatientProfile = async (
+  patientId: number,
+  data: Partial<UserProfileData>
+): Promise<{ 
+  message: string; 
+  profile_complete: boolean; 
+  missing_fields: string[];
+  profile_updated_by_therapist: boolean;
+  last_therapist_update: string | null;
+}> => {
+  return apiRequest(`/therapist/patients/${patientId}/profile/update/`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+};
+
+export const getPatientProfileValidation = async (
+  patientId: number
+): Promise<ProfileValidationStatus> => {
+  return apiRequest<ProfileValidationStatus>(`/therapist/patients/${patientId}/profile/validation/`);
 };

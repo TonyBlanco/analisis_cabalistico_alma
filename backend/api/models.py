@@ -30,11 +30,44 @@ class UserProfile(models.Model):
     # display_name: El nombre que usa para login (username de Django)
     # full_name: El nombre que se usa para los cálculos cabalísticos (para particulares)
     full_name = models.CharField(max_length=255)  # Nombre para cálculos cabalísticos
+    legal_full_name = models.CharField(max_length=255, blank=True)  # Nombre legal completo
     phone = models.CharField(max_length=20, blank=True)
     birth_date = models.DateField(null=True, blank=True)
-    # Ciudad de nacimiento opcional para compatibilidad con perfiles legacy
-    birth_city = models.CharField(max_length=255, null=True, blank=True)
+    birth_time = models.TimeField(null=True, blank=True)
     
+    # ========== COORDENADAS GEOGRÁFICAS (CORE FIELDS) ==========
+    # Estos campos son REQUERIDOS para análisis astrológicos/cabalísticos
+    birth_city = models.CharField(max_length=200, blank=True)
+    birth_country = models.CharField(max_length=100, blank=True)
+    birth_latitude = models.DecimalField(
+        max_digits=9, 
+        decimal_places=6, 
+        null=True, 
+        blank=True,
+        help_text='Latitud del lugar de nacimiento (núcleo perfil)'
+    )
+    birth_longitude = models.DecimalField(
+        max_digits=9, 
+        decimal_places=6, 
+        null=True, 
+        blank=True,
+        help_text='Longitud del lugar de nacimiento (núcleo perfil)'
+    )
+    birth_timezone = models.CharField(
+        max_length=100, 
+        blank=True,
+        help_text='Zona horaria del lugar de nacimiento (núcleo perfil)'
+    )
+    
+    # Control de versión y consentimiento
+    profile_version = models.IntegerField(default=1)
+    name_change_count = models.IntegerField(default=0)
+    consent_accepted_at = models.DateTimeField(
+        null=True, 
+        blank=True,
+        help_text='Marca de tiempo de aceptación de consentimiento terapéutico'
+    )
+
     # Sistema de roles y permisos
     is_admin = models.BooleanField(default=False)  # Admin puede ver estadísticas y mantener usuarios
     
@@ -221,8 +254,32 @@ class Patient(models.Model):
     # ========== DATOS ASTROLÓGICOS/CABALÍSTICOS ==========
     birth_date = models.DateField(help_text='Fecha de nacimiento')
     birth_time = models.TimeField(null=True, blank=True, help_text='Hora exacta de nacimiento')
-    birth_place = models.CharField(max_length=255, blank=True, help_text='Lugar de nacimiento (ciudad, país)')
+    birth_place = models.CharField(max_length=255, blank=True, help_text='Lugar de nacimiento (ciudad, país) - LEGACY')
     hebrew_name = models.CharField(max_length=255, blank=True, help_text='Nombre en hebreo (opcional)')
+    
+    # ========== COORDENADAS GEOGRÁFICAS (CORE FIELDS) ==========
+    # Estos campos son REQUERIDOS para análisis astrológicos/cabalísticos
+    birth_city = models.CharField(max_length=200, blank=True, help_text='Ciudad de nacimiento')
+    birth_country = models.CharField(max_length=100, blank=True, help_text='País de nacimiento')
+    birth_latitude = models.DecimalField(
+        max_digits=9, 
+        decimal_places=6, 
+        null=True, 
+        blank=True,
+        help_text='Latitud del lugar de nacimiento'
+    )
+    birth_longitude = models.DecimalField(
+        max_digits=9, 
+        decimal_places=6, 
+        null=True, 
+        blank=True,
+        help_text='Longitud del lugar de nacimiento'
+    )
+    birth_timezone = models.CharField(
+        max_length=100, 
+        blank=True, 
+        help_text='Zona horaria del lugar de nacimiento'
+    )
     
     # ========== DATOS CLÍNICOS ==========
     main_complaint = models.TextField(blank=True, help_text='Motivo principal de consulta')
@@ -254,6 +311,37 @@ class Patient(models.Model):
     
     # Status
     is_active = models.BooleanField(default=True, help_text='Indica si el paciente está activo')
+    
+    # ========== THERAPY STATUS (OWNERSHIP MANAGEMENT) ==========
+    THERAPY_STATUS_CHOICES = [
+        ('active', 'Activo'),
+        ('paused', 'Pausado'),
+        ('inactive', 'Inactivo'),
+        ('archived', 'Archivado'),
+    ]
+    therapy_status = models.CharField(
+        max_length=20,
+        choices=THERAPY_STATUS_CHOICES,
+        default='active',
+        help_text='Estado actual de la terapia del paciente'
+    )
+    pause_reason = models.TextField(
+        blank=True,
+        help_text='Motivo de pausa (si therapy_status es paused)'
+    )
+    status_changed_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text='Última vez que cambió el therapy_status'
+    )
+    status_changed_by = models.ForeignKey(
+        User,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='patient_status_changes',
+        help_text='Terapeuta que cambió el estado'
+    )
     
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)

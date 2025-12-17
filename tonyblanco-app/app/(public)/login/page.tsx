@@ -1,207 +1,401 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { login, getCurrentUser, requestPasswordReset } from '@/lib/api';
+import Link from 'next/link';
+import { login, getCurrentUser } from '@/lib/api';
 import { setAuthToken } from '@/lib/auth';
+import { clearAuthState } from '@/lib/auth-state';
 import { getUserRole } from '@/lib/getUserRole';
+import { Eye, EyeOff, Mail, Lock, AlertCircle, User, Sparkles, Heart } from 'lucide-react';
 
-type ErrorType = 'user_not_found' | 'invalid_password' | 'validation' | 'other';
+type ErrorType = 'user_not_found' | 'invalid_password' | 'account_inactive' | 'validation' | 'network' | 'other';
+
+interface LoginError {
+  type: ErrorType;
+  message: string;
+  email?: string;
+}
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [errorType, setErrorType] = useState<ErrorType | null>(null);
-  const [showResetForm, setShowResetForm] = useState(false);
+  const [error, setError] = useState<LoginError | null>(null);
   const [resetEmail, setResetEmail] = useState('');
-  const [resetLoading, setResetLoading] = useState(false);
+  const [showResetForm, setShowResetForm] = useState(false);
   const [resetSent, setResetSent] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
+
+  // ========== CRITICAL: Limpiar token al entrar a login ==========
+  useEffect(() => {
+    // Siempre limpiar estado de auth al entrar a login
+    // Esto previene que tokens viejos/inválidos causen problemas
+    clearAuthState();
+    console.log('🧹 Auth state cleared on login page load');
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setShowResetForm(false);
+    
+    // Validación básica
+    if (!email.trim()) {
+      setError({ type: 'validation', message: 'Ingresa tu email o nombre de usuario' });
+      setLoading(false);
+      return;
+    }
+    
+    if (!password) {
+      setError({ type: 'validation', message: 'Ingresa tu contraseña' });
+      setLoading(false);
+      return;
+    }
     
     try {
-      // Login con email o username (el backend acepta ambos en el campo 'username')
-      const loginResponse = await login(email, password);
+      // Login con email o username
+      const loginResponse = await login(email.trim(), password);
       
       // Guardar token
       setAuthToken(loginResponse.token);
       
-      // Obtener usuario actual para determinar rol y redirigir
-      // Nota: getCurrentUser requiere el token que acabamos de guardar
-      const user = await getCurrentUser();
+      // Obtener rol y redirigir
       const role = await getUserRole();
       
       // Redirigir según rol
-      if (role === 'admin') {
-        router.push('/dashboard/admin');
-      } else if (role === 'therapist') {
-        router.push('/dashboard/therapist');
-      } else if (role === 'personal') {
-        router.push('/dashboard/personal');
-      } else if (role === 'patient') {
-        router.push('/dashboard/patient');
-      } else {
-        router.push('/dashboard');
+      switch (role) {
+        case 'admin':
+          router.push('/dashboard/admin');
+          break;
+        case 'therapist':
+          router.push('/dashboard/therapist');
+          break;
+        case 'personal':
+          router.push('/dashboard/personal');
+          break;
+        case 'patient':
+          router.push('/dashboard/patient');
+          break;
+        default:
+          router.push('/dashboard');
       }
     } catch (err: any) {
       console.error('Login error:', err);
+      console.log('Error details:', { 
+        status: err?.status, 
+        response: err?.response,
+        message: err?.message 
+      });
+      setLoading(false);
       
-      // Check for structured error from backend
-      const errorData = err?.errorData || {};
-      const backendError = errorData.error;
-      const backendMessage = errorData.message || err.message || 'Error al iniciar sesión. Verifica tus credenciales.';
+      // Parsear error del backend
+      const response = err?.response || {};
+      const errorCode = response.error || '';
+      const errorMessage = response.message || err.message || 'Error al iniciar sesión';
       
-      setError(backendMessage);
+      console.log('Parsed error:', { errorCode, errorMessage });
       
-      if (backendError === 'user_not_found') {
-        setErrorType('user_not_found');
-      } else if (backendError === 'invalid_password') {
-        setErrorType('invalid_password');
-        // Show reset form and prefill email
-        const userEmail = errorData.email || email;
-        setResetEmail(userEmail);
+      // Determinar tipo de error
+      let errorType: ErrorType = 'other';
+      let displayMessage = errorMessage;
+      
+      if (err.status === 0 || err.message?.includes('conectar')) {
+        errorType = 'network';
+        displayMessage = 'No se pudo conectar con el servidor. Verifica tu conexión a internet.';
+      } else if (errorCode === 'user_not_found') {
+        errorType = 'user_not_found';
+        displayMessage = 'No existe una cuenta con ese email o usuario';
+      } else if (errorCode === 'invalid_password') {
+        errorType = 'invalid_password';
+        displayMessage = 'La contraseña es incorrecta';
+        setResetEmail(response.email || email);
         setShowResetForm(true);
-      } else if (backendError === 'validation') {
-        setErrorType('validation');
-      } else {
-        setErrorType('other');
+      } else if (errorCode === 'account_inactive') {
+        errorType = 'account_inactive';
+        displayMessage = 'Esta cuenta ha sido desactivada. Contacta soporte.';
+      } else if (errorCode === 'validation') {
+        errorType = 'validation';
       }
       
-      setLoading(false);
+      setError({
+        type: errorType,
+        message: displayMessage,
+        email: response.email
+      });
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (!resetEmail.trim()) return;
+    
+    setResetLoading(true);
+    try {
+      // TODO: Implementar endpoint de reset password
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      setResetSent(true);
+    } catch (err) {
+      console.error('Reset error:', err);
+    } finally {
+      setResetLoading(false);
+    }
+  };
+
+  const getErrorStyles = (type: ErrorType) => {
+    switch (type) {
+      case 'user_not_found':
+        return 'bg-amber-50 border-amber-200 text-amber-800';
+      case 'invalid_password':
+        return 'bg-orange-50 border-orange-200 text-orange-800';
+      case 'account_inactive':
+        return 'bg-red-50 border-red-200 text-red-800';
+      case 'network':
+        return 'bg-gray-50 border-gray-300 text-gray-700';
+      default:
+        return 'bg-red-50 border-red-200 text-red-700';
+    }
+  };
+
+  const getErrorIcon = (type: ErrorType) => {
+    switch (type) {
+      case 'user_not_found':
+        return <User className="w-5 h-5 text-amber-500 flex-shrink-0" />;
+      case 'invalid_password':
+        return <Lock className="w-5 h-5 text-orange-500 flex-shrink-0" />;
+      default:
+        return <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />;
     }
   };
 
   return (
-    <div className="w-full max-w-md">
-      <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-8">
-        <h1 className="text-2xl font-semibold text-gray-900 mb-6 text-center">
-          Iniciar Sesión
-        </h1>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full px-4 py-2 bg-white border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition-colors"
-            />
-          </div>
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-              Contraseña
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full px-4 py-2 bg-white border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition-colors"
-            />
-          </div>
-          {error && (
-            <div className={`px-4 py-3 rounded-md text-sm ${
-              errorType === 'user_not_found' 
-                ? 'bg-yellow-50 border border-yellow-200 text-yellow-800'
-                : errorType === 'invalid_password'
-                ? 'bg-orange-50 border border-orange-200 text-orange-800'
-                : 'bg-red-50 border border-red-200 text-red-700'
-            }`}>
-              {error}
+    <div className="min-h-screen flex">
+      {/* Left Panel - Branding */}
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 p-12 flex-col justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-white mb-2">
+            Kabbalah Aplicada
+          </h1>
+          <p className="text-violet-200 text-lg">
+            Psicoterapias del Alma
+          </p>
+        </div>
+        
+        <div className="space-y-8">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
+              <Sparkles className="w-6 h-6 text-white" />
             </div>
-          )}
-          
-          {showResetForm && !resetSent && (
-            <div className="bg-blue-50 border border-blue-200 rounded-md p-4 space-y-3">
-              <p className="text-sm text-blue-800 font-medium">
-                ¿Olvidaste tu contraseña?
+            <div>
+              <h3 className="text-white font-semibold mb-1">Análisis Cabalístico</h3>
+              <p className="text-violet-200 text-sm">
+                Descubre los patrones numéricos y energéticos de tu nombre y fecha de nacimiento
               </p>
+            </div>
+          </div>
+          
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
+              <Heart className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h3 className="text-white font-semibold mb-1">Acompañamiento Terapéutico</h3>
+              <p className="text-violet-200 text-sm">
+                Conecta con terapeutas especializados en kabbalah y desarrollo personal
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        <p className="text-violet-300 text-sm">
+          © 2024 Tony Blanco. Todos los derechos reservados.
+        </p>
+      </div>
+      
+      {/* Right Panel - Login Form */}
+      <div className="flex-1 flex items-center justify-center p-8 bg-gray-50">
+        <div className="w-full max-w-md">
+          {/* Mobile Logo */}
+          <div className="lg:hidden text-center mb-8">
+            <h1 className="text-2xl font-bold text-gray-900">Kabbalah Aplicada</h1>
+            <p className="text-gray-600">Psicoterapias del Alma</p>
+          </div>
+          
+          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
+            <div className="text-center mb-8">
+              <h2 className="text-2xl font-bold text-gray-900">Bienvenido</h2>
+              <p className="text-gray-500 mt-1">Inicia sesión en tu cuenta</p>
+            </div>
+            
+            <form onSubmit={handleSubmit} className="space-y-5">
+              {/* Email/Username Field */}
               <div>
-                <label htmlFor="reset-email" className="block text-sm font-medium text-blue-700 mb-2">
-                  Email
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                  Email o usuario
                 </label>
-                <input
-                  id="reset-email"
-                  type="email"
-                  value={resetEmail}
-                  onChange={(e) => setResetEmail(e.target.value)}
-                  className="w-full px-4 py-2 bg-white border border-blue-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-colors"
-                />
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Mail className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    id="email"
+                    type="text"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="tu@email.com"
+                    autoComplete="username"
+                    className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent focus:bg-white transition-all"
+                  />
+                </div>
               </div>
+              
+              {/* Password Field */}
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                  Contraseña
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Lock className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    autoComplete="current-password"
+                    className="w-full pl-10 pr-12 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent focus:bg-white transition-all"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
+              </div>
+              
+              {/* Error Message */}
+              {error && (
+                <div className={`flex items-start gap-3 px-4 py-3 rounded-xl border ${getErrorStyles(error.type)}`}>
+                  {getErrorIcon(error.type)}
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">{error.message}</p>
+                    {error.type === 'user_not_found' && (
+                      <p className="text-xs mt-1 opacity-80">
+                        Verifica que el email o usuario sea correcto
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+              
+              {/* Password Reset Form */}
+              {showResetForm && !resetSent && (
+                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 space-y-3">
+                  <p className="text-sm text-blue-800 font-medium">
+                    ¿Olvidaste tu contraseña?
+                  </p>
+                  <div className="flex gap-2">
+                    <input
+                      type="email"
+                      value={resetEmail}
+                      onChange={(e) => setResetEmail(e.target.value)}
+                      placeholder="Email para recuperación"
+                      className="flex-1 px-3 py-2 bg-white border border-blue-200 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleResetPassword}
+                      disabled={resetLoading || !resetEmail.trim()}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+                    >
+                      {resetLoading ? '...' : 'Enviar'}
+                    </button>
+                  </div>
+                </div>
+              )}
+              
+              {resetSent && (
+                <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-xl text-sm">
+                  ✓ Si el email existe, recibirás un enlace para restablecer tu contraseña.
+                </div>
+              )}
+              
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-3 px-4 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-xl font-semibold shadow-lg shadow-violet-500/30 hover:shadow-xl hover:shadow-violet-500/40 hover:from-violet-700 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
+              >
+                {loading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    Iniciando sesión...
+                  </span>
+                ) : (
+                  'Iniciar sesión'
+                )}
+              </button>
+            </form>
+            
+            {/* Forgot Password Link */}
+            <div className="mt-4 text-center">
               <button
                 type="button"
-                onClick={async () => {
-                  setResetLoading(true);
-                  try {
-                    await requestPasswordReset(resetEmail);
-                    setResetSent(true);
-                  } catch (err) {
-                    console.error('Reset error:', err);
-                    setError('Error al enviar el enlace de recuperación. Intenta de nuevo.');
-                  } finally {
-                    setResetLoading(false);
-                  }
+                onClick={() => {
+                  setShowResetForm(!showResetForm);
+                  setResetSent(false);
                 }}
-                disabled={resetLoading || !resetEmail}
-                className="w-full px-4 py-2 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                className="text-sm text-violet-600 hover:text-violet-800 transition-colors"
               >
-                {resetLoading ? 'Enviando...' : 'Enviar enlace de recuperación'}
+                ¿Olvidaste tu contraseña?
               </button>
             </div>
-          )}
-          
-          {resetSent && (
-            <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-md text-sm">
-              Si el email existe, recibirás un enlace para restablecer tu contraseña.
+            
+            {/* Divider */}
+            <div className="relative my-8">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-200"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-4 bg-white text-gray-500">¿No tienes cuenta?</span>
+              </div>
             </div>
-          )}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full px-4 py-2 rounded-md text-white font-medium transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-            style={{
-              backgroundColor: loading ? undefined : 'var(--accent-color)',
-            }}
-          >
-            {loading ? 'Iniciando sesión...' : 'Acceder a la plataforma'}
-          </button>
-        </form>
-
-        {/* Registration CTAs */}
-        <div className="mt-6 pt-6 border-t border-gray-200">
-          <p className="text-sm text-gray-600 text-center mb-4">
-            ¿No tienes cuenta?
-          </p>
-          <div className="space-y-3">
-            <button
-              type="button"
-              onClick={() => router.push('/register/therapist')}
-              className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-md font-medium hover:bg-gray-200 transition-colors"
-            >
-              Crear cuenta profesional
-            </button>
-            <button
-              type="button"
-              onClick={() => router.push('/register/personal')}
-              className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-md font-medium hover:bg-gray-200 transition-colors"
-            >
-              Crear cuenta personal
-            </button>
+            
+            {/* Registration Links */}
+            <div className="space-y-3">
+              <Link
+                href="/register/therapist"
+                className="flex items-center justify-center w-full py-3 px-4 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-colors"
+              >
+                Crear cuenta profesional
+              </Link>
+              <Link
+                href="/register/personal"
+                className="flex items-center justify-center w-full py-3 px-4 bg-white border border-gray-200 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-colors"
+              >
+                Crear cuenta personal
+              </Link>
+            </div>
           </div>
+          
+          {/* Footer */}
+          <p className="text-center text-sm text-gray-500 mt-6">
+            Al iniciar sesión, aceptas nuestros{' '}
+            <Link href="/terms" className="text-violet-600 hover:underline">términos</Link>
+            {' '}y{' '}
+            <Link href="/privacy" className="text-violet-600 hover:underline">privacidad</Link>
+          </p>
         </div>
       </div>
     </div>
   );
 }
-

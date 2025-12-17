@@ -62,6 +62,25 @@ class UserBirthData(models.Model):
         help_text="Etiqueta formateada del lugar de nacimiento (ej: 'La Habana, Cuba')"
     )
     
+    # Profile update tracking (for therapist corrections)
+    profile_updated_by_therapist = models.BooleanField(
+        default=False,
+        help_text="Indica si el terapeuta actualizó el perfil para corregir datos"
+    )
+    last_therapist_update = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Última vez que el terapeuta actualizó el perfil"
+    )
+    updated_by = models.ForeignKey(
+        User,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='birth_data_updates',
+        help_text="Terapeuta que actualizó el perfil"
+    )
+    
     class Meta:
         verbose_name = "Datos de Nacimiento"
         verbose_name_plural = "Datos de Nacimiento"
@@ -105,3 +124,47 @@ class UserBirthData(models.Model):
         self.unlock_requested = False
         self.unlock_token = None
         self.save(update_fields=['unlock_requested', 'unlock_token'])
+    
+    def is_profile_complete(self):
+        """
+        Valida si el perfil tiene datos esenciales completos para análisis cabalísticos.
+        
+        Datos mandatorios:
+        - Nombre legal completo (≥2 palabras: nombre + apellidos)
+        - Fecha de nacimiento
+        - Lugar de nacimiento (ciudad Y país)
+        
+        Returns:
+            dict: {
+                'is_complete': bool,
+                'missing_fields': list,
+                'warnings': list
+            }
+        """
+        missing = []
+        warnings = []
+        
+        # 1. Nombre legal completo (≥2 palabras)
+        if not self.full_name:
+            missing.append('full_name')
+        else:
+            words = self.full_name.strip().split()
+            if len(words) < 2:
+                missing.append('full_name')
+                warnings.append('El nombre debe incluir al menos nombre y apellido')
+        
+        # 2. Fecha de nacimiento
+        if not self.birth_date:
+            missing.append('birth_date')
+        
+        # 3. Lugar de nacimiento (ciudad Y país)
+        if not self.birth_city:
+            missing.append('birth_city')
+        if not self.birth_country:
+            missing.append('birth_country')
+        
+        return {
+            'is_complete': len(missing) == 0,
+            'missing_fields': missing,
+            'warnings': warnings
+        }

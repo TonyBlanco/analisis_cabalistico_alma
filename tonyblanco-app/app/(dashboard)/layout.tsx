@@ -16,6 +16,7 @@ import {
   Play, 
   GraduationCap, 
   Crown,
+  User,
   LucideIcon 
 } from 'lucide-react';
 
@@ -134,6 +135,7 @@ export default function DashboardLayout({
           { href: '/dashboard/personal/videos', label: 'Videos', icon: Play },
           { href: '/dashboard/personal/courses', label: 'Cursos', icon: GraduationCap, locked: true },
           { href: '/dashboard/personal/premium', label: 'Premium', icon: Crown, locked: true, badge: 'Próximamente' },
+          { href: '/dashboard/account', label: 'Cuenta', icon: User },
         ];
       case 'patient':
         // Patient: ONLY patient dashboard
@@ -151,6 +153,38 @@ export default function DashboardLayout({
   console.log('🧭 realUserRole:', realUserRole);
   console.log('🧭 sidebarItems:', sidebarItems);
 
+  // Patient and Therapist have their own layouts with sidebars - skip main layout wrapper
+  const isPatientRoute = pathname?.startsWith('/dashboard/patient');
+  const isTherapistRoute = pathname?.startsWith('/dashboard/therapist');
+  
+  if (isPatientRoute && realUserRole === 'patient') {
+    // Patient route: let patient/layout.tsx handle the sidebar
+    // We only render Header here, patient/layout.tsx handles sidebar
+    return (
+      <div className={`${themeRole ? `role-${themeRole}` : ''}`}>
+        <Header 
+          realUserRole={realUserRole} 
+          activeDashboardRole={getActiveDashboardRole(pathname)}
+        />
+        {children}
+      </div>
+    );
+  }
+
+  if (isTherapistRoute && (realUserRole === 'therapist' || realUserRole === 'admin')) {
+    // Therapist route: let therapist/layout.tsx handle everything
+    return (
+      <div className={`${themeRole ? `role-${themeRole}` : ''}`}>
+        <Header 
+          realUserRole={realUserRole} 
+          activeDashboardRole={getActiveDashboardRole(pathname)}
+        />
+        {children}
+      </div>
+    );
+  }
+
+  // Other roles: render standard dashboard layout
   return (
     <div className={`flex min-h-screen bg-gray-50 ${themeRole ? `role-${themeRole}` : ''}`}>
       {sidebarItems.length > 0 && <Sidebar items={sidebarItems} />}

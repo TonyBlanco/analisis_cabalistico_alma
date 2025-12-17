@@ -5,8 +5,7 @@ import { useRouter } from 'next/navigation';
 import { fetchSession } from '@/lib/session';
 import { getUserRole } from '@/lib/getUserRole';
 import { useRoleGuard } from '@/lib/role-guards';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://analisis-cabalistico-alma.onrender.com/api';
+import { getUserProfile, updateUserProfile } from '@/lib/api';
 
 /**
  * Profile Page
@@ -34,24 +33,33 @@ export default function ProfilePage() {
   useEffect(() => {
     getUserRole().then((userRole) => {
       setRole(userRole);
-      setLoading(false);
     });
 
-    fetchSession().then((session) => {
-      if (session.user) {
-        setUser(session.user);
-        
-        // Initialize form data from user session
-        const birthData = session.user.birth_data || {};
+    const load = async () => {
+      try {
+        const session = await fetchSession();
+        if (session.user) {
+          setUser(session.user);
+        }
+        // Perfil siempre via /profile/me/ (api.ts ya maneja token y 401)
+        const profile = await getUserProfile();
         setFormData({
-          full_name: session.user.full_name || session.user.profile?.full_name || '',
-          birth_date: session.user.birth_date || birthData.birth_date || '',
-          birth_city: birthData.birth_city || '',
-          birth_country: birthData.birth_country || '',
-          email: session.user.email || '',
+          full_name: profile.legal_full_name || session?.user?.full_name || '',
+          birth_date: profile.birth_date || '',
+          birth_city: profile.birth_city || '',
+          birth_country: profile.birth_country || '',
+          email: profile.email || session?.user?.email || '',
         });
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'No se pudo cargar el perfil';
+        setErrors({ load: message });
+        console.error('Error loading profile:', err);
+      } finally {
+        setLoading(false);
       }
-    });
+    };
+
+    load();
   }, []);
 
   useRoleGuard({
@@ -130,25 +138,13 @@ export default function ProfilePage() {
     try {
       const token = localStorage.getItem('authToken');
       const payload = {
-        full_name: formData.full_name.trim(),
+        legal_full_name: formData.full_name.trim(),
         birth_date: formData.birth_date,
         birth_city: formData.birth_city.trim(),
         birth_country: formData.birth_country.trim(),
       };
 
-      const response = await fetch(`${API_URL}/me/profile/`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { 'Authorization': `Token ${token}` } : {}),
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || errorData.message || 'Error al actualizar perfil');
-      }
+      await updateUserProfile(payload);
 
       // Success - refresh session and show success message
       setSuccess(true);
@@ -156,8 +152,10 @@ export default function ProfilePage() {
       if (session.user) {
         setUser(session.user);
       }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al guardar cambios';
+    } catch (err: any) {
+      const errorMessage =
+        (err?.response && (err.response.error || err.response.message)) ||
+        (err instanceof Error ? err.message : 'Error al guardar cambios');
       setErrors({ submit: errorMessage });
       console.error('Error updating profile:', err);
     } finally {

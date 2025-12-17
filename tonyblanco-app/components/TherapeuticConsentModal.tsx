@@ -25,9 +25,9 @@ export default function TherapeuticConsentModal({
 
   const canProceed = commitments.honesty && commitments.safeSpace && commitments.ready;
 
-  const handleAccept = () => {
+  const handleAccept = async () => {
     if (canProceed) {
-      // Guardar consentimiento en localStorage
+      // Guardar consentimiento en localStorage (para compatibilidad)
       const consentData = {
         timestamp: new Date().toISOString(),
         type,
@@ -35,7 +35,9 @@ export default function TherapeuticConsentModal({
         accepted: true
       };
       localStorage.setItem('therapeuticConsent', JSON.stringify(consentData));
-      onAccept();
+      
+      // Call parent callback (will handle backend API call)
+      await onAccept();
     }
   };
 

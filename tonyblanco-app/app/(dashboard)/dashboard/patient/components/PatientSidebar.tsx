@@ -19,7 +19,7 @@ export default function PatientSidebar() {
   return (
     <aside className="w-64 bg-white border-r border-gray-200 min-h-screen p-4">
       <div className="mb-6">
-        <h2 className="text-lg font-semibold text-gray-800">Panel Paciente</h2>
+        <h2 className="text-lg font-semibold text-gray-800">Panel de Paciente</h2>
       </div>
       <nav className="space-y-1">
         {items.map((item) => {

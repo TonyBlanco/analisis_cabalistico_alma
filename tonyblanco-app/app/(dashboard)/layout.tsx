@@ -7,10 +7,24 @@ import { getActiveRole, setActiveRole } from '@/lib/role-state';
 import { getActiveDashboardRole } from '@/lib/getActiveDashboardRole';
 import Header from '@/components/Header';
 import Sidebar from '@/components/Sidebar';
+import { 
+  Home, 
+  Sparkles, 
+  Clipboard, 
+  Book,
+  Headphones, 
+  Play, 
+  GraduationCap, 
+  Crown,
+  LucideIcon 
+} from 'lucide-react';
 
 interface SidebarItem {
   href: string;
   label: string;
+  icon?: LucideIcon;
+  locked?: boolean;
+  badge?: string;
 }
 
 export default function DashboardLayout({
@@ -23,18 +37,31 @@ export default function DashboardLayout({
   const [realUserRole, setRealUserRole] = useState<string | null>(null);
   const [themeRole, setThemeRole] = useState<string | null>(null);
 
+  // Initialize from localStorage on client mount (hydration-safe)
+  useEffect(() => {
+    const stored = getActiveRole();
+    if (stored) {
+      setRealUserRole(stored);
+    }
+  }, []);
+
   useEffect(() => {
     // Get real user role from backend
-    getUserRole().then((role) => {
-      if (role) {
-        setRealUserRole(role);
-        // Store in localStorage for persistence
-        const stored = getActiveRole();
-        if (!stored || stored !== role) {
-          setActiveRole(role);
+    getUserRole()
+      .then((role) => {
+        if (role) {
+          setRealUserRole(role);
+          // Store in localStorage for persistence
+          const stored = getActiveRole();
+          if (!stored || stored !== role) {
+            setActiveRole(role);
+          }
         }
-      }
-    });
+      })
+      .catch(() => {
+        console.warn('⚠️ No se pudo resolver el rol desde backend, usando fallback local');
+        setRealUserRole(getActiveRole());
+      });
   }, []);
 
   useEffect(() => {
@@ -98,9 +125,15 @@ export default function DashboardLayout({
           { href: '/dashboard/therapist/patients', label: 'Pacientes' },
         ];
       case 'personal':
-        // Personal: ONLY personal dashboard
+        // Personal: exploration and growth dashboard
         return [
-          { href: '/dashboard/personal', label: 'Panel Personal' },
+          { href: '/dashboard/personal', label: 'Exploraciones', icon: Sparkles },
+          { href: '/dashboard/personal/tests', label: 'Tests personales', icon: Clipboard },
+          { href: '/dashboard/personal/resources', label: 'Recursos', icon: Book },
+          { href: '/dashboard/personal/audios', label: 'Audios', icon: Headphones },
+          { href: '/dashboard/personal/videos', label: 'Videos', icon: Play },
+          { href: '/dashboard/personal/courses', label: 'Cursos', icon: GraduationCap, locked: true },
+          { href: '/dashboard/personal/premium', label: 'Premium', icon: Crown, locked: true, badge: 'Próximamente' },
         ];
       case 'patient':
         // Patient: ONLY patient dashboard
@@ -114,9 +147,13 @@ export default function DashboardLayout({
 
   const sidebarItems = getSidebarItems(realUserRole);
 
+  // DEBUG: inspeccionar resolución de rol y menú lateral
+  console.log('🧭 realUserRole:', realUserRole);
+  console.log('🧭 sidebarItems:', sidebarItems);
+
   return (
     <div className={`flex min-h-screen bg-gray-50 ${themeRole ? `role-${themeRole}` : ''}`}>
-      <Sidebar items={sidebarItems} />
+      {sidebarItems.length > 0 && <Sidebar items={sidebarItems} />}
       <div className="flex-1 flex flex-col">
         <Header 
           realUserRole={realUserRole} 

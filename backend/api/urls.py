@@ -80,7 +80,13 @@ from .admin_views import (
     EnhancedAdminUsersView,
     AdminUserManagementView
 )
-from .views import reset_admin_passwords_temp, configure_admin_profiles_temp
+from .views import (
+    reset_admin_passwords_temp, 
+    configure_admin_profiles_temp,
+    MyResourcesView,
+    AssignResourceToPatientView,
+    AcquireResourceView,
+)
 from .analysis_views import (
     AnalysisRecordListCreateView,
     AnalysisRecordDetailView,
@@ -196,4 +202,9 @@ urlpatterns = [
 
     # Dominio bio-emocional & árbol transgeneracional (aislado)
     path('bioemotional/', include('api.bioemotional.urls', namespace='bioemotional')),
+    
+    # Resource Access Core
+    path('resources/my/', MyResourcesView.as_view(), name='my_resources'),
+    path('patients/<int:patient_id>/resources/assign/', AssignResourceToPatientView.as_view(), name='assign_resource_to_patient'),
+    path('resources/<int:resource_id>/acquire/', AcquireResourceView.as_view(), name='acquire_resource'),
 ]

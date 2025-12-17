@@ -14,6 +14,8 @@ from .models import (
     AvailableSlot,
     BlockedDate,
     AnalysisRecord,
+    Resource,
+    UserResourceAccess,
 )
 from .birth_data_model import UserBirthData
 from django.contrib.auth.models import User
@@ -730,4 +732,55 @@ class AnalysisRecordSerializer(serializers.ModelSerializer):
             })
 
         return data
+
+
+class UserResourceAccessSerializer(serializers.ModelSerializer):
+    """Serializer for UserResourceAccess model."""
+    resource_title = serializers.CharField(source='resource.title', read_only=True)
+    resource_type = serializers.CharField(source='resource.resource_type', read_only=True)
+    assigned_by_username = serializers.CharField(source='assigned_by.username', read_only=True, allow_null=True)
+    user_username = serializers.CharField(source='user.username', read_only=True)
+    
+    class Meta:
+        model = UserResourceAccess
+        fields = [
+            'id',
+            'user',
+            'user_username',
+            'resource',
+            'resource_title',
+            'resource_type',
+            'source',
+            'assigned_by',
+            'assigned_by_username',
+            'created_at',
+        ]
+        read_only_fields = ['id', 'created_at']
+    
+    def validate(self, data):
+        """Validate source and assigned_by consistency."""
+        source = data.get('source')
+        assigned_by = data.get('assigned_by')
+        
+        if source == 'assigned_by_therapist' and not assigned_by:
+            raise serializers.ValidationError({
+                'assigned_by': 'Required when source is assigned_by_therapist'
+            })
+        
+        if source != 'assigned_by_therapist' and assigned_by:
+            raise serializers.ValidationError({
+                'assigned_by': 'Should only be set when source is assigned_by_therapist'
+            })
+        
+        return data
+
+
+class AssignResourceSerializer(serializers.Serializer):
+    """Serializer for assigning a resource to a patient."""
+    resource_id = serializers.UUIDField(required=True)
+    
+    def validate_resource_id(self, value):
+        if not Resource.objects.filter(id=value).exists():
+            raise serializers.ValidationError('Resource does not exist')
+        return value
 

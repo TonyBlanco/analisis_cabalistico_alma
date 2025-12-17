@@ -863,3 +863,105 @@ class AnalysisRecord(models.Model):
     def __str__(self) -> str:  # pragma: no cover - representación simple
         return f'{self.kind}::{self.module_code} [{self.id}]'
 
+
+class Resource(models.Model):
+    """
+    Shared resource model (videos, audios, PDFs, courses).
+    Resources exist once; access is managed via UserResourceAccess.
+    """
+    RESOURCE_TYPE_CHOICES = [
+        ('video', 'Video'),
+        ('audio', 'Audio'),
+        ('pdf', 'PDF'),
+        ('course', 'Curso'),
+    ]
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    title = models.CharField(max_length=255, help_text='Título del recurso')
+    description = models.TextField(blank=True, help_text='Descripción del recurso')
+    resource_type = models.CharField(
+        max_length=20,
+        choices=RESOURCE_TYPE_CHOICES,
+        help_text='Tipo de recurso'
+    )
+    content_url = models.URLField(blank=True, help_text='URL del contenido del recurso')
+    thumbnail_url = models.URLField(blank=True, help_text='URL de la miniatura')
+    access_level = models.CharField(
+        max_length=20,
+        default='free',
+        help_text='Nivel de acceso base (free, personal, professional, premium)'
+    )
+    is_active = models.BooleanField(default=True, help_text='Indica si el recurso está activo')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = 'Recurso'
+        verbose_name_plural = 'Recursos'
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return self.title
+
+
+class UserResourceAccess(models.Model):
+    """
+    Access control for shared resources.
+    
+    Resources exist once; access is managed via this relation table.
+    """
+    SOURCE_CHOICES = [
+        ('free', 'Gratuito'),
+        ('assigned_by_therapist', 'Asignado por terapeuta'),
+        ('self_purchased', 'Auto-adquirido'),
+    ]
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='resource_accesses',
+        help_text='Usuario que tiene acceso al recurso'
+    )
+    resource = models.ForeignKey(
+        'Resource',
+        on_delete=models.CASCADE,
+        related_name='user_accesses',
+        help_text='Recurso al que se tiene acceso'
+    )
+    source = models.CharField(
+        max_length=32,
+        choices=SOURCE_CHOICES,
+        help_text='Origen del acceso'
+    )
+    assigned_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='assigned_resources',
+        help_text='Terapeuta que asignó el recurso (solo si source=assigned_by_therapist)'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ('user', 'resource')
+        verbose_name = 'Acceso a Recurso'
+        verbose_name_plural = 'Accesos a Recursos'
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user', 'created_at']),
+            models.Index(fields=['resource', 'source']),
+        ]
+    
+    def __str__(self):
+        return f'{self.user.username} -> {self.resource.title} ({self.source})'
+    
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        # Validate assigned_by only if source is assigned_by_therapist
+        if self.source == 'assigned_by_therapist' and not self.assigned_by:
+            raise ValidationError('assigned_by is required when source is assigned_by_therapist')
+        if self.source != 'assigned_by_therapist' and self.assigned_by:
+            raise ValidationError('assigned_by should only be set when source is assigned_by_therapist')
+

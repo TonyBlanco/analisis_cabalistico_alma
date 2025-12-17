@@ -2161,4 +2161,149 @@ def configure_admin_profiles_temp(request):
     })
 
 
+# ========================================
+# RESOURCE ACCESS CORE
+# ========================================
+
+class MyResourcesView(APIView):
+    """
+    GET /api/resources/my/
+    Return all resources accessible to current user.
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        user = request.user
+        accesses = UserResourceAccess.objects.filter(user=user).select_related('resource', 'assigned_by')
+        serializer = UserResourceAccessSerializer(accesses, many=True)
+        return Response(serializer.data)
+
+
+class AssignResourceToPatientView(APIView):
+    """
+    POST /api/patients/{id}/resources/assign
+    Therapist assigns resource to patient.
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request, patient_id):
+        user = request.user
+        
+        # Check therapist role
+        try:
+            profile = user.profile
+            if profile.user_type != 'therapist':
+                return Response(
+                    {'error': 'Only therapists can assign resources'},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+        except:
+            return Response(
+                {'error': 'User profile not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Check patient exists and is owned by therapist
+        try:
+            patient = Patient.objects.get(id=patient_id, therapist=user)
+        except Patient.DoesNotExist:
+            return Response(
+                {'error': 'Patient not found or not owned by you'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Validate request data
+        serializer = AssignResourceSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        resource_id = serializer.validated_data['resource_id']
+        
+        # Get resource
+        try:
+            from .models import Resource
+            resource = Resource.objects.get(id=resource_id)
+        except Resource.DoesNotExist:
+            return Response(
+                {'error': 'Resource not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Create or get access
+        access, created = UserResourceAccess.objects.get_or_create(
+            user=patient.user,
+            resource=resource,
+            defaults={
+                'source': 'assigned_by_therapist',
+                'assigned_by': user,
+            }
+        )
+        
+        if not created:
+            return Response(
+                {'message': 'Resource already assigned to patient'},
+                status=status.HTTP_200_OK
+            )
+        
+        return Response(
+            UserResourceAccessSerializer(access).data,
+            status=status.HTTP_201_CREATED
+        )
+
+
+class AcquireResourceView(APIView):
+    """
+    POST /api/resources/{id}/acquire
+    Simulate self-purchase (no payments).
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request, resource_id):
+        user = request.user
+        
+        # Check user role (only patient and personal can self-purchase)
+        try:
+            profile = user.profile
+            if profile.user_type not in ['patient', 'personal']:
+                return Response(
+                    {'error': 'Only patient and personal users can acquire resources'},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+        except:
+            return Response(
+                {'error': 'User profile not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Get resource
+        try:
+            from .models import Resource
+            resource = Resource.objects.get(id=resource_id)
+        except Resource.DoesNotExist:
+            return Response(
+                {'error': 'Resource not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Create or get access
+        access, created = UserResourceAccess.objects.get_or_create(
+            user=user,
+            resource=resource,
+            defaults={
+                'source': 'self_purchased',
+            }
+        )
+        
+        if not created:
+            return Response(
+                {'message': 'Resource already acquired'},
+                status=status.HTTP_200_OK
+            )
+        
+        return Response(
+            UserResourceAccessSerializer(access).data,
+            status=status.HTTP_201_CREATED
+        )
+
+
 

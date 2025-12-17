@@ -43,7 +43,7 @@ export default function TherapeuticConsentModal({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose?.()}>
       <DialogContent className="max-w-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-slate-700 text-slate-100">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-light text-center mb-2" style={{ color: '#D4AF37' }}>
+          <DialogTitle className="text-2xl font-light text-center mb-2 text-[#D4AF37]">
             Antes de comenzar tu viaje interior
           </DialogTitle>
         </DialogHeader>

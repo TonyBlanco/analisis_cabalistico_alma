@@ -2,7 +2,11 @@
 
 import PatientSidebar from './components/PatientSidebar';
 
-export default function PatientLayout({ children }) {
+export default function PatientLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <div className="flex min-h-screen bg-gray-50">
       <PatientSidebar />

@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { fetchSession } from '@/lib/session';
 import { useRoleGuard } from '@/lib/role-guards';
+import { getUserRole } from '@/lib/getUserRole';
 import { clearAuthState } from '@/lib/auth-state';
 import GeoLocationField from '@/components/GeoLocationField';
 import NameVerificationModal from '@/components/NameVerificationModal';
@@ -15,7 +16,10 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://analisis-cabalistico
  */
 export default function AccountPage() {
   const router = useRouter();
-  const { role, loading: roleLoading, authorized } = useRoleGuard({
+  const [role, setRole] = useState<string | null>(null);
+  
+  useRoleGuard({
+    currentUserRole: role as 'admin' | 'therapist' | 'personal' | 'patient' | null,
     allowedRoles: ['admin', 'therapist', 'personal', 'patient'],
     redirectTo: '/login',
   });
@@ -23,6 +27,15 @@ export default function AccountPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [user, setUser] = useState<any>(null);
+
+  // Get user role
+  useEffect(() => {
+    getUserRole().then((userRole) => {
+      if (userRole) {
+        setRole(userRole);
+      }
+    });
+  }, []);
   const [formData, setFormData] = useState({
     full_name: '',
     legal_full_name: '',
@@ -281,7 +294,7 @@ export default function AccountPage() {
     }
   };
 
-  if (roleLoading || loading) {
+  if (loading) {
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="bg-white border border-gray-200 rounded-lg p-6">
@@ -291,7 +304,7 @@ export default function AccountPage() {
     );
   }
 
-  if (!authorized || !role) {
+  if (!role) {
     return null;
   }
 

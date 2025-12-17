@@ -1,13 +1,15 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { useRoleGuard } from '@/lib/role-guards';
 import { fetchSession } from '@/lib/session';
-import { getProfile, acceptConsent } from '@/lib/api';
 import PatientAssignedTestsSection from '@/components/PatientAssignedTestsSection';
 import PatientResultsSection from '@/components/PatientResultsSection';
 import DisclaimerModal from '@/components/DisclaimerModal';
 import TherapeuticConsentModal from '@/components/TherapeuticConsentModal';
+
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || 'https://analisis-cabalistico-alma.onrender.com/api';
 
 /**
  * Patient Dashboard
@@ -27,94 +29,72 @@ export default function PatientDashboard() {
   const [showConsentModal, setShowConsentModal] = useState(false);
   const [showFirstLoginDisclaimer, setShowFirstLoginDisclaimer] = useState(false);
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
-  const [profileLoading, setProfileLoading] = useState(true);
-  
-  // CRITICAL: useRef to ensure session fetch runs ONLY ONCE on mount
-  const hasLoadedSessionRef = useRef(false);
 
   // Fetch de sesión para contexto de paciente (independiente del rol)
-  // CRITICAL: Run ONLY ONCE on mount
   useEffect(() => {
-    // CRITICAL: Only run once on mount
-    if (hasLoadedSessionRef.current) {
-      return;
-    }
-    hasLoadedSessionRef.current = true;
-
     const load = async () => {
-      try {
-        const session = await fetchSession();
-        if (session.user) {
-          setUser(session.user);
-          if (session.user.patient_id) {
-            setPatientId(session.user.patient_id);
-          }
-          if (session.user.therapist) {
-            setTherapist(session.user.therapist);
-          }
+      const session = await fetchSession();
+      if (session.user) {
+        setUser(session.user);
+        if (session.user.patient_id) {
+          setPatientId(session.user.patient_id);
         }
+        if (session.user.therapist) {
+          setTherapist(session.user.therapist);
+        }
+      }
 
-        // UserProfile como fuente de verdad para consentimiento
-        // Use getProfile from api.ts - it never throws, returns error object on failure
-        const profileResponse = await getProfile();
-        
-        if (profileResponse && typeof profileResponse === 'object' && 'error' in profileResponse && profileResponse.error) {
-          // Network error or backend unavailable - use session as fallback
-          console.warn('No se pudo leer /profile/me/ para consentimiento, usando /me', (profileResponse as any).message);
-          if (session.user && (session.user as any).consent_accepted_at) {
-            setConsentAcceptedAt((session.user as any).consent_accepted_at);
-          } else {
-            // If no consent in session either, assume not accepted (will show modal)
-            setConsentAcceptedAt(null);
-          }
-        } else {
-          // Success - use profile data
-          const profile = profileResponse as any;
-          setConsentAcceptedAt(profile.consent_accepted_at || null);
+      // UserProfile como fuente de verdad para consentimiento
+      try {
+        const token =
+          typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
+        if (!token) {
+          setConsentAcceptedAt(null);
+          return;
         }
-      } catch (error) {
-        // Extra safety - should never reach here since getProfile never throws
-        console.error('Unexpected error loading patient dashboard:', error);
-        setConsentAcceptedAt(null);
-      } finally {
-        setProfileLoading(false);
+        const res = await fetch(`${API_URL}/profile/me/`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Token ${token}`,
+          },
+        });
+        if (res.ok) {
+          const profile = await res.json();
+          setConsentAcceptedAt(profile.consent_accepted_at || null);
+        } else if (session.user && session.user.consent_accepted_at) {
+          // Fallback suave a /api/me si el nuevo endpoint falla
+          setConsentAcceptedAt(session.user.consent_accepted_at);
+        } else {
+          setConsentAcceptedAt(null);
+        }
+      } catch (e) {
+        console.warn('No se pudo leer /profile/me/ para consentimiento, usando /me', e);
+        if (user && (user as any).consent_accepted_at) {
+          setConsentAcceptedAt((user as any).consent_accepted_at);
+        } else {
+          setConsentAcceptedAt(null);
+        }
       }
     };
 
     load();
-  }, []); // CRITICAL: Empty deps - run ONLY on mount
+  }, []);
 
   // Consentimiento terapéutico obligatorio antes de cualquier otra cosa
-  // CRITICAL: Use ref to prevent loops - only update when values actually change
-  const prevConsentRef = useRef<string | null>(null);
   useEffect(() => {
-    // Only update if consentAcceptedAt actually changed
-    if (prevConsentRef.current === consentAcceptedAt) {
-      return;
-    }
-    prevConsentRef.current = consentAcceptedAt;
-
-    // Only set modal state after profile has loaded
-    if (!profileLoading && role === 'patient') {
+    if (role === 'patient') {
       // Mostrar modal solo si el backend indica que nunca se aceptó
-      if (consentAcceptedAt === null) {
+      if (!consentAcceptedAt) {
         setShowConsentModal(true);
       } else {
         setShowConsentModal(false);
       }
     }
-  }, [role, consentAcceptedAt, profileLoading]);
+  }, [role, consentAcceptedAt]);
 
   // Disclaimer de primera vez, sólo cuando el rol es `patient` y el consentimiento ya fue aceptado
-  // CRITICAL: Use ref to prevent loops - only check once per consent state
-  const prevDisclaimerCheckRef = useRef<string | null>(null);
   useEffect(() => {
-    // Only check if consentAcceptedAt actually changed
-    if (prevDisclaimerCheckRef.current === consentAcceptedAt) {
-      return;
-    }
-    prevDisclaimerCheckRef.current = consentAcceptedAt;
-
     if (role === 'patient' && typeof window !== 'undefined' && consentAcceptedAt) {
       const accepted = localStorage.getItem('patient_disclaimer_accepted');
       if (!accepted) {
@@ -127,140 +107,89 @@ export default function PatientDashboard() {
 
   const handleAcceptConsent = async () => {
     try {
-      // Use acceptConsent from api.ts - it never throws, returns error object on failure
-      const response = await acceptConsent();
+      const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
+      if (!token) {
+        return;
+      }
+      const response = await fetch(`${API_URL}/profile/me/consent/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Token ${token}`,
+        },
+      });
 
-      // Check if response is an error object
-      if (response && typeof response === 'object' && 'error' in response && response.error) {
-        const errorResponse = response as any;
-        
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
         // Si ya estaba aceptado, consideramos el consentimiento como presente y ocultamos modal
         if (
-          errorResponse.status === 400 &&
-          (errorResponse.message || '').toString().toLowerCase().includes('ya había sido aceptado')
+          response.status === 400 &&
+          (data.detail || '').toString().toLowerCase().includes('ya había sido aceptado')
         ) {
-          // Try to get current profile to get consent_accepted_at
-          const profileResponse = await getProfile();
-          if (profileResponse && typeof profileResponse === 'object' && !('error' in profileResponse)) {
-            const profile = profileResponse as any;
-            setConsentAcceptedAt(profile.consent_accepted_at || new Date().toISOString());
-          } else {
-            setConsentAcceptedAt(new Date().toISOString());
-          }
+          setConsentAcceptedAt(data.consent_accepted_at || new Date().toISOString());
           setShowConsentModal(false);
           return;
         }
-        
-        console.error('Error al registrar consentimiento terapéutico', errorResponse);
+        console.error('Error al registrar consentimiento terapéutico', data);
         return;
       }
 
-      // Success - update state
-      const profile = response as any;
+      const profile = await response.json();
       setConsentAcceptedAt(profile.consent_accepted_at || new Date().toISOString());
       setShowConsentModal(false);
 
-      // Refrescar sesión para coherencia global (non-blocking)
-      fetchSession().catch(err => console.warn('Error refreshing session:', err));
+      // Refrescar sesión para coherencia global
+      await fetchSession();
     } catch (error) {
-      // Extra safety - should never reach here since acceptConsent never throws
-      console.error('Error inesperado al registrar consentimiento terapéutico:', error);
+      console.error('Error al registrar consentimiento terapéutico:', error);
     }
   };
 
-  // Guard simplificado: validar SOLO role === 'patient'
-  // NO redirigir pacientes desde /dashboard/patient
-  // Las condiciones de acceso adicionales (consent, disclaimer) están dentro del contenido
-  
-  // Estado de carga: mientras se resuelve el rol o el perfil
-  if (roleLoading || profileLoading) {
+  // Estado de carga inicial: hasta que el guard resuelva el rol
+  if (roleLoading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-          <p className="text-sm text-gray-500">Cargando dashboard...</p>
+          <p className="text-sm text-gray-500">Cargando...</p>
         </div>
       </div>
     );
   }
 
-  // Si el rol NO es 'patient' después de cargar, mostrar mensaje (el guard ya redirigió)
-  // Pero NO bloquear si role === 'patient'
-  // IMPORTANT: If role is null (network error), allow render to continue
-  // Components will handle empty states gracefully
-  if (role !== null && role !== 'patient') {
+  // Si no está autorizado, el guard ya habrá lanzado redirect
+  if (!authorized || role !== 'patient') {
+    return null;
+  }
+
+  // Mientras no se haya aceptado el consentimiento, bloqueamos el dashboard
+  if (!consentAcceptedAt) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-          <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
-            <p className="text-sm text-yellow-800">
-              No tienes acceso a esta sección. Redirigiendo...
-            </p>
-          </div>
-        </div>
-      </div>
+      <TherapeuticConsentModal
+        isOpen={showConsentModal}
+        onAccept={handleAcceptConsent}
+        type="analysis"
+      />
     );
   }
 
-  // If role is null (network error) but we have a token, allow render
-  // Components will show empty states if data fails to load
-  // If role === 'patient', continue with normal flow
-  // NO verificar 'authorized' aquí - el guard solo valida el rol
-
-  // Mientras no se haya aceptado el consentimiento, mostrar modal sobre fondo visible
-  // CRITICAL: Always show modal if consentAcceptedAt is null (after loading is complete)
-  if (consentAcceptedAt === null) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-          <p className="text-sm text-gray-500 mb-4">
-            {showConsentModal ? 'Por favor, acepta el consentimiento terapéutico para continuar.' : 'Cargando consentimiento...'}
-          </p>
-        </div>
-        <TherapeuticConsentModal
-          isOpen={showConsentModal}
-          onAccept={handleAcceptConsent}
-          onClose={() => {
-            // Modal should not be closable, but if it is, ensure we show it again
-            if (!consentAcceptedAt) {
-              setShowConsentModal(true);
-            }
-          }}
-          type="analysis"
-        />
-      </div>
-    );
-  }
-
-  // Disclaimer de primer login - mostrar sobre fondo visible
+  // Disclaimer de primer login
   if (showFirstLoginDisclaimer && !disclaimerAccepted) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-          <p className="text-sm text-gray-500 mb-4">Preparando tu dashboard...</p>
-        </div>
-        <DisclaimerModal
-          open={true}
-          type="patient_first_login"
-          onAccept={() => {
-            localStorage.setItem('patient_disclaimer_accepted', 'true');
-            setDisclaimerAccepted(true);
-            setShowFirstLoginDisclaimer(false);
-          }}
-          cancelable={false}
-        />
-      </div>
+      <DisclaimerModal
+        open={true}
+        type="patient_first_login"
+        onAccept={() => {
+          localStorage.setItem('patient_disclaimer_accepted', 'true');
+          setDisclaimerAccepted(true);
+          setShowFirstLoginDisclaimer(false);
+        }}
+        cancelable={false}
+      />
     );
   }
 
-  // Si el disclaimer aún no está aceptado pero no se está mostrando, mostrar estado de carga
   if (!disclaimerAccepted) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-          <p className="text-sm text-gray-500">Cargando dashboard...</p>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   return (

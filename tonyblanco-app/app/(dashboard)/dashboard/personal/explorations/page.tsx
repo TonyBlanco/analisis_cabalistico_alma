@@ -61,3 +61,4 @@ export default function PersonalExplorationsPage() {
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from rest_framework.authtoken.views import obtain_auth_token
 from .views import (
     CreatePatientWithAccountView,
@@ -16,7 +16,6 @@ from .views import (
     GeocodeCityView,
     CheckMembershipView,
     EmailOrUsernameAuthToken,
-    PasswordResetRequestView,
     GoogleOAuthView,
     AdminStatsView,
     AdminUsersView,
@@ -64,8 +63,7 @@ from .test_views import (
     GrantTestAccessView,
     AssignTestToPatientView,
     PatientPreviousTestsView,
-    ProcessTestSubmissionView,
-    AssignedTestsView,
+    ProcessTestSubmissionView
 )
 from .gematria_views import GematriaInterpretationView
 from .tarot_views import TarotAnalysisView
@@ -86,13 +84,6 @@ from .views import reset_admin_passwords_temp, configure_admin_profiles_temp
 from .analysis_views import (
     AnalysisRecordListCreateView,
     AnalysisRecordDetailView,
-    PatientMyResultsView,
-    UpdateAnalysisAnnotationsView,
-)
-from .resource_views import (
-    MyResourcesView,
-    AssignResourceToPatientView,
-    AcquireResourceView,
 )
 
 urlpatterns = [
@@ -105,7 +96,6 @@ urlpatterns = [
     
     # Autenticación
     path('login/', EmailOrUsernameAuthToken.as_view(), name='api_token_auth'),
-    path('password-reset/request/', PasswordResetRequestView.as_view(), name='password_reset_request'),
     path('login/google/', GoogleOAuthView.as_view(), name='google_oauth'),
     path('register/therapist/', RegisterTherapistView.as_view(), name='register_therapist'),
     path('register/personal/', RegisterPersonalView.as_view(), name='register_personal'),
@@ -132,7 +122,6 @@ urlpatterns = [
     path('therapist/patients/', PatientListCreateView.as_view(), name='patient_list_create'),
     path('therapist/patients/<int:pk>/', PatientDetailView.as_view(), name='patient_detail'),
     path('therapist/patients/<int:pk>/profile/', TherapistPatientProfileView.as_view(), name='therapist_patient_profile'),
-    path('therapist/patients/<int:pk>/generate-ai-plan/', GenerateAIPlanView.as_view(), name='generate_ai_plan'),
     path('therapist/patients/<int:id>/tarot-analysis/', TarotAnalysisView.as_view(), name='tarot_analysis'),
     path('therapist/patients/<int:id>/tarot-analysis/generate-and-save/', GenerateAndSaveTarotAnalysisView.as_view(), name='tarot_analysis_generate_and_save'),
     path('therapist/patients/<int:id>/cabalistic-analysis/', SaveCabalisticAnalysisView.as_view(), name='save_cabalistic_analysis'),
@@ -191,7 +180,6 @@ urlpatterns = [
     
     # Tests modulares (orden importante: rutas específicas primero)
     path('tests/', AvailableTestsView.as_view(), name='available_tests'),
-    path('tests/assigned/', AssignedTestsView.as_view(), name='assigned_tests'),
     path('tests/submit/', ProcessTestSubmissionView.as_view(), name='process_test_submission'),
     path('tests/execute/', ExecuteTestView.as_view(), name='execute_test'),
     path('tests/results/', TestResultsView.as_view(), name='test_results'),
@@ -205,11 +193,7 @@ urlpatterns = [
     # AnalysisRecord core (núcleo normalizado de análisis)
     path('analysis-records/', AnalysisRecordListCreateView.as_view(), name='analysisrecord_list_create'),
     path('analysis-records/<uuid:pk>/', AnalysisRecordDetailView.as_view(), name='analysisrecord_detail'),
-    path('analysis-records/<uuid:pk>/annotations/', UpdateAnalysisAnnotationsView.as_view(), name='analysisrecord_annotations'),
-    path('analysis-records/my-results/', PatientMyResultsView.as_view(), name='analysisrecord_my_results'),
-    
-    # Resource Access Core (FASE SELLADA)
-    path('resources/my/', MyResourcesView.as_view(), name='my_resources'),
-    path('patients/<int:id>/resources/assign/', AssignResourceToPatientView.as_view(), name='assign_resource_to_patient'),
-    path('resources/<uuid:id>/acquire/', AcquireResourceView.as_view(), name='acquire_resource'),
+
+    # Dominio bio-emocional & árbol transgeneracional (aislado)
+    path('bioemotional/', include('api.bioemotional.urls', namespace='bioemotional')),
 ]

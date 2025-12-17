@@ -46,3 +46,4 @@ class AstrologyAdapter(BaseAnalysisAdapter):
         }
 
 
+

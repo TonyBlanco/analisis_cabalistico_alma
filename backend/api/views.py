@@ -28,8 +28,6 @@ from .models import (
     Booking,
     AvailableSlot,
     BlockedDate,
-    Resource,
-    UserResourceAccess,
 )
 from .birth_data_model import UserBirthData
 from .serializers import (
@@ -150,26 +148,44 @@ class CurrentUserView(APIView):
         if hasattr(request.user, 'profile'):
             profile = request.user.profile
             user_data.update({
-                'full_name': profile.full_name,
-                'legal_full_name': profile.legal_full_name or profile.full_name,
-                'user_type': profile.user_type,
-                'is_admin': profile.is_admin,
-                'subscription_status': profile.subscription_status,
-                'subscription_plan': profile.subscription_plan,
-                'membership_expires': str(profile.membership_expires) if profile.membership_expires else None,
-                'phone': profile.phone,
-                'current_patients_count': profile.current_patients_count,
-                'fichas_created_this_month': profile.fichas_created_this_month,
-                'profile_version': profile.profile_version,
-                'name_change_count': profile.name_change_count,
-                'consent_accepted_at': profile.consent_accepted_at.isoformat() if profile.consent_accepted_at else None,
-                'birth_date': str(profile.birth_date) if profile.birth_date else None,
-                'birth_time': str(profile.birth_time) if profile.birth_time else None,
-                'birth_city': profile.birth_city,
-                'birth_country': profile.birth_country,
-                'birth_latitude': float(profile.birth_latitude) if profile.birth_latitude is not None else None,
-                'birth_longitude': float(profile.birth_longitude) if profile.birth_longitude is not None else None,
-                'birth_timezone': profile.birth_timezone,
+                'full_name': getattr(profile, 'full_name', None),
+                'legal_full_name': getattr(profile, 'legal_full_name', None) or getattr(profile, 'full_name', None),
+                'user_type': getattr(profile, 'user_type', None),
+                'is_admin': getattr(profile, 'is_admin', None),
+                'subscription_status': getattr(profile, 'subscription_status', None),
+                'subscription_plan': getattr(profile, 'subscription_plan', None),
+                'membership_expires': (
+                    str(getattr(profile, 'membership_expires', None))
+                    if getattr(profile, 'membership_expires', None) else None
+                ),
+                'phone': getattr(profile, 'phone', None),
+                'current_patients_count': getattr(profile, 'current_patients_count', None),
+                'fichas_created_this_month': getattr(profile, 'fichas_created_this_month', None),
+                'profile_version': getattr(profile, 'profile_version', None),
+                'name_change_count': getattr(profile, 'name_change_count', None),
+                'consent_accepted_at': (
+                    getattr(profile, 'consent_accepted_at', None).isoformat()
+                    if getattr(profile, 'consent_accepted_at', None) else None
+                ),
+                'birth_date': (
+                    str(getattr(profile, 'birth_date', None))
+                    if getattr(profile, 'birth_date', None) else None
+                ),
+                'birth_time': (
+                    str(getattr(profile, 'birth_time', None))
+                    if getattr(profile, 'birth_time', None) else None
+                ),
+                'birth_city': getattr(profile, 'birth_city', None),
+                'birth_country': getattr(profile, 'birth_country', None),
+                'birth_latitude': (
+                    float(getattr(profile, 'birth_latitude', None))
+                    if getattr(profile, 'birth_latitude', None) is not None else None
+                ),
+                'birth_longitude': (
+                    float(getattr(profile, 'birth_longitude', None))
+                    if getattr(profile, 'birth_longitude', None) is not None else None
+                ),
+                'birth_timezone': getattr(profile, 'birth_timezone', None),
             })
             
             # Si es paciente, incluir patient_id y referencia al therapist
@@ -548,10 +564,7 @@ class EmailOrUsernameAuthToken(APIView):
         password = request.data.get('password')
 
         if not username_or_email or not password:
-            return Response({
-                'error': 'validation',
-                'message': 'Usuario/email y contraseña son requeridos'
-            }, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'Usuario/email y contraseña son requeridos'}, status=status.HTTP_400_BAD_REQUEST)
 
         UserModel = get_user_model()
 
@@ -561,19 +574,12 @@ class EmailOrUsernameAuthToken(APIView):
         )
 
         if not user:
-            return Response({
-                'error': 'user_not_found',
-                'message': 'El usuario o email no está registrado. Verifica que esté escrito correctamente.'
-            }, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'Credenciales inválidas'}, status=status.HTTP_400_BAD_REQUEST)
 
         user_auth = authenticate(username=user.username, password=password)
 
         if not user_auth:
-            return Response({
-                'error': 'invalid_password',
-                'message': 'La contraseña es incorrecta.',
-                'email': user.email
-            }, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'Credenciales inválidas'}, status=status.HTTP_400_BAD_REQUEST)
 
         token, _ = Token.objects.get_or_create(user=user_auth)
         
@@ -587,53 +593,6 @@ class EmailOrUsernameAuthToken(APIView):
             'username': user_auth.username,
             'role': role
         })
-
-
-class PasswordResetRequestView(APIView):
-    """Solicita reset de contraseña enviando email con token."""
-    permission_classes = [AllowAny]
-
-    def post(self, request, *args, **kwargs):
-        from django.contrib.auth.tokens import default_token_generator
-        from django.utils.http import urlsafe_base64_encode
-        from django.utils.encoding import force_bytes
-        from django.conf import settings
-        from .emails import send_password_reset_email
-        
-        email = request.data.get('email')
-        
-        if not email:
-            return Response({
-                'error': 'validation',
-                'message': 'El email es requerido'
-            }, status=status.HTTP_400_BAD_REQUEST)
-        
-        UserModel = get_user_model()
-        
-        try:
-            user = UserModel.objects.get(email=email)
-        except UserModel.DoesNotExist:
-            # Por seguridad, siempre devolvemos éxito aunque el email no exista
-            return Response({
-                'message': 'Si el email existe, recibirás un enlace para restablecer tu contraseña.'
-            }, status=status.HTTP_200_OK)
-        
-        # Generar token de reset
-        token = default_token_generator.make_token(user)
-        uid = urlsafe_base64_encode(force_bytes(user.pk))
-        
-        # Enviar email
-        try:
-            send_password_reset_email(user, token, uid)
-            return Response({
-                'message': 'Si el email existe, recibirás un enlace para restablecer tu contraseña.'
-            }, status=status.HTTP_200_OK)
-        except Exception as e:
-            # Por seguridad, siempre devolvemos éxito
-            print(f"Error enviando email de reset: {e}")
-            return Response({
-                'message': 'Si el email existe, recibirás un enlace para restablecer tu contraseña.'
-            }, status=status.HTTP_200_OK)
 
 
 class CalculoCabalisticoView(APIView):
@@ -1114,169 +1073,52 @@ class TherapistPatientProfileView(APIView):
     """
     Perfil básico de paciente en contexto de terapeuta.
 
-    Endpoints:
-    - GET  /api/therapist/patients/<int:pk>/profile/  → Lee perfil del paciente
-    - PATCH /api/therapist/patients/<int:pk>/profile/  → Actualiza perfil del paciente
+    Endpoint:
+    - GET /api/therapist/patients/<int:pk>/profile/
 
     Reglas:
-    - Solo el terapeuta propietario puede ver/editar el perfil.
-    - Ownership check: patient.therapist == request.user
-    - Usa mismo serializer que /api/profile/me/ (UserProfileDetailSerializer)
-    - Enforce name_change_count y profile_version rules
-    - Coordinates locked unless explicit re-write flag
+    - Solo el terapeuta propietario puede ver el perfil.
+    - NO modifica nada (read-only).
     - No toca AnalysisRecord ni lógica clínica.
     """
 
     permission_classes = [IsAuthenticated, IsTherapist]
 
-    def get_patient(self, pk, therapist):
-        """Helper para obtener paciente con ownership check"""
+    def get(self, request, pk):
         try:
-            return Patient.objects.select_related("user", "user__profile").get(
-                therapist=therapist,
+            patient = Patient.objects.select_related("user").get(
+                therapist=request.user,
                 id=pk,
                 is_active=True,
             )
         except Patient.DoesNotExist:
-            return None
-
-    def get(self, request, pk):
-        patient = self.get_patient(pk, request.user)
-        if not patient:
             return Response(
                 {"error": "Paciente no encontrado o no te pertenece."},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        # Si el paciente tiene cuenta de usuario vinculada, usar UserProfile como fuente de verdad
+        # Datos base desde Patient
+        profile_data = {
+            "patient_id": patient.id,
+            "birth_date": getattr(patient, "birth_date", None),
+            "birth_city": getattr(patient, "birth_city", None),
+            "birth_country": getattr(patient, "birth_country", None),
+            "birth_latitude": getattr(patient, "birth_latitude", None),
+            "birth_longitude": getattr(patient, "birth_longitude", None),
+            "birth_timezone": getattr(patient, "birth_timezone", None),
+            "legal_full_name": None,
+            "consent_accepted_at": None,
+        }
+
+        # Si el paciente tiene cuenta de usuario vinculada, enriquecemos con UserProfile
         if patient.user and hasattr(patient.user, "profile"):
             up = patient.user.profile
-            serializer = UserProfileDetailSerializer(up)
-            profile_data = serializer.data
-            profile_data["patient_id"] = patient.id
-        else:
-            # Si no tiene user, usar datos del modelo Patient directamente
-            profile_data = {
-                "patient_id": patient.id,
-                "legal_full_name": patient.full_name,
-                "full_name": patient.full_name,
-                "birth_date": patient.birth_date.strftime("%Y-%m-%d") if patient.birth_date else None,
-                "birth_time": str(patient.birth_time) if patient.birth_time else None,
-                "birth_city": patient.birth_city,
-                "birth_country": patient.birth_country,
-                "birth_latitude": float(patient.birth_latitude) if patient.birth_latitude is not None else None,
-                "birth_longitude": float(patient.birth_longitude) if patient.birth_longitude is not None else None,
-                "birth_timezone": patient.birth_timezone,
-                "consent_accepted_at": None,
-                "profile_version": 0,
-                "name_change_count": 0,
-                "user_type": "patient",
-                "email": patient.email,
-            }
+            profile_data["legal_full_name"] = getattr(up, "legal_full_name", None) or getattr(
+                up, "full_name", None
+            )
+            profile_data["consent_accepted_at"] = getattr(up, "consent_accepted_at", None)
 
         return Response(profile_data, status=status.HTTP_200_OK)
-
-    def patch(self, request, pk):
-        """
-        Actualiza el perfil del paciente.
-        
-        Ownership check: patient.therapist == request.user
-        Usa UserProfileDetailSerializer si el paciente tiene user vinculado.
-        """
-        patient = self.get_patient(pk, request.user)
-        if not patient:
-            return Response(
-                {"error": "Paciente no encontrado o no te pertenece."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-
-        # Si el paciente tiene cuenta de usuario vinculada, actualizar UserProfile
-        if patient.user and hasattr(patient.user, "profile"):
-            profile = patient.user.profile
-            
-            # Preparar datos para el serializer
-            update_data = request.data.copy()
-            
-            # Si no se envía flag de reescribir coordenadas, no incluir lat/lng
-            rewrite_coordinates = update_data.pop('rewrite_coordinates', False)
-            if not rewrite_coordinates:
-                # No permitir modificar coordenadas si no hay flag explícito
-                update_data.pop('birth_latitude', None)
-                update_data.pop('birth_longitude', None)
-            
-            # Usar el mismo serializer que /api/profile/me/
-            serializer = UserProfileDetailSerializer(profile, data=update_data, partial=True)
-            serializer.is_valid(raise_exception=True)
-            
-            # Guardar cambios
-            profile = serializer.save()
-            
-            # Incrementar versión de perfil si hubo cambios significativos
-            fields_touched = set(update_data.keys())
-            relevant_fields = {
-                "legal_full_name",
-                "birth_date",
-                "birth_time",
-                "birth_city",
-                "birth_country",
-                "birth_latitude",
-                "birth_longitude",
-            }
-            if fields_touched.intersection(relevant_fields):
-                try:
-                    profile.profile_version = (profile.profile_version or 1) + 1
-                except Exception:
-                    profile.profile_version = 1
-                profile.save(update_fields=["profile_version"])
-            
-            # Retornar perfil actualizado
-            return Response(UserProfileDetailSerializer(profile).data, status=status.HTTP_200_OK)
-        
-        else:
-            # Si no tiene user vinculado, actualizar directamente el modelo Patient
-            # (caso menos común, pero necesario para pacientes sin cuenta)
-            update_data = request.data.copy()
-            
-            # Campos editables en Patient
-            if 'legal_full_name' in update_data:
-                patient.full_name = update_data['legal_full_name']
-            if 'birth_date' in update_data:
-                patient.birth_date = update_data['birth_date']
-            if 'birth_time' in update_data:
-                patient.birth_time = update_data['birth_time']
-            if 'birth_city' in update_data:
-                patient.birth_city = update_data['birth_city']
-            if 'birth_country' in update_data:
-                patient.birth_country = update_data['birth_country']
-            
-            # Coordinates solo si hay flag explícito
-            rewrite_coordinates = update_data.pop('rewrite_coordinates', False)
-            if rewrite_coordinates:
-                if 'birth_latitude' in update_data:
-                    patient.birth_latitude = update_data['birth_latitude']
-                if 'birth_longitude' in update_data:
-                    patient.birth_longitude = update_data['birth_longitude']
-            
-            if 'birth_timezone' in update_data:
-                patient.birth_timezone = update_data['birth_timezone']
-            
-            patient.save()
-            
-            # Retornar datos actualizados
-            return Response({
-                "patient_id": patient.id,
-                "legal_full_name": patient.full_name,
-                "birth_date": patient.birth_date.strftime("%Y-%m-%d") if patient.birth_date else None,
-                "birth_time": str(patient.birth_time) if patient.birth_time else None,
-                "birth_city": patient.birth_city,
-                "birth_country": patient.birth_country,
-                "birth_latitude": float(patient.birth_latitude) if patient.birth_latitude is not None else None,
-                "birth_longitude": float(patient.birth_longitude) if patient.birth_longitude is not None else None,
-                "birth_timezone": patient.birth_timezone,
-                "consent_accepted_at": None,
-                "profile_version": 0,
-                "name_change_count": 0,
-            }, status=status.HTTP_200_OK)
 
 
 class GenerateAIPlanView(APIView):

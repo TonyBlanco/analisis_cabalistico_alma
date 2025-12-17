@@ -14,8 +14,6 @@ from .models import (
     AvailableSlot,
     BlockedDate,
     AnalysisRecord,
-    Resource,
-    UserResourceAccess,
 )
 from .birth_data_model import UserBirthData
 from django.contrib.auth.models import User
@@ -349,8 +347,7 @@ class PatientSerializer(serializers.ModelSerializer):
             # Datos personales
             'first_name', 'last_name', 'full_name', 'email', 'phone', 'avatar',
             # Datos astrológicos/cabalísticos
-            'birth_date', 'birth_time', 'birth_place', 'birth_city', 'birth_country',
-            'birth_latitude', 'birth_longitude', 'birth_timezone', 'hebrew_name',
+            'birth_date', 'birth_time', 'birth_place', 'hebrew_name',
             # Datos clínicos
             'main_complaint', 'clinical_history',
             # Plan de tratamiento
@@ -637,7 +634,6 @@ class AnalysisRecordSerializer(serializers.ModelSerializer):
             'raw_input',
             'computed_result',
             'legacy_output',
-            'therapist_annotations',
             'visibility',
             'created_at',
             'test_result',
@@ -734,104 +730,4 @@ class AnalysisRecordSerializer(serializers.ModelSerializer):
             })
 
         return data
-
-
-# ========== RESOURCE ACCESS CORE (FASE SELLADA) ==========
-
-class ResourceSerializer(serializers.ModelSerializer):
-    """Serializer para Resource"""
-    
-    class Meta:
-        model = Resource
-        fields = [
-            'id',
-            'title',
-            'description',
-            'resource_type',
-            'category',
-            'level',
-            'content_url',
-            'thumbnail_url',
-            'is_active',
-            'is_featured',
-            'created_at',
-            'updated_at',
-        ]
-        read_only_fields = ['id', 'created_at', 'updated_at']
-
-
-class UserResourceAccessSerializer(serializers.ModelSerializer):
-    """Serializer para UserResourceAccess"""
-    resource = ResourceSerializer(read_only=True)
-    assigned_by_name = serializers.CharField(source='assigned_by.get_full_name', read_only=True)
-    
-    class Meta:
-        model = UserResourceAccess
-        fields = [
-            'id',
-            'user',
-            'resource',
-            'source',
-            'assigned_by',
-            'assigned_by_name',
-            'created_at',
-        ]
-        read_only_fields = ['id', 'user', 'created_at']
-
-
-class ResourceWithAccessSerializer(serializers.ModelSerializer):
-    """Serializer para Resource con información de acceso del usuario actual"""
-    access = serializers.SerializerMethodField()
-    
-    class Meta:
-        model = Resource
-        fields = [
-            'id',
-            'title',
-            'description',
-            'resource_type',
-            'category',
-            'level',
-            'content_url',
-            'thumbnail_url',
-            'is_active',
-            'is_featured',
-            'access',
-            'created_at',
-        ]
-    
-    def get_access(self, obj):
-        """Obtiene información de acceso del usuario actual"""
-        request = self.context.get('request')
-        if not request or not request.user.is_authenticated:
-            return None
-        
-        try:
-            access = UserResourceAccess.objects.get(user=request.user, resource=obj)
-            return {
-                'source': access.source,
-                'assigned_by': access.assigned_by.get_full_name() if access.assigned_by else None,
-                'created_at': access.created_at,
-            }
-        except UserResourceAccess.DoesNotExist:
-            # Si es free y está activo, puede ser accesible sin registro
-            if obj.level == 'free' and obj.is_active:
-                return {
-                    'source': 'free',
-                    'assigned_by': None,
-                    'created_at': None,
-                }
-            return None
-
-
-class AssignResourceSerializer(serializers.Serializer):
-    """Serializer para asignar recurso a paciente"""
-    resource_id = serializers.UUIDField()
-    
-    def validate_resource_id(self, value):
-        try:
-            resource = Resource.objects.get(id=value, is_active=True)
-            return value
-        except Resource.DoesNotExist:
-            raise serializers.ValidationError("Recurso no encontrado o inactivo")
 

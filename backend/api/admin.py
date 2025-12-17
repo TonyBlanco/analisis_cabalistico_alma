@@ -12,9 +12,7 @@ from .models import (
     PackageService,
     Booking,
     AvailableSlot,
-    BlockedDate,
-    Resource,
-    UserResourceAccess,
+    BlockedDate
 )
 from .test_models import TestModule, UserTestAccess, TestResult
 
@@ -179,51 +177,3 @@ class TestResultAdmin(admin.ModelAdmin):
     search_fields = ['user__username', 'test_module__name', 'client_name', 'notes']
     readonly_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
-
-
-# ========== RESOURCE ACCESS CORE (FASE SELLADA) ==========
-
-@admin.register(Resource)
-class ResourceAdmin(admin.ModelAdmin):
-    list_display = ['title', 'resource_type', 'category', 'level', 'is_active', 'is_featured', 'created_at']
-    list_filter = ['resource_type', 'category', 'level', 'is_active', 'is_featured']
-    search_fields = ['title', 'description', 'category']
-    readonly_fields = ['id', 'created_at', 'updated_at']
-    ordering = ['-created_at']
-    fieldsets = (
-        ('Información Básica', {
-            'fields': ('title', 'description', 'resource_type', 'category', 'level')
-        }),
-        ('Contenido', {
-            'fields': ('content_url', 'thumbnail_url')
-        }),
-        ('Estado', {
-            'fields': ('is_active', 'is_featured')
-        }),
-        ('Metadatos', {
-            'fields': ('id', 'created_at', 'updated_at'),
-            'classes': ('collapse',)
-        }),
-    )
-
-
-@admin.register(UserResourceAccess)
-class UserResourceAccessAdmin(admin.ModelAdmin):
-    list_display = ['user', 'resource', 'source', 'assigned_by', 'created_at']
-    list_filter = ['source', 'created_at']
-    search_fields = ['user__username', 'resource__title', 'assigned_by__username']
-    readonly_fields = ['id', 'created_at']
-    ordering = ['-created_at']
-    fieldsets = (
-        ('Acceso', {
-            'fields': ('user', 'resource', 'source')
-        }),
-        ('Asignación', {
-            'fields': ('assigned_by',),
-            'description': 'Solo se rellena si source=assigned_by_therapist'
-        }),
-        ('Metadatos', {
-            'fields': ('id', 'created_at'),
-            'classes': ('collapse',)
-        }),
-    )

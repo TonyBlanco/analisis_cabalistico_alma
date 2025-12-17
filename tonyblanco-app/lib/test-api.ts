@@ -29,40 +29,15 @@ export async function getAvailableTests(): Promise<{
   subscription_plan: string;
   membership_active: boolean;
 }> {
-  try {
-    const response = await fetch(`${API_BASE_URL}/tests/`, {
-      headers: getAuthHeaders(),
-    });
+  const response = await fetch(`${API_BASE_URL}/tests/`, {
+    headers: getAuthHeaders(),
+  });
 
-    if (!response.ok) {
-      // Manejar errores HTTP
-      if (response.status === 401) {
-        throw new Error('No autenticado. Por favor, inicia sesión nuevamente.');
-      } else if (response.status === 403) {
-        throw new Error('No tienes permiso para ver estos tests.');
-      } else if (response.status === 404) {
-        throw new Error(`Endpoint no encontrado. Verifica que el servidor esté corriendo en ${API_BASE_URL}`);
-      } else {
-        throw new Error(`Error al obtener tests disponibles (${response.status})`);
-      }
-    }
-
-    return response.json();
-  } catch (error) {
-    // Manejar errores de red (Failed to fetch, timeout, etc.)
-    if (error instanceof TypeError) {
-      const errorMsg = error.message?.toLowerCase() || '';
-      if (errorMsg.includes('failed to fetch') || errorMsg.includes('networkerror') || errorMsg.includes('network error')) {
-        throw new Error(`No se pudo conectar con el servidor. Verifica que el backend esté corriendo en ${API_BASE_URL}`);
-      }
-    }
-    // Si el error ya es un Error con mensaje, re-lanzarlo
-    if (error instanceof Error) {
-      throw error;
-    }
-    // Para cualquier otro tipo de error, crear un Error genérico
-    throw new Error(`Error al obtener tests disponibles: ${String(error)}`);
+  if (!response.ok) {
+    throw new Error('Error al obtener tests disponibles');
   }
+
+  return response.json();
 }
 
 /**
@@ -168,43 +143,21 @@ export async function getTestResults(filters?: {
   test_code?: string;
   favorites?: boolean;
 }): Promise<TestResult[]> {
-  try {
-    const params = new URLSearchParams();
-    if (filters?.test_code) params.append('test_code', filters.test_code);
-    if (filters?.favorites) params.append('favorites', 'true');
+  const params = new URLSearchParams();
+  if (filters?.test_code) params.append('test_code', filters.test_code);
+  if (filters?.favorites) params.append('favorites', 'true');
 
-    const url = `${API_BASE_URL}/tests/results/${params.toString() ? '?' + params.toString() : ''}`;
-    
-    const response = await fetch(url, {
-      headers: getAuthHeaders(),
-    });
+  const url = `${API_BASE_URL}/tests/results/${params.toString() ? '?' + params.toString() : ''}`;
+  
+  const response = await fetch(url, {
+    headers: getAuthHeaders(),
+  });
 
-    if (!response.ok) {
-      if (response.status === 401) {
-        throw new Error('No autenticado. Por favor, inicia sesión nuevamente.');
-      } else if (response.status === 404) {
-        throw new Error(`Endpoint no encontrado. Verifica que el servidor esté corriendo en ${API_BASE_URL}`);
-      } else {
-        throw new Error(`Error al obtener resultados (${response.status})`);
-      }
-    }
-
-    return response.json();
-  } catch (error) {
-    // Manejar errores de red
-    if (error instanceof TypeError) {
-      const errorMsg = error.message?.toLowerCase() || '';
-      if (errorMsg.includes('failed to fetch') || errorMsg.includes('networkerror') || errorMsg.includes('network error')) {
-        throw new Error(`No se pudo conectar con el servidor. Verifica que el backend esté corriendo en ${API_BASE_URL}`);
-      }
-    }
-    // Si el error ya es un Error con mensaje, re-lanzarlo
-    if (error instanceof Error) {
-      throw error;
-    }
-    // Para cualquier otro tipo de error, crear un Error genérico
-    throw new Error(`Error al obtener resultados: ${String(error)}`);
+  if (!response.ok) {
+    throw new Error('Error al obtener resultados');
   }
+
+  return response.json();
 }
 
 /**

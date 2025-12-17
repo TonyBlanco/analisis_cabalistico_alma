@@ -1,4 +1,8 @@
 Update del proyecto
+## Estado del Proyecto
+
+Para una descripción técnica completa del estado actual, arquitectura cerrada y prioridades:
+ver `docs/PROJECT_STATE_CURRENT.md`.
 
 README / CHANGELOG
 

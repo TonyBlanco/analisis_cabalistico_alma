@@ -28,3 +28,4 @@ class BaseAnalysisAdapter:
         raise NotImplementedError("Subclasses must implement execute()")
 
 
+

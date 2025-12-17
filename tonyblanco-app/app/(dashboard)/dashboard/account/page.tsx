@@ -5,9 +5,10 @@ import { useRouter } from 'next/navigation';
 import { fetchSession } from '@/lib/session';
 import { useRoleGuard } from '@/lib/role-guards';
 import { clearAuthState } from '@/lib/auth-state';
-import { getProfile, updateProfile, UserProfileData } from '@/lib/api';
 import GeoLocationField from '@/components/GeoLocationField';
 import NameVerificationModal from '@/components/NameVerificationModal';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://analisis-cabalistico-alma.onrender.com/api';
 
 /**
  * Account Page (User Profile)
@@ -23,6 +24,7 @@ export default function AccountPage() {
   const [saving, setSaving] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [formData, setFormData] = useState({
+    full_name: '',
     legal_full_name: '',
     birth_date: '',
     birth_time: '',
@@ -30,85 +32,89 @@ export default function AccountPage() {
     birth_country: '',
     birth_latitude: null as number | null,
     birth_longitude: null as number | null,
-    birth_timezone: '',
     email: '',
   });
-  const [profileVersion, setProfileVersion] = useState<number>(0);
-  const [nameChangeCount, setNameChangeCount] = useState<number>(0);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [success, setSuccess] = useState(false);
   const [showNameVerificationModal, setShowNameVerificationModal] = useState(false);
   const [coordinatesUnlocked, setCoordinatesUnlocked] = useState(false);
-  const [originalLegalFullName, setOriginalLegalFullName] = useState<string>('');
+  const [nameChangeCount, setNameChangeCount] = useState<number>(0);
+  const [originalFullName, setOriginalFullName] = useState<string>('');
   const pendingSubmitRef = useRef<(() => void) | null>(null);
-  
-  // CRITICAL: useRef to ensure profile fetch runs ONLY ONCE on mount
-  const hasFetchedProfileRef = useRef(false);
 
-  // CRITICAL: Fetch profile ONLY ONCE on mount
   useEffect(() => {
-    if (hasFetchedProfileRef.current) {
-      return;
-    }
-    hasFetchedProfileRef.current = true;
-
     const loadProfile = async () => {
-      try {
-        // Load session for user context
-        const session = await fetchSession();
-        if (session.user) {
-          setUser(session.user);
+      const session = await fetchSession();
+      if (session.user) {
+        setUser(session.user);
+        const birthData = session.user.birth_data || {};
+        const fullName =
+          session.user.full_name || session.user.legal_full_name || birthData.full_name || '';
+        setOriginalFullName(fullName);
+
+        let baseForm = {
+          full_name: fullName,
+          legal_full_name: session.user.legal_full_name || fullName,
+          birth_date: session.user.birth_date || birthData.birth_date || '',
+          birth_time: birthData.birth_time || '',
+          birth_city: session.user.birth_city || birthData.birth_city || '',
+          birth_country: session.user.birth_country || birthData.birth_country || '',
+          birth_latitude: session.user.birth_latitude || birthData.birth_latitude || null,
+          birth_longitude: session.user.birth_longitude || birthData.birth_longitude || null,
+          email: session.user.email || '',
+        };
+
+        try {
+          const token =
+            typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
+          if (token) {
+            const res = await fetch(`${API_URL}/profile/me/`, {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Token ${token}`,
+              },
+            });
+            if (res.ok) {
+              const profile = await res.json();
+              baseForm = {
+                ...baseForm,
+                legal_full_name: profile.legal_full_name || baseForm.legal_full_name,
+                birth_date: profile.birth_date || baseForm.birth_date,
+                birth_time: profile.birth_time || baseForm.birth_time,
+                birth_city: profile.birth_city || baseForm.birth_city,
+                birth_country: profile.birth_country || baseForm.birth_country,
+                birth_latitude:
+                  profile.birth_latitude ?? baseForm.birth_latitude,
+                birth_longitude:
+                  profile.birth_longitude ?? baseForm.birth_longitude,
+              };
+              if (typeof profile.name_change_count === 'number') {
+                setNameChangeCount(profile.name_change_count);
+              }
+            }
+          }
+        } catch (e) {
+          console.warn('No se pudo cargar /profile/me/', e);
         }
 
-        // Load profile from backend (source of truth)
-        const profileResponse = await getProfile();
-        
-        if (profileResponse && typeof profileResponse === 'object' && 'error' in profileResponse && profileResponse.error) {
-          console.warn('Error loading profile:', (profileResponse as any).message);
-          setLoading(false);
-          return;
-        }
-
-        const profile = profileResponse as UserProfileData;
-        
-        // Set form data from profile
-        setFormData({
-          legal_full_name: profile.legal_full_name || '',
-          birth_date: profile.birth_date || '',
-          birth_time: profile.birth_time || '',
-          birth_city: profile.birth_city || '',
-          birth_country: profile.birth_country || '',
-          birth_latitude: profile.birth_latitude ? Number(profile.birth_latitude) : null,
-          birth_longitude: profile.birth_longitude ? Number(profile.birth_longitude) : null,
-          birth_timezone: profile.birth_timezone || '',
-          email: profile.email || session.user?.email || '',
-        });
-
-        setOriginalLegalFullName(profile.legal_full_name || '');
-        setNameChangeCount(profile.name_change_count || 0);
-        setProfileVersion(profile.profile_version || 0);
-      } catch (err) {
-        console.error('Error loading profile:', err);
-      } finally {
-        setLoading(false);
+        setFormData(baseForm);
       }
+      setLoading(false);
     };
 
     loadProfile();
-  }, []); // CRITICAL: Empty deps - run ONLY on mount
+  }, []);
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
-    // Validate legal_full_name only if editable
-    if (nameChangeCount < 2) {
-      if (!formData.legal_full_name.trim()) {
-        newErrors.legal_full_name = 'El nombre completo legal es requerido';
-      } else {
-        const nameWords = formData.legal_full_name.trim().split(/\s+/).filter((w: string) => w.length > 0);
-        if (nameWords.length < 2) {
-          newErrors.legal_full_name = 'El nombre completo debe contener al menos 2 palabras';
-        }
+    if (!formData.full_name.trim()) {
+      newErrors.full_name = 'El nombre completo es requerido';
+    } else {
+      const nameWords = formData.full_name.trim().split(/\s+/).filter((w: string) => w.length > 0);
+      if (nameWords.length < 2) {
+        newErrors.full_name = 'El nombre completo debe contener al menos 2 palabras';
       }
     }
 
@@ -150,162 +156,82 @@ export default function AccountPage() {
 
   const performSubmit = async () => {
     setSaving(true);
-    setSuccess(false);
-    setErrors({});
 
     try {
-      // Build clean payload: only editable fields, no read-only fields
-      const payload: Partial<UserProfileData> = {};
+      const token = localStorage.getItem('authToken');
+      const payload: Record<string, any> = {
+        full_name: formData.full_name.trim(),
+        legal_full_name: formData.legal_full_name.trim() || formData.full_name.trim(),
+        birth_date: formData.birth_date,
+        birth_city: formData.birth_city.trim(),
+        birth_country: formData.birth_country.trim(),
+      };
 
-      // Only include legal_full_name if editable (name_change_count < 2)
-      if (nameChangeCount < 2 && formData.legal_full_name.trim()) {
-        payload.legal_full_name = formData.legal_full_name.trim();
+      if (formData.birth_time) {
+        payload.birth_time = formData.birth_time;
       }
 
-      // Birth date (required)
-      if (formData.birth_date) {
-        payload.birth_date = formData.birth_date;
+      if (
+        formData.birth_latitude &&
+        formData.birth_longitude &&
+        formData.birth_latitude !== 0 &&
+        formData.birth_longitude !== 0 &&
+        !isNaN(formData.birth_latitude) &&
+        !isNaN(formData.birth_longitude)
+      ) {
+        payload.birth_latitude = formData.birth_latitude;
+        payload.birth_longitude = formData.birth_longitude;
       }
 
-      // Birth time (optional - convert empty string to null)
-      if (formData.birth_time && formData.birth_time.trim()) {
-        payload.birth_time = formData.birth_time.trim();
-      }
+      const response = await fetch(`${API_URL}/profile/me/`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Token ${token}` } : {}),
+        },
+        body: JSON.stringify(payload),
+      });
 
-      // Birth city (required)
-      if (formData.birth_city.trim()) {
-        payload.birth_city = formData.birth_city.trim();
-      }
+      const responseData = await response.json().catch(() => ({}));
 
-      // Birth country (required)
-      if (formData.birth_country.trim()) {
-        payload.birth_country = formData.birth_country.trim();
-      }
-
-      // Birth timezone (optional - convert empty string to null)
-      if (formData.birth_timezone && formData.birth_timezone.trim()) {
-        payload.birth_timezone = formData.birth_timezone.trim();
-      }
-
-      // Coordinates: ONLY include if rewrite checkbox is active
-      if (coordinatesUnlocked) {
-        if (
-          formData.birth_latitude !== null &&
-          formData.birth_longitude !== null &&
-          formData.birth_latitude !== 0 &&
-          formData.birth_longitude !== 0 &&
-          !isNaN(formData.birth_latitude) &&
-          !isNaN(formData.birth_longitude)
-        ) {
-          payload.birth_latitude = formData.birth_latitude;
-          payload.birth_longitude = formData.birth_longitude;
-        }
-      }
-      // If coordinatesUnlocked is false, do NOT send coordinates (let backend calculate)
-
-      // Log payload for debugging
-      console.log('PATCH /api/profile/me/ payload:', payload);
-
-      const response = await updateProfile(payload);
-
-      // Check if response is an error object
-      if (response && typeof response === 'object' && 'error' in response && response.error) {
-        const errorResponse = response as any;
-        
-        // Log full backend error for debugging
-        console.error('Backend validation error:', {
-          status: errorResponse.status,
-          message: errorResponse.message,
-          networkError: errorResponse.networkError,
-          fullResponse: JSON.stringify(errorResponse, null, 2),
-        });
-
+      if (!response.ok) {
         const backendErrors: Record<string, string> = {};
-        
-        // Extract backend validation errors verbatim from the error response
-        // The error body from backend is already included in the response object
-        Object.keys(errorResponse).forEach((key) => {
-          // Skip API wrapper fields
-          if (key === 'error' || key === 'status' || key === 'networkError') {
-            return;
-          }
-          
-          const errorValue = errorResponse[key];
-          
-          // Skip if it's the general message (we'll handle it separately)
-          if (key === 'message' || key === 'detail') {
-            return;
-          }
-          
-          // Extract field-specific validation errors
-          if (errorValue !== undefined && errorValue !== null) {
-            if (Array.isArray(errorValue)) {
-              backendErrors[key] = errorValue.join(' ');
-            } else if (typeof errorValue === 'object') {
-              // If it's an object, stringify it
-              backendErrors[key] = JSON.stringify(errorValue);
-            } else {
-              backendErrors[key] = String(errorValue);
-            }
-          }
-        });
+        const legalError =
+          responseData.legal_full_name ||
+          responseData.error ||
+          responseData.detail ||
+          responseData.message;
 
-        // General error message
-        const generalError = errorResponse.message || errorResponse.detail || errorResponse.error;
-        if (generalError && typeof generalError === 'string') {
-          // Only set as submit error if we don't have field-specific errors
-          if (Object.keys(backendErrors).length === 0) {
-            backendErrors.submit = generalError;
-          } else {
-            // If we have field errors, show general message as info
-            backendErrors.submit = generalError;
-          }
-        } else if (Object.keys(backendErrors).length === 0) {
-          // Fallback if no errors extracted
-          backendErrors.submit = `Error ${errorResponse.status || 'desconocido'} al actualizar perfil`;
+        if (legalError) {
+          backendErrors.legal_full_name = Array.isArray(legalError)
+            ? legalError.join(' ')
+            : String(legalError);
         }
 
-        // Check for name change lock (special handling)
         if (
           backendErrors.legal_full_name &&
           backendErrors.legal_full_name.toLowerCase().includes('bloquead')
         ) {
           backendErrors.submit =
             'Cambios de nombre bloqueados. Contacta support@tonyblanco.es';
+        } else if (!backendErrors.submit) {
+          backendErrors.submit =
+            responseData.error || responseData.message || 'Error al actualizar perfil';
         }
 
-        console.log('Parsed backend errors for UI:', backendErrors);
         setErrors(backendErrors);
-        return;
+        throw new Error(backendErrors.submit);
       }
 
-      // Success - update local state
-      const updatedProfile = response as UserProfileData;
-      setFormData(prev => ({
-        ...prev,
-        legal_full_name: updatedProfile.legal_full_name || prev.legal_full_name,
-        birth_date: updatedProfile.birth_date || prev.birth_date,
-        birth_time: updatedProfile.birth_time || prev.birth_time,
-        birth_city: updatedProfile.birth_city || prev.birth_city,
-        birth_country: updatedProfile.birth_country || prev.birth_country,
-        birth_latitude: updatedProfile.birth_latitude ? Number(updatedProfile.birth_latitude) : prev.birth_latitude,
-        birth_longitude: updatedProfile.birth_longitude ? Number(updatedProfile.birth_longitude) : prev.birth_longitude,
-        birth_timezone: updatedProfile.birth_timezone || prev.birth_timezone,
-      }));
-
-      if (typeof updatedProfile.name_change_count === 'number') {
-        setNameChangeCount(updatedProfile.name_change_count);
+      if (typeof responseData.name_change_count === 'number') {
+        setNameChangeCount(responseData.name_change_count);
       }
 
-      if (typeof updatedProfile.profile_version === 'number') {
-        setProfileVersion(updatedProfile.profile_version);
-      }
-
-      setOriginalLegalFullName(updatedProfile.legal_full_name || '');
       setSuccess(true);
-      
-      // Refresh session for consistency
-      await fetchSession();
+      const session = await fetchSession();
+      if (session.user) {
+        setUser(session.user);
+      }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error al guardar cambios';
       setErrors({ submit: errorMessage });
@@ -324,16 +250,13 @@ export default function AccountPage() {
       return;
     }
 
-    // Only show name verification if legal_full_name is editable and is changing
-    if (nameChangeCount < 2) {
-      const isNameChanging = formData.legal_full_name.trim() !== originalLegalFullName.trim();
-      const isFirstTime = !originalLegalFullName.trim();
+    const isNameChanging = formData.full_name.trim() !== originalFullName.trim();
+    const isFirstTime = !originalFullName.trim();
 
-      if (isNameChanging || isFirstTime) {
-        setShowNameVerificationModal(true);
-        pendingSubmitRef.current = performSubmit;
-        return;
-      }
+    if (isNameChanging || isFirstTime) {
+      setShowNameVerificationModal(true);
+      pendingSubmitRef.current = performSubmit;
+      return;
     }
 
     await performSubmit();
@@ -358,13 +281,6 @@ export default function AccountPage() {
     }
   };
 
-  // Redirect patients to their specific account page
-  useEffect(() => {
-    if (!roleLoading && role === 'patient') {
-      router.replace('/dashboard/patient/account');
-    }
-  }, [role, roleLoading, router]);
-
   if (roleLoading || loading) {
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -373,11 +289,6 @@ export default function AccountPage() {
         </div>
       </div>
     );
-  }
-
-  // If patient, don't render (redirect will happen)
-  if (role === 'patient') {
-    return null;
   }
 
   if (!authorized || !role) {
@@ -414,65 +325,58 @@ export default function AccountPage() {
       {/* Profile Form */}
       <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Nombre legal */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Nombre completo legal
-              {nameChangeCount >= 2 && (
-                <span className="ml-2 text-xs text-red-600 font-normal">
-                  (Bloqueado - máximo alcanzado)
-                </span>
-              )}
-            </label>
-            <input
-              type="text"
-              value={formData.legal_full_name}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, legal_full_name: e.target.value }))
-              }
-              disabled={nameChangeCount >= 2}
-              className={`w-full px-4 py-2 border rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition-colors ${
-                nameChangeCount >= 2
-                  ? 'bg-gray-50 border-gray-200 cursor-not-allowed'
-                  : errors.legal_full_name
-                  ? 'bg-white border-red-300'
-                  : 'bg-white border-gray-300'
-              }`}
-              placeholder="Nombre y apellidos tal como figuran en tus documentos"
-            />
-            {errors.legal_full_name && (
-              <p className="mt-1 text-xs text-red-600">{errors.legal_full_name}</p>
-            )}
-            {nameChangeCount === 1 && (
-              <p className="mt-1 text-xs text-amber-600">
-                ⚠️ Has usado 1/2 cambios de nombre. Solo queda 1 cambio disponible.
-              </p>
-            )}
-            {nameChangeCount >= 2 && (
-              <p className="mt-1 text-xs text-red-600">
-                Has alcanzado el máximo de 2 cambios de nombre. Para más cambios, contacta con
-                soporte.
-              </p>
-            )}
-          </div>
-
-          {/* Profile version (read-only) */}
-          {profileVersion > 0 && (
+          {/* Nombre legal y nombre para cálculos */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Versión del perfil
+                Nombre completo legal
               </label>
               <input
                 type="text"
-                value={profileVersion}
-                disabled
-                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-md text-gray-600 cursor-not-allowed"
+                value={formData.legal_full_name}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, legal_full_name: e.target.value }))
+                }
+                className={`w-full px-4 py-2 bg-white border rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition-colors ${
+                  errors.legal_full_name ? 'border-red-300' : 'border-gray-300'
+                }`}
+                placeholder="Nombre y apellidos tal como figuran en tus documentos"
               />
-              <p className="mt-1 text-xs text-gray-500">
-                Versión interna del perfil (solo lectura)
-              </p>
+              {errors.legal_full_name && (
+                <p className="mt-1 text-xs text-red-600">{errors.legal_full_name}</p>
+              )}
             </div>
-          )}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Nombre para cálculos cabalísticos
+              </label>
+              <input
+                type="text"
+                value={formData.full_name}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, full_name: e.target.value }))
+                }
+                className={`w-full px-4 py-2 bg-white border rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition-colors ${
+                  errors.full_name ? 'border-red-300' : 'border-gray-300'
+                }`}
+                placeholder="Nombre que usaremos para los análisis"
+              />
+              {errors.full_name && (
+                <p className="mt-1 text-xs text-red-600">{errors.full_name}</p>
+              )}
+              {nameChangeCount > 0 && nameChangeCount < 2 && (
+                <p className="mt-1 text-xs text-amber-600">
+                  Has cambiado tu nombre {nameChangeCount}/2 veces
+                </p>
+              )}
+              {nameChangeCount >= 2 && (
+                <p className="mt-1 text-xs text-red-600">
+                  Has alcanzado el máximo de 2 cambios de nombre. Para más cambios, contacta con
+                  soporte.
+                </p>
+              )}
+            </div>
+          </div>
 
           {/* Fecha y hora de nacimiento */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -608,7 +512,7 @@ export default function AccountPage() {
           pendingSubmitRef.current = null;
         }}
         onConfirm={handleNameVerificationConfirm}
-        fullName={formData.legal_full_name}
+        fullName={formData.full_name}
       />
     </div>
   );

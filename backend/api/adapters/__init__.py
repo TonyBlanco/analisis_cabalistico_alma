@@ -31,3 +31,4 @@ def get_adapter_for_record(record):
     return adapter_cls(record)
 
 
+

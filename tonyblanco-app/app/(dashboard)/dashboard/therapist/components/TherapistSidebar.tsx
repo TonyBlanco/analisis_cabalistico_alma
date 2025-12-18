@@ -17,7 +17,6 @@ import {
   LucideIcon 
 } from 'lucide-react';
 import { clinicalTestsRegistry } from '@/lib/clinicalTests.registry';
-import ClinicalTestHelpModal from '@/components/ClinicalTestHelpModal';
 
 interface TherapistSidebarItem {
   href: string;
@@ -69,7 +68,6 @@ export default function TherapistSidebar() {
   const [testsOpen, setTestsOpen] = useState(false);
   const [psychTestsOpen, setPsychTestsOpen] = useState(false);
   const [cabalTestsOpen, setCabalTestsOpen] = useState(false);
-  const [openHelpCode, setOpenHelpCode] = useState<string | null>(null);
 
   const psychTests = useMemo(
     () => clinicalTestsRegistry.filter((test) => test.family === 'psicologicos'),
@@ -242,11 +240,11 @@ export default function TherapistSidebar() {
                           <button
                             type="button"
                             onClick={() => setTestsOpen((prev) => !prev)}
-                            className="
+                        className="
                               flex items-center justify-center lg:justify-start gap-3
                               px-2 lg:px-3 py-3 rounded-md text-sm
                               transition-all min-h-[44px] w-full
-                              text-gray-600 hover:bg-gray-50 hover:text-gray-900
+                              text-gray-700 hover:bg-gray-50 hover:text-gray-900
                             "
                             title={item.label}
                           >
@@ -277,43 +275,22 @@ export default function TherapistSidebar() {
                                   )}
                                 </button>
                                 {psychTestsOpen && (
-                                  <div className="mt-2 space-y-3 text-xs text-gray-600">
+                                  <div className="mt-2 space-y-3 text-xs text-gray-700">
                                     {Object.entries(psychDomains).map(([domain, tests]) => (
                                       <div key={domain}>
-                                        <div className="text-[11px] uppercase tracking-wide text-gray-500">
-                                          {domain}
+                                        <div className="flex items-center gap-2 text-[11px] uppercase tracking-wide text-gray-500">
+                                          <ClipboardCheck className="w-3 h-3" />
+                                          <span>{domain}</span>
                                         </div>
                                         <ul className="mt-1 space-y-1">
                                           {tests.map((test) => {
                                             const href = resolveTestHref(test);
-                                            const statusBadge = (
-                                              <span
-                                                className={`text-[10px] uppercase px-2 py-0.5 rounded-full ${
-                                                  test.implemented
-                                                    ? 'bg-green-100 text-green-800'
-                                                    : 'bg-gray-100 text-gray-500'
-                                                }`}
-                                              >
-                                                {test.implemented ? 'Disponible' : 'En desarrollo'}
-                                              </span>
-                                            );
                                             const content = (
-                                              <div className="flex items-center justify-between gap-2">
-                                                <span className="text-gray-700">{test.display_name}</span>
-                                                <div className="flex items-center gap-1">
-                                                  {statusBadge}
-                                                  <button
-                                                    type="button"
-                                                    onClick={(e) => {
-                                                      e.preventDefault();
-                                                      e.stopPropagation();
-                                                      setOpenHelpCode(test.test_code);
-                                                    }}
-                                                    className="text-[11px] text-blue-600 hover:text-blue-800 underline"
-                                                  >
-                                                    Que es?
-                                                  </button>
-                                                </div>
+                                              <div className="flex items-center gap-2">
+                                                <ClipboardCheck className={`w-4 h-4 ${test.implemented ? 'text-blue-600' : 'text-gray-400'}`} />
+                                                <span className={`text-sm font-medium ${test.implemented ? 'text-gray-900' : 'text-gray-400'}`}>
+                                                  {test.test_code.toUpperCase()}
+                                                </span>
                                               </div>
                                             );
                                             return (
@@ -321,12 +298,12 @@ export default function TherapistSidebar() {
                                                 {href ? (
                                                   <Link
                                                     href={href}
-                                                    className="block px-2 py-1 rounded hover:bg-gray-50"
+                                                    className="block px-2 py-1 rounded hover:bg-gray-50 transition-colors"
                                                   >
                                                     {content}
                                                   </Link>
                                                 ) : (
-                                                  <div className="block px-2 py-1 rounded text-gray-500">
+                                                  <div className="block px-2 py-1 rounded text-gray-400">
                                                     {content}
                                                   </div>
                                                 )}
@@ -354,43 +331,22 @@ export default function TherapistSidebar() {
                                   )}
                                 </button>
                                 {cabalTestsOpen && (
-                                  <div className="mt-2 space-y-3 text-xs text-gray-600">
+                                  <div className="mt-2 space-y-3 text-xs text-gray-700">
                                     {Object.entries(cabalDomains).map(([domain, tests]) => (
                                       <div key={domain}>
-                                        <div className="text-[11px] uppercase tracking-wide text-gray-500">
-                                          {domain}
+                                        <div className="flex items-center gap-2 text-[11px] uppercase tracking-wide text-gray-500">
+                                          <Sparkles className="w-3 h-3" />
+                                          <span>{domain}</span>
                                         </div>
                                         <ul className="mt-1 space-y-1">
                                           {tests.map((test) => {
                                             const href = resolveTestHref(test);
-                                            const statusBadge = (
-                                              <span
-                                                className={`text-[10px] uppercase px-2 py-0.5 rounded-full ${
-                                                  test.implemented
-                                                    ? 'bg-green-100 text-green-800'
-                                                    : 'bg-gray-100 text-gray-500'
-                                                }`}
-                                              >
-                                                {test.implemented ? 'Disponible' : 'En desarrollo'}
-                                              </span>
-                                            );
                                             const content = (
-                                              <div className="flex items-center justify-between gap-2">
-                                                <span className="text-gray-700">{test.display_name}</span>
-                                                <div className="flex items-center gap-1">
-                                                  {statusBadge}
-                                                  <button
-                                                    type="button"
-                                                    onClick={(e) => {
-                                                      e.preventDefault();
-                                                      e.stopPropagation();
-                                                      setOpenHelpCode(test.test_code);
-                                                    }}
-                                                    className="text-[11px] text-blue-600 hover:text-blue-800 underline"
-                                                  >
-                                                    Que es?
-                                                  </button>
-                                                </div>
+                                              <div className="flex items-center gap-2">
+                                                <Sparkles className={`w-4 h-4 ${test.implemented ? 'text-purple-600' : 'text-gray-400'}`} />
+                                                <span className={`text-sm font-medium ${test.implemented ? 'text-gray-900' : 'text-gray-400'}`}>
+                                                  {test.test_code.toUpperCase()}
+                                                </span>
                                               </div>
                                             );
                                             return (
@@ -398,12 +354,12 @@ export default function TherapistSidebar() {
                                                 {href ? (
                                                   <Link
                                                     href={href}
-                                                    className="block px-2 py-1 rounded hover:bg-gray-50"
+                                                    className="block px-2 py-1 rounded hover:bg-gray-50 transition-colors"
                                                   >
                                                     {content}
                                                   </Link>
                                                 ) : (
-                                                  <div className="block px-2 py-1 rounded text-gray-500">
+                                                  <div className="block px-2 py-1 rounded text-gray-400">
                                                     {content}
                                                   </div>
                                                 )}
@@ -472,11 +428,6 @@ export default function TherapistSidebar() {
 
       {/* Mobile: Sidebar hidden, controlled by Header hamburger menu */}
       {/* TODO: Implement mobile drawer if needed */}
-
-      <ClinicalTestHelpModal
-        testCode={openHelpCode}
-        onClose={() => setOpenHelpCode(null)}
-      />
     </>
   );
 }

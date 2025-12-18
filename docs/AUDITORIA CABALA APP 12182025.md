@@ -480,6 +480,8 @@ Logging is present for failures and critical paths.
 ## Archivos tocados en T6
 - T6.3–T6.10: ver rutas de tests PHQ-9, GAD-7, BAI, ISI, BDI-II (config, UI paciente, resultado paciente, resultado terapeuta), backend/api/test_views.py, backend/api/urls.py, SCDF placeholder terapeuta.
 - T6.12: tonyblanco-app/lib/clinicalTestKnowledge.registry.ts, tonyblanco-app/components/ClinicalTestHelpModal.tsx, tonyblanco-app/app/(dashboard)/dashboard/therapist/page.tsx, tonyblanco-app/app/(dashboard)/dashboard/therapist/components/TherapistSidebar.tsx, tonyblanco-app/app/(dashboard)/dashboard/therapist/patients/[id]/tests/phq9/page.tsx.
+- T6.13: tonyblanco-app/lib/clinicalTestKnowledge.registry.ts, tonyblanco-app/components/ClinicalTestHelpModal.tsx, docs/AUDITORIA CABALA APP 12182025.md.
+- T6.14: tonyblanco-app/app/(dashboard)/dashboard/therapist/components/TherapistSidebar.tsx, docs/AUDITORIA CABALA APP 12182025.md.
 
 ---
 

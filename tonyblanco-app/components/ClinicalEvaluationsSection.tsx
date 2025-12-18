@@ -8,6 +8,8 @@ import { getPatientDetail } from '@/lib/assignment-api';
 import { validateProfileForAnalysis } from '@/lib/profile-validation';
 import ProfileCompletionModal from './ProfileCompletionModal';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://analisis-cabalistico-alma.onrender.com/api';
+
 /**
  * Clinical Evaluations Section Component
  * 
@@ -27,6 +29,9 @@ export default function ClinicalEvaluationsSection() {
   const [profileValidationResult, setProfileValidationResult] = useState<{ missingFields: string[] } | null>(null);
   const [activePatientId, setActivePatientIdState] = useState<number | null>(null);
   const [activePatientName, setActivePatientNameState] = useState<string | null>(null);
+  const [analysisRecords, setAnalysisRecords] = useState<any[]>([]);
+  const [analysisLoading, setAnalysisLoading] = useState(false);
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
 
   // Cargar paciente activo solo en cliente para evitar mismatches SSR/CSR
   useEffect(() => {
@@ -39,6 +44,52 @@ export default function ClinicalEvaluationsSection() {
   useEffect(() => {
     fetchTests();
   }, []);
+
+  useEffect(() => {
+    if (!activePatientId) {
+      setAnalysisRecords([]);
+      setAnalysisError(null);
+      return;
+    }
+
+    const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
+    if (!token) {
+      setAnalysisError('No auth token found.');
+      return;
+    }
+
+    const fetchAnalysisRecords = async () => {
+      setAnalysisLoading(true);
+      setAnalysisError(null);
+
+      try {
+        const response = await fetch(
+          `${API_URL}/analysis-records/?patient_id=${encodeURIComponent(String(activePatientId))}`,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Token ${token}`,
+            },
+          }
+        );
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.detail || errorData.message || 'Error al cargar evaluaciones clínicas');
+        }
+        const data = await response.json();
+        const items = Array.isArray(data) ? data : (data?.results || []);
+        setAnalysisRecords(items);
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Error al cargar evaluaciones clínicas';
+        setAnalysisError(errorMessage);
+        setAnalysisRecords([]);
+      } finally {
+        setAnalysisLoading(false);
+      }
+    };
+
+    fetchAnalysisRecords();
+  }, [activePatientId]);
 
   useEffect(() => {
     // Load patient data when modal opens
@@ -238,6 +289,45 @@ export default function ClinicalEvaluationsSection() {
             ))}
           </div>
         )}
+
+        <div className="mt-6 border-t border-gray-200 pt-4">
+          <h3 className="text-sm font-semibold text-gray-900 mb-3">Evaluaciones Clinicas Registradas</h3>
+          {analysisLoading && (
+            <p className="text-sm text-gray-500">Cargando evaluaciones clinicas...</p>
+          )}
+          {!analysisLoading && analysisError && (
+            <p className="text-sm text-red-600">{analysisError}</p>
+          )}
+          {!analysisLoading && !analysisError && analysisRecords.length === 0 && (
+            <p className="text-sm text-gray-500">No hay evaluaciones clinicas registradas.</p>
+          )}
+          {!analysisLoading && !analysisError && analysisRecords.length > 0 && (
+            <div className="space-y-3">
+              {analysisRecords.map((record) => {
+                const recordType = record.analysis_type || record.module || record.type || record.name;
+                const recordStatus = record.status || record.state;
+                const recordDate = record.completed_at || record.created_at || record.updated_at;
+                const hasSummary = recordType || recordStatus || recordDate;
+
+                return (
+                  <div key={record.id || record.uuid} className="border border-gray-200 rounded-md p-3">
+                    {hasSummary ? (
+                      <div className="text-sm text-gray-700 space-y-1">
+                        <div>Tipo: {recordType || 'N/A'}</div>
+                        <div>Estado: {recordStatus || 'N/A'}</div>
+                        <div>Fecha: {recordDate || 'N/A'}</div>
+                      </div>
+                    ) : (
+                      <pre className="text-xs text-gray-600 whitespace-pre-wrap break-words">
+                        {safeJson(record)}
+                      </pre>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Profile Completion Modal */}
@@ -306,6 +396,14 @@ export default function ClinicalEvaluationsSection() {
       )}
     </>
   );
+}
+
+function safeJson(value: unknown): string {
+  try {
+    return JSON.stringify(value, null, 2);
+  } catch {
+    return String(value);
+  }
 }
 
 // Helper component for execute button

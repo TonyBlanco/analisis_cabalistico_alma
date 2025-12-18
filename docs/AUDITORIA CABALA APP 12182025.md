@@ -390,7 +390,7 @@ Frontend espera endpoints no presentes en backend:
 - `9b3d392e` `feat(frontend): T1.1 therapist patient clinical view`
 - `296de8b0` `feat(frontend): T1.2 therapist clinical actions in workspace`
 - `ebf363ce` `feat(frontend): T1.3 therapist synthesis annotations`
-- T1.4: pendiente de commit
+- - `c4c7d981` `feat(frontend): T1.4 ai narrative in therapist synthesis`
 
 ## Archivos tocados en T1
 - T1.1: `tonyblanco-app/app/(dashboard)/dashboard/therapist/patients/[id]/page.tsx`

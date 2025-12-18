@@ -462,3 +462,19 @@ Logging is present for failures and critical paths.
 - T4.4: `tonyblanco-app/app/(dashboard)/dashboard/therapist/page.tsx`
 - T4.4.a: `tonyblanco-app/app/(dashboard)/dashboard/therapist/page.tsx`
 - T4.4.a.1: `tonyblanco-app/app/(dashboard)/dashboard/tools/scdf/page.tsx`, `tonyblanco-app/components/SCDFHelpModal.tsx`, `tonyblanco-app/components/TherapistRoute.tsx`
+
+## Estado T6 (actualizado)
+- T6.3 cerrado: PHQ-9 en español, scoring backend, persistencia y vistas.
+- T6.4 cerrado: Vistas de resultados PHQ-9 (paciente/terapeuta).
+- T6.5 cerrado: SCDF placeholder con resultados PHQ-9 en solo lectura.
+- T6.6 cerrado: GAD-7 end-to-end en español (definición, UI, backend, vistas, SCDF).
+- T6.7 cerrado: BAI end-to-end en español (definición, UI, backend, vistas, SCDF).
+- T6.8 cerrado: ISI end-to-end en español (definición, UI, backend, vistas, SCDF).
+- T6.10 cerrado: BDI-II end-to-end en español + guía clínica para terapeutas.
+- Solo frontend/backend del sistema actual; sin legacy.
+
+## Commits T6
+- `b7535e40` `feat(frontend+backend): T6.10 BDI-II end-to-end with clinical guidance`
+
+## Archivos tocados en T6
+- T6.3–T6.10: ver rutas de tests PHQ-9, GAD-7, BAI, ISI, BDI-II (config, UI paciente, resultado paciente, resultado terapeuta), backend/api/test_views.py, backend/api/urls.py, SCDF placeholder terapeuta.

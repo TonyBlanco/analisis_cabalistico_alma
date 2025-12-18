@@ -39,13 +39,14 @@ export default function ClinicalTestHelpModal({ testCode, onClose }: Props) {
         {entry ? (
           <div className="space-y-4 text-sm text-gray-800">
             <div>
-              <h3 className="text-sm font-semibold text-gray-900 mb-1">Que es este test?</h3>
-              <p className="text-gray-700">{entry.what_is_it}</p>
+              <h3 className="text-sm font-semibold text-gray-900 mb-1">{entry.title}</h3>
+              <p className="text-xs text-gray-500 mb-1">{entry.purpose}</p>
+              <p className="text-gray-700">{entry.whatIsIt}</p>
             </div>
             <div>
               <h3 className="text-sm font-semibold text-gray-900 mb-1">Como interpretar</h3>
               <ul className="list-disc list-inside space-y-1 text-gray-700">
-                {entry.how_to_interpret.map((item, idx) => (
+                {entry.howToInterpret.map((item, idx) => (
                   <li key={idx}>{item}</li>
                 ))}
               </ul>
@@ -53,7 +54,15 @@ export default function ClinicalTestHelpModal({ testCode, onClose }: Props) {
             <div>
               <h3 className="text-sm font-semibold text-gray-900 mb-1">Que hacer despues</h3>
               <ul className="list-disc list-inside space-y-1 text-gray-700">
-                {entry.what_to_do_next.map((item, idx) => (
+                {entry.whatToDoNext.map((item, idx) => (
+                  <li key={idx}>{item}</li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-gray-900 mb-1">Notas clinicas</h3>
+              <ul className="list-disc list-inside space-y-1 text-gray-700">
+                {entry.clinicalNotes.map((item, idx) => (
                   <li key={idx}>{item}</li>
                 ))}
               </ul>
@@ -79,6 +88,16 @@ export default function ClinicalTestHelpModal({ testCode, onClose }: Props) {
                       {res.type && <span className="ml-2 text-xs text-gray-500">({res.type})</span>}
                       {res.note && <span className="ml-2 text-xs text-gray-500">{res.note}</span>}
                     </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {entry.disclaimers.length > 0 && (
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900 mb-1">Avisos</h3>
+                <ul className="list-disc list-inside space-y-1 text-gray-700">
+                  {entry.disclaimers.map((item, idx) => (
+                    <li key={idx}>{item}</li>
                   ))}
                 </ul>
               </div>

@@ -394,3 +394,34 @@ Frontend espera endpoints no presentes en backend:
 - T1.1: `tonyblanco-app/app/(dashboard)/dashboard/therapist/patients/[id]/page.tsx`
 - T1.2: `tonyblanco-app/app/(dashboard)/dashboard/therapist/page.tsx`, `tonyblanco-app/components/ClinicalEvaluationsSection.tsx`, `tonyblanco-app/components/PatientResultsSection.tsx`
 - T1.3: `tonyblanco-app/components/ClinicalEvaluationsSection.tsx`
+
+-T2.1 DONE.
+
+Modified files:
+
+backend/api/cabalistic_views.py
+backend/api/astrology_kerykeion/service.py
+Applied security fixes:
+
+Added IsTherapist to therapist clinical views (SaveCabalisticAnalysisView, ListCabalisticAnalysesView, GenerateAndSaveTarotAnalysisView) to enforce role.
+Removed unreachable Patient.DoesNotExist branches where get_object_or_404 is used.
+Replaced all str(e) client responses with generic messages; added structured logging via logger.error / logger.warning.
+Caught ValidationError explicitly in Kerykeion input validation and returned a generic validation error (no internal details).
+Hardened Kerykeion service against None values for house positions and aspects to avoid runtime errors.
+Ensured summary extraction remains safe (no KeyError risk).
+Final check highlights:
+
+Therapist access still works with ownership enforcement unchanged.
+Non-therapist access is denied by permissions.
+No internal exceptions are leaked to clients.
+Logging is present for failures and critical paths.
+
+## Estado T2 (actualizado)
+- T2.1 cerrado: hardening de endpoints clinicos del terapeuta (role, ownership, validacion segura, logging).
+- Sin cambios de modelo, migraciones ni rutas.
+
+## Commits T2
+- `9810cb39` `security: T2.1 harden therapist clinical endpoints`
+
+## Archivos tocados en T2
+- T2.1: `backend/api/cabalistic_views.py`, `backend/api/astrology_kerykeion/service.py`

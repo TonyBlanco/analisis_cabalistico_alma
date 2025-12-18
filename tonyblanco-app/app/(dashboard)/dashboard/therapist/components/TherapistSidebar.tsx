@@ -64,6 +64,78 @@ export default function TherapistSidebar() {
     // resources: false, // Future
     // account: false,   // Future
   });
+  const [testsOpen, setTestsOpen] = useState(false);
+  const [psychTestsOpen, setPsychTestsOpen] = useState(false);
+  const [cabalTestsOpen, setCabalTestsOpen] = useState(false);
+
+  const PSYCH_TEST_DOMAINS = [
+    {
+      label: 'Estado de animo y ansiedad',
+      tests: ['PHQ-9', 'GAD-7', 'BAI', 'BDI-II', 'STAI'],
+    },
+    {
+      label: 'Psicopatologia general',
+      tests: ['SCL-90', 'SCL-90-R'],
+    },
+    {
+      label: 'Personalidad clinica',
+      tests: ['PAI', 'PAI Profesional', 'MCMI-IV'],
+    },
+    {
+      label: 'Entrevistas estructuradas',
+      tests: ['SCID-5-RV', 'SCID-5'],
+    },
+    {
+      label: 'Neurodesarrollo',
+      tests: ['ADHD'],
+    },
+    {
+      label: 'TOC',
+      tests: ['OCD'],
+    },
+    {
+      label: 'Trauma',
+      tests: ['PTSD'],
+    },
+    {
+      label: 'Sueno',
+      tests: ['Insomnia Index'],
+    },
+    {
+      label: 'Conducta alimentaria',
+      tests: ['Eating Disorder Screen'],
+    },
+    {
+      label: 'Sustancias',
+      tests: ['Substance Use Screening'],
+    },
+    {
+      label: 'Psicologia',
+      tests: ['Screening Psicologico General'],
+    },
+    {
+      label: 'Bienestar',
+      tests: ['Wellness Assessment'],
+    },
+  ];
+
+  const CABALISTIC_TESTS = [
+    'Gematria',
+    'Analisis Shekinah',
+    'Tarot Terapeutico',
+    'Numerologia Completa',
+    'Astrologia Cabalistica',
+    'Astrologia Tecnica (Kerykeion)',
+    'Mapa del Alma',
+    'Arbol de la Vida',
+    'Numero del Alma',
+    'Tikun',
+    'Mazal',
+    '72 Nombres',
+    'Shemot',
+    'Analisis Cabalistico Completo',
+    'Abundancia Financiera',
+  ];
 
   const sections: TherapistSidebarSection[] = [
     {
@@ -194,7 +266,97 @@ export default function TherapistSidebar() {
                   {section.items.map((item) => {
                     const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
                     const Icon = item.icon;
-                    
+                    const isTestsItem = item.label === 'Tests';
+
+                    if (isTestsItem) {
+                      return (
+                        <div key={item.href} className="rounded-md border border-transparent">
+                          <button
+                            type="button"
+                            onClick={() => setTestsOpen((prev) => !prev)}
+                            className="
+                              flex items-center justify-center lg:justify-start gap-3
+                              px-2 lg:px-3 py-3 rounded-md text-sm
+                              transition-all min-h-[44px] w-full
+                              text-gray-600 hover:bg-gray-50 hover:text-gray-900
+                            "
+                            title={item.label}
+                          >
+                            <Icon className="w-5 h-5 flex-shrink-0 text-gray-500" />
+                            <span className="hidden lg:block flex-1">{item.label}</span>
+                            <span className="hidden lg:block">
+                              {testsOpen ? (
+                                <ChevronDown className="w-4 h-4 text-gray-400" />
+                              ) : (
+                                <ChevronRight className="w-4 h-4 text-gray-400" />
+                              )}
+                            </span>
+                          </button>
+
+                          {testsOpen && (
+                            <div className="hidden lg:block ml-10 mt-2 space-y-2">
+                              <div>
+                                <button
+                                  type="button"
+                                  onClick={() => setPsychTestsOpen((prev) => !prev)}
+                                  className="flex items-center gap-2 text-xs font-semibold text-gray-600 uppercase tracking-wide"
+                                >
+                                  <span>Tests Psicologicos</span>
+                                  {psychTestsOpen ? (
+                                    <ChevronDown className="w-3 h-3" />
+                                  ) : (
+                                    <ChevronRight className="w-3 h-3" />
+                                  )}
+                                </button>
+                                {psychTestsOpen && (
+                                  <div className="mt-2 space-y-3 text-xs text-gray-600">
+                                    {PSYCH_TEST_DOMAINS.map((domain) => (
+                                      <div key={domain.label}>
+                                        <div className="text-[11px] uppercase tracking-wide text-gray-500">
+                                          {domain.label}
+                                        </div>
+                                        <ul className="mt-1 space-y-1">
+                                          {domain.tests.map((test) => (
+                                            <li key={test} className="py-0.5">
+                                              {test}
+                                            </li>
+                                          ))}
+                                        </ul>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+
+                              <div>
+                                <button
+                                  type="button"
+                                  onClick={() => setCabalTestsOpen((prev) => !prev)}
+                                  className="flex items-center gap-2 text-xs font-semibold text-gray-600 uppercase tracking-wide"
+                                >
+                                  <span>Tests Cabalisticos</span>
+                                  {cabalTestsOpen ? (
+                                    <ChevronDown className="w-3 h-3" />
+                                  ) : (
+                                    <ChevronRight className="w-3 h-3" />
+                                  )}
+                                </button>
+                                {cabalTestsOpen && (
+                                  <ul className="mt-2 space-y-1 text-xs text-gray-600">
+                                    {CABALISTIC_TESTS.map((test) => (
+                                      <li key={test} className="py-0.5">
+                                        {test}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    }
+
                     return (
                       <Link
                         key={item.href}

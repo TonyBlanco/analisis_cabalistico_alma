@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { fetchSession } from '@/lib/session';
 import { getUserRole } from '@/lib/getUserRole';
 import { useRouter } from 'next/navigation';
@@ -20,6 +21,24 @@ export default function TherapistDashboard() {
   const [role, setRole] = useState<string | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [analysisRefreshKey, setAnalysisRefreshKey] = useState(0);
+  const [scdfPrereqs, setScdfPrereqs] = useState([
+    {
+      id: 'screenings',
+      label: 'Screenings psicologicos minimos',
+      description: 'Requiere al menos 2 screenings completados.',
+      status: 'pendiente' as 'pendiente' | 'asignado' | 'completado',
+      requiredCount: 2,
+      completedCount: 0,
+    },
+    {
+      id: 'cabalistic-analysis',
+      label: 'Analisis cabalistico previo',
+      description: 'Requiere al menos 1 analisis cabalistico completado.',
+      status: 'pendiente' as 'pendiente' | 'asignado' | 'completado',
+      requiredCount: 1,
+      completedCount: 0,
+    },
+  ]);
 
   useEffect(() => {
     fetchSession().then((session) => {
@@ -88,6 +107,32 @@ export default function TherapistDashboard() {
 
       {/* Main Workspace - Patient Context Only */}
       <div className="space-y-6">
+        <ScdfTrackingPanel
+          prerequisites={scdfPrereqs}
+          onAssign={(id) => {
+            setScdfPrereqs((prev) =>
+              prev.map((item) =>
+                item.id === id
+                  ? { ...item, status: item.status === 'pendiente' ? 'asignado' : item.status }
+                  : item
+              )
+            );
+          }}
+          onMarkCompleted={(id) => {
+            setScdfPrereqs((prev) =>
+              prev.map((item) =>
+                item.id === id
+                  ? {
+                      ...item,
+                      status: 'completado',
+                      completedCount: item.requiredCount,
+                    }
+                  : item
+              )
+            );
+          }}
+        />
+
         {/* Section 1: Assigned Tests (patient_self) */}
         {/* Shows tests assigned to active patient with status: pending / completed */}
         <AssignedTestsSection />
@@ -168,7 +213,369 @@ const GATE_STATUS = {
   recommended: { label: 'Recomendado', className: 'bg-blue-100 text-blue-800' },
 };
 
+const LEGACY_MODULES = [
+  {
+    id: 'phq-9',
+    name: 'PHQ-9',
+    category: 'Pre-analisis (psicologico)',
+    shortDescription: 'Screening clinico legacy para sintomas depresivos.',
+    legacyStatus: 'existente',
+  },
+  {
+    id: 'gad-7',
+    name: 'GAD-7',
+    category: 'Pre-analisis (psicologico)',
+    shortDescription: 'Screening clinico legacy para ansiedad generalizada.',
+    legacyStatus: 'existente',
+  },
+  {
+    id: 'bai',
+    name: 'BAI',
+    category: 'Pre-analisis (psicologico)',
+    shortDescription: 'Inventario de ansiedad clinica (legacy).',
+    legacyStatus: 'existente',
+  },
+  {
+    id: 'bdi-ii',
+    name: 'BDI-II',
+    category: 'Pre-analisis (psicologico)',
+    shortDescription: 'Inventario depresivo clinico (legacy).',
+    legacyStatus: 'existente',
+  },
+  {
+    id: 'scl-90',
+    name: 'SCL-90',
+    category: 'Pre-analisis (psicologico)',
+    shortDescription: 'Screening psicopatologico multidimensional (legacy).',
+    legacyStatus: 'existente',
+  },
+  {
+    id: 'scl-90-r',
+    name: 'SCL-90-R',
+    category: 'Pre-analisis (psicologico)',
+    shortDescription: 'Version revisada de screening psicopatologico (legacy).',
+    legacyStatus: 'existente',
+  },
+  {
+    id: 'stai',
+    name: 'STAI',
+    category: 'Pre-analisis (psicologico)',
+    shortDescription: 'Ansiedad estado-rasgo (legacy).',
+    legacyStatus: 'existente',
+  },
+  {
+    id: 'pai',
+    name: 'PAI',
+    category: 'Pre-analisis (psicologico)',
+    shortDescription: 'Inventario de personalidad clinica (legacy).',
+    legacyStatus: 'existente',
+  },
+  {
+    id: 'professional-pai',
+    name: 'PAI Profesional',
+    category: 'Pre-analisis (psicologico)',
+    shortDescription: 'Version profesional de PAI (legacy).',
+    legacyStatus: 'existente',
+  },
+  {
+    id: 'mcmi-iv',
+    name: 'MCMI-IV',
+    category: 'Pre-analisis (psicologico)',
+    shortDescription: 'Inventario clinico multiaxial (legacy).',
+    legacyStatus: 'existente',
+  },
+  {
+    id: 'scid-5-rv',
+    name: 'SCID-5-RV',
+    category: 'Pre-analisis (psicologico)',
+    shortDescription: 'Entrevista clinica estructurada (legacy).',
+    legacyStatus: 'existente',
+    notes: 'Requiere adaptacion clinica.',
+  },
+  {
+    id: 'scid5',
+    name: 'SCID-5',
+    category: 'Pre-analisis (psicologico)',
+    shortDescription: 'Modulo estructurado de evaluacion (legacy).',
+    legacyStatus: 'existente',
+  },
+  {
+    id: 'adhd',
+    name: 'ADHD',
+    category: 'Pre-analisis (psicologico)',
+    shortDescription: 'Screening clinico TDAH (legacy).',
+    legacyStatus: 'existente',
+  },
+  {
+    id: 'ocd',
+    name: 'OCD',
+    category: 'Pre-analisis (psicologico)',
+    shortDescription: 'Screening clinico TOC (legacy).',
+    legacyStatus: 'existente',
+  },
+  {
+    id: 'ptsd',
+    name: 'PTSD',
+    category: 'Pre-analisis (psicologico)',
+    shortDescription: 'Screening clinico TEPT (legacy).',
+    legacyStatus: 'existente',
+  },
+  {
+    id: 'insomnia',
+    name: 'Insomnia',
+    category: 'Pre-analisis (psicologico)',
+    shortDescription: 'Screening clinico de insomnio (legacy).',
+    legacyStatus: 'existente',
+  },
+  {
+    id: 'eating',
+    name: 'Eating',
+    category: 'Pre-analisis (psicologico)',
+    shortDescription: 'Screening clinico de alimentacion (legacy).',
+    legacyStatus: 'existente',
+  },
+  {
+    id: 'substance',
+    name: 'Substance',
+    category: 'Pre-analisis (psicologico)',
+    shortDescription: 'Screening clinico de consumo de sustancias (legacy).',
+    legacyStatus: 'existente',
+  },
+  {
+    id: 'psicologia',
+    name: 'Psicologia',
+    category: 'Pre-analisis (psicologico)',
+    shortDescription: 'Modulo psicologico legacy general.',
+    legacyStatus: 'existente',
+  },
+  {
+    id: 'wellness',
+    name: 'Wellness',
+    category: 'Pre-analisis (psicologico)',
+    shortDescription: 'Test de bienestar integral (legacy).',
+    legacyStatus: 'existente',
+  },
+  {
+    id: 'gematria',
+    name: 'Gematria',
+    category: 'Analisis cabalistico',
+    shortDescription: 'Calculo cabalistico numerico (legacy).',
+    legacyStatus: 'existente',
+  },
+  {
+    id: 'shekinah',
+    name: 'Analisis Shekinah',
+    category: 'Analisis cabalistico',
+    shortDescription: 'Metodo cabalistico Atlantis (legacy).',
+    legacyStatus: 'existente',
+  },
+  {
+    id: 'tarot',
+    name: 'Tarot Terapeutico',
+    category: 'Analisis cabalistico',
+    shortDescription: 'Lectura terapeutica simbolica (legacy).',
+    legacyStatus: 'existente',
+  },
+  {
+    id: 'complete-numerology',
+    name: 'Numerologia Completa',
+    category: 'Analisis cabalistico',
+    shortDescription: 'Analisis numerologico profundo (legacy).',
+    legacyStatus: 'existente',
+  },
+  {
+    id: 'cabalistic-astrology',
+    name: 'Astrologia Cabalistica',
+    category: 'Analisis cabalistico',
+    shortDescription: 'Astrologia integrada con cabala (legacy).',
+    legacyStatus: 'existente',
+  },
+  {
+    id: 'astrology-kerykeion',
+    name: 'Astrologia Tecnica (Kerykeion)',
+    category: 'Analisis cabalistico',
+    shortDescription: 'Carta tecnica precisa (legacy).',
+    legacyStatus: 'existente',
+  },
+  {
+    id: 'soul-map',
+    name: 'Mapa del Alma',
+    category: 'Analisis cabalistico',
+    shortDescription: 'Analisis de sefirot y diseno energetico (legacy).',
+    legacyStatus: 'existente',
+  },
+  {
+    id: 'tree-of-life',
+    name: 'Arbol de la Vida',
+    category: 'Analisis cabalistico',
+    shortDescription: 'Metodo cabalistico del arbol sefirotico (legacy).',
+    legacyStatus: 'existente',
+  },
+  {
+    id: 'soul-number',
+    name: 'Numero del Alma',
+    category: 'Analisis cabalistico',
+    shortDescription: 'Calculo del numero del alma (legacy).',
+    legacyStatus: 'existente',
+  },
+  {
+    id: 'tikun',
+    name: 'Tikun',
+    category: 'Analisis cabalistico',
+    shortDescription: 'Correccion del alma y mision de vida (legacy).',
+    legacyStatus: 'existente',
+  },
+  {
+    id: 'mazal',
+    name: 'Mazal',
+    category: 'Analisis cabalistico',
+    shortDescription: 'Destino y suerte cabalistica (legacy).',
+    legacyStatus: 'existente',
+  },
+  {
+    id: '72-names',
+    name: '72 Nombres',
+    category: 'Analisis cabalistico',
+    shortDescription: 'Trabajo cabalistico con los 72 nombres (legacy).',
+    legacyStatus: 'existente',
+  },
+  {
+    id: 'shemot',
+    name: 'Shemot',
+    category: 'Analisis cabalistico',
+    shortDescription: 'Poder de los nombres en cabala (legacy).',
+    legacyStatus: 'existente',
+  },
+  {
+    id: 'complete',
+    name: 'Analisis Cabalistico Completo',
+    category: 'Analisis cabalistico',
+    shortDescription: 'Integracion de metodos cabalisticos (legacy).',
+    legacyStatus: 'existente',
+  },
+  {
+    id: 'financial-abundance',
+    name: 'Abundancia Financiera',
+    category: 'Analisis cabalistico',
+    shortDescription: 'Analisis numerologico financiero (legacy).',
+    legacyStatus: 'existente',
+  },
+  {
+    id: 'scdf',
+    name: 'SCDF',
+    category: 'Herramienta clinica',
+    shortDescription: 'Structured Clinical Diagnostic Framework (legacy workspace).',
+    legacyStatus: 'existente',
+    notes: 'Herramienta clinica propietaria. No modificar.',
+  },
+];
+
+const PSYCH_TEST_GENRES = [
+  {
+    genre: 'Estado de Animo y Depresion',
+    description: 'Screening clinico de sintomas afectivos.',
+    tests: [
+      { name: 'PHQ-9', intent: 'Screening breve' },
+      { name: 'BDI-II', intent: 'Evaluacion amplia' },
+    ],
+  },
+  {
+    genre: 'Ansiedad y Estres',
+    description: 'Exploracion clinica de ansiedad y activacion.',
+    tests: [
+      { name: 'GAD-7', intent: 'Screening breve' },
+      { name: 'BAI', intent: 'Evaluacion amplia' },
+      { name: 'STAI', intent: 'Estado/rasgo' },
+    ],
+  },
+  {
+    genre: 'Personalidad y Psicopatologia',
+    description: 'Perfil clinico de rasgos y psicopatologia.',
+    tests: [
+      { name: 'PAI', intent: 'Multidimensional' },
+      { name: 'PAI Profesional', intent: 'Multidimensional' },
+      { name: 'MCMI-IV', intent: 'Evaluacion amplia' },
+    ],
+  },
+  {
+    genre: 'Screening General / Multidimensional',
+    description: 'Barrido clinico amplio de sintomas.',
+    tests: [
+      { name: 'SCL-90', intent: 'Multidimensional' },
+      { name: 'SCL-90-R', intent: 'Multidimensional' },
+      { name: 'Screening Psicologico General', intent: 'Screening breve' },
+    ],
+  },
+  {
+    genre: 'Entrevistas Estructuradas',
+    description: 'Instrumentos estructurados para diagnostico clinico.',
+    tests: [
+      { name: 'SCID-5-RV', intent: 'Requiere adaptacion clinica' },
+      { name: 'SCID-5', intent: 'Requiere adaptacion clinica' },
+    ],
+  },
+  {
+    genre: 'Trauma y Estres Postraumatico',
+    description: 'Exploracion clinica de trauma.',
+    tests: [
+      { name: 'PTSD', intent: 'Screening breve' },
+    ],
+  },
+  {
+    genre: 'Neurodesarrollo y Atencion',
+    description: 'Evaluacion clinica de atencion.',
+    tests: [
+      { name: 'ADHD', intent: 'Screening breve' },
+    ],
+  },
+  {
+    genre: 'TOC',
+    description: 'Exploracion clinica de sintomas obsesivos.',
+    tests: [
+      { name: 'OCD', intent: 'Screening breve' },
+    ],
+  },
+  {
+    genre: 'Sueno y Ritmos',
+    description: 'Sintomas de sueno y descanso.',
+    tests: [
+      { name: 'Insomnia Index', intent: 'Screening breve' },
+    ],
+  },
+  {
+    genre: 'Conducta Alimentaria',
+    description: 'Indicadores clinicos de conducta alimentaria.',
+    tests: [
+      { name: 'Eating Disorder Screen', intent: 'Screening breve' },
+    ],
+  },
+  {
+    genre: 'Consumo de Sustancias',
+    description: 'Exploracion clinica de consumo.',
+    tests: [
+      { name: 'Substance Use Screening', intent: 'Screening breve' },
+    ],
+  },
+  {
+    genre: 'Bienestar',
+    description: 'Indicadores de bienestar general.',
+    tests: [
+      { name: 'Wellness Assessment', intent: 'Screening breve' },
+    ],
+  },
+];
+
 function ClinicalCatalogSection() {
+  const legacyPreAnalysis = LEGACY_MODULES.filter(
+    (module) => module.category === 'Pre-analisis (psicologico)'
+  );
+  const legacyCabalistic = LEGACY_MODULES.filter(
+    (module) => module.category === 'Analisis cabalistico'
+  );
+  const legacyClinicalTools = LEGACY_MODULES.filter(
+    (module) => module.category === 'Herramienta clinica'
+  );
+
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
       <div className="mb-4">
@@ -192,6 +599,32 @@ function ClinicalCatalogSection() {
               </div>
             ))}
           </div>
+          {legacyPreAnalysis.length > 0 && (
+            <div className="mt-4 border-t border-gray-200 pt-3">
+              <p className="text-xs text-gray-500 mb-3">Modulo legacy (reintegrado)</p>
+              <div className="space-y-4">
+                {PSYCH_TEST_GENRES.map((genre) => (
+                  <div key={genre.genre} className="rounded-md border border-gray-100 bg-white p-3">
+                    <div className="text-sm font-semibold text-gray-900">{genre.genre}</div>
+                    <div className="text-xs text-gray-600 mt-1">{genre.description}</div>
+                    <div className="mt-3 space-y-2">
+                      {genre.tests.map((test) => (
+                        <div
+                          key={test.name}
+                          className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"
+                        >
+                          <span className="text-sm text-gray-800">{test.name}</span>
+                          <span className="text-[10px] uppercase px-2 py-1 rounded-full bg-gray-100 text-gray-600">
+                            {test.intent}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="border border-gray-200 rounded-md p-4">
@@ -242,6 +675,29 @@ function ClinicalCatalogSection() {
               </div>
             ))}
           </div>
+          {legacyCabalistic.length > 0 && (
+            <div className="mt-4 border-t border-gray-200 pt-3">
+              <p className="text-xs text-gray-500 mb-2">Modulo legacy (reintegrado)</p>
+              <div className="space-y-2">
+                {legacyCabalistic.map((module) => (
+                  <div key={module.id} className="rounded-md border border-gray-100 bg-white p-3">
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                      <div>
+                        <div className="text-sm font-medium text-gray-900">{module.name}</div>
+                        <div className="text-xs text-gray-600 mt-1">{module.shortDescription}</div>
+                        {module.notes && (
+                          <div className="text-xs text-gray-500 mt-1">{module.notes}</div>
+                        )}
+                      </div>
+                      <span className="text-[10px] uppercase px-2 py-1 rounded-full bg-gray-100 text-gray-600">
+                        {module.legacyStatus}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="border border-gray-200 rounded-md p-4">
@@ -253,18 +709,132 @@ function ClinicalCatalogSection() {
             Herramienta clinica propietaria. No modificar.
           </p>
           <p className="text-xs text-gray-500 mt-2">
-            Acceso desde workspace del terapeuta, con notas longitudinales y guardado de registros.
+            Seguimiento clinico central ubicado en el panel dedicado de SCDF.
           </p>
-          <div className="mt-3 rounded-md border border-gray-200 bg-white p-3">
-            <p className="text-xs text-gray-600">
-              Puerta clinica (informativa): requiere minimo 2 screenings completados y 1 analisis
-              cabalistico previo.
-            </p>
-            <p className="text-xs text-gray-500 mt-1">
-              Estado actual: <span className="font-medium">Pendiente</span> (informativo).
-            </p>
-          </div>
+          {legacyClinicalTools.length > 0 && (
+            <div className="mt-4 border-t border-gray-200 pt-3">
+              <p className="text-xs text-gray-500 mb-2">Modulo legacy (reintegrado)</p>
+              <div className="space-y-2">
+                {legacyClinicalTools.map((module) => (
+                  <div key={module.id} className="rounded-md border border-gray-100 bg-white p-3">
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                      <div>
+                        <div className="text-sm font-medium text-gray-900">{module.name}</div>
+                        <div className="text-xs text-gray-600 mt-1">{module.shortDescription}</div>
+                        {module.notes && (
+                          <div className="text-xs text-gray-500 mt-1">{module.notes}</div>
+                        )}
+                      </div>
+                      <span className="text-[10px] uppercase px-2 py-1 rounded-full bg-gray-100 text-gray-600">
+                        {module.legacyStatus}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
+      </div>
+    </div>
+  );
+}
+
+function ScdfTrackingPanel({
+  prerequisites,
+  onAssign,
+  onMarkCompleted,
+}: {
+  prerequisites: Array<{
+    id: string;
+    label: string;
+    description: string;
+    status: 'pendiente' | 'asignado' | 'completado';
+    requiredCount: number;
+    completedCount: number;
+  }>;
+  onAssign: (id: string) => void;
+  onMarkCompleted: (id: string) => void;
+}) {
+  const completedItems = prerequisites.filter((item) => item.status === 'completado').length;
+  const progress = prerequisites.length > 0 ? Math.round((completedItems / prerequisites.length) * 100) : 0;
+
+  const statusStyles = {
+    pendiente: 'bg-amber-100 text-amber-800',
+    asignado: 'bg-blue-100 text-blue-800',
+    completado: 'bg-green-100 text-green-800',
+  };
+
+  return (
+    <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+      <div className="mb-4 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900">Seguimiento Clinico (SCDF)</h2>
+          <p className="text-sm text-gray-500">
+            Seguimiento clinico - no ejecuta acciones.
+          </p>
+          <p className="text-xs text-gray-500 mt-1">
+            Acceso disponible aunque los prerrequisitos esten pendientes.
+          </p>
+        </div>
+        <Link
+          href="/dashboard/tools/scdf"
+          className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white rounded-md hover:opacity-90 transition-opacity"
+          style={{ backgroundColor: 'var(--accent-color)' }}
+        >
+          Ver SCDF
+        </Link>
+      </div>
+
+      <div className="mb-4">
+        <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
+          <span>Progreso</span>
+          <span>{progress}%</span>
+        </div>
+        <div className="w-full bg-gray-200 rounded-full h-2">
+          <div
+            className="h-2 rounded-full"
+            style={{ width: `${progress}%`, backgroundColor: 'var(--accent-color)' }}
+          />
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        {prerequisites.map((item) => (
+          <div key={item.id} className="border border-gray-200 rounded-md p-3">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <div>
+                <div className="text-sm font-medium text-gray-900">{item.label}</div>
+                <div className="text-xs text-gray-500 mt-1">{item.description}</div>
+                <div className="text-xs text-gray-500 mt-1">
+                  {item.completedCount}/{item.requiredCount} completados
+                </div>
+              </div>
+              <span
+                className={`text-[10px] uppercase px-2 py-1 rounded-full ${statusStyles[item.status]}`}
+              >
+                {item.status}
+              </span>
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => onAssign(item.id)}
+                className="px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+              >
+                Asignar al paciente
+              </button>
+              <button
+                type="button"
+                onClick={() => onMarkCompleted(item.id)}
+                className="px-3 py-1.5 text-xs font-medium text-white rounded-md hover:opacity-90 transition-opacity"
+                style={{ backgroundColor: 'var(--accent-color)' }}
+              >
+                Marcar completado
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

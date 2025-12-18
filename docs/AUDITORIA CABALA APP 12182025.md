@@ -435,7 +435,7 @@ Logging is present for failures and critical paths.
 - Solo frontend; sin cambios de backend ni `lib/api.ts`.
 
 ## Commits T3
-- T3.1/T3.2: pendiente de commit
+- - `142c00fa` `feat(frontend): T3.1-3.2 clinical catalog gates`
 
 ## Archivos tocados en T3
 - T3.1: `tonyblanco-app/app/(dashboard)/dashboard/therapist/page.tsx`

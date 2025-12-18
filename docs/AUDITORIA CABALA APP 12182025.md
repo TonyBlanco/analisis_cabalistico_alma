@@ -440,3 +440,25 @@ Logging is present for failures and critical paths.
 ## Archivos tocados en T3
 - T3.1: `tonyblanco-app/app/(dashboard)/dashboard/therapist/page.tsx`
 - T3.2: `tonyblanco-app/app/(dashboard)/dashboard/therapist/page.tsx`
+
+## Estado T4 (actualizado)
+- T4.1 cerrado: modulo legacy visible en catalogo clinico por categoria.
+- T4.3.a cerrado: accordion de Tests en sidebar terapeuta (informativo).
+- T4.3.a.1 cerrado: dominios clinicos como encabezados, solo tests reales listados.
+- T4.3.b cerrado: catalogo clinico organizado por generos y cues de intención.
+- T4.4 cerrado: panel SCDF de seguimiento clinico con prerequisitos locales y progreso.
+- T4.4.a cerrado: acceso libre a SCDF desde workspace.
+- T4.4.a.1 cerrado: ruta App Router para SCDF con redirect seguro a legacy.
+- Solo frontend; sin cambios de backend ni `lib/api.ts`.
+
+## Commits T4
+- `64515992` `feat(frontend): T4 catalog organization and SCDF access`
+
+## Archivos tocados en T4
+- T4.1: `tonyblanco-app/app/(dashboard)/dashboard/therapist/page.tsx`
+- T4.3.a: `tonyblanco-app/app/(dashboard)/dashboard/therapist/components/TherapistSidebar.tsx`
+- T4.3.a.1: `tonyblanco-app/app/(dashboard)/dashboard/therapist/components/TherapistSidebar.tsx`
+- T4.3.b: `tonyblanco-app/app/(dashboard)/dashboard/therapist/page.tsx`
+- T4.4: `tonyblanco-app/app/(dashboard)/dashboard/therapist/page.tsx`
+- T4.4.a: `tonyblanco-app/app/(dashboard)/dashboard/therapist/page.tsx`
+- T4.4.a.1: `tonyblanco-app/app/(dashboard)/dashboard/tools/scdf/page.tsx`, `tonyblanco-app/components/SCDFHelpModal.tsx`, `tonyblanco-app/components/TherapistRoute.tsx`

@@ -41,7 +41,7 @@ export interface ProfileUpdateData {
  * @throws Error if request fails
  */
 export async function updateProfile(data: ProfileUpdateData): Promise<any> {
-  const response = await fetch(`${API_BASE_URL}/me/profile/`, {
+  const response = await fetch(`${API_BASE_URL}/profile/me/`, {
     method: 'PATCH',
     headers: getAuthHeaders(),
     body: JSON.stringify(data),

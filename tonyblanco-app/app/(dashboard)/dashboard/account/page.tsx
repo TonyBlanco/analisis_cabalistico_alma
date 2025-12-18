@@ -66,7 +66,7 @@ export default function AccountPage() {
   // Patient-only endpoints
   const fetchPatientAccountProfile = async (): Promise<UserProfileData> => {
     const token = getAuthToken();
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://analisis-cabalistico-alma.onrender.com/api'}/account/profile/`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://analisis-cabalistico-alma.onrender.com/api'}/profile/me/`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -84,7 +84,7 @@ export default function AccountPage() {
 
   const patchPatientAccountProfile = async (data: Partial<UserProfileData>): Promise<UserProfileData> => {
     const token = getAuthToken();
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://analisis-cabalistico-alma.onrender.com/api'}/account/profile/`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://analisis-cabalistico-alma.onrender.com/api'}/profile/me/`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',

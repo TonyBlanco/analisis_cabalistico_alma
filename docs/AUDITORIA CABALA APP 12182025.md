@@ -383,17 +383,20 @@ Frontend espera endpoints no presentes en backend:
 - T1.1 cerrado: vista clinica del paciente para terapeuta con datos reales (paciente, perfil, resultados, analysis-records).
 - T1.2 cerrado: acciones clinicas del terapeuta (tarot, astrologia, gematria) con ejecucion directa y refresco de evaluaciones.
 - T1.3 cerrado: sintesis clinica con lectura y anotaciones sobre analysis-records (sin ejecutar nuevos analisis).
+- T1.4 cerrado: narrativa asistida (IA) en la sintesis clinica, sin persistencia de salida.
 - Solo frontend; sin cambios de backend ni `lib/api.ts`.
 
 ## Commits T1
 - `9b3d392e` `feat(frontend): T1.1 therapist patient clinical view`
 - `296de8b0` `feat(frontend): T1.2 therapist clinical actions in workspace`
 - `ebf363ce` `feat(frontend): T1.3 therapist synthesis annotations`
+- T1.4: pendiente de commit
 
 ## Archivos tocados en T1
 - T1.1: `tonyblanco-app/app/(dashboard)/dashboard/therapist/patients/[id]/page.tsx`
 - T1.2: `tonyblanco-app/app/(dashboard)/dashboard/therapist/page.tsx`, `tonyblanco-app/components/ClinicalEvaluationsSection.tsx`, `tonyblanco-app/components/PatientResultsSection.tsx`
 - T1.3: `tonyblanco-app/components/ClinicalEvaluationsSection.tsx`
+- T1.4: `tonyblanco-app/components/ClinicalEvaluationsSection.tsx`
 
 -T2.1 DONE.
 

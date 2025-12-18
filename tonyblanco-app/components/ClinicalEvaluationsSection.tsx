@@ -7,6 +7,7 @@ import { getActivePatientId, getActivePatientName } from '@/lib/active-patient';
 import { getPatientDetail } from '@/lib/assignment-api';
 import { validateProfileForAnalysis } from '@/lib/profile-validation';
 import ProfileCompletionModal from './ProfileCompletionModal';
+import { generateWithGemini } from '@/lib/gemini-config';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://analisis-cabalistico-alma.onrender.com/api';
 
@@ -39,6 +40,10 @@ export default function ClinicalEvaluationsSection() {
   const [notes, setNotes] = useState('');
   const [savingNotes, setSavingNotes] = useState(false);
   const [notesMessage, setNotesMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
+  const [aiNarrative, setAiNarrative] = useState<string | null>(null);
+  const [aiMessage, setAiMessage] = useState<string | null>(null);
 
   // Cargar paciente activo solo en cliente para evitar mismatches SSR/CSR
   useEffect(() => {
@@ -107,6 +112,9 @@ export default function ClinicalEvaluationsSection() {
       setAnalysisDetail(null);
       setNotes('');
       setNotesMessage(null);
+      setAiNarrative(null);
+      setAiError(null);
+      setAiMessage(null);
       return;
     }
 
@@ -135,6 +143,9 @@ export default function ClinicalEvaluationsSection() {
         const data = await response.json();
         setAnalysisDetail(data);
         setNotes(String(data?.annotations || data?.notes || ''));
+        setAiNarrative(null);
+        setAiError(null);
+        setAiMessage(null);
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Error al cargar el análisis.';
         setAnalysisDetailError(errorMessage);
@@ -259,6 +270,74 @@ export default function ClinicalEvaluationsSection() {
     setShowExecuteModal(false);
     setTestToExecute(null);
     setPatientData(null);
+  };
+
+  const buildAiPrompt = () => {
+    if (!analysisDetail) return '';
+
+    const analysisType = analysisDetail.analysis_type || analysisDetail.type || analysisDetail.name || 'N/A';
+    const analysisDate = analysisDetail.created_at || analysisDetail.updated_at || 'N/A';
+    const analysisSummary = analysisDetail.summary || 'N/A';
+    const resultData = safeJson(analysisDetail.result_data ?? analysisDetail);
+    const therapistNotes = notes && notes.trim() ? notes.trim() : 'N/A';
+
+    return [
+      'Eres un asistente clinico para uso exclusivo del terapeuta.',
+      'Usa solo la informacion provista; no inventes datos.',
+      'No diagnosticos ni prescripciones.',
+      'Devuelve en espanol con la estructura exacta:',
+      'Observaciones clave:',
+      '- ...',
+      'Patrones detectados:',
+      '- ...',
+      'Hipotesis terapeuticas (no diagnosticos):',
+      '- ...',
+      'Sugerencias de exploracion (no prescripciones):',
+      '- ...',
+      '',
+      'Datos del analisis:',
+      `Tipo: ${analysisType}`,
+      `Fecha: ${analysisDate}`,
+      `Resumen: ${analysisSummary}`,
+      `Resultados (result_data): ${resultData}`,
+      `Notas del terapeuta: ${therapistNotes}`
+    ].join('\n');
+  };
+
+  const handleGenerateNarrative = async () => {
+    if (!analysisDetail) return;
+
+    setAiLoading(true);
+    setAiError(null);
+    setAiMessage(null);
+
+    try {
+      const prompt = buildAiPrompt();
+      const narrative = await generateWithGemini(prompt);
+
+      if (!narrative) {
+        throw new Error('Empty response');
+      }
+
+      setAiNarrative(narrative);
+      setAiMessage('Narrativa generada.');
+    } catch {
+      setAiError('No se pudo generar la narrativa. Intenta nuevamente.');
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  const handleCopyNarrative = async () => {
+    if (!aiNarrative) return;
+
+    try {
+      await navigator.clipboard.writeText(aiNarrative);
+      setAiMessage('Narrativa copiada al portapapeles.');
+      setAiError(null);
+    } catch {
+      setAiError('No se pudo copiar la narrativa.');
+    }
   };
 
   if (loading) {
@@ -498,6 +577,44 @@ export default function ClinicalEvaluationsSection() {
               >
                 {savingNotes ? 'Guardando...' : 'Guardar notas'}
               </button>
+
+              <div className="border-t border-gray-200 pt-4">
+                <h4 className="text-sm font-semibold text-gray-900 mb-2">Narrativa asistida (IA)</h4>
+                <p className="text-xs text-gray-500 mb-3">
+                  Contenido generado por IA como apoyo al criterio clinico.
+                </p>
+                <button
+                  type="button"
+                  disabled={aiLoading}
+                  onClick={handleGenerateNarrative}
+                  className="px-4 py-2 text-sm font-medium text-white rounded-md hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{ backgroundColor: 'var(--accent-color)' }}
+                >
+                  {aiLoading ? 'Generando...' : 'Generar narrativa clinica (IA)'}
+                </button>
+
+                {aiError && (
+                  <p className="text-sm text-red-600 mt-2">{aiError}</p>
+                )}
+                {aiMessage && (
+                  <p className="text-sm text-green-700 mt-2">{aiMessage}</p>
+                )}
+
+                {aiNarrative && (
+                  <div className="mt-3 border border-gray-200 rounded-md p-3 bg-gray-50">
+                    <pre className="text-xs text-gray-700 whitespace-pre-wrap break-words">
+                      {aiNarrative}
+                    </pre>
+                    <button
+                      type="button"
+                      onClick={handleCopyNarrative}
+                      className="mt-3 text-sm text-blue-600 hover:text-blue-800 underline"
+                    >
+                      Copiar texto
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>

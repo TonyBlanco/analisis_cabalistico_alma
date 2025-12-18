@@ -390,7 +390,7 @@ Frontend espera endpoints no presentes en backend:
 - `9b3d392e` `feat(frontend): T1.1 therapist patient clinical view`
 - `296de8b0` `feat(frontend): T1.2 therapist clinical actions in workspace`
 - `ebf363ce` `feat(frontend): T1.3 therapist synthesis annotations`
-- - `c4c7d981` `feat(frontend): T1.4 ai narrative in therapist synthesis`
+- `c4c7d981` `feat(frontend): T1.4 ai narrative in therapist synthesis`
 
 ## Archivos tocados en T1
 - T1.1: `tonyblanco-app/app/(dashboard)/dashboard/therapist/patients/[id]/page.tsx`
@@ -428,3 +428,15 @@ Logging is present for failures and critical paths.
 
 ## Archivos tocados en T2
 - T2.1: `backend/api/cabalistic_views.py`, `backend/api/astrology_kerykeion/service.py`
+
+## Estado T3 (actualizado)
+- T3.1 cerrado: catalogo clinico del terapeuta integrado en workspace (declarativo, sin ejecucion).
+- T3.2 cerrado: puertas clinicas declarativas (requisitos y recomendaciones informativas).
+- Solo frontend; sin cambios de backend ni `lib/api.ts`.
+
+## Commits T3
+- T3.1/T3.2: pendiente de commit
+
+## Archivos tocados en T3
+- T3.1: `tonyblanco-app/app/(dashboard)/dashboard/therapist/page.tsx`
+- T3.2: `tonyblanco-app/app/(dashboard)/dashboard/therapist/page.tsx`

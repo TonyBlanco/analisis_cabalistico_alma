@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { 
@@ -16,6 +16,8 @@ import {
   ChevronRight,
   LucideIcon 
 } from 'lucide-react';
+import { clinicalTestsRegistry } from '@/lib/clinicalTests.registry';
+import ClinicalTestHelpModal from '@/components/ClinicalTestHelpModal';
 
 interface TherapistSidebarItem {
   href: string;
@@ -67,75 +69,41 @@ export default function TherapistSidebar() {
   const [testsOpen, setTestsOpen] = useState(false);
   const [psychTestsOpen, setPsychTestsOpen] = useState(false);
   const [cabalTestsOpen, setCabalTestsOpen] = useState(false);
+  const [openHelpCode, setOpenHelpCode] = useState<string | null>(null);
 
-  const PSYCH_TEST_DOMAINS = [
-    {
-      label: 'Estado de animo y ansiedad',
-      tests: ['PHQ-9', 'GAD-7', 'BAI', 'BDI-II', 'STAI'],
-    },
-    {
-      label: 'Psicopatologia general',
-      tests: ['SCL-90', 'SCL-90-R'],
-    },
-    {
-      label: 'Personalidad clinica',
-      tests: ['PAI', 'PAI Profesional', 'MCMI-IV'],
-    },
-    {
-      label: 'Entrevistas estructuradas',
-      tests: ['SCID-5-RV', 'SCID-5'],
-    },
-    {
-      label: 'Neurodesarrollo',
-      tests: ['ADHD'],
-    },
-    {
-      label: 'TOC',
-      tests: ['OCD'],
-    },
-    {
-      label: 'Trauma',
-      tests: ['PTSD'],
-    },
-    {
-      label: 'Sueno',
-      tests: ['Insomnia Index'],
-    },
-    {
-      label: 'Conducta alimentaria',
-      tests: ['Eating Disorder Screen'],
-    },
-    {
-      label: 'Sustancias',
-      tests: ['Substance Use Screening'],
-    },
-    {
-      label: 'Psicologia',
-      tests: ['Screening Psicologico General'],
-    },
-    {
-      label: 'Bienestar',
-      tests: ['Wellness Assessment'],
-    },
-  ];
+  const psychTests = useMemo(
+    () => clinicalTestsRegistry.filter((test) => test.family === 'psicologicos'),
+    []
+  );
+  const cabalisticTests = useMemo(
+    () => clinicalTestsRegistry.filter((test) => test.family === 'cabalisticos'),
+    []
+  );
+  const cabalDomains = useMemo(() => {
+    return cabalisticTests.reduce<Record<string, typeof cabalisticTests>>((acc, test) => {
+      acc[test.domain] = acc[test.domain] || [];
+      acc[test.domain].push(test);
+      return acc;
+    }, {});
+  }, [cabalisticTests]);
+  const psychDomains = useMemo(() => {
+    return psychTests.reduce<Record<string, typeof psychTests>>((acc, test) => {
+      acc[test.domain] = acc[test.domain] || [];
+      acc[test.domain].push(test);
+      return acc;
+    }, {});
+  }, [psychTests]);
 
-  const CABALISTIC_TESTS = [
-    'Gematria',
-    'Analisis Shekinah',
-    'Tarot Terapeutico',
-    'Numerologia Completa',
-    'Astrologia Cabalistica',
-    'Astrologia Tecnica (Kerykeion)',
-    'Mapa del Alma',
-    'Arbol de la Vida',
-    'Numero del Alma',
-    'Tikun',
-    'Mazal',
-    '72 Nombres',
-    'Shemot',
-    'Analisis Cabalistico Completo',
-    'Abundancia Financiera',
-  ];
+  const resolveTestHref = (test: (typeof clinicalTestsRegistry)[number]) => {
+    if (!test.implemented) return null;
+    if (test.patient_route) {
+      return test.patient_route;
+    }
+    if (test.therapist_route) {
+      return test.therapist_route.replace('[id]', 'paciente');
+    }
+    return null;
+  };
 
   const sections: TherapistSidebarSection[] = [
     {
@@ -310,17 +278,61 @@ export default function TherapistSidebar() {
                                 </button>
                                 {psychTestsOpen && (
                                   <div className="mt-2 space-y-3 text-xs text-gray-600">
-                                    {PSYCH_TEST_DOMAINS.map((domain) => (
-                                      <div key={domain.label}>
+                                    {Object.entries(psychDomains).map(([domain, tests]) => (
+                                      <div key={domain}>
                                         <div className="text-[11px] uppercase tracking-wide text-gray-500">
-                                          {domain.label}
+                                          {domain}
                                         </div>
                                         <ul className="mt-1 space-y-1">
-                                          {domain.tests.map((test) => (
-                                            <li key={test} className="py-0.5">
-                                              {test}
-                                            </li>
-                                          ))}
+                                          {tests.map((test) => {
+                                            const href = resolveTestHref(test);
+                                            const statusBadge = (
+                                              <span
+                                                className={`text-[10px] uppercase px-2 py-0.5 rounded-full ${
+                                                  test.implemented
+                                                    ? 'bg-green-100 text-green-800'
+                                                    : 'bg-gray-100 text-gray-500'
+                                                }`}
+                                              >
+                                                {test.implemented ? 'Disponible' : 'En desarrollo'}
+                                              </span>
+                                            );
+                                            const content = (
+                                              <div className="flex items-center justify-between gap-2">
+                                                <span className="text-gray-700">{test.display_name}</span>
+                                                <div className="flex items-center gap-1">
+                                                  {statusBadge}
+                                                  <button
+                                                    type="button"
+                                                    onClick={(e) => {
+                                                      e.preventDefault();
+                                                      e.stopPropagation();
+                                                      setOpenHelpCode(test.test_code);
+                                                    }}
+                                                    className="text-[11px] text-blue-600 hover:text-blue-800 underline"
+                                                  >
+                                                    Que es?
+                                                  </button>
+                                                </div>
+                                              </div>
+                                            );
+                                            return (
+                                              <li key={test.test_code} className="py-0.5">
+                                                {href ? (
+                                                  <Link
+                                                    href={href}
+                                                    className="block px-2 py-1 rounded hover:bg-gray-50"
+                                                  >
+                                                    {content}
+                                                  </Link>
+                                                ) : (
+                                                  <div className="block px-2 py-1 rounded text-gray-500">
+                                                    {content}
+                                                  </div>
+                                                )}
+                                              </li>
+                                            );
+                                          })}
                                         </ul>
                                       </div>
                                     ))}
@@ -342,13 +354,66 @@ export default function TherapistSidebar() {
                                   )}
                                 </button>
                                 {cabalTestsOpen && (
-                                  <ul className="mt-2 space-y-1 text-xs text-gray-600">
-                                    {CABALISTIC_TESTS.map((test) => (
-                                      <li key={test} className="py-0.5">
-                                        {test}
-                                      </li>
+                                  <div className="mt-2 space-y-3 text-xs text-gray-600">
+                                    {Object.entries(cabalDomains).map(([domain, tests]) => (
+                                      <div key={domain}>
+                                        <div className="text-[11px] uppercase tracking-wide text-gray-500">
+                                          {domain}
+                                        </div>
+                                        <ul className="mt-1 space-y-1">
+                                          {tests.map((test) => {
+                                            const href = resolveTestHref(test);
+                                            const statusBadge = (
+                                              <span
+                                                className={`text-[10px] uppercase px-2 py-0.5 rounded-full ${
+                                                  test.implemented
+                                                    ? 'bg-green-100 text-green-800'
+                                                    : 'bg-gray-100 text-gray-500'
+                                                }`}
+                                              >
+                                                {test.implemented ? 'Disponible' : 'En desarrollo'}
+                                              </span>
+                                            );
+                                            const content = (
+                                              <div className="flex items-center justify-between gap-2">
+                                                <span className="text-gray-700">{test.display_name}</span>
+                                                <div className="flex items-center gap-1">
+                                                  {statusBadge}
+                                                  <button
+                                                    type="button"
+                                                    onClick={(e) => {
+                                                      e.preventDefault();
+                                                      e.stopPropagation();
+                                                      setOpenHelpCode(test.test_code);
+                                                    }}
+                                                    className="text-[11px] text-blue-600 hover:text-blue-800 underline"
+                                                  >
+                                                    Que es?
+                                                  </button>
+                                                </div>
+                                              </div>
+                                            );
+                                            return (
+                                              <li key={test.test_code} className="py-0.5">
+                                                {href ? (
+                                                  <Link
+                                                    href={href}
+                                                    className="block px-2 py-1 rounded hover:bg-gray-50"
+                                                  >
+                                                    {content}
+                                                  </Link>
+                                                ) : (
+                                                  <div className="block px-2 py-1 rounded text-gray-500">
+                                                    {content}
+                                                  </div>
+                                                )}
+                                              </li>
+                                            );
+                                          })}
+                                        </ul>
+                                      </div>
                                     ))}
-                                  </ul>
+                                  </div>
                                 )}
                               </div>
                             </div>
@@ -407,6 +472,11 @@ export default function TherapistSidebar() {
 
       {/* Mobile: Sidebar hidden, controlled by Header hamburger menu */}
       {/* TODO: Implement mobile drawer if needed */}
+
+      <ClinicalTestHelpModal
+        testCode={openHelpCode}
+        onClose={() => setOpenHelpCode(null)}
+      />
     </>
   );
 }

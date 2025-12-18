@@ -471,6 +471,7 @@ Logging is present for failures and critical paths.
 - T6.7 cerrado: BAI end-to-end en español (definición, UI, backend, vistas, SCDF).
 - T6.8 cerrado: ISI end-to-end en español (definición, UI, backend, vistas, SCDF).
 - T6.10 cerrado: BDI-II end-to-end en español + guía clínica para terapeutas.
+- T6.12 cerrado: Capa de conocimiento v2 (PHQ-9) con registro declarativo y modal de ayuda; entrada desde catalogo, sidebar y vista terapeuta PHQ-9.
 - Solo frontend/backend del sistema actual; sin legacy.
 
 ## Commits T6
@@ -478,3 +479,26 @@ Logging is present for failures and critical paths.
 
 ## Archivos tocados en T6
 - T6.3–T6.10: ver rutas de tests PHQ-9, GAD-7, BAI, ISI, BDI-II (config, UI paciente, resultado paciente, resultado terapeuta), backend/api/test_views.py, backend/api/urls.py, SCDF placeholder terapeuta.
+- T6.12: tonyblanco-app/lib/clinicalTestKnowledge.registry.ts, tonyblanco-app/components/ClinicalTestHelpModal.tsx, tonyblanco-app/app/(dashboard)/dashboard/therapist/page.tsx, tonyblanco-app/app/(dashboard)/dashboard/therapist/components/TherapistSidebar.tsx, tonyblanco-app/app/(dashboard)/dashboard/therapist/patients/[id]/tests/phq9/page.tsx.
+
+---
+
+## Documentos vinculantes adicionales (desde 18/12/2025)
+
+Los siguientes documentos forman parte del **marco normativo activo del proyecto** y deben ser respetados en cualquier implementación presente o futura:
+
+1. **Checklist Técnico P1 – Bio-Emoción & Árbol de la Vida**  
+   Archivo:  
+   `docs/CHECKLIST_TECNICO_P1_BIOEMOCION_Y_ARBOL_DE_LA_VIDA.md`  
+
+   Define las tareas técnicas autorizadas para la fase P1 del módulo Bio-Emoción, incluyendo backend y frontend, sin romper la arquitectura cerrada ni mezclar capas clínicas y experienciales.
+
+2. **Módulo Personal / Experiencial – Conciencia y Reprogramación (Documento Espejo)**  
+   Archivo:  
+   `docs/MODULO_PERSONAL_EXPERIENCIAL_CONCIENCIA_Y_REPROGRAMACION.md`  
+
+   Define explícitamente la capa **no clínica** del ecosistema.  
+   Todo contenido experiencial, meditativo, simbólico o espiritual **debe vivir exclusivamente bajo este marco** y **no puede integrarse en módulos clínicos**.
+
+Estos documentos actúan como **frontera arquitectónica y conceptual** y su incumplimiento se considera una desviación del estado sellado del proyecto.
+

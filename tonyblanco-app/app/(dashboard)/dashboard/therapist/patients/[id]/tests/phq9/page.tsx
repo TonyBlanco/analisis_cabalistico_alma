@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
+import ClinicalTestHelpModal from "@/components/ClinicalTestHelpModal";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://analisis-cabalistico-alma.onrender.com/api";
 
@@ -30,6 +31,7 @@ export default function TherapistPatientPhq9Page() {
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [openHelp, setOpenHelp] = useState(false);
 
   useEffect(() => {
     const token = typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
@@ -164,6 +166,15 @@ export default function TherapistPatientPhq9Page() {
         <p className="text-sm text-gray-600 mt-2">
           Seguimiento de cribado. Este resultado no es un diagnóstico.
         </p>
+        <div className="mt-3">
+          <button
+            type="button"
+            onClick={() => setOpenHelp(true)}
+            className="text-sm text-blue-600 hover:text-blue-800 underline"
+          >
+            Que es este test?
+          </button>
+        </div>
       </div>
 
       <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm space-y-4">
@@ -248,6 +259,10 @@ export default function TherapistPatientPhq9Page() {
           Este resultado no es un diagnóstico.
         </p>
       </div>
+      {openHelp && (
+        <ClinicalTestHelpModal testCode="phq-9" onClose={() => setOpenHelp(false)} />
+      )}
+
     </div>
   );
 }

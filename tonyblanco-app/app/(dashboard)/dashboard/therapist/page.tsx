@@ -12,6 +12,8 @@ import ClinicalEvaluationsSection from '@/components/ClinicalEvaluationsSection'
 import PatientResultsSection from '@/components/PatientResultsSection';
 import { Patient } from '@/lib/patient-api';
 import { getActivePatientId, getActivePatientName } from '@/lib/active-patient';
+import { clinicalTestsRegistry } from '@/lib/clinicalTests.registry';
+import ClinicalTestHelpModal from '@/components/ClinicalTestHelpModal';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://analisis-cabalistico-alma.onrender.com/api';
 
@@ -211,6 +213,11 @@ const GATE_STATUS = {
   pending: { label: 'Pendiente', className: 'bg-amber-100 text-amber-800' },
   completed: { label: 'Completado', className: 'bg-green-100 text-green-800' },
   recommended: { label: 'Recomendado', className: 'bg-blue-100 text-blue-800' },
+};
+
+const TEST_STATUS_BADGES = {
+  disponible: { label: 'Disponible', className: 'bg-green-100 text-green-800' },
+  enDesarrollo: { label: 'En desarrollo', className: 'bg-gray-100 text-gray-600' },
 };
 
 const LEGACY_MODULES = [
@@ -566,15 +573,12 @@ const PSYCH_TEST_GENRES = [
 ];
 
 function ClinicalCatalogSection() {
-  const legacyPreAnalysis = LEGACY_MODULES.filter(
-    (module) => module.category === 'Pre-analisis (psicologico)'
-  );
-  const legacyCabalistic = LEGACY_MODULES.filter(
-    (module) => module.category === 'Analisis cabalistico'
-  );
-  const legacyClinicalTools = LEGACY_MODULES.filter(
-    (module) => module.category === 'Herramienta clinica'
-  );
+  const [openKnowledgeCode, setOpenKnowledgeCode] = useState<string | null>(null);
+  const grouped = clinicalTestsRegistry.reduce<Record<string, typeof clinicalTestsRegistry>>((acc, test) => {
+    acc[test.domain] = acc[test.domain] || [];
+    acc[test.domain].push(test);
+    return acc;
+  }, {});
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
@@ -586,160 +590,53 @@ function ClinicalCatalogSection() {
       </div>
 
       <div className="space-y-6">
-        <div className="border border-gray-200 rounded-md p-4">
-          <div className="mb-3">
-            <h3 className="text-sm font-semibold text-gray-900">Tests Psicologicos</h3>
-            <p className="text-xs text-gray-500">Pre-analisis (responde el paciente).</p>
-          </div>
-          <div className="space-y-2">
-            {PRE_ANALYSIS_TESTS.map((test) => (
-              <div key={test.name} className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                <span className="text-sm text-gray-800">{test.name}</span>
-                <span className="text-xs text-gray-500">{test.note}</span>
-              </div>
-            ))}
-          </div>
-          {legacyPreAnalysis.length > 0 && (
-            <div className="mt-4 border-t border-gray-200 pt-3">
-              <p className="text-xs text-gray-500 mb-3">Modulo legacy (reintegrado)</p>
-              <div className="space-y-4">
-                {PSYCH_TEST_GENRES.map((genre) => (
-                  <div key={genre.genre} className="rounded-md border border-gray-100 bg-white p-3">
-                    <div className="text-sm font-semibold text-gray-900">{genre.genre}</div>
-                    <div className="text-xs text-gray-600 mt-1">{genre.description}</div>
-                    <div className="mt-3 space-y-2">
-                      {genre.tests.map((test) => (
-                        <div
-                          key={test.name}
-                          className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"
-                        >
-                          <span className="text-sm text-gray-800">{test.name}</span>
-                          <span className="text-[10px] uppercase px-2 py-1 rounded-full bg-gray-100 text-gray-600">
-                            {test.intent}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
+        {Object.entries(grouped).map(([domain, tests]) => (
+          <div key={domain} className="border border-gray-200 rounded-md p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900">{domain}</h3>
+                <p className="text-xs text-gray-500">Tests patient_self (informativo, sin ejecucion).</p>
               </div>
             </div>
-          )}
-        </div>
-
-        <div className="border border-gray-200 rounded-md p-4">
-          <div className="mb-3">
-            <h3 className="text-sm font-semibold text-gray-900">Analisis Cabalisticos</h3>
-            <p className="text-xs text-gray-500">Analisis clinico (terapeuta).</p>
-          </div>
-          <div className="space-y-3">
-            {CLINICAL_ANALYSES.map((analysis) => (
-              <div key={analysis.name} className="border border-gray-100 rounded-md p-3 bg-gray-50">
-                <div className="text-sm font-medium text-gray-900">{analysis.name}</div>
-                <div className="text-xs text-gray-600 mt-1">{analysis.description}</div>
-                <div className="text-xs text-gray-500 mt-2">{analysis.readinessNotes}</div>
-                <div className="mt-3 space-y-2">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-xs text-gray-600">Requeridos:</span>
-                    {analysis.requiredTests.length === 0 && (
-                      <span className="text-xs text-gray-400">N/A</span>
-                    )}
-                    {analysis.requiredTests.map((test) => (
-                      <span key={test} className="inline-flex items-center gap-1 text-xs">
-                        <span className="text-gray-700">{test}</span>
-                        <span
-                          className={`px-2 py-0.5 rounded-full text-[10px] ${GATE_STATUS.pending.className}`}
-                        >
-                          {GATE_STATUS.pending.label}
-                        </span>
+            <div className="space-y-2">
+              {tests.map((test) => {
+                const status = test.implemented ? TEST_STATUS_BADGES.disponible : TEST_STATUS_BADGES.enDesarrollo;
+                return (
+                  <div
+                    key={test.test_code}
+                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 rounded-md border border-gray-100 bg-white p-3"
+                  >
+                    <div>
+                      <div className="text-sm font-medium text-gray-900">{test.display_name}</div>
+                      <div className="text-xs text-gray-500">Codigo: {test.test_code}</div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className={`text-[10px] uppercase px-2 py-1 rounded-full ${status.className}`}>
+                        {status.label}
                       </span>
-                    ))}
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-xs text-gray-600">Recomendados:</span>
-                    {analysis.recommendedTests.length === 0 && (
-                      <span className="text-xs text-gray-400">N/A</span>
-                    )}
-                    {analysis.recommendedTests.map((test) => (
-                      <span key={test} className="inline-flex items-center gap-1 text-xs">
-                        <span className="text-gray-700">{test}</span>
-                        <span
-                          className={`px-2 py-0.5 rounded-full text-[10px] ${GATE_STATUS.recommended.className}`}
-                        >
-                          {GATE_STATUS.recommended.label}
-                        </span>
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-          {legacyCabalistic.length > 0 && (
-            <div className="mt-4 border-t border-gray-200 pt-3">
-              <p className="text-xs text-gray-500 mb-2">Modulo legacy (reintegrado)</p>
-              <div className="space-y-2">
-                {legacyCabalistic.map((module) => (
-                  <div key={module.id} className="rounded-md border border-gray-100 bg-white p-3">
-                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
-                      <div>
-                        <div className="text-sm font-medium text-gray-900">{module.name}</div>
-                        <div className="text-xs text-gray-600 mt-1">{module.shortDescription}</div>
-                        {module.notes && (
-                          <div className="text-xs text-gray-500 mt-1">{module.notes}</div>
-                        )}
-                      </div>
-                      <span className="text-[10px] uppercase px-2 py-1 rounded-full bg-gray-100 text-gray-600">
-                        {module.legacyStatus}
-                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setOpenKnowledgeCode(test.test_code)}
+                        className="text-xs text-blue-600 hover:text-blue-800 underline"
+                      >
+                        Que es este test?
+                      </button>
                     </div>
                   </div>
-                ))}
-              </div>
+                );
+              })}
             </div>
-          )}
-        </div>
-
-        <div className="border border-gray-200 rounded-md p-4">
-          <div className="mb-3">
-            <h3 className="text-sm font-semibold text-gray-900">SCDF</h3>
-            <p className="text-xs text-gray-500">Herramienta Clinica Central.</p>
           </div>
-          <p className="text-sm text-gray-700">
-            Herramienta clinica propietaria. No modificar.
-          </p>
-          <p className="text-xs text-gray-500 mt-2">
-            Seguimiento clinico central ubicado en el panel dedicado de SCDF.
-          </p>
-          {legacyClinicalTools.length > 0 && (
-            <div className="mt-4 border-t border-gray-200 pt-3">
-              <p className="text-xs text-gray-500 mb-2">Modulo legacy (reintegrado)</p>
-              <div className="space-y-2">
-                {legacyClinicalTools.map((module) => (
-                  <div key={module.id} className="rounded-md border border-gray-100 bg-white p-3">
-                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
-                      <div>
-                        <div className="text-sm font-medium text-gray-900">{module.name}</div>
-                        <div className="text-xs text-gray-600 mt-1">{module.shortDescription}</div>
-                        {module.notes && (
-                          <div className="text-xs text-gray-500 mt-1">{module.notes}</div>
-                        )}
-                      </div>
-                      <span className="text-[10px] uppercase px-2 py-1 rounded-full bg-gray-100 text-gray-600">
-                        {module.legacyStatus}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
+        ))}
       </div>
+
+      <ClinicalTestHelpModal
+        testCode={openKnowledgeCode}
+        onClose={() => setOpenKnowledgeCode(null)}
+      />
     </div>
   );
 }
-
 function ScdfTrackingPanel({
   prerequisites,
   onAssign,

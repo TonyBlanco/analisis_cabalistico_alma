@@ -89,8 +89,7 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
       // Import here to avoid circular dependencies
       const { assignTestToPatient } = await import('@/lib/assignment-api');
       
-      // New endpoint uses patient_id directly, backend validates patient has linked User account
-      await assignTestToPatient(activePatientId, testToAssign.code);
+      await assignTestToPatient(activePatientId, testToAssign.code, 'patient_self');
       
       // Show success modal with professional UX
       setLastAssignedTest(testToAssign.name);

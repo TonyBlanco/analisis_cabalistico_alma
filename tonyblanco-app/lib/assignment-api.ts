@@ -30,6 +30,7 @@ function getAuthHeaders(): HeadersInit {
 export interface AssignTestRequest {
   patient_id: number;
   test_code: string;
+  execution_mode?: string;
 }
 
 export interface AssignTestResponse {
@@ -50,11 +51,13 @@ export interface AssignTestResponse {
  */
 export async function assignTestToPatient(
   patientId: number,
-  testCode: string
+  testCode: string,
+  executionMode?: string
 ): Promise<AssignTestResponse> {
   const payload = {
     patient_id: patientId,
     test_code: testCode,
+    ...(executionMode ? { execution_mode: executionMode } : {}),
   };
 
   const response = await fetch(`${API_BASE_URL}/tests/assign-to-patient/`, {

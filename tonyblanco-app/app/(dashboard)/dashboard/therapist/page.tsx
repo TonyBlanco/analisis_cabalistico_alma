@@ -23,6 +23,12 @@ export default function TherapistDashboard() {
   const [role, setRole] = useState<string | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [analysisRefreshKey, setAnalysisRefreshKey] = useState(0);
+  const [activePatientName, setActivePatientName] = useState<string | null>(null);
+  const [clinicalStatus, setClinicalStatus] = useState<'Evaluacion' | 'En curso' | 'Completa'>('Evaluacion');
+  const [clinicalProgress, setClinicalProgress] = useState(0);
+  const [knowledgeModalCode, setKnowledgeModalCode] = useState<string | null>(null);
+  const [knowledgeCollapsed, setKnowledgeCollapsed] = useState(true);
+  const [catalogCollapsed, setCatalogCollapsed] = useState(true);
   const [scdfPrereqs, setScdfPrereqs] = useState([
     {
       id: 'screenings',
@@ -59,6 +65,44 @@ export default function TherapistDashboard() {
   }, [router]);
 
   const isAdmin = role === 'admin';
+
+  useEffect(() => {
+    const syncPatient = () => {
+      const name = getActivePatientName();
+      setActivePatientName(name || null);
+    };
+    syncPatient();
+    window.addEventListener('activePatientChanged', syncPatient);
+    window.addEventListener('storage', syncPatient);
+    return () => {
+      window.removeEventListener('activePatientChanged', syncPatient);
+      window.removeEventListener('storage', syncPatient);
+    };
+  }, []);
+
+  const completedPrereqs = scdfPrereqs.filter((i) => i.status === 'completado').length;
+  useEffect(() => {
+    if (!activePatientName) {
+      setClinicalStatus('Evaluacion');
+      setClinicalProgress(0);
+      return;
+    }
+    if (completedPrereqs === scdfPrereqs.length && scdfPrereqs.length > 0) {
+      setClinicalStatus('Completa');
+      setClinicalProgress(100);
+    } else if (completedPrereqs > 0) {
+      setClinicalStatus('En curso');
+      setClinicalProgress(Math.round((completedPrereqs / scdfPrereqs.length) * 100));
+    } else {
+      setClinicalStatus('Evaluacion');
+      setClinicalProgress(20);
+    }
+  }, [activePatientName, completedPrereqs, scdfPrereqs.length]);
+
+  const implementedTests = useMemo(
+    () => clinicalTestsRegistry.filter((t) => t.implemented),
+    []
+  );
 
   const handleSelectPatient = () => {
     setPickerOpen(true);
@@ -109,54 +153,231 @@ export default function TherapistDashboard() {
 
       {/* Main Workspace - Patient Context Only */}
       <div className="space-y-6">
-        <ScdfTrackingPanel
-          prerequisites={scdfPrereqs}
-          onAssign={(id) => {
-            setScdfPrereqs((prev) =>
-              prev.map((item) =>
-                item.id === id
-                  ? { ...item, status: item.status === 'pendiente' ? 'asignado' : item.status }
-                  : item
-              )
-            );
-          }}
-          onMarkCompleted={(id) => {
-            setScdfPrereqs((prev) =>
-              prev.map((item) =>
-                item.id === id
-                  ? {
-                      ...item,
-                      status: 'completado',
-                      completedCount: item.requiredCount,
+        <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900 mb-1">Acciones clinicas prioritarias</h2>
+              <p className="text-sm text-gray-500">Enfoque inmediato para el paciente activo.</p>
+            </div>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-3">
+            <div className="border border-gray-200 rounded-lg p-4 shadow-sm bg-white flex flex-col gap-3">
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900">Screening psicologico minimo</h3>
+                <p className="text-xs text-gray-500">Tests auto-administrados basicos</p>
+              </div>
+              <div className="flex flex-wrap gap-2 items-center">
+                <span className="text-[10px] uppercase px-2 py-1 rounded-full bg-green-100 text-green-800">Disponible</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                className="px-3 py-1.5 text-sm font-medium text-white rounded-md hover:opacity-90 transition-opacity"
+                style={{ backgroundColor: 'var(--accent-color)' }}
+                  onClick={() => {
+                    const patientId = getActivePatientId();
+                    const suffix = patientId ? `?patient_id=${patientId}` : '';
+                    router.push(`/dashboard/therapist/tests${suffix}`);
+                  }}
+                >
+                  Asignar tests
+                </button>
+                <button
+                  type="button"
+                  className="text-sm text-blue-600 hover:text-blue-800"
+                  onClick={() => {
+                    const patientId = getActivePatientId();
+                    if (patientId) {
+                      router.push('/dashboard/therapist/patients/' + patientId);
                     }
-                  : item
-              )
-            );
-          }}
-        />
+                  }}
+                >
+                  Ver resultados
+                </button>
+              </div>
+            </div>
 
-        {/* Section 1: Assigned Tests (patient_self) */}
-        {/* Shows tests assigned to active patient with status: pending / completed */}
-        <AssignedTestsSection />
+            <div className="border border-gray-200 rounded-lg p-4 shadow-sm bg-white flex flex-col gap-3">
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900">Analisis cabalistico previo</h3>
+                <p className="text-xs text-gray-500">Numerologia y simbolismo guiado</p>
+              </div>
+              <div className="flex flex-wrap gap-2 items-center">
+                <span className="text-[10px] uppercase px-2 py-1 rounded-full bg-green-100 text-green-800">Disponible</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  className="px-3 py-1.5 text-sm font-medium text-white rounded-md hover:opacity-90 transition-opacity"
+                  style={{ backgroundColor: 'var(--accent-color)' }}
+                  onClick={() => router.push('/dashboard/therapist/cabala')}
+                >
+                  Ejecutar analisis
+                </button>
+                <button
+                  type="button"
+                  className="text-sm text-blue-600 hover:text-blue-800"
+                  onClick={() => {
+                    const patientId = getActivePatientId();
+                    if (patientId) {
+                      router.push('/dashboard/therapist/patients/' + patientId);
+                    }
+                  }}
+                >
+                  Historial
+                </button>
+              </div>
+            </div>
 
-        {/* Section 1.5: Therapist Clinical Catalog (reference only) */}
-        <ClinicalCatalogSection />
+            <div className="border border-gray-200 rounded-lg p-4 shadow-sm bg-white flex flex-col gap-3">
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900">SCDF</h3>
+                <p className="text-xs text-gray-500">Marco diagnostico estructurado</p>
+              </div>
+              <div className="flex flex-wrap gap-2 items-center">
+                <span className="text-[10px] uppercase px-2 py-1 rounded-full bg-green-100 text-green-800">Disponible</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  className="px-3 py-1.5 text-sm font-medium text-white rounded-md hover:opacity-90 transition-opacity"
+                  style={{ backgroundColor: 'var(--accent-color)' }}
+                  onClick={() => router.push('/dashboard/therapist/scdf')}
+                >
+                  Abrir SCDF
+                </button>
+                <button
+                  type="button"
+                  className="text-sm text-blue-600 hover:text-blue-800"
+                  onClick={() => {
+                    const patientId = getActivePatientId();
+                    if (patientId) {
+                      router.push('/dashboard/therapist/patients/' + patientId);
+                    }
+                  }}
+                >
+                  Progreso
+                </button>
+              </div>
+            </div>
+          </div>
 
-        {/* Section 2: Therapist Clinical Actions */}
-        <TherapistClinicalActions
-          onSuccess={() => setAnalysisRefreshKey((prev) => prev + 1)}
-        />
+          <div className="mt-5">
+            <ScdfTrackingPanel
+              prerequisites={scdfPrereqs}
+              onAssign={(id) => {
+                setScdfPrereqs((prev) =>
+                  prev.map((item) =>
+                    item.id === id
+                      ? { ...item, status: item.status === 'pendiente' ? 'asignado' : item.status }
+                      : item
+                  )
+                );
+              }}
+              onMarkCompleted={(id) => {
+                setScdfPrereqs((prev) =>
+                  prev.map((item) =>
+                    item.id === id
+                      ? {
+                          ...item,
+                          status: 'completado',
+                          completedCount: item.requiredCount,
+                        }
+                      : item
+                  )
+                );
+              }}
+            />
+          </div>
+        </div>
 
-        {/* Section 2: Clinical Evaluations (therapist_clinical) */}
-        {/* Run SCDF, Run Integrative Interview, Results are READ-ONLY after save */}
-        <ClinicalEvaluationsSection key={`clinical-evals-${analysisRefreshKey}`} />
+        <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <h2 className="text-sm font-semibold text-gray-900">Linea de tests asignados</h2>
+              <p className="text-xs text-gray-500">Estado y acceso a resultados.</p>
+            </div>
+          </div>
+          <AssignedTestsSection />
+        </div>
 
-        {/* Section 3: Results Panel */}
-        {/* List results per patient, expandable detail view, clear separation between test types */}
-        <PatientResultsSection />
+        <div className="grid gap-4 lg:grid-cols-2">
+          <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-semibold text-gray-900">Evaluaciones clinicas</h2>
+            </div>
+            <ClinicalEvaluationsSection key={`clinical-evals-${analysisRefreshKey}`} />
+          </div>
+          <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-semibold text-gray-900">Resultados del paciente</h2>
+            </div>
+            <PatientResultsSection />
+          </div>
+        </div>
+
+        <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-sm font-semibold text-gray-900">Capa de conocimiento y recursos</h2>
+              <p className="text-xs text-gray-500">Material educativo, solo lectura</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setKnowledgeCollapsed((prev) => !prev)}
+              className="text-xs text-blue-600 hover:text-blue-800 underline"
+            >
+              {knowledgeCollapsed ? 'Expandir' : 'Colapsar'}
+            </button>
+          </div>
+          {!knowledgeCollapsed && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {implementedTests.map((test) => (
+                <button
+                  key={test.test_code}
+                  type="button"
+                  onClick={() => setKnowledgeModalCode(test.test_code)}
+                  className="px-3 py-1.5 rounded-full border border-gray-200 text-xs font-medium text-gray-800 hover:border-gray-300 transition-colors"
+                >
+                  {test.test_code.toUpperCase()}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-sm font-semibold text-gray-900">Catalogo clinico global</h2>
+              <p className="text-xs text-gray-500">Abrir el catalogo completo para asignar tests.</p>
+            </div>
+            <button
+              type="button"
+              className="px-3 py-1.5 text-sm font-medium text-white rounded-md hover:opacity-90 transition-opacity"
+              style={{ backgroundColor: 'var(--accent-color)' }}
+              onClick={() => {
+                const patientId = getActivePatientId();
+                const suffix = patientId ? `?patient_id=${patientId}` : '';
+                router.push(`/dashboard/therapist/tests${suffix}`);
+              }}
+            >
+              Abrir catalogo
+            </button>
+          </div>
+          <p className="text-xs text-gray-500 mt-2">
+            El catalogo es una entidad global: descubre, informa y asigna fuera del Workspace.
+          </p>
+        </div>
       </div>
 
-      {/* Footer - Removed for cleaner UI */}
+      {knowledgeModalCode && (
+        <ClinicalTestHelpModal
+          testCode={knowledgeModalCode}
+          onClose={() => setKnowledgeModalCode(null)}
+        />
+      )}
     </div>
   );
 }

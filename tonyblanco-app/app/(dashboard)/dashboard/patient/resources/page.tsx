@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Headphones, Video, BookOpen, Sparkles, Lock } from 'lucide-react';
+import { getMyResources } from '@/lib/resources-api';
 
 interface Resource {
   id: string;
@@ -16,35 +17,30 @@ export default function PatientResourcesPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // TODO: Fetch resources from backend (GET /api/resources/my/)
-    // Placeholder data
-    setResources([
-      {
-        id: '1',
-        title: 'Meditación para el Alma',
-        type: 'audio',
-        access: 'free',
-      },
-      {
-        id: '2',
-        title: 'Introducción a la Cábala',
-        type: 'video',
-        access: 'assigned',
-      },
-      {
-        id: '3',
-        title: 'Curso de Desarrollo Personal',
-        type: 'course',
-        access: 'purchased',
-      },
-      {
-        id: '4',
-        title: 'Meditación Guiada Avanzada',
-        type: 'meditation',
-        access: 'free',
-      },
-    ]);
-    setLoading(false);
+    const loadResources = async () => {
+      try {
+        const data = await getMyResources();
+        const mapped = data.map((item) => {
+          const rawType = (item as any).resource_type || item.type || 'course';
+          const type = mapResourceType(rawType);
+          const access = item.acquired ? 'purchased' : 'assigned';
+          return {
+            id: String(item.id),
+            title: item.title,
+            type,
+            access,
+          } as Resource;
+        });
+        setResources(mapped);
+      } catch (error) {
+        console.error('Error loading resources:', error);
+        setResources([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadResources();
   }, []);
 
   if (loading) {
@@ -107,7 +103,7 @@ export default function PatientResourcesPage() {
         </p>
       </div>
 
-      {/* Categorías */}
+      {/* Categorias */}
       {categories.map((category) => {
         const categoryResources = resources.filter(r => r.type === category.type);
         const Icon = category.icon;
@@ -146,7 +142,7 @@ export default function PatientResourcesPage() {
         );
       })}
 
-      {/* Estado vacío */}
+      {/* Estado vacio */}
       {resources.length === 0 && (
         <div className="bg-white border border-gray-200 rounded-lg p-8 text-center">
           <Lock className="w-12 h-12 text-gray-400 mx-auto mb-3" />
@@ -154,10 +150,26 @@ export default function PatientResourcesPage() {
             No hay recursos disponibles
           </h3>
           <p className="text-gray-500 text-sm">
-            Los recursos aparecerán aquí cuando tu terapeuta te los asigne o los adquieras
+            Los recursos apareceran aqui cuando tu terapeuta te los asigne o los adquieras
           </p>
         </div>
       )}
     </div>
   );
+}
+
+function mapResourceType(rawType: string): Resource['type'] {
+  switch (rawType) {
+    case 'audio':
+      return 'audio';
+    case 'video':
+      return 'video';
+    case 'meditation':
+      return 'meditation';
+    case 'pdf':
+    case 'class':
+    case 'session':
+    default:
+      return 'course';
+  }
 }

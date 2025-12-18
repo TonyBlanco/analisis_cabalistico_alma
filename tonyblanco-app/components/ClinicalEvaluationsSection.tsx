@@ -32,6 +32,13 @@ export default function ClinicalEvaluationsSection() {
   const [analysisRecords, setAnalysisRecords] = useState<any[]>([]);
   const [analysisLoading, setAnalysisLoading] = useState(false);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
+  const [selectedAnalysisId, setSelectedAnalysisId] = useState<string | null>(null);
+  const [analysisDetail, setAnalysisDetail] = useState<any | null>(null);
+  const [analysisDetailLoading, setAnalysisDetailLoading] = useState(false);
+  const [analysisDetailError, setAnalysisDetailError] = useState<string | null>(null);
+  const [notes, setNotes] = useState('');
+  const [savingNotes, setSavingNotes] = useState(false);
+  const [notesMessage, setNotesMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   // Cargar paciente activo solo en cliente para evitar mismatches SSR/CSR
   useEffect(() => {
@@ -49,6 +56,10 @@ export default function ClinicalEvaluationsSection() {
     if (!activePatientId) {
       setAnalysisRecords([]);
       setAnalysisError(null);
+      setSelectedAnalysisId(null);
+      setAnalysisDetail(null);
+      setNotes('');
+      setNotesMessage(null);
       return;
     }
 
@@ -90,6 +101,50 @@ export default function ClinicalEvaluationsSection() {
 
     fetchAnalysisRecords();
   }, [activePatientId]);
+
+  useEffect(() => {
+    if (!selectedAnalysisId) {
+      setAnalysisDetail(null);
+      setNotes('');
+      setNotesMessage(null);
+      return;
+    }
+
+    const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
+    if (!token) {
+      setAnalysisDetailError('No auth token found.');
+      return;
+    }
+
+    const fetchDetail = async () => {
+      setAnalysisDetailLoading(true);
+      setAnalysisDetailError(null);
+      setNotesMessage(null);
+
+      try {
+        const response = await fetch(`${API_URL}/analysis-records/${selectedAnalysisId}/`, {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Token ${token}`,
+          },
+        });
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.detail || errorData.message || 'Error al cargar el análisis.');
+        }
+        const data = await response.json();
+        setAnalysisDetail(data);
+        setNotes(String(data?.annotations || data?.notes || ''));
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Error al cargar el análisis.';
+        setAnalysisDetailError(errorMessage);
+      } finally {
+        setAnalysisDetailLoading(false);
+      }
+    };
+
+    fetchDetail();
+  }, [selectedAnalysisId]);
 
   useEffect(() => {
     // Load patient data when modal opens
@@ -307,10 +362,11 @@ export default function ClinicalEvaluationsSection() {
                 const recordType = record.analysis_type || record.module || record.type || record.name;
                 const recordStatus = record.status || record.state;
                 const recordDate = record.completed_at || record.created_at || record.updated_at;
+                const recordId = String(record.uuid || record.id || '');
                 const hasSummary = recordType || recordStatus || recordDate;
 
                 return (
-                  <div key={record.id || record.uuid} className="border border-gray-200 rounded-md p-3">
+                  <div key={recordId} className="border border-gray-200 rounded-md p-3">
                     {hasSummary ? (
                       <div className="text-sm text-gray-700 space-y-1">
                         <div>Tipo: {recordType || 'N/A'}</div>
@@ -322,6 +378,15 @@ export default function ClinicalEvaluationsSection() {
                         {safeJson(record)}
                       </pre>
                     )}
+
+                    {recordId && (
+                      <button
+                        onClick={() => setSelectedAnalysisId(recordId)}
+                        className="mt-3 text-sm text-blue-600 hover:text-blue-800 underline"
+                      >
+                        Ver síntesis
+                      </button>
+                    )}
                   </div>
                 );
               })}
@@ -329,6 +394,114 @@ export default function ClinicalEvaluationsSection() {
           )}
         </div>
       </div>
+
+      {selectedAnalysisId && (
+        <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Síntesis Clínica</h3>
+              <p className="text-xs text-gray-500">Análisis clínico — uso exclusivo del terapeuta</p>
+            </div>
+            <button
+              onClick={() => setSelectedAnalysisId(null)}
+              className="text-sm text-gray-600 hover:text-gray-900 underline"
+            >
+              Cerrar
+            </button>
+          </div>
+
+          {analysisDetailLoading && (
+            <p className="text-sm text-gray-500">Cargando análisis...</p>
+          )}
+          {!analysisDetailLoading && analysisDetailError && (
+            <p className="text-sm text-red-600">{analysisDetailError}</p>
+          )}
+          {!analysisDetailLoading && !analysisDetailError && analysisDetail && (
+            <div className="space-y-4">
+              <div className="text-sm text-gray-700 space-y-1">
+                <div>Tipo: {analysisDetail.analysis_type || analysisDetail.type || analysisDetail.name || 'N/A'}</div>
+                <div>Fecha: {analysisDetail.created_at || analysisDetail.updated_at || 'N/A'}</div>
+                {analysisDetail.summary && (
+                  <div>Resumen: {analysisDetail.summary}</div>
+                )}
+              </div>
+
+              <details className="text-sm text-gray-700">
+                <summary className="cursor-pointer text-gray-600">Ver resultado (raw)</summary>
+                <pre className="mt-2 text-xs text-gray-600 whitespace-pre-wrap break-words">
+                  {safeJson(analysisDetail.result_data ?? analysisDetail)}
+                </pre>
+              </details>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Notas del terapeuta
+                </label>
+                <textarea
+                  value={notes}
+                  onChange={(event) => setNotes(event.target.value)}
+                  rows={5}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              {notesMessage && (
+                <div
+                  className={`rounded-md border p-3 text-sm ${
+                    notesMessage.type === 'success'
+                      ? 'border-green-200 bg-green-50 text-green-800'
+                      : 'border-red-200 bg-red-50 text-red-800'
+                  }`}
+                >
+                  {notesMessage.text}
+                </div>
+              )}
+
+              <button
+                type="button"
+                disabled={savingNotes}
+                onClick={async () => {
+                  const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
+                  if (!token) {
+                    setNotesMessage({ type: 'error', text: 'Sesión no válida. Vuelve a iniciar sesión.' });
+                    return;
+                  }
+                  setSavingNotes(true);
+                  setNotesMessage(null);
+                  try {
+                    const response = await fetch(
+                      `${API_URL}/analysis-records/${selectedAnalysisId}/annotations/`,
+                      {
+                        method: 'PATCH',
+                        headers: {
+                          'Content-Type': 'application/json',
+                          Authorization: `Token ${token}`,
+                        },
+                        body: JSON.stringify({ annotations: notes }),
+                      }
+                    );
+                    if (!response.ok) {
+                      throw new Error('No se pudo guardar la nota clínica.');
+                    }
+                    const updated = await response.json();
+                    setAnalysisDetail(updated);
+                    setNotes(String(updated?.annotations || updated?.notes || notes));
+                    setNotesMessage({ type: 'success', text: 'Notas guardadas correctamente.' });
+                  } catch {
+                    setNotesMessage({ type: 'error', text: 'No se pudo guardar la nota clínica.' });
+                  } finally {
+                    setSavingNotes(false);
+                  }
+                }}
+                className="px-4 py-2 text-sm font-medium text-white rounded-md hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ backgroundColor: 'var(--accent-color)' }}
+              >
+                {savingNotes ? 'Guardando...' : 'Guardar notas'}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Profile Completion Modal */}
       <ProfileCompletionModal

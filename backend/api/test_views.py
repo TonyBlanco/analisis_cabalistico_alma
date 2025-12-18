@@ -1002,6 +1002,467 @@ class AssignTestToPatientView(APIView):
         })
 
 
+class PHQ9SubmitView(APIView):
+    """
+    Procesa PHQ-9 en modo patient_self y guarda el resultado.
+    Ruta: POST /api/tests/phq9/submit/
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        profile = getattr(user, 'profile', None)
+        if not profile or profile.user_type != 'patient':
+            return Response(
+                {'error': 'No autorizado', 'message': 'Solo pacientes pueden enviar el PHQ-9.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        answers = {}
+        for i in range(1, 10):
+            key = f"q{i}"
+            if key not in request.data:
+                return Response(
+                    {'error': 'Respuestas incompletas', 'message': 'Faltan respuestas del cuestionario.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            try:
+                value = int(request.data.get(key))
+            except (TypeError, ValueError):
+                return Response(
+                    {'error': 'Respuesta inválida', 'message': f'La respuesta {key} debe ser un número entre 0 y 3.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            if value < 0 or value > 3:
+                return Response(
+                    {'error': 'Respuesta fuera de rango', 'message': f'La respuesta {key} debe estar entre 0 y 3.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            answers[key] = value
+
+        total_score = sum(answers.values())
+        if total_score <= 4:
+            severity_label = 'Mínima'
+        elif total_score <= 9:
+            severity_label = 'Leve'
+        elif total_score <= 14:
+            severity_label = 'Moderada'
+        elif total_score <= 19:
+            severity_label = 'Moderadamente grave'
+        else:
+            severity_label = 'Grave'
+
+        suicidal_ideation = answers.get('q9', 0) > 0
+        flags = {'suicidal_ideation': suicidal_ideation}
+        clinical_warning = None
+        if suicidal_ideation:
+            clinical_warning = (
+                'Se identifican respuestas en el ítem 9. Se recomienda seguimiento clínico inmediato.'
+            )
+
+        result_payload = {
+            'total_score': total_score,
+            'severity_label': severity_label,
+            'flags': flags,
+            'test_code': 'PHQ-9',
+            'execution_mode': 'patient_self',
+        }
+
+        details_payload = {
+            'raw_answers': answers,
+            'flags': flags,
+            'test_code': 'PHQ-9',
+            'execution_mode': 'patient_self',
+        }
+
+        TestResult.objects.create(
+            user=user,
+            test_id='phq-9',
+            input_data={'answers': answers},
+            result_data=result_payload,
+            score=total_score,
+            clinical_diagnosis=severity_label,
+            details=details_payload
+        )
+
+        response_payload = {
+            'total_score': total_score,
+            'severity_label': severity_label,
+            'flags': flags,
+            'message': 'Resultado guardado. Este test es un cribado y no constituye diagnóstico clínico.',
+        }
+        if clinical_warning:
+            response_payload['clinical_warning'] = clinical_warning
+
+        return Response(response_payload, status=status.HTTP_200_OK)
+
+
+class GAD7SubmitView(APIView):
+    """
+    Procesa GAD-7 en modo patient_self y guarda el resultado.
+    Ruta: POST /api/tests/gad7/submit/
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        profile = getattr(user, 'profile', None)
+        if not profile or profile.user_type != 'patient':
+            return Response(
+                {'error': 'No autorizado', 'message': 'Solo pacientes pueden enviar el GAD-7.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        answers = {}
+        for i in range(1, 8):
+            key = f"q{i}"
+            if key not in request.data:
+                return Response(
+                    {'error': 'Respuestas incompletas', 'message': 'Faltan respuestas del cuestionario.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            try:
+                value = int(request.data.get(key))
+            except (TypeError, ValueError):
+                return Response(
+                    {'error': 'Respuesta inválida', 'message': f'La respuesta {key} debe ser un número entre 0 y 3.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            if value < 0 or value > 3:
+                return Response(
+                    {'error': 'Respuesta fuera de rango', 'message': f'La respuesta {key} debe estar entre 0 y 3.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            answers[key] = value
+
+        total_score = sum(answers.values())
+        if total_score <= 4:
+            severity_label = 'Mínima'
+        elif total_score <= 9:
+            severity_label = 'Leve'
+        elif total_score <= 14:
+            severity_label = 'Moderada'
+        else:
+            severity_label = 'Grave'
+
+        result_payload = {
+            'total_score': total_score,
+            'severity_label': severity_label,
+            'flags': {},
+            'test_code': 'GAD-7',
+            'execution_mode': 'patient_self',
+        }
+
+        details_payload = {
+            'raw_answers': answers,
+            'flags': {},
+            'test_code': 'GAD-7',
+            'execution_mode': 'patient_self',
+        }
+
+        test_module = None
+        try:
+            test_module = TestModule.objects.get(code='gad-7', is_active=True)
+        except TestModule.DoesNotExist:
+            test_module = None
+
+        TestResult.objects.create(
+            user=user,
+            test_module=test_module,
+            test_id='gad-7',
+            input_data={'answers': answers},
+            result_data=result_payload,
+            score=total_score,
+            clinical_diagnosis=severity_label,
+            details=details_payload
+        )
+
+        response_payload = {
+            'total_score': total_score,
+            'severity_label': severity_label,
+            'flags': {},
+            'message': 'Resultado guardado. Este test es un cribado y no constituye diagnóstico clínico.',
+        }
+
+        return Response(response_payload, status=status.HTTP_200_OK)
+
+
+class BAISubmitView(APIView):
+    """
+    Procesa BAI en modo patient_self y guarda el resultado.
+    Ruta: POST /api/tests/bai/submit/
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        profile = getattr(user, 'profile', None)
+        if not profile or profile.user_type != 'patient':
+            return Response(
+                {'error': 'No autorizado', 'message': 'Solo pacientes pueden enviar el BAI.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        answers = {}
+        for i in range(1, 22):
+            key = f"q{i}"
+            if key not in request.data:
+                return Response(
+                    {'error': 'Respuestas incompletas', 'message': 'Faltan respuestas del cuestionario.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            try:
+                value = int(request.data.get(key))
+            except (TypeError, ValueError):
+                return Response(
+                    {'error': 'Respuesta inválida', 'message': f'La respuesta {key} debe ser un número entre 0 y 3.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            if value < 0 or value > 3:
+                return Response(
+                    {'error': 'Respuesta fuera de rango', 'message': f'La respuesta {key} debe estar entre 0 y 3.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            answers[key] = value
+
+        total_score = sum(answers.values())
+        if total_score <= 7:
+            severity_label = 'Ansiedad mínima'
+        elif total_score <= 15:
+            severity_label = 'Ansiedad leve'
+        elif total_score <= 25:
+            severity_label = 'Ansiedad moderada'
+        else:
+            severity_label = 'Ansiedad grave'
+
+        result_payload = {
+            'total_score': total_score,
+            'severity_label': severity_label,
+            'flags': {},
+            'test_code': 'BAI',
+            'execution_mode': 'patient_self',
+        }
+
+        details_payload = {
+            'raw_answers': answers,
+            'flags': {},
+            'test_code': 'BAI',
+            'execution_mode': 'patient_self',
+        }
+
+        test_module = None
+        try:
+            test_module = TestModule.objects.get(code='bai', is_active=True)
+        except TestModule.DoesNotExist:
+            test_module = None
+
+        TestResult.objects.create(
+            user=user,
+            test_module=test_module,
+            test_id='bai',
+            input_data={'answers': answers},
+            result_data=result_payload,
+            score=total_score,
+            clinical_diagnosis=severity_label,
+            details=details_payload
+        )
+
+        response_payload = {
+            'total_score': total_score,
+            'severity_label': severity_label,
+            'flags': {},
+            'message': 'Resultado guardado. Este test es un cribado y no constituye diagnóstico clínico.',
+        }
+
+        return Response(response_payload, status=status.HTTP_200_OK)
+
+
+class ISISubmitView(APIView):
+    """
+    Procesa ISI en modo patient_self y guarda el resultado.
+    Ruta: POST /api/tests/isi/submit/
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        profile = getattr(user, 'profile', None)
+        if not profile or profile.user_type != 'patient':
+            return Response(
+                {'error': 'No autorizado', 'message': 'Solo pacientes pueden enviar el ISI.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        answers = {}
+        for i in range(1, 8):
+            key = f"q{i}"
+            if key not in request.data:
+                return Response(
+                    {'error': 'Respuestas incompletas', 'message': 'Faltan respuestas del cuestionario.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            try:
+                value = int(request.data.get(key))
+            except (TypeError, ValueError):
+                return Response(
+                    {'error': 'Respuesta inválida', 'message': f'La respuesta {key} debe ser un número entre 0 y 4.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            if value < 0 or value > 4:
+                return Response(
+                    {'error': 'Respuesta fuera de rango', 'message': f'La respuesta {key} debe estar entre 0 y 4.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            answers[key] = value
+
+        total_score = sum(answers.values())
+        if total_score <= 7:
+            severity_label = 'Insomnio clínicamente no significativo'
+        elif total_score <= 14:
+            severity_label = 'Insomnio subclínico'
+        elif total_score <= 21:
+            severity_label = 'Insomnio clínico moderado'
+        else:
+            severity_label = 'Insomnio clínico grave'
+
+        result_payload = {
+            'total_score': total_score,
+            'severity_label': severity_label,
+            'flags': {},
+            'test_code': 'ISI',
+            'execution_mode': 'patient_self',
+        }
+
+        details_payload = {
+            'raw_answers': answers,
+            'flags': {},
+            'test_code': 'ISI',
+            'execution_mode': 'patient_self',
+        }
+
+        test_module = None
+        try:
+            test_module = TestModule.objects.get(code='isi', is_active=True)
+        except TestModule.DoesNotExist:
+            test_module = None
+
+        TestResult.objects.create(
+            user=user,
+            test_module=test_module,
+            test_id='isi',
+            input_data={'answers': answers},
+            result_data=result_payload,
+            score=total_score,
+            clinical_diagnosis=severity_label,
+            details=details_payload
+        )
+
+        response_payload = {
+            'total_score': total_score,
+            'severity_label': severity_label,
+            'flags': {},
+            'message': 'Resultado guardado. Este test es un cribado y no constituye diagnóstico clínico.',
+        }
+
+        return Response(response_payload, status=status.HTTP_200_OK)
+
+
+class BDI2SubmitView(APIView):
+    """
+    Procesa BDI-II en modo patient_self y guarda el resultado.
+    Ruta: POST /api/tests/bdi2/submit/
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        profile = getattr(user, 'profile', None)
+        if not profile or profile.user_type != 'patient':
+            return Response(
+                {'error': 'No autorizado', 'message': 'Solo pacientes pueden enviar el BDI-II.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        answers = {}
+        for i in range(1, 22):
+            key = f"q{i}"
+            if key not in request.data:
+                return Response(
+                    {'error': 'Respuestas incompletas', 'message': 'Faltan respuestas del cuestionario.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            try:
+                value = int(request.data.get(key))
+            except (TypeError, ValueError):
+                return Response(
+                    {'error': 'Respuesta inválida', 'message': f'La respuesta {key} debe ser un número entre 0 y 3.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            if value < 0 or value > 3:
+                return Response(
+                    {'error': 'Respuesta fuera de rango', 'message': f'La respuesta {key} debe estar entre 0 y 3.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            answers[key] = value
+
+        total_score = sum(answers.values())
+        if total_score <= 13:
+            severity_label = 'Depresión mínima'
+        elif total_score <= 19:
+            severity_label = 'Depresión leve'
+        elif total_score <= 28:
+            severity_label = 'Depresión moderada'
+        else:
+            severity_label = 'Depresión grave'
+
+        suicidal_flag = answers.get('q9', 0) > 0
+        flags = {'suicidal_ideation': suicidal_flag}
+
+        result_payload = {
+            'total_score': total_score,
+            'severity_label': severity_label,
+            'flags': flags,
+            'test_code': 'BDI-II',
+            'execution_mode': 'patient_self',
+        }
+
+        details_payload = {
+            'raw_answers': answers,
+            'flags': flags,
+            'test_code': 'BDI-II',
+            'execution_mode': 'patient_self',
+        }
+
+        test_module = None
+        try:
+            test_module = TestModule.objects.get(code='bdi-ii', is_active=True)
+        except TestModule.DoesNotExist:
+            test_module = None
+
+        TestResult.objects.create(
+            user=user,
+            test_module=test_module,
+            test_id='bdi-ii',
+            input_data={'answers': answers},
+            result_data=result_payload,
+            score=total_score,
+            clinical_diagnosis=severity_label,
+            details=details_payload
+        )
+
+        response_payload = {
+            'total_score': total_score,
+            'severity_label': severity_label,
+            'flags': flags,
+            'message': 'Resultado guardado. Este test es un cribado de severidad y no constituye diagnóstico clínico.',
+        }
+
+        if suicidal_flag:
+            response_payload['clinical_warning'] = 'Respuestas positivas en ítem de ideación suicida. Requiere valoración clínica.'
+
+        return Response(response_payload, status=status.HTTP_200_OK)
+
+
 @method_decorator(csrf_exempt, name='dispatch')
 class ProcessTestSubmissionView(APIView):
     """

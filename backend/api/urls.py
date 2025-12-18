@@ -63,7 +63,12 @@ from .test_views import (
     GrantTestAccessView,
     AssignTestToPatientView,
     PatientPreviousTestsView,
-    ProcessTestSubmissionView
+    ProcessTestSubmissionView,
+    PHQ9SubmitView,
+    GAD7SubmitView,
+    BAISubmitView,
+    ISISubmitView,
+    BDI2SubmitView
 )
 from .gematria_views import GematriaInterpretationView
 from .tarot_views import TarotAnalysisView
@@ -202,6 +207,11 @@ urlpatterns = [
     
     # Tests modulares (orden importante: rutas específicas primero)
     path('tests/', AvailableTestsView.as_view(), name='available_tests'),
+    path('tests/phq9/submit/', PHQ9SubmitView.as_view(), name='phq9_submit'),
+    path('tests/gad7/submit/', GAD7SubmitView.as_view(), name='gad7_submit'),
+    path('tests/bai/submit/', BAISubmitView.as_view(), name='bai_submit'),
+    path('tests/isi/submit/', ISISubmitView.as_view(), name='isi_submit'),
+    path('tests/bdi2/submit/', BDI2SubmitView.as_view(), name='bdi2_submit'),
     path('tests/submit/', ProcessTestSubmissionView.as_view(), name='process_test_submission'),
     path('tests/execute/', ExecuteTestView.as_view(), name='execute_test'),
     path('tests/results/', TestResultsView.as_view(), name='test_results'),

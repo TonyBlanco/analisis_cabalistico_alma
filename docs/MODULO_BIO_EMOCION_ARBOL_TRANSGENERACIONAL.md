@@ -209,3 +209,189 @@ Posible estructura (conceptual):
    - Los datos se guardan sin conclusiones diagnósticas automáticas.
 
 **Estado del módulo**: Documentado y diseñado. Implementación pendiente, respetando arquitectura sellada y reglas clínicas.
+9. Actualización del módulo: qué se hace a partir de ahora (estado actual)
+
+Esta sección consolida las acciones inmediatas, acciones habilitadas y acciones explícitamente fuera de alcance, tomando como referencia la auditoría técnica y el estado real del proyecto.
+
+9.1 Estado real confirmado (según auditoría)
+
+A día de hoy:
+
+✅ El workspace del terapeuta está operativo y estable.
+
+✅ Existe ya una ruta dedicada al módulo bioemocional:
+
+/dashboard/therapist/bioemotional
+
+✅ Existen endpoints activos relacionados con bio-emoción y genealogía:
+
+/api/bioemotional/dictionary/
+
+/api/bioemotional/hypotheses/
+
+/api/bioemotional/genealogy/*
+
+✅ El hardening de roles y ownership está aplicado en backend.
+
+❌ No existe aún persistencia estructurada de casos bio-emocionales como entidad clínica unificada.
+
+❌ No existe integración explícita con el Árbol de la Vida (solo implícita en otros módulos).
+
+Conclusión:
+El módulo ya existe funcionalmente, pero no está todavía elevado a módulo clínico de primer nivel.
+
+9.2 Qué se implementa ahora (prioridad P1 clínica)
+9.2.1 Unificación conceptual del módulo
+
+A partir de ahora, el módulo se considera formalmente:
+
+Un módulo clínico de indagación estructural, exclusivo del terapeuta, que integra:
+
+Bio-emoción
+
+Transgeneracional
+
+Lectura cabalística estructural (Árbol de la Vida, capa consultiva)
+
+Esto no crea nuevos flujos, solo ordena y eleva lo ya existente.
+
+9.2.2 Incorporación de la capa “Árbol de la Vida” (consultiva, no persistente)
+
+Se habilita explícitamente lo siguiente:
+
+Correlación síntoma → sefirá usando:
+
+diccionario_bioemocional_2016.json
+
+arbol_vida.py
+
+Correlación transgeneracional → ejes del Árbol (Biná / Jojmá / Yesod / Maljut).
+
+Lectura de Proyecto Sentido → Yesod como hipótesis estructural.
+
+⚠️ Esta capa:
+
+NO genera diagnósticos.
+
+NO se guarda como dato clínico.
+
+NO se muestra al paciente.
+
+Puede ser generada por IA solo como apoyo privado al terapeuta.
+
+(Ver Documento puente “Integración del Árbol de la Vida en el Módulo Bio-Emoción (v1)”).
+
+9.2.3 Normalización del “caso bio-emocional”
+
+Se establece como siguiente paso técnico crear una entidad unificadora (aunque inicialmente sea mínima):
+
+Un caso activo por paciente (o varios, si el terapeuta lo decide).
+
+Que agrupe:
+
+hipótesis bioemocionales
+
+genealogía
+
+eventos
+
+notas clínicas
+
+Sin tocar AnalysisRecord.
+
+Esto responde a una carencia detectada en la auditoría:
+actualmente los datos están dispersos, no estructurados como caso clínico coherente.
+
+9.3 Qué NO se hace ahora (explícitamente fuera de alcance)
+
+Para evitar desviaciones, queda explícitamente fuera de este módulo:
+
+❌ Meditaciones guiadas para pacientes.
+
+❌ Actos simbólicos automáticos.
+
+❌ Uso directo de los 72 Nombres de Dios con pacientes.
+
+❌ Diario emocional del usuario.
+
+❌ Escritura terapéutica asistida por IA para pacientes.
+
+❌ Visualizaciones espirituales o rituales.
+
+Todo lo anterior pertenece a una capa personal/experiencial, no al módulo clínico del terapeuta.
+
+9.4 Relación con otros módulos (según auditoría)
+Módulo	Relación con Bio-Emoción
+Tests clínicos (PHQ-9, BDI-II, etc.)	Bio-Emoción lee resultados, no los genera
+AnalysisRecord	Puede referenciarse por ID, no modificarse
+Tarot / Astrología / Gematría	Complementarios, no dependientes
+SCDF	Bio-Emoción aporta comprensión, no scoring
+Recursos paciente	No conectado
+9.5 Orden de implementación recomendado (sin romper nada)
+
+Basado en el roadmap y el estado actual:
+
+Paso 1 (inmediato)
+
+Formalizar el módulo como caso clínico estructurado.
+
+Mantener UI simple (lista + notas + genealogía).
+
+Paso 2
+
+Añadir la capa consultiva del Árbol de la Vida (no persistente).
+
+IA solo como redacción privada para el terapeuta.
+
+Paso 3
+
+Documentar claramente la separación:
+
+Bio-Emoción = comprensión
+
+Prescripción simbólica = módulo aparte (futuro)
+
+9.6 Estado final del módulo tras esta actualización
+
+El módulo queda:
+
+✔ alineado con la auditoría
+
+✔ coherente con la arquitectura cerrada
+
+✔ preparado para evolución sin deuda técnica
+
+No se introduce riesgo legal ni clínico.
+
+Se consolida como núcleo diferenciador profesional de la plataforma.
+
+Nota final
+
+Esta actualización no reescribe el módulo, lo actualiza al estado real del proyecto y fija con claridad:
+
+qué se hace ahora
+
+qué no se hace
+
+dónde encaja cada cosa
+
+---
+
+## Documentos vinculantes adicionales (desde 18/12/2025)
+
+Los siguientes documentos forman parte del **marco normativo activo del proyecto** y deben ser respetados en cualquier implementación presente o futura:
+
+1. **Checklist Técnico P1 – Bio-Emoción & Árbol de la Vida**  
+   Archivo:  
+   `docs/CHECKLIST_TECNICO_P1_BIOEMOCION_Y_ARBOL_DE_LA_VIDA.md`  
+
+   Define las tareas técnicas autorizadas para la fase P1 del módulo Bio-Emoción, incluyendo backend y frontend, sin romper la arquitectura cerrada ni mezclar capas clínicas y experienciales.
+
+2. **Módulo Personal / Experiencial – Conciencia y Reprogramación (Documento Espejo)**  
+   Archivo:  
+   `docs/MODULO_PERSONAL_EXPERIENCIAL_CONCIENCIA_Y_REPROGRAMACION.md`  
+
+   Define explícitamente la capa **no clínica** del ecosistema.  
+   Todo contenido experiencial, meditativo, simbólico o espiritual **debe vivir exclusivamente bajo este marco** y **no puede integrarse en módulos clínicos**.
+
+Estos documentos actúan como **frontera arquitectónica y conceptual** y su incumplimiento se considera una desviación del estado sellado del proyecto.

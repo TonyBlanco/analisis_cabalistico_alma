@@ -4,12 +4,13 @@ import { useEffect, useState } from 'react';
 import TestCatalogSection from '@/components/TestCatalogSection';
 import { ClipboardList, Info } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
-import { getActivePatientId, setActivePatientId } from '@/lib/active-patient';
+import { getActivePatientId, getActivePatientName, setActivePatientId } from '@/lib/active-patient';
 
 export default function TherapistTestsPage() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const searchParams = useSearchParams();
   const [resolvedPatientId, setResolvedPatientId] = useState<number | null>(getActivePatientId());
+  const [resolvedPatientName, setResolvedPatientName] = useState<string | null>(getActivePatientName());
 
   useEffect(() => {
     const idParam = searchParams.get('patient_id');
@@ -18,9 +19,11 @@ export default function TherapistTestsPage() {
       if (!isNaN(parsed)) {
         setActivePatientId(parsed);
         setResolvedPatientId(parsed);
+        setResolvedPatientName(getActivePatientName());
       }
     } else {
       setResolvedPatientId(getActivePatientId());
+      setResolvedPatientName(getActivePatientName());
     }
   }, [searchParams]);
 
@@ -38,9 +41,16 @@ export default function TherapistTestsPage() {
             Catálogo de Tests
           </h1>
         </div>
-        <p className="text-sm text-gray-600">
-          Visualiza y asigna tests disponibles para tus pacientes.
-        </p>
+        <div className="flex items-center flex-wrap gap-2">
+          <p className="text-sm text-gray-600">
+            Visualiza y asigna tests disponibles. El catálogo es global; la asignación usa el paciente activo.
+          </p>
+          {resolvedPatientId && (
+            <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-green-50 text-green-700 border border-green-100">
+              Paciente: {resolvedPatientName || resolvedPatientId}
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3">

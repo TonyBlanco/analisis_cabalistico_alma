@@ -61,7 +61,52 @@ export default function AssignedTestsSection() {
       const response = await getPatientPreviousTests({
         patient_id: activePatientId,
       });
-      setAssignedTests(response.results || []);
+      const remoteResults = response.results || [];
+
+      // Recupera asignaciones locales (pendientes) registradas tras la asignación.
+      let localAssignments: Array<TestResult> = [];
+      if (typeof window !== 'undefined') {
+        const raw = localStorage.getItem('assigned_tests_by_patient');
+        if (raw) {
+          const parsed = JSON.parse(raw) || {};
+          const list: Array<{ code: string; name: string; description?: string; assigned_at?: string }> =
+            parsed[String(activePatientId)] || [];
+          localAssignments = list.map((item) => ({
+            id: undefined as any,
+            test_module: {
+              id: 0,
+              code: item.code,
+              name: item.name,
+              description: item.description,
+              test_type: 'basic' as any,
+            },
+            test_module_code: item.code,
+            test_module_name: item.name,
+            input_data: {},
+            result_data: {},
+            notes: undefined,
+            is_favorite: false,
+            is_archived: false,
+            created_at: item.assigned_at || new Date().toISOString(),
+            updated_at: item.assigned_at || new Date().toISOString(),
+          }));
+        }
+      }
+
+      // Evitar duplicados: si remoto ya tiene el test, no incluir pendiente local.
+      const remoteCodes = new Set(
+        remoteResults
+          .map((r) => r.test_module?.code || r.test_module_code)
+          .filter(Boolean)
+      );
+      const merged = [
+        ...remoteResults,
+        ...localAssignments.filter(
+          (pending) => !remoteCodes.has(pending.test_module?.code || pending.test_module_code)
+        ),
+      ];
+
+      setAssignedTests(merged);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error al cargar tests asignados';
       setError(errorMessage);

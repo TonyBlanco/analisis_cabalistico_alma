@@ -1,71 +1,95 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { getAvailableTests } from '@/lib/test-api';
-import { TestModule } from '@/lib/test-types';
+import { useEffect, useState } from 'react';
+import { ClipboardList, Loader2, Mail, CheckCircle, Info } from 'lucide-react';
+import { TEST_TYPES, type TestModule } from '@/lib/test-types';
+import { clinicalTestsRegistry } from '@/lib/clinicalTests.registry';
 import { getActivePatientId } from '@/lib/active-patient';
 import { useToast } from '@/components/ui/Toast';
-import { Mail, CheckCircle } from 'lucide-react';
+import ClinicalTestHelpModal from '@/components/ClinicalTestHelpModal';
+import { useRouter } from 'next/navigation';
 
 interface TestCatalogSectionProps {
-  onTestAssigned?: () => void; // Callback when a test is assigned (to refresh assigned list)
+  onTestAssigned?: () => void;
 }
 
+type CatalogTest = TestModule & {
+  implemented?: boolean;
+  domainLabel?: string;
+  family?: string;
+};
+
 /**
- * Test Catalog Section Component
- * 
- * Displays tests filtered by execution_mode:
- * - "Asignables al paciente" (patient_self only) - with assignment capability
- * - "Evaluaciones clínicas" (therapist_clinical only) - no assignment
- * 
- * Assignment is only available for patient_self tests when active patient is selected.
+ * Catálogo clínico global: muestra todos los tests sin ocultar por estado.
+ * El patient_id solo afecta acciones (asignar) y estados calculados externamente.
  */
 export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectionProps = {}) {
-  const [tests, setTests] = useState<TestModule[]>([]);
+  const [tests, setTests] = useState<CatalogTest[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'assignable' | 'clinical'>('assignable');
   const [assigningTestCode, setAssigningTestCode] = useState<string | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [testToAssign, setTestToAssign] = useState<TestModule | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [lastAssignedTest, setLastAssignedTest] = useState<string | null>(null);
+  const [helpTestCode, setHelpTestCode] = useState<string | null>(null);
+
   const toast = useToast();
+  const router = useRouter();
+  const activePatientId = getActivePatientId();
 
   useEffect(() => {
     fetchTests();
   }, []);
 
+  // Carga desde el registro declarativo (sin depender de backend).
   const fetchTests = async () => {
     setLoading(true);
     setError(null);
-
     try {
-      const response = await getAvailableTests();
-      setTests(response.tests || []);
+      const mapped = clinicalTestsRegistry.map<CatalogTest>((entry, idx) => ({
+        id: idx + 1,
+        code: entry.test_code,
+        name: entry.display_name,
+        description:
+          entry.guidance?.what ||
+          entry.domain ||
+          'Instrumento clínico',
+        test_type: TEST_TYPES.BASIC,
+        required_access_level: 'professional',
+        is_active: true,
+        available_for_therapists: true,
+        available_for_personal: entry.family === 'psicologicos',
+        uses_per_month: null,
+        icon: '',
+        order: idx,
+        estimated_duration: 5,
+        is_available: true,
+        user_access: null,
+        implemented: entry.implemented,
+        domainLabel: entry.domain,
+        family: entry.family,
+      }));
+      setTests(mapped);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al cargar catálogo de tests';
-      setError(errorMessage);
-      console.error('Error fetching tests:', err);
+      const message = err instanceof Error ? err.message : 'Error al cargar catálogo de tests';
+      setError(message);
+      console.error('Error building catalog:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  // Filter tests by execution_mode
-  // patient_self: available_for_personal=True (may also have available_for_therapists=True)
-  // therapist_clinical: available_for_therapists=True AND available_for_personal=False
-  const assignableTests = tests.filter((test) => {
-    // patient_self tests: available_for_personal must be true
-    return test.available_for_personal === true;
+  // Normaliza modo para decidir acciones
+  const normalizedTests = tests.map((test) => {
+    const isClinical =
+      test.execution_mode === 'therapist_clinical' ||
+      (test.available_for_therapists === true && test.available_for_personal === false);
+    return {
+      ...test,
+      mode: isClinical ? 'therapist_clinical' : 'patient_self',
+    };
   });
-
-  const clinicalTests = tests.filter((test) => {
-    // therapist_clinical tests: available_for_therapists=True AND available_for_personal=False
-    return test.available_for_therapists === true && test.available_for_personal === false;
-  });
-
-  const activePatientId = getActivePatientId();
 
   const handleAssignTest = (test: TestModule) => {
     if (!activePatientId) {
@@ -81,29 +105,39 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
 
   const confirmAssignTest = async () => {
     if (!testToAssign || !activePatientId) return;
-
     setAssigningTestCode(testToAssign.code);
     setShowConfirmModal(false);
-
     try {
-      // Import here to avoid circular dependencies
       const { assignTestToPatient } = await import('@/lib/assignment-api');
-      
       await assignTestToPatient(activePatientId, testToAssign.code, 'patient_self');
-      
-      // Show success modal with professional UX
+      // Registrar asignación local para reflejar en el workspace mientras el backend responde.
+      const key = 'assigned_tests_by_patient';
+      const existing = typeof window !== 'undefined' ? localStorage.getItem(key) : null;
+      const parsed = existing ? JSON.parse(existing) : {};
+      const patientKey = String(activePatientId);
+      const current: Array<{ code: string; name: string; description?: string; assigned_at: string }> =
+        parsed[patientKey] || [];
+      const now = new Date().toISOString();
+      const deduped = current.filter((t) => t.code !== testToAssign.code);
+      deduped.push({
+        code: testToAssign.code,
+        name: testToAssign.name,
+        description: testToAssign.description,
+        assigned_at: now,
+      });
+      parsed[patientKey] = deduped;
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(key, JSON.stringify(parsed));
+        window.dispatchEvent(new Event('assignedTestsChanged'));
+      }
+
       setLastAssignedTest(testToAssign.name);
       setShowSuccessModal(true);
-      
-      // Refresh assigned tests list
-      if (onTestAssigned) {
-        onTestAssigned();
-      }
-      
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Error al asignar test';
-      toast.error('Error al asignar test', errorMessage);
-      console.error('Error assigning test:', error);
+      if (onTestAssigned) onTestAssigned();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error al asignar test';
+      toast.error('Error al asignar test', message);
+      console.error('Error assigning test:', err);
     } finally {
       setAssigningTestCode(null);
       setTestToAssign(null);
@@ -115,8 +149,13 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
     setTestToAssign(null);
   };
 
-  // Helper component for assign button
-  const AssignTestButton = ({ test, onAssign, disabled }: { test: TestModule; onAssign: () => void; disabled: boolean }) => {
+  const AssignTestButton = ({
+    onAssign,
+    disabled,
+  }: {
+    onAssign: () => void;
+    disabled: boolean;
+  }) => {
     if (!activePatientId) {
       return (
         <button
@@ -128,13 +167,12 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
         </button>
       );
     }
-
     return (
       <button
         onClick={onAssign}
         disabled={disabled}
         className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-white rounded-md hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-        style={{ backgroundColor: 'var(--accent-color)' }}
+        style={{ backgroundColor: '#1f6c8f' }}
       >
         {disabled ? 'Asignando...' : 'Asignar'}
       </button>
@@ -143,13 +181,16 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
 
   if (loading) {
     return (
-      <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Catálogo de Tests</h2>
-        <div className="text-center py-12">
-          <div className="inline-block animate-pulse">
-            <div className="h-2 w-32 bg-gray-200 rounded mb-2"></div>
-            <p className="text-sm text-gray-500 mt-2">Cargando catálogo de tests...</p>
+      <div className="bg-white border border-gray-100 rounded-xl p-6 shadow-sm">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <ClipboardList className="w-5 h-5 text-blue-600" />
+            <h2 className="text-lg font-semibold text-gray-900">Catálogo de Tests</h2>
           </div>
+        </div>
+        <div className="text-center py-12">
+          <Loader2 className="w-6 h-6 animate-spin text-gray-500 mx-auto" />
+          <p className="text-sm text-gray-500 mt-2">Cargando catálogo de tests...</p>
         </div>
       </div>
     );
@@ -157,8 +198,13 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
 
   if (error) {
     return (
-      <div className="bg-white border border-gray-200 rounded-lg p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Catálogo de Tests</h2>
+      <div className="bg-white border border-gray-100 rounded-xl p-6 shadow-sm">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <ClipboardList className="w-5 h-5 text-blue-600" />
+            <h2 className="text-lg font-semibold text-gray-900">Catálogo de Tests</h2>
+          </div>
+        </div>
         <div className="bg-red-50 border border-red-200 rounded-md p-4">
           <p className="text-sm text-red-800">{error}</p>
           <button
@@ -172,101 +218,125 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
     );
   }
 
-  return (
-    <div className="bg-white border border-gray-200 rounded-lg p-6">
-      <h2 className="text-lg font-semibold text-gray-900 mb-4">Catálogo de Tests</h2>
+  // Agrupa por familia para mejorar legibilidad sin ocultar tests
+  const groupedByFamily = normalizedTests.reduce<Record<string, CatalogTest[]>>((acc, test) => {
+    const family = (test as any).family ?? clinicalTestsRegistry.find((e) => e.test_code === test.code)?.family ?? 'psicologicos';
+    if (!acc[family]) acc[family] = [];
+    acc[family].push(test);
+    return acc;
+  }, {});
 
-      {/* Tabs */}
-      <div className="border-b border-gray-200 mb-4">
-        <nav className="flex gap-4">
+  const familyOrder: Array<{ key: string; label: string; desc: string }> = [
+    { key: 'psicologicos', label: 'Tests Psicológicos', desc: 'Cribados y escalas autoaplicadas.' },
+    { key: 'cabalisticos', label: 'Análisis Cabalísticos', desc: 'Herramientas clínicas del terapeuta.' },
+  ];
+
+  return (
+    <div className="bg-white border border-gray-100 rounded-xl p-6 shadow-sm">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-2">
+          <ClipboardList className="w-5 h-5 text-[#1f6c8f]" />
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900">Catálogo de Tests</h2>
+            <p className="text-sm text-gray-500">Inventario clínico global — acciones según paciente activo.</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="inline-flex items-center gap-1 text-xs px-3 py-1 rounded-full bg-gray-100 text-gray-700 border border-gray-200">
+            Paciente: {activePatientId ? `ID ${activePatientId}` : 'Selecciona un paciente'}
+          </span>
           <button
-            onClick={() => setActiveTab('assignable')}
-            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-              activeTab === 'assignable'
-                ? 'border-gray-900 text-gray-900'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
+            className="text-sm text-[#1f6c8f] hover:underline"
+            onClick={() => router.push('/dashboard/therapist')}
           >
-            Asignables al paciente ({assignableTests.length})
+            Volver al workspace
           </button>
-          <button
-            onClick={() => setActiveTab('clinical')}
-            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-              activeTab === 'clinical'
-                ? 'border-gray-900 text-gray-900'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
-          >
-            Evaluaciones clínicas ({clinicalTests.length})
-          </button>
-        </nav>
+        </div>
       </div>
 
-      {/* Content */}
       <div className="min-h-[200px]">
-        {activeTab === 'assignable' && (
-          <div>
-            {assignableTests.length === 0 ? (
-              <div className="text-center py-8">
-                <p className="text-sm text-gray-500">No hay tests asignables disponibles.</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {assignableTests.map((test) => (
-                  <div
-                    key={test.code}
-                    className="border border-gray-200 rounded-md p-4 hover:border-gray-300 transition-colors"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <h3 className="font-medium text-gray-900">{test.name}</h3>
-                        {test.description && (
-                          <p className="text-sm text-gray-600 mt-1">{test.description}</p>
-                        )}
-                        <div className="flex items-center gap-3 mt-2">
-                          <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded">
-                            Asignable
-                          </span>
-                          {test.test_type && (
-                            <span className="text-xs text-gray-500">{test.test_type}</span>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex-shrink-0">
-                        <AssignTestButton
-                          test={test}
-                          onAssign={() => handleAssignTest(test)}
-                          disabled={assigningTestCode === test.code}
-                        />
-                      </div>
+        {normalizedTests.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="text-sm text-gray-500">No hay tests disponibles.</p>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {familyOrder.map((family) => {
+              const items = groupedByFamily[family.key] || [];
+              if (items.length === 0) return null;
+              return (
+                <section key={family.key} className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-sm font-semibold text-gray-800">{family.label}</h3>
+                      <p className="text-xs text-gray-500">{family.desc}</p>
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {activeTab === 'clinical' && (
-          <div>
-            {clinicalTests.length === 0 ? (
-              <div className="text-center py-8">
-                <p className="text-sm text-gray-500">No hay evaluaciones clínicas disponibles.</p>
-              </div>
-            ) : (
-              <div className="bg-blue-50 border border-blue-200 rounded-md p-4 mb-4">
-                <p className="text-sm text-blue-800">
-                  💡 Las evaluaciones clínicas se ejecutan directamente desde la sección dedicada más abajo.
-                </p>
-              </div>
-            )}
+                  <div className="space-y-3">
+                    {items.map((test) => {
+                      const isTherapistOnly = test.mode === 'therapist_clinical';
+                      return (
+                        <div
+                          key={test.code}
+                          className="border border-gray-100 rounded-lg p-4 hover:border-gray-200 transition-colors bg-white shadow-[0_1px_3px_rgba(0,0,0,0.04)]"
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-1">
+                        <span className={`text-xs px-2 py-1 rounded-full ${isTherapistOnly ? 'bg-slate-100 text-slate-700' : 'bg-emerald-50 text-emerald-700'}`}>
+                          {isTherapistOnly ? 'Clínico (terapeuta)' : 'Asignable al paciente'}
+                        </span>
+                        <span className="text-xs text-gray-500">{(test as any).domainLabel || test.domain || 'Dominio clínico'}</span>
+                        {(test as any).implemented === false && (
+                          <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-600 border border-gray-200">
+                            En desarrollo
+                          </span>
+                        )}
+                      </div>
+                      <h3 className="font-semibold text-gray-900">{test.name}</h3>
+                      {test.description && (
+                        <p className="text-sm text-gray-600 mt-1 leading-relaxed">{test.description}</p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setHelpTestCode(test.code)}
+                        className="p-2 rounded-full border border-gray-200 text-[#1f6c8f] hover:bg-gray-50"
+                        aria-label="Ver guía clínica"
+                        title="Ver guía clínica"
+                      >
+                        <Info className="w-4 h-4" />
+                      </button>
+                      {isTherapistOnly ? (
+                        <span className="text-xs text-gray-500 px-2 py-1 rounded border border-gray-200">
+                          Ejecutar desde flujos clínicos
+                        </span>
+                      ) : (
+                        <AssignTestButton
+                          onAssign={() => handleAssignTest(test)}
+                          disabled={assigningTestCode === test.code || (test as any).implemented === false}
+                        />
+                      )}
+                    </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </section>
+              );
+            })}
           </div>
         )}
       </div>
 
       {/* Assignment Confirmation Modal */}
       {showConfirmModal && testToAssign && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={cancelAssignTest}>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+          onClick={cancelAssignTest}
+        >
           <div
             className="bg-white rounded-lg shadow-lg max-w-md w-full mx-4 p-6"
             onClick={(e) => e.stopPropagation()}
@@ -294,32 +364,23 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
         </div>
       )}
 
-      {/* Success Modal - Professional UX */}
+      {/* Success Modal */}
       {showSuccessModal && lastAssignedTest && (
-        <div 
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" 
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
           onClick={() => setShowSuccessModal(false)}
         >
           <div
             className="bg-white rounded-2xl shadow-xl max-w-md w-full mx-4 p-8 text-center"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Success Icon */}
             <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 flex items-center justify-center">
               <CheckCircle className="w-10 h-10 text-green-600" />
             </div>
-            
-            {/* Title */}
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              ¡Test asignado correctamente!
-            </h3>
-            
-            {/* Test Name */}
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">¡Test asignado correctamente!</h3>
             <p className="text-gray-600 mb-4">
               <strong>&quot;{lastAssignedTest}&quot;</strong> ha sido asignado al paciente.
             </p>
-            
-            {/* Email Notification Info */}
             <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
               <div className="flex items-center justify-center gap-2 text-blue-700 mb-1">
                 <Mail className="w-5 h-5" />
@@ -329,8 +390,6 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
                 El paciente ha recibido un email con las instrucciones para completar el test.
               </p>
             </div>
-            
-            {/* Action Button */}
             <button
               onClick={() => setShowSuccessModal(false)}
               className="w-full px-6 py-3 text-white font-medium rounded-xl transition-opacity hover:opacity-90"
@@ -340,6 +399,13 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
             </button>
           </div>
         </div>
+      )}
+
+      {helpTestCode && (
+        <ClinicalTestHelpModal
+          testCode={helpTestCode}
+          onClose={() => setHelpTestCode(null)}
+        />
       )}
     </div>
   );

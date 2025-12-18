@@ -11,6 +11,11 @@ Alcance: frontend (tonyblanco-app), backend (Django + DRF), docs y rutas legacy 
 - Tests/analisis: dos flujos inmutables (`patient_self`, `therapist_clinical`), con hardening aplicado en backend.
 - Ultimas 12 horas: no hay cambios MD ni commits recientes detectados.
 
+## Cambios recientes (T6 catálogo/assignments)
+- Catálogo clínico (terapeuta) ahora carga desde registro declarativo, agrupado por familias (psicológicos/cabalísticos), badges de disponibilidad y guía clínica por icono (sin tabs ni filtros que oculten tests).
+- Asignación: al asignar un test se persiste una marca local por paciente y se dispara `assignedTestsChanged` para reflejarlo de inmediato en el workspace sin bloquear por backend.
+- Línea de tests asignados en el workspace fusiona resultados remotos (`patient-previous`) con asignaciones locales pendientes evitando duplicados; muestra “Pendiente” hasta que el backend devuelve resultado real.
+
 ## Fuentes revisadas (clave)
 - `backend/api/urls.py`
 - `backend/api/bioemotional/urls.py`

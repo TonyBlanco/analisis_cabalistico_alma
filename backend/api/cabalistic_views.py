@@ -27,7 +27,7 @@ class SaveCabalisticAnalysisView(APIView):
     Guarda un análisis de Alta Cábala para un paciente
     Ruta: POST /api/therapist/patients/<id>/cabalistic-analysis/
     """
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsTherapist]
     
     def post(self, request, id):
         """Guarda un análisis cabalístico"""
@@ -75,16 +75,10 @@ class SaveCabalisticAnalysisView(APIView):
                 'message': 'Análisis guardado exitosamente'
             }, status=status.HTTP_201_CREATED)
         
-        except Patient.DoesNotExist:
+        except Exception:
+            logger.error("Error al guardar analisis cabalistico", exc_info=True)
             return Response(
-                {'error': 'Paciente no encontrado o no tienes permisos'},
-                status=status.HTTP_404_NOT_FOUND
-            )
-        except Exception as e:
-            import traceback
-            traceback.print_exc()
-            return Response(
-                {'error': f'Error al guardar el análisis: {str(e)}'},
+                {'error': 'Error al guardar el analisis'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
@@ -95,7 +89,7 @@ class ListCabalisticAnalysesView(APIView):
     Lista todos los análisis de Alta Cábala de un paciente
     Ruta: GET /api/therapist/patients/<id>/cabalistic-analyses/
     """
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsTherapist]
     
     def get(self, request, id):
         """Lista los análisis cabalísticos del paciente"""
@@ -136,14 +130,10 @@ class ListCabalisticAnalysesView(APIView):
                 'results': results
             }, status=status.HTTP_200_OK)
         
-        except Patient.DoesNotExist:
+        except Exception:
+            logger.error("Error al listar analisis cabalisticos", exc_info=True)
             return Response(
-                {'error': 'Paciente no encontrado o no tienes permisos'},
-                status=status.HTTP_404_NOT_FOUND
-            )
-        except Exception as e:
-            return Response(
-                {'error': f'Error al listar los análisis: {str(e)}'},
+                {'error': 'Error al listar los analisis'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
@@ -154,7 +144,7 @@ class GenerateAndSaveTarotAnalysisView(APIView):
     Genera y guarda automáticamente un análisis de Tarot cruzado
     Ruta: POST /api/therapist/patients/<id>/tarot-analysis/generate-and-save/
     """
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsTherapist]
     
     def post(self, request, id):
         """Genera y guarda el análisis de Tarot"""
@@ -216,16 +206,10 @@ class GenerateAndSaveTarotAnalysisView(APIView):
                 'message': 'Análisis de Tarot generado y guardado exitosamente'
             }, status=status.HTTP_201_CREATED)
         
-        except Patient.DoesNotExist:
+        except Exception:
+            logger.error("Error al generar y guardar analisis de Tarot", exc_info=True)
             return Response(
-                {'error': 'Paciente no encontrado o no tienes permisos'},
-                status=status.HTTP_404_NOT_FOUND
-            )
-        except Exception as e:
-            import traceback
-            traceback.print_exc()
-            return Response(
-                {'error': f'Error al generar y guardar el análisis: {str(e)}'},
+                {'error': 'Error al generar y guardar el analisis'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
@@ -264,33 +248,24 @@ class KerykeionAnalysisView(APIView):
             # Validar datos de entrada
             try:
                 input_schema = KerykeionInputSchema(**request.data)
-            except ValidationError as e:
-                # Loggear error completo internamente
-                logger.error(f"Error validando input Kerykeion para paciente {id}: {e}", exc_info=True)
-                # Formatear errores de Pydantic
-                error_details = []
-                for error in e.errors():
-                    field = '.'.join(str(loc) for loc in error.get('loc', []))
-                    msg = error.get('msg', 'Error de validación')
-                    error_details.append(f"{field}: {msg}")
+            except ValidationError:
+                logger.error(f"Error validando input Kerykeion para paciente {id}", exc_info=True)
                 return Response(
-                    {'error': 'Datos de entrada inválidos', 'details': '; '.join(error_details)},
+                    {'error': 'Datos de entrada invalidos'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            except Exception as e:
-                logger.error(f"Error inesperado validando input Kerykeion para paciente {id}: {str(e)}", exc_info=True)
+            except Exception:
+                logger.error(f"Error inesperado validando input Kerykeion para paciente {id}", exc_info=True)
                 return Response(
-                    {'error': 'Datos de entrada inválidos'},
+                    {'error': 'Datos de entrada invalidos'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
             
             # Ejecutar Kerykeion
             try:
                 result = execute_kerykeion(input_schema)
-            except Exception as e:
-                # Loggear error completo internamente
-                logger.error(f"Error ejecutando Kerykeion para paciente {id}: {str(e)}", exc_info=True)
-                # Retornar mensaje genérico al cliente
+            except Exception:
+                logger.error(f"Error ejecutando Kerykeion para paciente {id}", exc_info=True)
                 return Response(
                     {'error': 'Error al calcular carta natal. Por favor, verifica los datos de entrada.'},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -315,10 +290,10 @@ class KerykeionAnalysisView(APIView):
                 
                 logger.info(f"Análisis Kerykeion creado: ID {analysis.id} para paciente {patient.id} por terapeuta {request.user.id}")
                 
-            except Exception as e:
-                logger.error(f"Error guardando análisis Kerykeion para paciente {id}: {str(e)}", exc_info=True)
+            except Exception:
+                logger.error(f"Error guardando analisis Kerykeion para paciente {id}", exc_info=True)
                 return Response(
-                    {'error': 'Error al guardar el análisis'},
+                    {'error': 'Error al guardar el analisis'},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR
                 )
             
@@ -331,9 +306,8 @@ class KerykeionAnalysisView(APIView):
                 status=status.HTTP_201_CREATED
             )
             
-        except Exception as e:
-            # Catch-all para errores inesperados
-            logger.error(f"Error inesperado en KerykeionAnalysisView para paciente {id}: {str(e)}", exc_info=True)
+        except Exception:
+            logger.error(f"Error inesperado en KerykeionAnalysisView para paciente {id}", exc_info=True)
             return Response(
                 {'error': 'Error interno del servidor'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -377,18 +351,16 @@ class CrossoverSynthesisView(APIView):
             try:
                 engine = SynthesisEngine(patient=patient, therapist=request.user)
                 synthesis_result = engine.generate_synthesis()
-            except ValueError as e:
-                # Error de validación (sin fuentes, etc.)
-                logger.warning(f"Error de validación en síntesis para paciente {id}: {str(e)}")
+            except ValueError:
+                logger.warning(f"Error de validacion en sintesis para paciente {id}", exc_info=True)
                 return Response(
-                    {'error': str(e)},
+                    {'error': 'Datos invalidos para generar sintesis'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            except Exception as e:
-                # Error en motor de síntesis
-                logger.error(f"Error ejecutando síntesis cruzada para paciente {id}: {str(e)}", exc_info=True)
+            except Exception:
+                logger.error(f"Error ejecutando sintesis cruzada para paciente {id}", exc_info=True)
                 return Response(
-                    {'error': 'Error al generar síntesis cruzada'},
+                    {'error': 'Error al generar sintesis cruzada'},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR
                 )
             
@@ -441,10 +413,10 @@ class CrossoverSynthesisView(APIView):
                     f"por terapeuta {request.user.id} con {len(synthesis_result.sources)} fuentes"
                 )
                 
-            except Exception as e:
-                logger.error(f"Error guardando síntesis cruzada para paciente {id}: {str(e)}", exc_info=True)
+            except Exception:
+                logger.error(f"Error guardando sintesis cruzada para paciente {id}", exc_info=True)
                 return Response(
-                    {'error': 'Error al guardar la síntesis'},
+                    {'error': 'Error al guardar la sintesis'},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR
                 )
             
@@ -461,9 +433,8 @@ class CrossoverSynthesisView(APIView):
                 status=status.HTTP_201_CREATED
             )
             
-        except Exception as e:
-            # Catch-all para errores inesperados
-            logger.error(f"Error inesperado en CrossoverSynthesisView para paciente {id}: {str(e)}", exc_info=True)
+        except Exception:
+            logger.error(f"Error inesperado en CrossoverSynthesisView para paciente {id}", exc_info=True)
             return Response(
                 {'error': 'Error interno del servidor'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR

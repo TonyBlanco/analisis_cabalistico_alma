@@ -84,6 +84,9 @@ def execute_kerykeion(input_data: KerykeionInputSchema) -> KerykeionOutputSchema
     for house_num, house_obj in subject.houses.items():
         position = house_obj.position
         sign = house_obj.sign
+
+        if position is None:
+            continue
         
         # Calcular grado dentro del signo
         degree = position % 30
@@ -96,6 +99,12 @@ def execute_kerykeion(input_data: KerykeionInputSchema) -> KerykeionOutputSchema
     # Extraer aspectos reales
     aspects_data = []
     for aspect_obj in subject.aspects:
+        if aspect_obj.p1 is None or aspect_obj.p2 is None:
+            continue
+
+        if aspect_obj.orb is None:
+            continue
+
         # Mapear nombres de aspectos de Kerykeion a nuestro formato
         aspect_type_map = {
             'conjunction': 'conjunction',

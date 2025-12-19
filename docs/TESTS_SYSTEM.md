@@ -1,3 +1,7 @@
+> ⚠️ DOCUMENTO HISTÓRICO / LEGACY  
+> Este documento describe un sistema anterior de tests con membresías.  
+> NO es aplicable al sistema clínico actual (ver AUDITORIA CABALA APP 12182025.md).
+
 # Sistema de Tests Modulares
 
 Sistema completo de tests cabalísticos modulares con control de acceso basado en membresía.

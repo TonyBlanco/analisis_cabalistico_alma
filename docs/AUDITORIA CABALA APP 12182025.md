@@ -51,6 +51,7 @@ Alcance: frontend (tonyblanco-app), backend (Django + DRF), docs y rutas legacy 
 - Línea de tests asignados en el workspace fusiona resultados remotos (`patient-previous`) con asignaciones locales pendientes evitando duplicados; muestra “Pendiente” hasta que el backend devuelve resultado real.
 ## Cambios recientes (2025-12-19)
 - Guards de hydration en `TherapistTestsPage` y `TestCatalogSection` para contenido dependiente de paciente activo.
+- Nuevo documento: `docs/SCDF v2 — Diseño Clínico.md`.
 
 
 ## Fuentes revisadas (clave)
@@ -546,3 +547,130 @@ Los siguientes documentos forman parte del **marco normativo activo del proyecto
 
 Estos documentos actúan como **frontera arquitectónica y conceptual** y su incumplimiento se considera una desviación del estado sellado del proyecto.
 
+
+
+SCDF v2 — Plan Técnico de Implementación (Controlado)
+Estado actual (18-12-2025)
+
+El SCDF v2 queda definido como módulo clínico central, separado explícitamente del dominio de tests.
+
+El SCDF NO ejecuta tests, NO asigna tests y NO recalcula resultados.
+
+El SCDF consume resultados existentes (analysis-records) en modo solo lectura.
+
+Existe una única ruta canónica activa para SCDF:
+
+/dashboard/therapist/scdf
+
+Cualquier acceso legacy (/dashboard/tools/scdf, _legacy_app_backup/**) se considera obsoleto y debe ser redirigido o bloqueado.
+
+Fase 1 — Activada (Solo lectura)
+
+Objetivo: Consolidar el SCDF como punto de control clínico sin introducir lógica mutable.
+
+Características habilitadas:
+
+Vista principal SCDF accesible desde el Workspace Clínico del terapeuta.
+
+Lectura de:
+
+Señales (tests completados).
+
+Estructura clínica (síntesis, ejes, hipótesis, riesgos, recomendaciones).
+
+SCDF visible aunque existan prerrequisitos pendientes.
+
+Sin persistencia de datos clínicos nuevos.
+
+Sin scoring, sin ejecución, sin asignación.
+
+Restricciones explícitas:
+
+❌ No escritura en base de datos.
+
+❌ No creación de episodios.
+
+❌ No edición de contenido clínico.
+
+❌ No dependencia directa de flujos legacy.
+
+Reordenación UX (Confirmada)
+
+El SCDF se posiciona visual y conceptualmente en la parte superior del Workspace Clínico.
+
+El SCDF se comunica como:
+
+“Punto de control clínico del proceso terapéutico”.
+
+El historial de evaluaciones queda subordinado visualmente al SCDF.
+
+Limpieza de legado (En curso / obligatoria)
+
+Se detectó enlace activo hacia:
+
+/_legacy_app_backup/(dashboard)/dashboard/tools/scdf
+
+Acción requerida:
+
+Redirección obligatoria hacia /dashboard/therapist/scdf
+
+Eliminación de accesos visuales legacy.
+
+No se reutiliza lógica SCDF previa.
+
+El SCDF legacy queda definitivamente retirado del dominio activo.
+
+Fase 2 — Planificada (Escritura clínica controlada)
+
+(No iniciada — pendiente de aprobación explícita)
+
+Creación de entidad SCDFEpisode.
+
+Persistencia de:
+
+Síntesis clínica.
+
+Ejes clínicos.
+
+Hipótesis.
+
+Riesgos.
+
+Recomendaciones.
+
+Control de versiones por episodio.
+
+Un único episodio activo por paciente.
+
+Sin lógica automática de scoring.
+
+Regla de oro (bloqueante)
+
+Si algo ejecuta, puntúa, asigna o pregunta → NO es SCDF.
+
+Decisión arquitectónica (final)
+
+El SCDF es el núcleo integrador clínico del sistema.
+
+Los tests son fuentes de señal, no motores de decisión.
+
+Esta separación es irreversible y forma parte del diseño base del sistema.
+
+
+Diccionario Bioemocional — Integración Árbol de la Vida (P1)
+
+El Diccionario Bioemocional se valida como fuente clínica de consulta con 1106 entradas estructuradas.
+
+Se integra una capa consultiva no persistente del Árbol de la Vida, accesible únicamente para terapeutas.
+
+La integración es opt-in mediante el parámetro with_tree=1.
+
+La lectura cabalística es orientativa, no diagnóstica y no genera conclusiones automáticas.
+
+No se crean modelos nuevos, no hay migraciones ni persistencia de datos.
+
+El dominio cabalístico permanece desacoplado del dominio clínico y de SCDF.
+
+No hay impacto sobre tests, scoring, ni flujos existentes.
+
+La herramienta funciona exclusivamente como apoyo cognitivo clínico interno.

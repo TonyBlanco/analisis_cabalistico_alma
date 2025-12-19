@@ -30,6 +30,18 @@ interface DictionaryEntry {
   [key: string]: unknown;
 }
 
+interface TreeOfLifeInterpretation {
+  nombre?: string;
+  cualidad?: string;
+  [key: string]: unknown;
+}
+
+interface TreeOfLifeResult {
+  sefira?: string;
+  interpretacion?: TreeOfLifeInterpretation;
+  nota?: string;
+}
+
 type HypothesisStatus = 'open' | 'in_review' | 'discarded';
 type HypothesisType = 'lealtad_invisible' | 'repeticion' | 'aniversario' | 'proyecto_sentido' | 'otro';
 
@@ -72,6 +84,7 @@ export default function TherapistBioEmotionalPage() {
   const [dictError, setDictError] = useState<string | null>(null);
   const [dictResults, setDictResults] = useState<DictionaryEntry[]>([]);
   const [selectedEntry, setSelectedEntry] = useState<DictionaryEntry | null>(null);
+  const [dictTreeOfLife, setDictTreeOfLife] = useState<TreeOfLifeResult | null>(null);
 
   // Estado de hipótesis
   const [hypotheses, setHypotheses] = useState<Hypothesis[]>([]);
@@ -177,14 +190,16 @@ export default function TherapistBioEmotionalPage() {
     if (!q) {
       setDictResults([]);
       setSelectedEntry(null);
+      setDictTreeOfLife(null);
       return;
     }
     setDictSearching(true);
     setDictError(null);
     setSelectedEntry(null);
+    setDictTreeOfLife(null);
     try {
       const res = await fetch(
-        `/api/bioemotional/dictionary/?q=${encodeURIComponent(q)}`,
+        `/api/bioemotional/dictionary/?q=${encodeURIComponent(q)}&with_tree=1`,
         {
           method: 'GET',
           headers: {
@@ -209,11 +224,14 @@ export default function TherapistBioEmotionalPage() {
         setDictResults([]);
         return;
       }
-      const data = (await res.json()) as DictionaryEntry[];
-      setDictResults(data);
-      if (data.length > 0) {
-        setSelectedEntry(data[0]);
-        setFormTerm(data[0].termino);
+      const data = await res.json();
+      const results = Array.isArray(data) ? data : (data?.results || []);
+      const tree = Array.isArray(data) ? null : (data?.tree_of_life || null);
+      setDictResults(results);
+      setDictTreeOfLife(tree);
+      if (results.length > 0) {
+        setSelectedEntry(results[0]);
+        setFormTerm(results[0].termino);
       }
     } catch (error) {
       console.error('Error searching dictionary', error);

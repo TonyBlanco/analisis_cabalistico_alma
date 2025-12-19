@@ -24,6 +24,7 @@ from .dictionary_loader import (
     load_bioemotional_dictionary,
     BioEmotionalDictionaryError,
 )
+from api.bioemotional.services.tree_of_life_adapter import consult_tree_of_life
 
 
 class BioEmotionalDictionarySearchView(APIView):
@@ -60,7 +61,17 @@ class BioEmotionalDictionarySearchView(APIView):
             filtered = entries
 
         serializer = BioEmotionalDictionaryReadSerializer(filtered, many=True)
-        return Response(serializer.data)
+        results = serializer.data
+        with_tree = request.query_params.get("with_tree") == "1"
+        response = {
+            "results": results,
+        }
+        if with_tree and results:
+            term = results[0].get("termino")
+            tree = consult_tree_of_life(term)
+            if tree:
+                response["tree_of_life"] = tree
+        return Response(response)
 
 
 class GenealogyOverviewView(APIView):

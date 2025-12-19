@@ -33,12 +33,14 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [lastAssignedTest, setLastAssignedTest] = useState<string | null>(null);
   const [helpTestCode, setHelpTestCode] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
 
   const toast = useToast();
   const router = useRouter();
   const activePatientId = getActivePatientId();
 
   useEffect(() => {
+    setMounted(true);
     fetchTests();
   }, []);
 
@@ -243,7 +245,7 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
         </div>
         <div className="flex items-center gap-2">
           <span className="inline-flex items-center gap-1 text-xs px-3 py-1 rounded-full bg-gray-100 text-gray-700 border border-gray-200">
-            Paciente: {activePatientId ? `ID ${activePatientId}` : 'Selecciona un paciente'}
+            {mounted ? `Paciente: ${activePatientId ? `ID ${activePatientId}` : 'Selecciona un paciente'}` : ''}
           </span>
           <button
             className="text-sm text-[#1f6c8f] hover:underline"

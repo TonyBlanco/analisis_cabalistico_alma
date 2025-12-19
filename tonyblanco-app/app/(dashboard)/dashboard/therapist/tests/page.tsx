@@ -11,8 +11,10 @@ export default function TherapistTestsPage() {
   const searchParams = useSearchParams();
   const [resolvedPatientId, setResolvedPatientId] = useState<number | null>(getActivePatientId());
   const [resolvedPatientName, setResolvedPatientName] = useState<string | null>(getActivePatientName());
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     const idParam = searchParams.get('patient_id');
     if (idParam) {
       const parsed = parseInt(idParam, 10);
@@ -45,7 +47,7 @@ export default function TherapistTestsPage() {
           <p className="text-sm text-gray-600">
             Visualiza y asigna tests disponibles. El catálogo es global; la asignación usa el paciente activo.
           </p>
-          {resolvedPatientId && (
+          {mounted && resolvedPatientId && (
             <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-green-50 text-green-700 border border-green-100">
               Paciente: {resolvedPatientName || resolvedPatientId}
             </span>
@@ -56,7 +58,9 @@ export default function TherapistTestsPage() {
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3">
         <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
         <div className="text-sm text-blue-900 space-y-1">
-          {!resolvedPatientId ? (
+          {!mounted ? (
+            <p className="font-medium">Cargando informaci¢n del paciente...</p>
+          ) : !resolvedPatientId ? (
             <>
               <p className="font-medium">Seleccione un paciente activo para asignar tests.</p>
               <p className="text-xs text-blue-700">

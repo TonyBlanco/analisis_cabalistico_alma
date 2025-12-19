@@ -1,3 +1,37 @@
+# ⚠️ DIRECTIVA OBLIGATORIA PARA AGENTES Y DESARROLLO
+
+## VERIFICACIÓN PREVIA (NO NEGOCIABLE)
+
+Antes de ejecutar CUALQUIER cambio en este proyecto, el agente o desarrollador DEBE:
+
+1. Leer COMPLETAMENTE este documento.
+2. Verificar que la tarea solicitada:
+   - NO crea endpoints nuevos
+   - NO crea páginas nuevas
+   - NO modifica rutas existentes
+   - NO altera la arquitectura sellada
+3. Confirmar que la acción está EXPLÍCITAMENTE permitida en esta auditoría.
+
+Si una acción NO está claramente permitida aquí:
+➡️ NO SE EJECUTA.
+
+---
+
+## JERARQUÍA DE DOCUMENTOS (FIJA)
+
+1. **Este documento (AUDITORIA CABALA APP 12182025.md)** → FUENTE DE VERDAD VIGENTE
+2. SOURCE_OF_TRUTH.md → resumen normativo
+3. CHANGELOG_*.md → histórico informativo
+4. PROJECT_STATE_CURRENT.md / TESTS_SYSTEM.md → LEGACY (NO USAR)
+
+---
+
+## PRINCIPIO CLAVE
+
+> Este proyecto está en estado ESTABLE y SELLADO.  
+> El objetivo del agente NO es ampliar el sistema,  
+> es NO ROMPER lo que ya funciona.
+
 # AUDITORIA CABALA APP 12182025
 
 Fecha: 2025-12-18
@@ -15,6 +49,9 @@ Alcance: frontend (tonyblanco-app), backend (Django + DRF), docs y rutas legacy 
 - Catálogo clínico (terapeuta) ahora carga desde registro declarativo, agrupado por familias (psicológicos/cabalísticos), badges de disponibilidad y guía clínica por icono (sin tabs ni filtros que oculten tests).
 - Asignación: al asignar un test se persiste una marca local por paciente y se dispara `assignedTestsChanged` para reflejarlo de inmediato en el workspace sin bloquear por backend.
 - Línea de tests asignados en el workspace fusiona resultados remotos (`patient-previous`) con asignaciones locales pendientes evitando duplicados; muestra “Pendiente” hasta que el backend devuelve resultado real.
+## Cambios recientes (2025-12-19)
+- Guards de hydration en `TherapistTestsPage` y `TestCatalogSection` para contenido dependiente de paciente activo.
+
 
 ## Fuentes revisadas (clave)
 - `backend/api/urls.py`

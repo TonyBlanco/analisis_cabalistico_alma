@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "termino": { "type": "string", "minLength": 1 },
+      "definicion": { "type": ["string", "null"] },
+      "marco_tecnico": { "type": "object" },
+      "sentido_biologico": { "type": ["string", "null"] },
+      "conflictos_emocionales": { "type": "array" },
+      "referencias_cruzadas": { "type": "array" },
+      "fuente": { "type": "object" }
+    },
+    "required": ["termino"],
+    "additionalProperties": true
+  }
+}

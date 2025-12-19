@@ -102,7 +102,14 @@ export const clinicalTestsRegistry: ClinicalTestRegistryEntry[] = [
     display_name: "STAI (Ansiedad Estado-Rasgo)",
     domain: "Ansiedad y estres",
     family: "psicologicos",
-    implemented: false,
+    implemented: true,
+    guidance: {
+      what: "Evaluacion de ansiedad estado y rasgo.",
+      when: "Util para evaluar cambios de ansiedad en contexto clinico.",
+      diff: "Distingue ansiedad estado de ansiedad rasgo.",
+      after: "Interpretar niveles en conjunto con contexto clinico.",
+      reminder: "Instrumento de severidad, no diagnostico.",
+    },
   },
   {
     test_code: "scl-90-r",

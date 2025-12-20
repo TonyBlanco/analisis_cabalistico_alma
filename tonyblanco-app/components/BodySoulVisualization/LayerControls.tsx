@@ -7,10 +7,10 @@ interface LayerControlsProps {
   onSideChange: (side: BodyViewSide) => void;
 }
 
-const layerButtons: { id: VisualizationLayerId; label: string; description: string }[] = [
-  { id: 'body', label: 'Body', description: 'Capa corporal' },
-  { id: 'sefirot', label: 'Sefirot', description: 'Capa simbolica' },
-  { id: 'integrated', label: 'Integrated', description: 'Vista integrada' },
+const layerButtons: { id: VisualizationLayerId; label: string }[] = [
+  { id: 'body', label: 'Cuerpo' },
+  { id: 'sefirot', label: 'Sefirot' },
+  { id: 'integrated', label: 'Integrada' },
 ];
 
 export default function LayerControls({
@@ -20,14 +20,11 @@ export default function LayerControls({
   onSideChange,
 }: LayerControlsProps) {
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       <div>
         <h3 className="text-sm font-semibold text-gray-900">Capas manuales</h3>
-        <p className="text-xs text-gray-500">
-          Activa capas de forma consciente. Ninguna capa se activa por defecto.
-        </p>
       </div>
-      <div className="grid grid-cols-1 gap-2">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
         {layerButtons.map((layer) => {
           const isActive = activeLayers.includes(layer.id);
           return (
@@ -36,14 +33,13 @@ export default function LayerControls({
               type="button"
               onClick={() => onToggleLayer(layer.id)}
               aria-pressed={isActive}
-              className={`flex items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm transition-colors ${
+              className={`flex items-center justify-center rounded-md border px-3 py-1.5 text-xs font-medium transition-colors ${
                 isActive
                   ? 'border-gray-900 bg-gray-900 text-white'
                   : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
               }`}
             >
               <span>{layer.label}</span>
-              <span className="text-xs opacity-80">{layer.description}</span>
             </button>
           );
         })}
@@ -63,7 +59,7 @@ export default function LayerControls({
                   : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
               }`}
             >
-              {item === 'front' ? 'Front' : 'Back'}
+              {item === 'front' ? 'Frente' : 'Espalda'}
             </button>
           ))}
         </div>

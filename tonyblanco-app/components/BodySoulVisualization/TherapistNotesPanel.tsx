@@ -30,6 +30,31 @@ export default function TherapistNotesPanel({
 }: TherapistNotesPanelProps) {
   const [draftText, setDraftText] = useState('');
   const [draftStatus, setDraftStatus] = useState<TherapistNote['status']>('observed');
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [hasManualToggle, setHasManualToggle] = useState(false);
+
+  useEffect(() => {
+    if (hasManualToggle) return;
+    const media = window.matchMedia('(max-width: 768px)');
+    const updateCollapsed = () => setIsCollapsed(media.matches);
+    updateCollapsed();
+    media.addEventListener('change', updateCollapsed);
+    return () => media.removeEventListener('change', updateCollapsed);
+  }, [hasManualToggle]);
+
+  useEffect(() => {
+    const handleCopy = (event: Event) => {
+      const detail = (event as CustomEvent<{ text?: string }>).detail;
+      const incoming = detail?.text?.trim();
+      if (!incoming) return;
+      setHasManualToggle(true);
+      setIsCollapsed(false);
+      setDraftStatus('observed');
+      setDraftText((prev) => (prev ? `${prev}\n\n${incoming}` : incoming));
+    };
+    window.addEventListener('visualization-copy-notes', handleCopy as EventListener);
+    return () => window.removeEventListener('visualization-copy-notes', handleCopy as EventListener);
+  }, []);
 
   const target = useMemo(() => {
     if (selectedSefirah) return { type: 'sefirah' as const, id: selectedSefirah.id };
@@ -66,13 +91,33 @@ export default function TherapistNotesPanel({
 
   return (
     <div className="space-y-3">
-      <div>
-        <h3 className="text-sm font-semibold text-gray-900">Human notes</h3>
-        <p className="text-xs text-gray-500">
-          Notas manuales del terapeuta. Sin automatizacion ni interpretacion automatica.
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h3 className="text-sm font-semibold text-gray-900">Notas humanas</h3>
+          <p className="text-xs text-gray-500">
+            Notas manuales del terapeuta. Sin automatizacion ni interpretacion automatica.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            setHasManualToggle(true);
+            setIsCollapsed((prev) => !prev);
+          }}
+          className="text-xs font-medium text-gray-600 hover:text-gray-900"
+        >
+          {isCollapsed ? 'Expandir' : 'Colapsar'}
+        </button>
       </div>
 
+      {isCollapsed && (
+        <div className="rounded-md border border-dashed border-gray-200 p-3 text-xs text-gray-500">
+          Panel colapsado. Expande para registrar notas humanas.
+        </div>
+      )}
+
+      {!isCollapsed && (
+        <>
       {!target && (
         <div className="rounded-md border border-dashed border-gray-200 p-3 text-xs text-gray-500">
           Selecciona una region corporal o una sefira para vincular una nota humana.
@@ -109,7 +154,7 @@ export default function TherapistNotesPanel({
               onChange={(event) => setDraftText(event.target.value)}
               rows={4}
               className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 resize-y"
-              placeholder="Registrar observaciones consultive y reflexiones humanas."
+              placeholder="Registrar observaciones consultivas y reflexiones humanas."
             />
           </div>
 
@@ -143,6 +188,8 @@ export default function TherapistNotesPanel({
             </p>
           )}
         </div>
+      )}
+        </>
       )}
     </div>
   );

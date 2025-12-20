@@ -72,6 +72,52 @@ Documento vinculante:
 ---
 
 ## Sección Vinculante — UX Clínico
+## Principios de Representación Simbólica (VINCULANTE)
+
+### Regla del sistema (NO NEGOCIABLE)
+
+🧩 **Todo símbolo clínico profundo se expresa como SVG semántico desacoplado.**
+
+Definición:
+- Los símbolos clínicos profundos (Sefirot, Árbol de la Vida, cuerpo simbólico, cartas arquetípicas, mapas transgeneracionales, etc.)
+  **NO contienen lógica React, estado ni inferencias clínicas**.
+- Su representación se define como **SVG puro, semántico y reutilizable**.
+- Los símbolos clínicos profundos (Sefirot, Árbol de la Vida, cuerpo simbólico, cartas arquetípicas, mapas transgeneracionales, etc.)
+  **NO contienen lógica React, estado ni inferencias clínicas**.
+- Su representación se define como **SVG puro, semántico y reutilizable**.
+
+Motivos:
+- Permite reutilización del símbolo:
+  - En múltiples SWM
+  - En modo standalone
+  - En exportaciones futuras (PDF / imagen)
+- Evita acoplamiento entre:
+  - Visualización simbólica
+  - Lógica clínica
+  - Motor de inferencia
+- Preserva el valor cognitivo y pedagógico del símbolo.
+
+Integración permitida:
+- El SVG puede emitir eventos semánticos (`click`, `hover`) desacoplados
+- La lógica React escucha esos eventos **desde fuera**
+- El SVG nunca conoce el contexto clínico ni al paciente
+
+Prohibiciones:
+❌ No lógica React dentro del SVG  
+❌ No estado clínico embebido  
+❌ No inferencias automáticas  
+❌ No dependencias de hooks o stores  
+
+Este patrón es obligatorio para:
+- Body–Soul Visualization
+- Árbol de las Sefirot
+- Cabalá aplicada
+- Bio-Emoción
+- Transgeneracional
+- Tarot / Astrología simbólica
+
+🔒 **Estado: BLOQUEADO**
+
 
 ### Catálogo Clínico vs Workspace (Estado Cerrado)
 
@@ -223,3 +269,5 @@ El objetivo del UX es:
 🔒 **Estado: BLOQUEADO**
 
 Cualquier modificación futura requiere actualización explícita de este documento.
+
+

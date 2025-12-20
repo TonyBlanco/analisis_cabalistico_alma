@@ -3,6 +3,11 @@
 import React from 'react';
 import Link from 'next/link';
 import AssignedTestsSection from '@/components/AssignedTestsSection';
+import { bodyRegions } from '@/components/BodySoulVisualization/data/bodyRegions';
+import {
+  sefirotBodyCorrespondences,
+  sefirotDefinitions,
+} from '@/components/BodySoulVisualization/data/sefirotCorrespondences';
 import type { VisualizationState } from '@/components/BodySoulVisualization/types';
 import type { ContextSectionId, IntegrativeNote } from './types';
 
@@ -19,7 +24,44 @@ export default function RightPanel({
   integrativeNotes,
   onAddNote,
 }: RightPanelProps) {
-  void visualizationState;
+  const selectedRegion =
+    bodyRegions.find((region) => region.id === visualizationState?.selectedBodyRegionId) || null;
+  const selectedSefirah =
+    sefirotDefinitions.find((sefirah) => sefirah.id === visualizationState?.selectedSefirahId) ||
+    null;
+
+  const correspondences = sefirotBodyCorrespondences.filter((item) => {
+    if (selectedRegion) return item.bodyRegionId === selectedRegion.id;
+    if (selectedSefirah) return item.sefirahId === selectedSefirah.id;
+    return false;
+  });
+
+  const showSelectionCard =
+    activeSection === 'visualization' || selectedRegion !== null || selectedSefirah !== null;
+
+  const handleCopyToNotes = () => {
+    const title = selectedSefirah?.spanishName || selectedRegion?.label;
+    const description = selectedSefirah?.description || selectedRegion?.description;
+    if (!title) return;
+    const notes = correspondences.map((item) => item.note);
+    const text = [
+      `Seleccion actual: ${title}`,
+      description,
+      notes.length > 0 ? `Correspondencias: ${notes.join(' | ')}` : '',
+    ]
+      .filter(Boolean)
+      .join('\n');
+
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(text).catch(() => undefined);
+    }
+
+    window.dispatchEvent(
+      new CustomEvent('visualization-copy-notes', {
+        detail: { text },
+      }),
+    );
+  };
 
   return (
     <div className="space-y-4">
@@ -43,6 +85,47 @@ export default function RightPanel({
             Sin historial estructurado en este panel. Usa el perfil del paciente y las
             sesiones para ampliar contexto.
           </div>
+        </div>
+      )}
+
+      {showSelectionCard && (
+        <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm space-y-3">
+          <h3 className="text-sm font-semibold text-gray-900">Seleccion actual</h3>
+          {!selectedRegion && !selectedSefirah && (
+            <p className="text-xs text-gray-500">
+              Selecciona una region corporal o una sefira para ver su contexto.
+            </p>
+          )}
+          {(selectedRegion || selectedSefirah) && (
+            <div className="space-y-2">
+              <div>
+                <p className="text-sm font-medium text-gray-900">
+                  {selectedSefirah ? selectedSefirah.spanishName : selectedRegion?.label}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {selectedSefirah ? selectedSefirah.description : selectedRegion?.description}
+                </p>
+              </div>
+              {correspondences.length > 0 && (
+                <div className="rounded-md bg-gray-50 p-2 text-xs text-gray-600">
+                  <p className="font-medium text-gray-700">Correspondencia simbolica</p>
+                  <ul className="mt-1 space-y-1">
+                    {correspondences.map((item) => (
+                      <li key={`${item.sefirahId}-${item.bodyRegionId}`}>{item.note}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              <button
+                type="button"
+                onClick={handleCopyToNotes}
+                disabled={!selectedRegion && !selectedSefirah}
+                className="inline-flex items-center justify-center rounded-md border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                Copiar y enviar a notas humanas
+              </button>
+            </div>
+          )}
         </div>
       )}
 

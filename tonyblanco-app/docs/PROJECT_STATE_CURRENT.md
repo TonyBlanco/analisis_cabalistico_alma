@@ -82,9 +82,7 @@ Definición:
 - Los símbolos clínicos profundos (Sefirot, Árbol de la Vida, cuerpo simbólico, cartas arquetípicas, mapas transgeneracionales, etc.)
   **NO contienen lógica React, estado ni inferencias clínicas**.
 - Su representación se define como **SVG puro, semántico y reutilizable**.
-- Los símbolos clínicos profundos (Sefirot, Árbol de la Vida, cuerpo simbólico, cartas arquetípicas, mapas transgeneracionales, etc.)
-  **NO contienen lógica React, estado ni inferencias clínicas**.
-- Su representación se define como **SVG puro, semántico y reutilizable**.
+
 
 Motivos:
 - Permite reutilización del símbolo:
@@ -269,5 +267,7 @@ El objetivo del UX es:
 🔒 **Estado: BLOQUEADO**
 
 Cualquier modificación futura requiere actualización explícita de este documento.
+
+
 
 

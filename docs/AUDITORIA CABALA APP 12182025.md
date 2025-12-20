@@ -714,3 +714,10 @@ El dominio cabalístico permanece desacoplado del dominio clínico y de SCDF.
 No hay impacto sobre tests, scoring, ni flujos existentes.
 
 La herramienta funciona exclusivamente como apoyo cognitivo clínico interno.
+
+## Contrato SWM (v1) - Congelado
+
+Se congela el contrato tecnico de Specialized Workspace Modules como base v1.
+Documento de referencia:
+docs/CONTRATO TÉCNICO DE WORKSPACES ESPECIALIZADOS (SWM).md
+

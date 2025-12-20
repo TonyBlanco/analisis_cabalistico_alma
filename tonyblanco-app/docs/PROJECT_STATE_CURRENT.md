@@ -50,6 +50,14 @@ Reglas:
 - Solo se editan desde "Editar perfil"
 - No activan logica, filtros ni inferencias clinicas
 
+## Contrato SWM (v1)
+
+Estado: CONGELADO
+
+El contrato tecnico de los Specialized Workspace Modules queda congelado como base SWM v1.
+Documento vinculante:
+`docs/CONTRATO TÉCNICO DE WORKSPACES ESPECIALIZADOS (SWM).md`
+
 ## Reglas clave
 - Admin no es actor clínico
 - execution_mode nunca viene del request

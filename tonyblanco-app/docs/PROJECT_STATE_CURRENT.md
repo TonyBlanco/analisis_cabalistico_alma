@@ -83,7 +83,6 @@ Definición:
   **NO contienen lógica React, estado ni inferencias clínicas**.
 - Su representación se define como **SVG puro, semántico y reutilizable**.
 
-
 Motivos:
 - Permite reutilización del símbolo:
   - En múltiples SWM
@@ -267,7 +266,6 @@ El objetivo del UX es:
 🔒 **Estado: BLOQUEADO**
 
 Cualquier modificación futura requiere actualización explícita de este documento.
-
 
 
 

@@ -56,6 +56,8 @@ export interface PatientProfileSummary {
   birth_longitude: number | null;
   birth_timezone: string | null;
   consent_accepted_at: string | null;
+  biologicalSex?: 'male' | 'female' | 'intersex' | 'unknown' | 'not_recorded';
+  genderIdentity?: 'woman' | 'man' | 'non_binary' | 'other' | 'prefer_not_to_say' | 'not_recorded';
 }
 
 /**

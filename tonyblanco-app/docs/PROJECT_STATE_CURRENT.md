@@ -38,6 +38,18 @@ Características clave:
 Este dashboard es considerado el **Master Point del terapeuta**.
 Cualquier módulo futuro debe integrarse sin romper este workspace.
 
+## Identidad del paciente - Separacion estricta
+
+Estado: IMPLEMENTADO (v1)
+
+Se incorpora separacion entre **sexo biologico** e **identidad de genero**.
+Ambos campos son opcionales y su valor por defecto es `not_recorded`.
+
+Reglas:
+- Solo se muestran como contexto en el header del paciente
+- Solo se editan desde "Editar perfil"
+- No activan logica, filtros ni inferencias clinicas
+
 ## Reglas clave
 - Admin no es actor clínico
 - execution_mode nunca viene del request

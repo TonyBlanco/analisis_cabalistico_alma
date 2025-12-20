@@ -388,6 +388,7 @@ Dentro del Dashboard Terapéutico persistente.
 - No navega fuera del workspace
 - Puede abrirse como panel auxiliar
 - Comparte contexto con la Visualización Cuerpo–Alma
+- Los campos de sexo biologico e identidad de genero son solo contexto y no activan logica transgeneracional
 
 Esta integración refuerza su carácter consultivo y no diagnóstico.
 
@@ -408,4 +409,29 @@ Los siguientes documentos forman parte del **marco normativo activo del proyecto
    Define explícitamente la capa **no clínica** del ecosistema.  
    Todo contenido experiencial, meditativo, simbólico o espiritual **debe vivir exclusivamente bajo este marco** y **no puede integrarse en módulos clínicos**.
 
+3. ### Principio de Experiencia Corporal Vivida
+
+Las preguntas relacionadas con gestación, parto, aborto o pérdida intrauterina
+solo se formulan cuando existe experiencia corporal vivida relevante.
+
+En ausencia de dicha experiencia:
+- Las preguntas se reformulan en clave ancestral o sistémica
+- Nunca se atribuyen experiencias biográficas inexistentes
+- Se protege la coherencia terapéutica y simbólica
+
+Este principio es clínico-terapéutico, no ideológico.
+Nota:
+Los campos de sexo biológico e identidad de género
+no determinan ni activan preguntas transgeneracionales.
+
+Las preguntas de gestación, parto o aborto
+se rigen por el principio de experiencia corporal vivida,
+no por identidad declarada.
+
 Estos documentos actúan como **frontera arquitectónica y conceptual** y su incumplimiento se considera una desviación del estado sellado del proyecto.
+
+
+
+
+
+

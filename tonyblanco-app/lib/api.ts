@@ -436,6 +436,8 @@ export interface UserProfileData {
   consent_accepted_at?: string | null;
   email?: string;
   phone?: string;
+  biologicalSex?: 'male' | 'female' | 'intersex' | 'unknown' | 'not_recorded';
+  genderIdentity?: 'woman' | 'man' | 'non_binary' | 'other' | 'prefer_not_to_say' | 'not_recorded';
   profile_updated_by_therapist?: boolean;
   last_therapist_update?: string | null;
   // Para forzar re-geocodificación de coordenadas

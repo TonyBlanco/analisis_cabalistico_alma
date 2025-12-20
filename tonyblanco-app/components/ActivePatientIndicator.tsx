@@ -40,6 +40,12 @@ export default function ActivePatientIndicator({ onSelectPatient }: ActivePatien
   const [formBirthDate, setFormBirthDate] = useState<string | null>(null);
   const [formBirthCity, setFormBirthCity] = useState('');
   const [formBirthCountry, setFormBirthCountry] = useState('');
+  const [formBiologicalSex, setFormBiologicalSex] = useState<
+    'male' | 'female' | 'intersex' | 'unknown' | 'not_recorded'
+  >('not_recorded');
+  const [formGenderIdentity, setFormGenderIdentity] = useState<
+    'woman' | 'man' | 'non_binary' | 'other' | 'prefer_not_to_say' | 'not_recorded'
+  >('not_recorded');
   const [formReason, setFormReason] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
   const [formSaving, setFormSaving] = useState(false);
@@ -104,6 +110,8 @@ export default function ActivePatientIndicator({ onSelectPatient }: ActivePatien
     setFormBirthDate(profile?.birth_date || null);
     setFormBirthCity(profile?.birth_city || '');
     setFormBirthCountry(profile?.birth_country || '');
+    setFormBiologicalSex(profile?.biologicalSex ?? 'not_recorded');
+    setFormGenderIdentity(profile?.genderIdentity ?? 'not_recorded');
     setFormError(null);
     setFeedback(null);
     setEditOpen(true);
@@ -303,6 +311,49 @@ export default function ActivePatientIndicator({ onSelectPatient }: ActivePatien
                 placeholder="País"
               />
             </div>
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-gray-700">Sexo biologico</label>
+              <select
+                value={formBiologicalSex}
+                onChange={(e) =>
+                  setFormBiologicalSex(
+                    e.target.value as 'male' | 'female' | 'intersex' | 'unknown' | 'not_recorded',
+                  )
+                }
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white"
+              >
+                <option value="not_recorded">Sin registro</option>
+                <option value="female">Femenino</option>
+                <option value="male">Masculino</option>
+                <option value="intersex">Intersexual</option>
+                <option value="unknown">Desconocido</option>
+              </select>
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-gray-700">Identidad de genero</label>
+              <select
+                value={formGenderIdentity}
+                onChange={(e) =>
+                  setFormGenderIdentity(
+                    e.target.value as
+                      | 'woman'
+                      | 'man'
+                      | 'non_binary'
+                      | 'other'
+                      | 'prefer_not_to_say'
+                      | 'not_recorded',
+                  )
+                }
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white"
+              >
+                <option value="not_recorded">Sin registro</option>
+                <option value="woman">Mujer</option>
+                <option value="man">Hombre</option>
+                <option value="non_binary">No binaria</option>
+                <option value="other">Otra</option>
+                <option value="prefer_not_to_say">Prefiere no decirlo</option>
+              </select>
+            </div>
             {formError && <p className="text-sm text-red-600">{formError}</p>}
             {feedback && <p className="text-sm text-green-700">{feedback}</p>}
           </div>
@@ -329,6 +380,8 @@ export default function ActivePatientIndicator({ onSelectPatient }: ActivePatien
                     birth_date: formBirthDate || undefined,
                     birth_city: formBirthCity || undefined,
                     birth_country: formBirthCountry || undefined,
+                    biologicalSex: formBiologicalSex || 'not_recorded',
+                    genderIdentity: formGenderIdentity || 'not_recorded',
                   });
                   setFeedback('Perfil actualizado correctamente.');
                   window.dispatchEvent(new Event('activePatientChanged'));

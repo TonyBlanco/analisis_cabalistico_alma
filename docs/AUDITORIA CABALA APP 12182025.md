@@ -45,10 +45,50 @@ Alcance: frontend (tonyblanco-app), backend (Django + DRF), docs y rutas legacy 
 - Tests/analisis: dos flujos inmutables (`patient_self`, `therapist_clinical`), con hardening aplicado en backend.
 - Ultimas 12 horas: no hay cambios MD ni commits recientes detectados.
 
+
+## Decisión UX Estratégica – Dashboard Terapéutico
+
+Se ha adoptado un modelo de workspace clínico persistente
+inspirado en Orion Health, con las siguientes implicaciones:
+
+- Eliminación de navegación destructiva en contexto terapéutico
+- Separación entre:
+  - Workspace (persistente)
+  - Utilidades (paneles)
+- El sidebar deja de ser un menú clásico
+- El terapeuta nunca pierde el contexto visual del paciente
+
+Esta decisión es intencional y responde a:
+- reducción de carga cognitiva
+- aumento de calidad observacional
+- alineación ética (no diagnóstico automático)
+
+Cualquier cambio que rompa esta lógica se considera regresión UX.
+
 ## Cambios recientes (T6 catálogo/assignments)
 - Catálogo clínico (terapeuta) ahora carga desde registro declarativo, agrupado por familias (psicológicos/cabalísticos), badges de disponibilidad y guía clínica por icono (sin tabs ni filtros que oculten tests).
 - Asignación: al asignar un test se persiste una marca local por paciente y se dispara `assignedTestsChanged` para reflejarlo de inmediato en el workspace sin bloquear por backend.
 - Línea de tests asignados en el workspace fusiona resultados remotos (`patient-previous`) con asignaciones locales pendientes evitando duplicados; muestra “Pendiente” hasta que el backend devuelve resultado real.
+
+## Decisión UX Estratégica – Dashboard Terapéutico
+
+Se ha adoptado un modelo de workspace clínico persistente
+inspirado en Orion Health, con las siguientes implicaciones:
+
+- Eliminación de navegación destructiva en contexto terapéutico
+- Separación entre:
+  - Workspace (persistente)
+  - Utilidades (paneles)
+- El sidebar deja de ser un menú clásico
+- El terapeuta nunca pierde el contexto visual del paciente
+
+Esta decisión es intencional y responde a:
+- reducción de carga cognitiva
+- aumento de calidad observacional
+- alineación ética (no diagnóstico automático)
+
+Cualquier cambio que rompa esta lógica se considera regresión UX.
+
 ## Cambios recientes (2025-12-19)
 - Guards de hydration en `TherapistTestsPage` y `TestCatalogSection` para contenido dependiente de paciente activo.
 - Nuevo documento: `docs/SCDF v2 — Diseño Clínico.md`.

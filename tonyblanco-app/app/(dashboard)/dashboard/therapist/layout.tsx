@@ -1,6 +1,8 @@
 'use client';
 
 import TherapistSidebar from './components/TherapistSidebar';
+import { PanelManagerProvider } from '@/components/TherapistWorkspace/PanelManagerContext';
+import PanelDock from '@/components/TherapistWorkspace/PanelDock';
 
 /**
  * Therapist Layout
@@ -21,11 +23,14 @@ export default function TherapistLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <TherapistSidebar />
-      <main className="flex-1 p-4 sm:p-6 lg:p-8">
-        {children}
-      </main>
-    </div>
+    <PanelManagerProvider>
+      <div className="flex min-h-screen bg-gray-50">
+        <TherapistSidebar />
+        <div className="flex flex-1">
+          <main className="flex-1 p-4 sm:p-6 lg:p-8">{children}</main>
+          <PanelDock />
+        </div>
+      </div>
+    </PanelManagerProvider>
   );
 }

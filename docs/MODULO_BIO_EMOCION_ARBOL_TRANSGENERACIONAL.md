@@ -377,6 +377,20 @@ dónde encaja cada cosa
 
 ---
 
+
+## Integración UX
+
+El módulo Bio-Emoción se integra como herramienta contextual
+
+Dentro del Dashboard Terapéutico persistente.
+
+- No rompe el flujo clínico
+- No navega fuera del workspace
+- Puede abrirse como panel auxiliar
+- Comparte contexto con la Visualización Cuerpo–Alma
+
+Esta integración refuerza su carácter consultivo y no diagnóstico.
+
 ## Documentos vinculantes adicionales (desde 18/12/2025)
 
 Los siguientes documentos forman parte del **marco normativo activo del proyecto** y deben ser respetados en cualquier implementación presente o futura:

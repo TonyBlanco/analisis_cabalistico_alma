@@ -1,0 +1,154 @@
+import type { SefirahBodyCorrespondence, SefirahConnection, SefirahDefinition } from '../types';
+
+export const sefirotDefinitions: SefirahDefinition[] = [
+  {
+    id: 'keter',
+    hebrewName: 'Keter',
+    spanishName: 'Corona',
+    description: 'Referencia simbolica de apertura y vision amplia.',
+    colorToken: 'amber-500',
+    position: { x: 50, y: 6 },
+  },
+  {
+    id: 'chokhmah',
+    hebrewName: 'Chokhmah',
+    spanishName: 'Sabiduria',
+    description: 'Referencia simbolica de intuicion y perspectiva.',
+    colorToken: 'sky-500',
+    position: { x: 30, y: 18 },
+  },
+  {
+    id: 'binah',
+    hebrewName: 'Binah',
+    spanishName: 'Comprension',
+    description: 'Referencia simbolica de claridad y estructura.',
+    colorToken: 'indigo-500',
+    position: { x: 70, y: 18 },
+  },
+  {
+    id: 'chesed',
+    hebrewName: 'Chesed',
+    spanishName: 'Misericordia',
+    description: 'Referencia simbolica de amplitud y apertura relacional.',
+    colorToken: 'emerald-500',
+    position: { x: 24, y: 36 },
+  },
+  {
+    id: 'gevurah',
+    hebrewName: 'Gevurah',
+    spanishName: 'Rigor',
+    description: 'Referencia simbolica de limites y enfoque.',
+    colorToken: 'rose-500',
+    position: { x: 76, y: 36 },
+  },
+  {
+    id: 'tiferet',
+    hebrewName: 'Tiferet',
+    spanishName: 'Armonia',
+    description: 'Referencia simbolica de integracion y balance narrativo.',
+    colorToken: 'teal-500',
+    position: { x: 50, y: 52 },
+  },
+  {
+    id: 'netzach',
+    hebrewName: 'Netzach',
+    spanishName: 'Victoria',
+    description: 'Referencia simbolica de impulso y continuidad.',
+    colorToken: 'lime-500',
+    position: { x: 34, y: 68 },
+  },
+  {
+    id: 'hod',
+    hebrewName: 'Hod',
+    spanishName: 'Esplendor',
+    description: 'Referencia simbolica de lenguaje y expresion.',
+    colorToken: 'fuchsia-500',
+    position: { x: 66, y: 68 },
+  },
+  {
+    id: 'yesod',
+    hebrewName: 'Yesod',
+    spanishName: 'Fundamento',
+    description: 'Referencia simbolica de cohesion y memoria.',
+    colorToken: 'slate-500',
+    position: { x: 50, y: 84 },
+  },
+  {
+    id: 'malchut',
+    hebrewName: 'Malchut',
+    spanishName: 'Reino',
+    description: 'Referencia simbolica de presencia y realidad concreta.',
+    colorToken: 'orange-500',
+    position: { x: 50, y: 96 },
+  },
+];
+
+export const sefirotConnections: SefirahConnection[] = [
+  { fromId: 'keter', toId: 'chokhmah' },
+  { fromId: 'keter', toId: 'binah' },
+  { fromId: 'chokhmah', toId: 'binah' },
+  { fromId: 'chokhmah', toId: 'chesed' },
+  { fromId: 'binah', toId: 'gevurah' },
+  { fromId: 'chesed', toId: 'gevurah' },
+  { fromId: 'chesed', toId: 'tiferet' },
+  { fromId: 'gevurah', toId: 'tiferet' },
+  { fromId: 'tiferet', toId: 'netzach' },
+  { fromId: 'tiferet', toId: 'hod' },
+  { fromId: 'netzach', toId: 'hod' },
+  { fromId: 'netzach', toId: 'yesod' },
+  { fromId: 'hod', toId: 'yesod' },
+  { fromId: 'yesod', toId: 'malchut' },
+];
+
+export const sefirotBodyCorrespondences: SefirahBodyCorrespondence[] = [
+  {
+    sefirahId: 'keter',
+    bodyRegionId: 'head',
+    note: 'Correspondencia simbolica con la zona superior para observacion consultive.',
+  },
+  {
+    sefirahId: 'chokhmah',
+    bodyRegionId: 'rightShoulder',
+    note: 'Correspondencia simbolica con el lado derecho superior.',
+  },
+  {
+    sefirahId: 'binah',
+    bodyRegionId: 'leftShoulder',
+    note: 'Correspondencia simbolica con el lado izquierdo superior.',
+  },
+  {
+    sefirahId: 'chesed',
+    bodyRegionId: 'leftShoulder',
+    note: 'Correspondencia simbolica de apertura en el lado izquierdo.',
+  },
+  {
+    sefirahId: 'gevurah',
+    bodyRegionId: 'rightShoulder',
+    note: 'Correspondencia simbolica de enfoque en el lado derecho.',
+  },
+  {
+    sefirahId: 'tiferet',
+    bodyRegionId: 'heart',
+    note: 'Correspondencia simbolica con el centro toracico.',
+  },
+  {
+    sefirahId: 'netzach',
+    bodyRegionId: 'leftHip',
+    note: 'Correspondencia simbolica con el soporte izquierdo inferior.',
+  },
+  {
+    sefirahId: 'hod',
+    bodyRegionId: 'rightHip',
+    note: 'Correspondencia simbolica con el soporte derecho inferior.',
+  },
+  {
+    sefirahId: 'yesod',
+    bodyRegionId: 'abdomen',
+    note: 'Correspondencia simbolica con la zona abdominal.',
+  },
+  {
+    sefirahId: 'malchut',
+    bodyRegionId: 'pelvis',
+    note: 'Correspondencia simbolica con la base corporal.',
+  },
+];

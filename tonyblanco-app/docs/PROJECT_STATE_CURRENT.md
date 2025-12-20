@@ -20,6 +20,24 @@
 - Personal: mínimo clínico
 - Patient: pendiente de integración final
 
+
+## Dashboard Terapéutico – Workspace Persistente (Estilo Orion)
+
+Estado: IMPLEMENTADO (v1)
+
+Se ha definido e implementado un dashboard terapéutico de tipo
+**workspace persistente**, inspirado en portales clínicos Orion.
+
+Características clave:
+- El dashboard del terapeuta es el punto central del sistema
+- No se navega entre páginas para trabajo clínico
+- El cuerpo y la visualización simbólica son el ancla cognitiva
+- El sidebar actúa como Panel de Control de Utilidades (no navegación)
+- Las herramientas se abren como paneles superpuestos no destructivos
+
+Este dashboard es considerado el **Master Point del terapeuta**.
+Cualquier módulo futuro debe integrarse sin romper este workspace.
+
 ## Reglas clave
 - Admin no es actor clínico
 - execution_mode nunca viene del request

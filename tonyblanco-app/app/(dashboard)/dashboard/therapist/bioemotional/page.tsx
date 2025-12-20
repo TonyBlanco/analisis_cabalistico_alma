@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 import ActivePatientIndicator from '@/components/ActivePatientIndicator';
+import BodySoulVisualization from '@/components/BodySoulVisualization';
 import { useRoleGuard } from '@/lib/role-guards';
 import { getActivePatient } from '@/lib/active-patient';
 
@@ -901,6 +902,19 @@ export default function TherapistBioEmotionalPage() {
             )}
           </div>
         )}
+      </div>
+
+      <div className="bg-white border border-gray-200 rounded-lg p-4 sm:p-6 shadow-sm">
+        <div className="space-y-1 mb-4">
+          <h2 className="text-xl font-semibold text-gray-900">
+            Visualización Integrada Cuerpo–Alma
+          </h2>
+          <p className="text-sm text-gray-600">
+            Visualizacion consultive para observacion simbolica. Sin conclusiones clinicas ni
+            interpretacion automatica.
+          </p>
+        </div>
+        <BodySoulVisualization />
       </div>
     </div>
   );

@@ -19,36 +19,43 @@ import {
   ChevronLeft,
 } from 'lucide-react';
 import { usePanelManager } from '@/components/TherapistWorkspace/PanelManagerContext';
-import { panelRegistry } from '@/components/TherapistWorkspace/panelRegistry';
-import type { PanelId, PanelType } from '@/components/TherapistWorkspace/types';
+import { toolRegistry } from '@/components/TherapistWorkspace/panelRegistry';
+import type { ToolGroupId, ToolId } from '@/components/TherapistWorkspace/panelRegistry';
 
-const groupLabels: Record<PanelType, string> = {
+const groupLabels: Record<ToolGroupId, string> = {
   observation: 'OBSERVACION',
-  analysis: 'EVALUACION',
+  evaluation: 'EVALUACION',
   symbolic: 'HERRAMIENTAS SIMBOLICAS',
   history: 'HISTORIAL',
-  resource: 'RECURSOS',
+  resources: 'RECURSOS',
 };
 
-const toolIcons: Record<PanelId, LucideIcon> = {
+const toolIcons: Record<ToolId, LucideIcon> = {
   overview: Telescope,
   notes: NotebookPen,
-  assignedTests: ClipboardCheck,
+  tests: ClipboardCheck,
   bioemotional: Activity,
-  treeOfLife: Layers,
-  transgenerational: Stethoscope,
+  'tree-of-life': Layers,
+  hypotheses: Stethoscope,
   history: History,
   kabbalah: Sparkles,
   resources: BookOpen,
 };
 
-const groupOrder: PanelType[] = [
+const groupOrder: ToolGroupId[] = [
   'observation',
-  'analysis',
+  'evaluation',
   'symbolic',
   'history',
-  'resource',
+  'resources',
 ];
+
+const swmToolRoutes: Partial<Record<ToolId, string>> = {
+  bioemotional: '/dashboard/therapist/bioemotional-experiencial-profunda',
+  'tree-of-life': '/dashboard/therapist/cabala-aplicada',
+  hypotheses: '/dashboard/therapist/transgeneracional-profundo',
+  kabbalah: '/dashboard/therapist/cabala-aplicada',
+};
 
 const swmLaunchers = [
   {
@@ -86,11 +93,11 @@ const swmLaunchers = [
 ];
 
 export default function TherapistSidebar() {
-  const { panels, openPanel, focusedPanelId } = usePanelManager();
+  const { panels, openPanel } = usePanelManager();
   const [expanded, setExpanded] = useState(false);
 
   const activeToolIds = useMemo(
-    () => new Set(panels.map((panel) => panel.panelId)),
+    () => new Set(panels.map((panel) => panel.toolId)),
     [panels],
   );
 
@@ -98,7 +105,7 @@ export default function TherapistSidebar() {
     return groupOrder.map((group) => ({
       id: group,
       label: groupLabels[group],
-      tools: panelRegistry.filter((tool) => tool.type === group),
+      tools: toolRegistry.filter((tool) => tool.group === group),
     }));
   }, []);
 
@@ -142,13 +149,9 @@ export default function TherapistSidebar() {
               {group.tools.map((tool) => {
                 const Icon = toolIcons[tool.id] || Layers;
                 const isActive = activeToolIds.has(tool.id);
-                const isFocused = focusedPanelId === tool.id;
-                return (
-                  <button
-                    key={tool.id}
-                    type="button"
-                    onClick={() => openPanel(tool.id)}
-                    title={!expanded ? tool.title : undefined}
+                const swmHref = swmToolRoutes[tool.id];
+                const content = (
+                  <div
                     className={`flex items-center gap-3 w-full rounded-md px-2 py-2 text-sm transition-colors border ${
                       isActive
                         ? 'bg-gray-100 text-gray-900 border-gray-200'
@@ -158,16 +161,33 @@ export default function TherapistSidebar() {
                     <Icon className={`h-5 w-5 ${isActive ? 'text-gray-900' : 'text-gray-500'}`} />
                     {expanded && (
                       <div className="text-left">
-                        <div className="text-sm font-medium">{tool.title}</div>
+                        <div className="text-sm font-medium">{tool.label}</div>
                         {tool.description && (
                           <div className="text-[11px] text-gray-400">{tool.description}</div>
                         )}
                       </div>
                     )}
-                    {!expanded && <span className="sr-only">{tool.title}</span>}
-                    {expanded && isFocused && (
-                      <span className="ml-auto text-[10px] text-gray-500">Activo</span>
-                    )}
+                    {!expanded && <span className="sr-only">{tool.label}</span>}
+                  </div>
+                );
+
+                if (swmHref) {
+                  return (
+                    <Link key={tool.id} href={swmHref} className="block">
+                      {content}
+                    </Link>
+                  );
+                }
+
+                return (
+                  <button
+                    key={tool.id}
+                    type="button"
+                    onClick={() => openPanel(tool.id)}
+                    title={!expanded ? tool.label : undefined}
+                    className="w-full text-left"
+                  >
+                    {content}
                   </button>
                 );
               })}

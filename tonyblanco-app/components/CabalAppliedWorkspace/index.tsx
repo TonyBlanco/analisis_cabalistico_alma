@@ -1,0 +1,63 @@
+'use client';
+
+import Link from 'next/link';
+import { useState } from 'react';
+import { Sparkles } from 'lucide-react';
+import CabalAppliedSidebar from './CabalAppliedSidebar';
+import CabalAppliedVisualCore from './CabalAppliedVisualCore';
+import type { CabalSectionId } from './types';
+
+export default function CabalAppliedWorkspace() {
+  const [activeSection, setActiveSection] = useState<CabalSectionId>('tree');
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <header className="flex items-center justify-between border-b border-gray-200 bg-white px-6 py-4">
+        <div className="flex items-center gap-3">
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-gray-600">
+            <Sparkles className="h-5 w-5" />
+          </span>
+          <div>
+            <p className="text-xs uppercase tracking-wide text-gray-500">Workspace especializado</p>
+            <h1 className="text-2xl font-semibold text-gray-900">Cabala Aplicada</h1>
+          </div>
+        </div>
+        <Link
+          href="/dashboard/therapist"
+          className="text-sm font-medium text-gray-700 bg-gray-100 rounded-md px-3 py-2 hover:bg-gray-200"
+        >
+          Volver al espacio clinico
+        </Link>
+      </header>
+
+      <div className="flex">
+        <CabalAppliedSidebar activeSection={activeSection} onChange={setActiveSection} />
+        <main className="flex-1 px-6 py-6">
+          <div className="mb-4 rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700">
+            Observacional. Sin interpretacion, sin automatizacion, sin diagnostico.
+          </div>
+          <div className="flex gap-6 items-start">
+            <CabalAppliedVisualCore activeSection={activeSection} />
+            <aside className="w-72 space-y-4">
+              <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+                <h3 className="text-sm font-semibold text-gray-900">Panel interno</h3>
+                <p className="text-xs text-gray-600">
+                  Espacio reservado para notas humanas y recursos consultivos.
+                </p>
+              </div>
+              <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+                <h3 className="text-sm font-semibold text-gray-900">Seccion activa</h3>
+                <p className="text-xs text-gray-600">
+                  {activeSection === 'tree' && 'Arbol de la Vida'}
+                  {activeSection === 'gematria' && 'Gematria (placeholder)'}
+                  {activeSection === 'synthesis' && 'Sintesis humana'}
+                  {activeSection === 'resources' && 'Recursos de referencia'}
+                </p>
+              </div>
+            </aside>
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+}

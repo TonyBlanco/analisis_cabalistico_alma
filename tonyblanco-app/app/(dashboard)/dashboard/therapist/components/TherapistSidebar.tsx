@@ -1,13 +1,16 @@
 'use client';
 
+import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import {
   Activity,
   BookOpen,
   ClipboardCheck,
+  Compass,
   History,
   Layers,
+  LayoutGrid,
   NotebookPen,
   Sparkles,
   Stethoscope,
@@ -16,42 +19,78 @@ import {
   ChevronLeft,
 } from 'lucide-react';
 import { usePanelManager } from '@/components/TherapistWorkspace/PanelManagerContext';
-import { toolRegistry, type ToolGroupId, type ToolId } from '@/components/TherapistWorkspace/panelRegistry';
+import { panelRegistry } from '@/components/TherapistWorkspace/panelRegistry';
+import type { PanelId, PanelType } from '@/components/TherapistWorkspace/types';
 
-const groupLabels: Record<ToolGroupId, string> = {
-  observation: 'Observation',
-  evaluation: 'Evaluation',
-  symbolic: 'Symbolic tools',
-  history: 'History',
-  resources: 'Resources',
+const groupLabels: Record<PanelType, string> = {
+  observation: 'OBSERVACION',
+  analysis: 'EVALUACION',
+  symbolic: 'HERRAMIENTAS SIMBOLICAS',
+  history: 'HISTORIAL',
+  resource: 'RECURSOS',
 };
 
-const toolIcons: Record<ToolId, LucideIcon> = {
+const toolIcons: Record<PanelId, LucideIcon> = {
   overview: Telescope,
   notes: NotebookPen,
-  tests: ClipboardCheck,
+  assignedTests: ClipboardCheck,
   bioemotional: Activity,
-  'tree-of-life': Layers,
-  hypotheses: Stethoscope,
+  treeOfLife: Layers,
+  transgenerational: Stethoscope,
   history: History,
   kabbalah: Sparkles,
   resources: BookOpen,
 };
 
-const groupOrder: ToolGroupId[] = [
+const groupOrder: PanelType[] = [
   'observation',
-  'evaluation',
+  'analysis',
   'symbolic',
   'history',
-  'resources',
+  'resource',
+];
+
+const swmLaunchers = [
+  {
+    id: 'bioemotional-experiencial',
+    title: 'Bio-Emocion Experiencial',
+    description: 'Workspace profundo de observacion.',
+    href: '/dashboard/therapist/bioemotional-experiencial-profunda',
+    icon: LayoutGrid,
+    enabled: true,
+  },
+  {
+    id: 'cabala-aplicada',
+    title: 'Cabala Aplicada',
+    description: 'Workspace simbolico observacional.',
+    href: '/dashboard/therapist/cabala-aplicada',
+    icon: Sparkles,
+    enabled: true,
+  },
+  {
+    id: 'transgeneracional-profundo',
+    title: 'Transgeneracional Profundo',
+    description: 'Workspace relacional sin inferencia.',
+    href: '/dashboard/therapist/transgeneracional-profundo',
+    icon: Stethoscope,
+    enabled: true,
+  },
+  {
+    id: 'astrologia-tarot',
+    title: 'Astrologia | Tarot',
+    description: 'Workspace simbolico observacional.',
+    href: '/dashboard/therapist/astrologia-tarot',
+    icon: Compass,
+    enabled: true,
+  },
 ];
 
 export default function TherapistSidebar() {
-  const { panels, togglePanel } = usePanelManager();
+  const { panels, openPanel, focusedPanelId } = usePanelManager();
   const [expanded, setExpanded] = useState(false);
 
   const activeToolIds = useMemo(
-    () => new Set(panels.map((panel) => panel.toolId)),
+    () => new Set(panels.map((panel) => panel.panelId)),
     [panels],
   );
 
@@ -59,7 +98,7 @@ export default function TherapistSidebar() {
     return groupOrder.map((group) => ({
       id: group,
       label: groupLabels[group],
-      tools: toolRegistry.filter((tool) => tool.group === group),
+      tools: panelRegistry.filter((tool) => tool.type === group),
     }));
   }, []);
 
@@ -76,8 +115,8 @@ export default function TherapistSidebar() {
           </div>
           {expanded && (
             <div>
-              <p className="text-xs font-semibold text-gray-800">Workspace</p>
-              <p className="text-[11px] text-gray-500">Control panel</p>
+              <p className="text-xs font-semibold text-gray-800">Espacio clinico</p>
+              <p className="text-[11px] text-gray-500">Panel de control</p>
             </div>
           )}
         </div>
@@ -85,7 +124,7 @@ export default function TherapistSidebar() {
           type="button"
           onClick={() => setExpanded((prev) => !prev)}
           className="p-1 text-gray-500 hover:text-gray-700"
-          aria-label={expanded ? 'Collapse sidebar' : 'Expand sidebar'}
+          aria-label={expanded ? 'Colapsar panel' : 'Expandir panel'}
         >
           {expanded ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
         </button>
@@ -101,14 +140,15 @@ export default function TherapistSidebar() {
             )}
             <div className="space-y-1">
               {group.tools.map((tool) => {
-                const Icon = toolIcons[tool.id];
+                const Icon = toolIcons[tool.id] || Layers;
                 const isActive = activeToolIds.has(tool.id);
+                const isFocused = focusedPanelId === tool.id;
                 return (
                   <button
                     key={tool.id}
                     type="button"
-                    onClick={() => togglePanel(tool.id)}
-                    title={!expanded ? tool.label : undefined}
+                    onClick={() => openPanel(tool.id)}
+                    title={!expanded ? tool.title : undefined}
                     className={`flex items-center gap-3 w-full rounded-md px-2 py-2 text-sm transition-colors border ${
                       isActive
                         ? 'bg-gray-100 text-gray-900 border-gray-200'
@@ -118,23 +158,81 @@ export default function TherapistSidebar() {
                     <Icon className={`h-5 w-5 ${isActive ? 'text-gray-900' : 'text-gray-500'}`} />
                     {expanded && (
                       <div className="text-left">
-                        <div className="text-sm font-medium">{tool.label}</div>
-                        <div className="text-[11px] text-gray-400">{tool.description}</div>
+                        <div className="text-sm font-medium">{tool.title}</div>
+                        {tool.description && (
+                          <div className="text-[11px] text-gray-400">{tool.description}</div>
+                        )}
                       </div>
                     )}
-                    {!expanded && <span className="sr-only">{tool.label}</span>}
+                    {!expanded && <span className="sr-only">{tool.title}</span>}
+                    {expanded && isFocused && (
+                      <span className="ml-auto text-[10px] text-gray-500">Activo</span>
+                    )}
                   </button>
                 );
               })}
             </div>
           </div>
         ))}
+        <div className="space-y-2 pt-2">
+          {expanded && (
+            <div className="px-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400">
+              Workspaces
+            </div>
+          )}
+          <div className="space-y-1">
+            {swmLaunchers.map((launcher) => {
+              const Icon = launcher.icon;
+              const content = (
+                <div
+                  className={`flex items-center gap-3 w-full rounded-md px-2 py-2 text-sm transition-colors border ${
+                    launcher.enabled
+                      ? 'border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      : 'border-transparent text-gray-400 bg-gray-50 cursor-not-allowed'
+                  }`}
+                >
+                  <Icon className={`h-5 w-5 ${launcher.enabled ? 'text-gray-500' : 'text-gray-400'}`} />
+                  {expanded && (
+                    <div className="text-left">
+                      <div className="text-sm font-medium">{launcher.title}</div>
+                      <div className="text-[11px] text-gray-400">{launcher.description}</div>
+                    </div>
+                  )}
+                  {!expanded && <span className="sr-only">{launcher.title}</span>}
+                  {expanded && (
+                    <span
+                      className={`ml-auto text-[10px] ${
+                        launcher.enabled ? 'text-emerald-600' : 'text-gray-400'
+                      }`}
+                    >
+                      {launcher.enabled ? 'Disponible' : 'Proximamente'}
+                    </span>
+                  )}
+                </div>
+              );
+
+              if (!launcher.enabled) {
+                return (
+                  <div key={launcher.id} aria-disabled="true">
+                    {content}
+                  </div>
+                );
+              }
+
+              return (
+                <Link key={launcher.id} href={launcher.href} className="block">
+                  {content}
+                </Link>
+              );
+            })}
+          </div>
+        </div>
       </nav>
 
       <div className="p-3 border-t border-gray-200">
         <div className="flex items-center gap-2 text-[11px] text-gray-500">
           <span className="h-2 w-2 rounded-full bg-emerald-500" />
-          {expanded ? 'Workspace active' : 'Active'}
+          {expanded ? 'Espacio clinico activo' : 'Activo'}
         </div>
       </div>
     </aside>

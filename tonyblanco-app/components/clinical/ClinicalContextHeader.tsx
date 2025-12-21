@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { getActivePatient } from '@/lib/active-patient';
+import { getPatientProfileSummary, PatientProfileSummary } from '@/lib/patient-api';
 
 interface ActivePatientSummary {
   id: number;
@@ -34,22 +35,41 @@ export default function ClinicalContextHeader() {
   const [activePatient, setActivePatient] = useState<ActivePatientSummary | null>(
     null
   );
+  const [profile, setProfile] = useState<PatientProfileSummary | null>(null);
 
   useEffect(() => {
     const load = () => {
       const patient = getActivePatient();
       setActivePatient(patient);
+      setProfile(null);
+      if (patient) {
+        getPatientProfileSummary(patient.id)
+          .then((data) => setProfile(data))
+          .catch(() => setProfile(null));
+      }
     };
 
     load();
+    window.addEventListener('activePatientChanged', load);
     window.addEventListener('storage', load);
-    return () => window.removeEventListener('storage', load);
+    return () => {
+      window.removeEventListener('activePatientChanged', load);
+      window.removeEventListener('storage', load);
+    };
   }, []);
 
   const workspaceLabel = useMemo(
     () => formatWorkspaceLabel(pathname),
     [pathname]
   );
+
+  const birthDateLabel = useMemo(() => {
+    const birthDate = profile?.birth_date;
+    if (!birthDate) return '—';
+    const parsed = new Date(birthDate);
+    if (Number.isNaN(parsed.getTime())) return '—';
+    return parsed.toLocaleDateString('es-ES');
+  }, [profile?.birth_date]);
 
   return (
     <div className="sticky top-0 z-30 border-b border-gray-200 bg-white/95 backdrop-blur">
@@ -65,7 +85,7 @@ export default function ClinicalContextHeader() {
             {activePatient?.name || 'Paciente no seleccionado'}
           </span>
           <span>ID: {activePatient?.id ?? '—'}</span>
-          <span>Fecha de nacimiento: —</span>
+          <span>Fecha de nacimiento: {birthDateLabel}</span>
         </div>
       </div>
     </div>

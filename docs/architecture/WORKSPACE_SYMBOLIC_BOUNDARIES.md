@@ -6,6 +6,12 @@ No se mezclan visualizaciones, cálculos ni narrativas entre workspaces.
 
 ---
 
+## Contexto Clinico Global
+Todos los workspaces se muestran bajo contexto clinico con paciente activo.
+Ningun workspace opera sin conciencia del paciente seleccionado.
+
+---
+
 ## Tarot Workspace
 **Propósito:** Exploración simbólica a través de cartas.
 

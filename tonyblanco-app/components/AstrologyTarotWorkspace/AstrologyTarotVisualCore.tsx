@@ -1,7 +1,7 @@
 'use client';
 
 import type { AstrologyTarotSectionId, TarotSystemId } from './types';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { TarotDeck } from '@/components/TarotCard';
 import type { TarotCardData } from '@/components/TarotCard/TarotCard.types';
 import { ARCANOS_MAYORES } from '@/components/BodySoulVisualization/plugins/tarot/tarot.logic';
@@ -14,6 +14,7 @@ import { GOLDEN_DAWN_MAJOR_ARCANA } from '../../../src/symbolic/tarot/decks/gold
 import { BOTA_MAJOR_ARCANA } from '../../../src/symbolic/tarot/decks/bota';
 import { HERMETIC_MAJOR_ARCANA } from '../../../src/symbolic/tarot/decks/hermetic';
 import { SEPHIROTH_MAJOR_ARCANA } from '../../../src/symbolic/tarot/decks/sephiroth';
+import { addSymbolicTimelineEvent } from '@/components/SymbolicTimeline';
 
 interface AstrologyTarotVisualCoreProps {
   activeSection: AstrologyTarotSectionId;
@@ -93,6 +94,7 @@ export default function AstrologyTarotVisualCore({
   >('exploratorio');
   const [intention, setIntention] = useState('');
   const [draft, setDraft] = useState<Record<string, unknown> | null>(null);
+  const lastSessionKey = useRef<string | null>(null);
 
   const cabalaReference = useMemo(() => {
     if (!selectedCard?.sefirahId) {
@@ -200,9 +202,115 @@ export default function AstrologyTarotVisualCore({
     if (process.env.NODE_ENV !== 'production') {
       console.log('SymbolicAnalysisDraft', draftPayload);
     }
+
+    if (!patientId || !selectedCard) {
+      return;
+    }
+
+    addSymbolicTimelineEvent({
+      patientId,
+      date: new Date().toISOString(),
+      workspace: 'tarot',
+      system: selectedSystem ?? 'thoth',
+      symbols: {
+        cards: [selectedCard.id],
+      },
+      notes: intention || undefined,
+      source: 'ai-prep',
+    });
   };
 
   const displayDate = new Date().toLocaleDateString('es-ES');
+
+  const resolveSystemMapping = () => {
+    switch (selectedSystem) {
+      case 'thoth':
+        return thothMapping
+          ? {
+              letters: [thothMapping.hebrewLetter],
+              sefirot: thothMapping.sefirot,
+              paths: [thothMapping.path],
+            }
+          : null;
+      case 'golden-dawn':
+        return goldenDawnMapping
+          ? {
+              letters: [goldenDawnMapping.hebrewLetter],
+              sefirot: goldenDawnMapping.sefirot,
+              paths: [goldenDawnMapping.path],
+            }
+          : null;
+      case 'bota':
+        return botaMapping
+          ? {
+              letters: [botaMapping.hebrewLetter],
+              sefirot: botaMapping.sefirot,
+              paths: [botaMapping.path],
+            }
+          : null;
+      case 'hermetic':
+        return hermeticMapping
+          ? {
+              letters: [hermeticMapping.hebrewLetter],
+              sefirot: hermeticMapping.sefirot,
+              paths: [hermeticMapping.path],
+            }
+          : null;
+      case 'sephiroth':
+        return sephirothMapping
+          ? {
+              letters: [sephirothMapping.hebrewLetter],
+              sefirot: sephirothMapping.sefirot,
+              paths: [sephirothMapping.path],
+            }
+          : null;
+      default:
+        return null;
+    }
+  };
+
+  useEffect(() => {
+    if (!patientId || !selectedCard) {
+      return;
+    }
+
+    if (activeSection === 'tarot-ai-draft') {
+      return;
+    }
+
+    const systemKey = selectedSystem ?? 'thoth';
+    const sessionKey = `${patientId}:${systemKey}:${selectedCard.id}:${activeSection}`;
+    if (lastSessionKey.current === sessionKey) {
+      return;
+    }
+
+    const mapping = resolveSystemMapping();
+    addSymbolicTimelineEvent({
+      patientId,
+      date: new Date().toISOString(),
+      workspace: 'tarot',
+      system: systemKey,
+      symbols: {
+        cards: [selectedCard.id],
+        letters: mapping?.letters,
+        sefirot: mapping?.sefirot,
+        paths: mapping?.paths,
+      },
+      source: 'manual',
+    });
+
+    lastSessionKey.current = sessionKey;
+  }, [
+    activeSection,
+    patientId,
+    selectedCard,
+    selectedSystem,
+    thothMapping,
+    goldenDawnMapping,
+    botaMapping,
+    hermeticMapping,
+    sephirothMapping,
+  ]);
 
   return (
     <section className="flex-1 bg-white border border-gray-200 rounded-xl p-6 shadow-sm">

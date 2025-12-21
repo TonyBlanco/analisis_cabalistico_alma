@@ -50,6 +50,12 @@ Fase 0 de preparacion, sin ejecucion de IA.
 Recopila contexto, fuentes simbolicas e intencion.
 Los datos quedan listos para agentes futuros.
 
+## Emision de Eventos Simbolicos
+El workspace emite eventos al timeline simbolico en dos casos:
+- Seleccion de cartas en sesiones manuales.
+- Envio del borrador de analisis IA.
+La linea temporal permanece desacoplada y sin montaje visual.
+
 ## Capa Cabalistica
 Tarot consume datos simbolicos desde `src/symbolic` en modo solo lectura.
 La capa es observacional y no agrega interpretacion.

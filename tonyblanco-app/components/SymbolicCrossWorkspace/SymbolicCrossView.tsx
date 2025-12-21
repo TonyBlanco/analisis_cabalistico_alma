@@ -1,6 +1,6 @@
 'use client';
 
-import type { SymbolicCrossDataset } from './types';
+import type { SymbolicCrossDataset, SymbolicCrossEvent } from './types';
 import { deriveCrossPatterns, deriveSystemDominance, deriveTemporalAlignment } from './rules';
 import CrossPatterns from './sections/CrossPatterns';
 import TemporalAlignmentSection from './sections/TemporalAlignment';
@@ -9,18 +9,20 @@ import Notes from './sections/Notes';
 
 interface SymbolicCrossViewProps {
   dataset: SymbolicCrossDataset;
+  events?: SymbolicCrossEvent[];
 }
 
-export default function SymbolicCrossView({ dataset }: SymbolicCrossViewProps) {
+export default function SymbolicCrossView({ dataset, events }: SymbolicCrossViewProps) {
+  const activeEvents = events ?? dataset.events;
   const patterns = dataset.patterns.length
     ? dataset.patterns
-    : deriveCrossPatterns(dataset.events);
+    : deriveCrossPatterns(activeEvents, dataset.windowDays);
   const temporal = dataset.temporal.length
     ? dataset.temporal
-    : deriveTemporalAlignment(dataset.events);
+    : deriveTemporalAlignment(activeEvents, dataset.windowDays);
   const dominance = dataset.dominance.length
     ? dataset.dominance
-    : deriveSystemDominance(dataset.events);
+    : deriveSystemDominance(activeEvents);
 
   return (
     <div className="space-y-4">
@@ -33,7 +35,7 @@ export default function SymbolicCrossView({ dataset }: SymbolicCrossViewProps) {
             Paciente: {dataset.patientId}
           </span>
           <span className="rounded-full bg-gray-100 px-2 py-1">
-            Eventos: {dataset.events.length}
+            Eventos: {activeEvents.length}
           </span>
         </div>
       </div>

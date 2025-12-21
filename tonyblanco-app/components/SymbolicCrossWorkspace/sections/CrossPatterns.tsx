@@ -26,7 +26,16 @@ export default function CrossPatterns({ patterns }: CrossPatternsProps) {
                 Sistemas: {pattern.systems.join(', ')}
               </div>
               <div className="text-[11px] text-gray-500">
-                Evidencia: {pattern.evidence.join(' | ')}
+                Ventana: {pattern.window}
+              </div>
+              <div className="text-[11px] text-gray-500">
+                Evidencia:{' '}
+                {pattern.evidence
+                  .map(
+                    (item) =>
+                      `${item.system} @ ${item.date.split('T')[0]}: ${item.symbols.join(', ')}`
+                  )
+                  .join(' | ')}
               </div>
             </li>
           ))}

@@ -28,7 +28,13 @@ export default function TemporalAlignmentSection({
                 Sistemas: {alignment.systems.join(', ')}
               </div>
               <div className="text-[11px] text-gray-500">
-                Observaciones: {alignment.observations.join(' | ')}
+                Observaciones:{' '}
+                {alignment.events
+                  .map(
+                    (item) =>
+                      `${item.system} @ ${item.date.split('T')[0]}: ${item.symbols.join(', ')}`
+                  )
+                  .join(' | ')}
               </div>
             </li>
           ))}

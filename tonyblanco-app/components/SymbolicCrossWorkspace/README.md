@@ -12,5 +12,10 @@ Scope
 
 Rules
 - Cross patterns are derived from explicit event overlaps.
-- Temporal alignment is based on shared 24h windows.
+- Temporal alignment is based on explicit window rules (e.g., +/- N days).
 - System dominance is a proportional summary of events.
+
+Notes
+- Patterns are distinct from interpretation.
+- Outputs are descriptive and clinically neutral.
+- This workspace can feed future AI safely via explicit rules.

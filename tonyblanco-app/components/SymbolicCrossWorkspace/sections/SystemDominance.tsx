@@ -21,7 +21,7 @@ export default function SystemDominanceSection({
             <div className="flex items-center justify-between">
               <span className="font-medium text-gray-700">{entry.system}</span>
               <span className="text-[11px] text-gray-500">
-                {(entry.ratio * 100).toFixed(0)}%
+                {(entry.ratio * 100).toFixed(0)}% · {entry.count}
               </span>
             </div>
             <div className="h-1 w-full rounded-full bg-gray-100">

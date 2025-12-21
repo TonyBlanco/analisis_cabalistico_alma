@@ -5,4 +5,4 @@ export type AstrologyTarotSectionId =
   | 'tarot-correspondences'
   | 'tarot-deck-view';
 
-export type TarotSystemId = 'thoth' | 'golden-dawn';
+export type TarotSystemId = 'thoth' | 'golden-dawn' | 'bota';

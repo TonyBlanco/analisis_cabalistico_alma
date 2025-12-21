@@ -30,6 +30,11 @@ Golden Dawn Tarot opera en paralelo como sistema simbolico de referencia.
 Se utiliza para comparativa simbolica sin interpretacion.
 Preparado para futuras capas de IA con gobernanza.
 
+## B.O.T.A. Tarot
+Sistema orientado a estudio cabalistico estructurado.
+Profundidad pedagogica y terapeutica sin interpretacion automatica.
+Datos solo de correspondencias, preparados para IA asistida.
+
 ## Capa Cabalistica
 Tarot consume datos simbolicos desde `src/symbolic` en modo solo lectura.
 La capa es observacional y no agrega interpretacion.

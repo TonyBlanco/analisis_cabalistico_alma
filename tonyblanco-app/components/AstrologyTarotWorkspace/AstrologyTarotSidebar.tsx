@@ -81,9 +81,11 @@ const cabalisticSystems: Array<{
     status: 'Sistema simbolico',
   },
   {
+    id: 'bota',
     label: 'B.O.T.A. Tarot',
     description: 'Estudio cabalistico estructurado',
     Icon: DocumentTextIcon,
+    status: 'Sistema simbolico (estudio cabalistico)',
   },
   {
     label: 'Tarot of the Sephiroth',

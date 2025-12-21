@@ -1,0 +1,26 @@
+import type { HebrewLetter } from '../correspondences/types';
+
+export const HEBREW_LETTERS: HebrewLetter[] = [
+  { id: 'aleph', name: 'Aleph', transliteration: 'Aleph', gematria: 1 },
+  { id: 'beth', name: 'Beth', transliteration: 'Beth', gematria: 2 },
+  { id: 'gimel', name: 'Gimel', transliteration: 'Gimel', gematria: 3 },
+  { id: 'daleth', name: 'Daleth', transliteration: 'Daleth', gematria: 4 },
+  { id: 'heh', name: 'Heh', transliteration: 'Heh', gematria: 5 },
+  { id: 'vav', name: 'Vav', transliteration: 'Vav', gematria: 6 },
+  { id: 'zayin', name: 'Zayin', transliteration: 'Zayin', gematria: 7 },
+  { id: 'cheth', name: 'Cheth', transliteration: 'Cheth', gematria: 8 },
+  { id: 'teth', name: 'Teth', transliteration: 'Teth', gematria: 9 },
+  { id: 'yod', name: 'Yod', transliteration: 'Yod', gematria: 10 },
+  { id: 'kaph', name: 'Kaph', transliteration: 'Kaph', gematria: 20 },
+  { id: 'lamed', name: 'Lamed', transliteration: 'Lamed', gematria: 30 },
+  { id: 'mem', name: 'Mem', transliteration: 'Mem', gematria: 40 },
+  { id: 'nun', name: 'Nun', transliteration: 'Nun', gematria: 50 },
+  { id: 'samekh', name: 'Samekh', transliteration: 'Samekh', gematria: 60 },
+  { id: 'ayin', name: 'Ayin', transliteration: 'Ayin', gematria: 70 },
+  { id: 'pe', name: 'Pe', transliteration: 'Pe', gematria: 80 },
+  { id: 'tzaddi', name: 'Tzaddi', transliteration: 'Tzaddi', gematria: 90 },
+  { id: 'qoph', name: 'Qoph', transliteration: 'Qoph', gematria: 100 },
+  { id: 'resh', name: 'Resh', transliteration: 'Resh', gematria: 200 },
+  { id: 'shin', name: 'Shin', transliteration: 'Shin', gematria: 300 },
+  { id: 'tav', name: 'Tav', transliteration: 'Tav', gematria: 400 }
+];

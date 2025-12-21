@@ -1,0 +1,26 @@
+import type { TreePath } from '../correspondences/types';
+
+export const TREE_PATHS: TreePath[] = [
+  { id: 'kether-chokmah', from: 'kether', to: 'chokmah', letterId: 'aleph' },
+  { id: 'kether-binah', from: 'kether', to: 'binah', letterId: 'beth' },
+  { id: 'kether-tiferet', from: 'kether', to: 'tiferet', letterId: 'gimel' },
+  { id: 'chokmah-binah', from: 'chokmah', to: 'binah', letterId: 'daleth' },
+  { id: 'chokmah-tiferet', from: 'chokmah', to: 'tiferet', letterId: 'heh' },
+  { id: 'chokmah-chesed', from: 'chokmah', to: 'chesed', letterId: 'vav' },
+  { id: 'binah-tiferet', from: 'binah', to: 'tiferet', letterId: 'zayin' },
+  { id: 'binah-gevurah', from: 'binah', to: 'gevurah', letterId: 'cheth' },
+  { id: 'chesed-gevurah', from: 'chesed', to: 'gevurah', letterId: 'teth' },
+  { id: 'chesed-tiferet', from: 'chesed', to: 'tiferet', letterId: 'yod' },
+  { id: 'chesed-netzach', from: 'chesed', to: 'netzach', letterId: 'kaph' },
+  { id: 'gevurah-tiferet', from: 'gevurah', to: 'tiferet', letterId: 'lamed' },
+  { id: 'gevurah-hod', from: 'gevurah', to: 'hod', letterId: 'mem' },
+  { id: 'tiferet-netzach', from: 'tiferet', to: 'netzach', letterId: 'nun' },
+  { id: 'tiferet-yesod', from: 'tiferet', to: 'yesod', letterId: 'samekh' },
+  { id: 'tiferet-hod', from: 'tiferet', to: 'hod', letterId: 'ayin' },
+  { id: 'netzach-hod', from: 'netzach', to: 'hod', letterId: 'pe' },
+  { id: 'netzach-yesod', from: 'netzach', to: 'yesod', letterId: 'tzaddi' },
+  { id: 'netzach-malkuth', from: 'netzach', to: 'malkuth', letterId: 'qoph' },
+  { id: 'hod-yesod', from: 'hod', to: 'yesod', letterId: 'resh' },
+  { id: 'hod-malkuth', from: 'hod', to: 'malkuth', letterId: 'shin' },
+  { id: 'yesod-malkuth', from: 'yesod', to: 'malkuth', letterId: 'tav' }
+];

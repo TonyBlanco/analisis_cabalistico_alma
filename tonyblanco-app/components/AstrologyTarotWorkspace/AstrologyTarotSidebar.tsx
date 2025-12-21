@@ -74,9 +74,11 @@ const cabalisticSystems: Array<{
     status: 'Activo (Sistema simbolico)',
   },
   {
+    id: 'golden-dawn',
     label: 'Golden Dawn Tarot',
     description: 'Sistema cabalistico hermetico completo',
     Icon: CubeTransparentIcon,
+    status: 'Sistema simbolico',
   },
   {
     label: 'B.O.T.A. Tarot',

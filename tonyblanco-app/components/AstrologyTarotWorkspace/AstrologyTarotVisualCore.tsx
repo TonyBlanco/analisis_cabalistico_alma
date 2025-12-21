@@ -10,6 +10,7 @@ import { SEFIROT_DEFINITIONS } from '../../../src/symbolic/data/sefirot/definiti
 import { SEFIROT_MEANINGS } from '../../../src/symbolic/data/sefirot/meanings';
 import { SEFIROT_CORRESPONDENCES } from '../../../src/symbolic/data/sefirot/correspondences';
 import { THOTH_MAJOR_ARCANA } from '../../../src/symbolic/tarot/decks/thoth';
+import { GOLDEN_DAWN_MAJOR_ARCANA } from '../../../src/symbolic/tarot/decks/golden-dawn';
 
 interface AstrologyTarotVisualCoreProps {
   activeSection: AstrologyTarotSectionId;
@@ -110,6 +111,18 @@ export default function AstrologyTarotVisualCore({
     }
     return THOTH_MAJOR_ARCANA.find(
       (entry) => entry.arcanaId === selectedCard.id
+    );
+  }, [selectedCard, selectedSystem]);
+
+  const goldenDawnMapping = useMemo(() => {
+    if (selectedSystem !== 'golden-dawn' || !selectedCard) {
+      return null;
+    }
+    if (typeof selectedCard.number !== 'number') {
+      return null;
+    }
+    return GOLDEN_DAWN_MAJOR_ARCANA.find(
+      (entry) => entry.number === selectedCard.number
     );
   }, [selectedCard, selectedSystem]);
 
@@ -228,6 +241,46 @@ export default function AstrologyTarotVisualCore({
                 <span>
                   {thothMapping?.sefirot?.length
                     ? thothMapping.sefirot.join(' - ')
+                    : 'Dato simbolico no disponible'}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {selectedSystem === 'golden-dawn' && (
+          <div className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-700">
+            <div className="text-xs uppercase tracking-wide text-gray-500">
+              Sistema Golden Dawn Tarot
+            </div>
+            <div className="mt-2 grid gap-2">
+              <div>
+                <span className="font-medium">Arcano:</span>{' '}
+                <span>{selectedCard?.name || 'Dato simbolico no disponible'}</span>
+              </div>
+              <div>
+                <span className="font-medium">Letra hebrea:</span>{' '}
+                <span>
+                  {goldenDawnMapping?.hebrewLetter || 'Dato simbolico no disponible'}
+                </span>
+              </div>
+              <div>
+                <span className="font-medium">Gematria:</span>{' '}
+                <span>
+                  {typeof goldenDawnMapping?.gematria === 'number'
+                    ? goldenDawnMapping.gematria
+                    : 'Dato simbolico no disponible'}
+                </span>
+              </div>
+              <div>
+                <span className="font-medium">Sendero:</span>{' '}
+                <span>{goldenDawnMapping?.path || 'Dato simbolico no disponible'}</span>
+              </div>
+              <div>
+                <span className="font-medium">Sefirot relacionadas:</span>{' '}
+                <span>
+                  {goldenDawnMapping?.sefirot?.length
+                    ? goldenDawnMapping.sefirot.join(' - ')
                     : 'Dato simbolico no disponible'}
                 </span>
               </div>

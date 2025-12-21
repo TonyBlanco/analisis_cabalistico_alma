@@ -25,6 +25,11 @@ Thoth Tarot opera como capa de datos simbolicos, sin interpretacion ni prediccio
 Se usa como referencia profesional para analisis holistico futuro.
 No altera el comportamiento visual del workspace.
 
+## Golden Dawn Tarot
+Golden Dawn Tarot opera en paralelo como sistema simbolico de referencia.
+Se utiliza para comparativa simbolica sin interpretacion.
+Preparado para futuras capas de IA con gobernanza.
+
 ## Capa Cabalistica
 Tarot consume datos simbolicos desde `src/symbolic` en modo solo lectura.
 La capa es observacional y no agrega interpretacion.

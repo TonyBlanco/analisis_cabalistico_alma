@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { Star } from 'lucide-react';
 import AstrologyTarotSidebar from './AstrologyTarotSidebar';
 import AstrologyTarotVisualCore from './AstrologyTarotVisualCore';
-import type { AstrologyTarotSectionId } from './types';
+import type { AstrologyTarotSectionId, TarotSystemId } from './types';
 
 interface AstrologyTarotWorkspaceProps {
   patientId?: string;
@@ -16,7 +16,17 @@ export default function AstrologyTarotWorkspace({
   patientId,
   patientBirthDate,
 }: AstrologyTarotWorkspaceProps) {
-  const [activeSection, setActiveSection] = useState<AstrologyTarotSectionId>('visual');
+  const [activeSection, setActiveSection] =
+    useState<AstrologyTarotSectionId>('tarot-natal');
+  const [selectedSystem, setSelectedSystem] = useState<TarotSystemId>('thoth');
+
+  const sectionLabelMap: Record<AstrologyTarotSectionId, string> = {
+    'tarot-natal': 'Carta Natal',
+    'tarot-tree-spread': 'Tirada del Arbol',
+    'tarot-free-spread': 'Tirada Libre',
+    'tarot-correspondences': 'Correspondencias',
+    'tarot-deck-view': 'Visualizar Mazo',
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -27,7 +37,7 @@ export default function AstrologyTarotWorkspace({
           </span>
           <div>
             <p className="text-xs uppercase tracking-wide text-gray-500">Workspace simbolico</p>
-            <h1 className="text-2xl font-semibold text-gray-900">Astrologia | Tarot</h1>
+            <h1 className="text-2xl font-semibold text-gray-900">Tarot</h1>
           </div>
         </div>
         <Link
@@ -39,7 +49,12 @@ export default function AstrologyTarotWorkspace({
       </header>
 
       <div className="flex">
-        <AstrologyTarotSidebar activeSection={activeSection} onChange={setActiveSection} />
+        <AstrologyTarotSidebar
+          activeSection={activeSection}
+          onChange={setActiveSection}
+          selectedSystem={selectedSystem}
+          onSelectSystem={setSelectedSystem}
+        />
         <main className="flex-1 px-6 py-6">
           <div className="mb-4 rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700">
             Observacional. Sin interpretacion, sin prediccion, sin automatizacion.
@@ -49,6 +64,7 @@ export default function AstrologyTarotWorkspace({
               activeSection={activeSection}
               patientId={patientId}
               patientBirthDate={patientBirthDate}
+              selectedSystem={selectedSystem}
             />
             <aside className="w-72 space-y-4">
               <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
@@ -60,9 +76,7 @@ export default function AstrologyTarotWorkspace({
               <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
                 <h3 className="text-sm font-semibold text-gray-900">Seccion activa</h3>
                 <p className="text-xs text-gray-600">
-                  {activeSection === 'visual' && 'Visual principal'}
-                  {activeSection === 'reading' && 'Lectura consultiva'}
-                  {activeSection === 'synthesis' && 'Sintesis humana'}
+                  {sectionLabelMap[activeSection]}
                 </p>
               </div>
             </aside>

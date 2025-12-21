@@ -1,6 +1,6 @@
 'use client';
 
-import type { AstrologyTarotSectionId } from './types';
+import type { AstrologyTarotSectionId, TarotSystemId } from './types';
 import { useMemo, useState } from 'react';
 import { TarotDeck } from '@/components/TarotCard';
 import type { TarotCardData } from '@/components/TarotCard/TarotCard.types';
@@ -9,6 +9,7 @@ import type { PatientContext } from '@/components/BodySoulVisualization/types';
 import { SEFIROT_DEFINITIONS } from '../../../src/symbolic/data/sefirot/definitions';
 import { SEFIROT_MEANINGS } from '../../../src/symbolic/data/sefirot/meanings';
 import { SEFIROT_CORRESPONDENCES } from '../../../src/symbolic/data/sefirot/correspondences';
+import { THOTH_MAJOR_ARCANA } from '../../../src/symbolic/tarot/decks/thoth';
 
 interface AstrologyTarotVisualCoreProps {
   activeSection: AstrologyTarotSectionId;
@@ -18,6 +19,7 @@ interface AstrologyTarotVisualCoreProps {
   onSefirahHighlight?: (sefirahId: string | null) => void;
   onReadingComplete?: (reading: unknown) => void;
   onCardSelect?: (card: unknown) => void;
+  selectedSystem?: TarotSystemId | null;
 }
 
 export default function AstrologyTarotVisualCore({
@@ -28,6 +30,7 @@ export default function AstrologyTarotVisualCore({
   onSefirahHighlight,
   onReadingComplete,
   onCardSelect,
+  selectedSystem,
 }: AstrologyTarotVisualCoreProps) {
   const deckCards = useMemo<TarotCardData[]>(
     () =>
@@ -100,6 +103,15 @@ export default function AstrologyTarotVisualCore({
   const letterName = null;
   const gematriaValue = null;
   const pathLabel = null;
+
+  const thothMapping = useMemo(() => {
+    if (selectedSystem !== 'thoth' || !selectedCard) {
+      return null;
+    }
+    return THOTH_MAJOR_ARCANA.find(
+      (entry) => entry.arcanaId === selectedCard.id
+    );
+  }, [selectedCard, selectedSystem]);
 
   return (
     <section className="flex-1 bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
@@ -181,6 +193,44 @@ export default function AstrologyTarotVisualCore({
                   Correspondencia simbolica no disponible para esta carta.
                 </div>
               )}
+            </div>
+          </div>
+        )}
+
+        {selectedSystem === 'thoth' && (
+          <div className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-700">
+            <div className="text-xs uppercase tracking-wide text-gray-500">
+              Sistema Thoth Tarot
+            </div>
+            <div className="mt-2 grid gap-2">
+              <div>
+                <span className="font-medium">Arcano:</span>{' '}
+                <span>{selectedCard?.name || 'Dato simbolico no disponible'}</span>
+              </div>
+              <div>
+                <span className="font-medium">Letra hebrea:</span>{' '}
+                <span>{thothMapping?.hebrewLetter || 'Dato simbolico no disponible'}</span>
+              </div>
+              <div>
+                <span className="font-medium">Gematria:</span>{' '}
+                <span>
+                  {typeof thothMapping?.gematria === 'number'
+                    ? thothMapping.gematria
+                    : 'Dato simbolico no disponible'}
+                </span>
+              </div>
+              <div>
+                <span className="font-medium">Sendero:</span>{' '}
+                <span>{thothMapping?.path || 'Dato simbolico no disponible'}</span>
+              </div>
+              <div>
+                <span className="font-medium">Sefirot relacionadas:</span>{' '}
+                <span>
+                  {thothMapping?.sefirot?.length
+                    ? thothMapping.sefirot.join(' - ')
+                    : 'Dato simbolico no disponible'}
+                </span>
+              </div>
             </div>
           </div>
         )}

@@ -20,6 +20,11 @@ Estos sistemas son referencias simbolicas, no mazos visuales.
 Se mantienen como placeholders para uso profesional futuro.
 La iconografia y el arte pueden vivir en proyectos separados.
 
+## Thoth Tarot como Sistema Simbolico
+Thoth Tarot opera como capa de datos simbolicos, sin interpretacion ni prediccion.
+Se usa como referencia profesional para analisis holistico futuro.
+No altera el comportamiento visual del workspace.
+
 ## Capa Cabalistica
 Tarot consume datos simbolicos desde `src/symbolic` en modo solo lectura.
 La capa es observacional y no agrega interpretacion.

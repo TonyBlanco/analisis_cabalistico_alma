@@ -1,6 +1,6 @@
 'use client';
 
-import type { AstrologyTarotSectionId } from './types';
+import type { AstrologyTarotSectionId, TarotSystemId } from './types';
 import {
   CalendarDaysIcon,
   Squares2X2Icon,
@@ -17,6 +17,8 @@ import {
 interface AstrologyTarotSidebarProps {
   activeSection: AstrologyTarotSectionId;
   onChange: (section: AstrologyTarotSectionId) => void;
+  selectedSystem?: TarotSystemId | null;
+  onSelectSystem?: (system: TarotSystemId) => void;
 }
 
 const sections: Array<{
@@ -58,14 +60,18 @@ const sections: Array<{
 ];
 
 const cabalisticSystems: Array<{
+  id?: TarotSystemId;
   label: string;
   description: string;
   Icon: typeof CalendarDaysIcon;
+  status?: string;
 }> = [
   {
+    id: 'thoth',
     label: 'Thoth Tarot (Crowley)',
     description: 'Letras hebreas · Astrologia · Arbol de la Vida',
     Icon: AcademicCapIcon,
+    status: 'Activo (Sistema simbolico)',
   },
   {
     label: 'Golden Dawn Tarot',
@@ -92,6 +98,8 @@ const cabalisticSystems: Array<{
 export default function AstrologyTarotSidebar({
   activeSection,
   onChange,
+  selectedSystem,
+  onSelectSystem,
 }: AstrologyTarotSidebarProps) {
   return (
     <aside className="w-64 border-r border-gray-200 bg-white flex flex-col">
@@ -128,21 +136,54 @@ export default function AstrologyTarotSidebar({
             Sistemas Cabalisticos
           </p>
           <div className="mt-2 space-y-2">
-            {cabalisticSystems.map((system) => (
-              <div
-                key={system.label}
-                className="w-full rounded-md border border-dashed border-gray-200 px-3 py-2 text-left text-sm text-gray-500"
-                aria-disabled="true"
-              >
-                <div className="flex items-center gap-2">
-                  <system.Icon className="h-4 w-4 text-gray-400" />
-                  <p className="text-sm font-medium text-gray-600">
-                    {system.label}
-                  </p>
+            {cabalisticSystems.map((system) => {
+              const isActive = system.id && system.id === selectedSystem;
+              if (system.id) {
+                return (
+                  <button
+                    key={system.label}
+                    type="button"
+                    onClick={() => onSelectSystem?.(system.id)}
+                    className={`w-full rounded-md border px-3 py-2 text-left text-sm transition-colors ${
+                      isActive
+                        ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                        : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <system.Icon className="h-4 w-4 text-gray-400" />
+                        <p className="text-sm font-medium text-gray-700">
+                          {system.label}
+                        </p>
+                      </div>
+                      {system.status && (
+                        <span className="text-[10px] uppercase tracking-wide text-emerald-600">
+                          {system.status}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-gray-400">{system.description}</p>
+                  </button>
+                );
+              }
+
+              return (
+                <div
+                  key={system.label}
+                  className="w-full rounded-md border border-dashed border-gray-200 px-3 py-2 text-left text-sm text-gray-500"
+                  aria-disabled="true"
+                >
+                  <div className="flex items-center gap-2">
+                    <system.Icon className="h-4 w-4 text-gray-400" />
+                    <p className="text-sm font-medium text-gray-600">
+                      {system.label}
+                    </p>
+                  </div>
+                  <p className="text-[11px] text-gray-400">{system.description}</p>
                 </div>
-                <p className="text-[11px] text-gray-400">{system.description}</p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>

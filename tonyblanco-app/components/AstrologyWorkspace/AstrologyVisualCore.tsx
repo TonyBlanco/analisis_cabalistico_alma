@@ -12,7 +12,7 @@ export default function AstrologyVisualCore(_props: AstrologyVisualCoreProps) {
         <div>
           <h3 className="text-lg font-semibold text-gray-900">Astrologia (Visual)</h3>
           <p className="text-xs text-gray-500">
-            Observacional. Sin interpretacion ni automatizacion.
+            Observacional. Con interpretación asistida, sin predicción clínica, sin automatización decisoria.
           </p>
         </div>
         <div className="text-right text-xs text-gray-500">Vista base</div>

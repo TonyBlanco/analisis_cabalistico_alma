@@ -12,7 +12,7 @@ export default function Notes({ notes }: NotesProps) {
         Registro observacional sin conclusiones ni interpretacion.
       </p>
       <div className="mt-3 text-xs text-gray-600">
-        {notes || 'Observacional solamente. Sin diagnostico ni inferencia.'}
+        {notes || 'Observacional. Con interpretación asistida, sin predicción clínica, sin automatización decisoria.'}
       </div>
     </section>
   );

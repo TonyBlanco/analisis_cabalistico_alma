@@ -29,7 +29,7 @@ export default function AstrologySidebar() {
         ))}
       </div>
       <div className="px-4 py-3 border-t border-gray-200 text-[11px] text-gray-500">
-        Observacional. Sin interpretacion ni automatizacion.
+        Observacional. Con interpretación asistida, sin predicción clínica, sin automatización decisoria.
       </div>
     </aside>
   );

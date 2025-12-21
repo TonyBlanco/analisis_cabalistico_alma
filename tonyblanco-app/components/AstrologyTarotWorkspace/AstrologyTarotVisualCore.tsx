@@ -13,6 +13,7 @@ import { THOTH_MAJOR_ARCANA } from '../../../src/symbolic/tarot/decks/thoth';
 import { GOLDEN_DAWN_MAJOR_ARCANA } from '../../../src/symbolic/tarot/decks/golden-dawn';
 import { BOTA_MAJOR_ARCANA } from '../../../src/symbolic/tarot/decks/bota';
 import { HERMETIC_MAJOR_ARCANA } from '../../../src/symbolic/tarot/decks/hermetic';
+import { SEPHIROTH_MAJOR_ARCANA } from '../../../src/symbolic/tarot/decks/sephiroth';
 
 interface AstrologyTarotVisualCoreProps {
   activeSection: AstrologyTarotSectionId;
@@ -148,6 +149,18 @@ export default function AstrologyTarotVisualCore({
       return null;
     }
     return HERMETIC_MAJOR_ARCANA.find(
+      (entry) => entry.number === selectedCard.number
+    );
+  }, [selectedCard, selectedSystem]);
+
+  const sephirothMapping = useMemo(() => {
+    if (selectedSystem !== 'sephiroth' || !selectedCard) {
+      return null;
+    }
+    if (typeof selectedCard.number !== 'number') {
+      return null;
+    }
+    return SEPHIROTH_MAJOR_ARCANA.find(
       (entry) => entry.number === selectedCard.number
     );
   }, [selectedCard, selectedSystem]);
@@ -385,6 +398,46 @@ export default function AstrologyTarotVisualCore({
                 <span>
                   {hermeticMapping?.sefirot?.length
                     ? hermeticMapping.sefirot.join(' - ')
+                    : 'Dato simbolico no disponible'}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {selectedSystem === 'sephiroth' && (
+          <div className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-700">
+            <div className="text-xs uppercase tracking-wide text-gray-500">
+              Sistema Tarot of the Sephiroth
+            </div>
+            <div className="mt-2 grid gap-2">
+              <div>
+                <span className="font-medium">Arcano:</span>{' '}
+                <span>{selectedCard?.name || 'Dato simbolico no disponible'}</span>
+              </div>
+              <div>
+                <span className="font-medium">Letra hebrea:</span>{' '}
+                <span>
+                  {sephirothMapping?.hebrewLetter || 'Dato simbolico no disponible'}
+                </span>
+              </div>
+              <div>
+                <span className="font-medium">Gematria:</span>{' '}
+                <span>
+                  {typeof sephirothMapping?.gematria === 'number'
+                    ? sephirothMapping.gematria
+                    : 'Dato simbolico no disponible'}
+                </span>
+              </div>
+              <div>
+                <span className="font-medium">Sendero:</span>{' '}
+                <span>{sephirothMapping?.path || 'Dato simbolico no disponible'}</span>
+              </div>
+              <div>
+                <span className="font-medium">Sefirot relacionadas:</span>{' '}
+                <span>
+                  {sephirothMapping?.sefirot?.length
+                    ? sephirothMapping.sefirot.join(' - ')
                     : 'Dato simbolico no disponible'}
                 </span>
               </div>

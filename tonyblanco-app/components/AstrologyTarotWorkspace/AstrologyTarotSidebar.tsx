@@ -88,9 +88,11 @@ const cabalisticSystems: Array<{
     status: 'Sistema simbolico (estudio cabalistico)',
   },
   {
+    id: 'sephiroth',
     label: 'Tarot of the Sephiroth',
     description: 'Enfoque en el Arbol de la Vida',
     Icon: SquaresPlusIcon,
+    status: 'Sistema simbolico - Arbol de la Vida',
   },
   {
     id: 'hermetic',

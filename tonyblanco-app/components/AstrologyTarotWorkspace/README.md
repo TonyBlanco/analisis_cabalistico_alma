@@ -40,6 +40,11 @@ Sistema esoterico clasico con correspondencias rigurosas.
 Datos simbolicos sin interpretacion ni automatizacion.
 Preparado para analisis comparativo e IA asistida.
 
+## Tarot of the Sephiroth
+Enfoque directo en sefirot y estructura del Arbol de la Vida.
+Sistema simbolico sin interpretacion ni automatizacion.
+Preparado para analisis profundo y soporte IA.
+
 ## Capa Cabalistica
 Tarot consume datos simbolicos desde `src/symbolic` en modo solo lectura.
 La capa es observacional y no agrega interpretacion.

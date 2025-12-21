@@ -5,12 +5,14 @@ export type TreePathId = (typeof TREE_PATHS)[number]['id'];
 
 export interface TreeFocus {
   type: 'sefirah' | 'path';
-  id: string;
+  id: TreeSefirahId | TreePathId;
 }
 
 export interface TreeOfLifeSVGProps {
   highlightedSefirot?: TreeSefirahId[];
   highlightedPaths?: TreePathId[];
+  focusedSefirah?: TreeSefirahId | null;
+  dimUnrelated?: boolean;
   focus?: TreeFocus;
   emphasis?: 'soft' | 'strong';
   size?: 'sm' | 'md' | 'lg' | 'responsive';

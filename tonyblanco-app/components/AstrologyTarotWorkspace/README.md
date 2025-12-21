@@ -15,6 +15,11 @@ clear symbolic boundaries and avoid cross-domain mixing.
 - Correspondencias: symbolic links between cards and attributes.
 - Visualizar Mazo: full deck view for visual inspection.
 
+## Sistemas Cabalisticos
+Estos sistemas son referencias simbolicas, no mazos visuales.
+Se mantienen como placeholders para uso profesional futuro.
+La iconografia y el arte pueden vivir en proyectos separados.
+
 ## Capa Cabalistica
 Tarot consume datos simbolicos desde `src/symbolic` en modo solo lectura.
 La capa es observacional y no agrega interpretacion.

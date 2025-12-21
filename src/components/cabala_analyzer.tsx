@@ -1,6 +1,12 @@
 'use client';
 import React, { useState } from 'react';
 import { Calendar, Heart, Sparkles, Target, Zap, Users, Moon, Sun, Star } from 'lucide-react';
+import {
+  SEFIROT_CORRESPONDENCES,
+  SEFIROT_DEFINITIONS,
+  SEFIROT_MEANINGS,
+  type SefiraId
+} from '@/symbolic/data';
 
 const CabalaAnalyzer = () => {
   const [formData, setFormData] = useState({
@@ -10,6 +16,32 @@ const CabalaAnalyzer = () => {
     ano: ''
   });
   const [result, setResult] = useState(null);
+  const sefirotDefinitionsById = Object.fromEntries(
+    SEFIROT_DEFINITIONS.map((definition) => [definition.id, definition])
+  );
+  const sefirotMeaningsById = Object.fromEntries(
+    SEFIROT_MEANINGS.map((meaning) => [meaning.id, meaning])
+  );
+  const sefirotCorrespondencesById = Object.fromEntries(
+    SEFIROT_CORRESPONDENCES.map((correspondence) => [correspondence.id, correspondence])
+  );
+  const getSefirotData = (id: SefiraId) => ({
+    definition: sefirotDefinitionsById[id],
+    meaning: sefirotMeaningsById[id],
+    correspondence: sefirotCorrespondencesById[id]
+  });
+  const sefirotData = {
+    keter: getSefirotData('keter'),
+    chokmah: getSefirotData('chokmah'),
+    binah: getSefirotData('binah'),
+    chesed: getSefirotData('chesed'),
+    gevurah: getSefirotData('gevurah'),
+    tiferet: getSefirotData('tiferet'),
+    netzach: getSefirotData('netzach'),
+    hod: getSefirotData('hod'),
+    yesod: getSefirotData('yesod'),
+    malchut: getSefirotData('malchut')
+  };
 
   const valorLetra = (letra) => {
     const valores = {
@@ -309,19 +341,18 @@ const CabalaAnalyzer = () => {
                   <div className="mt-4 space-y-3 text-sm">
                     <div className="grid md:grid-cols-2 gap-4">
                       <div className="bg-white p-3 rounded-lg">
-                        <p><strong>🌍 Planeta:</strong> Plutón</p>
-                        <p><strong>🎴 Tarot:</strong> Los Ases (potencial puro)</p>
-                        <p><strong>🔮 Chakra:</strong> 7º - Corona (Sahasrara)</p>
-                        <p><strong>✨ Frase:</strong> "YO VENZO - YO SOY UNO"</p>
+                        <p><strong>🌍 Planeta:</strong> {sefirotData.keter.correspondence?.attributes?.[0]}</p>
+                        <p><strong>🎴 Tarot:</strong> {sefirotData.keter.correspondence?.attributes?.[1]}</p>
+                        <p><strong>🔮 Chakra:</strong> {sefirotData.keter.correspondence?.body?.[0]}</p>
+                        <p><strong>✨ Frase:</strong> {sefirotData.keter.meaning?.tikkun}</p>
                       </div>
                       <div className="bg-white p-3 rounded-lg">
-                        <p><strong>💡 Luminoso:</strong> Unión con Dios, conexión divina, fe absoluta, conciencia pura.</p>
-                        <p className="mt-2"><strong>⚠️ Sombra:</strong> Negar a Dios, falta de fe, desamparo, soberbia espiritual.</p>
+                        <p><strong>💡 Luminoso:</strong> {sefirotData.keter.meaning?.light}</p>
+                        <p className="mt-2"><strong>⚠️ Sombra:</strong> {sefirotData.keter.meaning?.shadow}</p>
                       </div>
                     </div>
                     <p className="text-purple-800 italic bg-purple-50 p-3 rounded">
-                      "Keter es la Corona de la Vida. Representa la conexión directa con la fuente divina, 
-                      el Padre celestial, la conciencia cósmica. Es el retorno al origen."
+                      &quot;{sefirotData.keter.definition?.essence}&quot;
                     </p>
                   </div>
                 </details>
@@ -334,19 +365,18 @@ const CabalaAnalyzer = () => {
                   <div className="mt-4 space-y-3 text-sm">
                     <div className="grid md:grid-cols-2 gap-4">
                       <div className="bg-white p-3 rounded-lg">
-                        <p><strong>🌍 Planeta:</strong> Urano (Neptuno)</p>
-                        <p><strong>🎴 Tarot:</strong> Los Doses</p>
-                        <p><strong>🔮 Chakra:</strong> 6º - Tercer Ojo posterior</p>
-                        <p><strong>✨ Frase:</strong> "YO SÉ - YO CONFÍO"</p>
+                        <p><strong>🌍 Planeta:</strong> {sefirotData.chokmah.correspondence?.attributes?.[0]}</p>
+                        <p><strong>🎴 Tarot:</strong> {sefirotData.chokmah.correspondence?.attributes?.[1]}</p>
+                        <p><strong>🔮 Chakra:</strong> {sefirotData.chokmah.correspondence?.body?.[0]}</p>
+                        <p><strong>✨ Frase:</strong> {sefirotData.chokmah.meaning?.tikkun}</p>
                       </div>
                       <div className="bg-white p-3 rounded-lg">
-                        <p><strong>💡 Luminoso:</strong> Sabiduría infinita, intuición superior, revelación, certeza.</p>
-                        <p className="mt-2"><strong>⚠️ Sombra:</strong> Rigidez mental, dogmatismo, control mental, fanatismo.</p>
+                        <p><strong>💡 Luminoso:</strong> {sefirotData.chokmah.meaning?.light}</p>
+                        <p className="mt-2"><strong>⚠️ Sombra:</strong> {sefirotData.chokmah.meaning?.shadow}</p>
                       </div>
                     </div>
                     <p className="text-blue-800 italic bg-blue-50 p-3 rounded">
-                      "Jokhmah es el Búho de la sabiduría. La biblioteca cósmica, el conocimiento intuitivo, 
-                      las epifanías y los chispazos de conciencia."
+                      &quot;{sefirotData.chokmah.definition?.essence}&quot;
                     </p>
                   </div>
                 </details>
@@ -359,19 +389,18 @@ const CabalaAnalyzer = () => {
                   <div className="mt-4 space-y-3 text-sm">
                     <div className="grid md:grid-cols-2 gap-4">
                       <div className="bg-white p-3 rounded-lg">
-                        <p><strong>🌍 Planeta:</strong> Neptuno (Saturno)</p>
-                        <p><strong>🎴 Tarot:</strong> Los Treses</p>
-                        <p><strong>🔮 Chakra:</strong> 6º - Tercer Ojo anterior</p>
-                        <p><strong>✨ Frase:</strong> "YO ENTIENDO - YO DOY"</p>
+                        <p><strong>🌍 Planeta:</strong> {sefirotData.binah.correspondence?.attributes?.[0]}</p>
+                        <p><strong>🎴 Tarot:</strong> {sefirotData.binah.correspondence?.attributes?.[1]}</p>
+                        <p><strong>🔮 Chakra:</strong> {sefirotData.binah.correspondence?.body?.[0]}</p>
+                        <p><strong>✨ Frase:</strong> {sefirotData.binah.meaning?.tikkun}</p>
                       </div>
                       <div className="bg-white p-3 rounded-lg">
-                        <p><strong>💡 Luminoso:</strong> Fertilidad activa, creatividad, compartir dones, positividad.</p>
-                        <p className="mt-2"><strong>⚠️ Sombra:</strong> Bloqueo mental, negatividad, incapacidad de dar.</p>
+                        <p><strong>💡 Luminoso:</strong> {sefirotData.binah.meaning?.light}</p>
+                        <p className="mt-2"><strong>⚠️ Sombra:</strong> {sefirotData.binah.meaning?.shadow}</p>
                       </div>
                     </div>
                     <p className="text-indigo-800 italic bg-indigo-50 p-3 rounded">
-                      "Binah es el Espejo que da forma. La Gran Madre Cósmica que convierte la sabiduría 
-                      en acción creativa y fértil."
+                      &quot;{sefirotData.binah.definition?.essence}&quot;
                     </p>
                   </div>
                 </details>
@@ -384,19 +413,18 @@ const CabalaAnalyzer = () => {
                   <div className="mt-4 space-y-3 text-sm">
                     <div className="grid md:grid-cols-2 gap-4">
                       <div className="bg-white p-3 rounded-lg">
-                        <p><strong>🌍 Planeta:</strong> Júpiter</p>
-                        <p><strong>🎴 Tarot:</strong> Los Cuatros</p>
-                        <p><strong>🔮 Chakra:</strong> 5º - Laríngeo posterior</p>
-                        <p><strong>✨ Frase:</strong> "YO AMO - YO SIRVO"</p>
+                        <p><strong>🌍 Planeta:</strong> {sefirotData.chesed.correspondence?.attributes?.[0]}</p>
+                        <p><strong>🎴 Tarot:</strong> {sefirotData.chesed.correspondence?.attributes?.[1]}</p>
+                        <p><strong>🔮 Chakra:</strong> {sefirotData.chesed.correspondence?.body?.[0]}</p>
+                        <p><strong>✨ Frase:</strong> {sefirotData.chesed.meaning?.tikkun}</p>
                       </div>
                       <div className="bg-white p-3 rounded-lg">
-                        <p><strong>💡 Luminoso:</strong> Amor incondicional, vocación, servicio, misericordia.</p>
-                        <p className="mt-2"><strong>⚠️ Sombra:</strong> Autoridad mal ejercida, dogmatismo, hipocresía.</p>
+                        <p><strong>💡 Luminoso:</strong> {sefirotData.chesed.meaning?.light}</p>
+                        <p className="mt-2"><strong>⚠️ Sombra:</strong> {sefirotData.chesed.meaning?.shadow}</p>
                       </div>
                     </div>
                     <p className="text-cyan-800 italic bg-cyan-50 p-3 rounded">
-                      "Jesed es el Corazón divino. Representa entregar tu vida a tu vocación verdadera, 
-                      ser co-creador con Dios y servir a la humanidad."
+                      &quot;{sefirotData.chesed.definition?.essence}&quot;
                     </p>
                   </div>
                 </details>
@@ -409,19 +437,18 @@ const CabalaAnalyzer = () => {
                   <div className="mt-4 space-y-3 text-sm">
                     <div className="grid md:grid-cols-2 gap-4">
                       <div className="bg-white p-3 rounded-lg">
-                        <p><strong>🌍 Planeta:</strong> Marte</p>
-                        <p><strong>🎴 Tarot:</strong> Los Cincos</p>
-                        <p><strong>🔮 Chakra:</strong> 5º - Laríngeo anterior</p>
-                        <p><strong>✨ Frase:</strong> "YO PUEDO - YO REALIZO"</p>
+                        <p><strong>🌍 Planeta:</strong> {sefirotData.gevurah.correspondence?.attributes?.[0]}</p>
+                        <p><strong>🎴 Tarot:</strong> {sefirotData.gevurah.correspondence?.attributes?.[1]}</p>
+                        <p><strong>🔮 Chakra:</strong> {sefirotData.gevurah.correspondence?.body?.[0]}</p>
+                        <p><strong>✨ Frase:</strong> {sefirotData.gevurah.meaning?.tikkun}</p>
                       </div>
                       <div className="bg-white p-3 rounded-lg">
-                        <p><strong>💡 Luminoso:</strong> Poder consciente, valentía, compromiso, rigor ético.</p>
-                        <p className="mt-2"><strong>⚠️ Sombra:</strong> Abuso de poder, ira, violencia, cobardía.</p>
+                        <p><strong>💡 Luminoso:</strong> {sefirotData.gevurah.meaning?.light}</p>
+                        <p className="mt-2"><strong>⚠️ Sombra:</strong> {sefirotData.gevurah.meaning?.shadow}</p>
                       </div>
                     </div>
                     <p className="text-red-800 italic bg-red-50 p-3 rounded">
-                      "Guevurah es la Espada de la verdad. El poder espiritual ejercido con impecabilidad, 
-                      la fuerza para vivir tu verdad con valentía."
+                      &quot;{sefirotData.gevurah.definition?.essence}&quot;
                     </p>
                   </div>
                 </details>
@@ -434,19 +461,18 @@ const CabalaAnalyzer = () => {
                   <div className="mt-4 space-y-3 text-sm">
                     <div className="grid md:grid-cols-2 gap-4">
                       <div className="bg-white p-3 rounded-lg">
-                        <p><strong>🌍 Planeta:</strong> Sol</p>
-                        <p><strong>🎴 Tarot:</strong> Los Seises</p>
-                        <p><strong>🔮 Chakra:</strong> 4º - Corazón (Anahata)</p>
-                        <p><strong>✨ Frase:</strong> "YO ME AMO - YO SOY"</p>
+                        <p><strong>🌍 Planeta:</strong> {sefirotData.tiferet.correspondence?.attributes?.[0]}</p>
+                        <p><strong>🎴 Tarot:</strong> {sefirotData.tiferet.correspondence?.attributes?.[1]}</p>
+                        <p><strong>🔮 Chakra:</strong> {sefirotData.tiferet.correspondence?.body?.[0]}</p>
+                        <p><strong>✨ Frase:</strong> {sefirotData.tiferet.meaning?.tikkun}</p>
                       </div>
                       <div className="bg-white p-3 rounded-lg">
-                        <p><strong>💡 Luminoso:</strong> Autoestima suprema, autorreconocimiento, identidad verdadera.</p>
-                        <p className="mt-2"><strong>⚠️ Sombra:</strong> Crisis de identidad, baja autoestima, vivir una mentira.</p>
+                        <p><strong>💡 Luminoso:</strong> {sefirotData.tiferet.meaning?.light}</p>
+                        <p className="mt-2"><strong>⚠️ Sombra:</strong> {sefirotData.tiferet.meaning?.shadow}</p>
                       </div>
                     </div>
                     <p className="text-yellow-800 italic bg-yellow-50 p-3 rounded">
-                      "Tiferet es el Sol radiante, el centro del Árbol. Tu identidad verdadera, el Cristo 
-                      interno, el Alma reconociéndose a sí misma."
+                      &quot;{sefirotData.tiferet.definition?.essence}&quot;
                     </p>
                   </div>
                 </details>
@@ -459,19 +485,18 @@ const CabalaAnalyzer = () => {
                   <div className="mt-4 space-y-3 text-sm">
                     <div className="grid md:grid-cols-2 gap-4">
                       <div className="bg-white p-3 rounded-lg">
-                        <p><strong>🌍 Planeta:</strong> Venus</p>
-                        <p><strong>🎴 Tarot:</strong> Los Sietes</p>
-                        <p><strong>🔮 Chakra:</strong> 3º - Plexo Solar posterior</p>
-                        <p><strong>✨ Frase:</strong> "YO ME SANO - YO ME ARMONIZO"</p>
+                        <p><strong>🌍 Planeta:</strong> {sefirotData.netzach.correspondence?.attributes?.[0]}</p>
+                        <p><strong>🎴 Tarot:</strong> {sefirotData.netzach.correspondence?.attributes?.[1]}</p>
+                        <p><strong>🔮 Chakra:</strong> {sefirotData.netzach.correspondence?.body?.[0]}</p>
+                        <p><strong>✨ Frase:</strong> {sefirotData.netzach.meaning?.tikkun}</p>
                       </div>
                       <div className="bg-white p-3 rounded-lg">
-                        <p><strong>💡 Luminoso:</strong> Paz interior, armonía, salud emocional, propósito.</p>
-                        <p className="mt-2"><strong>⚠️ Sombra:</strong> Miedos, carencias, emociones tempestuosas.</p>
+                        <p><strong>💡 Luminoso:</strong> {sefirotData.netzach.meaning?.light}</p>
+                        <p className="mt-2"><strong>⚠️ Sombra:</strong> {sefirotData.netzach.meaning?.shadow}</p>
                       </div>
                     </div>
                     <p className="text-green-800 italic bg-green-50 p-3 rounded">
-                      "Netsaj es la Rosa de la armonía. Santificar las emociones, vivir en coherencia 
-                      con tu propósito para alcanzar la paz interior."
+                      &quot;{sefirotData.netzach.definition?.essence}&quot;
                     </p>
                   </div>
                 </details>
@@ -484,19 +509,18 @@ const CabalaAnalyzer = () => {
                   <div className="mt-4 space-y-3 text-sm">
                     <div className="grid md:grid-cols-2 gap-4">
                       <div className="bg-white p-3 rounded-lg">
-                        <p><strong>🌍 Planeta:</strong> Mercurio</p>
-                        <p><strong>🎴 Tarot:</strong> Los Ochos</p>
-                        <p><strong>🔮 Chakra:</strong> 3º - Plexo Solar anterior</p>
-                        <p><strong>✨ Frase:</strong> "YO ME MUESTRO"</p>
+                        <p><strong>🌍 Planeta:</strong> {sefirotData.hod.correspondence?.attributes?.[0]}</p>
+                        <p><strong>🎴 Tarot:</strong> {sefirotData.hod.correspondence?.attributes?.[1]}</p>
+                        <p><strong>🔮 Chakra:</strong> {sefirotData.hod.correspondence?.body?.[0]}</p>
+                        <p><strong>✨ Frase:</strong> {sefirotData.hod.meaning?.tikkun}</p>
                       </div>
                       <div className="bg-white p-3 rounded-lg">
-                        <p><strong>💡 Luminoso:</strong> Inteligencia iluminada, servicio humanitario, ética.</p>
-                        <p className="mt-2"><strong>⚠️ Sombra:</strong> Egoísmo, buscar poder, materialismo, injusticia.</p>
+                        <p><strong>💡 Luminoso:</strong> {sefirotData.hod.meaning?.light}</p>
+                        <p className="mt-2"><strong>⚠️ Sombra:</strong> {sefirotData.hod.meaning?.shadow}</p>
                       </div>
                     </div>
                     <p className="text-orange-800 italic bg-orange-50 p-3 rounded">
-                      "Hod son los Pies Alados de Hermes. La inteligencia al servicio del bien común, 
-                      trabajar por la humanidad con ética e impecabilidad."
+                      &quot;{sefirotData.hod.definition?.essence}&quot;
                     </p>
                   </div>
                 </details>
@@ -509,19 +533,18 @@ const CabalaAnalyzer = () => {
                   <div className="mt-4 space-y-3 text-sm">
                     <div className="grid md:grid-cols-2 gap-4">
                       <div className="bg-white p-3 rounded-lg">
-                        <p><strong>🌍 Planeta:</strong> Luna</p>
-                        <p><strong>🎴 Tarot:</strong> Los Nueves</p>
-                        <p><strong>🔮 Chakra:</strong> 2º - Sacro (Svadhisthana)</p>
-                        <p><strong>✨ Frase:</strong> "YO ME FERTILIZO"</p>
+                        <p><strong>🌍 Planeta:</strong> {sefirotData.yesod.correspondence?.attributes?.[0]}</p>
+                        <p><strong>🎴 Tarot:</strong> {sefirotData.yesod.correspondence?.attributes?.[1]}</p>
+                        <p><strong>🔮 Chakra:</strong> {sefirotData.yesod.correspondence?.body?.[0]}</p>
+                        <p><strong>✨ Frase:</strong> {sefirotData.yesod.meaning?.tikkun}</p>
                       </div>
                       <div className="bg-white p-3 rounded-lg">
-                        <p><strong>💡 Luminoso:</strong> Ego santificado, subconsciente limpio, personalidad iluminada.</p>
-                        <p className="mt-2"><strong>⚠️ Sombra:</strong> Ego cristalizado, creencias erróneas, máscaras.</p>
+                        <p><strong>💡 Luminoso:</strong> {sefirotData.yesod.meaning?.light}</p>
+                        <p className="mt-2"><strong>⚠️ Sombra:</strong> {sefirotData.yesod.meaning?.shadow}</p>
                       </div>
                     </div>
                     <p className="text-pink-800 italic bg-pink-50 p-3 rounded">
-                      "Yesod es la Luna del subconsciente. El ego como maestro, las creencias del 
-                      inconsciente que deben ser sanadas y purificadas."
+                      &quot;{sefirotData.yesod.definition?.essence}&quot;
                     </p>
                   </div>
                 </details>
@@ -534,19 +557,18 @@ const CabalaAnalyzer = () => {
                   <div className="mt-4 space-y-3 text-sm">
                     <div className="grid md:grid-cols-2 gap-4">
                       <div className="bg-white p-3 rounded-lg">
-                        <p><strong>🌍 Planeta:</strong> Tierra</p>
-                        <p><strong>🎴 Tarot:</strong> Los Dieces y Cartas de Corte</p>
-                        <p><strong>🔮 Chakra:</strong> 1º - Raíz (Muladhara)</p>
-                        <p><strong>✨ Frase:</strong> "YO EVOLUCIONO - YO ME REALIZO"</p>
+                        <p><strong>🌍 Planeta:</strong> {sefirotData.malchut.correspondence?.attributes?.[0]}</p>
+                        <p><strong>🎴 Tarot:</strong> {sefirotData.malchut.correspondence?.attributes?.[1]}</p>
+                        <p><strong>🔮 Chakra:</strong> {sefirotData.malchut.correspondence?.body?.[0]}</p>
+                        <p><strong>✨ Frase:</strong> {sefirotData.malchut.meaning?.tikkun}</p>
                       </div>
                       <div className="bg-white p-3 rounded-lg">
-                        <p><strong>💡 Luminoso:</strong> Evolución consciente, materia como medio, enraizamiento.</p>
-                        <p className="mt-2"><strong>⚠️ Sombra:</strong> Negar evolución, zona de confort, negligencia.</p>
+                        <p><strong>💡 Luminoso:</strong> {sefirotData.malchut.meaning?.light}</p>
+                        <p className="mt-2"><strong>⚠️ Sombra:</strong> {sefirotData.malchut.meaning?.shadow}</p>
                       </div>
                     </div>
                     <p className="text-amber-800 italic bg-amber-50 p-3 rounded">
-                      "Malkuth es la Tierra, el Reino manifestado. La materia como escuela de evolución, 
-                      donde el espíritu se hace carne para crecer."
+                      &quot;{sefirotData.malchut.definition?.essence}&quot;
                     </p>
                   </div>
                 </details>

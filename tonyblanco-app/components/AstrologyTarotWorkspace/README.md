@@ -35,6 +35,11 @@ Sistema orientado a estudio cabalistico estructurado.
 Profundidad pedagogica y terapeutica sin interpretacion automatica.
 Datos solo de correspondencias, preparados para IA asistida.
 
+## Hermetic Tarot
+Sistema esoterico clasico con correspondencias rigurosas.
+Datos simbolicos sin interpretacion ni automatizacion.
+Preparado para analisis comparativo e IA asistida.
+
 ## Capa Cabalistica
 Tarot consume datos simbolicos desde `src/symbolic` en modo solo lectura.
 La capa es observacional y no agrega interpretacion.

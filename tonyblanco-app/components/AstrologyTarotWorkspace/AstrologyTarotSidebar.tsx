@@ -93,9 +93,11 @@ const cabalisticSystems: Array<{
     Icon: SquaresPlusIcon,
   },
   {
+    id: 'hermetic',
     label: 'Hermetic Tarot',
     description: 'Simbolismo esoterico profundo',
     Icon: SparklesIcon,
+    status: 'Sistema simbolico hermetico',
   },
 ];
 

@@ -134,9 +134,16 @@ export default function TarotCardGrid({
               </label>
               <input
                 type="date"
-                value={birthDate?.toISOString().split('T')[0] || ''}
+                value={
+                  birthDate && !Number.isNaN(birthDate.getTime())
+                    ? birthDate.toISOString().split('T')[0]
+                    : ''
+                }
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                onChange={(e) => setBirthDate(new Date(e.target.value))}
+                onChange={(e) => {
+                  const nextValue = e.target.value;
+                  setBirthDate(nextValue ? new Date(nextValue) : null);
+                }}
               />
             </div>
             <button

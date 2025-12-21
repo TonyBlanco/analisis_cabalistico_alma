@@ -1,13 +1,27 @@
 'use client';
 
 import type { AstrologyTarotSectionId } from './types';
+import TarotPluginAdapter from './TarotPluginAdapter';
+import type { DrawnCard } from '@/components/BodySoulVisualization/plugins/tarot';
 
 interface AstrologyTarotVisualCoreProps {
   activeSection: AstrologyTarotSectionId;
+  patientId?: string;
+  patientName?: string;
+  patientBirthDate?: Date;
+  onSefirahHighlight?: (sefirahId: string | null) => void;
+  onReadingComplete?: (reading: DrawnCard[]) => void;
+  onCardSelect?: (card: DrawnCard) => void;
 }
 
 export default function AstrologyTarotVisualCore({
   activeSection,
+  patientId,
+  patientName,
+  patientBirthDate,
+  onSefirahHighlight,
+  onReadingComplete,
+  onCardSelect,
 }: AstrologyTarotVisualCoreProps) {
   return (
     <section className="flex-1 bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
@@ -35,18 +49,14 @@ export default function AstrologyTarotVisualCore({
           </svg>
           <p className="text-xs text-gray-500">Rueda simbolica sin calculos.</p>
         </div>
-        <div className="rounded-lg border border-dashed border-gray-200 bg-gray-50 p-4 flex flex-col items-center gap-3">
-          <h4 className="text-sm font-semibold text-gray-800">Mesa de Tarot (visual)</h4>
-          <div className="grid grid-cols-3 gap-2">
-            {Array.from({ length: 6 }).map((_, index) => (
-              <div
-                key={index}
-                className="h-16 w-10 rounded-md border border-gray-300 bg-white"
-              />
-            ))}
-          </div>
-          <p className="text-xs text-gray-500">Cartas simbolicas sin lectura.</p>
-        </div>
+        <TarotPluginAdapter
+          patientId={patientId}
+          patientName={patientName}
+          patientBirthDate={patientBirthDate}
+          onSefirahHighlight={onSefirahHighlight}
+          onReadingComplete={onReadingComplete}
+          onCardSelect={onCardSelect}
+        />
       </div>
     </section>
   );

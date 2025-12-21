@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import type { AstrologyTarotSectionId } from './types';
 import TarotPluginAdapter from './TarotPluginAdapter';
 import type { DrawnCard } from '@/components/BodySoulVisualization/plugins/tarot';
@@ -38,17 +39,17 @@ export default function AstrologyTarotVisualCore({
         </div>
       </div>
       <div className="grid gap-4 lg:grid-cols-2">
-        <div className="rounded-lg border border-dashed border-gray-200 bg-gray-50 p-4 flex flex-col items-center gap-3">
-          <h4 className="text-sm font-semibold text-gray-800">Carta Astral (visual)</h4>
-          <svg viewBox="0 0 200 200" className="h-40 w-40 text-gray-400" role="img" aria-label="Carta astral">
-            <circle cx="100" cy="100" r="70" stroke="currentColor" strokeWidth="2" fill="none" />
-            <circle cx="100" cy="100" r="45" stroke="currentColor" strokeWidth="2" fill="none" />
-            <line x1="100" y1="30" x2="100" y2="170" stroke="currentColor" strokeWidth="2" />
-            <line x1="30" y1="100" x2="170" y2="100" stroke="currentColor" strokeWidth="2" />
-            <line x1="45" y1="45" x2="155" y2="155" stroke="currentColor" strokeWidth="2" />
-            <line x1="155" y1="45" x2="45" y2="155" stroke="currentColor" strokeWidth="2" />
-          </svg>
-          <p className="text-xs text-gray-500">Rueda simbolica sin calculos.</p>
+        <div className="rounded-lg border border-dashed border-gray-200 bg-gray-50 p-4 flex flex-col items-center gap-3 text-center">
+          <h4 className="text-sm font-semibold text-gray-800">Astrologia</h4>
+          <p className="text-xs text-gray-500">
+            La visualizacion astrologica vive en su propio workspace.
+          </p>
+          <Link
+            href="/dashboard/therapist/astrologia"
+            className="text-sm font-medium text-blue-600 underline underline-offset-4"
+          >
+            Abrir Workspace de Astrologia
+          </Link>
         </div>
         <TarotPluginAdapter
           patientId={patientId}

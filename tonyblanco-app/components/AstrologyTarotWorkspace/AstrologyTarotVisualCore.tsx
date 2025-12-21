@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import type { AstrologyTarotSectionId } from './types';
 import TarotPluginAdapter from './TarotPluginAdapter';
 import type { DrawnCard } from '@/components/BodySoulVisualization/plugins/tarot';
@@ -38,19 +37,7 @@ export default function AstrologyTarotVisualCore({
           Seccion activa: <span className="font-medium text-gray-700">{activeSection}</span>
         </div>
       </div>
-      <div className="grid gap-4 lg:grid-cols-2">
-        <div className="rounded-lg border border-dashed border-gray-200 bg-gray-50 p-4 flex flex-col items-center gap-3 text-center">
-          <h4 className="text-sm font-semibold text-gray-800">Astrologia</h4>
-          <p className="text-xs text-gray-500">
-            La visualizacion astrologica vive en su propio workspace.
-          </p>
-          <Link
-            href="/dashboard/therapist/astrologia"
-            className="text-sm font-medium text-blue-600 underline underline-offset-4"
-          >
-            Abrir Workspace de Astrologia
-          </Link>
-        </div>
+      <div className="grid gap-4">
         <TarotPluginAdapter
           patientId={patientId}
           patientName={patientName}

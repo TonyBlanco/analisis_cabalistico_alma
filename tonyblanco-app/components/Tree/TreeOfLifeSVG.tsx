@@ -1,6 +1,7 @@
 import { TREE_PATHS, TREE_SEFIROT } from './tree.config';
 import type { TreeOfLifeSVGProps, TreePathId, TreeSefirahId } from './tree.types';
 
+// SVG integration pending
 const SIZE_MAP: Record<NonNullable<TreeOfLifeSVGProps['size']>, number | string> = {
   sm: 200,
   md: 320,

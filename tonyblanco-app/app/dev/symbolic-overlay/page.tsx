@@ -1,7 +1,6 @@
 'use client';
 
-import SymbolicOverlayViewer from '@/components/SymbolicOverlayViewer';
-import { mockOverlayData } from '@/components/SymbolicOverlayViewer/mock';
+import { SymbolicOverlayViewer, mockOverlayData } from '@/components/SymbolicOverlayViewer';
 
 export default function SymbolicOverlayDevPage() {
   return (

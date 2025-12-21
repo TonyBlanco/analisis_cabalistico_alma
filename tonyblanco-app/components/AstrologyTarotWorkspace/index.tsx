@@ -6,11 +6,17 @@ import { Star } from 'lucide-react';
 import AstrologyTarotSidebar from './AstrologyTarotSidebar';
 import AstrologyTarotVisualCore from './AstrologyTarotVisualCore';
 import type { AstrologyTarotSectionId } from './types';
-import type { PatientContext } from '@/components/BodySoulVisualization/types';
 
-export default function AstrologyTarotWorkspace() {
+interface AstrologyTarotWorkspaceProps {
+  patientId?: string;
+  patientBirthDate?: Date;
+}
+
+export default function AstrologyTarotWorkspace({
+  patientId,
+  patientBirthDate,
+}: AstrologyTarotWorkspaceProps) {
   const [activeSection, setActiveSection] = useState<AstrologyTarotSectionId>('visual');
-  const patientContext: PatientContext | null = null;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -41,8 +47,8 @@ export default function AstrologyTarotWorkspace() {
           <div className="flex gap-6 items-start">
             <AstrologyTarotVisualCore
               activeSection={activeSection}
-              patientId={patientContext?.patientId}
-              patientBirthDate={patientContext?.patientBirthDate}
+              patientId={patientId}
+              patientBirthDate={patientBirthDate}
             />
             <aside className="w-72 space-y-4">
               <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">

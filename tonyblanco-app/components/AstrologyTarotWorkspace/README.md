@@ -45,6 +45,11 @@ Enfoque directo en sefirot y estructura del Arbol de la Vida.
 Sistema simbolico sin interpretacion ni automatizacion.
 Preparado para analisis profundo y soporte IA.
 
+## Interfaz de Entrada para IA Simbolica
+Fase 0 de preparacion, sin ejecucion de IA.
+Recopila contexto, fuentes simbolicas e intencion.
+Los datos quedan listos para agentes futuros.
+
 ## Capa Cabalistica
 Tarot consume datos simbolicos desde `src/symbolic` en modo solo lectura.
 La capa es observacional y no agrega interpretacion.

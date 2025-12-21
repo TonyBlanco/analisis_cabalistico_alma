@@ -7,6 +7,7 @@ import {
   HandRaisedIcon,
   LinkIcon,
   RectangleGroupIcon,
+  ClipboardDocumentCheckIcon,
   AcademicCapIcon,
   CubeTransparentIcon,
   DocumentTextIcon,
@@ -56,6 +57,12 @@ const sections: Array<{
     label: 'Visualizar Mazo',
     description: 'Vista completa del mazo.',
     Icon: RectangleGroupIcon,
+  },
+  {
+    id: 'tarot-ai-draft',
+    label: 'Preparar Analisis IA',
+    description: 'Borrador simbolico, sin ejecucion.',
+    Icon: ClipboardDocumentCheckIcon,
   },
 ];
 

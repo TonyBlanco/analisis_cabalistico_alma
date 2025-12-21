@@ -3,6 +3,7 @@ export type AstrologyTarotSectionId =
   | 'tarot-tree-spread'
   | 'tarot-free-spread'
   | 'tarot-correspondences'
-  | 'tarot-deck-view';
+  | 'tarot-deck-view'
+  | 'tarot-ai-draft';
 
 export type TarotSystemId = 'thoth' | 'golden-dawn' | 'bota' | 'hermetic' | 'sephiroth';

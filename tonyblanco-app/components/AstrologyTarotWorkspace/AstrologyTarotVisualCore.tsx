@@ -75,10 +75,24 @@ export default function AstrologyTarotVisualCore({
       title: 'Visualizar Mazo',
       description: 'Vista completa del mazo tarot.',
     },
+    'tarot-ai-draft': {
+      title: 'Preparar Analisis IA',
+      description: 'Preparacion simbolica sin ejecucion.',
+    },
   };
 
   const activeConfig = sectionConfig[activeSection];
   const [selectedCard, setSelectedCard] = useState<TarotCardData | null>(null);
+  const [analysisSources, setAnalysisSources] = useState({
+    tarot: true,
+    cabala: false,
+    paths: false,
+  });
+  const [analysisType, setAnalysisType] = useState<
+    'exploratorio' | 'integrativo' | 'evolutivo'
+  >('exploratorio');
+  const [intention, setIntention] = useState('');
+  const [draft, setDraft] = useState<Record<string, unknown> | null>(null);
 
   const cabalaReference = useMemo(() => {
     if (!selectedCard?.sefirahId) {
@@ -165,6 +179,31 @@ export default function AstrologyTarotVisualCore({
     );
   }, [selectedCard, selectedSystem]);
 
+  const handleDraftSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const draftPayload = {
+      patientId: patientId ?? null,
+      system: selectedSystem ?? null,
+      selectedCards: selectedCard
+        ? [{ id: selectedCard.id, name: selectedCard.name }]
+        : [],
+      correspondences: {
+        tarot: analysisSources.tarot,
+        cabala: analysisSources.cabala,
+        paths: analysisSources.paths,
+      },
+      analysisType,
+      intention,
+      timestamp: new Date().toISOString(),
+    };
+    setDraft(draftPayload);
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('SymbolicAnalysisDraft', draftPayload);
+    }
+  };
+
+  const displayDate = new Date().toLocaleDateString('es-ES');
+
   return (
     <section className="flex-1 bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
       <div className="flex items-start justify-between gap-4 mb-4">
@@ -216,6 +255,152 @@ export default function AstrologyTarotVisualCore({
           <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700">
             Correspondencias simbolicas disponibles para consulta visual.
           </div>
+        )}
+        {activeSection === 'tarot-ai-draft' && (
+          <form
+            className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-700 space-y-4"
+            onSubmit={handleDraftSubmit}
+          >
+            <div>
+              <div className="text-xs uppercase tracking-wide text-gray-500">
+                Contexto (solo lectura)
+              </div>
+              <div className="mt-2 grid gap-2 text-xs">
+                <div>
+                  <span className="font-medium">Paciente:</span>{' '}
+                  <span>{patientName || 'Paciente no seleccionado'}</span>
+                </div>
+                <div>
+                  <span className="font-medium">ID:</span>{' '}
+                  <span>{patientId ?? '—'}</span>
+                </div>
+                <div>
+                  <span className="font-medium">Fecha:</span>{' '}
+                  <span>{displayDate}</span>
+                </div>
+                <div>
+                  <span className="font-medium">Sistema activo:</span>{' '}
+                  <span>{selectedSystem ?? '—'}</span>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div className="text-xs uppercase tracking-wide text-gray-500">
+                Fuentes simbolicas
+              </div>
+              <div className="mt-2 grid gap-2 text-xs">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={analysisSources.tarot}
+                    onChange={(event) =>
+                      setAnalysisSources((prev) => ({
+                        ...prev,
+                        tarot: event.target.checked,
+                      }))
+                    }
+                  />
+                  Tarot (cartas seleccionadas)
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={analysisSources.cabala}
+                    onChange={(event) =>
+                      setAnalysisSources((prev) => ({
+                        ...prev,
+                        cabala: event.target.checked,
+                      }))
+                    }
+                  />
+                  Correspondencias cabalisticas
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={analysisSources.paths}
+                    onChange={(event) =>
+                      setAnalysisSources((prev) => ({
+                        ...prev,
+                        paths: event.target.checked,
+                      }))
+                    }
+                  />
+                  Senderos del Arbol de la Vida
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <div className="text-xs uppercase tracking-wide text-gray-500">
+                Tipo de analisis
+              </div>
+              <div className="mt-2 grid gap-2 text-xs">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="analysisType"
+                    value="exploratorio"
+                    checked={analysisType === 'exploratorio'}
+                    onChange={() => setAnalysisType('exploratorio')}
+                  />
+                  Exploratorio simbolico
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="analysisType"
+                    value="integrativo"
+                    checked={analysisType === 'integrativo'}
+                    onChange={() => setAnalysisType('integrativo')}
+                  />
+                  Integrativo transversal
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="analysisType"
+                    value="evolutivo"
+                    checked={analysisType === 'evolutivo'}
+                    onChange={() => setAnalysisType('evolutivo')}
+                  />
+                  Evolutivo (temporal)
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <div className="text-xs uppercase tracking-wide text-gray-500">
+                Intencion
+              </div>
+              <textarea
+                className="mt-2 w-full rounded-md border border-gray-200 px-3 py-2 text-sm text-gray-700"
+                rows={3}
+                value={intention}
+                onChange={(event) => setIntention(event.target.value)}
+                placeholder="Explorar patrones simbolicos relevantes…"
+              />
+            </div>
+
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-[11px] text-gray-500">
+                Preparacion de analisis simbolico (fase 0)
+              </span>
+              <button
+                type="submit"
+                className="rounded-md border border-gray-200 bg-gray-100 px-3 py-2 text-xs text-gray-700 hover:bg-gray-200"
+              >
+                Guardar borrador
+              </button>
+            </div>
+
+            {draft && (
+              <div className="rounded-md border border-dashed border-gray-200 bg-gray-50 p-3 text-[11px] text-gray-500">
+                Borrador listo. Datos almacenados localmente.
+              </div>
+            )}
+          </form>
         )}
 
         {selectedCard && (

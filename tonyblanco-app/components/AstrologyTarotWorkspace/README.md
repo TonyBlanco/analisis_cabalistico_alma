@@ -1,9 +1,25 @@
-# AstrologyTarotWorkspace
+# Tarot Workspace
 
-## Tarot plugin adapter
-Tarot renders as a BodySoulVisualization plugin so the workspace stays a thin container. The adapter exists to mount TarotLayer without changing workspace logic; props flow in from the workspace and pass through to the plugin for visual-only rendering.
+## Purpose
+This workspace renders tarot visualization only.
+It is a visual, observational space with no automation or interpretation.
 
-<!--
-AstrologyTarotWorkspace -> AstrologyTarotVisualCore -> TarotPluginAdapter -> TarotLayer (plugin)
-Props: patientId, patientBirthDate, callbacks (passthrough)
--->
+## Why tarot is isolated
+Tarot remains separate from Body, Tree of Life, and Astrology to preserve
+clear symbolic boundaries and avoid cross-domain mixing.
+
+## Sidebar tasks
+- Carta Natal: visual reference for natal tarot positions.
+- Tirada del Arbol: card positions inspired by the Tree of Life (no tree rendering).
+- Tirada Libre: open layout for manual exploration.
+- Correspondencias: symbolic links between cards and attributes.
+- Visualizar Mazo: full deck view for visual inspection.
+
+## Capa Cabalistica
+Tarot consume datos simbolicos desde `src/symbolic` en modo solo lectura.
+La capa es observacional y no agrega interpretacion.
+Esto prepara futuras capas de IA fuera del workspace visual.
+
+## Note
+Este workspace no ejecuta interpretacion, diagnostico ni automatizacion.
+Cualquier analisis futuro sera realizado por capas de IA externas.

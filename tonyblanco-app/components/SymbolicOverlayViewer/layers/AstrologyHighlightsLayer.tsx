@@ -18,11 +18,11 @@ export default function AstrologyHighlightsLayer({
   return (
     <div className="space-y-3 text-xs text-gray-600">
       <div className="flex flex-wrap gap-2">
-        {dates.map((date) => {
+        {dates.map((date, index) => {
           const isActive = highlightedDates.includes(date);
           return (
             <span
-              key={date}
+              key={`${date}-${index}`}
               className={`rounded-full border px-2 py-1 ${
                 isActive
                   ? 'border-sky-200 bg-sky-50 text-sky-700'

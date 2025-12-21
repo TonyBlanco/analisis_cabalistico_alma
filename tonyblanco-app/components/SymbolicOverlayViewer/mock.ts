@@ -8,7 +8,7 @@ export const mockOverlayData: SymbolicOverlayData = {
   events: [
     {
       patientId: 'DEMO-PATIENT-001',
-      date: new Date().toISOString(),
+      date: '2025-12-21T22:35:32.104Z',
       workspace: 'tarot',
       system: 'thoth',
       symbols: {
@@ -20,7 +20,7 @@ export const mockOverlayData: SymbolicOverlayData = {
     },
     {
       patientId: 'DEMO-PATIENT-001',
-      date: new Date(Date.now() - 1000 * 60 * 60 * 6).toISOString(),
+      date: '2025-12-21T16:12:08.512Z',
       workspace: 'tarot',
       system: 'golden-dawn',
       symbols: {
@@ -39,7 +39,7 @@ export const mockOverlayData: SymbolicOverlayData = {
       evidence: [
         {
           sourceEventId: 'timeline-1',
-          date: new Date().toISOString(),
+          date: '2025-12-21T22:35:32.104Z',
           system: 'tarot',
           symbols: ['fool', 'Kether'],
         },

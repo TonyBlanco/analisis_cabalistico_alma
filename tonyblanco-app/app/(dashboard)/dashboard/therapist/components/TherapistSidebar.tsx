@@ -90,6 +90,14 @@ const swmLaunchers = [
     icon: Compass,
     enabled: true,
   },
+  {
+    id: 'astrologia',
+    title: 'Astrologia',
+    description: 'Workspace astrologico observacional.',
+    href: '/dashboard/therapist/astrologia',
+    icon: Telescope,
+    enabled: true,
+  },
 ];
 
 export default function TherapistSidebar() {

@@ -64,3 +64,8 @@ export interface VisualizationState {
   side: BodyViewSide;
   notes: TherapistNote[];
 }
+
+export interface PatientContext {
+  patientId: string;
+  patientBirthDate: Date;
+}

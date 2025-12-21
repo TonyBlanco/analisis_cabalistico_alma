@@ -5,11 +5,12 @@ import BodySoulVisualization from '@/components/BodySoulVisualization';
 import TarotCardGrid from './TarotCardGrid';
 import TarotTreeOverlay from './TarotTreeOverlay';
 import type { DrawnCard } from './types';
+import type { PatientContext } from '@/components/BodySoulVisualization/types';
 
 interface TarotLayerProps {
-  patientId?: string;
+  patientId?: PatientContext['patientId'];
   patientName?: string;
-  patientBirthDate?: Date;
+  patientBirthDate?: PatientContext['patientBirthDate'];
 }
 
 type ActiveModule = 'bodyTree' | 'tarot' | 'integrated';

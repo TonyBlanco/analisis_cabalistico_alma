@@ -3,12 +3,13 @@
 import type { AstrologyTarotSectionId } from './types';
 import TarotPluginAdapter from './TarotPluginAdapter';
 import type { DrawnCard } from '@/components/BodySoulVisualization/plugins/tarot';
+import type { PatientContext } from '@/components/BodySoulVisualization/types';
 
 interface AstrologyTarotVisualCoreProps {
   activeSection: AstrologyTarotSectionId;
-  patientId?: string;
+  patientId?: PatientContext['patientId'];
   patientName?: string;
-  patientBirthDate?: Date;
+  patientBirthDate?: PatientContext['patientBirthDate'];
   onSefirahHighlight?: (sefirahId: string | null) => void;
   onReadingComplete?: (reading: DrawnCard[]) => void;
   onCardSelect?: (card: DrawnCard) => void;

@@ -1,0 +1,99 @@
+.tarot-deck {
+  --card-gap: 16px;
+  --hover-lift: 6px;
+  display: grid;
+  gap: var(--card-gap);
+  justify-items: center;
+  align-items: center;
+}
+
+.deck-card-wrapper {
+  position: relative;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+  transform: translateZ(0);
+}
+
+.deck-card-wrapper:hover {
+  transform: translateY(calc(var(--hover-lift) * -1));
+}
+
+.grid-layout {
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+
+.three-card-spread {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 0;
+  flex-wrap: nowrap;
+  min-height: 260px;
+}
+
+.three-card-spread .deck-card-wrapper {
+  --mid: calc((var(--card-count) - 1) / 2);
+  --offset: calc(var(--card-index) - var(--mid));
+  transform: translateX(calc(var(--offset) * 28px))
+    translateY(calc(var(--offset) * var(--offset) * -2px))
+    rotate(calc(var(--offset) * 2deg));
+  z-index: calc(10 - var(--offset));
+}
+
+.three-card-spread .deck-card-wrapper:hover {
+  transform: translateX(calc(var(--offset) * 28px))
+    translateY(calc(var(--offset) * var(--offset) * -2px - var(--hover-lift)))
+    rotate(calc(var(--offset) * 2deg));
+}
+
+.celtic-cross-spread {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--card-gap);
+}
+
+.fan-layout {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 0;
+  flex-wrap: nowrap;
+  min-height: 280px;
+  padding-bottom: 12px;
+}
+
+.fan-layout .deck-card-wrapper {
+  --mid: calc((var(--card-count) - 1) / 2);
+  --offset: calc(var(--card-index) - var(--mid));
+  transform-origin: 50% 120%;
+  transform: translateX(calc(var(--offset) * 18px))
+    rotate(calc(var(--offset) * 6deg));
+  z-index: calc(10 - var(--offset));
+}
+
+.fan-layout .deck-card-wrapper:hover {
+  transform: translateX(calc(var(--offset) * 18px))
+    rotate(calc(var(--offset) * 6deg))
+    translateY(calc(var(--hover-lift) * -1));
+}
+
+.stack-layout {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 720px) {
+  .three-card-spread,
+  .fan-layout {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
+    min-height: unset;
+  }
+
+  .three-card-spread .deck-card-wrapper,
+  .fan-layout .deck-card-wrapper {
+    transform: none;
+  }
+}

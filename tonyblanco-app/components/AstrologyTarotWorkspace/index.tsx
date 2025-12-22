@@ -26,6 +26,7 @@ export default function AstrologyTarotWorkspace({
     'tarot-free-spread': 'Tirada Libre',
     'tarot-correspondences': 'Correspondencias',
     'tarot-deck-view': 'Visualizar Mazo',
+    'tarot-ai-draft': 'Preparar Analisis IA',
   };
 
   return (

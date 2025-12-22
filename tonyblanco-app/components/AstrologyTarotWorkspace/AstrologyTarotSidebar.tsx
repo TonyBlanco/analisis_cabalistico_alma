@@ -67,7 +67,7 @@ const sections: Array<{
 ];
 
 const cabalisticSystems: Array<{
-  id?: TarotSystemId;
+  id: TarotSystemId;
   label: string;
   description: string;
   Icon: typeof CalendarDaysIcon;

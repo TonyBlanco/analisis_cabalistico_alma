@@ -2,12 +2,12 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import type { CabalSectionId } from './types';
-import TreeOfLifeSVG from '@/components/Tree/TreeOfLifeSVG';
 import TarotTreeOverlay from '@/components/BodySoulVisualization/plugins/tarot/TarotTreeOverlay';
 import type { DrawnCard } from '@/components/BodySoulVisualization/plugins/tarot/types';
 import { getActivePatientId } from '@/lib/active-patient';
 import { getPatientProfileSummary, type PatientProfileSummary } from '@/lib/patient-api';
 import { useTreeStructuralState } from '@/lib/tree-structural-state';
+import TreeVisualPlaceholder from './TreeVisualPlaceholder';
 
 interface CabalAppliedVisualCoreProps {
   activeSection: CabalSectionId;
@@ -73,20 +73,6 @@ export default function CabalAppliedVisualCore({ activeSection }: CabalAppliedVi
       .filter((value): value is string => Boolean(value));
   }, [state?.senderos_activos]);
 
-  const repeatedSefirot = useMemo(() => {
-    if (!state?.repeticiones.length) return [];
-    return state.repeticiones
-      .map((item) => item.simbolo_id)
-      .filter((id) => !id.includes('-'));
-  }, [state?.repeticiones]);
-
-  const repeatedPaths = useMemo(() => {
-    if (!state?.repeticiones.length) return [];
-    return state.repeticiones
-      .map((item) => item.simbolo_id)
-      .filter((id) => id.includes('-'));
-  }, [state?.repeticiones]);
-
   const mapWeightsToOpacity = (items: Array<{ id: string; weight: number }>) => {
     if (!items.length) {
       return {};
@@ -149,30 +135,7 @@ export default function CabalAppliedVisualCore({ activeSection }: CabalAppliedVi
           Seccion activa: <span className="font-medium text-gray-700">{activeSection}</span>
         </div>
       </div>
-      <div className="grid gap-6">
-        <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-          <div className="relative w-full h-72">
-            <TreeOfLifeSVG
-              highlightedSefirot={[]}
-              highlightedPaths={[]}
-              emphasis="soft"
-              size="responsive"
-              className="absolute inset-0 h-full w-full opacity-40 pointer-events-none"
-            />
-            <TreeOfLifeSVG
-              highlightedSefirot={highlightedSefirot}
-              highlightedPaths={highlightedPaths}
-              highlightedSefirotOpacity={highlightedSefirotOpacity}
-              highlightedPathOpacity={highlightedPathOpacity}
-              repeatedSefirot={repeatedSefirot}
-              repeatedPaths={repeatedPaths}
-              emphasis="soft"
-              size="responsive"
-              className="absolute inset-0 h-full w-full pointer-events-none"
-            />
-          </div>
-        </div>
-      </div>
+      <TreeVisualPlaceholder />
       <div className="mt-6">
         <TarotTreeOverlay
           reading={treeReading}

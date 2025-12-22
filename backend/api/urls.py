@@ -71,7 +71,7 @@ from .test_views import (
     BDI2SubmitView
 )
 from .gematria_views import GematriaInterpretationView
-from .tarot_views import TarotAnalysisView
+from .tarot_views import TarotAnalysisView, TarotCabalisticCorrespondenceView
 from .cabalistic_views import (
     SaveCabalisticAnalysisView,
     ListCabalisticAnalysesView,
@@ -150,6 +150,7 @@ urlpatterns = [
     path('therapist/patients/<int:pk>/status/', PatientStatusUpdateView.as_view(), name='patient_status_update'),
     path('therapist/patients/<int:pk>/archive/', PatientArchiveView.as_view(), name='patient_archive'),
     path('therapist/patients/<int:id>/tarot-analysis/', TarotAnalysisView.as_view(), name='tarot_analysis'),
+    path('tarot/cabalistic-correspondence/', TarotCabalisticCorrespondenceView.as_view(), name='tarot_cabalistic_correspondence'),
     path('therapist/patients/<int:id>/tarot-analysis/generate-and-save/', GenerateAndSaveTarotAnalysisView.as_view(), name='tarot_analysis_generate_and_save'),
     path('therapist/patients/<int:id>/cabalistic-analysis/', SaveCabalisticAnalysisView.as_view(), name='save_cabalistic_analysis'),
     path('therapist/patients/<int:id>/cabalistic-analyses/', ListCabalisticAnalysesView.as_view(), name='list_cabalistic_analyses'),

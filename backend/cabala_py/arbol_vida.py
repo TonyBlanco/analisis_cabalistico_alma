@@ -1,4 +1,5 @@
 # cabala_py/arbol_vida.py
+import unicodedata
 """
 Datos estructurados del Árbol de la Vida Cabalístico
 Incluye: Sefiroth, Senderos, Nombres Divinos, Arcángeles, Órdenes Angélicas
@@ -357,6 +358,104 @@ SENDEROS = {
     "8-10": {"id": "8-10", "numero": 31, "letra_hebrea": "Shin", "tarot": 20, "nombre": "El Juicio"},
     "9-10": {"id": "9-10", "numero": 32, "letra_hebrea": "Tav", "tarot": 21, "nombre": "El Mundo"}
 }
+
+# ============================================================================
+# CORRESPONDENCIAS TAROT → CABALA (PASIVO)
+# ============================================================================
+
+HEBREW_LETTER_GLYPHS = {
+    "Alef": "א",
+    "Bet": "ב",
+    "Gimel": "ג",
+    "Dalet": "ד",
+    "He": "ה",
+    "Vav": "ו",
+    "Zayin": "ז",
+    "Het": "ח",
+    "Tet": "ט",
+    "Yod": "י",
+    "Kaf": "כ",
+    "Lamed": "ל",
+    "Mem": "מ",
+    "Nun": "נ",
+    "Samekh": "ס",
+    "Ayin": "ע",
+    "Pe": "פ",
+    "Tzadi": "צ",
+    "Qof": "ק",
+    "Resh": "ר",
+    "Shin": "ש",
+    "Tav": "ת",
+}
+
+TAROT_NAME_ALIASES = {
+    "el sumo sacerdote": "el hierofante",
+    "la rueda de la fortuna": "la rueda",
+}
+
+
+def _normalizar_texto(texto):
+    texto = (texto or "").strip().lower()
+    texto = unicodedata.normalize("NFD", texto)
+    return "".join(
+        caracter for caracter in texto if unicodedata.category(caracter) != "Mn"
+    )
+
+
+def get_tarot_cabalistic_correspondence(card_name):
+    """
+    Devuelve correspondencias cabalisticas deterministas de una carta de Tarot.
+    NO interpreta. NO calcula narrativa.
+    """
+    if not card_name:
+        return None
+
+    nombre_normalizado = _normalizar_texto(card_name)
+    nombre_normalizado = TAROT_NAME_ALIASES.get(nombre_normalizado, nombre_normalizado)
+
+    from .gematria import ALFABETO_HEBREO_CLASICO
+
+    sefirot_por_indice = {
+        data.get("index"): data.get("nombre", {}).get("roman")
+        for data in SEFIROTH.values()
+        if data.get("index")
+    }
+
+    for sendero in SENDEROS.values():
+        if _normalizar_texto(sendero.get("nombre")) != nombre_normalizado:
+            continue
+
+        letra_nombre = sendero.get("letra_hebrea")
+        letra_hebrew = HEBREW_LETTER_GLYPHS.get(letra_nombre)
+        if not letra_hebrew:
+            return None
+
+        gematria = ALFABETO_HEBREO_CLASICO.get(letra_hebrew)
+        sendero_id = sendero.get("id", "")
+        try:
+            origen_idx, destino_idx = [int(part) for part in sendero_id.split("-")]
+        except ValueError:
+            origen_idx = None
+            destino_idx = None
+
+        origen = sefirot_por_indice.get(origen_idx)
+        destino = sefirot_por_indice.get(destino_idx)
+        sendero_label = None
+        if origen and destino:
+            sendero_label = f"{origen} ↔ {destino}"
+
+        return {
+            "card": sendero.get("nombre"),
+            "cabala": {
+                "letra_hebrea": letra_hebrew,
+                "nombre_letra": letra_nombre,
+                "valor_gematrico": gematria,
+                "sendero": sendero_label,
+                "sistema": "Thoth",
+            },
+        }
+
+    return None
 
 
 # ============================================================================

@@ -3,12 +3,10 @@
 import type { AstrologyTarotSectionId, TarotSystemId } from './types';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { TarotDeck } from '@/components/TarotCard';
+import { API_BASE_URL, getAuthToken } from '@/lib/api';
 import type { TarotCardData } from '@/components/TarotCard/TarotCard.types';
 import { ARCANOS_MAYORES } from '@/components/BodySoulVisualization/plugins/tarot/tarot.logic';
 import type { PatientContext } from '@/components/BodySoulVisualization/types';
-import { SEFIROT_DEFINITIONS } from '../../../src/symbolic/data/sefirot/definitions';
-import { SEFIROT_MEANINGS } from '../../../src/symbolic/data/sefirot/meanings';
-import { SEFIROT_CORRESPONDENCES } from '../../../src/symbolic/data/sefirot/correspondences';
 import { THOTH_MAJOR_ARCANA } from '../../../src/symbolic/tarot/decks/thoth';
 import { GOLDEN_DAWN_MAJOR_ARCANA } from '../../../src/symbolic/tarot/decks/golden-dawn';
 import { BOTA_MAJOR_ARCANA } from '../../../src/symbolic/tarot/decks/bota';
@@ -26,6 +24,17 @@ interface AstrologyTarotVisualCoreProps {
   onCardSelect?: (card: unknown) => void;
   selectedSystem?: TarotSystemId | null;
 }
+
+type CabalaCorrespondence = {
+  card: string;
+  cabala: {
+    letra_hebrea: string;
+    nombre_letra: string;
+    valor_gematrico: number;
+    sendero: string | null;
+    sistema: string;
+  };
+} | null;
 
 export default function AstrologyTarotVisualCore({
   activeSection,
@@ -94,35 +103,16 @@ export default function AstrologyTarotVisualCore({
   >('exploratorio');
   const [intention, setIntention] = useState('');
   const [draft, setDraft] = useState<Record<string, unknown> | null>(null);
+  const [cabalisticCorrespondence, setCabalisticCorrespondence] =
+    useState<CabalaCorrespondence>(null);
   const lastSessionKey = useRef<string | null>(null);
 
-  const cabalaReference = useMemo(() => {
-    if (!selectedCard?.sefirahId) {
-      return null;
-    }
-
-    const definition = SEFIROT_DEFINITIONS.find(
-      (item) => item.id === selectedCard.sefirahId
-    );
-    const meaning = SEFIROT_MEANINGS.find(
-      (item) => item.id === selectedCard.sefirahId
-    );
-    const correspondence = SEFIROT_CORRESPONDENCES.find(
-      (item) => item.id === selectedCard.sefirahId
-    );
-
-    if (!definition && !meaning && !correspondence) {
-      return null;
-    }
-
-    return { definition, meaning, correspondence };
-  }, [selectedCard?.sefirahId]);
-
   const fallbackText = 'Correspondencia simbolica no disponible';
-  const hebrewGlyph = null;
-  const letterName = null;
-  const gematriaValue = null;
-  const pathLabel = null;
+  const cabalaData = cabalisticCorrespondence?.cabala ?? null;
+  const hebrewGlyph = cabalaData?.letra_hebrea ?? null;
+  const letterName = cabalaData?.nombre_letra ?? null;
+  const gematriaValue = cabalaData?.valor_gematrico ?? null;
+  const pathLabel = cabalaData?.sendero ?? null;
 
   const thothMapping = useMemo(() => {
     if (selectedSystem !== 'thoth' || !selectedCard) {
@@ -268,6 +258,42 @@ export default function AstrologyTarotVisualCore({
         return null;
     }
   };
+
+  useEffect(() => {
+    if (!selectedCard?.name) {
+      setCabalisticCorrespondence(null);
+      return;
+    }
+
+    const controller = new AbortController();
+    const fetchCorrespondence = async () => {
+      try {
+        const token = getAuthToken();
+        const headers: HeadersInit = token
+          ? { Authorization: `Token ${token}` }
+          : {};
+        const response = await fetch(
+          `${API_BASE_URL}/tarot/cabalistic-correspondence/?card_name=${encodeURIComponent(
+            selectedCard.name
+          )}`,
+          { headers, signal: controller.signal }
+        );
+        if (!response.ok) {
+          setCabalisticCorrespondence(null);
+          return;
+        }
+        const data = (await response.json()) as CabalaCorrespondence;
+        setCabalisticCorrespondence(data);
+      } catch (error) {
+        if ((error as { name?: string }).name !== 'AbortError') {
+          setCabalisticCorrespondence(null);
+        }
+      }
+    };
+
+    fetchCorrespondence();
+    return () => controller.abort();
+  }, [selectedCard?.name]);
 
   useEffect(() => {
     if (!patientId || !selectedCard) {
@@ -535,7 +561,7 @@ export default function AstrologyTarotVisualCore({
                 <span className="font-medium">Sendero:</span>{' '}
                 <span>{pathLabel ?? fallbackText}</span>
               </div>
-              {!cabalaReference && (
+              {!cabalaData && (
                 <div className="text-xs text-gray-500">
                   Correspondencia simbolica no disponible para esta carta.
                 </div>

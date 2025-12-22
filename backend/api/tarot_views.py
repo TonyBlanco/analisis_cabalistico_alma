@@ -10,6 +10,7 @@ from django.utils.decorators import method_decorator
 from django.shortcuts import get_object_or_404
 from .models import Patient
 from .utils.tarot_service import analyze_archetype_vs_clinical
+from cabala_py.arbol_vida import get_tarot_cabalistic_correspondence
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -88,3 +89,21 @@ class TarotAnalysisView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
+@method_decorator(csrf_exempt, name='dispatch')
+class TarotCabalisticCorrespondenceView(APIView):
+    """
+    Devuelve correspondencias cabalisticas deterministas para una carta de Tarot.
+    Ruta: GET /api/tarot/cabalistic-correspondence/?card_name=El%20Loco
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        card_name = request.query_params.get('card_name', '').strip()
+        if not card_name:
+            return Response(
+                {'error': 'card_name es requerido'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        correspondence = get_tarot_cabalistic_correspondence(card_name)
+        return Response(correspondence, status=status.HTTP_200_OK)

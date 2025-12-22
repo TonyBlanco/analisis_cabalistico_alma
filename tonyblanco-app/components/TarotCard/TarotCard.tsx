@@ -11,6 +11,8 @@ interface TarotCardProps {
   isInteractive?: boolean;
   isSelected?: boolean;
   showDetails?: boolean;
+  showTitle?: boolean;
+  showContent?: boolean;
   onSelect?: (card: TarotCardData) => void;
 }
 
@@ -27,6 +29,8 @@ function TarotCard({
   isInteractive = true,
   isSelected = false,
   showDetails = false,
+  showTitle = true,
+  showContent = true,
   onSelect,
 }: TarotCardProps) {
   const handleClick = useCallback(() => {
@@ -58,31 +62,33 @@ function TarotCard({
                 </div>
               )}
             </div>
-            <div className="card-content">
-              <div className="card-header">
-                <span className="card-number">{card.number ?? ''}</span>
-                <h3 className="card-title">{card.name}</h3>
-                <span className="card-symbol">{card.arcana ?? ''}</span>
-              </div>
-              {showDetails && (
-                <div className="card-details">
-                  {card.element && (
-                    <div className="card-element">
-                      <span className="element-text">{card.element}</span>
-                    </div>
-                  )}
-                  {card.keywords?.length ? (
-                    <div className="card-keywords">
-                      {card.keywords.slice(0, 3).map((keyword) => (
-                        <span key={`${card.id}-${keyword}`} className="keyword-tag">
-                          {keyword}
-                        </span>
-                      ))}
-                    </div>
-                  ) : null}
+            {showContent && (
+              <div className="card-content">
+                <div className="card-header">
+                  <span className="card-number">{card.number ?? ''}</span>
+                  {showTitle && <h3 className="card-title">{card.name}</h3>}
+                  <span className="card-symbol">{card.arcana ?? ''}</span>
                 </div>
-              )}
-            </div>
+                {showDetails && (
+                  <div className="card-details">
+                    {card.element && (
+                      <div className="card-element">
+                        <span className="element-text">{card.element}</span>
+                      </div>
+                    )}
+                    {card.keywords?.length ? (
+                      <div className="card-keywords">
+                        {card.keywords.slice(0, 3).map((keyword) => (
+                          <span key={`${card.id}-${keyword}`} className="keyword-tag">
+                            {keyword}
+                          </span>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
         <div className="card-back">

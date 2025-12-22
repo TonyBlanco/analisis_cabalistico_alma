@@ -11,6 +11,7 @@ interface TarotDeckProps {
   cards: TarotDeckCard[];
   layout?: 'spread' | 'grid' | 'fan' | 'stack';
   spreadType?: 'three-card' | 'celtic-cross' | 'single';
+  showContent?: boolean;
   onCardSelect?: (card: TarotCardData) => void;
   interactive?: boolean;
 }
@@ -19,6 +20,7 @@ export default function TarotDeck({
   cards,
   layout = 'grid',
   spreadType = 'three-card',
+  showContent,
   onCardSelect,
   interactive = true,
 }: TarotDeckProps) {
@@ -63,6 +65,8 @@ export default function TarotDeck({
     }
   }, [layout, spreadType]);
 
+  const showCardContent = showContent ?? layout !== 'grid';
+
   return (
     <div className={`tarot-deck ${layoutClass}`}>
       {normalizedCards.map((card, index) => (
@@ -84,6 +88,8 @@ export default function TarotDeck({
             onSelect={handleCardSelect}
             size={layout === 'stack' ? 'small' : 'medium'}
             showDetails={layout === 'grid'}
+            showTitle={false}
+            showContent={showCardContent}
           />
         </div>
       ))}

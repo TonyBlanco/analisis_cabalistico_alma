@@ -341,6 +341,7 @@ export default function AstrologyTarotVisualCore({
             spreadType="celtic-cross"
             interactive={true}
             onCardSelect={setSelectedCard}
+            showContent={false}
           />
         )}
         {activeSection === 'tarot-free-spread' && (
@@ -349,6 +350,7 @@ export default function AstrologyTarotVisualCore({
             layout="fan"
             interactive={true}
             onCardSelect={setSelectedCard}
+            showContent={false}
           />
         )}
         {activeSection === 'tarot-natal' && (

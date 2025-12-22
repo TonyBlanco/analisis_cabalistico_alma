@@ -721,3 +721,8 @@ Se congela el contrato tecnico de Specialized Workspace Modules como base v1.
 Documento de referencia:
 docs/CONTRATO TÉCNICO DE WORKSPACES ESPECIALIZADOS (SWM).md
 
+### Nota (Sistema Simbolico)
+
+El desarrollo del Sistema Simbolico (Tarot-Arbol-Astrologia)
+se documenta en archivos de arquitectura simbolica especificos
+y no altera la arquitectura clinica ni los flujos descritos en esta auditoria.

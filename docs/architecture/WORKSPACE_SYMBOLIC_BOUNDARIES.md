@@ -63,6 +63,8 @@ No se incrustan visualizaciones de un workspace dentro de otro.
 ---
 
 ## Nota sobre IA (Futuro)
+La interpretacion simbolica puede ser asistida por IA,
+pero nunca es predictiva ni automatizada.
 Estos límites permiten:
 - Análisis simbólico cruzado por IA
 - Diagnóstico holístico no clínico

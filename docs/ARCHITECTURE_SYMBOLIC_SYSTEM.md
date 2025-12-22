@@ -10,6 +10,8 @@ The symbolic system provides visualization and exploration of symbolic layers (T
 - Canonical Symbolic Data (CABALA_JSON): Source of truth for symbolic definitions and correspondences.
 - Analysis & AI: Future layer, not implemented, separated from visualization and UI.
 
+The Core Symbolic Layer lives in `src/symbolic/` as the single source of truth for symbolic data. Workspaces consume symbolic data; they do not define it. Interpretation may be assisted, never predictive or automatic.
+
 ## 3. Data Flow
 ```
 PatientContext

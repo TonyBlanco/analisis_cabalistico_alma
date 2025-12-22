@@ -1,6 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import SefirotInteractive, {
+  SEFIROT_CANONICAL,
+  type SefirotId,
+} from '../../SefirotInteractive';
 import type { DrawnCard } from './types';
 
 interface TarotTreeOverlayProps {
@@ -9,54 +13,53 @@ interface TarotTreeOverlayProps {
   selectedCard: DrawnCard | null;
 }
 
-const SEFIROT_POSITIONS = {
-  keter: { x: 50, y: 5 },
-  chokmah: { x: 75, y: 20 },
-  binah: { x: 25, y: 20 },
-  chesed: { x: 75, y: 40 },
-  gevurah: { x: 25, y: 40 },
-  tiferet: { x: 50, y: 45 },
-  netzach: { x: 75, y: 65 },
-  hod: { x: 25, y: 65 },
-  yesod: { x: 50, y: 75 },
-  malkuth: { x: 50, y: 90 },
+const SEFIROT_COLOR_MAP: Record<SefirotId, string> = {
+  malkuth: '#84cc16',
+  yesod: '#a855f7',
+  hod: '#f97316',
+  netzach: '#22c55e',
+  tiferet: '#eab308',
+  gevurah: '#ef4444',
+  chesed: '#3b82f6',
+  binah: '#6366f1',
+  chokmah: '#0ea5e9',
+  keter: '#94a3b8',
 };
-
-const SEFIROT_INFO = [
-  { id: 'malkuth', name: 'Malkuth', spanishName: 'Reino', color: '#84cc16' },
-  { id: 'yesod', name: 'Yesod', spanishName: 'Fundamento', color: '#a855f7' },
-  { id: 'hod', name: 'Hod', spanishName: 'Esplendor', color: '#f97316' },
-  { id: 'netzach', name: 'Netzach', spanishName: 'Victoria', color: '#22c55e' },
-  { id: 'tiferet', name: 'Tiferet', spanishName: 'Belleza', color: '#eab308' },
-  { id: 'gevurah', name: 'Gevurah', spanishName: 'Rigor', color: '#ef4444' },
-  { id: 'chesed', name: 'Chesed', spanishName: 'Misericordia', color: '#3b82f6' },
-  { id: 'binah', name: 'Binah', spanishName: 'Entendimiento', color: '#6366f1' },
-  { id: 'chokmah', name: 'Chokmah', spanishName: 'Sabiduría', color: '#0ea5e9' },
-  { id: 'keter', name: 'Keter', spanishName: 'Corona', color: '#94a3b8' },
-];
 
 export default function TarotTreeOverlay({
   reading,
   onCardSelect,
   selectedCard,
 }: TarotTreeOverlayProps) {
-  const [hoveredSefirah, setHoveredSefirah] = useState<string | null>(null);
+  const [hoveredSefirah, setHoveredSefirah] = useState<SefirotId | null>(null);
 
-  const getCardForSefirah = (sefirahId: string): DrawnCard | null => {
+  const sefirahInfo = useMemo(
+    () =>
+      SEFIROT_CANONICAL.map((node) => ({
+        id: node.id,
+        cx: node.cx,
+        cy: node.cy,
+        spanishName: node.meaning,
+        color: SEFIROT_COLOR_MAP[node.id],
+      })),
+    [],
+  );
+
+  const getCardForSefirah = (sefirahId: SefirotId): DrawnCard | null => {
     if (!reading) return null;
-    return reading.find(c => c.card.sefirah === sefirahId) || null;
+    return reading.find((card) => card.card.sefirah === sefirahId) ?? null;
   };
 
-  const getSefirahIndex = (sefirahId: string): number => {
+  const getSefirahIndex = (sefirahId: SefirotId): number => {
     if (!reading) return -1;
-    return reading.findIndex(c => c.card.sefirah === sefirahId);
+    return reading.findIndex((card) => card.card.sefirah === sefirahId);
   };
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-6">
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-lg font-semibold text-gray-800">
-          Árbol de la Vida con Cartas
+          Arbol de la Vida con Cartas
         </h3>
         <div className="text-sm text-gray-600">
           Click en las Sefirot para ver detalles
@@ -64,53 +67,23 @@ export default function TarotTreeOverlay({
       </div>
 
       <div className="relative w-full" style={{ paddingBottom: '120%' }}>
-        <svg viewBox="0 0 100 120" className="absolute inset-0 w-full h-full">
-          {/* Senderos (paths) */}
-          <g className="paths" opacity="0.3">
-            <line x1="50" y1="5" x2="50" y2="45" stroke="#94a3b8" strokeWidth="0.5" />
-            <line x1="50" y1="45" x2="50" y2="75" stroke="#94a3b8" strokeWidth="0.5" />
-            <line x1="50" y1="75" x2="50" y2="90" stroke="#94a3b8" strokeWidth="0.5" />
-            
-            <line x1="75" y1="20" x2="75" y2="40" stroke="#94a3b8" strokeWidth="0.5" />
-            <line x1="75" y1="40" x2="75" y2="65" stroke="#94a3b8" strokeWidth="0.5" />
-            
-            <line x1="25" y1="20" x2="25" y2="40" stroke="#94a3b8" strokeWidth="0.5" />
-            <line x1="25" y1="40" x2="25" y2="65" stroke="#94a3b8" strokeWidth="0.5" />
-            
-            <line x1="50" y1="5" x2="75" y2="20" stroke="#94a3b8" strokeWidth="0.5" />
-            <line x1="50" y1="5" x2="25" y2="20" stroke="#94a3b8" strokeWidth="0.5" />
-            <line x1="75" y1="20" x2="25" y2="20" stroke="#94a3b8" strokeWidth="0.5" />
-            
-            <line x1="75" y1="20" x2="50" y2="45" stroke="#94a3b8" strokeWidth="0.5" />
-            <line x1="25" y1="20" x2="50" y2="45" stroke="#94a3b8" strokeWidth="0.5" />
-            <line x1="75" y1="20" x2="25" y2="40" stroke="#94a3b8" strokeWidth="0.5" />
-            <line x1="25" y1="20" x2="75" y2="40" stroke="#94a3b8" strokeWidth="0.5" />
-            
-            <line x1="75" y1="40" x2="50" y2="45" stroke="#94a3b8" strokeWidth="0.5" />
-            <line x1="25" y1="40" x2="50" y2="45" stroke="#94a3b8" strokeWidth="0.5" />
-            <line x1="75" y1="40" x2="25" y2="40" stroke="#94a3b8" strokeWidth="0.5" />
-            
-            <line x1="75" y1="40" x2="25" y2="65" stroke="#94a3b8" strokeWidth="0.5" />
-            <line x1="25" y1="40" x2="75" y2="65" stroke="#94a3b8" strokeWidth="0.5" />
-            <line x1="50" y1="45" x2="75" y2="65" stroke="#94a3b8" strokeWidth="0.5" />
-            <line x1="50" y1="45" x2="25" y2="65" stroke="#94a3b8" strokeWidth="0.5" />
-            
-            <line x1="75" y1="65" x2="50" y2="75" stroke="#94a3b8" strokeWidth="0.5" />
-            <line x1="25" y1="65" x2="50" y2="75" stroke="#94a3b8" strokeWidth="0.5" />
-            <line x1="75" y1="65" x2="25" y2="65" stroke="#94a3b8" strokeWidth="0.5" />
-            
-            <line x1="75" y1="65" x2="50" y2="90" stroke="#94a3b8" strokeWidth="0.5" />
-            <line x1="25" y1="65" x2="50" y2="90" stroke="#94a3b8" strokeWidth="0.5" />
-          </g>
-
-          {/* Sefirot con cartas */}
-          {SEFIROT_INFO.map((sefirah) => {
-            const pos = SEFIROT_POSITIONS[sefirah.id as keyof typeof SEFIROT_POSITIONS];
+        <SefirotInteractive
+          className="absolute inset-0 w-full h-full"
+          showBackground={false}
+          showPillarLabels={false}
+          showPillarGuides={false}
+          showHebrew={false}
+          showLabels={false}
+          showMeaning={false}
+        >
+          {sefirahInfo.map((sefirah) => {
             const card = getCardForSefirah(sefirah.id);
             const index = getSefirahIndex(sefirah.id);
             const isHovered = hoveredSefirah === sefirah.id;
             const isSelected = selectedCard?.card.sefirah === sefirah.id;
             const hasCard = card !== null;
+            const radius = 12;
+            const glowRadius = 18;
 
             return (
               <g
@@ -120,38 +93,35 @@ export default function TarotTreeOverlay({
                 onMouseLeave={() => setHoveredSefirah(null)}
                 onClick={() => card && onCardSelect(card)}
               >
-                {/* Glow effect cuando tiene carta */}
-                {hasCard && (
+                {hasCard ? (
                   <circle
-                    cx={pos.x}
-                    cy={pos.y}
-                    r="6"
+                    cx={sefirah.cx}
+                    cy={sefirah.cy}
+                    r={glowRadius}
                     fill={sefirah.color}
                     opacity="0.2"
                     className="animate-pulse"
                   />
-                )}
+                ) : null}
 
-                {/* Círculo principal */}
                 <circle
-                  cx={pos.x}
-                  cy={pos.y}
-                  r="4"
+                  cx={sefirah.cx}
+                  cy={sefirah.cy}
+                  r={radius}
                   fill={hasCard ? sefirah.color : '#f1f5f9'}
                   stroke={isSelected ? '#8b5cf6' : isHovered ? '#a78bfa' : '#cbd5e1'}
-                  strokeWidth={isSelected ? '0.8' : isHovered ? '0.6' : '0.4'}
+                  strokeWidth={isSelected ? 2.4 : isHovered ? 2 : 1.4}
                   className="transition-all"
                   style={{
-                    filter: isSelected ? 'drop-shadow(0 0 4px rgba(139, 92, 246, 0.6))' : 'none'
+                    filter: isSelected ? 'drop-shadow(0 0 6px rgba(139, 92, 246, 0.6))' : 'none',
                   }}
                 />
 
-                {/* Nombre de la Sefirá */}
                 <text
-                  x={pos.x}
-                  y={pos.y + 7}
+                  x={sefirah.cx}
+                  y={sefirah.cy + 28}
                   textAnchor="middle"
-                  fontSize="2.5"
+                  fontSize="10"
                   fontWeight="600"
                   fill={hasCard ? '#374151' : '#9ca3af'}
                   className="pointer-events-none"
@@ -159,66 +129,63 @@ export default function TarotTreeOverlay({
                   {sefirah.spanishName}
                 </text>
 
-                {/* Número de posición si tiene carta */}
-                {hasCard && index >= 0 && (
+                {hasCard && index >= 0 ? (
                   <text
-                    x={pos.x}
-                    y={pos.y + 0.8}
+                    x={sefirah.cx}
+                    y={sefirah.cy + 4}
                     textAnchor="middle"
-                    fontSize="2"
+                    fontSize="9"
                     fontWeight="700"
                     fill="white"
                     className="pointer-events-none"
                   >
                     {index + 1}
                   </text>
-                )}
+                ) : null}
 
-                {/* Tooltip con nombre de carta */}
-                {hasCard && isHovered && (
+                {hasCard && isHovered ? (
                   <g>
                     <rect
-                      x={pos.x - 15}
-                      y={pos.y - 12}
-                      width="30"
-                      height="8"
+                      x={sefirah.cx - 70}
+                      y={sefirah.cy - 34}
+                      width="140"
+                      height="24"
                       fill="rgba(0, 0, 0, 0.9)"
-                      rx="1"
+                      rx="4"
                     />
                     <text
-                      x={pos.x}
-                      y={pos.y - 7}
+                      x={sefirah.cx}
+                      y={sefirah.cy - 18}
                       textAnchor="middle"
-                      fontSize="2"
+                      fontSize="9"
                       fill="white"
                       fontWeight="600"
                       className="pointer-events-none"
                     >
                       {card.card.spanishName}
                     </text>
-                    {card.reversed && (
+                    {card.reversed ? (
                       <text
-                        x={pos.x}
-                        y={pos.y - 4.5}
+                        x={sefirah.cx}
+                        y={sefirah.cy - 6}
                         textAnchor="middle"
-                        fontSize="1.5"
+                        fontSize="8"
                         fill="#fca5a5"
                         className="pointer-events-none"
                       >
                         (Invertida)
                       </text>
-                    )}
+                    ) : null}
                   </g>
-                )}
+                ) : null}
               </g>
             );
           })}
-        </svg>
+        </SefirotInteractive>
       </div>
 
-      {/* Leyenda */}
       <div className="mt-6 grid grid-cols-2 md:grid-cols-3 gap-3">
-        {SEFIROT_INFO.map((sefirah) => {
+        {sefirahInfo.map((sefirah) => {
           const card = getCardForSefirah(sefirah.id);
           return (
             <div
@@ -236,18 +203,17 @@ export default function TarotTreeOverlay({
                 <div className="text-xs font-medium text-gray-700 truncate">
                   {sefirah.spanishName}
                 </div>
-                {card && (
+                {card ? (
                   <div className="text-xs text-gray-500 truncate">
                     {card.card.spanishName}
                   </div>
-                )}
+                ) : null}
               </div>
             </div>
           );
         })}
       </div>
 
-      {/* Pilares info */}
       <div className="mt-6 grid grid-cols-3 gap-4">
         <div className="text-center p-3 bg-red-50 rounded-lg border border-red-200">
           <div className="text-xs font-semibold text-red-800 mb-1">Severidad</div>

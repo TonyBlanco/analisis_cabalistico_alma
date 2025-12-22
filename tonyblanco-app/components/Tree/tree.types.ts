@@ -1,7 +1,7 @@
-import type { TREE_PATHS, TREE_SEFIROT } from './tree.config';
+import type { SEFIROT_CANONICAL, SEFIROT_PATHS } from '../BodySoulVisualization/SefirotInteractive';
 
-export type TreeSefirahId = (typeof TREE_SEFIROT)[number]['id'];
-export type TreePathId = (typeof TREE_PATHS)[number]['id'];
+export type TreeSefirahId = (typeof SEFIROT_CANONICAL)[number]['id'];
+export type TreePathId = (typeof SEFIROT_PATHS)[number]['id'];
 
 export interface TreeFocus {
   type: 'sefirah' | 'path';

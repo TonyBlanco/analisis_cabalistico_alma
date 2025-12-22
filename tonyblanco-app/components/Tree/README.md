@@ -1,7 +1,8 @@
 # Tree of Life SVG
 
-This module provides a neutral, reusable Tree of Life visual stub.
-It renders only geometry (nodes + paths) with optional highlights.
+This module provides a neutral, reusable Tree of Life visual wrapper.
+It delegates to the canonical `SefirotInteractive` SVG and applies
+highlight and focus styles via props.
 
 ## Scope
 - Pure visual renderer
@@ -16,10 +17,9 @@ path thickness, and a soft glow for sefirot.
 It is designed to be mounted by symbolic workspaces when needed.
 
 ## SVG Integration Point
-The current renderer is a placeholder SVG layout.
-A production-grade Tree of Life SVG should replace the stub drawing logic
-inside TreeOfLifeSVG while keeping the same public props and types.
-SVG element IDs must match the canonical TreeSefirahId and TreePathId values.
+The base SVG lives in `BodySoulVisualization/SefirotInteractive.tsx`.
+TreeOfLifeSVG preserves the public props and types while mapping
+highlight, focus, repetition, and opacity styles onto the canonical layout.
 
 ## Intended Consumers
 - Symbolic Overlay Viewer

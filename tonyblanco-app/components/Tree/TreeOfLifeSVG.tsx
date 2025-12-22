@@ -1,27 +1,16 @@
-import { TREE_PATHS, TREE_SEFIROT } from './tree.config';
+import SefirotInteractive, {
+  SEFIROT_CANONICAL,
+  SEFIROT_PATHS,
+  type SefirotNodeStyle,
+  type SefirotPathStyle,
+} from '../BodySoulVisualization/SefirotInteractive';
 import type { TreeOfLifeSVGProps, TreePathId, TreeSefirahId } from './tree.types';
 
-// SVG integration pending
 const SIZE_MAP: Record<NonNullable<TreeOfLifeSVGProps['size']>, number | string> = {
   sm: 200,
   md: 320,
   lg: 480,
-  responsive: '100%'
-};
-
-const DEFAULT_VIEWBOX = '0 0 100 100';
-
-const SEFIRAH_LABELS: Record<TreeSefirahId, { id: string; label: string }> = {
-  kether: { id: 'keter', label: 'Corona' },
-  chokmah: { id: 'chochmah', label: 'Sabiduria' },
-  binah: { id: 'binah', label: 'Entendimiento' },
-  chesed: { id: 'chesed', label: 'Misericordia' },
-  gevurah: { id: 'gevurah', label: 'Rigor' },
-  tiferet: { id: 'tiferet', label: 'Belleza' },
-  netzach: { id: 'netzach', label: 'Victoria' },
-  hod: { id: 'hod', label: 'Esplendor' },
-  yesod: { id: 'yesod', label: 'Fundamento' },
-  malkuth: { id: 'malkuth', label: 'Reino' },
+  responsive: '100%',
 };
 
 function getSizeStyle(size: TreeOfLifeSVGProps['size']) {
@@ -41,7 +30,7 @@ function getConnectedSetsForSefirah(focusedId: TreeSefirahId) {
   const connectedSefirot = new Set<TreeSefirahId>();
   const connectedPaths = new Set<TreePathId>();
 
-  TREE_PATHS.forEach((path) => {
+  SEFIROT_PATHS.forEach((path) => {
     if (path.from === focusedId) {
       connectedSefirot.add(path.to);
       connectedPaths.add(path.id);
@@ -59,7 +48,7 @@ function getConnectedSetsForSefirah(focusedId: TreeSefirahId) {
 function getConnectedSetsForPath(focusedPathId: TreePathId) {
   const connectedSefirot = new Set<TreeSefirahId>();
   const connectedPaths = new Set<TreePathId>();
-  const focusedPath = TREE_PATHS.find((path) => path.id === focusedPathId);
+  const focusedPath = SEFIROT_PATHS.find((path) => path.id === focusedPathId);
 
   if (focusedPath) {
     connectedSefirot.add(focusedPath.from);
@@ -85,7 +74,7 @@ export default function TreeOfLifeSVG({
   interactive = false,
   onSefirahHover,
   onPathHover,
-  className
+  className,
 }: TreeOfLifeSVGProps) {
   const highlightedSefirotSet = new Set<TreeSefirahId>(highlightedSefirot);
   const highlightedPathsSet = new Set<TreePathId>(highlightedPaths);
@@ -96,7 +85,6 @@ export default function TreeOfLifeSVG({
   const resolvedFocusedPath =
     focus?.type === 'path' ? (focus.id as TreePathId) : null;
   const hasFocus = Boolean(resolvedFocusedSefirah || resolvedFocusedPath);
-  const dimOthers = hasFocus || dimUnrelated;
 
   const pathBaseOpacity = emphasis === 'strong' ? 0.9 : 0.7;
   const pathHighlightOpacity = emphasis === 'strong' ? 1 : 0.85;
@@ -113,176 +101,113 @@ export default function TreeOfLifeSVG({
       ? getConnectedSetsForPath(resolvedFocusedPath)
       : { connectedSefirot: new Set<TreeSefirahId>(), connectedPaths: new Set<TreePathId>() };
 
-  return (
-    <svg
-      className={className}
-      viewBox={DEFAULT_VIEWBOX}
-      style={getSizeStyle(size)}
-      role="img"
-      aria-label="Tree of Life visual stub"
-    >
-      <defs>
-        <filter id="sefirah-glow" x="-50%" y="-50%" width="200%" height="200%">
-          <feDropShadow dx="0" dy="0" stdDeviation="1.6" floodColor="#14b8a6" floodOpacity="0.6" />
-        </filter>
-      </defs>
-      <g strokeLinecap="round" strokeLinejoin="round">
-        {TREE_PATHS.map((path) => {
-          const from = TREE_SEFIROT.find((node) => node.id === path.from);
-          const to = TREE_SEFIROT.find((node) => node.id === path.to);
+  const pathStyleOverrides: Partial<Record<TreePathId, SefirotPathStyle>> = {};
+  SEFIROT_PATHS.forEach((path) => {
+    const focused = isFocused(focus, 'path', path.id);
+    const highlighted = highlightedPathsSet.has(path.id);
+    const isConnected =
+      connectedPaths.has(path.id) ||
+      (resolvedFocusedSefirah
+        ? path.from === resolvedFocusedSefirah || path.to === resolvedFocusedSefirah
+        : false);
+    const dimmed =
+      hasFocus ? !isConnected : dimUnrelated && !highlighted;
+    const stroke = highlighted || isConnected || focused ? highlightStroke : '#cbd5f5';
+    const opacity = hasFocus
+      ? isConnected
+        ? 0.7
+        : 0.2
+      : dimmed
+        ? 0.25
+        : highlighted
+          ? pathHighlightOpacity
+          : pathBaseOpacity;
+    const resolvedOpacity =
+      highlighted && highlightedPathOpacity?.[path.id] !== undefined
+        ? highlightedPathOpacity[path.id]!
+        : opacity;
+    const strokeWidth =
+      highlighted || isConnected || focused
+        ? emphasis === 'strong'
+          ? 2.8
+          : 2.4
+        : 1.2;
+    const hasRepetition = repeatedPathsSet.has(path.id);
 
-          if (!from || !to) {
-            return null;
+    pathStyleOverrides[path.id] = {
+      stroke,
+      opacity: resolvedOpacity,
+      strokeWidth,
+      repeat: hasRepetition
+        ? {
+            stroke: repetitionStroke,
+            strokeWidth: strokeWidth + 1.6,
+            opacity: repetitionOpacity,
           }
+        : undefined,
+    };
+  });
 
-          const focused = isFocused(focus, 'path', path.id);
-          const highlighted = highlightedPathsSet.has(path.id);
-          const isConnected =
-            connectedPaths.has(path.id) ||
-            (resolvedFocusedSefirah
-              ? path.from === resolvedFocusedSefirah || path.to === resolvedFocusedSefirah
-              : false);
-          const dimmed =
-            hasFocus ? !isConnected : dimUnrelated && !highlighted;
-          const stroke = highlighted || isConnected || focused ? highlightStroke : '#cbd5f5';
-          const opacity = hasFocus
-            ? isConnected
-              ? 0.7
-              : 0.2
-            : dimmed
-              ? 0.25
-              : highlighted
-                ? pathHighlightOpacity
-                : pathBaseOpacity;
-          const resolvedOpacity =
-            highlighted && highlightedPathOpacity?.[path.id] !== undefined
-              ? highlightedPathOpacity[path.id]!
-              : opacity;
-          const strokeWidth =
-            highlighted || isConnected || focused
-              ? emphasis === 'strong'
-                ? 2.8
-                : 2.4
-              : 1.2;
-          const hasRepetition = repeatedPathsSet.has(path.id);
-          const repetitionStrokeWidth = strokeWidth + 1.6;
+  const nodeStyleOverrides: Partial<Record<TreeSefirahId, SefirotNodeStyle>> = {};
+  SEFIROT_CANONICAL.forEach((node) => {
+    const nodeId = node.id as TreeSefirahId;
+    const focused = isFocused(focus, 'sefirah', nodeId);
+    const highlighted = highlightedSefirotSet.has(nodeId);
+    const isFocusedSefirah = resolvedFocusedSefirah === nodeId || focused;
+    const isConnected = connectedSefirot.has(nodeId);
+    const dimmed =
+      hasFocus ? !(isFocusedSefirah || isConnected) : dimUnrelated && !highlighted;
+    const opacity = hasFocus
+      ? isFocusedSefirah
+        ? 1
+        : isConnected
+          ? 0.7
+          : 0.2
+      : dimmed
+        ? 0.3
+        : 1;
+    const resolvedOpacity =
+      highlighted && highlightedSefirotOpacity?.[nodeId] !== undefined
+        ? highlightedSefirotOpacity[nodeId]!
+        : opacity;
+    const stroke = highlighted || isFocusedSefirah ? highlightStroke : sefirahStroke;
+    const strokeWidth = highlighted || isFocusedSefirah ? 3 : 2;
+    const radius = highlighted || isFocusedSefirah ? node.r + 3 : node.r;
+    const hasRepetition = repeatedSefirotSet.has(nodeId);
+    const fill = highlighted || isFocusedSefirah ? highlightFill : sefirahFill;
 
-          return (
-            <g key={path.id}>
-              {hasRepetition ? (
-                <line
-                  key={`${path.id}-repeat`}
-                  x1={from.x}
-                  y1={from.y}
-                  x2={to.x}
-                  y2={to.y}
-                  stroke={repetitionStroke}
-                  strokeWidth={repetitionStrokeWidth}
-                  opacity={repetitionOpacity}
-                />
-              ) : null}
-              <line
-                x1={from.x}
-                y1={from.y}
-                x2={to.x}
-                y2={to.y}
-                stroke={stroke}
-                strokeWidth={strokeWidth}
-                opacity={resolvedOpacity}
-                onMouseEnter={
-                  interactive && onPathHover
-                    ? () => onPathHover(path.id)
-                    : undefined
-                }
-                onMouseLeave={
-                  interactive && onPathHover
-                    ? () => onPathHover(null)
-                    : undefined
-                }
-                style={{ cursor: interactive ? 'pointer' : 'default' }}
-              />
-            </g>
-          );
-        })}
-      </g>
-      <g>
-        {TREE_SEFIROT.map((node) => {
-          const sefiraInfo = SEFIRAH_LABELS[node.id];
-          const focused = isFocused(focus, 'sefirah', node.id);
-          const highlighted = highlightedSefirotSet.has(node.id);
-          const isFocusedSefirah = resolvedFocusedSefirah === node.id || focused;
-          const isConnected = connectedSefirot.has(node.id);
-          const dimmed =
-            hasFocus ? !(isFocusedSefirah || isConnected) : dimUnrelated && !highlighted;
-          const opacity = hasFocus
-            ? isFocusedSefirah
-              ? 1
-              : isConnected
-                ? 0.7
-                : 0.2
-            : dimmed
-              ? 0.3
-              : 1;
-          const resolvedOpacity =
-            highlighted && highlightedSefirotOpacity?.[node.id] !== undefined
-              ? highlightedSefirotOpacity[node.id]!
-              : opacity;
-          const stroke = highlighted || isFocusedSefirah ? highlightStroke : sefirahStroke;
-          const strokeWidth = highlighted || isFocusedSefirah ? 2.6 : 1.4;
-          const radius = highlighted || isFocusedSefirah ? 5.4 : 4.2;
-          const repetitionRadius = radius + 1.6;
-          const hasRepetition = repeatedSefirotSet.has(node.id);
-          const fill = highlighted || isFocusedSefirah ? highlightFill : sefirahFill;
-          const glow = highlighted || isFocusedSefirah;
+    nodeStyleOverrides[nodeId] = {
+      fill,
+      stroke,
+      strokeWidth,
+      opacity: resolvedOpacity,
+      radius,
+      ring: hasRepetition
+        ? {
+            stroke: repetitionStroke,
+            strokeWidth: 1.6,
+            opacity: repetitionOpacity,
+            radius: radius + 6,
+          }
+        : undefined,
+    };
+  });
 
-          return (
-            <g key={node.id} id={`sefira-${sefiraInfo.id}`}>
-              {hasRepetition ? (
-                <circle
-                  cx={node.x}
-                  cy={node.y}
-                  r={repetitionRadius}
-                  fill="none"
-                  stroke={repetitionStroke}
-                  strokeWidth={1.2}
-                  opacity={repetitionOpacity}
-                />
-              ) : null}
-              <circle
-                cx={node.x}
-                cy={node.y}
-                r={radius}
-                fill={fill}
-                stroke={stroke}
-                strokeWidth={strokeWidth}
-                opacity={resolvedOpacity}
-                filter={glow ? 'url(#sefirah-glow)' : undefined}
-                onMouseEnter={
-                  interactive && onSefirahHover
-                    ? () => onSefirahHover(node.id)
-                    : undefined
-                }
-                onMouseLeave={
-                  interactive && onSefirahHover
-                    ? () => onSefirahHover(null)
-                    : undefined
-                }
-                style={{ cursor: interactive ? 'pointer' : 'default' }}
-              />
-              <text
-                x={node.x}
-                y={node.y + 11}
-                textAnchor="middle"
-                fontSize="3"
-                fill="#475569"
-                opacity={resolvedOpacity}
-              >
-                {sefiraInfo.label}
-              </text>
-            </g>
-          );
-        })}
-      </g>
-    </svg>
+  return (
+    <SefirotInteractive
+      className={className}
+      style={getSizeStyle(size)}
+      interactive={interactive}
+      onHover={onSefirahHover}
+      onPathHover={onPathHover}
+      nodeStyleOverrides={nodeStyleOverrides}
+      pathStyleOverrides={pathStyleOverrides}
+      showBackground={false}
+      showPillarLabels={false}
+      showPillarGuides={false}
+      showHebrew={false}
+      showLabels={false}
+      showMeaning
+    />
   );
 }

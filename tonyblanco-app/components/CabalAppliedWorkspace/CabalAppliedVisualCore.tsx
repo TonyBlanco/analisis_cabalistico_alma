@@ -2,11 +2,10 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import type { CabalSectionId } from './types';
-import TarotTreeOverlay from '@/components/BodySoulVisualization/plugins/tarot/TarotTreeOverlay';
-import type { DrawnCard } from '@/components/BodySoulVisualization/plugins/tarot/types';
 import { getActivePatientId } from '@/lib/active-patient';
 import { getPatientProfileSummary, type PatientProfileSummary } from '@/lib/patient-api';
 import { useTreeStructuralState } from '@/lib/tree-structural-state';
+import TreeOfLifeSVG from '@/components/Tree/TreeOfLifeSVG';
 import TreeVisualPlaceholder from './TreeVisualPlaceholder';
 
 interface CabalAppliedVisualCoreProps {
@@ -14,6 +13,7 @@ interface CabalAppliedVisualCoreProps {
 }
 
 export default function CabalAppliedVisualCore({ activeSection }: CabalAppliedVisualCoreProps) {
+  const [activePatientId, setActivePatientId] = useState<string | null>(null);
   const [patientProfile, setPatientProfile] = useState<PatientProfileSummary | null>(null);
 
   useEffect(() => {
@@ -21,6 +21,7 @@ export default function CabalAppliedVisualCore({ activeSection }: CabalAppliedVi
     const loadPatient = async () => {
       const patientId = getActivePatientId();
       if (!isMounted) return;
+      setActivePatientId(patientId ?? null);
       if (!patientId) {
         setPatientProfile(null);
         return;
@@ -57,10 +58,10 @@ export default function CabalAppliedVisualCore({ activeSection }: CabalAppliedVi
 
   const { state, loading } = useTreeStructuralState(treeInput);
 
-  const highlightedSefirot = useMemo(
-    () => state?.sefirot_activas.map((item) => item.id_canonico) ?? [],
-    [state?.sefirot_activas]
-  );
+  const highlightedSefirot = useMemo(() => {
+    if (!state?.sefirot_activas.length) return [];
+    return state.sefirot_activas.map((item) => item.id_canonico);
+  }, [state?.sefirot_activas]);
 
   const highlightedPaths = useMemo(() => {
     if (!state?.senderos_activos.length) return [];
@@ -72,6 +73,20 @@ export default function CabalAppliedVisualCore({ activeSection }: CabalAppliedVi
       })
       .filter((value): value is string => Boolean(value));
   }, [state?.senderos_activos]);
+
+  const repeatedSefirot = useMemo(() => {
+    if (!state?.repeticiones.length) return [];
+    return state.repeticiones
+      .map((item) => item.simbolo_id)
+      .filter((id) => !id.includes('-'));
+  }, [state?.repeticiones]);
+
+  const repeatedPaths = useMemo(() => {
+    if (!state?.repeticiones.length) return [];
+    return state.repeticiones
+      .map((item) => item.simbolo_id)
+      .filter((id) => id.includes('-'));
+  }, [state?.repeticiones]);
 
   const mapWeightsToOpacity = (items: Array<{ id: string; weight: number }>) => {
     if (!items.length) {
@@ -120,8 +135,6 @@ export default function CabalAppliedVisualCore({ activeSection }: CabalAppliedVi
     return mapWeightsToOpacity(items);
   }, [state?.senderos_activos]);
 
-  const treeReading: DrawnCard[] | null = null;
-
   return (
     <section className="flex-1 bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
       <div className="flex items-start justify-between gap-4 mb-4">
@@ -136,84 +149,108 @@ export default function CabalAppliedVisualCore({ activeSection }: CabalAppliedVi
         </div>
       </div>
       <TreeVisualPlaceholder />
-      <div className="mt-6">
-        <TarotTreeOverlay
-          reading={treeReading}
-          selectedCard={null}
-          onCardSelect={() => undefined}
-        />
-      </div>
-      <div className="mt-6 grid gap-4 md:grid-cols-2">
-        <div className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-700">
-          <div className="text-xs uppercase tracking-wide text-gray-500">Sefirot activas</div>
-          <div className="mt-2 text-xs">
-            {loading ? (
-              <span>Cargando...</span>
-            ) : state?.sefirot_activas.length ? (
-              <span>
-                {state.sefirot_activas
-                  .map((item) => `${item.id_canonico} (${item.indice ?? '-'}, ${item.peso})`)
-                  .join(', ')}
-              </span>
-            ) : (
-              <span>No disponible</span>
-            )}
-          </div>
+      {!activePatientId ? (
+        <div className="mt-6 rounded-lg border border-dashed border-gray-200 bg-gray-50 p-4 text-sm text-gray-600">
+          Seleccione un paciente para ver el Arbol de la Vida.
         </div>
-        <div className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-700">
-          <div className="text-xs uppercase tracking-wide text-gray-500">Senderos activos</div>
-          <div className="mt-2 text-xs">
-            {loading ? (
-              <span>Cargando...</span>
-            ) : state?.senderos_activos.length ? (
-              <span>
-                {state.senderos_activos
-                  .map((item) => `${item.id_canonico} (${item.numero ?? '-'}, ${item.peso})`)
-                  .join(', ')}
-              </span>
-            ) : (
-              <span>No disponible</span>
-            )}
+      ) : (
+        <>
+          <div className="mt-6 rounded-lg border border-gray-200 bg-gray-50 p-4">
+            <div className="relative w-full h-72">
+              <TreeOfLifeSVG
+                highlightedSefirot={[]}
+                highlightedPaths={[]}
+                emphasis="soft"
+                size="responsive"
+                className="absolute inset-0 h-full w-full opacity-40 pointer-events-none"
+              />
+              <TreeOfLifeSVG
+                highlightedSefirot={highlightedSefirot}
+                highlightedPaths={highlightedPaths}
+                highlightedSefirotOpacity={highlightedSefirotOpacity}
+                highlightedPathOpacity={highlightedPathOpacity}
+                repeatedSefirot={repeatedSefirot}
+                repeatedPaths={repeatedPaths}
+                emphasis="strong"
+                dimUnrelated={true}
+                size="responsive"
+                className="absolute inset-0 h-full w-full"
+              />
+            </div>
           </div>
-        </div>
-        <div className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-700">
-          <div className="text-xs uppercase tracking-wide text-gray-500">Repeticiones</div>
-          <div className="mt-2 text-xs">
-            {loading ? (
-              <span>Cargando...</span>
-            ) : state?.repeticiones.length ? (
-              <span>
-                {state.repeticiones
-                  .map((item) => `${item.simbolo_id} (${item.conteo})`)
-                  .join(', ')}
-              </span>
-            ) : (
-              <span>No disponible</span>
-            )}
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
+            <div className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-700">
+              <div className="text-xs uppercase tracking-wide text-gray-500">Sefirot activas</div>
+              <div className="mt-2 text-xs">
+                {loading ? (
+                  <span>Cargando...</span>
+                ) : state?.sefirot_activas.length ? (
+                  <span>
+                    {state.sefirot_activas
+                      .map((item) => `${item.id_canonico} (${item.indice ?? '-'}, ${item.peso})`)
+                      .join(', ')}
+                  </span>
+                ) : (
+                  <span>No disponible</span>
+                )}
+              </div>
+            </div>
+            <div className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-700">
+              <div className="text-xs uppercase tracking-wide text-gray-500">Senderos activos</div>
+              <div className="mt-2 text-xs">
+                {loading ? (
+                  <span>Cargando...</span>
+                ) : state?.senderos_activos.length ? (
+                  <span>
+                    {state.senderos_activos
+                      .map((item) => `${item.id_canonico} (${item.numero ?? '-'}, ${item.peso})`)
+                      .join(', ')}
+                  </span>
+                ) : (
+                  <span>No disponible</span>
+                )}
+              </div>
+            </div>
+            <div className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-700">
+              <div className="text-xs uppercase tracking-wide text-gray-500">Repeticiones</div>
+              <div className="mt-2 text-xs">
+                {loading ? (
+                  <span>Cargando...</span>
+                ) : state?.repeticiones.length ? (
+                  <span>
+                    {state.repeticiones
+                      .map((item) => `${item.simbolo_id} (${item.conteo})`)
+                      .join(', ')}
+                  </span>
+                ) : (
+                  <span>No disponible</span>
+                )}
+              </div>
+            </div>
+            <div className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-700">
+              <div className="text-xs uppercase tracking-wide text-gray-500">Pesos</div>
+              <div className="mt-2 text-xs">
+                {loading ? (
+                  <span>Cargando...</span>
+                ) : state && Object.keys(state.pesos).length ? (
+                  <span>
+                    {Object.entries(state.pesos)
+                      .map(([key, value]) => `${key} (${value})`)
+                      .join(', ')}
+                  </span>
+                ) : (
+                  <span>No disponible</span>
+                )}
+              </div>
+            </div>
           </div>
-        </div>
-        <div className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-700">
-          <div className="text-xs uppercase tracking-wide text-gray-500">Pesos</div>
-          <div className="mt-2 text-xs">
-            {loading ? (
-              <span>Cargando...</span>
-            ) : state && Object.keys(state.pesos).length ? (
-              <span>
-                {Object.entries(state.pesos)
-                  .map(([key, value]) => `${key} (${value})`)
-                  .join(', ')}
-              </span>
-            ) : (
-              <span>No disponible</span>
-            )}
+          <div className="mt-4 rounded-lg border border-dashed border-gray-200 bg-gray-50 p-3 text-xs text-gray-500">
+            <span className="font-medium">Ejes:</span> No disponible -{' '}
+            <span className="font-medium">Polaridades:</span> No disponible -{' '}
+            <span className="font-medium">Fuentes:</span> No disponible
           </div>
-        </div>
-      </div>
-      <div className="mt-4 rounded-lg border border-dashed border-gray-200 bg-gray-50 p-3 text-xs text-gray-500">
-        <span className="font-medium">Ejes:</span> No disponible ·{' '}
-        <span className="font-medium">Polaridades:</span> No disponible ·{' '}
-        <span className="font-medium">Fuentes:</span> No disponible
-      </div>
+        </>
+      )}
     </section>
   );
 }

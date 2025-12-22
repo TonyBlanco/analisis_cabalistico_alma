@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { TransgenerationalSectionId } from './types';
 import TreeOfLifeSVG from '@/components/Tree/TreeOfLifeSVG';
+import type { TreePathId, TreeSefirahId } from '@/components/Tree/tree.types';
 import { getActivePatientId } from '@/lib/active-patient';
 import { getPatientProfileSummary, type PatientProfileSummary } from '@/lib/patient-api';
 import { useTreeStructuralState } from '@/lib/tree-structural-state';
@@ -15,6 +16,8 @@ export default function TransgenerationalVisualCore({
   activeSection,
 }: TransgenerationalVisualCoreProps) {
   const [patientProfile, setPatientProfile] = useState<PatientProfileSummary | null>(null);
+  const [hoveredSefirah, setHoveredSefirah] = useState<TreeSefirahId | null>(null);
+  const [hoveredPath, setHoveredPath] = useState<TreePathId | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -134,6 +137,43 @@ export default function TransgenerationalVisualCore({
     return mapWeightsToOpacity(items);
   }, [state?.senderos_activos]);
 
+  const tooltipData = useMemo(() => {
+    if (!state) return null;
+    if (hoveredSefirah) {
+      const repetition = state.repeticiones.find(
+        (item) => item.simbolo_id === hoveredSefirah
+      );
+      const weight =
+        state.pesos?.[hoveredSefirah] ??
+        state.sefirot_activas.find((item) => item.id_canonico === hoveredSefirah)?.peso;
+      return {
+        type: 'sefira' as const,
+        id: hoveredSefirah,
+        weight,
+        repetition: repetition?.conteo,
+      };
+    }
+    if (hoveredPath) {
+      const repetition = state.repeticiones.find(
+        (item) => item.simbolo_id === hoveredPath
+      );
+      const weight =
+        state.pesos?.[hoveredPath] ??
+        state.senderos_activos.find((item) => {
+          const from = item.endpoints.from_sefira;
+          const to = item.endpoints.to_sefira;
+          return from && to ? `${from}-${to}` === hoveredPath : false;
+        })?.peso;
+      return {
+        type: 'sendero' as const,
+        id: hoveredPath,
+        weight,
+        repetition: repetition?.conteo,
+      };
+    }
+    return null;
+  }, [hoveredPath, hoveredSefirah, state]);
+
   const weightRanking = useMemo(() => {
     if (!state?.pesos) return [];
     return Object.entries(state.pesos).sort((a, b) => b[1] - a[1]);
@@ -171,9 +211,33 @@ export default function TransgenerationalVisualCore({
               repeatedPaths={repeatedPaths}
               emphasis="strong"
               dimUnrelated={true}
+              interactive={true}
+              onSefirahHover={(id) => {
+                setHoveredSefirah(id);
+                if (id) {
+                  setHoveredPath(null);
+                }
+              }}
+              onPathHover={(id) => {
+                setHoveredPath(id);
+                if (id) {
+                  setHoveredSefirah(null);
+                }
+              }}
               size="responsive"
-              className="absolute inset-0 h-full w-full pointer-events-none"
+              className="absolute inset-0 h-full w-full"
             />
+            {tooltipData ? (
+              <div className="pointer-events-none absolute right-3 top-3 rounded-md border border-slate-200 bg-white/95 px-2 py-1 text-[11px] text-slate-700 shadow-sm">
+                <div className="font-medium">ID: {tooltipData.id}</div>
+                {tooltipData.weight !== undefined ? (
+                  <div>Peso: {tooltipData.weight}</div>
+                ) : null}
+                {tooltipData.repetition !== undefined ? (
+                  <div>Repeticion: {tooltipData.repetition}</div>
+                ) : null}
+              </div>
+            ) : null}
           </div>
         </div>
         <div className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-700">

@@ -10,8 +10,8 @@ export const sefirotDefinitions: SefirahDefinition[] = [
     position: { x: 50, y: 6 },
   },
   {
-    id: 'chokhmah',
-    hebrewName: 'Chokhmah',
+    id: 'chokmah',
+    hebrewName: 'Chokmah',
     spanishName: 'Sabiduria',
     description: 'Referencia simbolica de intuicion y perspectiva.',
     colorToken: 'sky-500',
@@ -74,8 +74,8 @@ export const sefirotDefinitions: SefirahDefinition[] = [
     position: { x: 50, y: 84 },
   },
   {
-    id: 'malchut',
-    hebrewName: 'Malchut',
+    id: 'malkuth',
+    hebrewName: 'Malkuth',
     spanishName: 'Reino',
     description: 'Referencia simbolica de presencia y realidad concreta.',
     colorToken: 'orange-500',
@@ -84,10 +84,10 @@ export const sefirotDefinitions: SefirahDefinition[] = [
 ];
 
 export const sefirotConnections: SefirahConnection[] = [
-  { fromId: 'keter', toId: 'chokhmah' },
+  { fromId: 'keter', toId: 'chokmah' },
   { fromId: 'keter', toId: 'binah' },
-  { fromId: 'chokhmah', toId: 'binah' },
-  { fromId: 'chokhmah', toId: 'chesed' },
+  { fromId: 'chokmah', toId: 'binah' },
+  { fromId: 'chokmah', toId: 'chesed' },
   { fromId: 'binah', toId: 'gevurah' },
   { fromId: 'chesed', toId: 'gevurah' },
   { fromId: 'chesed', toId: 'tiferet' },
@@ -97,7 +97,7 @@ export const sefirotConnections: SefirahConnection[] = [
   { fromId: 'netzach', toId: 'hod' },
   { fromId: 'netzach', toId: 'yesod' },
   { fromId: 'hod', toId: 'yesod' },
-  { fromId: 'yesod', toId: 'malchut' },
+  { fromId: 'yesod', toId: 'malkuth' },
 ];
 
 export const sefirotBodyCorrespondences: SefirahBodyCorrespondence[] = [
@@ -107,7 +107,7 @@ export const sefirotBodyCorrespondences: SefirahBodyCorrespondence[] = [
     note: 'Correspondencia simbolica con la zona superior para observacion consultive.',
   },
   {
-    sefirahId: 'chokhmah',
+    sefirahId: 'chokmah',
     bodyRegionId: 'rightShoulder',
     note: 'Correspondencia simbolica con el lado derecho superior.',
   },
@@ -147,7 +147,7 @@ export const sefirotBodyCorrespondences: SefirahBodyCorrespondence[] = [
     note: 'Correspondencia simbolica con la zona abdominal.',
   },
   {
-    sefirahId: 'malchut',
+    sefirahId: 'malkuth',
     bodyRegionId: 'pelvis',
     note: 'Correspondencia simbolica con la base corporal.',
   },

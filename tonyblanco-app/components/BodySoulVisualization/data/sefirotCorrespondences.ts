@@ -15,15 +15,15 @@ export const sefirotDefinitions: SefirahDefinition[] = [
     spanishName: 'Sabiduria',
     description: 'Referencia simbolica de intuicion y perspectiva.',
     colorToken: 'sky-500',
-    position: { x: 30, y: 18 },
+    position: { x: 70, y: 18 },
   },
   {
     id: 'binah',
     hebrewName: 'Binah',
-    spanishName: 'Comprension',
+    spanishName: 'Entendimiento',
     description: 'Referencia simbolica de claridad y estructura.',
     colorToken: 'indigo-500',
-    position: { x: 70, y: 18 },
+    position: { x: 30, y: 18 },
   },
   {
     id: 'chesed',
@@ -31,7 +31,7 @@ export const sefirotDefinitions: SefirahDefinition[] = [
     spanishName: 'Misericordia',
     description: 'Referencia simbolica de amplitud y apertura relacional.',
     colorToken: 'emerald-500',
-    position: { x: 24, y: 36 },
+    position: { x: 76, y: 36 },
   },
   {
     id: 'gevurah',
@@ -39,12 +39,12 @@ export const sefirotDefinitions: SefirahDefinition[] = [
     spanishName: 'Rigor',
     description: 'Referencia simbolica de limites y enfoque.',
     colorToken: 'rose-500',
-    position: { x: 76, y: 36 },
+    position: { x: 24, y: 36 },
   },
   {
     id: 'tiferet',
     hebrewName: 'Tiferet',
-    spanishName: 'Armonia',
+    spanishName: 'Belleza',
     description: 'Referencia simbolica de integracion y balance narrativo.',
     colorToken: 'teal-500',
     position: { x: 50, y: 52 },
@@ -55,7 +55,7 @@ export const sefirotDefinitions: SefirahDefinition[] = [
     spanishName: 'Victoria',
     description: 'Referencia simbolica de impulso y continuidad.',
     colorToken: 'lime-500',
-    position: { x: 34, y: 68 },
+    position: { x: 66, y: 68 },
   },
   {
     id: 'hod',
@@ -63,7 +63,7 @@ export const sefirotDefinitions: SefirahDefinition[] = [
     spanishName: 'Esplendor',
     description: 'Referencia simbolica de lenguaje y expresion.',
     colorToken: 'fuchsia-500',
-    position: { x: 66, y: 68 },
+    position: { x: 34, y: 68 },
   },
   {
     id: 'yesod',
@@ -118,13 +118,13 @@ export const sefirotBodyCorrespondences: SefirahBodyCorrespondence[] = [
   },
   {
     sefirahId: 'chesed',
-    bodyRegionId: 'leftShoulder',
-    note: 'Correspondencia simbolica de apertura en el lado izquierdo.',
+    bodyRegionId: 'rightShoulder',
+    note: 'Correspondencia simbolica de apertura en el lado derecho.',
   },
   {
     sefirahId: 'gevurah',
-    bodyRegionId: 'rightShoulder',
-    note: 'Correspondencia simbolica de enfoque en el lado derecho.',
+    bodyRegionId: 'leftShoulder',
+    note: 'Correspondencia simbolica de enfoque en el lado izquierdo.',
   },
   {
     sefirahId: 'tiferet',
@@ -133,13 +133,13 @@ export const sefirotBodyCorrespondences: SefirahBodyCorrespondence[] = [
   },
   {
     sefirahId: 'netzach',
-    bodyRegionId: 'leftHip',
-    note: 'Correspondencia simbolica con el soporte izquierdo inferior.',
+    bodyRegionId: 'rightHip',
+    note: 'Correspondencia simbolica con el soporte derecho inferior.',
   },
   {
     sefirahId: 'hod',
-    bodyRegionId: 'rightHip',
-    note: 'Correspondencia simbolica con el soporte derecho inferior.',
+    bodyRegionId: 'leftHip',
+    note: 'Correspondencia simbolica con el soporte izquierdo inferior.',
   },
   {
     sefirahId: 'yesod',

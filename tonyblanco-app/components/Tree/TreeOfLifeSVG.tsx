@@ -11,6 +11,19 @@ const SIZE_MAP: Record<NonNullable<TreeOfLifeSVGProps['size']>, number | string>
 
 const DEFAULT_VIEWBOX = '0 0 100 100';
 
+const SEFIRAH_LABELS: Record<TreeSefirahId, { id: string; label: string }> = {
+  kether: { id: 'keter', label: 'Corona' },
+  chokmah: { id: 'chochmah', label: 'Sabiduria' },
+  binah: { id: 'binah', label: 'Entendimiento' },
+  chesed: { id: 'chesed', label: 'Misericordia' },
+  gevurah: { id: 'gevurah', label: 'Rigor' },
+  tiferet: { id: 'tiferet', label: 'Belleza' },
+  netzach: { id: 'netzach', label: 'Victoria' },
+  hod: { id: 'hod', label: 'Esplendor' },
+  yesod: { id: 'yesod', label: 'Fundamento' },
+  malkuth: { id: 'malkuth', label: 'Reino' },
+};
+
 function getSizeStyle(size: TreeOfLifeSVGProps['size']) {
   const resolved = SIZE_MAP[size ?? 'md'];
   if (resolved === '100%') {
@@ -60,6 +73,10 @@ function getConnectedSetsForPath(focusedPathId: TreePathId) {
 export default function TreeOfLifeSVG({
   highlightedSefirot = [],
   highlightedPaths = [],
+  highlightedSefirotOpacity,
+  highlightedPathOpacity,
+  repeatedSefirot = [],
+  repeatedPaths = [],
   focusedSefirah = null,
   dimUnrelated = false,
   focus,
@@ -72,6 +89,8 @@ export default function TreeOfLifeSVG({
 }: TreeOfLifeSVGProps) {
   const highlightedSefirotSet = new Set<TreeSefirahId>(highlightedSefirot);
   const highlightedPathsSet = new Set<TreePathId>(highlightedPaths);
+  const repeatedSefirotSet = new Set<TreeSefirahId>(repeatedSefirot);
+  const repeatedPathsSet = new Set<TreePathId>(repeatedPaths);
   const resolvedFocusedSefirah =
     focusedSefirah ?? (focus?.type === 'sefirah' ? (focus.id as TreeSefirahId) : null);
   const resolvedFocusedPath =
@@ -83,6 +102,8 @@ export default function TreeOfLifeSVG({
   const pathHighlightOpacity = emphasis === 'strong' ? 1 : 0.85;
   const sefirahFill = '#f1f5f9';
   const sefirahStroke = '#94a3b8';
+  const repetitionStroke = '#64748b';
+  const repetitionOpacity = 0.45;
   const highlightStroke = emphasis === 'strong' ? '#0f766e' : '#0d9488';
   const highlightFill = emphasis === 'strong' ? '#ccfbf1' : '#e0f2f1';
 
@@ -133,40 +154,60 @@ export default function TreeOfLifeSVG({
               : highlighted
                 ? pathHighlightOpacity
                 : pathBaseOpacity;
+          const resolvedOpacity =
+            highlighted && highlightedPathOpacity?.[path.id] !== undefined
+              ? highlightedPathOpacity[path.id]!
+              : opacity;
           const strokeWidth =
             highlighted || isConnected || focused
               ? emphasis === 'strong'
                 ? 2.8
                 : 2.4
               : 1.2;
+          const hasRepetition = repeatedPathsSet.has(path.id);
+          const repetitionStrokeWidth = strokeWidth + 1.6;
 
           return (
-            <line
-              key={path.id}
-              x1={from.x}
-              y1={from.y}
-              x2={to.x}
-              y2={to.y}
-              stroke={stroke}
-              strokeWidth={strokeWidth}
-              opacity={opacity}
-              onMouseEnter={
-                interactive && onPathHover
-                  ? () => onPathHover(path.id)
-                  : undefined
-              }
-              onMouseLeave={
-                interactive && onPathHover
-                  ? () => onPathHover(null)
-                  : undefined
-              }
-              style={{ cursor: interactive ? 'pointer' : 'default' }}
-            />
+            <g key={path.id}>
+              {hasRepetition ? (
+                <line
+                  key={`${path.id}-repeat`}
+                  x1={from.x}
+                  y1={from.y}
+                  x2={to.x}
+                  y2={to.y}
+                  stroke={repetitionStroke}
+                  strokeWidth={repetitionStrokeWidth}
+                  opacity={repetitionOpacity}
+                />
+              ) : null}
+              <line
+                x1={from.x}
+                y1={from.y}
+                x2={to.x}
+                y2={to.y}
+                stroke={stroke}
+                strokeWidth={strokeWidth}
+                opacity={resolvedOpacity}
+                onMouseEnter={
+                  interactive && onPathHover
+                    ? () => onPathHover(path.id)
+                    : undefined
+                }
+                onMouseLeave={
+                  interactive && onPathHover
+                    ? () => onPathHover(null)
+                    : undefined
+                }
+                style={{ cursor: interactive ? 'pointer' : 'default' }}
+              />
+            </g>
           );
         })}
       </g>
       <g>
         {TREE_SEFIROT.map((node) => {
+          const sefiraInfo = SEFIRAH_LABELS[node.id];
           const focused = isFocused(focus, 'sefirah', node.id);
           const highlighted = highlightedSefirotSet.has(node.id);
           const isFocusedSefirah = resolvedFocusedSefirah === node.id || focused;
@@ -182,14 +223,31 @@ export default function TreeOfLifeSVG({
             : dimmed
               ? 0.3
               : 1;
+          const resolvedOpacity =
+            highlighted && highlightedSefirotOpacity?.[node.id] !== undefined
+              ? highlightedSefirotOpacity[node.id]!
+              : opacity;
           const stroke = highlighted || isFocusedSefirah ? highlightStroke : sefirahStroke;
           const strokeWidth = highlighted || isFocusedSefirah ? 2.6 : 1.4;
           const radius = highlighted || isFocusedSefirah ? 5.4 : 4.2;
+          const repetitionRadius = radius + 1.6;
+          const hasRepetition = repeatedSefirotSet.has(node.id);
           const fill = highlighted || isFocusedSefirah ? highlightFill : sefirahFill;
           const glow = highlighted || isFocusedSefirah;
 
           return (
-            <g key={node.id}>
+            <g key={node.id} id={`sefira-${sefiraInfo.id}`}>
+              {hasRepetition ? (
+                <circle
+                  cx={node.x}
+                  cy={node.y}
+                  r={repetitionRadius}
+                  fill="none"
+                  stroke={repetitionStroke}
+                  strokeWidth={1.2}
+                  opacity={repetitionOpacity}
+                />
+              ) : null}
               <circle
                 cx={node.x}
                 cy={node.y}
@@ -197,7 +255,7 @@ export default function TreeOfLifeSVG({
                 fill={fill}
                 stroke={stroke}
                 strokeWidth={strokeWidth}
-                opacity={opacity}
+                opacity={resolvedOpacity}
                 filter={glow ? 'url(#sefirah-glow)' : undefined}
                 onMouseEnter={
                   interactive && onSefirahHover
@@ -217,9 +275,9 @@ export default function TreeOfLifeSVG({
                 textAnchor="middle"
                 fontSize="3"
                 fill="#475569"
-                opacity={opacity}
+                opacity={resolvedOpacity}
               >
-                {node.id}
+                {sefiraInfo.label}
               </text>
             </g>
           );

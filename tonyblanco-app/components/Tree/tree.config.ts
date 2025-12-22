@@ -1,12 +1,12 @@
 export const TREE_SEFIROT = [
   { id: 'kether', x: 50, y: 5 },
-  { id: 'chokmah', x: 20, y: 15 },
-  { id: 'binah', x: 80, y: 15 },
-  { id: 'chesed', x: 20, y: 35 },
-  { id: 'gevurah', x: 80, y: 35 },
+  { id: 'binah', x: 20, y: 15 },
+  { id: 'chokmah', x: 80, y: 15 },
+  { id: 'gevurah', x: 20, y: 35 },
+  { id: 'chesed', x: 80, y: 35 },
   { id: 'tiferet', x: 50, y: 50 },
-  { id: 'netzach', x: 20, y: 70 },
-  { id: 'hod', x: 80, y: 70 },
+  { id: 'hod', x: 20, y: 70 },
+  { id: 'netzach', x: 80, y: 70 },
   { id: 'yesod', x: 50, y: 85 },
   { id: 'malkuth', x: 50, y: 97 }
 ] as const;

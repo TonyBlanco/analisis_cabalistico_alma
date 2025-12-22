@@ -11,6 +11,10 @@ export interface TreeFocus {
 export interface TreeOfLifeSVGProps {
   highlightedSefirot?: TreeSefirahId[];
   highlightedPaths?: TreePathId[];
+  highlightedSefirotOpacity?: Partial<Record<TreeSefirahId, number>>;
+  highlightedPathOpacity?: Partial<Record<TreePathId, number>>;
+  repeatedSefirot?: TreeSefirahId[];
+  repeatedPaths?: TreePathId[];
   focusedSefirah?: TreeSefirahId | null;
   dimUnrelated?: boolean;
   focus?: TreeFocus;

@@ -105,6 +105,7 @@ from .patient_status_views import (
     PatientStatusUpdateView,
     PatientArchiveView,
 )
+from .symbolic_views import TreeStructuralStateView
 
 urlpatterns = [
     # ⚠️ ENDPOINTS TEMPORALES - ELIMINAR DESPUÉS DE USAR ⚠️
@@ -229,6 +230,8 @@ urlpatterns = [
 
     # Dominio bio-emocional & árbol transgeneracional (aislado)
     path('bioemotional/', include('api.bioemotional.urls', namespace='bioemotional')),
+    # Estado simbolico estructural (TreeStructuralState v0.1)
+    path('symbolic/tree-structural-state/', TreeStructuralStateView.as_view(), name='tree_structural_state'),
     
     # Resource Access Core
     path('resources/my/', MyResourcesView.as_view(), name='my_resources'),

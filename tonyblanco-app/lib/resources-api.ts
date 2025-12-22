@@ -75,3 +75,13 @@ export async function acquireResource(
 
   return response.json();
 }
+
+// TEMPORAL – stub para estabilizar build
+export async function getResources(): Promise<Resource[]> {
+  return [];
+}
+
+// TEMPORAL – stub para estabilizar build
+export async function unassignResourceFromPatient(): Promise<{ success: boolean }> {
+  return { success: true };
+}

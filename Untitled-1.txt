@@ -1,0 +1,222 @@
+/* Custom CSS for Hospitalarias.in - Branding & Layout (Updated for Menu Visibility & Styling) */
+
+/* Global Body Styles */
+body {
+    font-family: "Albert Sans", "Helvetica Neue", "Arial", sans-serif;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+    color: #4d4d4d; /* Content headings color from master site */
+}
+
+/* Header Adjustments for Reykjavik Theme */
+.site-header { /* Clase principal del header en Reykjavik */
+    background-color: #ffffff; /* Fondo blanco para el header principal */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    border-bottom: none; /* Elimina cualquier borde si lo tiene */
+    position: relative; /* Necesario para posicionar la barra superior */
+    z-index: 100; /* Asegura que esté por encima de otros elementos */
+}
+
+/* Ocultar el título y descripción del sitio si no se usan con el logo */
+.site-title,
+.site-description {
+    display: none !important;
+}
+
+/* Ocultar elementos de navegación y búsqueda por defecto en la página "Coming Soon" */
+/* !IMPORTANT añadido para forzar la ocultación */
+.main-navigation,
+.secondary-navigation,
+.menu-skip-links,
+.mobile-search-form {
+    display: none !important;
+    visibility: hidden !important; /* Añadido para asegurar la ocultación */
+    height: 0 !important; /* Añadido para colapsar el espacio */
+    overflow: hidden !important; /* Añadido para evitar scroll indeseado */
+}
+
+/* Estilo para el Site Branding (donde va el logo y título del sitio) */
+.site-branding {
+    text-align: center; /* Centra el logo */
+    padding: 15px 0; /* Ajusta el padding para el logo */
+}
+
+/* Logo */
+.custom-logo-link {
+    display: inline-block; /* Permite centrar el logo */
+}
+
+.custom-logo {
+    max-width: 200px; /* Tamaño sugerido para el logo */
+    height: 120px; /* Tamaño sugerido para el logo */
+    display: block;
+    margin: 0 auto; /* Centra el logo */
+}
+
+/* Header Top Bar (Esta barra la vamos a insertar manualmente en un widget o bloque) */
+.hospitalarias-top-bar {
+    background-color: #8C0052; /* Magenta oficial */
+    padding: 8px 20px;
+    display: flex;
+    justify-content: flex-end; /* Alinea el selector de idioma a la derecha */
+    align-items: center;
+    color: #ffffff; /* Texto blanco */
+    font-size: 0.9em;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.hospitalarias-top-bar .language-selector {
+    display: flex;
+    align-items: center;
+}
+
+.hospitalarias-top-bar .language-selector a {
+    color: #ffffff;
+    text-decoration: none;
+    margin-left: 15px;
+    padding: 3px 6px;
+    border-radius: 3px;
+    transition: background-color 0.3s ease;
+}
+
+.hospitalarias-top-bar .language-selector a:hover,
+.hospitalarias-top-bar .language-selector a.active {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Coming Soon Content Area (aplicado al grupo de bloques en la página) */
+.coming-soon-wrapper {
+    text-align: center;
+    padding: 60px 20px;
+    max-width: 800px;
+    margin: 50px auto;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.coming-soon-wrapper h1 {
+    color: #8C0052; /* Magenta accent for main heading */
+    font-size: 2.5em; /* Ligeramente más pequeño para mejor ajuste */
+    margin-bottom: 20px;
+}
+
+.coming-soon-wrapper p {
+    font-size: 1.1em; /* Ligeramente más pequeño */
+    line-height: 1.7;
+    margin-bottom: 20px;
+    color: #535354;
+}
+
+.coming-soon-wrapper .spiritual-quote {
+    font-style: italic;
+    color: #8C0052;
+    font-size: 1em;
+    margin-top: 25px;
+}
+
+/* Footer Styles */
+.site-footer {
+    background-color: #8C0052; /* Magenta oficial */
+    color: #eeeeee; /* Texto gris claro */
+    padding: 40px 20px;
+    font-size: 0.9em;
+    text-align: center;
+}
+
+.site-footer-area-inner.site-info-inner,
+.site-footer .widget-area {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    column-gap: 30px;
+    row-gap: 20px;
+    margin-bottom: 30px;
+    align-items: flex-start;
+}
+
+.site-footer .widget {
+    flex: 1;
+    min-width: 280px;
+    max-width: 350px;
+    box-sizing: border-box;
+    padding: 15px;
+    color: #eeeeee;
+    text-align: left;
+}
+
+.site-footer .widget-title {
+    color: #ffffff;
+    font-size: 1.2em;
+    margin-bottom: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding-bottom: 10px;
+}
+
+.site-footer .widget p,
+.site-footer .widget a {
+    color: #eeeeee;
+    text-decoration: none;
+    line-height: 1.8;
+    display: block;
+}
+
+.site-footer .widget a:hover {
+    text-decoration: underline;
+}
+
+.site-footer .site-info {
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    padding-top: 20px;
+    margin-top: 20px;
+    text-align: center;
+    font-size: 0.8em;
+    width: 100%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .hospitalarias-top-bar {
+        justify-content: center;
+        flex-direction: column;
+        row-gap: 5px;
+    }
+    .hospitalarias-top-bar .language-selector {
+        flex-direction: column;
+    }
+    .hospitalarias-top-bar .language-selector a {
+        margin: 5px 0;
+    }
+
+    .custom-logo {
+        max-width: 150px !important;
+        height: auto !important;
+    }
+
+    .coming-soon-wrapper {
+        padding: 40px 15px;
+        margin: 30px auto;
+    }
+
+    .coming-soon-wrapper h1 {
+        font-size: 1.8em;
+    }
+
+    .coming-soon-wrapper p {
+        font-size: 0.95em;
+    }
+
+    .site-footer .widget-area {
+        flex-direction: column;
+        align-items: center;
+        row-gap: 20px;
+    }
+
+    .site-footer .widget {
+        text-align: center;
+        min-width: unset;
+        width: 100%;
+    }
+}

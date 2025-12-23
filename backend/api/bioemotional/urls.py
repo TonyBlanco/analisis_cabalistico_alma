@@ -16,6 +16,12 @@ from .views import (
 
     GenealogyEventDetailView,
 
+    BioEmotionalObservationListCreateView,
+
+    BioEmotionalHypothesisListCreateView,
+
+    BioEmotionalHypothesisUpdateView,
+
     BioTransgenerationalHypothesisListCreateView,
 
     BioTransgenerationalHypothesisDetailView,
@@ -98,19 +104,29 @@ urlpatterns = [
 
 
 
+
+    # Observaciones bio-emocionales
+    # POST /api/bioemotional/observations/
+    # GET  /api/bioemotional/observations/?patient_id=
+    path(
+        "observations/",
+        BioEmotionalObservationListCreateView.as_view(),
+        name="observation_list_create",
+    ),
+
     # Hipótesis bio-transgeneracionales
     # POST /api/bioemotional/hypotheses/
-    # GET  /api/bioemotional/hypotheses/?patient_id=UUID
-    # GET  /api/bioemotional/hypotheses/{id}/
-    # PATCH/DELETE /api/bioemotional/hypotheses/{id}/
+    # GET  /api/bioemotional/hypotheses/?patient_id=
+    # PATCH /api/bioemotional/hypotheses/{id}/
+    # PATCH /api/bioemotional/hypotheses/{id}/
     path(
         "hypotheses/",
-        BioTransgenerationalHypothesisListCreateView.as_view(),
+        BioEmotionalHypothesisListCreateView.as_view(),
         name="hypothesis_list_create",
     ),
     path(
         "hypotheses/<uuid:id>/",
-        BioTransgenerationalHypothesisDetailView.as_view(),
+        BioEmotionalHypothesisUpdateView.as_view(),
         name="hypothesis_detail",
     ),
 

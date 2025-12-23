@@ -6,11 +6,13 @@ import ExperientialSidebar from './ExperientialSidebar';
 import ExperientialToolPanels from './ExperientialToolPanels';
 import ExperientialVisualCore from './ExperientialVisualCore';
 import { useExperientialContext } from './hooks/useExperientialContext';
+import { useBodySelection } from './hooks/useBodySelection';
 import type { WorkspaceState } from './types';
 
 export default function BioEmotionalExperientialWorkspace() {
   const [workspaceState, setWorkspaceState] = useState<WorkspaceState>('observation');
   const { context, loading, error } = useExperientialContext();
+  const { selectedRegionId, selectedRegion, selectRegion, clearSelection } = useBodySelection();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -49,14 +51,29 @@ export default function BioEmotionalExperientialWorkspace() {
             <div className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm text-gray-700">
               {context.sessionLabel}
             </div>
+            {selectedRegion && (
+              <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-sm text-blue-700 font-medium">
+                Región: {selectedRegion.label}
+              </div>
+            )}
           </div>
 
-          <div className="flex gap-6 items-start">
-            <ExperientialVisualCore anatomy={context.biologicalSex} state={workspaceState} />
-            <ExperientialToolPanels
+          <div className="grid grid-cols-[minmax(0,34%)_minmax(0,42%)_minmax(0,24%)] gap-6 items-start">
+            <ExperientialVisualCore
+              anatomy={context.biologicalSex}
               state={workspaceState}
-              hasPatient={Boolean(context.patientId)}
+              selectedRegionId={selectedRegionId}
+              onRegionSelect={selectRegion}
+              selectedRegion={selectedRegion}
+              onClearSelection={clearSelection}
             />
+            <div className="col-span-2">
+              <ExperientialToolPanels
+                state={workspaceState}
+                hasPatient={Boolean(context.patientId)}
+                selectedRegion={selectedRegion}
+              />
+            </div>
           </div>
         </main>
       </div>

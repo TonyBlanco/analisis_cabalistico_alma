@@ -163,3 +163,68 @@ class BioTransgenerationalHypothesis(models.Model):
 
     def __str__(self) -> str:  # pragma: no cover - simple representation
         return f"{self.termino_bioemocional} ({self.get_status_display()})"
+
+
+class BioEmotionalObservation(models.Model):
+    """Observaci¢n cl¡nica del terapeuta, ligada opcionalmente a regi¢n/termino."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    therapist = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="bio_observations",
+    )
+    patient = models.ForeignKey(
+        Patient,
+        on_delete=models.CASCADE,
+        related_name="bio_observations",
+    )
+    region_id = models.CharField(max_length=64, blank=True, null=True)
+    dictionary_term_slug = models.CharField(max_length=128, blank=True, null=True)
+    note_text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Observaci¢n bio-emocional"
+        verbose_name_plural = "Observaciones bio-emocionales"
+        ordering = ["patient", "-created_at"]
+        indexes = [
+            models.Index(fields=["patient", "created_at"]),
+        ]
+
+
+class BioEmotionalHypothesis(models.Model):
+    """Hip¢tesis bio-emocional redactada por el terapeuta (sin automatismos)."""
+
+    STATUS_CHOICES = [
+        ("open", "Abierta"),
+        ("in_review", "En revisi¢n"),
+        ("discarded", "Descartada"),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    therapist = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="bio_emotional_hypotheses",
+    )
+    patient = models.ForeignKey(
+        Patient,
+        on_delete=models.CASCADE,
+        related_name="bio_emotional_hypotheses",
+    )
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    related_region_id = models.CharField(max_length=64, blank=True, null=True)
+    related_dictionary_term = models.CharField(max_length=128, blank=True, null=True)
+    status = models.CharField(max_length=16, choices=STATUS_CHOICES, default="open")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Hip¢tesis bio-emocional"
+        verbose_name_plural = "Hip¢tesis bio-emocionales"
+        ordering = ["patient", "-updated_at"]
+        indexes = [
+            models.Index(fields=["patient", "status"]),
+        ]

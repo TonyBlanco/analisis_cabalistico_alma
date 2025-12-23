@@ -15,13 +15,10 @@ _CACHE: List[Dict[str, Any]] | None = None
 def _get_resources_path() -> Path:
     """Devuelve la ruta absoluta al directorio `backend/resources`.
 
-    No depende de variables de entorno; se calcula de forma relativa al
-    paquete `api` para mantener el módulo aislado.
+    Basamos la ruta en settings.BASE_DIR para mantenerla estable en todos los entornos.
     """
 
-    # __file__ → backend/api/bioemotional/dictionary_loader.py
-    # parents[2] → backend/
-    return Path(__file__).resolve().parents[2] / "resources"
+    return Path(settings.BASE_DIR) / "resources"
 
 
 def _load_json_file(path: Path) -> Any:

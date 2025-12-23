@@ -82,4 +82,13 @@ Si el error persiste, revisa:
 - `gad-7` - GAD-7 (Ansiedad Generalizada)
 - `bai` - BAI (Ansiedad de Beck)
 - `bdi-ii` - BDI-II (Depresión de Beck)
+## Bioemotional Dictionary (Django)
+
+Si el error ocurre al buscar en el diccionario bio-emocional:
+
+- Asegurate de que Django corre en http://127.0.0.1:8000
+- Configura estas variables en .env.local:
+  - NEXT_PUBLIC_BACKEND_URL=http://127.0.0.1:8000
+  - BACKEND_URL=http://127.0.0.1:8000
+- Reinicia Next.js despues de cambiar las variables de entorno
 

@@ -5,6 +5,8 @@ from .models import (
     GenealogyPerson,
     GenealogyEvent,
     BioTransgenerationalHypothesis,
+    BioEmotionalObservation,
+    BioEmotionalHypothesis,
 )
 from .dictionary_loader import load_bioemotional_dictionary, BioEmotionalDictionaryError
 
@@ -161,4 +163,49 @@ class BioTransgenerationalHypothesisSerializer(serializers.ModelSerializer):
         }
         if value not in allowed:
             raise serializers.ValidationError("Tipo de hipótesis transgeneracional inválido.")
+        return value
+
+
+class BioEmotionalObservationSerializer(serializers.ModelSerializer):
+    therapist_id = serializers.IntegerField(source="therapist.id", read_only=True)
+    patient_id = serializers.IntegerField(source="patient.id", read_only=True)
+
+    class Meta:
+        model = BioEmotionalObservation
+        fields = [
+            "id",
+            "therapist_id",
+            "patient_id",
+            "region_id",
+            "dictionary_term_slug",
+            "note_text",
+            "created_at",
+        ]
+        read_only_fields = ["id", "therapist_id", "patient_id", "created_at"]
+
+
+class BioEmotionalHypothesisSerializer(serializers.ModelSerializer):
+    therapist_id = serializers.IntegerField(source="therapist.id", read_only=True)
+    patient_id = serializers.IntegerField(source="patient.id", read_only=True)
+
+    class Meta:
+        model = BioEmotionalHypothesis
+        fields = [
+            "id",
+            "therapist_id",
+            "patient_id",
+            "title",
+            "description",
+            "related_region_id",
+            "related_dictionary_term",
+            "status",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = ["id", "therapist_id", "patient_id", "created_at", "updated_at"]
+
+    def validate_status(self, value: str) -> str:
+        allowed = {"open", "in_review", "discarded"}
+        if value not in allowed:
+            raise serializers.ValidationError("Estado inv lido para hip¢tesis bio-emocional.")
         return value

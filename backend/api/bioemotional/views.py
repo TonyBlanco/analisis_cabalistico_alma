@@ -3,6 +3,7 @@ from rest_framework import status, generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import ValidationError, PermissionDenied
 
 from api.models import Patient
 from api.permissions import IsTherapist
@@ -11,6 +12,8 @@ from .models import (
     GenealogyPerson,
     GenealogyEvent,
     BioTransgenerationalHypothesis,
+    BioEmotionalObservation,
+    BioEmotionalHypothesis,
 )
 from .serializers import (
     BioEmotionalDictionaryReadSerializer,
@@ -18,6 +21,8 @@ from .serializers import (
     GenealogyEventSerializer,
     GenealogyOverviewSerializer,
     BioTransgenerationalHypothesisSerializer,
+    BioEmotionalObservationSerializer,
+    BioEmotionalHypothesisSerializer,
 )
 from .permissions import IsTherapistAndOwnsPatient
 from .dictionary_loader import (
@@ -39,6 +44,11 @@ class BioEmotionalDictionarySearchView(APIView):
     """
 
     permission_classes = [IsAuthenticated, IsTherapist]
+
+    def get_permissions(self):
+        if self.request.method == "OPTIONS":
+            return []
+        return [permission() for permission in self.permission_classes]
 
     def get(self, request):
         try:
@@ -174,6 +184,85 @@ class GenealogyEventDetailView(generics.RetrieveUpdateDestroyAPIView):
         if not hasattr(user, "profile") or user.profile.user_type != "therapist":
             return GenealogyEvent.objects.none()
         return GenealogyEvent.objects.filter(patient__therapist=user)
+
+
+class BioEmotionalObservationListCreateView(generics.ListCreateAPIView):
+    """Observaciones cl¡nicas bio-emocionales (solo terapeuta)."""
+
+    serializer_class = BioEmotionalObservationSerializer
+    permission_classes = [IsAuthenticated, IsTherapist]
+
+    def _get_patient(self, patient_id):
+        if not patient_id:
+            raise ValidationError({"patient_id": "El campo patient_id es obligatorio."})
+        try:
+            patient_id_int = int(patient_id)
+        except (TypeError, ValueError):
+            raise ValidationError({"patient_id": "El patient_id debe ser un entero v lido."})
+
+        user = self.request.user
+        try:
+            patient = Patient.objects.get(pk=patient_id_int, therapist=user)
+        except Patient.DoesNotExist:
+            raise PermissionDenied("Paciente no autorizado para este terapeuta.")
+
+        if patient.user_id and patient.user_id == user.id:
+            raise PermissionDenied("No se permite autoevaluaci¢n del terapeuta.")
+        return patient
+
+    def get_queryset(self):
+        patient_id = self.request.query_params.get("patient_id")
+        patient = self._get_patient(patient_id)
+        return BioEmotionalObservation.objects.filter(patient=patient, therapist=self.request.user)
+
+    def perform_create(self, serializer):
+        patient_id = self.request.data.get("patient_id")
+        patient = self._get_patient(patient_id)
+        serializer.save(patient=patient, therapist=self.request.user)
+
+
+class BioEmotionalHypothesisListCreateView(generics.ListCreateAPIView):
+    """Hip¢tesis bio-emocionales (solo terapeuta)."""
+
+    serializer_class = BioEmotionalHypothesisSerializer
+    permission_classes = [IsAuthenticated, IsTherapist]
+
+    def _get_patient(self, patient_id):
+        if not patient_id:
+            raise ValidationError({"patient_id": "El campo patient_id es obligatorio."})
+        try:
+            patient_id_int = int(patient_id)
+        except (TypeError, ValueError):
+            raise ValidationError({"patient_id": "El patient_id debe ser un entero v lido."})
+
+        user = self.request.user
+        try:
+            patient = Patient.objects.get(pk=patient_id_int, therapist=user)
+        except Patient.DoesNotExist:
+            raise PermissionDenied("Paciente no autorizado para este terapeuta.")
+
+        if patient.user_id and patient.user_id == user.id:
+            raise PermissionDenied("No se permite autoevaluaci¢n del terapeuta.")
+        return patient
+
+    def get_queryset(self):
+        patient_id = self.request.query_params.get("patient_id")
+        patient = self._get_patient(patient_id)
+        return BioEmotionalHypothesis.objects.filter(patient=patient, therapist=self.request.user)
+
+    def perform_create(self, serializer):
+        patient_id = self.request.data.get("patient_id")
+        patient = self._get_patient(patient_id)
+        serializer.save(patient=patient, therapist=self.request.user)
+
+
+class BioEmotionalHypothesisUpdateView(generics.UpdateAPIView):
+    """Actualiza hip¢tesis bio-emocionales por id."""
+
+    serializer_class = BioEmotionalHypothesisSerializer
+    permission_classes = [IsAuthenticated, IsTherapistAndOwnsPatient]
+    queryset = BioEmotionalHypothesis.objects.all()
+    http_method_names = ["patch", "options", "head"]
 
 
 class BioTransgenerationalHypothesisListCreateView(generics.ListCreateAPIView):

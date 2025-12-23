@@ -76,7 +76,7 @@ export default function ClinicalContextHeader() {
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-6 py-3 text-sm text-gray-700">
         <div className="flex items-center gap-3">
           <span className="rounded-full bg-gray-100 px-2 py-1 text-[11px] uppercase tracking-wide text-gray-500">
-            Contexto clinico
+            CONTEXTO PROFESIONAL
           </span>
           <span className="font-medium text-gray-900">{workspaceLabel}</span>
         </div>

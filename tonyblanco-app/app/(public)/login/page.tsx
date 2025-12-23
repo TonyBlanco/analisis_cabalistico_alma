@@ -176,10 +176,10 @@ export default function LoginPage() {
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 p-12 flex-col justify-between">
         <div>
           <h1 className="text-3xl font-bold text-white mb-2">
-            Kabbalah Aplicada
+            Holistica Aplicada
           </h1>
           <p className="text-violet-200 text-lg">
-            Psicoterapias del Alma
+            Bienestar integral y desarrollo humano
           </p>
         </div>
         
@@ -189,9 +189,9 @@ export default function LoginPage() {
               <Sparkles className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h3 className="text-white font-semibold mb-1">Análisis Cabalístico</h3>
+              <h3 className="text-white font-semibold mb-1">Analisis Holistico Personal</h3>
               <p className="text-violet-200 text-sm">
-                Descubre los patrones numéricos y energéticos de tu nombre y fecha de nacimiento
+                Explora patrones simbolicos y energias de tu nombre y fecha de nacimiento
               </p>
             </div>
           </div>
@@ -201,9 +201,9 @@ export default function LoginPage() {
               <Heart className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h3 className="text-white font-semibold mb-1">Acompañamiento Terapéutico</h3>
+              <h3 className="text-white font-semibold mb-1">Acompanamiento Holistico</h3>
               <p className="text-violet-200 text-sm">
-                Conecta con terapeutas especializados en kabbalah y desarrollo personal
+                Conecta con acompanantes especializados en bienestar integral y desarrollo humano
               </p>
             </div>
           </div>
@@ -219,8 +219,8 @@ export default function LoginPage() {
         <div className="w-full max-w-md">
           {/* Mobile Logo */}
           <div className="lg:hidden text-center mb-8">
-            <h1 className="text-2xl font-bold text-gray-900">Kabbalah Aplicada</h1>
-            <p className="text-gray-600">Psicoterapias del Alma</p>
+            <h1 className="text-2xl font-bold text-gray-900">Holistica Aplicada</h1>
+            <p className="text-gray-600">Bienestar integral y desarrollo humano</p>
           </div>
           
           <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">

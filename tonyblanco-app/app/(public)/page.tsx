@@ -3,13 +3,13 @@ export default function LandingPage() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-12">
       <div className="max-w-3xl mx-auto text-center">
         <h1 className="text-3xl md:text-5xl font-semibold text-gray-800 mb-4 title-font">
-          Kabbalah Aplicada & Psicoterapias del Alma
+          Holistica Aplicada
         </h1>
         <p className="text-lg md:text-xl text-gray-600 mb-6">
-          Plataforma profesional de análisis cabalístico y numerología
+          Bienestar integral y desarrollo humano
         </p>
         <p className="text-base text-gray-500 mb-8 max-w-2xl mx-auto">
-          Herramientas especializadas para profesionales de la salud mental y el desarrollo personal.
+          Plataforma integral para exploracion, conciencia y acompanamiento en sabidurias ancestrales.
         </p>
         <div className="flex justify-center">
           <a

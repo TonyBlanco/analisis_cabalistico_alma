@@ -16,7 +16,7 @@ export default function Header({ realUserRole, activeDashboardRole }: HeaderProp
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-semibold text-gray-900">
-            Kabbalah Aplicada & Psicoterapias del Alma
+            Holística Aplicada
           </h1>
         </div>
         <div className="flex items-center gap-4">

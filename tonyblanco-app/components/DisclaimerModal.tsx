@@ -124,9 +124,9 @@ export default function DisclaimerModal({
                 <div>
                   <h3 className="font-medium text-gray-900 mb-2">2. Naturaleza de los Servicios</h3>
                   <p>
-                    Esta plataforma proporciona herramientas de análisis cabalístico y evaluación que son
+                    Esta plataforma proporciona herramientas de exploracion holistica y evaluacion integral que son
                     <strong> complementarias y orientativas</strong>. No deben utilizarse como único método de
-                    evaluación o tratamiento. Los servicios NO constituyen diagnóstico médico o psicológico.
+                    evaluacion o acompanamiento. Los servicios NO constituyen dictamen medico o psicologico.
                   </p>
                 </div>
 

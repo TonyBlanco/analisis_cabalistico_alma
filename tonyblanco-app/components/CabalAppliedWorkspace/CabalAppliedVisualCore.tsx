@@ -265,6 +265,9 @@ function PitagorasReport({
             <p className="mt-1 text-xs text-gray-500">
               Lectura manual · Uso formativo y de consulta · No automática
             </p>
+            <p className="mt-1 text-[10px] text-gray-400 italic">
+              Los gráficos representan estructuras simbólicas, no escalas clínicas.
+            </p>
           </div>
           <span className="rounded-full bg-gray-200 px-2 py-1 text-[10px] font-medium text-gray-600">
             Solo lectura

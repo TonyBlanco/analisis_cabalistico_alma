@@ -106,6 +106,10 @@ from .patient_status_views import (
     PatientArchiveView,
 )
 from .symbolic_views import TreeStructuralStateView
+from .utils.symbolic_interpreter_ai import (
+    generate_symbolic_interpretation_view,
+    symbolic_interpreter_status_view,
+)
 
 urlpatterns = [
     # ⚠️ ENDPOINTS TEMPORALES - ELIMINAR DESPUÉS DE USAR ⚠️
@@ -232,6 +236,10 @@ urlpatterns = [
     path('bioemotional/', include('api.bioemotional.urls', namespace='bioemotional')),
     # Estado simbolico estructural (TreeStructuralState v0.1)
     path('symbolic/tree-structural-state/', TreeStructuralStateView.as_view(), name='tree_structural_state'),
+    
+    # Symbolic Interpreter AI (read-only, non-clinical)
+    path('symbolic-interpreter/generate/', generate_symbolic_interpretation_view, name='symbolic_interpreter_generate'),
+    path('symbolic-interpreter/status/', symbolic_interpreter_status_view, name='symbolic_interpreter_status'),
     
     # Resource Access Core
     path('resources/my/', MyResourcesView.as_view(), name='my_resources'),

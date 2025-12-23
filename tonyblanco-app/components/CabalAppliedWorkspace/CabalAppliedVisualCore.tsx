@@ -25,6 +25,11 @@ import { ejecutarMetodoAvgad, adaptAvgadToTree } from '../../../src/symbolic/met
 import { ejecutarMetodoTemurah, adaptTemurahToTree } from '../../../src/symbolic/methods/temurah';
 import { ejecutarMetodoNotarikon, adaptNotarikonToTree } from '../../../src/symbolic/methods/notarikon';
 
+// Symbolic Interpretation AI
+import { SymbolicInterpretationPanel } from '@/components/SymbolicInterpretation';
+import { generateAISymbolicInterpretation } from '@/lib/api/symbolic-interpreter-api';
+import type { SymbolicInterpretation } from '../../../src/symbolic/tree/symbolic-interpreter.types';
+
 // ============================================================================
 // PITAGORAS PROFESSIONAL REPORT COMPONENTS (UI ONLY)
 // ============================================================================
@@ -377,6 +382,11 @@ export default function CabalAppliedVisualCore({ activeSection }: CabalAppliedVi
   const [pitagorasState, setPitagorasState] = useState<PitagorasSymbolicState | null>(null);
   const [treeStructuralState, setTreeStructuralState] = useState<TreeStructuralState | null>(null);
   const [selectedMethod, setSelectedMethod] = useState<string>('pitagoras');
+  
+  // Symbolic Interpretation AI state
+  const [symbolicInterpretation, setSymbolicInterpretation] = useState<SymbolicInterpretation | null>(null);
+  const [isInterpretationLoading, setIsInterpretationLoading] = useState(false);
+  const [showInterpretationPanel, setShowInterpretationPanel] = useState(false);
 
   const METHODS = useMemo(() => [
     { id: 'pitagoras', name: 'Pitágoras', run: (input: any) => ejecutarMetodoPitagorico(input as any) },
@@ -448,8 +458,36 @@ export default function CabalAppliedVisualCore({ activeSection }: CabalAppliedVi
       }
       
       setTreeStructuralState(treeState);
+      
+      // Clear previous interpretation when method changes
+      setSymbolicInterpretation(null);
+      setShowInterpretationPanel(false);
     } catch (err) {
       console.error('Error ejecutando método simbólico:', err);
+    }
+  }
+  
+  async function handleRequestInterpretation() {
+    if (!treeStructuralState) {
+      console.warn('No TreeStructuralState available for interpretation');
+      return;
+    }
+    
+    setIsInterpretationLoading(true);
+    setShowInterpretationPanel(true);
+    
+    try {
+      const interpretation = await generateAISymbolicInterpretation({
+        treeState: treeStructuralState,
+        safetyLevel: 'educational',
+        focusAreas: ['flows', 'sefirot-roles'],
+      });
+      
+      setSymbolicInterpretation(interpretation);
+    } catch (error) {
+      console.error('Error generating symbolic interpretation:', error);
+    } finally {
+      setIsInterpretationLoading(false);
     }
   }
 
@@ -653,6 +691,31 @@ export default function CabalAppliedVisualCore({ activeSection }: CabalAppliedVi
               <span className="text-xs text-gray-500">Ejecutar manualmente el método seleccionado (solo lectura, formativo)</span>
             </div>
           )}
+          
+          {/* Symbolic Interpretation AI Panel */}
+          {treeStructuralState && (
+            <div className="mt-6">
+              {!showInterpretationPanel && (
+                <button
+                  onClick={() => setShowInterpretationPanel(true)}
+                  className="w-full rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-3 text-sm font-medium text-white hover:from-purple-700 hover:to-indigo-700 transition-all shadow-md flex items-center justify-center gap-2"
+                >
+                  <Sparkles className="h-4 w-4" />
+                  Activar Lectura Simbólica Asistida (IA)
+                </button>
+              )}
+              
+              {showInterpretationPanel && (
+                <SymbolicInterpretationPanel
+                  interpretation={symbolicInterpretation}
+                  isLoading={isInterpretationLoading}
+                  onRequestInterpretation={handleRequestInterpretation}
+                  onClose={() => setShowInterpretationPanel(false)}
+                />
+              )}
+            </div>
+          )}
+          
           <div className="mt-6 grid gap-4 md:grid-cols-2">
             <div className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-700">
               <div className="text-xs uppercase tracking-wide text-gray-500">Sefirot activas</div>

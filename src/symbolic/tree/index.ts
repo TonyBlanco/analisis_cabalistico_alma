@@ -20,3 +20,5 @@ export { TREE_STRUCTURAL_STATE_META } from './tree-structural-state.types';
 
 // Adapters
 export { adaptPitagorasToTree } from './pitagoras-tree-adapter';
+export { adaptGenericMethodToTree } from './generic-method-adapter';
+export type { GenericSymbolicState } from './generic-method-adapter';

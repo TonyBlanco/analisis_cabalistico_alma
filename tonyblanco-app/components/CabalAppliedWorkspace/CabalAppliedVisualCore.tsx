@@ -14,16 +14,16 @@ import type { PitagorasSymbolicState, PitagorasNumberMeaning } from '../../../sr
 import { adaptPitagorasToTree, type TreeStructuralState } from '../../../src/symbolic/tree';
 
 // Additional symbolic methods (FASE 1)
-import { ejecutarMetodoGematriaStandard } from '../../../src/symbolic/methods/gematria-standard';
-import { ejecutarMetodoGematriaKatan } from '../../../src/symbolic/methods/gematria-katan';
-import { ejecutarMetodoMisparGadol } from '../../../src/symbolic/methods/mispar-gadol';
-import { ejecutarMetodoMisparSiduri } from '../../../src/symbolic/methods/mispar-siduri';
-import { ejecutarMetodoMilui } from '../../../src/symbolic/methods/milui';
-import { ejecutarMetodoAtbash } from '../../../src/symbolic/methods/atbash';
-import { ejecutarMetodoAlbam } from '../../../src/symbolic/methods/albam';
-import { ejecutarMetodoAvgad } from '../../../src/symbolic/methods/avgad';
-import { ejecutarMetodoTemurah } from '../../../src/symbolic/methods/temurah';
-import { ejecutarMetodoNotarikon } from '../../../src/symbolic/methods/notarikon';
+import { ejecutarMetodoGematriaStandard, adaptGematriaStandardToTree } from '../../../src/symbolic/methods/gematria-standard';
+import { ejecutarMetodoGematriaKatan, adaptGematriaKatanToTree } from '../../../src/symbolic/methods/gematria-katan';
+import { ejecutarMetodoMisparGadol, adaptMisparGadolToTree } from '../../../src/symbolic/methods/mispar-gadol';
+import { ejecutarMetodoMisparSiduri, adaptMisparSiduriToTree } from '../../../src/symbolic/methods/mispar-siduri';
+import { ejecutarMetodoMilui, adaptMiluiToTree } from '../../../src/symbolic/methods/milui';
+import { ejecutarMetodoAtbash, adaptAtbashToTree } from '../../../src/symbolic/methods/atbash';
+import { ejecutarMetodoAlbam, adaptAlbamToTree } from '../../../src/symbolic/methods/albam';
+import { ejecutarMetodoAvgad, adaptAvgadToTree } from '../../../src/symbolic/methods/avgad';
+import { ejecutarMetodoTemurah, adaptTemurahToTree } from '../../../src/symbolic/methods/temurah';
+import { ejecutarMetodoNotarikon, adaptNotarikonToTree } from '../../../src/symbolic/methods/notarikon';
 
 // ============================================================================
 // PITAGORAS PROFESSIONAL REPORT COMPONENTS (UI ONLY)
@@ -409,14 +409,45 @@ export default function CabalAppliedVisualCore({ activeSection }: CabalAppliedVi
       const estado: PitagorasSymbolicState = method.run(input);
       setPitagorasState(estado);
       
-      // Si el método es Pitágoras, generar TreeStructuralState
-      if (selectedMethod === 'pitagoras') {
-        const treeState = adaptPitagorasToTree(estado);
-        setTreeStructuralState(treeState);
-      } else {
-        // Otros métodos aún no tienen adaptador al Árbol
-        setTreeStructuralState(null);
+      // Generar TreeStructuralState según el método seleccionado
+      let treeState: TreeStructuralState | null = null;
+      switch (selectedMethod) {
+        case 'pitagoras':
+          treeState = adaptPitagorasToTree(estado);
+          break;
+        case 'gematria-standard':
+          treeState = adaptGematriaStandardToTree(estado);
+          break;
+        case 'gematria-katan':
+          treeState = adaptGematriaKatanToTree(estado);
+          break;
+        case 'mispar-gadol':
+          treeState = adaptMisparGadolToTree(estado);
+          break;
+        case 'mispar-siduri':
+          treeState = adaptMisparSiduriToTree(estado);
+          break;
+        case 'milui':
+          treeState = adaptMiluiToTree(estado);
+          break;
+        case 'atbash':
+          treeState = adaptAtbashToTree(estado);
+          break;
+        case 'albam':
+          treeState = adaptAlbamToTree(estado);
+          break;
+        case 'avgad':
+          treeState = adaptAvgadToTree(estado);
+          break;
+        case 'temurah':
+          treeState = adaptTemurahToTree(estado);
+          break;
+        case 'notarikon':
+          treeState = adaptNotarikonToTree(estado);
+          break;
       }
+      
+      setTreeStructuralState(treeState);
     } catch (err) {
       console.error('Error ejecutando método simbólico:', err);
     }

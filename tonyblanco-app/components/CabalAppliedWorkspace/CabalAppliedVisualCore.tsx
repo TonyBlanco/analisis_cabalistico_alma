@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { ChevronDown, ChevronUp, BookOpen, Hash, Sparkles } from 'lucide-react';
 import type { CabalSectionId } from './types';
 import { getActivePatientId } from '@/lib/active-patient';
 import { getPatientProfileSummary, type PatientProfileSummary } from '@/lib/patient-api';
@@ -8,7 +9,346 @@ import { useTreeStructuralState } from '@/lib/tree-structural-state';
 import TreeOfLifeSVG from '@/components/Tree/TreeOfLifeSVG';
 import TreeVisualPlaceholder from './TreeVisualPlaceholder';
 import { ejecutarMetodoPitagorico } from '../../../src/symbolic/methods/pitagoras';
-import type { PitagorasSymbolicState } from '../../../src/symbolic/methods/pitagoras/pitagoras.types';
+import type { PitagorasSymbolicState, PitagorasNumberMeaning } from '../../../src/symbolic/methods/pitagoras/pitagoras.types';
+
+// ============================================================================
+// PITAGORAS PROFESSIONAL REPORT COMPONENTS (UI ONLY)
+// ============================================================================
+
+/** Card for fundamental numbers */
+function PitagorasNumberCard({
+  label,
+  value,
+  meaning,
+  colorClass,
+}: {
+  label: string;
+  value: number;
+  meaning?: PitagorasNumberMeaning;
+  colorClass: string;
+}) {
+  return (
+    <div className={`rounded-xl border p-4 ${colorClass} shadow-sm`}>
+      <div className="flex items-start justify-between">
+        <div className="flex-1">
+          <p className="text-xs font-medium uppercase tracking-wide text-gray-500">{label}</p>
+          <p className="mt-1 text-sm font-medium text-gray-700">{meaning?.titulo ?? 'N/A'}</p>
+        </div>
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/80 text-2xl font-bold text-gray-900 shadow-inner">
+          {value}
+        </div>
+      </div>
+      <p className="mt-3 text-xs text-gray-600 leading-relaxed line-clamp-3">
+        {meaning?.descripcion ?? 'Descripción no disponible.'}
+      </p>
+      {meaning?.cualidad && (
+        <p className="mt-2 text-[10px] font-medium text-gray-500">
+          Cualidad: <span className="text-gray-700">{meaning.cualidad}</span>
+        </p>
+      )}
+    </div>
+  );
+}
+
+/** 3x3 Pythagorean Grid */
+function PitagorasGrid({
+  inclusionMap,
+}: {
+  inclusionMap: PitagorasSymbolicState['inclusionMap'];
+}) {
+  // Grid layout: 1-9 in 3x3
+  const gridLayout = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9],
+  ];
+
+  return (
+    <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+      <div className="mb-3 flex items-center gap-2">
+        <Hash className="h-4 w-4 text-gray-500" />
+        <h4 className="text-sm font-semibold text-gray-900">Cuadrado Pitagórico</h4>
+      </div>
+      <div className="grid grid-cols-3 gap-2">
+        {gridLayout.flat().map((num) => {
+          const cell = inclusionMap[num];
+          const isAbsent = cell?.isAbsent ?? false;
+          const isDominant = cell?.isDominant ?? false;
+          const frequency = cell?.frequency ?? 0;
+
+          let bgClass = 'bg-gray-50 border-gray-200';
+          let textClass = 'text-gray-400';
+          let freqClass = 'text-gray-300';
+
+          if (isDominant) {
+            bgClass = 'bg-indigo-100 border-indigo-300';
+            textClass = 'text-indigo-700';
+            freqClass = 'text-indigo-500';
+          } else if (!isAbsent && frequency > 0) {
+            bgClass = 'bg-blue-50 border-blue-200';
+            textClass = 'text-blue-700';
+            freqClass = 'text-blue-500';
+          } else if (isAbsent) {
+            bgClass = 'bg-gray-100 border-dashed border-gray-300';
+            textClass = 'text-gray-300';
+            freqClass = 'text-gray-200';
+          }
+
+          return (
+            <div
+              key={num}
+              className={`flex flex-col items-center justify-center rounded-lg border p-3 ${bgClass} transition-colors`}
+            >
+              <span className={`text-xl font-bold ${textClass}`}>{num}</span>
+              <span className={`text-xs font-medium ${freqClass}`}>
+                {frequency > 0 ? `×${frequency}` : '—'}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+      <div className="mt-3 flex items-center justify-center gap-4 text-[10px] text-gray-500">
+        <span className="flex items-center gap-1">
+          <span className="inline-block h-2 w-2 rounded-full bg-indigo-400" /> Dominante
+        </span>
+        <span className="flex items-center gap-1">
+          <span className="inline-block h-2 w-2 rounded-full bg-blue-300" /> Presente
+        </span>
+        <span className="flex items-center gap-1">
+          <span className="inline-block h-2 w-2 rounded-full border border-dashed border-gray-300 bg-gray-100" /> Ausente
+        </span>
+      </div>
+    </div>
+  );
+}
+
+/** Frequency Bar Chart */
+function PitagorasBarChart({
+  inclusionMap,
+}: {
+  inclusionMap: PitagorasSymbolicState['inclusionMap'];
+}) {
+  const maxFreq = Math.max(1, ...Object.values(inclusionMap).map((v) => v.frequency));
+
+  return (
+    <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+      <h4 className="mb-3 text-sm font-semibold text-gray-900">Distribución Numérica</h4>
+      <div className="flex items-end gap-1 h-24">
+        {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => {
+          const cell = inclusionMap[num];
+          const freq = cell?.frequency ?? 0;
+          const height = maxFreq > 0 ? (freq / maxFreq) * 100 : 0;
+          const isDominant = cell?.isDominant ?? false;
+          const isAbsent = cell?.isAbsent ?? false;
+
+          let barClass = 'bg-blue-400';
+          if (isDominant) barClass = 'bg-indigo-500';
+          else if (isAbsent || freq === 0) barClass = 'bg-gray-200';
+
+          return (
+            <div key={num} className="flex-1 flex flex-col items-center">
+              <div className="w-full flex flex-col items-center justify-end h-20">
+                <div
+                  className={`w-full max-w-[20px] rounded-t ${barClass} transition-all`}
+                  style={{ height: `${Math.max(height, 4)}%` }}
+                />
+              </div>
+              <span className="mt-1 text-[10px] font-medium text-gray-600">{num}</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/** Collapsible Pedagogical Block */
+function PitagorasPedagogicalBlock({
+  inclusionMap,
+  primaryNumbers,
+}: {
+  inclusionMap: PitagorasSymbolicState['inclusionMap'];
+  primaryNumbers: PitagorasSymbolicState['primaryNumbers'];
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const dominantes = Object.entries(inclusionMap)
+    .filter(([, v]) => v.isDominant)
+    .map(([k]) => k);
+  const ausencias = Object.entries(inclusionMap)
+    .filter(([, v]) => v.isAbsent)
+    .map(([k]) => k);
+
+  return (
+    <div className="rounded-xl border border-amber-200 bg-amber-50 shadow-sm">
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex w-full items-center justify-between px-4 py-3 text-left"
+      >
+        <div className="flex items-center gap-2">
+          <BookOpen className="h-4 w-4 text-amber-600" />
+          <span className="text-sm font-semibold text-amber-900">
+            Lectura simbólica orientativa (formación)
+          </span>
+        </div>
+        {isOpen ? (
+          <ChevronUp className="h-4 w-4 text-amber-600" />
+        ) : (
+          <ChevronDown className="h-4 w-4 text-amber-600" />
+        )}
+      </button>
+      {isOpen && (
+        <div className="border-t border-amber-200 px-4 py-3 text-xs text-amber-900 space-y-3">
+          <div>
+            <p className="font-medium">Números dominantes:</p>
+            <p className="text-amber-700">
+              {dominantes.length > 0
+                ? `Casas ${dominantes.join(', ')} muestran mayor frecuencia. Energías predominantes en el perfil.`
+                : 'No hay dominancias marcadas.'}
+            </p>
+          </div>
+          <div>
+            <p className="font-medium">Ausencias:</p>
+            <p className="text-amber-700">
+              {ausencias.length > 0
+                ? `Casas ${ausencias.join(', ')} están vacías. Áreas de menor expresión natural.`
+                : 'Todas las casas tienen presencia.'}
+            </p>
+          </div>
+          <div>
+            <p className="font-medium">Números fundamentales:</p>
+            <ul className="mt-1 space-y-1 text-amber-700">
+              {primaryNumbers.map((n) => (
+                <li key={n.key}>
+                  <strong>{n.label}:</strong> {n.value} — {n.meaning?.titulo ?? 'N/A'}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="pt-2 border-t border-amber-200 text-[10px] text-amber-600">
+            ⚠ Este contenido es puramente estructural y formativo. No constituye diagnóstico ni interpretación automática.
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Main Pitagoras Professional Report */
+function PitagorasReport({
+  pitagorasState,
+  treeState,
+  treeLoading,
+}: {
+  pitagorasState: PitagorasSymbolicState;
+  treeState: ReturnType<typeof useTreeStructuralState>['state'];
+  treeLoading: boolean;
+}) {
+  const cardColors = [
+    'bg-gradient-to-br from-rose-50 to-rose-100 border-rose-200',
+    'bg-gradient-to-br from-sky-50 to-sky-100 border-sky-200',
+    'bg-gradient-to-br from-amber-50 to-amber-100 border-amber-200',
+    'bg-gradient-to-br from-emerald-50 to-emerald-100 border-emerald-200',
+  ];
+
+  return (
+    <div className="mt-6 space-y-6">
+      {/* Header */}
+      <div className="rounded-xl border border-gray-200 bg-gradient-to-r from-slate-50 to-slate-100 p-5 shadow-sm">
+        <div className="flex items-start justify-between">
+          <div>
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-indigo-600" />
+              <h3 className="text-lg font-bold text-gray-900">Informe Pitagórico Simbólico</h3>
+            </div>
+            <p className="mt-1 text-xs text-gray-500">
+              Lectura manual · Uso formativo y de consulta · No automática
+            </p>
+          </div>
+          <span className="rounded-full bg-gray-200 px-2 py-1 text-[10px] font-medium text-gray-600">
+            Solo lectura
+          </span>
+        </div>
+        <div className="mt-3 text-xs text-gray-600">
+          <span className="font-medium">Sujeto:</span>{' '}
+          {pitagorasState.rawData.identidad.nombreCompleto} ·{' '}
+          <span className="font-medium">Fecha:</span>{' '}
+          {pitagorasState.rawData.identidad.fechaNacimiento}
+        </div>
+      </div>
+
+      {/* Fundamental Numbers Cards */}
+      <div>
+        <h4 className="mb-3 text-sm font-semibold text-gray-800">Números Fundamentales</h4>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {pitagorasState.primaryNumbers.map((n, idx) => (
+            <PitagorasNumberCard
+              key={n.key}
+              label={n.label}
+              value={n.value}
+              meaning={n.meaning}
+              colorClass={cardColors[idx % cardColors.length]}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Grid + Bar Chart Row */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <PitagorasGrid inclusionMap={pitagorasState.inclusionMap} />
+        <PitagorasBarChart inclusionMap={pitagorasState.inclusionMap} />
+      </div>
+
+      {/* Tree of Life Correspondence */}
+      <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+        <h4 className="mb-3 text-sm font-semibold text-gray-900">Correspondencia con el Árbol de la Vida</h4>
+        {treeLoading ? (
+          <p className="text-xs text-gray-500">Cargando correspondencias...</p>
+        ) : treeState?.sefirot_activas.length ? (
+          <div className="space-y-2">
+            {treeState.sefirot_activas.slice(0, 10).map((sefira) => {
+              const maxPeso = Math.max(1, ...treeState.sefirot_activas.map((s) => s.peso));
+              const widthPercent = (sefira.peso / maxPeso) * 100;
+              return (
+                <div key={sefira.id_canonico} className="flex items-center gap-3">
+                  <span className="w-20 text-xs font-medium text-gray-700 truncate">
+                    {sefira.id_canonico}
+                  </span>
+                  <div className="flex-1 h-4 bg-gray-100 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-indigo-400 rounded-full transition-all"
+                      style={{ width: `${widthPercent}%` }}
+                    />
+                  </div>
+                  <span className="w-8 text-right text-[10px] text-gray-500">
+                    {sefira.peso.toFixed(1)}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <p className="text-xs text-gray-500">No hay sefirot activas disponibles.</p>
+        )}
+        {treeState?.repeticiones.length ? (
+          <div className="mt-3 pt-3 border-t border-gray-100">
+            <p className="text-xs text-gray-600">
+              <span className="font-medium">Repeticiones:</span>{' '}
+              {treeState.repeticiones.map((r) => `${r.simbolo_id} (×${r.conteo})`).join(', ')}
+            </p>
+          </div>
+        ) : null}
+      </div>
+
+      {/* Pedagogical Block */}
+      <PitagorasPedagogicalBlock
+        inclusionMap={pitagorasState.inclusionMap}
+        primaryNumbers={pitagorasState.primaryNumbers}
+      />
+    </div>
+  );
+}
 
 interface CabalAppliedVisualCoreProps {
   activeSection: CabalSectionId;
@@ -283,27 +623,15 @@ export default function CabalAppliedVisualCore({ activeSection }: CabalAppliedVi
             <span className="font-medium">Polaridades:</span> No disponible -{' '}
             <span className="font-medium">Fuentes:</span> No disponible
           </div>
-          {/* Pitagoras result panel (solo UI, no persistencia) */}
-          {pitagorasState ? (
-            <div className="mt-4 rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-700">
-              <div className="text-xs uppercase tracking-wide text-gray-500">Pitágoras (resultado simbólico)</div>
-              <div className="mt-2 text-xs">
-                {pitagorasState.primaryNumbers.map((n) => (
-                  <div key={n.key} className="mb-1">
-                    <strong>{n.label}:</strong> {n.value} — {n.meaning?.titulo ?? n.meaning?.descripcion ?? '—'}
-                  </div>
-                ))}
-                <div className="mt-2">
-                  <div className="text-xs font-medium text-gray-600">Inclusion (casas):</div>
-                  <div className="mt-1 text-xs">
-                    {Object.entries(pitagorasState.inclusionMap)
-                      .map(([k, v]) => `${k}: ${v.frequency}${v.isAbsent ? ' (ausente)' : ''}${v.isDominant ? ' (dominante)' : ''}`)
-                      .join(', ')}
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : null}
+
+          {/* Pitagoras Professional Report (solo UI, no persistencia) */}
+          {pitagorasState && (
+            <PitagorasReport
+              pitagorasState={pitagorasState}
+              treeState={state}
+              treeLoading={loading}
+            />
+          )}
         </>
       )}
     </section>

@@ -7,8 +7,8 @@ import { getPatientProfileSummary, type PatientProfileSummary } from '@/lib/pati
 import { useTreeStructuralState } from '@/lib/tree-structural-state';
 import TreeOfLifeSVG from '@/components/Tree/TreeOfLifeSVG';
 import TreeVisualPlaceholder from './TreeVisualPlaceholder';
-import { ejecutarMetodoPitagorico } from '@/symbolic/methods/pitagoras';
-import type { PitagorasSymbolicState } from '@/symbolic/methods/pitagoras/pitagoras.types';
+import { ejecutarMetodoPitagorico } from '../../../src/symbolic/methods/pitagoras';
+import type { PitagorasSymbolicState } from '../../../src/symbolic/methods/pitagoras/pitagoras.types';
 
 interface CabalAppliedVisualCoreProps {
   activeSection: CabalSectionId;
@@ -290,7 +290,7 @@ export default function CabalAppliedVisualCore({ activeSection }: CabalAppliedVi
               <div className="mt-2 text-xs">
                 {pitagorasState.primaryNumbers.map((n) => (
                   <div key={n.key} className="mb-1">
-                    <strong>{n.label}:</strong> {n.value} — {n.meaning?.title ?? n.meaning ?? '—'}
+                    <strong>{n.label}:</strong> {n.value} — {n.meaning?.titulo ?? n.meaning?.descripcion ?? '—'}
                   </div>
                 ))}
                 <div className="mt-2">

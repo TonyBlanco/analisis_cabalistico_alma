@@ -6,9 +6,19 @@ import type { AnatomicalRegion } from './data/anatomicalRegions';
 
 interface DictionaryPanelProps {
   selectedRegion: AnatomicalRegion | null;
+  onCopyToObservation?: (text: string) => void;
+  onCopyToHypothesis?: (text: string) => void;
+  onCopyToSynthesis?: (text: string) => void;
+  isReadOnly?: boolean;
 }
 
-export default function DictionaryPanel({ selectedRegion }: DictionaryPanelProps) {
+export default function DictionaryPanel({
+  selectedRegion,
+  onCopyToObservation,
+  onCopyToHypothesis,
+  onCopyToSynthesis,
+  isReadOnly = false,
+}: DictionaryPanelProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [results, setResults] = useState<BioEmotionalDictionaryEntry[]>([]);
   const [loading, setLoading] = useState(false);
@@ -47,6 +57,16 @@ export default function DictionaryPanel({ selectedRegion }: DictionaryPanelProps
       }
     }
     return null;
+  };
+
+  const buildCopyText = (entry: BioEmotionalDictionaryEntry) => {
+    const fuente = formatFuente(entry.fuente);
+    const lines = [
+      entry.termino ? `Termino: ${entry.termino}` : null,
+      entry.definicion ? `Definicion: ${entry.definicion}` : null,
+      fuente ? `Fuente: ${fuente}` : null,
+    ].filter(Boolean);
+    return lines.map((line) => `> ${line}`).join('\n');
   };
 
   // Reset search when region changes
@@ -212,6 +232,33 @@ export default function DictionaryPanel({ selectedRegion }: DictionaryPanelProps
               <p className="text-xs text-gray-500 italic">{formatFuente(selectedEntry.fuente)}</p>
             </div>
           )}
+
+          <div className="flex flex-wrap gap-2 pt-2 border-t border-blue-200">
+            <button
+              type="button"
+              onClick={() => onCopyToObservation?.(buildCopyText(selectedEntry))}
+              disabled={isReadOnly || !onCopyToObservation}
+              className="px-2 py-1 text-xs font-medium text-blue-700 border border-blue-200 rounded-md hover:bg-blue-50 disabled:opacity-60"
+            >
+              Copiar a observacion
+            </button>
+            <button
+              type="button"
+              onClick={() => onCopyToHypothesis?.(buildCopyText(selectedEntry))}
+              disabled={isReadOnly || !onCopyToHypothesis}
+              className="px-2 py-1 text-xs font-medium text-blue-700 border border-blue-200 rounded-md hover:bg-blue-50 disabled:opacity-60"
+            >
+              Copiar a hipotesis
+            </button>
+            <button
+              type="button"
+              onClick={() => onCopyToSynthesis?.(buildCopyText(selectedEntry))}
+              disabled={isReadOnly || !onCopyToSynthesis}
+              className="px-2 py-1 text-xs font-medium text-blue-700 border border-blue-200 rounded-md hover:bg-blue-50 disabled:opacity-60"
+            >
+              Copiar a sintesis
+            </button>
+          </div>
 
           {/* Possible relation with selected region (informative only) */}
           {selectedRegion && (

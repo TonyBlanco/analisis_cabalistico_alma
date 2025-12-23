@@ -3,16 +3,54 @@
 import DictionaryPanel from './DictionaryPanel';
 import ObservationPanel from './ObservationPanel';
 import HypothesisPanel from './HypothesisPanel';
+import SynthesisPanel from './SynthesisPanel';
+import ClosurePanel from './ClosurePanel';
+import AssistedDiagnosisPanel from './AssistedDiagnosisPanel';
 import type { WorkspaceState } from './types';
 import type { AnatomicalRegion } from './data/anatomicalRegions';
+import type { BioEmotionalSynthesis } from '@/lib/api/bioemotional-clinical';
 
 interface ExperientialToolPanelsProps {
   state: WorkspaceState;
   hasPatient: boolean;
   selectedRegion: AnatomicalRegion | null;
+  synthesisRecord: BioEmotionalSynthesis | null;
+  onSynthesisSaved: (record: BioEmotionalSynthesis) => void;
+  onSynthesisClosed: (record: BioEmotionalSynthesis) => void;
+  observationInsert: string | null;
+  onObservationInsertApplied: () => void;
+  hypothesisInsert: string | null;
+  onHypothesisInsertApplied: () => void;
+  synthesisInsert: string | null;
+  onSynthesisInsertApplied: () => void;
+  onCopyToObservation: (text: string) => void;
+  onCopyToHypothesis: (text: string) => void;
+  onCopyToSynthesis: (text: string) => void;
+  onInsertToSynthesis: (text: string) => void;
+  isReadOnly: boolean;
+  referenceSnippets: string[];
 }
 
-export default function ExperientialToolPanels({ state, hasPatient, selectedRegion }: ExperientialToolPanelsProps) {
+export default function ExperientialToolPanels({
+  state,
+  hasPatient,
+  selectedRegion,
+  synthesisRecord,
+  onSynthesisSaved,
+  onSynthesisClosed,
+  observationInsert,
+  onObservationInsertApplied,
+  hypothesisInsert,
+  onHypothesisInsertApplied,
+  synthesisInsert,
+  onSynthesisInsertApplied,
+  onCopyToObservation,
+  onCopyToHypothesis,
+  onCopyToSynthesis,
+  onInsertToSynthesis,
+  isReadOnly,
+  referenceSnippets,
+}: ExperientialToolPanelsProps) {
   return (
     <aside className="w-full flex flex-col gap-4">
       <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
@@ -53,12 +91,28 @@ export default function ExperientialToolPanels({ state, hasPatient, selectedRegi
         {state === 'analysis' && (
           <>
             <div className="space-y-4">
-              <ObservationPanel selectedRegion={selectedRegion} />
-              <HypothesisPanel selectedRegion={selectedRegion} />
+              <ObservationPanel
+                selectedRegion={selectedRegion}
+                insertText={observationInsert}
+                onInsertApplied={onObservationInsertApplied}
+                isReadOnly={isReadOnly}
+              />
+              <HypothesisPanel
+                selectedRegion={selectedRegion}
+                insertText={hypothesisInsert}
+                onInsertApplied={onHypothesisInsertApplied}
+                isReadOnly={isReadOnly}
+              />
             </div>
             <div className="space-y-4">
               {/* Dictionary Panel - Phase 2 Integration */}
-              <DictionaryPanel selectedRegion={selectedRegion} />
+              <DictionaryPanel
+                selectedRegion={selectedRegion}
+                onCopyToObservation={onCopyToObservation}
+                onCopyToHypothesis={onCopyToHypothesis}
+                onCopyToSynthesis={onCopyToSynthesis}
+                isReadOnly={isReadOnly}
+              />
             </div>
           </>
         )}
@@ -66,20 +120,28 @@ export default function ExperientialToolPanels({ state, hasPatient, selectedRegi
         {state === 'synthesis' && (
           <>
             <div className="space-y-4">
-              <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
-                <h4 className="text-sm font-semibold text-gray-900">Sintesis terapeutica</h4>
-                <p className="text-xs text-gray-600">
-                  Integracion narrativa y simbolica en notas humanas.
-                </p>
-              </div>
+              <SynthesisPanel
+                selectedRegion={selectedRegion}
+                insertText={synthesisInsert}
+                onInsertApplied={onSynthesisInsertApplied}
+                synthesisRecord={synthesisRecord}
+                onSaved={onSynthesisSaved}
+                isReadOnly={isReadOnly}
+                referenceSnippets={referenceSnippets}
+              />
+              <AssistedDiagnosisPanel
+                synthesisRecord={synthesisRecord}
+                referenceSnippets={referenceSnippets}
+                onInsertToSynthesis={onInsertToSynthesis}
+                isReadOnly={isReadOnly}
+              />
             </div>
             <div className="space-y-4">
-              <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
-                <h4 className="text-sm font-semibold text-gray-900">Puertas de trabajo futuro</h4>
-                <p className="text-xs text-gray-600">
-                  Espacio reservado para modulos futuros (meditacion, sonido, aromas).
-                </p>
-              </div>
+              <DictionaryPanel
+                selectedRegion={selectedRegion}
+                onCopyToSynthesis={onCopyToSynthesis}
+                isReadOnly={isReadOnly}
+              />
             </div>
           </>
         )}
@@ -87,20 +149,14 @@ export default function ExperientialToolPanels({ state, hasPatient, selectedRegi
         {state === 'closure' && (
           <>
             <div className="space-y-4">
-              <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
-                <h4 className="text-sm font-semibold text-gray-900">Cierre consciente</h4>
-                <p className="text-xs text-gray-600">
-                  Registro final de la sesion sin conclusiones automaticas.
-                </p>
-              </div>
+              <ClosurePanel
+                synthesisRecord={synthesisRecord}
+                onClosed={onSynthesisClosed}
+                isReadOnly={isReadOnly}
+              />
             </div>
             <div className="space-y-4">
-              <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
-                <h4 className="text-sm font-semibold text-gray-900">Checklist humano</h4>
-                <p className="text-xs text-gray-600">
-                  Confirmar que las notas son completas y auditables.
-                </p>
-              </div>
+              <DictionaryPanel selectedRegion={selectedRegion} isReadOnly={true} />
             </div>
           </>
         )}

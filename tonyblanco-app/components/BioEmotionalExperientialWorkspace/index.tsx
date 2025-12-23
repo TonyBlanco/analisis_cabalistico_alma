@@ -8,11 +8,38 @@ import ExperientialVisualCore from './ExperientialVisualCore';
 import { useExperientialContext } from './hooks/useExperientialContext';
 import { useBodySelection } from './hooks/useBodySelection';
 import type { WorkspaceState } from './types';
+import type { BioEmotionalSynthesis } from '@/lib/api/bioemotional-clinical';
 
 export default function BioEmotionalExperientialWorkspace() {
   const [workspaceState, setWorkspaceState] = useState<WorkspaceState>('observation');
   const { context, loading, error } = useExperientialContext();
   const { selectedRegionId, selectedRegion, selectRegion, clearSelection } = useBodySelection();
+  const [synthesisRecord, setSynthesisRecord] = useState<BioEmotionalSynthesis | null>(null);
+  const [observationInsert, setObservationInsert] = useState<string | null>(null);
+  const [hypothesisInsert, setHypothesisInsert] = useState<string | null>(null);
+  const [synthesisInsert, setSynthesisInsert] = useState<string | null>(null);
+  const [referenceSnippets, setReferenceSnippets] = useState<string[]>([]);
+
+  const isReadOnly = workspaceState === 'closure' || Boolean(synthesisRecord?.is_closed);
+
+  const registerReference = (text: string) => {
+    setReferenceSnippets((prev) => [text, ...prev].slice(0, 10));
+  };
+
+  const handleCopyToObservation = (text: string) => {
+    registerReference(text);
+    setObservationInsert(text);
+  };
+
+  const handleCopyToHypothesis = (text: string) => {
+    registerReference(text);
+    setHypothesisInsert(text);
+  };
+
+  const handleCopyToSynthesis = (text: string) => {
+    registerReference(text);
+    setSynthesisInsert(text);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -72,6 +99,21 @@ export default function BioEmotionalExperientialWorkspace() {
                 state={workspaceState}
                 hasPatient={Boolean(context.patientId)}
                 selectedRegion={selectedRegion}
+                synthesisRecord={synthesisRecord}
+                onSynthesisSaved={setSynthesisRecord}
+                onSynthesisClosed={setSynthesisRecord}
+                observationInsert={observationInsert}
+                onObservationInsertApplied={() => setObservationInsert(null)}
+                hypothesisInsert={hypothesisInsert}
+                onHypothesisInsertApplied={() => setHypothesisInsert(null)}
+                synthesisInsert={synthesisInsert}
+                onSynthesisInsertApplied={() => setSynthesisInsert(null)}
+                onCopyToObservation={handleCopyToObservation}
+                onCopyToHypothesis={handleCopyToHypothesis}
+                onCopyToSynthesis={handleCopyToSynthesis}
+                onInsertToSynthesis={(text) => setSynthesisInsert(text)}
+                isReadOnly={isReadOnly}
+                referenceSnippets={referenceSnippets}
               />
             </div>
           </div>

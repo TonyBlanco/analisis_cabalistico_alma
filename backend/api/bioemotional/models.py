@@ -228,3 +228,60 @@ class BioEmotionalHypothesis(models.Model):
         indexes = [
             models.Index(fields=["patient", "status"]),
         ]
+
+
+class BioEmotionalSynthesis(models.Model):
+    """Sintesis clinica redactada por el terapeuta (sin automatismos)."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    therapist = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="bio_emotional_synthesis",
+    )
+    patient = models.ForeignKey(
+        Patient,
+        on_delete=models.CASCADE,
+        related_name="bio_emotional_synthesis",
+    )
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_closed = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = "Sintesis bio-emocional"
+        verbose_name_plural = "Sintesis bio-emocionales"
+        ordering = ["patient", "-created_at"]
+        indexes = [
+            models.Index(fields=["patient", "is_closed"]),
+        ]
+
+
+class BioEmotionalAssistedDiagnosis(models.Model):
+    """Lectura orientativa asistida por IA, validada manualmente por terapeuta."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    therapist = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="bio_emotional_assisted_diagnoses",
+    )
+    patient = models.ForeignKey(
+        Patient,
+        on_delete=models.CASCADE,
+        related_name="bio_emotional_assisted_diagnoses",
+    )
+    content = models.TextField()
+    based_on = models.JSONField(default=list, blank=True)
+    prompt_version = models.CharField(max_length=64)
+    is_validated = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Lectura asistida bio-emocional"
+        verbose_name_plural = "Lecturas asistidas bio-emocionales"
+        ordering = ["patient", "-created_at"]
+        indexes = [
+            models.Index(fields=["patient", "is_validated"]),
+        ]

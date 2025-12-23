@@ -7,6 +7,8 @@ from .models import (
     BioTransgenerationalHypothesis,
     BioEmotionalObservation,
     BioEmotionalHypothesis,
+    BioEmotionalSynthesis,
+    BioEmotionalAssistedDiagnosis,
 )
 from .dictionary_loader import load_bioemotional_dictionary, BioEmotionalDictionaryError
 
@@ -208,4 +210,55 @@ class BioEmotionalHypothesisSerializer(serializers.ModelSerializer):
         allowed = {"open", "in_review", "discarded"}
         if value not in allowed:
             raise serializers.ValidationError("Estado inv lido para hip¢tesis bio-emocional.")
+        return value
+
+
+class BioEmotionalSynthesisSerializer(serializers.ModelSerializer):
+    therapist_id = serializers.IntegerField(source="therapist.id", read_only=True)
+    patient_id = serializers.IntegerField(source="patient.id", read_only=True)
+
+    class Meta:
+        model = BioEmotionalSynthesis
+        fields = [
+            "id",
+            "therapist_id",
+            "patient_id",
+            "text",
+            "created_at",
+            "is_closed",
+        ]
+        read_only_fields = ["id", "therapist_id", "patient_id", "created_at", "is_closed"]
+
+
+class BioEmotionalAssistedDiagnosisSerializer(serializers.ModelSerializer):
+    therapist_id = serializers.IntegerField(source="therapist.id", read_only=True)
+    patient_id = serializers.IntegerField(source="patient.id", read_only=True)
+
+    class Meta:
+        model = BioEmotionalAssistedDiagnosis
+        fields = [
+            "id",
+            "therapist_id",
+            "patient_id",
+            "content",
+            "based_on",
+            "prompt_version",
+            "is_validated",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = ["id", "therapist_id", "patient_id", "is_validated", "created_at", "updated_at"]
+
+    def validate_based_on(self, value):
+        if not isinstance(value, list):
+            raise serializers.ValidationError("based_on debe ser una lista.")
+        for idx, item in enumerate(value):
+            if not isinstance(item, dict):
+                raise serializers.ValidationError(f"based_on[{idx}] debe ser un objeto.")
+            item_type = item.get("type")
+            item_id = item.get("id")
+            if item_type not in {"observation", "hypothesis", "synthesis", "dictionary_quote"}:
+                raise serializers.ValidationError(f"based_on[{idx}].type invalido.")
+            if item_id is None or item_id == "":
+                raise serializers.ValidationError(f"based_on[{idx}].id es obligatorio.")
         return value

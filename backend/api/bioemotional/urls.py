@@ -22,6 +22,14 @@ from .views import (
 
     BioEmotionalHypothesisUpdateView,
 
+    BioEmotionalSynthesisCreateView,
+
+    BioEmotionalSynthesisCloseView,
+
+    BioEmotionalAssistedDiagnosisListCreateView,
+
+    BioEmotionalAssistedDiagnosisValidateView,
+
     BioTransgenerationalHypothesisListCreateView,
 
     BioTransgenerationalHypothesisDetailView,
@@ -112,6 +120,35 @@ urlpatterns = [
         "observations/",
         BioEmotionalObservationListCreateView.as_view(),
         name="observation_list_create",
+    ),
+
+    # Sintesis clinica
+    # POST /api/bioemotional/synthesis/
+    # PATCH /api/bioemotional/synthesis/{id}/close/
+    path(
+        "synthesis/",
+        BioEmotionalSynthesisCreateView.as_view(),
+        name="synthesis_create",
+    ),
+    path(
+        "synthesis/<uuid:id>/close/",
+        BioEmotionalSynthesisCloseView.as_view(),
+        name="synthesis_close",
+    ),
+
+    # Lectura asistida
+    # POST /api/bioemotional/assisted-diagnosis/
+    # GET  /api/bioemotional/assisted-diagnosis/?patient_id=
+    # PATCH /api/bioemotional/assisted-diagnosis/{id}/validate/
+    path(
+        "assisted-diagnosis/",
+        BioEmotionalAssistedDiagnosisListCreateView.as_view(),
+        name="assisted_diagnosis_list_create",
+    ),
+    path(
+        "assisted-diagnosis/<uuid:id>/validate/",
+        BioEmotionalAssistedDiagnosisValidateView.as_view(),
+        name="assisted_diagnosis_validate",
     ),
 
     # Hipótesis bio-transgeneracionales

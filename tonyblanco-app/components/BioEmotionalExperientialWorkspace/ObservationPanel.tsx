@@ -11,9 +11,17 @@ import {
 
 interface ObservationPanelProps {
   selectedRegion: AnatomicalRegion | null;
+  insertText?: string | null;
+  onInsertApplied?: () => void;
+  isReadOnly?: boolean;
 }
 
-export default function ObservationPanel({ selectedRegion }: ObservationPanelProps) {
+export default function ObservationPanel({
+  selectedRegion,
+  insertText,
+  onInsertApplied,
+  isReadOnly = false,
+}: ObservationPanelProps) {
   const { context } = useExperientialContext();
   const patientId = context.patientId;
   const [noteText, setNoteText] = useState('');
@@ -44,6 +52,16 @@ export default function ObservationPanel({ selectedRegion }: ObservationPanelPro
     };
     load();
   }, [patientId]);
+
+  useEffect(() => {
+    if (!insertText) {
+      return;
+    }
+    setNoteText((prev) => (prev ? `${prev}\n\n${insertText}` : insertText));
+    if (onInsertApplied) {
+      onInsertApplied();
+    }
+  }, [insertText, onInsertApplied]);
 
   const handleSave = async () => {
     if (!patientId) {
@@ -97,7 +115,7 @@ export default function ObservationPanel({ selectedRegion }: ObservationPanelPro
           rows={4}
           placeholder="Escribe una observacion clinica (sin conclusiones)..."
           className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-          disabled={saving}
+          disabled={saving || isReadOnly}
         />
 
         <div className="flex items-center gap-2 text-xs text-gray-600">
@@ -106,7 +124,7 @@ export default function ObservationPanel({ selectedRegion }: ObservationPanelPro
             type="checkbox"
             checked={linkRegion}
             onChange={(e) => setLinkRegion(e.target.checked)}
-            disabled={!selectedRegion || saving}
+            disabled={!selectedRegion || saving || isReadOnly}
             className="h-4 w-4 rounded border-gray-300"
           />
           <label htmlFor="link-region">
@@ -120,13 +138,13 @@ export default function ObservationPanel({ selectedRegion }: ObservationPanelPro
           onChange={(e) => setDictionaryTerm(e.target.value)}
           placeholder="Vincular termino del diccionario (opcional)"
           className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-          disabled={saving}
+          disabled={saving || isReadOnly}
         />
 
         <button
           type="button"
           onClick={handleSave}
-          disabled={saving || !noteText.trim()}
+          disabled={saving || isReadOnly || !noteText.trim()}
           className="w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
         >
           {saving ? 'Guardando...' : 'Guardar observacion'}

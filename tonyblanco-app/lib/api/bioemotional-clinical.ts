@@ -41,8 +41,48 @@ export interface BioEmotionalHypothesis {
   updated_at: string;
 }
 
+export interface BioEmotionalSynthesisPayload {
+  patient_id: number;
+  text: string;
+}
+
+export interface BioEmotionalSynthesis {
+  id: string;
+  therapist_id: number;
+  patient_id: number;
+  text: string;
+  created_at: string;
+  is_closed: boolean;
+}
+
+export interface AssistedDiagnosisBasedOn {
+  type: "observation" | "hypothesis" | "synthesis" | "dictionary_quote";
+  id: string;
+}
+
+export interface AssistedDiagnosisPayload {
+  patient_id: number;
+  content: string;
+  based_on: AssistedDiagnosisBasedOn[];
+  prompt_version: string;
+}
+
+export interface AssistedDiagnosisRecord {
+  id: string;
+  therapist_id: number;
+  patient_id: number;
+  content: string;
+  based_on: AssistedDiagnosisBasedOn[];
+  prompt_version: string;
+  is_validated: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 const OBSERVATIONS_URL = `${API_BASE_URL}/bioemotional/observations/`;
 const HYPOTHESES_URL = `${API_BASE_URL}/bioemotional/hypotheses/`;
+const SYNTHESIS_URL = `${API_BASE_URL}/bioemotional/synthesis/`;
+const ASSISTED_DIAGNOSIS_URL = `${API_BASE_URL}/bioemotional/assisted-diagnosis/`;
 
 async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
   const token = getAuthToken();
@@ -101,5 +141,44 @@ export async function updateHypothesis(
   return request<BioEmotionalHypothesis>(`${HYPOTHESES_URL}${id}/`, {
     method: "PATCH",
     body: JSON.stringify(payload),
+  });
+}
+
+export async function createSynthesis(
+  payload: BioEmotionalSynthesisPayload
+): Promise<BioEmotionalSynthesis> {
+  return request<BioEmotionalSynthesis>(SYNTHESIS_URL, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function closeSynthesis(id: string): Promise<BioEmotionalSynthesis> {
+  return request<BioEmotionalSynthesis>(`${SYNTHESIS_URL}${id}/close/`, {
+    method: "PATCH",
+  });
+}
+
+export async function listAssistedDiagnosis(
+  patientId: number
+): Promise<AssistedDiagnosisRecord[]> {
+  const url = `${ASSISTED_DIAGNOSIS_URL}?patient_id=${patientId}`;
+  return request<AssistedDiagnosisRecord[]>(url);
+}
+
+export async function createAssistedDiagnosis(
+  payload: AssistedDiagnosisPayload
+): Promise<AssistedDiagnosisRecord> {
+  return request<AssistedDiagnosisRecord>(ASSISTED_DIAGNOSIS_URL, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function validateAssistedDiagnosis(
+  id: string
+): Promise<AssistedDiagnosisRecord> {
+  return request<AssistedDiagnosisRecord>(`${ASSISTED_DIAGNOSIS_URL}${id}/validate/`, {
+    method: "PATCH",
   });
 }

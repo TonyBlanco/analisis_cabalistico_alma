@@ -12,6 +12,8 @@ from .models import (
     GenealogyPerson,
     GenealogyEvent,
     BioTransgenerationalHypothesis,
+    BioEmotionalSynthesis,
+    BioEmotionalAssistedDiagnosis,
     BioEmotionalObservation,
     BioEmotionalHypothesis,
 )
@@ -21,6 +23,8 @@ from .serializers import (
     GenealogyEventSerializer,
     GenealogyOverviewSerializer,
     BioTransgenerationalHypothesisSerializer,
+    BioEmotionalSynthesisSerializer,
+    BioEmotionalAssistedDiagnosisSerializer,
     BioEmotionalObservationSerializer,
     BioEmotionalHypothesisSerializer,
 )
@@ -263,6 +267,144 @@ class BioEmotionalHypothesisUpdateView(generics.UpdateAPIView):
     permission_classes = [IsAuthenticated, IsTherapistAndOwnsPatient]
     queryset = BioEmotionalHypothesis.objects.all()
     http_method_names = ["patch", "options", "head"]
+
+
+class BioEmotionalSynthesisCreateView(generics.CreateAPIView):
+    """Sintesis clinica bio-emocional (solo terapeuta)."""
+
+    serializer_class = BioEmotionalSynthesisSerializer
+    permission_classes = [IsAuthenticated, IsTherapist]
+
+    def _get_patient(self, patient_id):
+        if not patient_id:
+            raise ValidationError({"patient_id": "El campo patient_id es obligatorio."})
+        try:
+            patient_id_int = int(patient_id)
+        except (TypeError, ValueError):
+            raise ValidationError({"patient_id": "El patient_id debe ser un entero v lido."})
+
+        user = self.request.user
+        try:
+            patient = Patient.objects.get(pk=patient_id_int, therapist=user)
+        except Patient.DoesNotExist:
+            raise PermissionDenied("Paciente no autorizado para este terapeuta.")
+
+        if patient.user_id and patient.user_id == user.id:
+            raise PermissionDenied("No se permite autoevaluaci¢n del terapeuta.")
+        return patient
+
+    def create(self, request, *args, **kwargs):
+        patient_id = request.data.get("patient_id")
+        patient = self._get_patient(patient_id)
+        text_value = (request.data.get("text") or "").strip()
+        if not text_value:
+            raise ValidationError({"text": "La sintesis no puede estar vacia."})
+
+        existing = BioEmotionalSynthesis.objects.filter(
+            patient=patient, therapist=request.user, is_closed=False
+        ).order_by("-created_at").first()
+
+        if existing:
+            existing.text = text_value
+            existing.save(update_fields=["text"])
+            serializer = self.get_serializer(existing)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        serializer = self.get_serializer(data={"text": text_value})
+        serializer.is_valid(raise_exception=True)
+        serializer.save(patient=patient, therapist=request.user)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+
+class BioEmotionalSynthesisCloseView(generics.UpdateAPIView):
+    """Cierra la sintesis clinica (solo terapeuta)."""
+
+    serializer_class = BioEmotionalSynthesisSerializer
+    permission_classes = [IsAuthenticated, IsTherapistAndOwnsPatient]
+    queryset = BioEmotionalSynthesis.objects.all()
+    http_method_names = ["patch", "options", "head"]
+
+    def get_queryset(self):
+        return BioEmotionalSynthesis.objects.filter(therapist=self.request.user)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.is_closed:
+            serializer = self.get_serializer(instance)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        instance.is_closed = True
+        instance.save(update_fields=["is_closed"])
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class BioEmotionalAssistedDiagnosisListCreateView(generics.ListCreateAPIView):
+    """Lecturas asistidas bio-emocionales (solo terapeuta)."""
+
+    serializer_class = BioEmotionalAssistedDiagnosisSerializer
+    permission_classes = [IsAuthenticated, IsTherapist]
+
+    def _get_patient(self, patient_id):
+        if not patient_id:
+            raise ValidationError({"patient_id": "El campo patient_id es obligatorio."})
+        try:
+            patient_id_int = int(patient_id)
+        except (TypeError, ValueError):
+            raise ValidationError({"patient_id": "El patient_id debe ser un entero v lido."})
+
+        user = self.request.user
+        try:
+            patient = Patient.objects.get(pk=patient_id_int, therapist=user)
+        except Patient.DoesNotExist:
+            raise PermissionDenied("Paciente no autorizado para este terapeuta.")
+
+        if patient.user_id and patient.user_id == user.id:
+            raise PermissionDenied("No se permite autoevaluaci¢n del terapeuta.")
+        return patient
+
+    def get_queryset(self):
+        patient_id = self.request.query_params.get("patient_id")
+        patient = self._get_patient(patient_id)
+        return BioEmotionalAssistedDiagnosis.objects.filter(patient=patient, therapist=self.request.user)
+
+    def perform_create(self, serializer):
+        patient_id = self.request.data.get("patient_id")
+        patient = self._get_patient(patient_id)
+        content_value = (self.request.data.get("content") or "").strip()
+        if not content_value:
+            raise ValidationError({"content": "El contenido no puede estar vacio."})
+        prompt_version = (self.request.data.get("prompt_version") or "").strip()
+        if not prompt_version:
+            raise ValidationError({"prompt_version": "prompt_version es obligatorio."})
+        serializer.save(
+            patient=patient,
+            therapist=self.request.user,
+            content=content_value,
+            prompt_version=prompt_version,
+        )
+
+
+class BioEmotionalAssistedDiagnosisValidateView(generics.UpdateAPIView):
+    """Valida una lectura asistida (solo terapeuta)."""
+
+    serializer_class = BioEmotionalAssistedDiagnosisSerializer
+    permission_classes = [IsAuthenticated, IsTherapistAndOwnsPatient]
+    queryset = BioEmotionalAssistedDiagnosis.objects.all()
+    http_method_names = ["patch", "options", "head"]
+
+    def get_queryset(self):
+        return BioEmotionalAssistedDiagnosis.objects.filter(therapist=self.request.user)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.is_validated:
+            serializer = self.get_serializer(instance)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        instance.is_validated = True
+        instance.save(update_fields=["is_validated"])
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class BioTransgenerationalHypothesisListCreateView(generics.ListCreateAPIView):

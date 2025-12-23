@@ -13,6 +13,9 @@ import {
 
 interface HypothesisPanelProps {
   selectedRegion: AnatomicalRegion | null;
+  insertText?: string | null;
+  onInsertApplied?: () => void;
+  isReadOnly?: boolean;
 }
 
 const statusLabels: Record<HypothesisStatus, string> = {
@@ -21,7 +24,12 @@ const statusLabels: Record<HypothesisStatus, string> = {
   discarded: 'Descartada',
 };
 
-export default function HypothesisPanel({ selectedRegion }: HypothesisPanelProps) {
+export default function HypothesisPanel({
+  selectedRegion,
+  insertText,
+  onInsertApplied,
+  isReadOnly = false,
+}: HypothesisPanelProps) {
   const { context } = useExperientialContext();
   const patientId = context.patientId;
   const [title, setTitle] = useState('');
@@ -55,6 +63,16 @@ export default function HypothesisPanel({ selectedRegion }: HypothesisPanelProps
     };
     load();
   }, [patientId]);
+
+  useEffect(() => {
+    if (!insertText) {
+      return;
+    }
+    setDescription((prev) => (prev ? `${prev}\n\n${insertText}` : insertText));
+    if (onInsertApplied) {
+      onInsertApplied();
+    }
+  }, [insertText, onInsertApplied]);
 
   const resetForm = () => {
     setTitle('');
@@ -137,7 +155,7 @@ export default function HypothesisPanel({ selectedRegion }: HypothesisPanelProps
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Titulo de la hipotesis"
           className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-          disabled={saving}
+          disabled={saving || isReadOnly}
         />
 
         <textarea
@@ -146,7 +164,7 @@ export default function HypothesisPanel({ selectedRegion }: HypothesisPanelProps
           rows={4}
           placeholder="Describe la hipotesis de forma neutral..."
           className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-          disabled={saving}
+          disabled={saving || isReadOnly}
         />
 
         <div className="flex items-center gap-2 text-xs text-gray-600">
@@ -155,7 +173,7 @@ export default function HypothesisPanel({ selectedRegion }: HypothesisPanelProps
             type="checkbox"
             checked={linkRegion}
             onChange={(e) => setLinkRegion(e.target.checked)}
-            disabled={!selectedRegion || saving}
+            disabled={!selectedRegion || saving || isReadOnly}
             className="h-4 w-4 rounded border-gray-300"
           />
           <label htmlFor="link-region-hypo">Vincular region seleccionada</label>
@@ -167,7 +185,7 @@ export default function HypothesisPanel({ selectedRegion }: HypothesisPanelProps
           onChange={(e) => setDictionaryTerm(e.target.value)}
           placeholder="Vincular termino del diccionario (opcional)"
           className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-          disabled={saving}
+          disabled={saving || isReadOnly}
         />
 
         <div>
@@ -176,7 +194,7 @@ export default function HypothesisPanel({ selectedRegion }: HypothesisPanelProps
             value={status}
             onChange={(e) => setStatus(e.target.value as HypothesisStatus)}
             className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            disabled={saving}
+            disabled={saving || isReadOnly}
           >
             <option value="open">Abierta</option>
             <option value="in_review">En revision</option>
@@ -188,7 +206,7 @@ export default function HypothesisPanel({ selectedRegion }: HypothesisPanelProps
           <button
             type="button"
             onClick={handleSave}
-            disabled={saving || !title.trim() || !description.trim()}
+            disabled={saving || isReadOnly || !title.trim() || !description.trim()}
             className="flex-1 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
           >
             {saving ? 'Guardando...' : selectedId ? 'Actualizar hipotesis' : 'Guardar hipotesis'}
@@ -197,6 +215,7 @@ export default function HypothesisPanel({ selectedRegion }: HypothesisPanelProps
             <button
               type="button"
               onClick={resetForm}
+              disabled={isReadOnly}
               className="px-3 py-2 text-sm font-medium text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
             >
               Cancelar

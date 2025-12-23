@@ -7,9 +7,23 @@ import { getActivePatientId } from '@/lib/active-patient';
 import { getPatientProfileSummary, type PatientProfileSummary } from '@/lib/patient-api';
 import { useTreeStructuralState } from '@/lib/tree-structural-state';
 import TreeOfLifeSVG from '@/components/Tree/TreeOfLifeSVG';
+import { TreeWithFlows } from '@/components/Tree';
 import TreeVisualPlaceholder from './TreeVisualPlaceholder';
 import { ejecutarMetodoPitagorico } from '../../../src/symbolic/methods/pitagoras';
 import type { PitagorasSymbolicState, PitagorasNumberMeaning } from '../../../src/symbolic/methods/pitagoras/pitagoras.types';
+import { adaptPitagorasToTree, type TreeStructuralState } from '../../../src/symbolic/tree';
+
+// Additional symbolic methods (FASE 1)
+import { ejecutarMetodoGematriaStandard } from '../../../src/symbolic/methods/gematria-standard';
+import { ejecutarMetodoGematriaKatan } from '../../../src/symbolic/methods/gematria-katan';
+import { ejecutarMetodoMisparGadol } from '../../../src/symbolic/methods/mispar-gadol';
+import { ejecutarMetodoMisparSiduri } from '../../../src/symbolic/methods/mispar-siduri';
+import { ejecutarMetodoMilui } from '../../../src/symbolic/methods/milui';
+import { ejecutarMetodoAtbash } from '../../../src/symbolic/methods/atbash';
+import { ejecutarMetodoAlbam } from '../../../src/symbolic/methods/albam';
+import { ejecutarMetodoAvgad } from '../../../src/symbolic/methods/avgad';
+import { ejecutarMetodoTemurah } from '../../../src/symbolic/methods/temurah';
+import { ejecutarMetodoNotarikon } from '../../../src/symbolic/methods/notarikon';
 
 // ============================================================================
 // PITAGORAS PROFESSIONAL REPORT COMPONENTS (UI ONLY)
@@ -361,6 +375,52 @@ export default function CabalAppliedVisualCore({ activeSection }: CabalAppliedVi
   const [activePatientId, setActivePatientId] = useState<string | null>(null);
   const [patientProfile, setPatientProfile] = useState<PatientProfileSummary | null>(null);
   const [pitagorasState, setPitagorasState] = useState<PitagorasSymbolicState | null>(null);
+  const [treeStructuralState, setTreeStructuralState] = useState<TreeStructuralState | null>(null);
+  const [selectedMethod, setSelectedMethod] = useState<string>('pitagoras');
+
+  const METHODS = useMemo(() => [
+    { id: 'pitagoras', name: 'Pitágoras', run: (input: any) => ejecutarMetodoPitagorico(input as any) },
+    { id: 'gematria-standard', name: 'Gematría Estándar', run: (input: any) => ejecutarMetodoGematriaStandard(input as any) },
+    { id: 'gematria-katan', name: 'Gematría Katan', run: (input: any) => ejecutarMetodoGematriaKatan(input as any) },
+    { id: 'mispar-gadol', name: 'Mispar Gadol', run: (input: any) => ejecutarMetodoMisparGadol(input as any) },
+    { id: 'mispar-siduri', name: 'Mispar Siduri', run: (input: any) => ejecutarMetodoMisparSiduri(input as any) },
+    { id: 'milui', name: 'Milui', run: (input: any) => ejecutarMetodoMilui(input as any) },
+    { id: 'atbash', name: 'Atbash', run: (input: any) => ejecutarMetodoAtbash(input as any) },
+    { id: 'albam', name: 'Albam', run: (input: any) => ejecutarMetodoAlbam(input as any) },
+    { id: 'avgad', name: 'Avgad', run: (input: any) => ejecutarMetodoAvgad(input as any) },
+    { id: 'temurah', name: 'Temurah', run: (input: any) => ejecutarMetodoTemurah(input as any) },
+    { id: 'notarikon', name: 'Notarikon', run: (input: any) => ejecutarMetodoNotarikon(input as any) },
+  ], [] as any);
+
+  function runSelectedMethodForPatient() {
+    if (!patientProfile?.legal_full_name || !patientProfile?.birth_date) return;
+    try {
+      const date = new Date(patientProfile.birth_date);
+      const input = {
+        nombreCompleto: patientProfile.legal_full_name,
+        fechaNacimiento: {
+          dia: date.getUTCDate(),
+          mes: date.getUTCMonth() + 1,
+          anio: date.getUTCFullYear(),
+        },
+      };
+      const method = METHODS.find((m: any) => m.id === selectedMethod) as any;
+      if (!method) return;
+      const estado: PitagorasSymbolicState = method.run(input);
+      setPitagorasState(estado);
+      
+      // Si el método es Pitágoras, generar TreeStructuralState
+      if (selectedMethod === 'pitagoras') {
+        const treeState = adaptPitagorasToTree(estado);
+        setTreeStructuralState(treeState);
+      } else {
+        // Otros métodos aún no tienen adaptador al Árbol
+        setTreeStructuralState(null);
+      }
+    } catch (err) {
+      console.error('Error ejecutando método simbólico:', err);
+    }
+  }
 
   useEffect(() => {
     let isMounted = true;
@@ -503,56 +563,63 @@ export default function CabalAppliedVisualCore({ activeSection }: CabalAppliedVi
         <>
           <div className="mt-6 rounded-lg border border-gray-200 bg-gray-50 p-4">
             <div className="relative w-full h-72">
-              <TreeOfLifeSVG
-                highlightedSefirot={[]}
-                highlightedPaths={[]}
-                emphasis="soft"
-                size="responsive"
-                className="absolute inset-0 h-full w-full opacity-40 pointer-events-none"
-              />
-              <TreeOfLifeSVG
-                highlightedSefirot={highlightedSefirot}
-                highlightedPaths={highlightedPaths}
-                highlightedSefirotOpacity={highlightedSefirotOpacity}
-                highlightedPathOpacity={highlightedPathOpacity}
-                repeatedSefirot={repeatedSefirot}
-                repeatedPaths={repeatedPaths}
-                emphasis="strong"
-                dimUnrelated={true}
-                size="responsive"
-                className="absolute inset-0 h-full w-full"
-              />
+              {treeStructuralState ? (
+                // TreeStructuralState v0.1 con flechas (Pitágoras ejecutado)
+                <TreeWithFlows
+                  treeState={treeStructuralState}
+                  size="responsive"
+                  className="absolute inset-0 h-full w-full"
+                />
+              ) : (
+                // Fallback: árbol legacy con backend highlights
+                <>
+                  <TreeOfLifeSVG
+                    highlightedSefirot={[]}
+                    highlightedPaths={[]}
+                    emphasis="soft"
+                    size="responsive"
+                    className="absolute inset-0 h-full w-full opacity-40 pointer-events-none"
+                  />
+                  <TreeOfLifeSVG
+                    highlightedSefirot={highlightedSefirot}
+                    highlightedPaths={highlightedPaths}
+                    highlightedSefirotOpacity={highlightedSefirotOpacity}
+                    highlightedPathOpacity={highlightedPathOpacity}
+                    repeatedSefirot={repeatedSefirot}
+                    repeatedPaths={repeatedPaths}
+                    emphasis="strong"
+                    dimUnrelated={true}
+                    size="responsive"
+                    className="absolute inset-0 h-full w-full"
+                  />
+                </>
+              )}
             </div>
           </div>
           {activePatientId && (
             <div className="mt-4 flex items-center gap-3">
+              <label className="sr-only">Método cabalístico</label>
+              <select
+                value={selectedMethod}
+                onChange={(e) => setSelectedMethod(e.target.value)}
+                className="rounded-md border-gray-200 bg-white px-3 py-2 text-sm text-gray-700"
+              >
+                {METHODS.map((m: any) => (
+                  <option key={m.id} value={m.id}>
+                    {m.name}
+                  </option>
+                ))}
+              </select>
+
               <button
                 type="button"
                 className="rounded-md bg-indigo-600 px-3 py-2 text-sm text-white hover:bg-indigo-700"
-                onClick={() => {
-                  // Ejecutar método Pitágoras usando solo datos disponibles del paciente
-                  if (!patientProfile?.legal_full_name || !patientProfile?.birth_date) return;
-                  try {
-                    const date = new Date(patientProfile.birth_date);
-                    const input = {
-                      nombreCompleto: patientProfile.legal_full_name,
-                      fechaNacimiento: {
-                        dia: date.getUTCDate(),
-                        mes: date.getUTCMonth() + 1,
-                        anio: date.getUTCFullYear(),
-                      },
-                    };
-                    const estado = ejecutarMetodoPitagorico(input as any) as PitagorasSymbolicState;
-                    setPitagorasState(estado);
-                  } catch (err) {
-                    // No persistir ni lanzar interpretaciones; solo silenciar fallos locales
-                    console.error('Error ejecutando Pitágoras:', err);
-                  }
-                }}
+                onClick={() => runSelectedMethodForPatient()}
               >
-                Pitágoras
+                Ejecutar
               </button>
-              <span className="text-xs text-gray-500">Ejecutar manualmente el método Pitagórico (solo lectura)</span>
+
+              <span className="text-xs text-gray-500">Ejecutar manualmente el método seleccionado (solo lectura, formativo)</span>
             </div>
           )}
           <div className="mt-6 grid gap-4 md:grid-cols-2">

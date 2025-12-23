@@ -7,6 +7,8 @@ import { getPatientProfileSummary, type PatientProfileSummary } from '@/lib/pati
 import { useTreeStructuralState } from '@/lib/tree-structural-state';
 import TreeOfLifeSVG from '@/components/Tree/TreeOfLifeSVG';
 import TreeVisualPlaceholder from './TreeVisualPlaceholder';
+import { ejecutarMetodoPitagorico } from '@/symbolic/methods/pitagoras';
+import type { PitagorasSymbolicState } from '@/symbolic/methods/pitagoras/pitagoras.types';
 
 interface CabalAppliedVisualCoreProps {
   activeSection: CabalSectionId;
@@ -15,6 +17,7 @@ interface CabalAppliedVisualCoreProps {
 export default function CabalAppliedVisualCore({ activeSection }: CabalAppliedVisualCoreProps) {
   const [activePatientId, setActivePatientId] = useState<string | null>(null);
   const [patientProfile, setPatientProfile] = useState<PatientProfileSummary | null>(null);
+  const [pitagorasState, setPitagorasState] = useState<PitagorasSymbolicState | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -178,6 +181,37 @@ export default function CabalAppliedVisualCore({ activeSection }: CabalAppliedVi
               />
             </div>
           </div>
+          {activePatientId && (
+            <div className="mt-4 flex items-center gap-3">
+              <button
+                type="button"
+                className="rounded-md bg-indigo-600 px-3 py-2 text-sm text-white hover:bg-indigo-700"
+                onClick={() => {
+                  // Ejecutar método Pitágoras usando solo datos disponibles del paciente
+                  if (!patientProfile?.legal_full_name || !patientProfile?.birth_date) return;
+                  try {
+                    const date = new Date(patientProfile.birth_date);
+                    const input = {
+                      nombreCompleto: patientProfile.legal_full_name,
+                      fechaNacimiento: {
+                        dia: date.getUTCDate(),
+                        mes: date.getUTCMonth() + 1,
+                        anio: date.getUTCFullYear(),
+                      },
+                    };
+                    const estado = ejecutarMetodoPitagorico(input as any) as PitagorasSymbolicState;
+                    setPitagorasState(estado);
+                  } catch (err) {
+                    // No persistir ni lanzar interpretaciones; solo silenciar fallos locales
+                    console.error('Error ejecutando Pitágoras:', err);
+                  }
+                }}
+              >
+                Pitágoras
+              </button>
+              <span className="text-xs text-gray-500">Ejecutar manualmente el método Pitagórico (solo lectura)</span>
+            </div>
+          )}
           <div className="mt-6 grid gap-4 md:grid-cols-2">
             <div className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-700">
               <div className="text-xs uppercase tracking-wide text-gray-500">Sefirot activas</div>
@@ -249,6 +283,27 @@ export default function CabalAppliedVisualCore({ activeSection }: CabalAppliedVi
             <span className="font-medium">Polaridades:</span> No disponible -{' '}
             <span className="font-medium">Fuentes:</span> No disponible
           </div>
+          {/* Pitagoras result panel (solo UI, no persistencia) */}
+          {pitagorasState ? (
+            <div className="mt-4 rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-700">
+              <div className="text-xs uppercase tracking-wide text-gray-500">Pitágoras (resultado simbólico)</div>
+              <div className="mt-2 text-xs">
+                {pitagorasState.primaryNumbers.map((n) => (
+                  <div key={n.key} className="mb-1">
+                    <strong>{n.label}:</strong> {n.value} — {n.meaning?.title ?? n.meaning ?? '—'}
+                  </div>
+                ))}
+                <div className="mt-2">
+                  <div className="text-xs font-medium text-gray-600">Inclusion (casas):</div>
+                  <div className="mt-1 text-xs">
+                    {Object.entries(pitagorasState.inclusionMap)
+                      .map(([k, v]) => `${k}: ${v.frequency}${v.isAbsent ? ' (ausente)' : ''}${v.isDominant ? ' (dominante)' : ''}`)
+                      .join(', ')}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : null}
         </>
       )}
     </section>

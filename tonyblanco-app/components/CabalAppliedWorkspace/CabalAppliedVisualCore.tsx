@@ -108,13 +108,13 @@ function PitagorasGrid({
         })}
       </div>
       <div className="mt-3 flex items-center justify-center gap-4 text-[10px] text-gray-500">
-        <span className="flex items-center gap-1">
+        <span className="flex items-center gap-1 cursor-help" title="Mayor frecuencia en el perfil. Energía predominante.">
           <span className="inline-block h-2 w-2 rounded-full bg-indigo-400" /> Dominante
         </span>
-        <span className="flex items-center gap-1">
+        <span className="flex items-center gap-1 cursor-help" title="Número activo en el perfil con presencia natural.">
           <span className="inline-block h-2 w-2 rounded-full bg-blue-300" /> Presente
         </span>
-        <span className="flex items-center gap-1">
+        <span className="flex items-center gap-1 cursor-help" title="Ausencia indica menor expresión espontánea, no carencia.">
           <span className="inline-block h-2 w-2 rounded-full border border-dashed border-gray-300 bg-gray-100" /> Ausente
         </span>
       </div>

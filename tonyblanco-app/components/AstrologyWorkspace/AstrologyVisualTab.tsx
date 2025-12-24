@@ -234,6 +234,38 @@ export default function AstrologyVisualTab({ patientId }: AstrologyVisualTabProp
         {/* Rueda de carta natal */}
         <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
           <h4 className="text-sm font-semibold text-gray-900 mb-4">Carta Natal</h4>
+
+          {/* Detección de agrupamientos anómalos (varios planetas en la misma longitud)
+              Si se detectan, sugerir recalculo (posible problema del motor astrológico). */}
+          {chart.planetas && (() => {
+            const counts: Record<string, number> = {};
+            chart.planetas.forEach((p) => {
+              const key = (Math.round((p.longitud_ecliptica || 0) * 100) / 100).toFixed(2);
+              counts[key] = (counts[key] || 0) + 1;
+            });
+            const dupGroups = Object.values(counts).filter((c) => c > 1);
+            if (dupGroups.length > 0) {
+              const worst = Math.max(...dupGroups);
+              if (worst > 2) {
+                return (
+                  <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-md">
+                    <p className="text-amber-800 text-sm font-medium">Se detectó que varios planetas comparten posiciones muy cercanas en la rueda.</p>
+                    <p className="text-xs text-amber-700">Esto puede indicar un problema en el cálculo. Intenta recalcular la carta natal.</p>
+                    <div className="mt-2">
+                      <button
+                        onClick={calculateChart}
+                        className="px-3 py-1 text-xs bg-amber-600 text-white rounded-md hover:bg-amber-700"
+                      >
+                        Recalcular carta natal
+                      </button>
+                    </div>
+                  </div>
+                );
+              }
+            }
+            return null;
+          })()}
+
           <NatalChartWheel chart={chart} />
         </div>
 

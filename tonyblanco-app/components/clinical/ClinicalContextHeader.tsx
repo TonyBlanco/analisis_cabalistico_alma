@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { getActivePatient } from '@/lib/active-patient';
 import { getPatientProfileSummary, PatientProfileSummary } from '@/lib/patient-api';
 
@@ -58,6 +58,8 @@ export default function ClinicalContextHeader() {
     };
   }, []);
 
+  const router = useRouter();
+
   const workspaceLabel = useMemo(
     () => formatWorkspaceLabel(pathname),
     [pathname]
@@ -86,6 +88,14 @@ export default function ClinicalContextHeader() {
           </span>
           <span>ID: {activePatient?.id ?? '—'}</span>
           <span>Fecha de nacimiento: {birthDateLabel}</span>
+          {/* Quick access to Patients management for therapists */}
+          <button
+            onClick={() => router.push('/dashboard/therapist/patients')}
+            className="ml-2 inline-flex items-center px-2 py-1 rounded bg-indigo-600 text-white text-xs hover:bg-indigo-700 transition-colors"
+            title="Ir a Gestión de Pacientes"
+          >
+            Pacientes
+          </button>
         </div>
       </div>
     </div>

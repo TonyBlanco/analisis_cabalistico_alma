@@ -209,7 +209,14 @@ export default function AstrologyVisualTab({ patientId }: AstrologyVisualTabProp
                 <div className={`text-xs ${hasCompleteProfile ? 'text-green-700' : 'text-gray-500'}`}>Coords: {patientProfile.birth_latitude != null && patientProfile.birth_longitude != null ? `${patientProfile.birth_latitude.toFixed(4)}, ${patientProfile.birth_longitude.toFixed(4)}` : 'Sin coordenadas'}</div>
                 {!hasCompleteProfile && (
                   <button
-                    onClick={() => router.push(`/dashboard/therapist/patients/${patientId}`)}
+                    onClick={() => {
+                      const missing = !patientProfile.birth_time ? 'birth_time' : !patientProfile.birth_city ? 'birth_city' : 'birth_country';
+                      try {
+                        window.dispatchEvent(new CustomEvent('openPatientEditor', { detail: { focusField: missing, patientId } }));
+                      } catch (e) {
+                        router.push(`/dashboard/therapist/patients/${patientId}`);
+                      }
+                    }}
                     className="mt-2 text-xs text-amber-700 underline"
                   >
                     Completar perfil

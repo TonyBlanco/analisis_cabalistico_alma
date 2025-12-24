@@ -39,6 +39,7 @@ export default function ClinicalContextHeader() {
   const [profile, setProfile] = useState<PatientProfileSummary | null>(null);
   const [showEditor, setShowEditor] = useState(false);
   const [editorLoading, setEditorLoading] = useState(false);
+  const [editorFocusField, setEditorFocusField] = useState<string | null>(null);
 
   useEffect(() => {
     const load = () => {
@@ -55,9 +56,30 @@ export default function ClinicalContextHeader() {
     load();
     window.addEventListener('activePatientChanged', load);
     window.addEventListener('storage', load);
+
+    const openHandler = (e: Event) => {
+      const ce = e as CustomEvent;
+      const detail = ce.detail || {};
+      const focusField = detail.focusField || null;
+      const targetPatientId = detail.patientId ? Number(detail.patientId) : null;
+      const ap = getActivePatient();
+
+      // If the event targets a different patient, open that patient's page
+      if (targetPatientId && ap && targetPatientId !== ap.id) {
+        router.push(`/dashboard/therapist/patients/${targetPatientId}`);
+        return;
+      }
+
+      setEditorFocusField(focusField);
+      openEditorForActivePatient();
+    };
+
+    window.addEventListener('openPatientEditor', openHandler as EventListener);
+
     return () => {
       window.removeEventListener('activePatientChanged', load);
       window.removeEventListener('storage', load);
+      window.removeEventListener('openPatientEditor', openHandler as EventListener);
     };
   }, []);
 
@@ -99,6 +121,7 @@ export default function ClinicalContextHeader() {
     } catch (err) {
       console.warn('Error refreshing profile after save:', err);
     } finally {
+      setEditorFocusField(null);
       setShowEditor(false);
     }
   };
@@ -156,8 +179,9 @@ export default function ClinicalContextHeader() {
                 birth_country: profile.birth_country || '',
               } : null}
               patientId={String(activePatient.id)}
+              initialFocus={editorFocusField}
               onSave={handleEditorSave}
-              onClose={handleEditorClose}
+              onClose={() => { setEditorFocusField(null); handleEditorClose(); }}
             />
           )}
         </div>

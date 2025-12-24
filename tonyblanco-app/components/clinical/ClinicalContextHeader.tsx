@@ -2,8 +2,9 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { getActivePatient } from '@/lib/active-patient';
+import { getActivePatient, setActivePatientId } from '@/lib/active-patient';
 import { getPatientProfileSummary, PatientProfileSummary } from '@/lib/patient-api';
+import PatientProfileEditor from '@/components/patient/PatientProfileEditor';
 
 interface ActivePatientSummary {
   id: number;
@@ -36,6 +37,8 @@ export default function ClinicalContextHeader() {
     null
   );
   const [profile, setProfile] = useState<PatientProfileSummary | null>(null);
+  const [showEditor, setShowEditor] = useState(false);
+  const [editorLoading, setEditorLoading] = useState(false);
 
   useEffect(() => {
     const load = () => {
@@ -57,6 +60,52 @@ export default function ClinicalContextHeader() {
       window.removeEventListener('storage', load);
     };
   }, []);
+
+  const openEditorForActivePatient = async () => {
+    const ap = getActivePatient();
+    if (!ap) {
+      // If no active patient set, go to patients management
+      router.push('/dashboard/therapist/patients');
+      return;
+    }
+
+    setEditorLoading(true);
+    try {
+      const fullProfile = await getPatientProfileSummary(ap.id);
+      setProfile(fullProfile);
+      setShowEditor(true);
+    } catch (err) {
+      console.error('Error loading patient profile for editor:', err);
+      // If fetching profile fails, redirect to patients list to let user select
+      router.push('/dashboard/therapist/patients');
+    } finally {
+      setEditorLoading(false);
+    }
+  };
+
+  const handleEditorSave = async () => {
+    // Refresh profile and update active patient name in storage + dispatch event
+    const ap = getActivePatient();
+    if (!ap) return;
+
+    try {
+      const refreshed = await getPatientProfileSummary(ap.id);
+      setProfile(refreshed);
+      if (refreshed && refreshed.legal_full_name) {
+        setActivePatientId(ap.id, refreshed.legal_full_name);
+      }
+      // notify other components
+      window.dispatchEvent(new Event('activePatientChanged'));
+    } catch (err) {
+      console.warn('Error refreshing profile after save:', err);
+    } finally {
+      setShowEditor(false);
+    }
+  };
+
+  const handleEditorClose = () => {
+    setShowEditor(false);
+  };
 
   const router = useRouter();
 
@@ -88,14 +137,29 @@ export default function ClinicalContextHeader() {
           </span>
           <span>ID: {activePatient?.id ?? '—'}</span>
           <span>Fecha de nacimiento: {birthDateLabel}</span>
-          {/* Quick access to Patients management for therapists */}
+          {/* Quick access: if there is an active patient, open edit modal; otherwise go to Patients management */}
           <button
-            onClick={() => router.push('/dashboard/therapist/patients')}
+            onClick={() => (activePatient ? openEditorForActivePatient() : router.push('/dashboard/therapist/patients'))}
             className="ml-2 inline-flex items-center px-2 py-1 rounded bg-indigo-600 text-white text-xs hover:bg-indigo-700 transition-colors"
-            title="Ir a Gestión de Pacientes"
+            title={activePatient ? 'Editar paciente activo' : 'Ir a Gestión de Pacientes'}
           >
-            Pacientes
+            {activePatient ? (editorLoading ? 'Cargando…' : 'Editar paciente') : 'Pacientes'}
           </button>
+
+          {showEditor && activePatient && (
+            <PatientProfileEditor
+              profile={profile ? {
+                legal_full_name: profile.legal_full_name || '',
+                birth_date: profile.birth_date || '',
+                birth_time: '',
+                birth_city: profile.birth_city || '',
+                birth_country: profile.birth_country || '',
+              } : null}
+              patientId={String(activePatient.id)}
+              onSave={handleEditorSave}
+              onClose={handleEditorClose}
+            />
+          )
         </div>
       </div>
     </div>

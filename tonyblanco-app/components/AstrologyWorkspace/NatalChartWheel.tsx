@@ -31,13 +31,50 @@ const PLANET_SYMBOLS: Record<string, string> = {
 export default function NatalChartWheel({ chart }: NatalChartWheelProps) {
   const { planetas, casas } = chart;
 
+  // Normalize longitudes and detect overlapping planets.
+  // If several planets share (almost) the exact same longitude, apply a tiny visual offset
+  // so they are all visible on the wheel while keeping the exact longitude in the tooltip.
+  const normalizePlanetLongitudes = (planets: any[]) => {
+    const EPS = 1e-6; // threshold to consider equal
+    // Map by rounded longitude to clusters
+    const clusters: Record<string, any[]> = {};
+    planets.forEach((p) => {
+      const key = (Math.round((p.longitud_ecliptica || 0) * 100) / 100).toFixed(2);
+      clusters[key] = clusters[key] || [];
+      clusters[key].push(p);
+    });
+
+    // For each cluster with >1 planet, compute small offsets in degrees
+    const adjusted: any[] = [];
+    Object.keys(clusters).forEach((k) => {
+      const group = clusters[k];
+      const base = group[0].longitud_ecliptica || 0;
+      if (group.length === 1) {
+        adjusted.push({ ...group[0], _display_longitude: base });
+      } else {
+        const spreadDeg = 0.6; // total spread in degrees across group
+        const step = spreadDeg / Math.max(1, group.length - 1);
+        const start = -spreadDeg / 2;
+        group.forEach((p, i) => {
+          adjusted.push({ ...p, _display_longitude: base + start + i * step });
+        });
+      }
+    });
+
+    return adjusted;
+  };
+
+  const displayedPlanets = normalizePlanetLongitudes(planetas || []);
+
   // Calcular posición de planetas en el círculo (basado en longitud eclíptica)
   const getPlanetPosition = (longitude: number) => {
     const radius = 65;
     const centerX = 100;
     const centerY = 100;
-    // Convertir longitud a ángulo (0° Aries = top, clockwise)
-    const angle = (longitude - 90) * (Math.PI / 180);
+    // Normalize longitude to 0-360
+    const lon = ((longitude % 360) + 360) % 360;
+    // Convertir longitud a ángulo (0° Aries = top, clockwise). Subtract 90 to put Aries at top.
+    const angle = (lon - 90) * (Math.PI / 180);
     return {
       x: centerX + radius * Math.cos(angle),
       y: centerY + radius * Math.sin(angle),
@@ -49,7 +86,8 @@ export default function NatalChartWheel({ chart }: NatalChartWheelProps) {
     const radius = 85;
     const centerX = 100;
     const centerY = 100;
-    const angle = (longitude - 90) * (Math.PI / 180);
+    const lon = ((longitude % 360) + 360) % 360;
+    const angle = (lon - 90) * (Math.PI / 180);
     return {
       x: centerX + radius * Math.cos(angle),
       y: centerY + radius * Math.sin(angle),
@@ -134,12 +172,15 @@ export default function NatalChartWheel({ chart }: NatalChartWheelProps) {
           );
         })}
 
-        {/* Planetas */}
-        {planetas.map((planeta) => {
-          const pos = getPlanetPosition(planeta.longitud_ecliptica);
+        {/* Planetas (usamos _display_longitude cuando esté disponible para evitar overlap visual) */}
+        {displayedPlanets.map((planeta) => {
+          const lon = (planeta._display_longitude !== undefined) ? planeta._display_longitude : planeta.longitud_ecliptica;
+          const pos = getPlanetPosition(lon);
           const symbol = PLANET_SYMBOLS[planeta.nombre] || '●';
+          const title = `${planeta.nombre.toUpperCase()} ${planeta.signo ?? ''} ${planeta.grados != null ? planeta.grados + '°' : ''} (lon: ${planeta.longitud_ecliptica}°) - Casa ${planeta.casa ?? '—'}`;
           return (
-            <g key={planeta.nombre}>
+            <g key={`${planeta.nombre}-${planeta.longitud_ecliptica}`}>
+              <title>{title}</title>
               <circle
                 cx={pos.x}
                 cy={pos.y}

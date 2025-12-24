@@ -145,8 +145,8 @@ export default function AstrologyVisualTab({ patientId }: AstrologyVisualTabProp
           </p>
         </div>
         <div className="text-right text-xs text-gray-500">
-          <p>Calculada: {new Date(chart.metadatos.calculated_at).toLocaleString('es-ES')}</p>
-          <p>Sistema: {chart.metadatos.sistema_casas}</p>
+          <p>Calculada: {chart.metadatos?.calculated_at ? new Date(chart.metadatos.calculated_at).toLocaleString('es-ES') : '—'}</p>
+          <p>Sistema: {chart.metadatos?.sistema_casas || '—'}</p>
         </div>
       </div>
 

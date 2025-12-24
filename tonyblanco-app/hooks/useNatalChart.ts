@@ -115,7 +115,35 @@ export function useNatalChart(patientId: string | undefined): UseNatalChartRetur
       }
 
       const data = await response.json();
-      setChart(data.chart_payload);
+      // Normalize backend response shapes:
+      // - Some responses return { chart: {...}, calculated_at, house_system, source }
+      // - Others return { chart_payload: { planetas, casas, aspectos, metadatos } }
+      let payload: any = null;
+
+      if (data.chart) {
+        // Build NatalChartPayload from response
+        payload = {
+          planetas: data.chart.planetas || [],
+          casas: data.chart.casas || [],
+          aspectos: data.chart.aspectos || [],
+          metadatos: {
+            sistema_casas: data.house_system || (data.chart.metadatos && data.chart.metadatos.sistema_casas) || 'placidus',
+            fuente: data.source || (data.chart.metadatos && data.chart.metadatos.fuente) || 'kerykeion',
+            calculated_at: data.calculated_at || (data.chart.metadatos && data.chart.metadatos.calculated_at) || new Date().toISOString(),
+            version_engine: (data.chart.metadatos && data.chart.metadatos.version_engine) || 'unknown',
+            input_snapshot: (data.chart.metadatos && data.chart.metadatos.input_snapshot) || null,
+          }
+        };
+      } else if (data.chart_payload) {
+        payload = data.chart_payload;
+      } else if (data.planetas) {
+        // Already in chart shape
+        payload = data as any;
+      } else {
+        payload = null;
+      }
+
+      setChart(payload);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al cargar carta natal');
       setChart(null);
@@ -167,7 +195,31 @@ export function useNatalChart(patientId: string | undefined): UseNatalChartRetur
       }
 
       const data = await response.json();
-      setChart(data);
+      // Normalize POST response (same shape as GET)
+      let payload: any = null;
+      if (data.chart) {
+        payload = {
+          planetas: data.chart.planetas || [],
+          casas: data.chart.casas || [],
+          aspectos: data.chart.aspectos || [],
+          metadatos: {
+            sistema_casas: data.house_system || (data.chart.metadatos && data.chart.metadatos.sistema_casas) || 'placidus',
+            fuente: data.source || (data.chart.metadatos && data.chart.metadatos.fuente) || 'kerykeion',
+            calculated_at: data.calculated_at || (data.chart.metadatos && data.chart.metadatos.calculated_at) || new Date().toISOString(),
+            version_engine: (data.chart.metadatos && data.chart.metadatos.version_engine) || 'unknown',
+            input_snapshot: (data.chart.metadatos && data.chart.metadatos.input_snapshot) || null,
+          }
+        };
+      } else if (data.chart_payload) {
+        payload = data.chart_payload;
+      } else if (data.planetas) {
+        payload = data as any;
+      } else {
+        // Fallback: try to use 'chart' prop or raw
+        payload = data.chart || data;
+      }
+
+      setChart(payload);
       setError(null);
       setMissingFields(null);
     } catch (err) {

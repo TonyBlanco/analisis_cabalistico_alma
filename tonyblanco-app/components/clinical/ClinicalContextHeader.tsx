@@ -151,7 +151,7 @@ export default function ClinicalContextHeader() {
               profile={profile ? {
                 legal_full_name: profile.legal_full_name || '',
                 birth_date: profile.birth_date || '',
-                birth_time: '',
+                birth_time: profile.birth_time || '' ,
                 birth_city: profile.birth_city || '',
                 birth_country: profile.birth_country || '',
               } : null}
@@ -159,7 +159,7 @@ export default function ClinicalContextHeader() {
               onSave={handleEditorSave}
               onClose={handleEditorClose}
             />
-          )
+          )}
         </div>
       </div>
     </div>

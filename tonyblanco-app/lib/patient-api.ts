@@ -50,6 +50,7 @@ export interface PatientProfileSummary {
   patient_id: number;
   legal_full_name: string | null;
   birth_date: string | null;
+  birth_time?: string | null;
   birth_city: string | null;
   birth_country: string | null;
   birth_latitude: number | null;

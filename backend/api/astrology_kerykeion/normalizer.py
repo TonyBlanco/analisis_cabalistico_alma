@@ -54,17 +54,24 @@ def normalize_kerykeion_output(
         
         if planet_data:
             # Calcular longitud eclíptica (signo * 30 + grado)
-            sign_order = [
-                'Aries', 'Tauro', 'Géminis', 'Cáncer', 'Leo', 'Virgo',
-                'Libra', 'Escorpio', 'Sagitario', 'Capricornio', 'Acuario', 'Piscis'
-            ]
+            # Accept both Spanish and English sign names from different engines
+            sign_order_sp = ['Aries', 'Tauro', 'Géminis', 'Cáncer', 'Leo', 'Virgo', 'Libra', 'Escorpio', 'Sagitario', 'Capricornio', 'Acuario', 'Piscis']
+            sign_order_en = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces']
             sign = planet_data.get('sign', '')
             degree_in_sign = planet_data.get('degree', 0)
             
+            sign_index = None
             try:
-                sign_index = sign_order.index(sign)
+                sign_index = sign_order_sp.index(sign)
+            except ValueError:
+                try:
+                    sign_index = sign_order_en.index(sign)
+                except ValueError:
+                    sign_index = None
+            
+            if sign_index is not None:
                 longitud_ecliptica = sign_index * 30 + degree_in_sign
-            except (ValueError, TypeError):
+            else:
                 longitud_ecliptica = 0
             
             # Determinar casa (si está disponible)
@@ -102,14 +109,20 @@ def normalize_kerykeion_output(
             degree_in_sign = house_data.get('degree', 0)
             
             # Calcular longitud de cúspide
-            sign_order = [
-                'Aries', 'Tauro', 'Géminis', 'Cáncer', 'Leo', 'Virgo',
-                'Libra', 'Escorpio', 'Sagitario', 'Capricornio', 'Acuario', 'Piscis'
-            ]
+            sign_order_sp = ['Aries', 'Tauro', 'Géminis', 'Cáncer', 'Leo', 'Virgo', 'Libra', 'Escorpio', 'Sagitario', 'Capricornio', 'Acuario', 'Piscis']
+            sign_order_en = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces']
+            sign_index = None
             try:
-                sign_index = sign_order.index(sign)
+                sign_index = sign_order_sp.index(sign)
+            except ValueError:
+                try:
+                    sign_index = sign_order_en.index(sign)
+                except ValueError:
+                    sign_index = None
+            
+            if sign_index is not None:
                 cuspide_longitud = sign_index * 30 + degree_in_sign
-            except (ValueError, TypeError):
+            else:
                 cuspide_longitud = 0
             
             houses_normalized.append({

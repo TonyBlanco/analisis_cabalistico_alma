@@ -64,15 +64,22 @@ class PlanetsEngine:
             # Get planet position
             result = swe.calc(jd, planet_id, flags)
 
-            if result[0] != 0:  # Error flag
-                raise RuntimeError(f"Swiss Ephemeris error for {planet_name}: {result[0]}")
+            # Result may be either a flat sequence [lon, lat, dist, sp_lon, sp_lat, sp_dist]
+            # or a tuple where the first element is that sequence and the second a status code (common in some swisseph bindings).
+            vals = None
+            if result and isinstance(result[0], (list, tuple)) and len(result[0]) >= 6:
+                vals = result[0]
+            elif result and len(result) >= 6:
+                vals = result
+            else:
+                raise RuntimeError(f"Unexpected Swiss Ephemeris result for {planet_name}: {result}")
 
-            longitude = Decimal(str(result[0][0]))  # Longitude in degrees
-            latitude = Decimal(str(result[0][1]))   # Latitude in degrees
-            distance = Decimal(str(result[0][2]))   # Distance in AU
-            speed_longitude = Decimal(str(result[0][3]))  # Speed in longitude
-            speed_latitude = Decimal(str(result[0][4]))   # Speed in latitude
-            speed_distance = Decimal(str(result[0][5]))   # Speed in distance
+            longitude = Decimal(str(vals[0]))  # Longitude in degrees
+            latitude = Decimal(str(vals[1]))   # Latitude in degrees
+            distance = Decimal(str(vals[2]))   # Distance in AU
+            speed_longitude = Decimal(str(vals[3]))  # Speed in longitude
+            speed_latitude = Decimal(str(vals[4]))   # Speed in latitude
+            speed_distance = Decimal(str(vals[5]))   # Speed in distance
 
             # Debug print
             print(f"Planet {planet_name} (ID {planet_id}): Long={longitude}, Lat={latitude}")

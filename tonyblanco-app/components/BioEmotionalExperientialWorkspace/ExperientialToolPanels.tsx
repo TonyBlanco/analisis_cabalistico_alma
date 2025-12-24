@@ -3,6 +3,7 @@
 import DictionaryPanel from './DictionaryPanel';
 import ObservationPanel from './ObservationPanel';
 import HypothesisPanel from './HypothesisPanel';
+import HolisticCrossPanel from './HolisticCrossPanel';
 import SynthesisPanel from './SynthesisPanel';
 import ClosurePanel from './ClosurePanel';
 import AssistedDiagnosisPanel from './AssistedDiagnosisPanel';
@@ -109,6 +110,14 @@ export default function ExperientialToolPanels({
               <DictionaryPanel
                 selectedRegion={selectedRegion}
                 onCopyToObservation={onCopyToObservation}
+                onCopyToHypothesis={onCopyToHypothesis}
+                onCopyToSynthesis={onCopyToSynthesis}
+                isReadOnly={isReadOnly}
+              />
+              {/* Holistic Cross Panel - Phase 5 Integration */}
+              <HolisticCrossPanel
+                selectedRegion={selectedRegion}
+                referenceSnippets={referenceSnippets}
                 onCopyToHypothesis={onCopyToHypothesis}
                 onCopyToSynthesis={onCopyToSynthesis}
                 isReadOnly={isReadOnly}

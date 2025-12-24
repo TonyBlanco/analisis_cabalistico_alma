@@ -285,3 +285,33 @@ class BioEmotionalAssistedDiagnosis(models.Model):
         indexes = [
             models.Index(fields=["patient", "is_validated"]),
         ]
+
+
+class BioEmotionalPatientBrief(models.Model):
+    """Resumen simplificado para el paciente, publicado por el terapeuta."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    therapist = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="bio_emotional_patient_briefs",
+    )
+    patient = models.ForeignKey(
+        Patient,
+        on_delete=models.CASCADE,
+        related_name="bio_emotional_patient_briefs",
+    )
+    title = models.CharField(max_length=255)
+    content = models.TextField()
+    sources = models.JSONField(default=list, blank=True)
+    is_published = models.BooleanField(default=False)
+    published_at = models.DateTimeField(null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Resumen bio-emocional para paciente"
+        verbose_name_plural = "Resúmenes bio-emocionales para paciente"
+        ordering = ["patient", "-updated_at"]
+        indexes = [
+            models.Index(fields=["patient", "is_published"]),
+        ]

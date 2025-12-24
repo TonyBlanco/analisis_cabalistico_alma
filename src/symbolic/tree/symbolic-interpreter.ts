@@ -59,44 +59,116 @@ function generateSymbolicPrompt(treeState: TreeStructuralState, safetyLevel: Sym
     intensity: f.intensity,
   }));
   
-  const prompt = `INSTRUCCIONES CRÍTICAS DE SEGURIDAD:
-- NO emitas diagnósticos clínicos
-- NO des consejos personales
-- NO uses etiquetas psicológicas
-- NO hagas afirmaciones deterministas
-- USA lenguaje simbólico neutral y educativo
-- ENFÓCATE en patrones estructurales observables
+  const prompt = `# ROLE: Symbolic Structural Analyst (Kabbalistic)
+# MODE: NON-CLINICAL / PROFESSIONAL / EDUCATIONAL
 
-CONTEXTO SIMBÓLICO:
-Método: ${source.method}
-Estado estructural del Árbol de la Vida
+You receive a TreeStructuralState v0.1.
+You DO NOT receive personal data.
+You DO NOT diagnose.
+You DO NOT give advice.
 
-SEFIROT (${sefirot.length} elementos):
-${sefiraData.map(s => `- ${s.id}: rol=${s.role}, activación=${s.activation.toFixed(2)}`).join('\n')}
+Your task is to produce a SYMBOLIC STRUCTURAL READING
+useful for trainers and professional practitioners of Kabbalah.
 
-FLUJOS (${flows.length} conexiones):
-${flowData.map(f => `- ${f.from}→${f.to}: polaridad=${f.polarity}, intensidad=${f.intensity}`).join('\n')}
+---
 
-TAREA:
-Genera 3-4 observaciones simbólicas educativas sobre este patrón estructural.
-Cada observación debe tener:
-1. Un título breve
-2. Contenido descriptivo simbólico (2-3 frases)
+## STRICT LIMITS (CRITICAL SAFETY RULES)
+- NO diagnosis
+- NO advice
+- NO determinism
+- NO personal labels
+- NO psychological terms
+- Symbolic-structural language ONLY
 
-FORMATO DE RESPUESTA (JSON):
+---
+
+## INPUT DATA (TreeStructuralState v0.1)
+
+**Method Applied**: ${source.method}
+
+**SEFIROT** (${sefirot.length} elements):
+${sefiraData.map(s => `- ${s.id}: role=${s.role}, activation=${s.activation.toFixed(2)}`).join('\n')}
+
+**FLOWS** (${flows.length} connections):
+${flowData.map(f => `- ${f.from}→${f.to}: polarity=${f.polarity}, intensity=${f.intensity.toFixed(2)}`).join('\n')}
+
+---
+
+## OUTPUT STRUCTURE (MANDATORY)
+
+Generate 4 observations following this EXACT structure:
+
+### Observation 1: Structural Panorama
+**Type**: "structural-analysis"
+**Title**: Brief title about overall structure
+**Content**: Describe:
+- Overall density of the structure
+- Vertical vs horizontal emphasis
+- Central vs lateral dominance
+- Concentration across triads (Supernal/Ethical/Astral)
+
+Use neutral, symbolic language. 2-3 sentences.
+
+### Observation 2: Sefirotic Dynamics
+**Type**: "pattern-recognition"
+**Title**: Brief title about sefirotic relationships
+**Content**: Identify:
+- Significant relationships between sefirot
+- Harmonic, integrative and tensional patterns
+- Structural balances or imbalances
+
+DO NOT personalize. DO NOT psychologize. 2-3 sentences.
+
+### Observation 3: Methodological Context
+**Type**: "educational-context"
+**Title**: Brief title about method influence
+**Content**: Explain:
+- What the applied method emphasizes
+- What the method does NOT capture
+- How this conditions the observed structure
+
+This is educational context. 2-3 sentences.
+
+### Observation 4: Professional Keys
+**Type**: "symbolic-comparison"
+**Title**: Brief title about observational cues
+**Content**: Provide:
+- Observational cues for practitioners
+- Questions worth exploring
+- Structural themes worth attention
+
+DO NOT give conclusions. DO NOT suggest actions. 2-3 sentences.
+
+---
+
+## RESPONSE FORMAT (JSON ONLY)
+
+Return ONLY this JSON structure, no additional text:
+
 {
   "observations": [
     {
+      "type": "structural-analysis",
+      "title": "...",
+      "content": "..."
+    },
+    {
       "type": "pattern-recognition",
-      "title": "Título de la observación",
-      "content": "Descripción simbólica neutral sin interpretación clínica"
+      "title": "...",
+      "content": "..."
+    },
+    {
+      "type": "educational-context",
+      "title": "...",
+      "content": "..."
+    },
+    {
+      "type": "symbolic-comparison",
+      "title": "...",
+      "content": "..."
     }
   ]
-}
-
-TIPOS PERMITIDOS: pattern-recognition, structural-analysis, symbolic-comparison, educational-context
-
-Genera SOLO el JSON sin texto adicional.`;
+}`;
 
   return prompt;
 }
@@ -235,26 +307,49 @@ export function validateTreeStateForInterpretation(treeState: TreeStructuralStat
 
 /**
  * Creates a fallback interpretation when AI fails
+ * Follows same 4-observation structure as AI-generated interpretations
  */
 export function createFallbackInterpretation(treeState: TreeStructuralState): SymbolicInterpretation {
-  const primarySefirot = treeState.sefirot.filter(s => s.role === 'dominant');
+  const dominantSefirot = treeState.sefirot.filter(s => s.role === 'dominant');
+  const presentSefirot = treeState.sefirot.filter(s => s.role === 'present');
   const harmonicFlows = treeState.flows.filter(f => f.polarity === 'harmonic');
+  const integrativeFlows = treeState.flows.filter(f => f.polarity === 'integrative');
+  const tensionalFlows = treeState.flows.filter(f => f.polarity === 'tensional');
+  
+  // Calculate vertical emphasis (flows crossing triads)
+  const verticalFlows = treeState.flows.filter(f => {
+    const upperTriad = ['keter', 'chokmah', 'binah'];
+    const middleTriad = ['chesed', 'gevurah', 'tiferet'];
+    const lowerTriad = ['netzach', 'hod', 'yesod', 'malchut'];
+    
+    const fromUpper = upperTriad.includes(f.from);
+    const fromMiddle = middleTriad.includes(f.from);
+    const toMiddle = middleTriad.includes(f.to);
+    const toLower = lowerTriad.includes(f.to);
+    
+    return (fromUpper && (toMiddle || toLower)) || (fromMiddle && toLower);
+  });
   
   const fallbackObservations: SymbolicObservation[] = [
     {
       type: 'structural-analysis',
-      title: 'Estructura básica identificada',
-      content: `Este patrón presenta ${primarySefirot.length} sefirot primarias y ${treeState.flows.length} conexiones estructurales.`,
+      title: 'Panorama Estructural',
+      content: `La estructura presenta ${dominantSefirot.length} sefirot dominantes y ${presentSefirot.length} presentes, con ${treeState.flows.length} conexiones activas. ${verticalFlows.length > treeState.flows.length / 2 ? 'Énfasis vertical predominante' : 'Distribución equilibrada entre ejes'}. La densidad estructural indica un patrón ${treeState.flows.length > 15 ? 'complejo' : treeState.flows.length > 10 ? 'moderado' : 'concentrado'}.`,
     },
     {
       type: 'pattern-recognition',
-      title: 'Flujos armónicos observados',
-      content: `Se identifican ${harmonicFlows.length} flujos de polaridad armónica en la estructura.`,
+      title: 'Dinámica Sefirática',
+      content: `Los flujos se distribuyen en ${harmonicFlows.length} armónicos, ${integrativeFlows.length} integrativos y ${tensionalFlows.length} tensionales. ${harmonicFlows.length > tensionalFlows.length ? 'Predominancia de patrones armónicos' : 'Balance entre polaridades'}. Las sefirot dominantes establecen centros de concentración estructural que definen el patrón relacional.`,
     },
     {
       type: 'educational-context',
-      title: 'Contexto metodológico',
-      content: `Método aplicado: ${treeState.source.method}. Los patrones reflejan la aplicación determinística del método simbólico.`,
+      title: 'Contexto Metodológico',
+      content: `Método aplicado: ${treeState.source.method}. Este método enfatiza la reducción numerológica y el mapeo directo sefirático. No captura dinámicas astrológicas ni simbología tarótica. La estructura observada refleja exclusivamente el modelo matemático-cabalístico del método.`,
+    },
+    {
+      type: 'symbolic-comparison',
+      title: 'Claves de Observación Profesional',
+      content: `Para análisis profundo, considerar: ¿Qué sefirot dominantes establecen polaridades estructurales? ¿Cómo se distribuye la energía entre triadas (Supernal/Ética/Astral)? ¿Qué ausencias latentes podrían ser significativas? La observación sistemática de flujos tensionales puede revelar zonas de potencial transformación estructural.`,
     },
   ];
   
@@ -263,7 +358,7 @@ export function createFallbackInterpretation(treeState: TreeStructuralState): Sy
     timestamp: new Date().toISOString(),
     safetyLevel: 'educational',
     observations: fallbackObservations,
-    educationalContext: 'Interpretación generada sin asistencia de IA (modo fallback)',
+    educationalContext: 'Interpretación generada sin asistencia de IA (modo fallback) — Análisis estructural algorítmico basado en conteo de patrones',
     safetyValidation: {
       passed: true,
       warnings: [],

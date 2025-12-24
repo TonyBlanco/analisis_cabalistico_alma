@@ -1,36 +1,11 @@
 'use client';
 
+import AstrologyVisualTab from './AstrologyVisualTab';
+
 interface AstrologyVisualCoreProps {
-  patientId?: string;
-  patientBirthDate?: Date;
+  patientId?: number | null;
 }
 
-export default function AstrologyVisualCore(_props: AstrologyVisualCoreProps) {
-  return (
-    <section className="flex-1 bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-      <div className="flex items-start justify-between gap-4 mb-4">
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900">Astrologia (Visual)</h3>
-          <p className="text-xs text-gray-500">
-            Observacional. Con interpretación asistida, sin predicción clínica, sin automatización decisoria.
-          </p>
-        </div>
-        <div className="text-right text-xs text-gray-500">Vista base</div>
-      </div>
-      <div className="grid gap-4 lg:grid-cols-1">
-        <div className="rounded-lg border border-dashed border-gray-200 bg-gray-50 p-4 flex flex-col items-center gap-3">
-          <h4 className="text-sm font-semibold text-gray-800">Carta Astral (visual)</h4>
-          <svg viewBox="0 0 200 200" className="h-40 w-40 text-gray-400" role="img" aria-label="Carta astral">
-            <circle cx="100" cy="100" r="70" stroke="currentColor" strokeWidth="2" fill="none" />
-            <circle cx="100" cy="100" r="45" stroke="currentColor" strokeWidth="2" fill="none" />
-            <line x1="100" y1="30" x2="100" y2="170" stroke="currentColor" strokeWidth="2" />
-            <line x1="30" y1="100" x2="170" y2="100" stroke="currentColor" strokeWidth="2" />
-            <line x1="45" y1="45" x2="155" y2="155" stroke="currentColor" strokeWidth="2" />
-            <line x1="155" y1="45" x2="45" y2="155" stroke="currentColor" strokeWidth="2" />
-          </svg>
-          <p className="text-xs text-gray-500">Rueda simbolica sin calculos.</p>
-        </div>
-      </div>
-    </section>
-  );
+export default function AstrologyVisualCore(props: AstrologyVisualCoreProps) {
+  return <AstrologyVisualTab patientId={props.patientId?.toString()} />;
 }

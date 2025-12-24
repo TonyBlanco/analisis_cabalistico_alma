@@ -148,6 +148,79 @@
   - Return to core workspace
 
 - [ ] Update workspace state transitions
+
+---
+
+## Phase 5: Holistic Cross-Engine Correlation ✅
+
+### Completed Tasks:
+- [x] Define Signal and Correlation types
+  - Signal: domain (bio/trans/tree), label, evidence, sourceRef
+  - Correlation: title, rationale, signals[], confidence, therapistAction
+
+- [x] Implement HolisticCrossPanel.tsx component
+  - Signal collection from Bio, Trans, Tree domains
+  - Normalization without AI (tag-based grouping)
+  - Correlation detection via key overlap
+  - Display correlations with evidence
+  - Therapist actions: mark, copy to hypothesis, copy to synthesis
+  - Optional AI explainer (consultative, not diagnostic)
+
+- [x] Integrate into ExperientialToolPanels
+  - Added to analysis state alongside DictionaryPanel
+  - Receives selectedRegion, referenceSnippets, copy handlers
+  - Respects isReadOnly state
+
+- [x] Verify Gemini AI integration
+  - Uses existing gemini-config.ts
+  - Consultative prompt (no diagnosis)
+  - Proposes exploratory questions
+  - Read-only output
+
+- [x] Create Phase 5 documentation
+  - PHASE_5_COMPLETION_SUMMARY.md with full specs
+  - Architecture diagrams
+  - Testing checklist
+  - UX compliance validation
+
+### Phase 5 Rules (Binding):
+✅ Collect signals from Bio, Trans, Tree domains
+✅ Normalize without AI (text processing only)
+✅ Correlate using key overlap and co-occurrence
+✅ Output correlations (no writes)
+✅ No automatic insertions or hypothesis creation
+✅ AI explainer is optional and consultative only
+✅ Therapist-driven actions (copy requires button click)
+✅ No regressions in Phases 1-4
+❌ NO automatic diagnosis or conclusions
+❌ NO AI-driven correlation detection
+❌ NO persistent marking (session-only)
+❌ NO cross-patient learning
+
+### Signal Sources:
+- **Bio**: Body regions, observations, dictionary quotes
+- **Trans**: Hypothesis keywords (aniversario, doble, repeticion, patron, linaje)
+- **Tree**: Canonical sefirot correspondences (static reference map)
+
+### Correlation Algorithm:
+1. Extract tags from signal labels and evidence
+2. Group signals by shared tags
+3. Count domains represented
+4. Assign confidence: 4+ = high, 3 = medium, 2 = low
+5. Generate rationale describing convergence
+
+### Backend Integration Points:
+- GET /api/bioemotional/observations/{patient_id}/ (existing)
+- GET /api/bioemotional/hypotheses/{patient_id}/ (existing)
+- Correlations computed client-side (no backend endpoint)
+
+---
+
+## Phase 6: Future Enhancements 🔮
+
+### Optional Improvements (NOT Required):
+- [ ] Persistent correlation marking
+- [ ] Advanced trans signal detection (date calculations)
   - Validate state changes
   - Prevent data loss
   - Confirmation dialogs

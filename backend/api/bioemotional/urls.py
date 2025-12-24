@@ -30,6 +30,12 @@ from .views import (
 
     BioEmotionalAssistedDiagnosisValidateView,
 
+    BioEmotionalPatientBriefListCreateView,
+
+    BioEmotionalPatientBriefPublishView,
+
+    BioEmotionalPatientBriefMyListView,
+
     BioTransgenerationalHypothesisListCreateView,
 
     BioTransgenerationalHypothesisDetailView,
@@ -149,6 +155,28 @@ urlpatterns = [
         "assisted-diagnosis/<uuid:id>/validate/",
         BioEmotionalAssistedDiagnosisValidateView.as_view(),
         name="assisted_diagnosis_validate",
+    ),
+
+    # Resumen para paciente
+    # POST /api/bioemotional/patient-brief/
+    # GET  /api/bioemotional/patient-brief/?patient_id=
+    # PATCH /api/bioemotional/patient-brief/{id}/publish/
+    path(
+        "patient-brief/",
+        BioEmotionalPatientBriefListCreateView.as_view(),
+        name="patient_brief_list_create",
+    ),
+    path(
+        "patient-brief/<uuid:id>/publish/",
+        BioEmotionalPatientBriefPublishView.as_view(),
+        name="patient_brief_publish",
+    ),
+    # Resumenes del paciente autenticado
+    # GET /api/bioemotional/my-briefs/
+    path(
+        "my-briefs/",
+        BioEmotionalPatientBriefMyListView.as_view(),
+        name="patient_brief_my_list",
     ),
 
     # Hipótesis bio-transgeneracionales

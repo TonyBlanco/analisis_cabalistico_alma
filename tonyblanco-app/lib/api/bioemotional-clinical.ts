@@ -67,6 +67,33 @@ export interface AssistedDiagnosisPayload {
   prompt_version: string;
 }
 
+
+export interface BioEmotionalPatientBriefPayload {
+  patient_id: number;
+  title: string;
+  content: string;
+  sources: Array<{ type: string; id: string }>;
+}
+
+export interface BioEmotionalPatientBrief {
+  id: string;
+  therapist_id: number;
+  patient_id: number;
+  title: string;
+  content: string;
+  sources: Array<{ type: string; id: string }>;
+  is_published: boolean;
+  published_at: string | null;
+  updated_at: string;
+}
+
+export interface BioEmotionalPatientBriefRead {
+  id: string;
+  title: string;
+  content: string;
+  published_at: string | null;
+  updated_at: string;
+}
 export interface AssistedDiagnosisRecord {
   id: string;
   therapist_id: number;
@@ -83,6 +110,8 @@ const OBSERVATIONS_URL = `${API_BASE_URL}/bioemotional/observations/`;
 const HYPOTHESES_URL = `${API_BASE_URL}/bioemotional/hypotheses/`;
 const SYNTHESIS_URL = `${API_BASE_URL}/bioemotional/synthesis/`;
 const ASSISTED_DIAGNOSIS_URL = `${API_BASE_URL}/bioemotional/assisted-diagnosis/`;
+const PATIENT_BRIEF_URL = `${API_BASE_URL}/bioemotional/patient-brief/`;
+const MY_BRIEFS_URL = `${API_BASE_URL}/bioemotional/my-briefs/`;
 
 async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
   const token = getAuthToken();
@@ -181,4 +210,29 @@ export async function validateAssistedDiagnosis(
   return request<AssistedDiagnosisRecord>(`${ASSISTED_DIAGNOSIS_URL}${id}/validate/`, {
     method: "PATCH",
   });
+}
+
+
+export async function listPatientBriefs(patientId: number): Promise<BioEmotionalPatientBrief[]> {
+  const url = `${PATIENT_BRIEF_URL}?patient_id=${patientId}`;
+  return request<BioEmotionalPatientBrief[]>(url);
+}
+
+export async function createPatientBrief(
+  payload: BioEmotionalPatientBriefPayload
+): Promise<BioEmotionalPatientBrief> {
+  return request<BioEmotionalPatientBrief>(PATIENT_BRIEF_URL, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function publishPatientBrief(id: string): Promise<BioEmotionalPatientBrief> {
+  return request<BioEmotionalPatientBrief>(`${PATIENT_BRIEF_URL}${id}/publish/`, {
+    method: "PATCH",
+  });
+}
+
+export async function listMyBriefs(): Promise<BioEmotionalPatientBriefRead[]> {
+  return request<BioEmotionalPatientBriefRead[]>(MY_BRIEFS_URL);
 }

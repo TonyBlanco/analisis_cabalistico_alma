@@ -237,6 +237,9 @@ urlpatterns = [
     # Estado simbolico estructural (TreeStructuralState v0.1)
     path('symbolic/tree-structural-state/', TreeStructuralStateView.as_view(), name='tree_structural_state'),
     
+    # Astrology Core (astronomical calculations only)
+    path('therapist/', include('astrology.api.urls')),
+    
     # Symbolic Interpreter AI (read-only, non-clinical)
     path('symbolic-interpreter/generate/', generate_symbolic_interpretation_view, name='symbolic_interpreter_generate'),
     path('symbolic-interpreter/status/', symbolic_interpreter_status_view, name='symbolic_interpreter_status'),

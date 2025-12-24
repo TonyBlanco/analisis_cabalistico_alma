@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     
     # --- Mis Apps ---
     'api',              # Tu app de lógica cabalística
+    'astrology',        # Módulo de astrología (cálculos astronómicos)
     'courses',          # Sistema LMS de cursos
 ]
 

@@ -9,6 +9,7 @@ from .models import (
     BioEmotionalHypothesis,
     BioEmotionalSynthesis,
     BioEmotionalAssistedDiagnosis,
+    BioEmotionalPatientBrief,
 )
 from .dictionary_loader import load_bioemotional_dictionary, BioEmotionalDictionaryError
 
@@ -262,3 +263,43 @@ class BioEmotionalAssistedDiagnosisSerializer(serializers.ModelSerializer):
             if item_id is None or item_id == "":
                 raise serializers.ValidationError(f"based_on[{idx}].id es obligatorio.")
         return value
+
+
+class BioEmotionalPatientBriefSerializer(serializers.ModelSerializer):
+    therapist_id = serializers.IntegerField(source="therapist.id", read_only=True)
+    patient_id = serializers.IntegerField(source="patient.id", read_only=True)
+
+    class Meta:
+        model = BioEmotionalPatientBrief
+        fields = [
+            "id",
+            "therapist_id",
+            "patient_id",
+            "title",
+            "content",
+            "sources",
+            "is_published",
+            "published_at",
+            "updated_at",
+        ]
+        read_only_fields = [
+            "id",
+            "therapist_id",
+            "patient_id",
+            "is_published",
+            "published_at",
+            "updated_at",
+        ]
+
+
+class BioEmotionalPatientBriefReadSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BioEmotionalPatientBrief
+        fields = [
+            "id",
+            "title",
+            "content",
+            "published_at",
+            "updated_at",
+        ]
+        read_only_fields = fields

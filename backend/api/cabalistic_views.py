@@ -11,9 +11,11 @@ from django.utils.decorators import method_decorator
 from django.shortcuts import get_object_or_404
 import logging
 from .models import Patient, CabalisticAnalysis
+from .models_astrology import AstrologyNatalChart
 from .utils.tarot_service import analyze_archetype_vs_clinical
 from .astrology_kerykeion.service import execute_kerykeion
-from .astrology_kerykeion.schemas import KerykeionInputSchema
+from .astrology_kerykeion.schemas import KerykeionInputSchema, LocationSchema
+from .astrology_kerykeion.normalizer import normalize_kerykeion_output
 from .permissions import IsTherapist
 from .synthesis_engine import SynthesisEngine
 from pydantic import ValidationError
@@ -217,23 +219,24 @@ class GenerateAndSaveTarotAnalysisView(APIView):
 @method_decorator(csrf_exempt, name='dispatch')
 class KerykeionAnalysisView(APIView):
     """
-    Endpoint para calcular y guardar análisis Kerykeion
-    Ruta: POST /api/therapist/patients/<id>/astrology-kerykeion/
+    Endpoint para calcular y recuperar carta natal Kerykeion
+    Ruta: GET/POST /api/therapist/patients/<id>/astrology-kerykeion/
+    
+    GET: Devuelve la última carta natal calculada
+    POST: Calcula nueva carta natal usando datos del perfil del paciente
     """
     permission_classes = [IsAuthenticated, IsTherapist]
     
-    def post(self, request, id):
+    def get(self, request, id):
         """
-        Calcula carta natal técnica Kerykeion y la guarda en CabalisticAnalysis
+        Obtiene la última carta natal calculada para el paciente
         
-        Flujo:
-        1. Validar input
-        2. Ejecutar Kerykeion
-        3. Guardar en CabalisticAnalysis
-        4. Retornar analysis_id
+        Returns:
+            200: Carta natal normalizada
+            404: No se ha calculado ninguna carta natal aún
         """
         try:
-            # Obtener el paciente (solo si es del terapeuta actual)
+            # Verificar acceso al paciente
             try:
                 patient = Patient.objects.get(
                     id=id,
@@ -245,69 +248,208 @@ class KerykeionAnalysisView(APIView):
                     status=status.HTTP_404_NOT_FOUND
                 )
             
-            # Validar datos de entrada
+            # Buscar la última carta natal
             try:
-                input_schema = KerykeionInputSchema(**request.data)
-            except ValidationError:
-                logger.error(f"Error validando input Kerykeion para paciente {id}", exc_info=True)
+                natal_chart = AstrologyNatalChart.objects.get(patient=patient)
+            except AstrologyNatalChart.DoesNotExist:
                 return Response(
-                    {'error': 'Datos de entrada invalidos'},
+                    {
+                        'error': 'No se ha calculado ninguna carta natal para este paciente',
+                        'message': 'Usa POST para calcular la carta natal por primera vez'
+                    },
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+            # Devolver payload normalizado
+            response_data = {
+                'status': 'ok',
+                'calculated_at': natal_chart.calculated_at.isoformat(),
+                'house_system': natal_chart.house_system,
+                'source': natal_chart.source,
+                'chart': natal_chart.chart_payload
+            }
+            
+            return Response(response_data, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            logger.error(f"Error inesperado en GET KerykeionAnalysisView para paciente {id}: {str(e)}", exc_info=True)
+            return Response(
+                {'error': 'Error interno del servidor'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    def post(self, request, id):
+        """
+        Calcula carta natal usando datos del perfil del paciente
+        
+        Flujo:
+        1. Verificar permisos y acceso
+        2. Validar que el perfil tenga todos los datos requeridos
+        3. Construir input desde el perfil (NO desde request)
+        4. Ejecutar Kerykeion
+        5. Normalizar output
+        6. Persistir en AstrologyNatalChart
+        7. Retornar payload normalizado
+        
+        Returns:
+            200: Carta natal calculada y normalizada
+            400: Faltan datos en el perfil del paciente
+            500: Error en el cálculo
+        """
+        try:
+            # Verificar acceso al paciente
+            try:
+                patient = Patient.objects.get(
+                    id=id,
+                    therapist=request.user
+                )
+            except Patient.DoesNotExist:
+                return Response(
+                    {'error': 'Paciente no encontrado o no tienes acceso'},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+            # Validar que el perfil tenga todos los datos requeridos
+            missing_fields = []
+            
+            if not patient.birth_date:
+                missing_fields.append('birth_date')
+            if not patient.birth_time:
+                missing_fields.append('birth_time')
+            if not patient.birth_city:
+                missing_fields.append('birth_city')
+            if not patient.birth_country:
+                missing_fields.append('birth_country')
+            if patient.birth_latitude is None:
+                missing_fields.append('birth_latitude')
+            if patient.birth_longitude is None:
+                missing_fields.append('birth_longitude')
+            if not patient.birth_timezone:
+                missing_fields.append('birth_timezone')
+            
+            if missing_fields:
+                return Response(
+                    {
+                        'error': 'El perfil del paciente no tiene todos los datos requeridos',
+                        'missing_fields': missing_fields,
+                        'message': 'Por favor completa el perfil del paciente antes de calcular la carta natal'
+                    },
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            except Exception:
-                logger.error(f"Error inesperado validando input Kerykeion para paciente {id}", exc_info=True)
+            
+            # Construir input desde el perfil del paciente
+            input_data_dict = {
+                'birth_date': patient.birth_date.strftime('%Y-%m-%d'),
+                'birth_time': patient.birth_time.strftime('%H:%M'),
+                'location': {
+                    'city': patient.birth_city,
+                    'country': patient.birth_country,
+                    'lat': float(patient.birth_latitude),
+                    'lng': float(patient.birth_longitude),
+                    'timezone': patient.birth_timezone
+                },
+                'house_system': request.data.get('house_system', 'placidus'),
+                'zodiac_system': 'tropical',
+                'engine': 'kerykeion',
+                'engine_version': '1.0.0'
+            }
+            
+            # Validar con schema
+            try:
+                input_schema = KerykeionInputSchema(**input_data_dict)
+            except ValidationError as e:
+                logger.error(f"Error validando input Kerykeion para paciente {id}: {str(e)}", exc_info=True)
                 return Response(
-                    {'error': 'Datos de entrada invalidos'},
+                    {
+                        'error': 'Error en los datos del perfil del paciente',
+                        'details': str(e)
+                    },
                     status=status.HTTP_400_BAD_REQUEST
                 )
             
             # Ejecutar Kerykeion
             try:
-                result = execute_kerykeion(input_schema)
-            except Exception:
-                logger.error(f"Error ejecutando Kerykeion para paciente {id}", exc_info=True)
-                return Response(
-                    {'error': 'Error al calcular carta natal. Por favor, verifica los datos de entrada.'},
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
-                )
-            
-            # Guardar en CabalisticAnalysis
-            try:
-                result_dict = result.model_dump()
-                houses_dict = result_dict.get('houses', {})
-                asc_sign = houses_dict.get('1', {}).get('sign', 'N/A') if houses_dict else 'N/A'
-                mc_sign = houses_dict.get('10', {}).get('sign', 'N/A') if houses_dict else 'N/A'
+                kerykeion_result = execute_kerykeion(input_schema)
+                kerykeion_result_dict = kerykeion_result.model_dump()
+            except Exception as e:
+                logger.error(f"Error ejecutando Kerykeion para paciente {id}: {str(e)}", exc_info=True)
                 
-                analysis = CabalisticAnalysis.objects.create(
-                    therapist=request.user,
+                # Guardar error en modelo
+                AstrologyNatalChart.objects.update_or_create(
                     patient=patient,
-                    analysis_type='astrology-kerykeion',
-                    input_data=input_schema.model_dump(),
-                    result_data=result_dict,
-                    summary=f"Kerykeion {result.engine_version}: ASC {asc_sign} - MC {mc_sign}",
-                    therapist_notes='Generado automáticamente por Módulo Kerykeion - Fuente técnica objetiva'
+                    defaults={
+                        'created_by': request.user,
+                        'house_system': input_data_dict['house_system'],
+                        'source': 'kerykeion',
+                        'status': 'error',
+                        'chart_payload': {},
+                        'input_snapshot': input_data_dict,
+                        'error_payload': {
+                            'error': str(e),
+                            'type': type(e).__name__
+                        }
+                    }
                 )
                 
-                logger.info(f"Análisis Kerykeion creado: ID {analysis.id} para paciente {patient.id} por terapeuta {request.user.id}")
-                
-            except Exception:
-                logger.error(f"Error guardando analisis Kerykeion para paciente {id}", exc_info=True)
                 return Response(
-                    {'error': 'Error al guardar el analisis'},
+                    {
+                        'error': 'Error al calcular carta natal',
+                        'message': 'Por favor verifica los datos de nacimiento del paciente'
+                    },
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR
                 )
             
-            # Retornar analysis_id (formato limpio)
-            return Response(
-                {
-                    'analysis_id': analysis.id,
-                    'status': 'ok'
-                },
-                status=status.HTTP_201_CREATED
-            )
+            # Normalizar output
+            try:
+                normalized_chart = normalize_kerykeion_output(
+                    kerykeion_result_dict,
+                    input_data_dict
+                )
+            except Exception as e:
+                logger.error(f"Error normalizando output Kerykeion para paciente {id}: {str(e)}", exc_info=True)
+                return Response(
+                    {'error': 'Error al procesar los resultados del cálculo'},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
             
-        except Exception:
-            logger.error(f"Error inesperado en KerykeionAnalysisView para paciente {id}", exc_info=True)
+            # Persistir en AstrologyNatalChart (update_or_create para sobrescribir si existe)
+            try:
+                natal_chart, created = AstrologyNatalChart.objects.update_or_create(
+                    patient=patient,
+                    defaults={
+                        'created_by': request.user,
+                        'house_system': input_data_dict['house_system'],
+                        'source': 'kerykeion',
+                        'status': 'ok',
+                        'chart_payload': normalized_chart,
+                        'input_snapshot': input_data_dict,
+                        'error_payload': None
+                    }
+                )
+                
+                action = 'creada' if created else 'actualizada'
+                logger.info(f"Carta natal {action} para paciente {patient.id} por terapeuta {request.user.id}")
+                
+            except Exception as e:
+                logger.error(f"Error persistiendo carta natal para paciente {id}: {str(e)}", exc_info=True)
+                return Response(
+                    {'error': 'Error al guardar la carta natal'},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+            
+            # Retornar payload normalizado
+            response_data = {
+                'status': 'ok',
+                'calculated_at': natal_chart.calculated_at.isoformat(),
+                'house_system': natal_chart.house_system,
+                'source': natal_chart.source,
+                'chart': normalized_chart
+            }
+            
+            return Response(response_data, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            logger.error(f"Error inesperado en POST KerykeionAnalysisView para paciente {id}: {str(e)}", exc_info=True)
             return Response(
                 {'error': 'Error interno del servidor'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR

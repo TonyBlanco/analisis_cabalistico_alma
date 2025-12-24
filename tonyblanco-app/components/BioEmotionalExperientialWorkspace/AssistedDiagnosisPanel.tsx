@@ -22,15 +22,13 @@ interface AssistedDiagnosisPanelProps {
 }
 
 const PROMPT_DIAGNOSIS =
-  'Elabora una lectura diagnostica orientativa e integrativa basada EXCLUSIVAMENTE en el texto provisto (observaciones, hipotesis y/o sintesis). ' +
-  'No inventes datos. No emitas diagnosticos definitivos. Usa tono neutral y consultivo. Indica que requiere validacion humana. ' +
-  'Salida: 1–2 parrafos en espanol.';
+  'Elabora una lectura diagnóstica orientativa e integrativa basada EXCLUSIVAMENTE en el texto provisto. No inventes datos. No emitas diagnósticos definitivos. Usa tono neutral y consultivo. Indica explícitamente que requiere validación humana. Salida: 1–2 párrafos en español.';
 
 const PROMPT_REFORMULATE =
-  'Reformula el texto provisto para mayor claridad y neutralidad. No agregues informacion nueva. No diagnostiques. Salida: texto continuo en espanol.';
+  'Reformula el texto para mayor claridad y neutralidad. No agregues información nueva. No diagnostiques. Salida: texto continuo en español.';
 
 const PROMPT_SUMMARY =
-  'Resume el texto provisto en tono neutral y consultivo. No agregues informacion nueva. Salida: 3–5 frases en espanol.';
+  'Resume el texto en tono neutral y consultivo. No agregues información nueva. Salida: 3–5 frases en español.';
 
 export default function AssistedDiagnosisPanel({
   synthesisRecord,
@@ -250,10 +248,9 @@ export default function AssistedDiagnosisPanel({
     <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm space-y-4">
       <div>
         <h4 className="text-sm font-semibold text-gray-900">Lectura asistida (IA)</h4>
-        <p className="text-xs text-gray-600">
-          Lectura orientativa asistida por IA. No es diagnostico definitivo.
-        </p>
-        <p className="text-xs text-gray-500">Requiere validacion clinica por el terapeuta.</p>
+        <p className="text-xs text-gray-600">Lectura diagnóstica orientativa asistida por IA.</p>
+        <p className="text-xs text-gray-600">No es diagnóstico clínico definitivo.</p>
+        <p className="text-xs text-gray-500">Requiere validación humana.</p>
       </div>
 
       <div className="space-y-2">
@@ -268,7 +265,7 @@ export default function AssistedDiagnosisPanel({
                 disabled={isReadOnly}
                 className="mt-0.5 h-4 w-4"
               />
-              <span>Observacion #{item.id.slice(0, 6)}: {item.note_text.slice(0, 80)}...</span>
+            <span>Observación #{item.id.slice(0, 6)}: {item.note_text.slice(0, 80)}...</span>
             </label>
           ))}
           {hypotheses.map((item) => (
@@ -314,14 +311,14 @@ export default function AssistedDiagnosisPanel({
       </div>
 
       <div className="flex flex-wrap gap-2">
-        <button
-          type="button"
-          onClick={() => runAi('diagnosis')}
-          disabled={loading || isReadOnly}
-          className="px-3 py-1.5 text-xs font-medium text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
-        >
-          Generar lectura diagnostica orientativa (IA)
-        </button>
+          <button
+            type="button"
+            onClick={() => runAi('diagnosis')}
+            disabled={loading || isReadOnly}
+            className="px-3 py-1.5 text-xs font-medium text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
+          >
+            Generar lectura diagnóstica orientativa (IA)
+          </button>
         <button
           type="button"
           onClick={() => runAi('reformulate')}
@@ -330,14 +327,14 @@ export default function AssistedDiagnosisPanel({
         >
           Reformular lectura
         </button>
-        <button
-          type="button"
-          onClick={() => runAi('summary')}
-          disabled={loading || isReadOnly}
-          className="px-3 py-1.5 text-xs font-medium text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
-        >
-          Resumir en 3-5 frases
-        </button>
+          <button
+            type="button"
+            onClick={() => runAi('summary')}
+            disabled={loading || isReadOnly}
+            className="px-3 py-1.5 text-xs font-medium text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
+          >
+            Resumir lectura
+          </button>
       </div>
 
       {aiOutput && (

@@ -1,0 +1,1 @@
+export type { PitagorasInput as AvgadInput, PitagorasResult as AvgadResult, PitagorasSymbolicState as AvgadSymbolicState, PitagorasNumberMeaning as AvgadNumberMeaning } from '../pitagoras/pitagoras.types';

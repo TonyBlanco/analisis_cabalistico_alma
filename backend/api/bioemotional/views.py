@@ -14,6 +14,7 @@ from .models import (
     BioTransgenerationalHypothesis,
     BioEmotionalSynthesis,
     BioEmotionalAssistedDiagnosis,
+    BioEmotionalPatientBrief,
     BioEmotionalObservation,
     BioEmotionalHypothesis,
 )
@@ -25,6 +26,8 @@ from .serializers import (
     BioTransgenerationalHypothesisSerializer,
     BioEmotionalSynthesisSerializer,
     BioEmotionalAssistedDiagnosisSerializer,
+    BioEmotionalPatientBriefSerializer,
+    BioEmotionalPatientBriefReadSerializer,
     BioEmotionalObservationSerializer,
     BioEmotionalHypothesisSerializer,
 )
@@ -405,6 +408,89 @@ class BioEmotionalAssistedDiagnosisValidateView(generics.UpdateAPIView):
         instance.save(update_fields=["is_validated"])
         serializer = self.get_serializer(instance)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class BioEmotionalPatientBriefListCreateView(generics.ListCreateAPIView):
+    """Resúmenes para paciente (solo terapeuta)."""
+
+    serializer_class = BioEmotionalPatientBriefSerializer
+    permission_classes = [IsAuthenticated, IsTherapist]
+
+    def _get_patient(self, patient_id):
+        if not patient_id:
+            raise ValidationError({"patient_id": "El campo patient_id es obligatorio."})
+        try:
+            patient_id_int = int(patient_id)
+        except (TypeError, ValueError):
+            raise ValidationError({"patient_id": "El patient_id debe ser un entero válido."})
+
+        user = self.request.user
+        try:
+            patient = Patient.objects.get(pk=patient_id_int, therapist=user)
+        except Patient.DoesNotExist:
+            raise PermissionDenied("Paciente no autorizado para este terapeuta.")
+
+        if patient.user_id and patient.user_id == user.id:
+            raise PermissionDenied("No se permite autoevaluación del terapeuta.")
+        return patient
+
+    def get_queryset(self):
+        patient_id = self.request.query_params.get("patient_id")
+        patient = self._get_patient(patient_id)
+        return BioEmotionalPatientBrief.objects.filter(patient=patient, therapist=self.request.user)
+
+    def perform_create(self, serializer):
+        patient_id = self.request.data.get("patient_id")
+        patient = self._get_patient(patient_id)
+        title_value = (self.request.data.get("title") or "").strip()
+        content_value = (self.request.data.get("content") or "").strip()
+        if not title_value:
+            raise ValidationError({"title": "El titulo es obligatorio."})
+        if not content_value:
+            raise ValidationError({"content": "El contenido es obligatorio."})
+        serializer.save(
+            patient=patient,
+            therapist=self.request.user,
+            title=title_value,
+            content=content_value,
+        )
+
+
+class BioEmotionalPatientBriefPublishView(generics.UpdateAPIView):
+    """Publica un resumen para el paciente (solo terapeuta)."""
+
+    serializer_class = BioEmotionalPatientBriefSerializer
+    permission_classes = [IsAuthenticated, IsTherapistAndOwnsPatient]
+    queryset = BioEmotionalPatientBrief.objects.all()
+    http_method_names = ["patch", "options", "head"]
+
+    def get_queryset(self):
+        return BioEmotionalPatientBrief.objects.filter(therapist=self.request.user)
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.is_published:
+            serializer = self.get_serializer(instance)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        instance.is_published = True
+        instance.published_at = timezone.now()
+        instance.save(update_fields=["is_published", "published_at", "updated_at"])
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class BioEmotionalPatientBriefMyListView(generics.ListAPIView):
+    """Resúmenes publicados visibles para el paciente autenticado."""
+
+    serializer_class = BioEmotionalPatientBriefReadSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        patient = Patient.objects.filter(user=user).first()
+        if not patient:
+            return BioEmotionalPatientBrief.objects.none()
+        return BioEmotionalPatientBrief.objects.filter(patient=patient, is_published=True)
 
 
 class BioTransgenerationalHypothesisListCreateView(generics.ListCreateAPIView):

@@ -1,0 +1,1 @@
+export type { PitagorasInput as TemurahInput, PitagorasResult as TemurahResult, PitagorasSymbolicState as TemurahSymbolicState, PitagorasNumberMeaning as TemurahNumberMeaning } from '../pitagoras/pitagoras.types';

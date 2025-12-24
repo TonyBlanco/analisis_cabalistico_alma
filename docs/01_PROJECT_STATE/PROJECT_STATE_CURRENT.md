@@ -71,6 +71,132 @@ Documento vinculante:
 
 ---
 
+## TreeStructuralState System — Unified Symbolic Visualization
+
+### Phase 1: TreeStructuralState v0.1 Contract ✅
+**Estado**: IMPLEMENTADO (commit eeb0f3f2)
+
+**Alcance**: Contrato único e inmutable para todos los métodos simbólicos cabalísticos.
+
+**Entregables**:
+- `tree-structural-state.types.ts`: Interfaz TreeStructuralState (source, sefirot, flows, notes)
+- `pitagoras-tree-adapter.ts`: Adaptador de Pitágoras → TreeStructuralState
+- `TreeWithFlows.tsx`: Componente SVG con flechas dinámicas (verde=harmonic, naranja=integrative, rojo=tensional)
+- Integración en `CabalAppliedVisualCore.tsx`
+
+**Reglas**:
+- TreeStructuralState v0.1 es **INMUTABLE** y **NO NEGOCIABLE**
+- Todos los métodos DEBEN usar este contrato
+- NO se crearán contratos alternativos
+- Compatibilidad ES5 obligatoria (sin Map, Set, Object.entries)
+
+### Phase 2: Standardization of All Methods ✅
+**Estado**: IMPLEMENTADO (commit b0a37015)
+
+**Alcance**: Aplicar TreeStructuralState v0.1 a los 10 métodos simbólicos existentes.
+
+**Entregables**:
+- `generic-method-adapter.ts`: Adaptador reutilizable para todos los métodos
+- 10 adaptadores específicos:
+  - gematria-standard-tree-adapter.ts
+  - gematria-katan-tree-adapter.ts
+  - mispar-gadol-tree-adapter.ts
+  - mispar-siduri-tree-adapter.ts
+  - milui-tree-adapter.ts
+  - atbash-tree-adapter.ts
+  - albam-tree-adapter.ts
+  - avgad-tree-adapter.ts
+  - temurah-tree-adapter.ts
+  - notarikon-tree-adapter.ts
+- Integración completa en Workspace con switch case
+
+**Resultado**: Los 10 métodos ahora generan TreeStructuralState compatible con TreeWithFlows.
+
+### Phase 3: AI-Assisted Symbolic Interpretation Layer ✅
+**Estado**: IMPLEMENTADO (commit 356f92ce)
+
+**Alcance**: Capa de interpretación simbólica asistida por IA (SAFE / NON-CLINICAL / SYMBOLIC ONLY).
+
+**Entregables**:
+- `symbolic-interpreter.types.ts`: Tipos para SymbolicInterpretation, SymbolicObservation, safety metadata
+- `symbolic-interpreter.ts`: Lógica de interpretación con 5 capas de seguridad
+- `backend/api/utils/symbolic_interpreter_ai.py`: Integración Gemini con validación
+- `SymbolicInterpretationPanel.tsx`: Panel UI con disclaimers prominentes
+- Integración en `CabalAppliedVisualCore.tsx`
+
+**Arquitectura de Seguridad (5 capas)**:
+1. **Frontend pre-request**: Validación de TreeState antes de envío
+2. **Backend API**: Detección de datos personales, validación de estructura
+3. **Prompt engineering**: Instrucciones STRICT LIMITS embebidas en prompt
+4. **Response filtering**: Filtrado de 14 términos prohibidos post-generación
+5. **UI warnings**: Advertencias visibles si contenido sospechoso detectado
+
+**Reglas de Seguridad**:
+- ❌ NO diagnosis clínico
+- ❌ NO consejos personales
+- ❌ NO etiquetas psicológicas
+- ❌ NO determinismo ("siempre", "nunca", "debes")
+- ✅ SOLO observaciones estructural-simbólicas
+- ✅ Lenguaje educativo y formativo
+- ✅ Acceso READ-ONLY a TreeStructuralState (sin datos personales)
+
+**Términos Prohibidos** (14):
+diagnóstico, diagnosis, trastorno, disorder, patología, pathology, enfermedad, disease, debes, must, tienes que, have to, definitivamente, definitely, siempre, always, nunca, never, etc.
+
+**Fallback**: Sistema de interpretación algorítmica cuando IA no disponible.
+
+### Phase 4: Professional Kabbalistic Analyst Prompt ✅
+**Estado**: IMPLEMENTADO (2025-12-23, pendiente commit)
+
+**Alcance**: Upgrade del prompt de IA de nivel educativo genérico a **analista profesional cabalístico**.
+
+**Entregables**:
+- Prompt profesional con rol definido: "Symbolic Structural Analyst (Kabbalistic)"
+- 4 secciones obligatorias de output:
+  1. **Structural Panorama** (structural-analysis): Densidad, énfasis vertical/horizontal, triadas
+  2. **Sefirotic Dynamics** (pattern-recognition): Relaciones, polaridades, balances
+  3. **Methodological Context** (educational-context): Qué enfatiza el método, qué NO captura
+  4. **Professional Keys** (symbolic-comparison): Cues observacionales, preguntas exploratorias
+- Fallback mejorado con cálculos profesionales:
+  - Filtrado de sefirot dominantes vs presentes
+  - Conteo de flujos por polaridad (harmonic/integrative/tensional)
+  - Análisis de énfasis vertical (flujos que cruzan triadas)
+  - Determinación de densidad estructural (complex/moderate/concentrated)
+- Documentación actualizada: `SYMBOLIC_INTERPRETER_AI_IMPLEMENTATION.md`
+- Documento técnico nuevo: `SYMBOLIC_INTERPRETER_PROFESSIONAL_PROMPT.md`
+
+**Audiencia**:
+- **Trainers de Cábala**: Profesionales que enseñan análisis cabalístico
+- **Practitioners avanzados**: Analistas que trabajan con TreeStructuralState
+- **Uso formativo**: Contexto educativo sin aplicación clínica directa
+
+**Diferencias vs Phase 3**:
+- Antes: Prompt genérico con 3-4 observaciones variables
+- Ahora: Estructura fija de 4 secciones con tipos específicos
+- Antes: Fallback básico ("Estructura básica identificada")
+- Ahora: Fallback algorítmico profesional con análisis de triadas
+- Antes: Lenguaje educativo genérico
+- Ahora: Terminología cabalística profesional (triadas, polaridades, columnas)
+
+**Reglas Mantenidas**:
+- ✅ Todas las reglas de seguridad de Phase 3
+- ✅ 5 capas de validación intactas
+- ✅ 14 términos prohibidos mantenidos
+- ✅ NO diagnosis, NO consejos, NO determinismo
+
+**Modelo de IA**:
+- Gemini 1.5-flash
+- temperature=0.7, top_p=0.8, top_k=40, max_tokens=1024
+- Modo: JSON-only response
+
+### Documentación de Referencia:
+- `docs/TreeStructuralState_v0.1.md` (Phase 1 contract)
+- `docs/TREE_STRUCTURAL_STATE_PHASE_2_STANDARDIZATION.md` (Phase 2 completion)
+- `docs/SYMBOLIC_INTERPRETER_AI_IMPLEMENTATION.md` (Phase 3+4 implementation)
+- `docs/SYMBOLIC_INTERPRETER_PROFESSIONAL_PROMPT.md` (Phase 4 technical spec)
+
+---
+
 ## Sección Vinculante — UX Clínico
 ## Principios de Representación Simbólica (VINCULANTE)
 
@@ -270,4 +396,11 @@ El objetivo del UX es:
 
 Cualquier modificación futura requiere actualización explícita de este documento.
 
+## Documentation Governance
+- **Status:** RESOLVED (Chaos eliminated)
+- **Rule:** All documentation centralized in `/docs` with canonical structure.
+- **Reference:** See `SOURCE_OF_TRUTH.md`.
+- **Date:** 2025-12-24
 
+“Any documentation generated by humans or AI MUST be placed under /docs following the canonical structure.
+Documentation created outside this structure is considered invalid and must be relocated before further development.”

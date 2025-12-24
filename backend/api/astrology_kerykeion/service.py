@@ -1,22 +1,66 @@
 """
 Servicio de cálculo Kerykeion
 Ejecuta cálculos astrológicos técnicos sin interpretación usando la librería Kerykeion real
+Fallback a Swiss Ephemeris directo si Kerykeion falla
 """
 from datetime import datetime
-from kerykeion import AstrologicalSubject, KerykeionChartSVG
 from .schemas import KerykeionInputSchema, KerykeionOutputSchema, PlanetOutputSchema, HouseOutputSchema, AspectOutputSchema, CabalisticMappingSchema
 from .mapper_cabala import build_cabalistic_mapping
+
+# Try import Kerykeion
+try:
+    from kerykeion import AstrologicalSubject, KerykeionChartSVG
+    KERYKEION_AVAILABLE = True
+except ImportError:
+    KERYKEION_AVAILABLE = False
+
+# Fallback: Swiss Ephemeris adapter
+from .swisseph_adapter import execute_with_astrology_core, ASTROLOGY_CORE_AVAILABLE
 
 
 def execute_kerykeion(input_data: KerykeionInputSchema) -> KerykeionOutputSchema:
     """
     Ejecuta el cálculo Kerykeion completo usando la librería Kerykeion real
+    Fallback a Swiss Ephemeris directo si Kerykeion no está disponible o falla
     
     Args:
         input_data: Datos de entrada validados
     
     Returns:
         Resultado del cálculo en formato estándar Kerykeion
+    """
+    # Intentar con Kerykeion primero
+    if KERYKEION_AVAILABLE:
+        try:
+            return _execute_with_kerykeion(input_data)
+        except Exception as e:
+            print(f"Kerykeion falló, usando Swiss Ephemeris directo: {e}")
+    
+    # Fallback a Swiss Ephemeris directo
+    if ASTROLOGY_CORE_AVAILABLE:
+        try:
+            result_dict = execute_with_astrology_core(
+                birth_date=input_data.birth_date,
+                birth_time=input_data.birth_time,
+                city=input_data.location.city,
+                country=input_data.location.country,
+                lat=input_data.location.lat,
+                lng=input_data.location.lng,
+                timezone=input_data.location.timezone,
+                house_system=input_data.house_system or 'placidus'
+            )
+            
+            # Convertir a schema
+            return KerykeionOutputSchema(**result_dict)
+        except Exception as e:
+            raise RuntimeError(f"Error en cálculo astrológico: {e}")
+    
+    raise RuntimeError("Ni Kerykeion ni Swiss Ephemeris están disponibles")
+
+
+def _execute_with_kerykeion(input_data: KerykeionInputSchema) -> KerykeionOutputSchema:
+    """
+    Ejecuta cálculo con Kerykeion (implementación original)
     """
     # Parsear fecha y hora
     birth_datetime = datetime.strptime(
@@ -36,8 +80,7 @@ def execute_kerykeion(input_data: KerykeionInputSchema) -> KerykeionOutputSchema
         nation=input_data.location.country,
         lat=input_data.location.lat,
         lng=input_data.location.lng,
-        tz_str=input_data.location.timezone,
-        house_system=input_data.house_system or "placidus"
+        tz_str=input_data.location.timezone
     )
     
     # Generar SVG de la carta usando KerykeionChartSVG

@@ -14,6 +14,7 @@ from .models import (
     AvailableSlot,
     BlockedDate,
     AnalysisRecord,
+    CabalisticAnalysis,
     Resource,
     UserResourceAccess,
 )
@@ -428,6 +429,51 @@ class PatientSerializer(serializers.ModelSerializer):
         """Indica si el paciente tiene coordenadas válidas para análisis astrológicos"""
         return obj.birth_latitude is not None and obj.birth_longitude is not None
 
+    def validate(self, attrs):
+        """
+        Geo-resolución automática de coordenadas para pacientes si cambia la ciudad/país.
+        """
+        instance = self.instance
+        
+        new_city = attrs.get("birth_city")
+        new_country = attrs.get("birth_country")
+        
+        # Determinar valores actuales
+        current_city = instance.birth_city if instance else None
+        current_country = instance.birth_country if instance else None
+        
+        # Determinar valores finales
+        final_city = new_city if new_city is not None else current_city
+        final_country = new_country if new_country is not None else current_country
+        
+        # Detectar cambios
+        city_changing = new_city is not None and new_city != current_city
+        country_changing = new_country is not None and new_country != current_country
+        
+        # Detectar si faltan coordenadas en el registro existente (reparación)
+        missing_coords = instance and (instance.birth_latitude is None or instance.birth_longitude is None)
+        
+        if city_changing or country_changing or (missing_coords and final_city):
+            # Solo intentamos geocodificar si hay al menos ciudad y no se están enviando coordenadas manuales
+            if final_city and (attrs.get("birth_latitude") is None or attrs.get("birth_longitude") is None):
+                from .geocoding_utils import geocode_city
+                
+                geo_result = geocode_city(final_city, final_country)
+                
+                if geo_result:
+                    attrs["birth_latitude"] = geo_result["latitude"]
+                    attrs["birth_longitude"] = geo_result["longitude"]
+                    attrs["birth_timezone"] = geo_result["timezone"]
+                    # Normalizar nombres
+                    if geo_result.get("city"): attrs["birth_city"] = geo_result["city"]
+                    if geo_result.get("country"): attrs["birth_country"] = geo_result["country"]
+                else:
+                    raise serializers.ValidationError({
+                        "birth_city": f"No se pudieron resolver las coordenadas para: {final_city}. Verifica el nombre."
+                    })
+        
+        return attrs
+
 
 class SessionSerializer(serializers.ModelSerializer):
     """Serializer para sesiones terapéuticas"""
@@ -666,6 +712,20 @@ from api.validators.test_execution import (
 )
 
 
+class CabalisticAnalysisSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CabalisticAnalysis
+        fields = [
+            'id',
+            'analysis_type',
+            'input_data',
+            'result_data',
+            'summary',
+            'therapist_notes',
+            'created_at',
+        ]
+        read_only_fields = fields
+
 class AnalysisRecordSerializer(serializers.ModelSerializer):
     """
     Serializer para AnalysisRecord con validaciones defensivas.
@@ -675,6 +735,8 @@ class AnalysisRecordSerializer(serializers.ModelSerializer):
     - execution_mode no se acepta desde el request: se deriva desde module_code + contexto.
     - therapist_clinical requiere patient_id + therapist_id + ownership + no auto-evaluación.
     """
+
+    cabalistic_analysis = CabalisticAnalysisSerializer(read_only=True)
 
     class Meta:
         model = AnalysisRecord
@@ -693,6 +755,7 @@ class AnalysisRecordSerializer(serializers.ModelSerializer):
             'raw_input',
             'computed_result',
             'legacy_output',
+            'therapist_annotations',
             'visibility',
             'created_at',
             'test_result',
@@ -840,4 +903,3 @@ class AssignResourceSerializer(serializers.Serializer):
         if not Resource.objects.filter(id=value).exists():
             raise serializers.ValidationError('Resource does not exist')
         return value
-

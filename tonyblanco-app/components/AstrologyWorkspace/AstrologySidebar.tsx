@@ -2,13 +2,18 @@
 
 import type { AstrologyViewMode } from './types';
 
-const sections: Array<{ id: AstrologyViewMode; label: string }> = [
-  { id: 'visual', label: 'Visual' },
-  { id: 'correspondences', label: 'Correspondencias' },
-  { id: 'synthesis', label: 'Sintesis' },
+interface AstrologySidebarProps {
+  activeView: AstrologyViewMode;
+  onViewChange: (view: AstrologyViewMode) => void;
+}
+
+const sections: Array<{ id: AstrologyViewMode; label: string; enabled: boolean }> = [
+  { id: 'visual', label: 'Visual', enabled: true },
+  { id: 'correspondences', label: 'Correspondencias', enabled: false },
+  { id: 'synthesis', label: 'Sintesis', enabled: false },
 ];
 
-export default function AstrologySidebar() {
+export default function AstrologySidebar({ activeView, onViewChange }: AstrologySidebarProps) {
   return (
     <aside className="w-64 border-r border-gray-200 bg-white flex flex-col">
       <div className="px-4 py-4 border-b border-gray-200">
@@ -20,11 +25,20 @@ export default function AstrologySidebar() {
           <button
             key={section.id}
             type="button"
-            disabled
-            className="w-full text-left rounded-md border border-transparent px-3 py-2 text-sm text-gray-400 cursor-not-allowed"
+            disabled={!section.enabled}
+            onClick={() => section.enabled && onViewChange(section.id)}
+            className={`w-full text-left rounded-md px-3 py-2 text-sm transition-colors ${
+              section.enabled
+                ? activeView === section.id
+                  ? 'bg-blue-50 border border-blue-200 text-blue-900'
+                  : 'border border-transparent text-gray-700 hover:bg-gray-50'
+                : 'border border-transparent text-gray-400 cursor-not-allowed'
+            }`}
           >
             <p className="text-sm font-medium">{section.label}</p>
-            <p className="text-[11px] text-gray-400">Deshabilitado</p>
+            <p className="text-[11px] text-gray-500">
+              {section.enabled ? (activeView === section.id ? 'Activo' : 'Disponible') : 'Deshabilitado'}
+            </p>
           </button>
         ))}
       </div>

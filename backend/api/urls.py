@@ -77,6 +77,7 @@ from .cabalistic_views import (
     ListCabalisticAnalysesView,
     GenerateAndSaveTarotAnalysisView,
     KerykeionAnalysisView,
+    KabbalahInterpretationView,
     CrossoverSynthesisView
 )
 from .admin_views import (
@@ -160,6 +161,7 @@ urlpatterns = [
     path('therapist/patients/<int:id>/cabalistic-analysis/', SaveCabalisticAnalysisView.as_view(), name='save_cabalistic_analysis'),
     path('therapist/patients/<int:id>/cabalistic-analyses/', ListCabalisticAnalysesView.as_view(), name='list_cabalistic_analyses'),
     path('therapist/patients/<int:id>/astrology-kerykeion/', KerykeionAnalysisView.as_view(), name='kerykeion_analysis'),
+    path('therapist/patients/<int:id>/interpretation/kabbalah/', KabbalahInterpretationView.as_view(), name='kabbalah_interpretation'),
     path('therapist/patients/<int:id>/crossover/generate-and-save/', CrossoverSynthesisView.as_view(), name='crossover_synthesis'),
     path('therapist/sessions/', SessionListCreateView.as_view(), name='session_list_create'),
     path('therapist/sessions/<int:pk>/', SessionDetailView.as_view(), name='session_detail'),

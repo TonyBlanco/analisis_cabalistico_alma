@@ -377,7 +377,7 @@ interface CabalAppliedVisualCoreProps {
 }
 
 export default function CabalAppliedVisualCore({ activeSection }: CabalAppliedVisualCoreProps) {
-  const [activePatientId, setActivePatientId] = useState<string | null>(null);
+  const [activePatientId, setActivePatientId] = useState<number | null>(null);
   const [patientProfile, setPatientProfile] = useState<PatientProfileSummary | null>(null);
   const [pitagorasState, setPitagorasState] = useState<PitagorasSymbolicState | null>(null);
   const [treeStructuralState, setTreeStructuralState] = useState<TreeStructuralState | null>(null);
@@ -533,34 +533,35 @@ export default function CabalAppliedVisualCore({ activeSection }: CabalAppliedVi
 
   const { state, loading } = useTreeStructuralState(treeInput);
 
+  // Ensure typed arrays matching Tree types
   const highlightedSefirot = useMemo(() => {
-    if (!state?.sefirot_activas.length) return [];
-    return state.sefirot_activas.map((item) => item.id_canonico);
+    if (!state?.sefirot_activas.length) return [] as import('../Tree/tree.types').TreeSefirahId[];
+    return state.sefirot_activas.map((item) => item.id_canonico as import('../Tree/tree.types').TreeSefirahId);
   }, [state?.sefirot_activas]);
 
   const highlightedPaths = useMemo(() => {
-    if (!state?.senderos_activos.length) return [];
+    if (!state?.senderos_activos.length) return [] as import('../Tree/tree.types').TreePathId[];
     return state.senderos_activos
       .map((sendero) => {
         const from = sendero.endpoints.from_sefira;
         const to = sendero.endpoints.to_sefira;
         return from && to ? `${from}-${to}` : null;
       })
-      .filter((value): value is string => Boolean(value));
+      .filter((value): value is string => Boolean(value)) as import('../Tree/tree.types').TreePathId[];
   }, [state?.senderos_activos]);
 
   const repeatedSefirot = useMemo(() => {
-    if (!state?.repeticiones.length) return [];
+    if (!state?.repeticiones.length) return [] as import('../Tree/tree.types').TreeSefirahId[];
     return state.repeticiones
       .map((item) => item.simbolo_id)
-      .filter((id) => !id.includes('-'));
+      .filter((id) => !id.includes('-')) as import('../Tree/tree.types').TreeSefirahId[];
   }, [state?.repeticiones]);
 
   const repeatedPaths = useMemo(() => {
-    if (!state?.repeticiones.length) return [];
+    if (!state?.repeticiones.length) return [] as import('../Tree/tree.types').TreePathId[];
     return state.repeticiones
       .map((item) => item.simbolo_id)
-      .filter((id) => id.includes('-'));
+      .filter((id) => id.includes('-')) as import('../Tree/tree.types').TreePathId[];
   }, [state?.repeticiones]);
 
   const mapWeightsToOpacity = (items: Array<{ id: string; weight: number }>) => {

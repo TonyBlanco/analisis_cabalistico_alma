@@ -10,6 +10,7 @@ import { getActivePatientId } from '@/lib/active-patient';
 
 export default function AstrologyWorkspace() {
   const [activeView, setActiveView] = useState<AstrologyViewMode>('visual');
+  const [houseSystem, setHouseSystem] = useState<string>('P'); // P=Placidus default
   const [activePatientId, setActivePatientId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -111,7 +112,7 @@ export default function AstrologyWorkspace() {
       </header>
 
       <div className="flex">
-        <AstrologySidebar activeView={activeView} onViewChange={setActiveView} />
+        <AstrologySidebar activeView={activeView} onViewChange={setActiveView} houseSystem={houseSystem} setHouseSystem={setHouseSystem} />
         <main className="flex-1 px-6 py-6">
           <div className="mb-4 rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700">
             Observacional. Con interpretación asistida, sin predicción clínica, sin automatización decisoria.

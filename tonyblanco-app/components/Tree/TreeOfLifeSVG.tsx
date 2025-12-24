@@ -198,8 +198,8 @@ export default function TreeOfLifeSVG({
       className={className}
       style={getSizeStyle(size)}
       interactive={interactive}
-      onHover={onSefirahHover}
-      onPathHover={onPathHover}
+      onHover={(id) => onSefirahHover?.(id as TreeSefirahId | null)}
+      onPathHover={(id) => onPathHover?.(id as TreePathId | null)}
       nodeStyleOverrides={nodeStyleOverrides}
       pathStyleOverrides={pathStyleOverrides}
       showBackground={false}

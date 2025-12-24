@@ -94,7 +94,7 @@ export default function PatientResourcesPage() {
               <ResourceCard
                 key={resource.id}
                 resource={resource}
-                therapistNotes={resource.therapist_notes}
+                therapistNotes={resource.therapist_notes || undefined}
                 readOnly={true}
               />
             ))}

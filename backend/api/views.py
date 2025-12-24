@@ -897,46 +897,6 @@ class CalculoCabalisticoView(APIView):
             )
 
 
-class GeocodeCityView(APIView):
-    """Geocodificar una ciudad para obtener coordenadas y zona horaria"""
-    permission_classes = [IsAuthenticated]
-    
-    def post(self, request):
-        city = request.data.get('city', '')
-        country = request.data.get('country', '')
-        
-        if not city:
-            return Response(
-                {'error': 'Se requiere el nombre de la ciudad'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        try:
-            from .geocoding_utils import geocode_city
-            result = geocode_city(city, country)
-            
-            if result:
-                return Response({
-                    'success': True,
-                    'latitude': result['latitude'],
-                    'longitude': result['longitude'],
-                    'timezone': result['timezone'],
-                    'city': result['city'],
-                    'country': result['country'],
-                    'full_address': result.get('full_address', '')
-                })
-            else:
-                return Response(
-                    {'error': f'No se pudo encontrar la ciudad: {city}'},
-                    status=status.HTTP_404_NOT_FOUND
-                )
-        except Exception as e:
-            return Response(
-                {'error': f'Error en geocodificación: {str(e)}'},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
-
-
 class BirthDataView(APIView):
     """
     Obtener o actualizar los datos de nacimiento del usuario.
@@ -1404,6 +1364,99 @@ class TherapistPatientProfileView(APIView):
             profile_data["consent_accepted_at"] = getattr(up, "consent_accepted_at", None)
 
         return Response(profile_data, status=status.HTTP_200_OK)
+
+
+class TherapistUpdatePatientProfileView(APIView):
+    """
+    Actualización de perfil de paciente por terapeuta.
+
+    Endpoint:
+    - PATCH /api/therapist/patients/<int:pk>/profile/update/
+
+    Reglas:
+    - Solo el terapeuta propietario puede actualizar el perfil del paciente.
+    - Actualiza campos básicos del paciente (Patient model) y UserProfile si existe cuenta vinculada.
+    - Si se proporciona ciudad/país, automáticamente resuelve coordenadas y zona horaria.
+    - Retorna estado de completitud del perfil.
+    """
+
+    permission_classes = [IsAuthenticated, IsTherapist]
+
+    def patch(self, request, pk):
+        try:
+            patient = Patient.objects.select_related("user").get(
+                therapist=request.user,
+                id=pk,
+                is_active=True,
+            )
+        except Patient.DoesNotExist:
+            return Response(
+                {"error": "Paciente no encontrado o no te pertenece."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        # Campos permitidos para actualizar en Patient model
+        patient_fields = {
+            'full_name': 'full_name',  # legal_full_name se mapea a full_name en Patient
+            'birth_date': 'birth_date',
+            'birth_time': 'birth_time',
+            'birth_city': 'birth_city', 
+            'birth_country': 'birth_country'
+        }
+
+        # Actualizar campos del Patient model
+        patient_updated = False
+        for api_field, model_field in patient_fields.items():
+            if api_field in request.data and request.data[api_field] is not None:
+                setattr(patient, model_field, request.data[api_field])
+                patient_updated = True
+
+        # Si se actualizó ciudad o país, intentar geocoding
+        city = request.data.get('birth_city') or getattr(patient, 'birth_city', None)
+        country = request.data.get('birth_country') or getattr(patient, 'birth_country', None)
+        if city or country:
+            from .geocoding_utils import geocode_city
+            geo_result = geocode_city(city, country)
+            if geo_result:
+                patient.birth_latitude = geo_result['latitude'] 
+                patient.birth_longitude = geo_result['longitude']
+                patient.birth_timezone = geo_result.get('timezone', '')
+                patient_updated = True
+
+        if patient_updated:
+            patient.save()
+
+        # Si el paciente tiene cuenta de usuario vinculada, actualizar UserProfile también
+        user_profile_updated = False
+        if patient.user and hasattr(patient.user, "profile") and 'legal_full_name' in request.data:
+            patient.user.profile.legal_full_name = request.data['legal_full_name'] or None
+            patient.user.profile.save(update_fields=['legal_full_name', 'updated_at'] if hasattr(patient.user.profile, 'updated_at') else ['legal_full_name'])
+            user_profile_updated = True
+
+        # Calcular estado de completitud del perfil
+        profile_complete = bool(
+            patient.full_name and
+            patient.birth_date and
+            patient.birth_city and
+            patient.birth_country and
+            patient.birth_latitude is not None and
+            patient.birth_longitude is not None
+        )
+
+        missing_fields = []
+        if not patient.full_name: missing_fields.append('legal_full_name')  # API usa legal_full_name
+        if not patient.birth_date: missing_fields.append('birth_date') 
+        if not patient.birth_city: missing_fields.append('birth_city') 
+        if not patient.birth_country: missing_fields.append('birth_country') 
+        if patient.birth_latitude is None or patient.birth_longitude is None: missing_fields.append('coordinates') 
+
+        return Response({
+            "message": "Perfil actualizado exitosamente" if patient_updated or user_profile_updated else "No se realizaron cambios", 
+            "profile_complete": profile_complete, 
+            "missing_fields": missing_fields, 
+            "profile_updated_by_therapist": True, 
+            "last_therapist_update": timezone.now().isoformat() if patient_updated else None
+        })
 
 
 class GenerateAIPlanView(APIView):
@@ -2651,6 +2704,55 @@ class AcquireResourceView(APIView):
             UserResourceAccessSerializer(access).data,
             status=status.HTTP_201_CREATED
         )
+
+
+# ========================================
+# GEOCODING VIEWS
+# ========================================
+
+class GeocodeCityView(APIView):
+    """
+    Geocode a city to get coordinates and timezone.
+    Uses the centralized geocoding_utils.py module.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        from .geocoding_utils import geocode_city
+
+        city = request.data.get('city', '').strip()
+        country = request.data.get('country', '').strip() or None
+
+        if not city:
+            return Response(
+                {'error': 'City is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            result = geocode_city(city, country)
+
+            if result:
+                return Response({
+                    'success': True,
+                    'latitude': result['latitude'],
+                    'longitude': result['longitude'],
+                    'timezone': result['timezone'],
+                    'city': result['city'],
+                    'country': result['country'],
+                    'full_address': result.get('full_address', '')
+                })
+            else:
+                return Response({
+                    'success': False,
+                    'error': 'City not found'
+                }, status=status.HTTP_404_NOT_FOUND)
+
+        except Exception as e:
+            return Response(
+                {'error': f'Geocoding failed: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 

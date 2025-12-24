@@ -787,3 +787,13 @@ Documentos Vinculantes: Se integran formalmente ASTROLOGIA_WORKSPACE_TAB_VISUAL_
 Arquitectura Sellada: No se han detectado regresiones en los flujos inmutables patient_self y therapist_clinical.
 
 Capa Clínica vs Simbólica: Se mantiene la frontera técnica; el SCDF v2 permanece en modo consulta sin procesar la lógica del Árbol de la Vida.
+
+4. Mejoras de Infraestructura (Geocoding Unification)
+Se implementó un sistema unificado de geocodificación para resolver inconsistencias en el manejo de coordenadas geográficas:
+
+- **Problema identificado**: Tres implementaciones separadas de geocoding causando errores 500 y mantenimiento duplicado
+- **Solución implementada**: Endpoint centralizado `POST /api/geocode/city/` con geopy backend
+- **Beneficios**: Mejor rendimiento, manejo de errores consistente, reducción de código duplicado
+- **Impacto**: No afecta flujos clínicos ni arquitectura simbólica; mejora estabilidad del sistema
+
+Documentos actualizados: `docs/README.md`, `backend/API_DOCUMENTATION.md`

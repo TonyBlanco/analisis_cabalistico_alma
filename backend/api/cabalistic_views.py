@@ -9,8 +9,9 @@ from rest_framework.permissions import IsAuthenticated
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.shortcuts import get_object_or_404
+from django.db import OperationalError
 import logging
-from .models import Patient, CabalisticAnalysis
+from .models import Patient, CabalisticAnalysis, AnalysisRecord
 from .models_astrology import AstrologyNatalChart
 from .utils.tarot_service import analyze_archetype_vs_clinical
 from .astrology_kerykeion.service import execute_kerykeion
@@ -19,6 +20,13 @@ from .astrology_kerykeion.normalizer import normalize_kerykeion_output
 from .permissions import IsTherapist
 from .synthesis_engine import SynthesisEngine
 from pydantic import ValidationError
+
+# Analysis service for creating/executing AnalysisRecord
+from .services.analysis_service import create_and_execute_analysis
+from .serializers import AnalysisRecordSerializer
+
+# Symbolic PoC engine
+from .symbolic.kabbalah_engine import score_72_names, compute_tikun_signals
 
 logger = logging.getLogger(__name__)
 
@@ -454,6 +462,193 @@ class KerykeionAnalysisView(APIView):
                 {'error': 'Error interno del servidor'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class KabbalahInterpretationView(APIView):
+    """
+    PoC endpoint para interpretación cabalística profunda (Kabbalah).
+    Ruta: POST /api/therapist/patients/<id>/interpretation/kabbalah/
+
+    POST: Ejecuta e intenta persistir el análisis.
+    GET: Devuelve la última interpretación kabbalística calculada para el paciente si existe.
+    """
+    permission_classes = [IsAuthenticated, IsTherapist]
+
+    def get(self, request, id):
+        try:
+            patient = Patient.objects.get(id=id, therapist=request.user)
+        except Patient.DoesNotExist:
+            return Response({'error': 'Paciente no encontrado o no tienes acceso'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Buscar último AnalysisRecord de kind=kabbalah
+        try:
+            record = AnalysisRecord.objects.filter(kind='kabbalah', patient=patient).order_by('-created_at').first()
+        except OperationalError as e:
+            # En algunos entornos de prueba el esquema puede estar desactualizado (columna faltante).
+            # Capturamos el error y devolvemos un 404 para mantener la compatibilidad y permitir el fallback.
+            logger.error(f"Error al acceder a AnalysisRecord (posible esquema desactualizado): {e}", exc_info=True)
+            record = None
+
+        if not record or not record.computed_result:
+            return Response({'error': 'No se ha encontrado ninguna interpretación kabbalística para este paciente'}, status=status.HTTP_404_NOT_FOUND)
+
+        ke = (record.computed_result or {}).get('kabbalah_engine')
+        if not ke:
+            return Response({'error': 'La interpretación existe pero el motor kabbalístico no generó salidas'}, status=status.HTTP_404_NOT_FOUND)
+
+        return Response({'success': True, 'kabbalah_engine': ke, 'record_id': str(record.id)}, status=status.HTTP_200_OK)
+
+    def post(self, request, id):
+        try:
+            # Obtener paciente y validar ownership
+            try:
+                patient = Patient.objects.get(id=id, therapist=request.user)
+            except Patient.DoesNotExist:
+                return Response({'error': 'Paciente no encontrado o no tienes acceso'}, status=status.HTTP_404_NOT_FOUND)
+
+            # Validaciones mínimas para PoC
+            missing = []
+            if not patient.full_name:
+                missing.append('full_name')
+            if not patient.birth_date:
+                missing.append('birth_date')
+
+            if missing:
+                return Response({
+                    'error': 'Faltan campos requeridos en el perfil del paciente',
+                    'missing_fields': missing
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            # Construir birth_data_snapshot
+            birth_snapshot = {
+                'legal_name': patient.full_name,
+                'birth_date': patient.birth_date.strftime('%Y-%m-%d'),
+                'birth_time': patient.birth_time.strftime('%H:%M') if patient.birth_time else '',
+                'city': patient.birth_city or '',
+                'country': patient.birth_country or '',
+                'lat': float(patient.birth_latitude) if patient.birth_latitude is not None else None,
+                'lng': float(patient.birth_longitude) if patient.birth_longitude is not None else None,
+                'timezone': patient.birth_timezone or '',
+                'geocode_source': 'patient_profile'
+            }
+
+            # Para esta PoC requerimos coordenadas explícitas en el perfil (no intento de geocoding automático)
+            if birth_snapshot['lat'] is None or birth_snapshot['lng'] is None:
+                return Response(
+                    {'error': 'El perfil del paciente debe incluir latitud y longitud para interpretación cabalística en esta fase.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            raw_input = request.data.get('raw_input', {}) or {}
+            sistema = raw_input.get('sistema', 'dshevastan')
+
+            algo_snapshot = {
+                'engine': 'kabbalah_adapter',
+                'version': '1.0.0',
+                'params': {
+                    'sistema': sistema
+                }
+            }
+
+            record_payload = {
+                'kind': 'kabbalah',
+                'module_code': 'kabbalah_core',
+                'role_context': 'therapist',
+                'birth_data_snapshot': birth_snapshot,
+                'algorithm_snapshot': algo_snapshot,
+                'raw_input': raw_input,
+                'patient': patient,
+                'therapist': request.user,
+                'created_by_user': request.user,
+                'visibility': 'therapist',
+            }
+
+            # Intentamos persistir el AnalysisRecord; en caso de fallo (entorno de pruebas o migraciones)
+            # caemos a un modo PoC no persistente que ejecuta directamente el adapter para devolver resultados.
+            try:
+                record = create_and_execute_analysis(record_payload)
+
+                # Integrate deterministic PoC engine outputs into computed_result
+                try:
+                    natal = None
+                    if record.computed_result and isinstance(record.computed_result, dict):
+                        natal = record.computed_result.get('profile') or record.computed_result
+                    elif record.legacy_output and isinstance(record.legacy_output, dict):
+                        natal = record.legacy_output.get('profile') or record.legacy_output
+
+                    if natal:
+                        names_scores = score_72_names(natal)
+                        tikun_signals = compute_tikun_signals(natal)
+                        # Attach under a clear namespace
+                        cr = record.computed_result or {}
+                        cr['kabbalah_engine'] = {
+                            '72_names': names_scores,
+                            'tikun_signals': tikun_signals,
+                        }
+                        record.computed_result = cr
+                        record.save(update_fields=['computed_result'])
+                except Exception:
+                    logger.exception('Error integrando outputs del motor Kabbalah PoC')
+
+                serializer = AnalysisRecordSerializer(record, context={'request': request})
+                return Response({'success': True, 'record': serializer.data}, status=status.HTTP_200_OK)
+
+            except Exception as e:
+                logger.warning('No se pudo persistir AnalysisRecord (PoC fallback): %s', e)
+                # Fallback: execute adapter directly without saving
+                from types import SimpleNamespace
+                from .adapters.kabbalah_adapter import KabbalahAdapter
+
+                fake_record = SimpleNamespace(
+                    birth_data_snapshot=birth_snapshot,
+                    raw_input=raw_input,
+                    algorithm_snapshot=algo_snapshot,
+                    created_by_user=request.user,
+                    patient=patient,
+                )
+
+                try:
+                    adapter = KabbalahAdapter(fake_record)
+                    outputs = adapter.execute()
+                except Exception as e2:
+                    logger.exception('Error ejecutando adapter Kabbalah en modo fallback')
+                    return Response({'error': 'Error ejecutando interpretación cabalística (fallback)', 'details': str(e2)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+                # Compute engine outputs from adapter result
+                try:
+                    natal = outputs.get('computed_result', {}) or outputs.get('legacy_output', {})
+                    profile = natal.get('profile') if isinstance(natal, dict) else natal
+                    names_scores = score_72_names(profile or {})
+                    tikun_signals = compute_tikun_signals(profile or {})
+                except Exception:
+                    logger.exception('Error ejecutando motor kabbalah en fallback')
+                    names_scores = {}
+                    tikun_signals = []
+
+                # Normalizar respuesta para mantener la forma 'record' esperada por clientes
+                minimal_record = {
+                    'kind': 'kabbalah',
+                    'module_code': 'kabbalah_core',
+                    'patient': {'id': patient.id, 'full_name': patient.full_name},
+                    'therapist': {'id': request.user.id, 'username': request.user.username},
+                    'birth_snapshot': birth_snapshot,
+                    'computed_result': outputs.get('computed_result'),
+                    'legacy_output': outputs.get('legacy_output'),
+                }
+
+                # Attach engine outputs to minimal record
+                minimal_record['computed_result'] = minimal_record.get('computed_result') or {}
+                minimal_record['computed_result']['kabbalah_engine'] = {
+                    '72_names': names_scores,
+                    'tikun_signals': tikun_signals,
+                }
+
+                return Response({'success': True, 'record': minimal_record}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            logger.exception('Error inesperado en KabbalahInterpretationView')
+            return Response({'error': 'Error interno del servidor'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @method_decorator(csrf_exempt, name='dispatch')

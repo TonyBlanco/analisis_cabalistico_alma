@@ -1,8 +1,20 @@
 'use client';
 
 import { useState } from 'react';
-import { TarotKabbalahCalculator, TarotEngine, ARCANOS_MAYORES } from './tarot.logic';
+import { TarotEngine, ARCANOS_MAYORES } from './tarot.logic';
 import type { DrawnCard } from './types';
+
+// Local placeholder: small birth-chart generator for Tarot-Kabbalah mapping (PoC)
+function generateBirthChart(birthDate: Date) {
+  // Very small deterministic placeholder: seed with date to pick a few arcana
+  const seed = birthDate.getTime();
+  const idx = Math.abs(seed % ARCANOS_MAYORES.length);
+  const primary = ARCANOS_MAYORES[idx];
+  return {
+    primaryArcana: primary,
+    generatedAt: new Date().toISOString(),
+  };
+}
 
 interface TarotCardGridProps {
   patientId?: string;
@@ -30,7 +42,7 @@ export default function TarotCardGrid({
 
   const handleCalculateChart = () => {
     if (birthDate) {
-      const chart = TarotKabbalahCalculator.generateBirthChart(birthDate);
+      const chart = generateBirthChart(birthDate);
       setBirthChart(chart);
     }
   };

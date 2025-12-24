@@ -21,13 +21,13 @@ print('ASTROLOGY_CORE_AVAILABLE =', ASTROLOGY_CORE_AVAILABLE)
 
 input_data = {
     'birth_date': '1959-08-01',
-    'birth_time': '12:00',
+    'birth_time': '20:00',
     'location': {
-        'city': 'London',
-        'country': 'United Kingdom',
-        'lat': 51.5074,
-        'lng': -0.1278,
-        'timezone': 'Europe/London'
+        'city': 'La Habana',
+        'country': 'Cuba',
+        'lat': 23.113592,
+        'lng': -82.366592,
+        'timezone': 'America/Havana'
     },
     'house_system': 'placidus',
     'zodiac_system': 'tropical',

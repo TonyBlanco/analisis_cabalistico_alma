@@ -2,6 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
+import PatientProfileView from '@/components/patient/PatientProfileView';
+import PatientProfileEditor from '@/components/patient/PatientProfileEditor';
+import dynamic from 'next/dynamic'
+
+const KabbalahPanel = dynamic(() => import('@/components/therapist/KabbalahPanel'), { ssr: false })
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://analisis-cabalistico-alma.onrender.com/api';
 
@@ -15,8 +20,18 @@ export default function TherapistPatientDetailPage() {
   const [profile, setProfile] = useState<any | null>(null);
   const [results, setResults] = useState<any[]>([]);
   const [analysisRecords, setAnalysisRecords] = useState<any[]>([]);
+  const [showEditor, setShowEditor] = useState(false);
 
   useEffect(() => {
+    if (patientId) {
+      loadData();
+    } else {
+      setErrors(['Missing patient id.']);
+      setLoading(false);
+    }
+  }, [patientId]);
+
+  const loadData = async () => {
     const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
     if (!token) {
       setErrors(['No auth token found.']);
@@ -39,51 +54,42 @@ export default function TherapistPatientDetailPage() {
       return response.json();
     };
 
-    const load = async () => {
-      setLoading(true);
-      setErrors([]);
+    setLoading(true);
+    setErrors([]);
 
-      const nextErrors: string[] = [];
+    const nextErrors: string[] = [];
 
-      const patientPromise = fetchJson(`${API_URL}/therapist/patients/${patientId}/`).catch((err) => {
-        nextErrors.push(`Patient fetch failed: ${err.message}`);
-        return null;
-      });
-      const profilePromise = fetchJson(`${API_URL}/therapist/patients/${patientId}/profile/`).catch((err) => {
-        nextErrors.push(`Profile fetch failed: ${err.message}`);
-        return null;
-      });
-      const resultsPromise = fetchJson(`${API_URL}/tests/results/?patient_id=${encodeURIComponent(patientId)}`).catch((err) => {
-        nextErrors.push(`Test results fetch failed: ${err.message}`);
-        return [];
-      });
-      const analysisPromise = fetchJson(`${API_URL}/analysis-records/?patient_id=${encodeURIComponent(patientId)}`).catch((err) => {
-        nextErrors.push(`Analysis records fetch failed: ${err.message}`);
-        return [];
-      });
+    const patientPromise = fetchJson(`${API_URL}/therapist/patients/${patientId}/`).catch((err) => {
+      nextErrors.push(`Patient fetch failed: ${err.message}`);
+      return null;
+    });
+    const profilePromise = fetchJson(`${API_URL}/therapist/patients/${patientId}/profile/`).catch((err) => {
+      nextErrors.push(`Profile fetch failed: ${err.message}`);
+      return null;
+    });
+    const resultsPromise = fetchJson(`${API_URL}/tests/results/?patient_id=${encodeURIComponent(patientId)}`).catch((err) => {
+      nextErrors.push(`Test results fetch failed: ${err.message}`);
+      return [];
+    });
+    const analysisPromise = fetchJson(`${API_URL}/analysis-records/?patient_id=${encodeURIComponent(patientId)}`).catch((err) => {
+      nextErrors.push(`Analysis records fetch failed: ${err.message}`);
+      return [];
+    });
 
-      const [patientData, profileData, resultsData, analysisData] = await Promise.all([
-        patientPromise,
-        profilePromise,
-        resultsPromise,
-        analysisPromise,
-      ]);
+    const [patientData, profileData, resultsData, analysisData] = await Promise.all([
+      patientPromise,
+      profilePromise,
+      resultsPromise,
+      analysisPromise,
+    ]);
 
-      setPatient(patientData);
-      setProfile(profileData);
-      setResults(Array.isArray(resultsData) ? resultsData : (resultsData?.results || []));
-      setAnalysisRecords(Array.isArray(analysisData) ? analysisData : (analysisData?.results || []));
-      setErrors(nextErrors);
-      setLoading(false);
-    };
-
-    if (patientId) {
-      load();
-    } else {
-      setErrors(['Missing patient id.']);
-      setLoading(false);
-    }
-  }, [patientId]);
+    setPatient(patientData);
+    setProfile(profileData);
+    setResults(Array.isArray(resultsData) ? resultsData : (resultsData?.results || []));
+    setAnalysisRecords(Array.isArray(analysisData) ? analysisData : (analysisData?.results || []));
+    setErrors(nextErrors);
+    setLoading(false);
+  };
 
   if (loading) {
     return (
@@ -128,13 +134,11 @@ export default function TherapistPatientDetailPage() {
 
       <section className="bg-white border border-gray-200 rounded-lg p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-3">Profile summary</h2>
-        {profile ? (
-          <pre className="text-sm text-gray-700 whitespace-pre-wrap break-words">
-            {safeJson(profile)}
-          </pre>
-        ) : (
-          <p className="text-sm text-gray-600">No profile data.</p>
-        )}
+        <PatientProfileView
+          profile={profile}
+          onEdit={() => setShowEditor(true)}
+          canEdit={true}
+        />
       </section>
 
       <section className="bg-white border border-gray-200 rounded-lg p-6">
@@ -184,6 +188,20 @@ export default function TherapistPatientDetailPage() {
           </div>
         )}
       </section>
+
+      <section className="bg-white border border-gray-200 rounded-lg p-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-3">Kabbalah Interpretation (PoC)</h2>
+        <KabbalahPanel patientId={patientId} />
+      </section>
+
+      {showEditor && (
+        <PatientProfileEditor
+          profile={profile}
+          patientId={patientId}
+          onSave={loadData}
+          onClose={() => setShowEditor(false)}
+        />
+      )}
     </div>
   );
 }
@@ -191,12 +209,4 @@ export default function TherapistPatientDetailPage() {
 function valueOrFallback(value: unknown): string {
   if (value === null || value === undefined || value === '') return 'N/A';
   return String(value);
-}
-
-function safeJson(value: unknown): string {
-  try {
-    return JSON.stringify(value, null, 2);
-  } catch {
-    return String(value);
-  }
 }

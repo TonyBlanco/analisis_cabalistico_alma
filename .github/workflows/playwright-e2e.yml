@@ -1,0 +1,32 @@
+name: Playwright E2E
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ./tonyblanco-app
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+        working-directory: ./tonyblanco-app
+      - name: Build frontend
+        run: npm run build
+        working-directory: ./tonyblanco-app
+      - name: Start server
+        run: npm run start & npx wait-on http://localhost:3000
+        working-directory: ./tonyblanco-app
+      - name: Run Playwright tests
+        run: npx playwright test --config=e2e/playwright.config.ts
+        working-directory: ./tonyblanco-app

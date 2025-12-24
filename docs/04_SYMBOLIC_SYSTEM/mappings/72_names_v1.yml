@@ -1,0 +1,25 @@
+version: "1.0.0"
+source: "72 Names Canonical Mapping v1"
+created_at: "2025-12-24"
+curator: "Tony Blanco & Team"
+license: "CC-BY-4.0"
+description: "Curated sample entries for 72 Names mapping. PoC subset."
+names:
+  - id: "name_1"
+    key: "אהיה"
+    name: "אהיה"
+    letters: ["א", "ה", "י", "ה"]
+    strength: 0.8
+    associated_planet: "Sun"
+    associated_sephira: "Keter"
+    house_hint: 10
+    description: "Healing of will / alignment of intention."
+  - id: "name_2"
+    key: "להם"
+    name: "להם"
+    letters: ["ל", "ה", "מ"]
+    strength: 0.6
+    associated_planet: "Moon"
+    associated_sephira: "Chokhmah"
+    house_hint: 7
+    description: "Relational harmonization."

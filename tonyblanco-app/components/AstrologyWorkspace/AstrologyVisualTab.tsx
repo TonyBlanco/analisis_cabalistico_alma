@@ -12,6 +12,7 @@ import { AlertCircle, Loader2, CheckCircle } from 'lucide-react';
 
 interface AstrologyVisualTabProps {
   patientId: string | undefined;
+  houseSystem?: string;
 }
 
 /**
@@ -28,8 +29,13 @@ interface AstrologyVisualTabProps {
  * - Botón para calcular (POST) si no hay carta
  * - Validación de campos faltantes con mensaje claro
  */
-export default function AstrologyVisualTab({ patientId }: AstrologyVisualTabProps) {
+export default function AstrologyVisualTab({ patientId, houseSystem }: AstrologyVisualTabProps) {
   const { chart, loading, error, missingFields, calculateChart } = useNatalChart(patientId);
+  // When an explicit houseSystem is passed prop, prefer it when calculating
+  const handleCalculate = async () => {
+    await calculateChart(houseSystem);
+  };
+
   const [patientProfile, setPatientProfile] = useState<any | null>(null);
   const [patientLoading, setPatientLoading] = useState(false);
   const router = useRouter();
@@ -159,7 +165,7 @@ export default function AstrologyVisualTab({ patientId }: AstrologyVisualTabProp
               </div>
               
               <button
-                onClick={calculateChart}
+                onClick={handleCalculate}
                 disabled={loading}
                 className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
               >
@@ -191,6 +197,12 @@ export default function AstrologyVisualTab({ patientId }: AstrologyVisualTabProp
             <p>Calculada: {chart.metadatos?.calculated_at ? new Date(chart.metadatos.calculated_at).toLocaleString('es-ES') : '—'}</p>
             <p>Sistema: {chart.metadatos?.sistema_casas || '—'}</p>
           </div>
+          {houseSystem && (
+            <div className="text-xs text-gray-600 bg-gray-50 border border-gray-100 rounded-md px-3 py-2">
+              <p className="font-medium">Sistema seleccionado: {houseSystem}</p>
+              <p className="text-[11px] text-gray-500">{houseSystem === 'W' ? 'Whole Sign (recomendado para Kabbalah)' : ''}</p>
+            </div>
+          )}
 
           <div className={hasCompleteProfile ? "text-xs text-green-700 bg-green-50 border border-green-200 rounded-md px-3 py-2" : "text-xs text-gray-700 bg-gray-50 border border-gray-200 rounded-md px-3 py-2"}>
             {patientLoading ? (
@@ -253,7 +265,7 @@ export default function AstrologyVisualTab({ patientId }: AstrologyVisualTabProp
                     <p className="text-xs text-amber-700">Esto puede indicar un problema en el cálculo. Intenta recalcular la carta natal.</p>
                     <div className="mt-2">
                       <button
-                        onClick={calculateChart}
+                        onClick={handleCalculate}
                         className="px-3 py-1 text-xs bg-amber-600 text-white rounded-md hover:bg-amber-700"
                       >
                         Recalcular carta natal

@@ -140,7 +140,8 @@ export default function TherapistPatientsPage() {
             {patients.map((patient) => (
               <div
                 key={patient.id}
-                className="border border-gray-200 rounded-md p-4 hover:border-gray-300 hover:shadow-sm transition-all"
+                onClick={() => router.push(`/dashboard/therapist/patients/${patient.id}`)}
+                className="cursor-pointer border border-gray-200 rounded-md p-4 hover:border-gray-300 hover:shadow-sm hover:bg-gray-50 transition-all"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">

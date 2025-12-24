@@ -1,7 +1,7 @@
 # SOURCE OF TRUTH
 
-La fuente de verdad normativa clinica vigente es: docs/AUDITORIA CABALA APP 12182025.md.
-PROJECT_STATE_CURRENT.md es valido como referencia de estado operativo y simbolico.
+La fuente de verdad normativa clinica vigente es: AUDITORIA CABALA APP 12182025.md.
+../01_PROJECT_STATE/PROJECT_STATE_CURRENT.md es valido como referencia de estado operativo y simbolico.
 Los documentos de arquitectura y evolucion simbolica son complementarios.
 Toda implementacion debe alinearse estrictamente con la auditoria vigente.
 ### Nota (2025-12-22)
@@ -31,9 +31,9 @@ para el Árbol de la Vida cabalístico:
 - ✅ Acceso READ-ONLY a TreeStructuralState (sin datos personales)
 
 **Documentación de referencia**:
-- `docs/TREE_STRUCTURAL_STATE_PHASE_2_STANDARDIZATION.md` (Phases 1-4 completas)
-- `docs/SYMBOLIC_INTERPRETER_AI_IMPLEMENTATION.md` (Phase 3+4 implementation)
-- `docs/SYMBOLIC_INTERPRETER_PROFESSIONAL_PROMPT.md` (Phase 4 technical spec)
+- `../04_SYMBOLIC_SYSTEM/TREE_STRUCTURAL_STATE_PHASE_2_STANDARDIZATION.md` (Phases 1-4 completas)
+- `../04_SYMBOLIC_SYSTEM/SYMBOLIC_INTERPRETER_AI_IMPLEMENTATION.md` (Phase 3+4 implementation)
+- `../04_SYMBOLIC_SYSTEM/SYMBOLIC_INTERPRETER_PROFESSIONAL_PROMPT.md` (Phase 4 technical spec)
 
 **Commits**:
 - eeb0f3f2 (Phase 1: TreeStructuralState v0.1)

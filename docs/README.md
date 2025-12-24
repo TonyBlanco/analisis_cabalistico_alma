@@ -24,8 +24,26 @@ Platform for holistic therapeutic analysis integrating:
 - **Backend**: Django 4.2 + Django REST Framework
 - **Database**: PostgreSQL (production) / SQLite (local)
 - **AI**: Google Gemini 1.5-flash (symbolic interpretation)
+- **Geocoding**: OpenStreetMap Nominatim (geopy backend integration)
 - **Auth**: Token-based authentication
 - **Deployment**: Vercel (frontend) + Render (backend)
+
+### Architecture Overview
+
+The system follows a modular architecture with clear separation of concerns:
+
+- **Backend (Django REST Framework)**: Handles all business logic, data persistence, and API endpoints
+- **Frontend (Next.js/TypeScript)**: Provides the user interface and client-side logic
+- **Geocoding Service**: Centralized backend service for location data processing
+- **Symbolic Engine**: AI-powered analysis and interpretation system
+
+#### Recent Architecture Improvements
+
+**Geocoding Unification (2024)**:
+- Consolidated three separate geocoding implementations into a single backend endpoint
+- Eliminated frontend geocoding inconsistencies and maintenance overhead
+- Added intelligent caching and rate limiting for better performance
+- Improved error handling and user experience for location-based features
 
 ### Key Modules
 
@@ -35,7 +53,14 @@ Platform for holistic therapeutic analysis integrating:
    - Session tracking
    - Analysis records (AnalysisRecord model)
 
-2. **Symbolic System** (`src/symbolic/`)
+2. **Geocoding System** (`backend/api/geocoding_utils.py`)
+   - Unified city → coordinates conversion
+   - OpenStreetMap Nominatim integration via geopy
+   - Intelligent caching and rate limiting
+   - Automatic timezone calculation
+   - API endpoint: `POST /api/geocode/city/`
+
+3. **Symbolic System** (`src/symbolic/`)
    - TreeStructuralState v0.1 (unified contract)
    - 10 Kabbalistic methods (Pitágoras, Gematria, Atbash, etc.)
    - Tree of Life visualization with flows
@@ -210,23 +235,22 @@ See:
 ## Documentation
 
 ### Architecture
-- `docs/ARCHITECTURE_SYMBOLIC_SYSTEM.md`: Symbolic system architecture
-- `docs/source_of_truth/SOURCE_OF_TRUTH.md`: Normative source of truth
-- `tonyblanco-app/docs/PROJECT_STATE_CURRENT.md`: Current project state
+- `04_SYMBOLIC_SYSTEM/ARCHITECTURE_SYMBOLIC_SYSTEM.md`: Symbolic system architecture
+- `00_SOURCE_OF_TRUTH/SOURCE_OF_TRUTH.md`: Normative source of truth
+- `01_PROJECT_STATE/PROJECT_STATE_CURRENT.md`: Current project state
 
 ### TreeStructuralState System
-- `docs/TreeStructuralState_v0.1.md`: Phase 1 contract specification
-- `docs/TREE_STRUCTURAL_STATE_PHASE_2_STANDARDIZATION.md`: Phases 1-4 complete
-- `docs/SYMBOLIC_INTERPRETER_AI_IMPLEMENTATION.md`: Phase 3+4 implementation
-- `docs/SYMBOLIC_INTERPRETER_PROFESSIONAL_PROMPT.md`: Phase 4 technical spec
+- `04_SYMBOLIC_SYSTEM/TREE_STRUCTURAL_STATE_PHASE_2_STANDARDIZATION.md`: Phases 1-4 complete
+- `04_SYMBOLIC_SYSTEM/SYMBOLIC_INTERPRETER_AI_IMPLEMENTATION.md`: Phase 3+4 implementation
+- `04_SYMBOLIC_SYSTEM/SYMBOLIC_INTERPRETER_PROFESSIONAL_PROMPT.md`: Phase 4 technical spec
 
 ### Clinical Workflows
-- `docs/AUDITORIA CABALA APP 12182025.md`: Clinical audit
-- `backend/API_DOCUMENTATION.md`: Backend API reference
+- `00_SOURCE_OF_TRUTH/AUDITORIA CABALA APP 12182025.md`: Clinical audit
+- `../backend/API_DOCUMENTATION.md`: Backend API reference
 
 ### BioEmotional
-- `docs/BIOEMOCION_EXPERIENCIAL_PROFUNDA_TECHNICAL_SPEC.md`: BioEmotional technical spec
-- `docs/TODO.md`: Implementation progress tracker
+- `03_SWM_CONTRACTS/BIOEMOCION_EXPERIENCIAL_PROFUNDA_TECHNICAL_SPEC.md`: BioEmotional technical spec
+- `01_PROJECT_STATE/TODO.md`: Implementation progress tracker
 
 ---
 

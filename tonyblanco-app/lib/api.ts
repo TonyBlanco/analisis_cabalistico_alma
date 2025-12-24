@@ -6,6 +6,14 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://analisis-cabalistico
 export const API_BASE_URL = API_URL;
 
 // Type definitions for API responses
+export interface UserProfile {
+  id?: number;
+  full_name?: string;
+  username?: string;
+  email?: string;
+  birth_date?: string | null;
+}
+
 export interface User {
   id: number;
   username: string;
@@ -13,22 +21,6 @@ export interface User {
   first_name: string;
   last_name: string;
   profile: UserProfile;
-}
-
-export interface UserProfile {
-  user_type: 'personal' | 'therapist';
-  full_name: string;
-  phone: string;
-  birth_date?: string;
-  profession?: string;
-  specialization?: string;
-  license_number?: string;
-  years_of_experience?: number;
-  subscription_status: 'trial' | 'active' | 'canceled' | 'expired';
-  subscription_start_date?: string;
-  subscription_end_date?: string;
-  max_fichas_per_month: number;
-  fichas_created_this_month: number;
 }
 
 export interface RegisterResponse {
@@ -179,15 +171,28 @@ async function apiRequest<T>(
     console.log('✅ API Response:', { status: response.status, ok: response.ok });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ 
-        message: `Error ${response.status}: No se pudo conectar con el servidor` 
-      }));
-      
-      // Log para debugging
-      console.error('❌ API Error:', { status: response.status, error });
-      
-      // Crear error con toda la información del backend
-      const errorMsg = error.message || error.detail || error.error || `Error: ${response.status}`;
+      // Intentar parsear JSON; si falla, recuperar texto crudo
+      let error: any = {};
+      try {
+        error = await response.json();
+      } catch (jsonErr) {
+        const text = await response.text().catch(() => null);
+        if (text) {
+          try {
+            error = JSON.parse(text);
+          } catch (_) {
+            error = { raw: text };
+          }
+        } else {
+          error = {};
+        }
+      }
+
+      // Log para debugging incluyendo URL y status text
+      console.error('❌ API Error:', { url, status: response.status, statusText: response.statusText, error });
+
+      // Construir mensaje útil con varios fallback
+      const errorMsg = error?.message || error?.detail || error?.error || (Object.keys(error).length ? JSON.stringify(error) : null) || `Error ${response.status}: ${response.statusText}`;
       const errorWithResponse = new Error(errorMsg);
       (errorWithResponse as any).status = response.status;
       (errorWithResponse as any).response = error;

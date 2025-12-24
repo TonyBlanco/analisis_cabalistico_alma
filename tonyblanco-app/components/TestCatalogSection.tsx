@@ -17,6 +17,10 @@ type CatalogTest = TestModule & {
   implemented?: boolean;
   domainLabel?: string;
   family?: string;
+  execution_mode?: string;
+  available_for_personal?: boolean;
+  mode?: string;
+  domain?: string;
 };
 
 /**

@@ -54,7 +54,7 @@ interface UseNatalChartReturn {
   loading: boolean;
   error: string | null;
   missingFields: string[] | null;
-  calculateChart: () => Promise<void>;
+  calculateChart: (houseSystem?: string) => Promise<void>;
   refetch: () => Promise<void>;
 }
 
@@ -152,7 +152,7 @@ export function useNatalChart(patientId: string | undefined): UseNatalChartRetur
     }
   }, [patientId, apiURL]);
 
-  const calculateChart = useCallback(async () => {
+  const calculateChart = useCallback(async (houseSystem?: string) => {
     if (!patientId) {
       setError('No patient ID provided');
       return;
@@ -168,6 +168,13 @@ export function useNatalChart(patientId: string | undefined): UseNatalChartRetur
         throw new Error('No token found');
       }
 
+      const bodyPayload: any = {};
+      if (houseSystem) {
+        // Map our short codes to backend expected values
+        const map: Record<string, string> = { P: 'placidus', K: 'koch', E: 'equal', W: 'whole', R: 'regiomontanus' };
+        bodyPayload.house_system = map[houseSystem] || 'placidus';
+      }
+
       const response = await fetch(
         `${apiURL}/therapist/patients/${patientId}/astrology-kerykeion/`,
         {
@@ -176,7 +183,7 @@ export function useNatalChart(patientId: string | undefined): UseNatalChartRetur
             'Authorization': `Token ${token}`,
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({}), // Backend lee desde perfil del paciente
+          body: JSON.stringify(bodyPayload),
         }
       );
 

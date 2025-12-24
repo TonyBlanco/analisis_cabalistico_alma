@@ -203,12 +203,12 @@ export default function TransgenerationalVisualCore({
               className="absolute inset-0 h-full w-full opacity-40 pointer-events-none"
             />
             <TreeOfLifeSVG
-              highlightedSefirot={highlightedSefirot}
-              highlightedPaths={highlightedPaths}
+              highlightedSefirot={highlightedSefirot as TreeSefirahId[]}
+              highlightedPaths={highlightedPaths as TreePathId[]}
               highlightedSefirotOpacity={highlightedSefirotOpacity}
               highlightedPathOpacity={highlightedPathOpacity}
-              repeatedSefirot={repeatedSefirot}
-              repeatedPaths={repeatedPaths}
+              repeatedSefirot={repeatedSefirot as TreeSefirahId[]}
+              repeatedPaths={repeatedPaths as TreePathId[]}
               emphasis="strong"
               dimUnrelated={true}
               interactive={true}

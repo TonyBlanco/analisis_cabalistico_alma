@@ -156,6 +156,63 @@ Authorization: Token abc123xyz...
 
 ---
 
+### 🌍 Geocodificación
+
+#### POST `/api/geocode/city/`
+Convierte un nombre de ciudad en coordenadas geográficas y zona horaria.
+
+**Headers:**
+```
+Authorization: Token abc123xyz...
+```
+
+**Body:**
+```json
+{
+  "city": "La Habana",
+  "country": "Cuba"
+}
+```
+
+**Parámetros:**
+- `city` (requerido): Nombre de la ciudad
+- `country` (opcional): Nombre del país para mayor precisión
+
+**Response (éxito):**
+```json
+{
+  "success": true,
+  "latitude": 23.113592,
+  "longitude": -82.366592,
+  "timezone": "America/Havana",
+  "city": "La Habana",
+  "country": "Cuba",
+  "full_address": "La Habana, Cuba"
+}
+```
+
+**Response (ciudad no encontrada):**
+```json
+{
+  "success": false,
+  "error": "City not found"
+}
+```
+
+**Características:**
+- ✅ Cache inteligente para evitar llamadas repetidas
+- ✅ Rate limiting integrado
+- ✅ Normalización automática de nombres
+- ✅ Zona horaria calculada automáticamente
+- ✅ Soporte para ambigüedades (país ayuda a desambiguar)
+
+**Notas técnicas:**
+- Usa OpenStreetMap Nominatim vía geopy
+- Cache en memoria para optimización
+- Autenticación requerida para prevenir abuso
+
+---
+
 ### 🔮 Cálculos Numerológicos
 
 #### POST `/api/calcular/`
@@ -256,6 +313,52 @@ Authorization: Token abc123xyz...
   }
 ]
 ```
+
+---
+
+### 🔯 Interpretación Cabalística (PoC)
+
+#### POST `/api/therapist/patients/{id}/interpretation/kabbalah/`
+Endpoint PoC para generar una interpretación kabbalística profunda para un paciente.
+
+**Permisos:** Terapeuta (propietario del paciente)
+
+**Comportamiento:**
+- PoC determinista: utiliza el adaptador legacy `KabbalahAdapter` para producir `computed_result` y `legacy_output`.
+- Intenta persistir un `AnalysisRecord`. Si la persistencia falla (entorno de pruebas o desincronización de esquema), cae a un **modo de ejecución no persistente** que devuelve el resultado directamente.
+- **Requisito**: el perfil del paciente debe incluir `birth_latitude` y `birth_longitude` (la PoC no intenta geocoding automático).
+
+**Body (opcional):**
+```json
+{
+  "raw_input": { "sistema": "dshevastan" }
+}
+```
+
+**Response (éxito):**
+```json
+{
+  "success": true,
+  "record": {
+    "kind": "kabbalah",
+    "module_code": "kabbalah_core",
+    "patient": { "id": 123, "full_name": "Jane Doe" },
+    "therapist": { "id": 1, "username": "drsmith" },
+    "birth_snapshot": { /* snapshot used */ },
+    "computed_result": { /* normalized computed_result */ },
+    "legacy_output": { /* raw legacy engine output */ }
+  }
+}
+```
+
+**Response (error de datos):**
+```json
+{ "error": "El perfil del paciente debe incluir latitud y longitud para interpretación cabalística en esta fase." }
+```
+
+**Notas de gobernanza:**
+- Por diseño, la PoC **no** expone texto generativo al paciente; solo el terapeuta recibe el `legacy_output` en el `record`.
+- Integración con LLMs y salida textual exigirá un documento de gobernanza, revisión humana y flags de consentimiento explícito (fase posterior).
 
 ---
 

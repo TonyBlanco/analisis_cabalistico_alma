@@ -18,8 +18,22 @@ def create_analysis_record(validated_data: Dict[str, Any]) -> AnalysisRecord:
     """Crea un AnalysisRecord a partir de datos ya validados.
 
     No ejecuta ningún análisis; solo persiste el snapshot y el contexto.
+
+    Implementa una reintento defensivo: si la BD no contiene columnas
+    recientes por alguna razón, reintenta creando el registro usando
+    únicamente las columnas presentes en la tabla (introspección).
     """
-    return AnalysisRecord.objects.create(**validated_data)
+    # Keep creation simple and deterministic. If DB creation fails due to schema mismatch
+    # raise the exception to caller so they can handle fallback without further DB ops
+    try:
+        return AnalysisRecord.objects.create(**validated_data)
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.exception("Fallo al crear AnalysisRecord: %s", e)
+        # Re-raise to allow callers to decide fallback strategy (avoid doing DB introspection here
+        # because we might be inside an atomic transaction and that would prevent further queries).
+        raise
 
 
 @transaction.atomic

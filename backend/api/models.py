@@ -870,6 +870,15 @@ class AnalysisRecord(models.Model):
         help_text='Salida original del módulo legacy (JSON serializado, opcional).',
     )
 
+    # Anotaciones del terapeuta (editable por propietario)
+    therapist_annotations = models.JSONField(
+        null=True,
+        blank=True,
+        default=dict,
+        help_text=('Anotaciones del terapeuta sobre este resultado. '
+                   'Estructura: {summary: string, notes: string, visible_to_patient: boolean}.'),
+    )
+
     visibility = models.CharField(
         max_length=16,
         choices=VISIBILITY_CHOICES,

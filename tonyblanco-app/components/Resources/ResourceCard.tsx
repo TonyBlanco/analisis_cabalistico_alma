@@ -5,7 +5,7 @@ import { Resource } from '@/lib/resources-api';
 import SessionLinkModal from './SessionLinkModal';
 
 interface ResourceCardProps {
-  resource: Resource;
+  resource: Resource & { resource_type?: string; external_link?: string | null; file_url?: string | null; duration?: number | null; access_level?: string };
   onAssign?: (resourceId: number) => void;
   onUnassign?: (resourceId: number) => void;
   showAssignButton?: boolean;
@@ -86,8 +86,8 @@ export default function ResourceCard({
       <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
         <div className="flex items-start justify-between mb-3">
           <div className="flex gap-2 flex-wrap">
-            {getResourceTypeBadge(resource.resource_type)}
-            {getAccessLevelBadge(resource.access_level)}
+            {getResourceTypeBadge(resource.resource_type || 'pdf')}
+            {getAccessLevelBadge(resource.access_level || 'free') }
           </div>
         </div>
 
@@ -152,7 +152,7 @@ export default function ResourceCard({
           open={showSessionModal}
           onClose={() => setShowSessionModal(false)}
           onConfirm={handleConfirmSession}
-          sessionType={resource.resource_type}
+          sessionType={resource.resource_type || 'session'}
           sessionTitle={resource.title}
         />
       )}

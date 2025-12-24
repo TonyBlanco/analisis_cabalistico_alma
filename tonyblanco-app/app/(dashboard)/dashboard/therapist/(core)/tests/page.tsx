@@ -1,21 +1,23 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 import { useEffect, useState } from 'react';
 import TestCatalogSection from '@/components/TestCatalogSection';
 import { ClipboardList, Info } from 'lucide-react';
-import { useSearchParams } from 'next/navigation';
 import { getActivePatientId, getActivePatientName, setActivePatientId } from '@/lib/active-patient';
 
 export default function TherapistTestsPage() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const searchParams = useSearchParams();
   const [resolvedPatientId, setResolvedPatientId] = useState<number | null>(getActivePatientId());
   const [resolvedPatientName, setResolvedPatientName] = useState<string | null>(getActivePatientName());
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    const idParam = searchParams.get('patient_id');
+    // Use window.location search to avoid CSR-only next/navigation hook during prerender
+    const search = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+    const idParam = search ? search.get('patient_id') : null;
     if (idParam) {
       const parsed = parseInt(idParam, 10);
       if (!isNaN(parsed)) {
@@ -27,7 +29,7 @@ export default function TherapistTestsPage() {
       setResolvedPatientId(getActivePatientId());
       setResolvedPatientName(getActivePatientName());
     }
-  }, [searchParams]);
+  }, []);
 
   const handleTestAssigned = () => {
     setRefreshTrigger((prev) => prev + 1);

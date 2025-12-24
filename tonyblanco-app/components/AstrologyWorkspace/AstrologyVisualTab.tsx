@@ -1,6 +1,9 @@
 'use client';
 
 import { useNatalChart } from '@/hooks/useNatalChart';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { getPatientProfileSummary } from '@/lib/patient-api';
 import NatalChartWheel from './NatalChartWheel';
 import PlanetsTable from './PlanetsTable';
 import HousesTable from './HousesTable';
@@ -27,6 +30,35 @@ interface AstrologyVisualTabProps {
  */
 export default function AstrologyVisualTab({ patientId }: AstrologyVisualTabProps) {
   const { chart, loading, error, missingFields, calculateChart } = useNatalChart(patientId);
+  const [patientProfile, setPatientProfile] = useState<any | null>(null);
+  const [patientLoading, setPatientLoading] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    let mounted = true;
+    const loadProfile = async () => {
+      if (!patientId) {
+        setPatientProfile(null);
+        return;
+      }
+      setPatientLoading(true);
+      try {
+        const profile = await getPatientProfileSummary(Number(patientId));
+        if (!mounted) return;
+        setPatientProfile(profile);
+      } catch (err) {
+        console.warn('Could not load patient profile for natal header:', err);
+        if (mounted) setPatientProfile(null);
+      } finally {
+        if (mounted) setPatientLoading(false);
+      }
+    };
+
+    loadProfile();
+    return () => {
+      mounted = false;
+    };
+  }, [patientId]);
 
   // ESTADO 1: LOADING
   if (loading) {
@@ -144,9 +176,33 @@ export default function AstrologyVisualTab({ patientId }: AstrologyVisualTabProp
             Representación astrológica observacional. No constituye diagnóstico ni predicción.
           </p>
         </div>
-        <div className="text-right text-xs text-gray-500">
-          <p>Calculada: {chart.metadatos?.calculated_at ? new Date(chart.metadatos.calculated_at).toLocaleString('es-ES') : '—'}</p>
-          <p>Sistema: {chart.metadatos?.sistema_casas || '—'}</p>
+        <div className="flex items-center gap-4">
+          <div className="text-right text-xs text-gray-500">
+            <p>Calculada: {chart.metadatos?.calculated_at ? new Date(chart.metadatos.calculated_at).toLocaleString('es-ES') : '—'}</p>
+            <p>Sistema: {chart.metadatos?.sistema_casas || '—'}</p>
+          </div>
+
+          <div className="text-xs text-gray-700 bg-gray-50 border border-gray-200 rounded-md px-3 py-2">
+            {patientLoading ? (
+              <p className="text-sm text-gray-600">Cargando paciente…</p>
+            ) : patientProfile ? (
+              <div className="min-w-[220px]">
+                <div className="font-medium text-sm text-gray-900">{patientProfile.legal_full_name || 'Paciente'}</div>
+                <div className="text-xs text-gray-500">Nacimiento: {patientProfile.birth_date || '—'}{patientProfile.birth_time ? ` ${patientProfile.birth_time}` : ''}</div>
+                <div className="text-xs text-gray-500">Coords: {patientProfile.birth_latitude != null && patientProfile.birth_longitude != null ? `${patientProfile.birth_latitude.toFixed(4)}, ${patientProfile.birth_longitude.toFixed(4)}` : 'Sin coordenadas'}</div>
+                {(!patientProfile.birth_latitude || !patientProfile.birth_longitude) && (
+                  <button
+                    onClick={() => router.push(`/dashboard/therapist/patients/${patientId}`)}
+                    className="mt-2 text-xs text-amber-700 underline"
+                  >
+                    Completar perfil
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="text-xs text-gray-500">No hay paciente activo</div>
+            )}
+          </div>
         </div>
       </div>
 

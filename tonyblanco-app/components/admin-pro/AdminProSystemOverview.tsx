@@ -1,19 +1,19 @@
 'use client';
 
-import type { AdminWorkspaceContractV2 } from '@/lib/contracts/adminWorkspace.v2';
+import type { AdminWorkspaceContractV2_1 } from '@/lib/contracts/adminWorkspace.v2_1';
 
 function StatCard(props: { label: string; value: number | string | undefined; hint?: string }) {
   const { label, value, hint } = props;
   return (
-    <div className="rounded-md border bg-white px-3 py-2">
-      <div className="text-[11px] font-semibold uppercase tracking-wide text-gray-600">{label}</div>
-      <div className="mt-1 text-lg font-semibold text-gray-900">{value ?? '—'}</div>
-      {hint ? <div className="mt-0.5 text-[11px] text-gray-600">{hint}</div> : null}
+    <div className="bg-white border border-slate-200 rounded-md p-3">
+      <div className="text-xs text-slate-500 uppercase tracking-wide">{label}</div>
+      <div className="text-2xl font-semibold text-slate-900">{value ?? '—'}</div>
+      {hint ? <div className="mt-0.5 text-xs text-slate-600">{hint}</div> : null}
     </div>
   );
 }
 
-export function AdminProSystemOverview(props: { contract: AdminWorkspaceContractV2 }) {
+export function AdminProSystemOverview(props: { contract: AdminWorkspaceContractV2_1 }) {
   const { contract } = props;
   const total = contract.stats.users_total;
   const byRole = contract.stats.users_by_role;
@@ -21,16 +21,17 @@ export function AdminProSystemOverview(props: { contract: AdminWorkspaceContract
   const extras = contract.stats.extras ? Object.entries(contract.stats.extras).slice(0, 6) : [];
 
   return (
-    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+    <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
       <StatCard label="Usuarios" value={total} />
       <StatCard label="Admins" value={byRole?.admin} />
       <StatCard label="Terapeutas" value={byRole?.therapist} />
       <StatCard label="Personal" value={byRole?.personal} />
       <StatCard label="Pacientes" value={byRole?.patient} />
-      <StatCard label="Desconocidos" value={byRole?.unknown} />
+      {/* Keep unknown as derived field if present */}
+      {typeof byRole?.unknown === 'number' ? <StatCard label="Desconocidos" value={byRole?.unknown} /> : null}
 
       {extras.length ? (
-        <div className="col-span-2 grid grid-cols-2 gap-2 sm:col-span-3 lg:col-span-6 lg:grid-cols-6">
+        <div className="col-span-2 grid grid-cols-2 gap-3 md:col-span-5 md:grid-cols-5">
           {extras.map(([key, value]) => (
             <StatCard key={key} label={key} value={value} />
           ))}

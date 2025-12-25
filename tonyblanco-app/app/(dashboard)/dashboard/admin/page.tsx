@@ -23,7 +23,7 @@ export default function AdminDashboard() {
 
   if (checking) {
     return (
-      <div className="rounded-md border bg-white p-4 text-sm text-gray-700">
+      <div className="bg-white border border-slate-200 rounded-md p-4 text-sm text-slate-700">
         Verificando acceso…
       </div>
     );
@@ -31,9 +31,9 @@ export default function AdminDashboard() {
 
   if (role !== 'admin') {
     return (
-      <div className="rounded-md border bg-white p-6">
-        <h1 className="text-xl font-semibold text-gray-900">Acceso denegado</h1>
-        <p className="mt-2 text-sm text-gray-600">
+      <div className="bg-white border border-slate-200 rounded-md p-6">
+        <h1 className="text-xl font-semibold text-slate-900">Acceso denegado</h1>
+        <p className="mt-2 text-sm text-slate-600">
           Este workspace está reservado para administración.
         </p>
         <div className="mt-4">

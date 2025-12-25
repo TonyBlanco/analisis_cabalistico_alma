@@ -1,11 +1,11 @@
 'use client';
 
-import type { AdminSystemStatus } from '@/lib/contracts/adminWorkspace.v2';
+import type { AdminSystemStatus } from '@/lib/contracts/adminWorkspace.v2_1';
 
 function statusBadge(status: AdminSystemStatus) {
-  if (status === 'ok') return { label: 'Sistema OK', className: 'border-green-200 bg-green-50 text-green-800' };
-  if (status === 'degraded') return { label: 'Degradado', className: 'border-yellow-200 bg-yellow-50 text-yellow-800' };
-  return { label: 'Desconocido', className: 'border-gray-200 bg-gray-50 text-gray-800' };
+  if (status === 'ok') return { label: 'Sistema OK', className: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
+  if (status === 'degraded') return { label: 'Degradado', className: 'bg-amber-50 text-amber-700 border-amber-200' };
+  return { label: 'Desconocido', className: 'bg-slate-50 text-slate-500 border-slate-300' };
 }
 
 export function AdminProHeader(props: {
@@ -20,11 +20,11 @@ export function AdminProHeader(props: {
   const badge = statusBadge(status);
 
   return (
-    <header className="fixed left-0 right-0 top-0 z-30 border-b bg-white">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-3 py-2 sm:px-6">
+    <header className="sticky top-0 z-30 bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-0 w-full">
         <div className="flex min-w-0 items-center gap-2">
-          <h1 className="truncate text-sm font-semibold text-gray-900 sm:text-base">{title}</h1>
-          <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium ${badge.className}`}>
+          <h1 className="truncate text-sm font-semibold text-slate-900 sm:text-base">{title}</h1>
+          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium border ${badge.className}`}>
             {badge.label}
           </span>
           {chips && chips.length ? (
@@ -34,7 +34,7 @@ export function AdminProHeader(props: {
                 return (
                   <span
                     key={c.label}
-                    className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium ${b.className}`}
+                    className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium border ${b.className}`}
                   >
                     {c.label}
                   </span>
@@ -45,14 +45,14 @@ export function AdminProHeader(props: {
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="hidden text-[11px] text-gray-600 sm:block">
-            Última actualización: <span className="font-medium text-gray-900">{lastUpdated ?? '—'}</span>
+          <div className="hidden text-[11px] text-slate-600 sm:block">
+            Última actualización: <span className="font-medium text-slate-900">{lastUpdated ?? '—'}</span>
           </div>
           <button
             type="button"
             onClick={onRefresh}
             disabled={refreshing}
-            className="inline-flex items-center rounded-md border bg-white px-2.5 py-1.5 text-xs font-medium text-gray-800 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex items-center rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-900 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {refreshing ? 'Refrescando…' : 'Refrescar'}
           </button>

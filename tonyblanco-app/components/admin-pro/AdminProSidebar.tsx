@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import type { AdminSectionKind } from '@/lib/contracts/adminWorkspace.v2';
+import type { AdminSectionKind } from '@/lib/contracts/adminWorkspace.v2_1';
 
 type Section = { id: string; title: string; enabled: boolean; kind: AdminSectionKind };
 
@@ -64,11 +64,11 @@ export function AdminProSidebar(props: { sections: Section[]; headerOffsetPx?: n
   const orderedKinds: AdminSectionKind[] = ['system', 'users', 'platform', 'lms', 'config'];
 
   return (
-    <aside className="hidden w-64 shrink-0 border-r bg-white md:block">
+    <aside className="hidden w-64 shrink-0 border-r border-slate-200 bg-white md:block">
       <div className="sticky" style={{ top: headerOffsetPx }}>
-        <div className="border-b px-3 py-2">
-          <div className="text-[11px] font-semibold uppercase tracking-wide text-gray-600">Admin Pro</div>
-          <div className="mt-0.5 text-xs text-gray-700">Backoffice</div>
+        <div className="border-b border-slate-200 px-3 py-2">
+          <div className="text-[11px] font-semibold uppercase tracking-wide text-slate-600">Admin Pro</div>
+          <div className="mt-0.5 text-xs text-slate-700">Backoffice</div>
         </div>
 
         <nav className="p-2">
@@ -77,8 +77,8 @@ export function AdminProSidebar(props: { sections: Section[]; headerOffsetPx?: n
             if (!items.length) return null;
 
             return (
-              <div key={kind} className="mb-3 rounded-md border">
-                <div className="border-b bg-gray-50 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-gray-700">
+              <div key={kind} className="mb-3 rounded-md border border-slate-200">
+                <div className="border-b border-slate-200 bg-slate-50 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-slate-700">
                   {groupTitles[kind]}
                 </div>
                 <ul className="p-1">
@@ -89,8 +89,10 @@ export function AdminProSidebar(props: { sections: Section[]; headerOffsetPx?: n
                         <button
                           type="button"
                           onClick={() => scrollTo(item.id)}
-                          className={`w-full rounded-md px-2.5 py-2 text-left text-xs font-medium ${
-                            isActive ? 'bg-gray-100 text-gray-900' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                          className={`w-full text-left text-sm ${
+                            isActive
+                              ? 'pl-3 py-1 border-l-4 border-blue-600 text-slate-900 bg-slate-100'
+                              : 'pl-3 py-1 border-l-4 border-transparent text-slate-600 hover:bg-slate-100'
                           }`}
                         >
                           {item.title}

@@ -2,7 +2,12 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { adminCheck, deleteAdminUser, getAdminStats, getAdminUsers, patchAdminUser } from '@/lib/admin-pro-api';
-import { buildAdminWorkspaceContractV2, type AdminRole, type AdminUserRow, type AdminWorkspaceContractV2 } from '@/lib/contracts/adminWorkspace.v2';
+import {
+  buildAdminWorkspaceContractV2_1,
+  type AdminRole,
+  type AdminUserRow,
+  type AdminWorkspaceContractV2_1,
+} from '@/lib/contracts/adminWorkspace.v2_1';
 import { AdminProHeader } from './AdminProHeader';
 import { AdminProSidebar } from './AdminProSidebar';
 import { AdminProSystemOverview } from './AdminProSystemOverview';
@@ -10,14 +15,14 @@ import { AdminProUsersTable } from './AdminProUsersTable';
 import { AdminProUserDrawer } from './AdminProUserDrawer';
 import { AdminProDomainPanels } from './AdminProDomainPanels';
 
-type Caps = AdminWorkspaceContractV2['users']['capabilities'];
+type Caps = AdminWorkspaceContractV2_1['users']['capabilities'];
 
 const initialCaps: Caps = { can_patch_role: true, can_patch_active: true, can_delete: true };
 
 export function AdminProWorkspace() {
   const [capabilities, setCapabilities] = useState<Caps>(initialCaps);
-  const [contract, setContract] = useState<AdminWorkspaceContractV2>(() =>
-    buildAdminWorkspaceContractV2({ last_refresh_ms: 0, capabilities: initialCaps })
+  const [contract, setContract] = useState<AdminWorkspaceContractV2_1>(() =>
+    buildAdminWorkspaceContractV2_1({ last_refresh_ms: 0, capabilities: initialCaps })
   );
 
   const [loading, setLoading] = useState(true);
@@ -70,7 +75,7 @@ export function AdminProWorkspace() {
     const end = typeof performance !== 'undefined' ? performance.now() : Date.now();
     const ms = Math.max(0, Math.round(end - start));
 
-    const next = buildAdminWorkspaceContractV2({
+    const next = buildAdminWorkspaceContractV2_1({
       check: checkRes,
       stats: statsRes,
       users: usersRes,
@@ -199,11 +204,11 @@ export function AdminProWorkspace() {
   const headerOffsetPx = 56;
 
   if (loading) {
-    return <div className="rounded-md border bg-white p-4 text-sm text-gray-700">Cargando administración…</div>;
+    return <div className="bg-white border border-slate-200 rounded-md p-4 text-sm text-slate-700">Cargando administración…</div>;
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-slate-50">
       <AdminProHeader
         status={contract.system.status}
         lastUpdated={lastUpdated}
@@ -216,7 +221,7 @@ export function AdminProWorkspace() {
 
         <main className="w-full px-3 pb-10 md:px-6">
           {actionError ? (
-            <div className="mb-3 rounded-md border border-yellow-200 bg-yellow-50 px-3 py-2 text-xs text-yellow-900">
+            <div className="mb-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
               {actionError}
             </div>
           ) : null}
@@ -224,11 +229,11 @@ export function AdminProWorkspace() {
           <section id="dashboard" className="scroll-mt-24">
             <div className="mb-2 flex items-end justify-between">
               <div>
-                <div className="text-[11px] font-semibold uppercase tracking-wide text-gray-600">System Overview</div>
-                <div className="mt-0.5 text-sm font-semibold text-gray-900">Control center</div>
+                <div className="text-[11px] font-semibold uppercase tracking-wide text-slate-600">System Overview</div>
+                <div className="mt-0.5 text-sm font-semibold text-slate-900">Control center</div>
               </div>
-              <div className="text-[11px] text-gray-600">
-                Generado: <span className="font-medium text-gray-900">{contract.meta.generated_at}</span>
+              <div className="text-[11px] text-slate-600">
+                Generado: <span className="font-medium text-slate-900">{contract.meta.generated_at}</span>
               </div>
             </div>
             <AdminProSystemOverview contract={contract} />
@@ -237,12 +242,12 @@ export function AdminProWorkspace() {
           <section id="users" className="mt-6 scroll-mt-24">
             <div className="mb-2 flex items-end justify-between">
               <div>
-                <div className="text-[11px] font-semibold uppercase tracking-wide text-gray-600">Usuarios</div>
-                <div className="mt-0.5 text-sm font-semibold text-gray-900">Gestión y operaciones</div>
+                <div className="text-[11px] font-semibold uppercase tracking-wide text-slate-600">Usuarios</div>
+                <div className="mt-0.5 text-sm font-semibold text-slate-900">Gestión y operaciones</div>
               </div>
-              <div className="text-[11px] text-gray-600">
+              <div className="text-[11px] text-slate-600">
                 Capabilities:{' '}
-                <span className="font-medium text-gray-900">
+                <span className="font-medium text-slate-900">
                   role={String(contract.users.capabilities.can_patch_role)} · active={String(contract.users.capabilities.can_patch_active)} · delete={String(
                     contract.users.capabilities.can_delete
                   )}
@@ -263,8 +268,8 @@ export function AdminProWorkspace() {
 
           <div className="mt-6">
             <div className="mb-2">
-              <div className="text-[11px] font-semibold uppercase tracking-wide text-gray-600">Dominios del sistema</div>
-              <div className="mt-0.5 text-sm font-semibold text-gray-900">Paneles (Django-like)</div>
+              <div className="text-[11px] font-semibold uppercase tracking-wide text-slate-600">Dominios del sistema</div>
+              <div className="mt-0.5 text-sm font-semibold text-slate-900">Paneles (Django-like)</div>
             </div>
             <AdminProDomainPanels contract={contract} />
           </div>
@@ -277,7 +282,7 @@ export function AdminProWorkspace() {
         <button
           type="button"
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="fixed bottom-4 right-4 z-40 rounded-md border bg-white px-3 py-2 text-xs font-medium text-gray-800 shadow-sm hover:bg-gray-50"
+          className="fixed bottom-4 right-4 z-40 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-900 shadow-sm hover:bg-slate-50"
         >
           Ir arriba
         </button>

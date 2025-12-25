@@ -1,29 +1,36 @@
 'use client';
 
-import type { AdminWorkspaceContractV2 } from '@/lib/contracts/adminWorkspace.v2';
+import type { AdminWorkspaceContractV2_1 } from '@/lib/contracts/adminWorkspace.v2_1';
 import { AdminProPlaceholderPanel } from './AdminProPlaceholders';
 
-function HealthPanel(props: { contract: AdminWorkspaceContractV2 }) {
+function HealthPanel(props: { contract: AdminWorkspaceContractV2_1 }) {
   const { contract } = props;
+
+  const badgeClass = (status: string) => {
+    if (status === 'ok') return 'border-emerald-200 bg-emerald-50 text-emerald-700';
+    if (status === 'degraded') return 'border-amber-200 bg-amber-50 text-amber-700';
+    return 'border-slate-200 bg-slate-50 text-slate-600';
+  };
+
   return (
-    <div className="rounded-md border bg-white">
-      <div className="border-b px-3 py-2">
-        <div className="text-xs font-semibold uppercase tracking-wide text-gray-700">Salud operativa</div>
-        <div className="mt-0.5 text-[11px] text-gray-600">Last refresh: {contract.system.last_refresh_ms}ms</div>
+    <div className="bg-white border border-slate-200 rounded-md">
+      <div className="border-b border-slate-200 px-3 py-2">
+        <div className="text-xs font-semibold uppercase tracking-wide text-slate-700">Salud operativa</div>
+        <div className="mt-0.5 text-[11px] text-slate-600">Last refresh: {contract.system.last_refresh_ms}ms</div>
       </div>
       <div className="p-3">
         <ul className="space-y-1">
           {contract.system.checks.map((c) => (
-            <li key={c.key} className="flex items-center justify-between rounded-md border bg-white px-3 py-2 text-xs">
-              <span className="font-medium text-gray-900">{c.label}</span>
-              <span className="text-gray-700">
+            <li key={c.key} className="flex items-center justify-between rounded-md border border-slate-200 bg-white px-3 py-2 text-xs">
+              <span className="font-medium text-slate-900">{c.label}</span>
+              <span className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[11px] font-medium ${badgeClass(c.status)}`}>
                 {c.status === 'ok' ? 'OK' : c.status === 'degraded' ? 'Degradado' : 'Desconocido'}
               </span>
             </li>
           ))}
         </ul>
         {contract.system.checks.some((c) => c.detail) ? (
-          <div className="mt-3 rounded-md border bg-gray-50 p-3 text-xs text-gray-700">
+          <div className="mt-3 rounded-md border border-slate-200 bg-slate-50 p-3 text-xs text-slate-700">
             {contract.system.checks
               .filter((c) => c.detail)
               .map((c) => (
@@ -38,7 +45,7 @@ function HealthPanel(props: { contract: AdminWorkspaceContractV2 }) {
   );
 }
 
-export function AdminProDomainPanels(props: { contract: AdminWorkspaceContractV2 }) {
+export function AdminProDomainPanels(props: { contract: AdminWorkspaceContractV2_1 }) {
   const { contract } = props;
 
   return (
@@ -65,7 +72,7 @@ export function AdminProDomainPanels(props: { contract: AdminWorkspaceContractV2
 
       <section id="tokens" className="scroll-mt-24">
         <AdminProPlaceholderPanel
-          title="Tokens/Sesiones"
+          title="Tokens / Sesiones"
           description="Gestión de tokens y sesiones pendiente de conexión."
           items={['Revocar tokens', 'Sesiones activas', 'Políticas de expiración']}
         />

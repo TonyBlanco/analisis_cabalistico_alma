@@ -216,7 +216,7 @@ export function AdminProWorkspace() {
         refreshing={refreshing}
       />
 
-      <div className="mx-auto flex max-w-7xl gap-0 px-0 pt-16 sm:px-6">
+      <div className="mx-auto flex max-w-7xl gap-0 px-3 pt-16 sm:px-6">
         <AdminProSidebar sections={sections} headerOffsetPx={headerOffsetPx} />
 
         <main className="w-full px-3 pb-10 md:px-6">

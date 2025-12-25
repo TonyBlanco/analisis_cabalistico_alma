@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { Sparkles } from 'lucide-react';
 import CabalAppliedSidebar from './CabalAppliedSidebar';
 import CabalAppliedVisualCore from './CabalAppliedVisualCore';
+import CabalaAplicadaHistoryList from './CabalaAplicadaHistoryList';
 import type { CabalSectionId } from './types';
 
 export default function CabalAppliedWorkspace() {
@@ -39,6 +40,13 @@ export default function CabalAppliedWorkspace() {
           <div className="flex gap-6 items-start">
             <CabalAppliedVisualCore activeSection={activeSection} />
             <aside className="w-72 space-y-4">
+              <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+                <h3 className="text-sm font-semibold text-gray-900">Historial (Cabala Aplicada)</h3>
+                <p className="mt-1 text-xs text-gray-600">Ejecuciones guardadas para el paciente activo.</p>
+                <div className="mt-3">
+                  <CabalaAplicadaHistoryList />
+                </div>
+              </div>
               <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
                 <h3 className="text-sm font-semibold text-gray-900">Panel interno</h3>
                 <p className="text-xs text-gray-600">

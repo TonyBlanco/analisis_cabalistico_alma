@@ -158,9 +158,13 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
   const AssignTestButton = ({
     onAssign,
     disabled,
+    isAssigning,
+    isImplemented,
   }: {
     onAssign: () => void;
     disabled: boolean;
+    isAssigning: boolean;
+    isImplemented: boolean;
   }) => {
     if (!activePatientId) {
       return (
@@ -179,8 +183,9 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
         disabled={disabled}
         className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-white rounded-md hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
         style={{ backgroundColor: '#1f6c8f' }}
+        title={!isImplemented ? 'Este test está marcado como “En desarrollo”.' : undefined}
       >
-        {disabled ? 'Asignando...' : 'Asignar'}
+        {isAssigning ? 'Asignando...' : !isImplemented ? 'En desarrollo' : 'Asignar'}
       </button>
     );
   };
@@ -319,10 +324,19 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
                           Ejecutar desde flujos clínicos
                         </span>
                       ) : (
+                        (() => {
+                          const isAssigning = assigningTestCode === test.code;
+                          const isImplemented = (test as any).implemented !== false;
+                          const disabled = isAssigning || !isImplemented;
+                          return (
                         <AssignTestButton
                           onAssign={() => handleAssignTest(test)}
-                          disabled={assigningTestCode === test.code || (test as any).implemented === false}
+                              disabled={disabled}
+                              isAssigning={isAssigning}
+                              isImplemented={isImplemented}
                         />
+                          );
+                        })()
                       )}
                     </div>
                           </div>

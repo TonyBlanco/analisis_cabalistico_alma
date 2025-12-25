@@ -11,6 +11,7 @@ import {
   Loader2
 } from 'lucide-react';
 import { setActivePatientId } from '@/lib/active-patient';
+import { openPrintableReport } from '@/lib/report-printing';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://analisis-cabalistico-alma.onrender.com/api';
 
@@ -183,9 +184,15 @@ export default function PatientSymbolicOverview({ patientId }: PatientSymbolicOv
       const patientName = sanitizeFilename(overview?.patient_name || `patient_${patientId}`);
       const base = `holistic_export_${patientName}_${today}`;
 
-      downloadFile(`${base}.json`, JSON.stringify(exportObj ?? data, null, 2), 'application/json;charset=utf-8');
       if (typeof markdown === 'string' && markdown.trim()) {
-        downloadFile(`${base}.md`, markdown, 'text/markdown;charset=utf-8');
+        openPrintableReport({
+          title: 'Reporte holístico (Terapeuta)',
+          subtitle: overview?.patient_name || null,
+          markdown,
+        });
+      } else {
+        // Fallback: si por alguna razón no hay markdown, guardar JSON.
+        downloadFile(`${base}.json`, JSON.stringify(exportObj ?? data, null, 2), 'application/json;charset=utf-8');
       }
     } catch (err: any) {
       console.error('Error exporting holistic data:', err);
@@ -438,7 +445,9 @@ export default function PatientSymbolicOverview({ patientId }: PatientSymbolicOv
         <div className="flex items-center justify-between gap-4">
           <div>
             <p className="font-medium text-gray-900">Export holístico</p>
-            <p className="text-xs text-gray-600 mt-1">Descarga JSON + Markdown (solo terapeuta)</p>
+            <p className="text-xs text-gray-600 mt-1">
+              Genera un reporte imprimible (PDF) y lo guarda en el historial.
+            </p>
           </div>
           <label className="flex items-center gap-2 text-xs text-gray-700">
             <input
@@ -457,7 +466,7 @@ export default function PatientSymbolicOverview({ patientId }: PatientSymbolicOv
             className="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium border border-gray-300 bg-white text-gray-800 hover:bg-gray-50 disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-            {exporting ? 'Exportando…' : 'Exportar'}
+            {exporting ? 'Exportando…' : 'Exportar PDF'}
           </button>
         </div>
         {exportError && <p className="text-xs text-red-600 mt-2">{exportError}</p>}

@@ -4,6 +4,7 @@ import { X, Minus, Square, RectangleVertical } from 'lucide-react';
 import { useMemo } from 'react';
 import { usePanelManager } from './PanelManagerContext';
 import { toolRegistry } from './panelRegistry';
+import HistoryPanelContent from './HistoryPanelContent';
 
 const sizeClasses = {
   compact: 'w-64',
@@ -92,10 +93,16 @@ export default function PanelDock() {
               </div>
               {!panel.collapsed && (
                 <div className="p-3 space-y-2">
-                  <p className="text-xs text-gray-600">{tool.summary}</p>
-                  <p className="text-[11px] text-gray-500">
-                    Keep the workspace visible while reviewing this panel.
-                  </p>
+                  {panel.toolId === 'history' ? (
+                    <HistoryPanelContent />
+                  ) : (
+                    <>
+                      <p className="text-xs text-gray-600">{tool.summary}</p>
+                      <p className="text-[11px] text-gray-500">
+                        Keep the workspace visible while reviewing this panel.
+                      </p>
+                    </>
+                  )}
                 </div>
               )}
             </div>

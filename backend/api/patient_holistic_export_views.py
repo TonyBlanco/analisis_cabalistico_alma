@@ -414,10 +414,16 @@ def _extract_cabala_aplicada_digest(
         sistema = algo_params.get('sistema') or raw.get('sistema') or None
 
         computed: Dict[str, Any] = r.computed_result if isinstance(r.computed_result, dict) else {}
+
         engine: Dict[str, Any] = {}
         raw_engine = computed.get('kabbalah_engine')
         if isinstance(raw_engine, dict):
             engine = raw_engine
+
+        cabala_aplicada: Dict[str, Any] = {}
+        raw_cabala_aplicada = computed.get('cabala_aplicada')
+        if isinstance(raw_cabala_aplicada, dict):
+            cabala_aplicada = raw_cabala_aplicada
 
         tikun_signals = engine.get('tikun_signals')
         tikun_top = []
@@ -456,6 +462,14 @@ def _extract_cabala_aplicada_digest(
             else None,
         }
 
+        if cabala_aplicada:
+            method_id = cabala_aplicada.get('method_id') or cabala_aplicada.get('method')
+            method_name = cabala_aplicada.get('method_name')
+            item['cabala_aplicada_method'] = {
+                'method_id': method_id,
+                'method_name': method_name,
+            }
+
         if level == 'audit':
             item['birth_data_snapshot'] = r.birth_data_snapshot
             item['algorithm_snapshot'] = r.algorithm_snapshot
@@ -463,10 +477,27 @@ def _extract_cabala_aplicada_digest(
             item['computed_result'] = r.computed_result
             item['legacy_output'] = r.legacy_output
         else:
-            item['kabbalah_engine'] = {
-                'tikun_signals_top': tikun_top,
-                'names_top': names_top,
-            }
+            if cabala_aplicada:
+                # Resumen ligero para records de Cabala Aplicada (client-side)
+                tree_state = cabala_aplicada.get('tree_state')
+                tree_counts = {}
+                if isinstance(tree_state, dict):
+                    sefirot = tree_state.get('sefirot')
+                    paths = tree_state.get('paths')
+                    tree_counts = {
+                        'sefirot': len(sefirot) if isinstance(sefirot, list) else None,
+                        'paths': len(paths) if isinstance(paths, list) else None,
+                    }
+                item['cabala_aplicada_summary'] = {
+                    'method_id': (cabala_aplicada.get('method_id') or cabala_aplicada.get('method')),
+                    'method_name': cabala_aplicada.get('method_name'),
+                    'tree_counts': tree_counts or None,
+                }
+            else:
+                item['kabbalah_engine'] = {
+                    'tikun_signals_top': tikun_top,
+                    'names_top': names_top,
+                }
 
         records.append(item)
 
@@ -484,16 +515,87 @@ def _build_markdown(export_json: Dict[str, Any]) -> str:
     patient_name = export_json.get('patient', {}).get('name') or f"Paciente #{export_json.get('patient', {}).get('id')}"
     created_at = export_json.get('generated_at') or ''
     sections = export_json.get('sections', {}) if isinstance(export_json.get('sections'), dict) else {}
+    annotations = export_json.get('therapist_annotations') if isinstance(export_json.get('therapist_annotations'), dict) else {}
+    clinical_notes = (annotations.get('clinical_notes') or '').strip()
+    diagnosis_hypotheses = (annotations.get('diagnosis_hypotheses') or '').strip()
+    recommendations_next_steps = (annotations.get('recommendations_next_steps') or '').strip()
 
     lines: List[str] = []
-    lines.append(f"# Export Holístico (Terapeuta)\n")
+    lines.append(f"# Reporte clínico (Terapeuta)\n")
+    lines.append("## Identificación\n")
     lines.append(f"- Paciente: {patient_name}")
-    lines.append(f"- Generado: {created_at}")
-    lines.append(f"- Versión: {export_json.get('export_version', '1')}\n")
+    lines.append(f"- Fecha/hora de generación: {created_at}")
+    lines.append(f"- Versión de export: {export_json.get('export_version', '1')}\n")
 
-    if sections.get('astrology'):
-        a = sections['astrology']
-        lines.append("## Astrología\n")
+    # Resumen rápido para pegar en notas / historia / contexto longitudinal
+    lines.append("## Resumen (para notas / historia / contexto longitudinal)\n")
+    astrology_present = bool(sections.get('astrology'))
+    tests_value = sections.get('tests')
+    tests_list: List[Any] = tests_value if isinstance(tests_value, list) else []
+    tests_present = bool(tests_list)
+    cab_value = sections.get('cabalistic')
+    cab: Dict[str, Any] = cab_value if isinstance(cab_value, dict) else {}
+    tarot_count = len(cab.get('tarot') or [])
+    kabbalah_count = len(cab.get('kabbalah') or [])
+    cabala_aplicada = cab.get('cabala_aplicada')
+    cabala_aplicada_total = 0
+    if isinstance(cabala_aplicada, dict):
+        raw_counts = cabala_aplicada.get('counts')
+        if isinstance(raw_counts, dict):
+            cabala_aplicada_total = int(raw_counts.get('analysis_records', 0) or 0)
+    bio = sections.get('bioemotional') if isinstance(sections.get('bioemotional'), dict) else None
+    bio_counts = bio.get('counts') if isinstance(bio, dict) else {}
+    bio_obs = bio_counts.get('observations', 0) if isinstance(bio_counts, dict) else 0
+    bio_hyp = bio_counts.get('hypotheses', 0) if isinstance(bio_counts, dict) else 0
+    bio_syn = bio_counts.get('synthesis', 0) if isinstance(bio_counts, dict) else 0
+
+    lines.append(f"- Astrología: {'sí' if astrology_present else 'no'}")
+    lines.append(f"- Tests: {'sí' if tests_present else 'no'}")
+    lines.append(f"- Tarot (registros): {tarot_count}")
+    lines.append(f"- Cábala (registros): {kabbalah_count}")
+    lines.append(f"- Cábala aplicada (registros): {cabala_aplicada_total}")
+    lines.append(f"- Bio-Emoción (obs/hip/síntesis): {bio_obs}/{bio_hyp}/{bio_syn}")
+    lines.append("")
+
+    lines.append("## Notas clínicas (manual)\n")
+    if clinical_notes:
+        lines.append(clinical_notes)
+    else:
+        lines.append("- Motivo de consulta (texto libre):")
+        lines.append("- Contexto relevante / antecedentes (texto libre):")
+    lines.append("")
+
+    lines.append("## Diagnóstico / hipótesis (manual)\n")
+    if diagnosis_hypotheses:
+        lines.append(diagnosis_hypotheses)
+    else:
+        lines.append("- Hipótesis principal (sin automatización):")
+        lines.append("- Hipótesis secundarias / diferenciales: ")
+        lines.append("- Señales de riesgo / derivación (si aplica):")
+        lines.append("- Objetivo terapéutico de la sesión: ")
+    lines.append("")
+
+    lines.append("## Recomendaciones / próximos pasos (manual)\n")
+    if recommendations_next_steps:
+        lines.append(recommendations_next_steps)
+        lines.append("")
+    # Checklist base: útil incluso cuando no hay datos todavía.
+    lines.append(f"- [ ] Completar carta natal (si falta): {'pendiente' if not astrology_present else 'listo'}")
+    lines.append(f"- [ ] Revisar/registrar tests (si corresponde): {'pendiente' if not tests_present else 'listo'}")
+    lines.append("- [ ] Registrar observaciones bio-emocionales (si corresponde)")
+    lines.append("- [ ] Elaborar síntesis bio-emocional (si corresponde)")
+    lines.append("- [ ] Registrar tirada de tarot (si corresponde)")
+    lines.append("- [ ] Registrar análisis cabalístico (si corresponde)")
+    lines.append("- [ ] Registrar cabala aplicada / árbol de la vida (si corresponde)")
+    lines.append("")
+
+    lines.append("---")
+    lines.append("## Evidencia / artefactos incluidos (solo observación)\n")
+
+    # Astrología
+    lines.append("## Astrología\n")
+    a = sections.get('astrology') if isinstance(sections.get('astrology'), dict) else None
+    if isinstance(a, dict):
         lines.append(f"- Sistema de casas: {a.get('house_system') or '—'}")
         lines.append(f"- Zodíaco: {a.get('zodiac_type') or '—'}")
         sun = a.get('sun') or {}
@@ -511,73 +613,82 @@ def _build_markdown(export_json: Dict[str, Any]) -> str:
             for asp in aspects[:8]:
                 if not isinstance(asp, dict):
                     continue
-                lines.append(
-                    f"- {asp.get('planet1')} {asp.get('type')} {asp.get('planet2')} (orb {asp.get('orb')})"
-                )
-        lines.append("")
+                lines.append(f"- {asp.get('planet1')} {asp.get('type')} {asp.get('planet2')} (orb {asp.get('orb')})")
+    else:
+        lines.append("- Sin datos de carta natal en este export.")
+    lines.append("")
 
-    if sections.get('tests'):
-        tests = sections['tests']
-        lines.append("## Tests\n")
-        for t in tests[:10]:
+    # Tests
+    lines.append("## Tests\n")
+    if tests_list:
+        for t in tests_list[:10]:
             if not isinstance(t, dict):
                 continue
             sev = t.get('severity')
             sev_txt = f" — {sev}" if sev else ''
             lines.append(f"- {t.get('test_name')}{sev_txt}")
-        lines.append("")
+    else:
+        lines.append("- Sin tests incluidos en este export.")
+    lines.append("")
 
-    cab = sections.get('cabalistic')
-    if isinstance(cab, dict):
-        tarot_list = cab.get('tarot') or []
-        if isinstance(tarot_list, list) and tarot_list:
-            lines.append("## Tarot\n")
-            for item in tarot_list[:10]:
-                if not isinstance(item, dict):
-                    continue
-                lines.append(f"- {item.get('summary') or 'Lectura guardada'}")
-            lines.append("")
-        kabbalah_list = cab.get('kabbalah') or []
-        if isinstance(kabbalah_list, list) and kabbalah_list:
-            lines.append("## Cábala / Análisis simbólicos\n")
-            for item in kabbalah_list[:10]:
-                if not isinstance(item, dict):
-                    continue
-                at = item.get('analysis_type')
-                label = f"({at}) " if at else ''
-                lines.append(f"- {label}{item.get('summary') or 'Análisis guardado'}")
-            lines.append("")
+    # Cabalístico (Tarot / Cábala / Cábala aplicada)
+    cab_value = sections.get('cabalistic')
+    cab: Dict[str, Any] = cab_value if isinstance(cab_value, dict) else {}
 
-        cabala_aplicada = cab.get('cabala_aplicada')
-        if isinstance(cabala_aplicada, dict):
-            counts: Dict[str, Any] = {}
-            raw_counts = cabala_aplicada.get('counts')
-            if isinstance(raw_counts, dict):
-                counts = raw_counts
-            total = counts.get('analysis_records', 0)
-            records_recent = cabala_aplicada.get('records_recent') if isinstance(cabala_aplicada.get('records_recent'), list) else []
-            if total or records_recent:
-                lines.append("## Cábala Aplicada (Árbol de la Vida)\n")
-                lines.append(f"- Registros: {total}")
-                if records_recent:
-                    latest = records_recent[0] if isinstance(records_recent[0], dict) else None
-                    if latest:
-                        sistema = latest.get('sistema')
-                        if sistema:
-                            lines.append(f"- Sistema: {sistema}")
-                        engine = latest.get('kabbalah_engine') if isinstance(latest.get('kabbalah_engine'), dict) else {}
-                        tikun = engine.get('tikun_signals_top') if isinstance(engine.get('tikun_signals_top'), list) else []
-                        if tikun:
-                            lines.append("\n**Señales (tikún) — top**")
-                            for s in tikun[:6]:
-                                lines.append(f"- {s}")
-                lines.append("")
+    lines.append("## Tarot\n")
+    tarot_list = cab.get('tarot') if isinstance(cab.get('tarot'), list) else []
+    if tarot_list:
+        for item in tarot_list[:10]:
+            if not isinstance(item, dict):
+                continue
+            lines.append(f"- {item.get('summary') or 'Lectura guardada'}")
+    else:
+        lines.append("- Sin registros de tarot en este export.")
+    lines.append("")
 
-    bio = sections.get('bioemotional')
+    lines.append("## Cábala / Análisis simbólicos\n")
+    kabbalah_list = cab.get('kabbalah') if isinstance(cab.get('kabbalah'), list) else []
+    if kabbalah_list:
+        for item in kabbalah_list[:10]:
+            if not isinstance(item, dict):
+                continue
+            at = item.get('analysis_type')
+            label = f"({at}) " if at else ''
+            lines.append(f"- {label}{item.get('summary') or 'Análisis guardado'}")
+    else:
+        lines.append("- Sin registros cabalísticos en este export.")
+    lines.append("")
+
+    lines.append("## Cábala Aplicada (Árbol de la Vida)\n")
+    cabala_aplicada = cab.get('cabala_aplicada') if isinstance(cab.get('cabala_aplicada'), dict) else None
+    if isinstance(cabala_aplicada, dict):
+        raw_counts = cabala_aplicada.get('counts')
+        counts: Dict[str, Any] = raw_counts if isinstance(raw_counts, dict) else {}
+        total = counts.get('analysis_records', 0)
+        lines.append(f"- Registros: {total}")
+        records_recent = cabala_aplicada.get('records_recent') if isinstance(cabala_aplicada.get('records_recent'), list) else []
+        if records_recent:
+            latest = records_recent[0] if isinstance(records_recent[0], dict) else None
+            if latest:
+                sistema = latest.get('sistema')
+                if sistema:
+                    lines.append(f"- Sistema: {sistema}")
+                engine = latest.get('kabbalah_engine') if isinstance(latest.get('kabbalah_engine'), dict) else {}
+                tikun = engine.get('tikun_signals_top') if isinstance(engine.get('tikun_signals_top'), list) else []
+                if tikun:
+                    lines.append("\n**Señales (tikún) — top**")
+                    for s in tikun[:6]:
+                        lines.append(f"- {s}")
+    else:
+        lines.append("- Sin registros de cabala aplicada en este export.")
+    lines.append("")
+
+    # Bio-Emoción
+    lines.append("## Bio-Emoción (Experiencial)\n")
+    bio = sections.get('bioemotional') if isinstance(sections.get('bioemotional'), dict) else None
     if isinstance(bio, dict):
         raw_counts = bio.get('counts')
         counts: Dict[str, Any] = raw_counts if isinstance(raw_counts, dict) else {}
-        lines.append("## Bio-Emoción (Experiencial)\n")
         lines.append(f"- Observaciones: {counts.get('observations', 0)}")
         lines.append(f"- Hipótesis: {counts.get('hypotheses', 0)}")
         lines.append(f"- Síntesis: {counts.get('synthesis', 0)}")
@@ -589,13 +700,15 @@ def _build_markdown(export_json: Dict[str, Any]) -> str:
         if synthesis:
             closed_txt = 'cerrada' if synthesis.get('is_closed') else 'abierta'
             lines.append(f"- Última síntesis: {synthesis.get('created_at') or '—'} ({closed_txt})")
-        lines.append("")
+    else:
+        lines.append("- Sin datos bio-emocionales en este export.")
+    lines.append("")
 
     lines.append("---")
     lines.append("Nota: Este export es interno (solo terapeuta). No es informe para paciente.")
     return "\n".join(lines).strip() + "\n"
 
-
+    lines.append("Nota: Este reporte es interno (solo terapeuta). No es informe para paciente. No sustituye criterio clínico ni diagnóstico médico.")
 class PatientHolisticExportsView(APIView):
     """GET/POST exports holísticos de un paciente.
 
@@ -726,6 +839,12 @@ class PatientHolisticExportsView(APIView):
                 'id': getattr(request.user, 'id', None),
                 'username': getattr(request.user, 'username', None),
             },
+            # Campos clínicos persistibles (manuales). Se editan vía /analysis-records/<id>/annotations
+            'therapist_annotations': {
+                'clinical_notes': '',
+                'diagnosis_hypotheses': '',
+                'recommendations_next_steps': '',
+            },
             'source_trace': {
                 'astrology_natal_chart_id': astrology_id,
                 'test_result_ids': test_ids,
@@ -780,6 +899,9 @@ class PatientHolisticExportsView(APIView):
             therapist_annotations={
                 'summary': 'Export holístico (interno) generado',
                 'notes': '',
+                'clinical_notes': '',
+                'diagnosis_hypotheses': '',
+                'recommendations_next_steps': '',
                 'visible_to_patient': False,
             },
             visibility='therapist',

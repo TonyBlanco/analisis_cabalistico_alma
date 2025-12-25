@@ -10,12 +10,14 @@ import {
 } from '@/components/BodySoulVisualization/data/sefirotCorrespondences';
 import type { VisualizationState } from '@/components/BodySoulVisualization/types';
 import type { ContextSectionId, IntegrativeNote } from './types';
+import ExportHistoryList from '@/components/HolisticExportHistory/ExportHistoryList';
 
 interface RightPanelProps {
   activeSection: ContextSectionId;
   visualizationState: VisualizationState | null;
   integrativeNotes: IntegrativeNote[];
   onAddNote: (text: string) => void;
+  patientId?: string | number;
 }
 
 export default function RightPanel({
@@ -23,6 +25,7 @@ export default function RightPanel({
   visualizationState,
   integrativeNotes,
   onAddNote,
+  patientId,
 }: RightPanelProps) {
   const selectedRegion =
     bodyRegions.find((region) => region.id === visualizationState?.selectedBodyRegionId) || null;
@@ -81,9 +84,11 @@ export default function RightPanel({
           <p className="text-xs text-gray-500">
             Contexto para observacion longitudinal.
           </p>
-          <div className="rounded-md border border-dashed border-gray-200 p-3 text-xs text-gray-500">
-            Sin historial estructurado en este panel. Usa el perfil del paciente y las
-            sesiones para ampliar contexto.
+          <div className="space-y-2">
+            <p className="text-xs text-gray-600">
+              Exports holísticos guardados (puedes abrirlos como PDF e insertarlos en notas).
+            </p>
+            <ExportHistoryList patientId={patientId} onAddNote={onAddNote} />
           </div>
         </div>
       )}

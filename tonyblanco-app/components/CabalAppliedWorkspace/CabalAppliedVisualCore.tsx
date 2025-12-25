@@ -29,6 +29,7 @@ import { ejecutarMetodoNotarikon, adaptNotarikonToTree } from '../../../src/symb
 import { SymbolicInterpretationPanel } from '@/components/SymbolicInterpretation';
 import { generateAISymbolicInterpretation } from '@/lib/api/symbolic-interpreter-api';
 import type { SymbolicInterpretation } from '../../../src/symbolic/tree/symbolic-interpreter.types';
+import { saveCabalaAplicadaMethodRecord } from '@/lib/cabala-aplicada-api';
 
 // ============================================================================
 // PITAGORAS PROFESSIONAL REPORT COMPONENTS (UI ONLY)
@@ -458,6 +459,21 @@ export default function CabalAppliedVisualCore({ activeSection }: CabalAppliedVi
       }
       
       setTreeStructuralState(treeState);
+
+      // Persistir ejecución como artefacto longitudinal (best-effort; no bloquea UX)
+      if (activePatientId) {
+        void saveCabalaAplicadaMethodRecord(activePatientId, {
+          method_id: selectedMethod,
+          method_name: method?.name ?? null,
+          input: input as unknown as Record<string, unknown>,
+          method_output: (estado as unknown as Record<string, unknown>) ?? null,
+          tree_state: (treeState as unknown as Record<string, unknown>) ?? null,
+          backend_structural_state: (state as unknown as Record<string, unknown>) ?? null,
+          symbolic_interpretation: (symbolicInterpretation as unknown as Record<string, unknown>) ?? null,
+        }).catch((e) => {
+          console.warn('No se pudo guardar Cabala Aplicada en historial:', e);
+        });
+      }
       
       // Clear previous interpretation when method changes
       setSymbolicInterpretation(null);

@@ -78,6 +78,7 @@ from .cabalistic_views import (
     GenerateAndSaveTarotAnalysisView,
     KerykeionAnalysisView,
     KabbalahInterpretationView,
+    CabalaAplicadaMethodRecordView,
     CrossoverSynthesisView
 )
 from .admin_views import (
@@ -96,6 +97,7 @@ from .views import (
 from .analysis_views import (
     AnalysisRecordListCreateView,
     AnalysisRecordDetailView,
+    UpdateAnalysisAnnotationsView,
 )
 from .patient_profile_views import (
     TherapistUpdatePatientProfileView,
@@ -166,6 +168,7 @@ urlpatterns = [
     path('therapist/patients/<int:id>/cabalistic-analyses/', ListCabalisticAnalysesView.as_view(), name='list_cabalistic_analyses'),
     path('therapist/patients/<int:id>/astrology-kerykeion/', KerykeionAnalysisView.as_view(), name='kerykeion_analysis'),
     path('therapist/patients/<int:id>/interpretation/kabbalah/', KabbalahInterpretationView.as_view(), name='kabbalah_interpretation'),
+    path('therapist/patients/<int:id>/cabala-aplicada/records/', CabalaAplicadaMethodRecordView.as_view(), name='cabala_aplicada_records'),
     path('therapist/patients/<int:id>/crossover/generate-and-save/', CrossoverSynthesisView.as_view(), name='crossover_synthesis'),
     path('therapist/sessions/', SessionListCreateView.as_view(), name='session_list_create'),
     path('therapist/sessions/<int:pk>/', SessionDetailView.as_view(), name='session_detail'),
@@ -237,6 +240,7 @@ urlpatterns = [
     # AnalysisRecord core (núcleo normalizado de análisis)
     path('analysis-records/', AnalysisRecordListCreateView.as_view(), name='analysisrecord_list_create'),
     path('analysis-records/<uuid:pk>/', AnalysisRecordDetailView.as_view(), name='analysisrecord_detail'),
+    path('analysis-records/<uuid:pk>/annotations/', UpdateAnalysisAnnotationsView.as_view(), name='analysisrecord_annotations'),
 
     # Dominio bio-emocional & árbol transgeneracional (aislado)
     path('bioemotional/', include('api.bioemotional.urls', namespace='bioemotional')),

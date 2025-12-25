@@ -32,6 +32,102 @@ logger = logging.getLogger(__name__)
 
 
 @method_decorator(csrf_exempt, name='dispatch')
+class CabalaAplicadaMethodRecordView(APIView):
+    """Guarda una ejecución del workspace Cabala Aplicada como AnalysisRecord.
+
+    Ruta:
+      POST /api/therapist/patients/<id>/cabala-aplicada/records/
+
+    Objetivo:
+    - Persistir ejecuciones manuales (client-side) de métodos simbólicos
+      (pitágoras, gematrías, notarikon, etc.) como artefactos longitudinales.
+    - Hacerlos visibles en historial/overview y en export holístico.
+    """
+
+    permission_classes = [IsAuthenticated, IsTherapist]
+
+    def post(self, request, id):
+        try:
+            try:
+                patient = Patient.objects.get(id=id, therapist=request.user)
+            except Patient.DoesNotExist:
+                return Response({'error': 'Paciente no encontrado o no tienes acceso'}, status=status.HTTP_404_NOT_FOUND)
+
+            body = request.data if isinstance(request.data, dict) else {}
+            method_id = body.get('method_id')
+            method_name = body.get('method_name')
+
+            if not isinstance(method_id, str) or not method_id.strip():
+                return Response({'error': 'method_id es requerido'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Normalizar módulo estable (max_length=64)
+            normalized_method = method_id.strip().lower().replace(' ', '-')
+            module_code = f"CABALA_APLICADA_{normalized_method}"[:64]
+
+            birth_snapshot = {
+                'legal_name': patient.full_name or '',
+                'birth_date': patient.birth_date.strftime('%Y-%m-%d') if patient.birth_date else '',
+                'birth_time': patient.birth_time.strftime('%H:%M') if patient.birth_time else '',
+                'city': patient.birth_city or '',
+                'country': patient.birth_country or '',
+                'lat': float(patient.birth_latitude) if patient.birth_latitude is not None else None,
+                'lng': float(patient.birth_longitude) if patient.birth_longitude is not None else None,
+                'timezone': patient.birth_timezone or '',
+                'geocode_source': 'patient_profile',
+            }
+
+            algo_snapshot = {
+                'engine': 'cabala_aplicada_client',
+                'version': '0.1.0',
+                'params': {
+                    'method_id': normalized_method,
+                    'method_name': method_name or None,
+                },
+            }
+
+            raw_input = {
+                'method_id': normalized_method,
+                'method_name': method_name or None,
+                'input': body.get('input') if isinstance(body.get('input'), dict) else None,
+            }
+
+            # computed_result: mantener un namespace claro
+            computed_result = {
+                'cabala_aplicada': {
+                    'method_id': normalized_method,
+                    'method_name': method_name or None,
+                    'method_output': body.get('method_output') if isinstance(body.get('method_output'), dict) else None,
+                    'tree_state': body.get('tree_state') if isinstance(body.get('tree_state'), dict) else None,
+                    'backend_structural_state': body.get('backend_structural_state') if isinstance(body.get('backend_structural_state'), dict) else None,
+                    'symbolic_interpretation': body.get('symbolic_interpretation') if isinstance(body.get('symbolic_interpretation'), dict) else None,
+                }
+            }
+
+            record = AnalysisRecord.objects.create(
+                kind='kabbalah',
+                module_code=module_code,
+                role_context='therapist',
+                execution_mode=None,
+                birth_data_snapshot=birth_snapshot,
+                algorithm_snapshot=algo_snapshot,
+                raw_input=raw_input,
+                computed_result=computed_result,
+                visibility='therapist',
+                created_by_user=request.user,
+                therapist=request.user,
+                patient=patient,
+                subject_user=getattr(patient, 'user', None),
+            )
+
+            serializer = AnalysisRecordSerializer(record, context={'request': request})
+            return Response({'success': True, 'record': serializer.data}, status=status.HTTP_201_CREATED)
+
+        except Exception:
+            logger.exception('Error inesperado en CabalaAplicadaMethodRecordView')
+            return Response({'error': 'Error interno del servidor'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@method_decorator(csrf_exempt, name='dispatch')
 class SaveCabalisticAnalysisView(APIView):
     """
     Guarda un análisis de Alta Cábala para un paciente

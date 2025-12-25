@@ -97,7 +97,14 @@ class UpdateAnalysisAnnotationsView(APIView):
             )
 
         # Validar que solo se actualicen annotations
-        allowed_fields = {'summary', 'notes', 'visible_to_patient'}
+        allowed_fields = {
+            'summary',
+            'notes',
+            'clinical_notes',
+            'diagnosis_hypotheses',
+            'recommendations_next_steps',
+            'visible_to_patient',
+        }
         annotations_data = request.data.get('therapist_annotations', {})
         
         if not isinstance(annotations_data, dict):
@@ -106,17 +113,37 @@ class UpdateAnalysisAnnotationsView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Construir objeto de anotaciones
         current_annotations = record.therapist_annotations or {}
+
+        # Merge defensivo: solo keys permitidas.
         updated_annotations = {
-            'summary': annotations_data.get('summary', current_annotations.get('summary', '')),
-            'notes': annotations_data.get('notes', current_annotations.get('notes', '')),
-            'visible_to_patient': annotations_data.get('visible_to_patient', current_annotations.get('visible_to_patient', False)),
+            key: annotations_data.get(key, current_annotations.get(key))
+            for key in allowed_fields
         }
 
-        # Actualizar solo therapist_annotations
         record.therapist_annotations = updated_annotations
-        record.save(update_fields=['therapist_annotations'])
+
+        # Si es un export holístico, refrescar markdown para que el PDF refleje los campos guardados.
+        try:
+            if record.module_code == 'HOLISTIC_EXPORT_V1' and isinstance(record.computed_result, dict):
+                export_obj = record.computed_result.get('export')
+                if isinstance(export_obj, dict):
+                    export_obj['therapist_annotations'] = {
+                        'clinical_notes': updated_annotations.get('clinical_notes', '') or '',
+                        'diagnosis_hypotheses': updated_annotations.get('diagnosis_hypotheses', '') or '',
+                        'recommendations_next_steps': updated_annotations.get('recommendations_next_steps', '') or '',
+                    }
+                    from .patient_holistic_export_views import _build_markdown
+
+                    export_obj['markdown'] = _build_markdown(export_obj)
+                    record.computed_result['export'] = export_obj
+                    record.save(update_fields=['therapist_annotations', 'computed_result'])
+                else:
+                    record.save(update_fields=['therapist_annotations'])
+            else:
+                record.save(update_fields=['therapist_annotations'])
+        except Exception:
+            record.save(update_fields=['therapist_annotations'])
 
         logger.info(
             "Therapist annotations updated successfully",

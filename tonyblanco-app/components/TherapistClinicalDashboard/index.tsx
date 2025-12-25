@@ -111,6 +111,7 @@ export default function TherapistClinicalDashboard({
             visualizationState={visualizationState}
             integrativeNotes={integrativeNotes}
             onAddNote={handleAddNote}
+            patientId={patientId}
           />
         </aside>
       </div>

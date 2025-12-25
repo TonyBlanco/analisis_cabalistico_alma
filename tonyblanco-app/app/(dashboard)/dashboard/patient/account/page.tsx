@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { User, Calendar, Lock, LogOut, CheckCircle, AlertCircle, MapPin } from 'lucide-react';
 import { clearAuthState } from '@/lib/auth-state';
+import { getApiBaseUrl } from '@/lib/api-base';
 
 interface PatientProfile {
   legal_full_name: string;
@@ -20,6 +21,8 @@ interface PatientProfile {
   profile_version: number;
   name_change_count: number;
   consent_accepted_at?: string | null;
+  biologicalSex?: 'male' | 'female' | 'intersex' | 'unknown' | 'not_recorded';
+  genderIdentity?: 'woman' | 'man' | 'non_binary' | 'other' | 'prefer_not_to_say' | 'not_recorded';
 }
 
 /**
@@ -41,6 +44,8 @@ export default function PatientAccountPage() {
   const [formData, setFormData] = useState({
     legal_full_name: '',
     phone: '',
+    biologicalSex: 'not_recorded' as PatientProfile['biologicalSex'],
+    genderIdentity: 'not_recorded' as PatientProfile['genderIdentity'],
   });
 
   const getAuthToken = () => {
@@ -62,7 +67,7 @@ export default function PatientAccountPage() {
       }
 
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api';
+        const apiUrl = getApiBaseUrl();
         const response = await fetch(`${apiUrl}/profile/me/`, {
           method: 'GET',
           headers: {
@@ -85,6 +90,8 @@ export default function PatientAccountPage() {
         setFormData({
           legal_full_name: data.legal_full_name || '',
           phone: data.phone || '',
+          biologicalSex: (data.biologicalSex || 'not_recorded') as PatientProfile['biologicalSex'],
+          genderIdentity: (data.genderIdentity || 'not_recorded') as PatientProfile['genderIdentity'],
         });
       } catch (err) {
         console.error('Error loading profile:', err);
@@ -109,7 +116,7 @@ export default function PatientAccountPage() {
     }
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api';
+      const apiUrl = getApiBaseUrl();
       const response = await fetch(`${apiUrl}/profile/me/`, {
         method: 'PATCH',
         headers: {
@@ -119,6 +126,8 @@ export default function PatientAccountPage() {
         body: JSON.stringify({
           legal_full_name: formData.legal_full_name.trim(),
           phone: formData.phone.trim(),
+          biologicalSex: formData.biologicalSex,
+          genderIdentity: formData.genderIdentity,
         }),
       });
 
@@ -129,6 +138,13 @@ export default function PatientAccountPage() {
 
       const updated = await response.json();
       setProfile(updated);
+      setFormData((prev) => ({
+        ...prev,
+        legal_full_name: updated.legal_full_name || prev.legal_full_name,
+        phone: updated.phone || prev.phone,
+        biologicalSex: (updated.biologicalSex || prev.biologicalSex || 'not_recorded') as PatientProfile['biologicalSex'],
+        genderIdentity: (updated.genderIdentity || prev.genderIdentity || 'not_recorded') as PatientProfile['genderIdentity'],
+      }));
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
@@ -259,6 +275,49 @@ export default function PatientAccountPage() {
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
               className="w-full border border-gray-300 rounded-md px-3 py-2 text-gray-900 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
             />
+          </div>
+
+          {/* Biological Sex */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Sexo biológico</label>
+            <select
+              value={formData.biologicalSex || 'not_recorded'}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  biologicalSex: e.target.value as PatientProfile['biologicalSex'],
+                })
+              }
+              className="w-full border border-gray-300 rounded-md px-3 py-2 text-gray-900 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+            >
+              <option value="not_recorded">No especificado</option>
+              <option value="female">Femenino</option>
+              <option value="male">Masculino</option>
+              <option value="intersex">Intersex</option>
+              <option value="unknown">Desconocido</option>
+            </select>
+          </div>
+
+          {/* Gender Identity */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Identidad de género</label>
+            <select
+              value={formData.genderIdentity || 'not_recorded'}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  genderIdentity: e.target.value as PatientProfile['genderIdentity'],
+                })
+              }
+              className="w-full border border-gray-300 rounded-md px-3 py-2 text-gray-900 focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+            >
+              <option value="not_recorded">No especificado</option>
+              <option value="woman">Mujer</option>
+              <option value="man">Hombre</option>
+              <option value="non_binary">No binario</option>
+              <option value="other">Otro</option>
+              <option value="prefer_not_to_say">Prefiero no decirlo</option>
+            </select>
           </div>
         </div>
       </div>

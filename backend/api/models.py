@@ -21,6 +21,24 @@ SUBSCRIPTION_STATUS_CHOICES = [
     ('expired', 'Expirada'),
 ]
 
+# Demografía básica
+BIOLOGICAL_SEX_CHOICES = [
+    ('male', 'Masculino'),
+    ('female', 'Femenino'),
+    ('intersex', 'Intersexual'),
+    ('unknown', 'Desconocido'),
+    ('not_recorded', 'Sin registro'),
+]
+
+GENDER_IDENTITY_CHOICES = [
+    ('woman', 'Mujer'),
+    ('man', 'Hombre'),
+    ('non_binary', 'No binaria'),
+    ('other', 'Otra'),
+    ('prefer_not_to_say', 'Prefiere no decirlo'),
+    ('not_recorded', 'Sin registro'),
+]
+
 class UserProfile(models.Model):
     """Perfil extendido del usuario con información adicional"""
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
@@ -32,6 +50,23 @@ class UserProfile(models.Model):
     full_name = models.CharField(max_length=255)  # Nombre para cálculos cabalísticos
     legal_full_name = models.CharField(max_length=255, blank=True)  # Nombre legal completo
     phone = models.CharField(max_length=20, blank=True)
+
+    # Demografía
+    biological_sex = models.CharField(
+        max_length=20,
+        choices=BIOLOGICAL_SEX_CHOICES,
+        default='not_recorded',
+        blank=True,
+        help_text='Sexo biológico (demografía básica)'
+    )
+    gender_identity = models.CharField(
+        max_length=20,
+        choices=GENDER_IDENTITY_CHOICES,
+        default='not_recorded',
+        blank=True,
+        help_text='Identidad de género (demografía básica)'
+    )
+
     birth_date = models.DateField(null=True, blank=True)
     birth_time = models.TimeField(null=True, blank=True)
     
@@ -247,6 +282,22 @@ class Patient(models.Model):
     email = models.EmailField(help_text='Email del paciente')
     phone = models.CharField(max_length=20, blank=True, help_text='Teléfono de contacto')
     avatar = models.URLField(blank=True, help_text='URL del avatar del paciente')
+
+    # Demografía
+    biological_sex = models.CharField(
+        max_length=20,
+        choices=BIOLOGICAL_SEX_CHOICES,
+        default='not_recorded',
+        blank=True,
+        help_text='Sexo biológico (demografía básica)'
+    )
+    gender_identity = models.CharField(
+        max_length=20,
+        choices=GENDER_IDENTITY_CHOICES,
+        default='not_recorded',
+        blank=True,
+        help_text='Identidad de género (demografía básica)'
+    )
     
     # Campo legacy para compatibilidad (se calcula automáticamente)
     full_name = models.CharField(max_length=255, help_text='Nombre completo (calculado automáticamente)')

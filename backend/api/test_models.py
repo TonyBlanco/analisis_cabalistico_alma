@@ -18,6 +18,7 @@ TEST_TYPE_CHOICES = [
     ('bdi', 'BDI-II - Inventario de Depresión de Beck'),
     ('bai', 'BAI - Inventario de Ansiedad de Beck'),
     ('diagnostic', 'Diagnostic Screenings (PHQ/GAD/Other)'),
+    ('holistic_screening', 'Holistic Screenings (in-house)'),
 ]
 
 # Niveles de acceso por membresía

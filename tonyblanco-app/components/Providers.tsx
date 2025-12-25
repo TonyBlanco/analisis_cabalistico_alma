@@ -1,7 +1,7 @@
 'use client';
 
 import { ReactNode } from 'react';
-import { ToastProvider } from '@/components/ui/Toast';
+import { ToastProvider } from '@/components/ui/toast';
 
 /**
  * Client-side providers wrapper

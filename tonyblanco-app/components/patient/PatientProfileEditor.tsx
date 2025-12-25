@@ -1,14 +1,20 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { updatePatientProfile, UserProfileData } from '@/lib/api';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { updatePatientProfile } from '@/lib/api';
 
 interface PatientProfile {
+  full_name?: string | null;
   legal_full_name?: string;
   birth_date?: string;
   birth_time?: string;
   birth_city?: string;
   birth_country?: string;
-  latitude?: number;
-  longitude?: number;
+  birth_latitude?: number | null;
+  birth_longitude?: number | null;
+  birth_timezone?: string | null;
+  biologicalSex?: 'male' | 'female' | 'intersex' | 'unknown' | 'not_recorded';
+  genderIdentity?: 'woman' | 'man' | 'non_binary' | 'other' | 'prefer_not_to_say' | 'not_recorded';
+  coordinates_valid?: boolean;
 }
 
 interface PatientProfileEditorProps {
@@ -20,13 +26,23 @@ interface PatientProfileEditorProps {
 }
 
 export default function PatientProfileEditor({ profile, patientId, onSave, onClose, initialFocus = null }: PatientProfileEditorProps) {
-  const [formData, setFormData] = useState({
-    legal_full_name: profile?.legal_full_name || '',
+  const [mounted, setMounted] = useState(false);
+  const initialName = useMemo(() => {
+    const full = typeof profile?.full_name === 'string' ? profile?.full_name?.trim() : '';
+    const legal = profile?.legal_full_name?.trim();
+    // Therapist edits Patient.full_name primarily; legal_full_name is secondary (account).
+    return full || legal || '';
+  }, [profile?.legal_full_name, profile?.full_name]);
+
+  const [formData, setFormData] = useState(() => ({
+    full_name: initialName,
     birth_date: profile?.birth_date || '',
     birth_time: profile?.birth_time || '',
     birth_city: profile?.birth_city || '',
     birth_country: profile?.birth_country || '',
-  });
+    biologicalSex: profile?.biologicalSex || 'not_recorded',
+    genderIdentity: profile?.genderIdentity || 'not_recorded',
+  }));
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
   const nameRef = useRef<HTMLInputElement | null>(null);
@@ -34,11 +50,13 @@ export default function PatientProfileEditor({ profile, patientId, onSave, onClo
   const birthTimeRef = useRef<HTMLInputElement | null>(null);
   const birthCityRef = useRef<HTMLInputElement | null>(null);
   const birthCountryRef = useRef<HTMLInputElement | null>(null);
+  const formRef = useRef<HTMLFormElement | null>(null);
 
   useEffect(() => {
     if (!initialFocus) return;
     setFocusedField(initialFocus);
     const map: Record<string, React.RefObject<HTMLInputElement | null>> = {
+      full_name: nameRef,
       legal_full_name: nameRef,
       birth_date: birthDateRef,
       birth_time: birthTimeRef,
@@ -54,8 +72,24 @@ export default function PatientProfileEditor({ profile, patientId, onSave, onClo
       return () => clearTimeout(t);
     }
   }, [initialFocus]);
+
+  useEffect(() => {
+    setFormData({
+      full_name: initialName,
+      birth_date: profile?.birth_date || '',
+      birth_time: profile?.birth_time || '',
+      birth_city: profile?.birth_city || '',
+      birth_country: profile?.birth_country || '',
+      biologicalSex: profile?.biologicalSex || 'not_recorded',
+      genderIdentity: profile?.genderIdentity || 'not_recorded',
+    });
+  }, [patientId, initialName, profile?.birth_city, profile?.birth_country, profile?.birth_date, profile?.birth_time, profile?.biologicalSex, profile?.genderIdentity]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -68,12 +102,12 @@ export default function PatientProfileEditor({ profile, patientId, onSave, onClo
 
     try {
       // Basic validation
-      if (!formData.legal_full_name?.trim()) {
-        setError('Legal full name is required');
+      if (!formData.full_name?.trim()) {
+        setError('El nombre completo es obligatorio');
         return;
       }
       if (!formData.birth_date) {
-        setError('Birth date is required');
+        setError('La fecha de nacimiento es obligatoria');
         return;
       }
 
@@ -84,11 +118,15 @@ export default function PatientProfileEditor({ profile, patientId, onSave, onClo
       }
 
       await updatePatientProfile(id, {
-        legal_full_name: formData.legal_full_name.trim(),
+        full_name: formData.full_name.trim(),
+        // Keep linked UserProfile consistent when patient has an account
+        legal_full_name: formData.full_name.trim(),
         birth_date: formData.birth_date,
         birth_time: formData.birth_time || undefined,
         birth_city: formData.birth_city || undefined,
         birth_country: formData.birth_country || undefined,
+        biologicalSex: formData.biologicalSex || undefined,
+        genderIdentity: formData.genderIdentity || undefined,
       });
 
       onSave(); // Trigger refresh
@@ -111,11 +149,13 @@ export default function PatientProfileEditor({ profile, patientId, onSave, onClo
     }
   };
 
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">Edit Patient Profile</h2>
+  if (!mounted) return null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4 overflow-y-auto">
+      <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl max-h-[calc(100svh-2rem)] flex flex-col">
+        <div className="flex justify-between items-center px-5 py-4 border-b border-gray-200">
+          <h2 className="text-lg font-semibold text-gray-900">Editar paciente</h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600"
@@ -126,88 +166,168 @@ export default function PatientProfileEditor({ profile, patientId, onSave, onClo
           </button>
         </div>
 
-        {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-            <p className="text-sm text-red-700">{error}</p>
-          </div>
-        )}
+        <form ref={formRef} onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+          <div className="p-5 overflow-y-auto space-y-4">
+            {error && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+                <p className="text-sm text-red-700">{error}</p>
+              </div>
+            )}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Sexo biológico</label>
+              <select
+                value={formData.biologicalSex}
+                onChange={(e) => handleChange('biologicalSex', e.target.value)}
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="not_recorded">Sin registro</option>
+                <option value="female">Femenino</option>
+                <option value="male">Masculino</option>
+                <option value="intersex">Intersexual</option>
+                <option value="unknown">Desconocido</option>
+              </select>
+            </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Legal Full Name</label>
-            <input
-              ref={nameRef}
-              type="text"
-              value={formData.legal_full_name}
-              onChange={(e) => handleChange('legal_full_name', e.target.value)}
-              className={`mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${focusedField === 'legal_full_name' ? 'ring-2 ring-indigo-300' : ''}`}
-              placeholder="Enter legal full name"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Birth Date</label>
-            <input
-              ref={birthDateRef}
-              type="date"
-              value={formData.birth_date}
-              onChange={(e) => handleChange('birth_date', e.target.value)}
-              className={`mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${focusedField === 'birth_date' ? 'ring-2 ring-indigo-300' : ''}`}
-            />
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Identidad de género</label>
+              <select
+                value={formData.genderIdentity}
+                onChange={(e) => handleChange('genderIdentity', e.target.value)}
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="not_recorded">Sin registro</option>
+                <option value="woman">Mujer</option>
+                <option value="man">Hombre</option>
+                <option value="non_binary">No binaria</option>
+                <option value="other">Otra</option>
+                <option value="prefer_not_to_say">Prefiere no decirlo</option>
+              </select>
+            </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Nombre completo</label>
+              <input
+                ref={nameRef}
+                type="text"
+                value={formData.full_name}
+                onChange={(e) => handleChange('full_name', e.target.value)}
+                className={`mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${focusedField === 'full_name' ? 'ring-2 ring-indigo-300' : ''}`}
+                placeholder="Nombre y apellido"
+              />
+              {profile?.legal_full_name && profile.legal_full_name !== (profile?.full_name ?? '') && (
+                <p className="mt-1 text-xs text-gray-500">
+                  Nombre legal (cuenta): {profile.legal_full_name}
+                </p>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Fecha de nacimiento</label>
+                <input
+                  ref={birthDateRef}
+                  type="date"
+                  value={formData.birth_date}
+                  onChange={(e) => handleChange('birth_date', e.target.value)}
+                  className={`mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${focusedField === 'birth_date' ? 'ring-2 ring-indigo-300' : ''}`}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Hora de nacimiento</label>
+                <input
+                  ref={birthTimeRef}
+                  type="time"
+                  value={formData.birth_time}
+                  onChange={(e) => handleChange('birth_time', e.target.value)}
+                  className={`mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${focusedField === 'birth_time' ? 'ring-2 ring-indigo-300' : ''}`}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Ciudad de nacimiento</label>
+                <input
+                  ref={birthCityRef}
+                  type="text"
+                  value={formData.birth_city}
+                  onChange={(e) => handleChange('birth_city', e.target.value)}
+                  className={`mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${focusedField === 'birth_city' ? 'ring-2 ring-indigo-300' : ''}`}
+                  placeholder="Ej: Madrid"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">País de nacimiento</label>
+                <input
+                  ref={birthCountryRef}
+                  type="text"
+                  value={formData.birth_country}
+                  onChange={(e) => handleChange('birth_country', e.target.value)}
+                  className={`mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${focusedField === 'birth_country' ? 'ring-2 ring-indigo-300' : ''}`}
+                  placeholder="Ej: España"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Latitud (auto)</label>
+                <input
+                  type="text"
+                  value={profile?.birth_latitude ?? ''}
+                  readOnly
+                  className="mt-1 block w-full px-3 py-2 border border-gray-200 rounded-md bg-gray-50 text-gray-700"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Longitud (auto)</label>
+                <input
+                  type="text"
+                  value={profile?.birth_longitude ?? ''}
+                  readOnly
+                  className="mt-1 block w-full px-3 py-2 border border-gray-200 rounded-md bg-gray-50 text-gray-700"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Zona horaria (auto)</label>
+                <input
+                  type="text"
+                  value={profile?.birth_timezone ?? ''}
+                  readOnly
+                  className="mt-1 block w-full px-3 py-2 border border-gray-200 rounded-md bg-gray-50 text-gray-700"
+                />
+              </div>
+            </div>
+
+            <p className="text-xs text-gray-500">
+              Si cambias ciudad/país, el sistema recalcula coordenadas automáticamente.
+            </p>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Birth Time</label>
-            <input
-              ref={birthTimeRef}
-              type="time"
-              value={formData.birth_time}
-              onChange={(e) => handleChange('birth_time', e.target.value)}
-              className={`mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${focusedField === 'birth_time' ? 'ring-2 ring-indigo-300' : ''}`}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Birth City</label>
-            <input
-              ref={birthCityRef}
-              type="text"
-              value={formData.birth_city}
-              onChange={(e) => handleChange('birth_city', e.target.value)}
-              className={`mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${focusedField === 'birth_city' ? 'ring-2 ring-indigo-300' : ''}`}
-              placeholder="Enter birth city"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Birth Country</label>
-            <input
-              ref={birthCountryRef}
-              type="text"
-              value={formData.birth_country}
-              onChange={(e) => handleChange('birth_country', e.target.value)}
-              className={`mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${focusedField === 'birth_country' ? 'ring-2 ring-indigo-300' : ''}`}
-              placeholder="Enter birth country"
-            />
-          </div>
-
-          <div className="flex justify-end space-x-3 pt-4">
+          <div className="flex justify-end gap-3 px-5 py-4 border-t border-gray-200">
             <button
               type="button"
               onClick={onClose}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
             >
-              Cancel
+              Cancelar
             </button>
             <button
               type="submit"
               disabled={loading}
               className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {loading ? 'Saving...' : 'Save Changes'}
+              {loading ? 'Guardando…' : 'Guardar cambios'}
             </button>
           </div>
         </form>
       </div>
     </div>
+    ,
+    document.body
   );
 }

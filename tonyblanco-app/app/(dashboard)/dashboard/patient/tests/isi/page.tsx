@@ -1,12 +1,18 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { isiDefinition } from "./isi.config";
 
 type AnswerMap = Record<string, string>;
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://analisis-cabalistico-alma.onrender.com/api";
+
 export default function IsiPage() {
+  const router = useRouter();
   const [answers, setAnswers] = useState<AnswerMap>({});
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const questions = isiDefinition.questions;
   const totalQuestions = questions.length;
@@ -18,6 +24,47 @@ export default function IsiPage() {
 
   const handleSelect = (questionId: string, value: string) => {
     setAnswers((prev) => ({ ...prev, [questionId]: value }));
+  };
+
+  const handleSubmit = async () => {
+    if (!isComplete || submitting) return;
+
+    const token = typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
+    if (!token) {
+      setError("Sesión no válida. Inicia sesión nuevamente.");
+      return;
+    }
+
+    setSubmitting(true);
+    setError(null);
+    try {
+      const response = await fetch(`${API_URL}/tests/isi/submit/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Token ${token}`,
+        },
+        body: JSON.stringify(answers),
+      });
+
+      if (!response.ok) {
+        let msg = "No se pudo guardar el ISI.";
+        try {
+          const data = await response.json();
+          msg = data?.message || data?.error || msg;
+        } catch {
+          // ignore
+        }
+        throw new Error(msg);
+      }
+
+      router.push("/dashboard/patient/tests/isi/result");
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Error al enviar el cuestionario.";
+      setError(msg);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -32,10 +79,9 @@ export default function IsiPage() {
         </div>
         <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
           <div
-            className="h-2 rounded-full"
+            className="h-2 rounded-full bg-gray-900"
             style={{
               width: `${Math.round((answeredCount / totalQuestions) * 100)}%`,
-              backgroundColor: "var(--accent-color)",
             }}
           />
         </div>
@@ -71,13 +117,18 @@ export default function IsiPage() {
       </div>
 
       <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+        {error && (
+          <div className="mb-3 bg-red-50 border border-red-200 rounded-md p-3">
+            <p className="text-sm text-red-800">{error}</p>
+          </div>
+        )}
         <button
           type="button"
-          disabled={!isComplete}
-          className="w-full sm:w-auto px-5 py-2 text-sm font-medium text-white rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
-          style={{ backgroundColor: "var(--accent-color)" }}
+          onClick={handleSubmit}
+          disabled={!isComplete || submitting}
+          className="w-full sm:w-auto px-5 py-2 text-sm font-medium text-white rounded-md bg-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Enviar
+          {submitting ? "Enviando…" : "Enviar"}
         </button>
         {!isComplete && (
           <p className="text-xs text-gray-500 mt-2">

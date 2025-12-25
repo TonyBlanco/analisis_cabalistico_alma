@@ -57,9 +57,17 @@ class AvailableTestsView(APIView):
             # patient / personal → ONLY patient_self tests
             tests = tests.filter(available_for_personal=True)
         
-        # Additional filtering by subscription/access level (existing logic)
-        # Filter by is_available_for_user for each test (subscription/access level checks)
-        filtered_tests = [test for test in tests if test.is_available_for_user(user)]
+        # Additional filtering by subscription/access level.
+        # IMPORTANT: Also include tests granted via special access (assigned by therapist).
+        special_access_codes = set(
+            UserTestAccess.objects.filter(user=user, has_special_access=True)
+            .values_list('test_module__code', flat=True)
+        )
+        filtered_tests = [
+            test
+            for test in tests
+            if (test.is_available_for_user(user) or test.code in special_access_codes)
+        ]
         
         serializer = TestModuleSerializer(
             filtered_tests, 
@@ -115,8 +123,13 @@ class TestModuleDetailView(APIView):
                         status=status.HTTP_403_FORBIDDEN
                     )
 
-        # Verify subscription/access level (existing logic)
-        if not test_module.is_available_for_user(user):
+        # Verify subscription/access level, but allow therapist-assigned (special access).
+        has_special_access = UserTestAccess.objects.filter(
+            user=user,
+            test_module=test_module,
+            has_special_access=True
+        ).exists()
+        if not (test_module.is_available_for_user(user) or has_special_access):
             return Response(
                 {
                     'error': 'No tienes acceso a este test',
@@ -216,14 +229,25 @@ class ExecuteTestView(APIView):
             return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
         except PermissionDenied as e:
             return Response(e.detail, status=status.HTTP_403_FORBIDDEN)
-        
-        # Verificar disponibilidad del test para el usuario (validación existente)
-        if not test_module.is_available_for_user(request.user):
-            return Response({'error': 'No tienes acceso a este test'}, status=status.HTTP_403_FORBIDDEN)
 
+        # Crear/obtener acceso del usuario ANTES de validar disponibilidad.
+        # Esto permite que asignaciones (has_special_access=True) habiliten el uso
+        # incluso si el plan/membresía no alcanza el nivel requerido.
         user_access, created = UserTestAccess.objects.get_or_create(user=request.user, test_module=test_module)
+
+        # Gate único: can_use_test() valida is_active, rol/disponibilidad, licencia y límites.
         if not user_access.can_use_test():
-            return Response({'error': 'Has alcanzado el límite mensual de usos para este test', 'current_uses': user_access.current_month_uses, 'limit': test_module.uses_per_month}, status=status.HTTP_429_TOO_MANY_REQUESTS)
+            # Distinguimos límite mensual de acceso denegado de forma simple.
+            if test_module.uses_per_month is not None and user_access.current_month_uses >= test_module.uses_per_month:
+                return Response(
+                    {
+                        'error': 'Has alcanzado el límite mensual de usos para este test',
+                        'current_uses': user_access.current_month_uses,
+                        'limit': test_module.uses_per_month
+                    },
+                    status=status.HTTP_429_TOO_MANY_REQUESTS
+                )
+            return Response({'error': 'No tienes acceso a este test'}, status=status.HTTP_403_FORBIDDEN)
 
         # Completar input_data con información del perfil si es necesario
         if execution_mode == 'patient_self':
@@ -280,6 +304,14 @@ class ExecuteTestView(APIView):
             details_dict = {
                 'audit': audit_metadata
             }
+
+            clinician_notes = ''
+            try:
+                raw_notes = input_data.get('clinician_notes')
+                if isinstance(raw_notes, str):
+                    clinician_notes = raw_notes.strip()
+            except Exception:
+                clinician_notes = ''
             
             # Crear TestResult con metadata de auditoría
             test_result = TestResult.objects.create(
@@ -290,7 +322,8 @@ class ExecuteTestView(APIView):
                 client_name=client_name,
                 client_birth_date=client_birth_date,
                 patient=patient,
-                details=details_dict  # H4: Audit metadata stored in details JSONField
+                details=details_dict,  # H4: Audit metadata stored in details JSONField
+                notes=clinician_notes
             )
 
         response_data = {'success': True, 'result': result_data, 'uses_remaining': None}
@@ -305,18 +338,44 @@ class ExecuteTestView(APIView):
         # Lazy import compute functions to avoid import errors when optional SDKs aren't installed
         compute_bdi = compute_bai = compute_scl90 = compute_stai = compute_mcmi4 = compute_scid5 = None
         compute_pai = None
+        compute_wellness_assessment = None
+        compute_screening_general = None
+        compute_scdf = None
         try:
             # optional internal modules; if missing, we'll continue with None placeholders
             from .pai import compute_pai
         except Exception:
             compute_pai = None
         try:
-            from .diagnostics import compute_bdi, compute_bai, compute_scl90, compute_stai, compute_mcmi4, compute_scid5
+            from .diagnostics import (
+                compute_bdi,
+                compute_bai,
+                compute_scl90,
+                compute_stai,
+                compute_mcmi4,
+                compute_scid5,
+                compute_wellness_assessment,
+                compute_screening_general,
+                compute_scdf,
+            )
         except Exception:
             compute_bdi = compute_bai = compute_scl90 = compute_stai = compute_mcmi4 = compute_scid5 = None
+            compute_wellness_assessment = None
+            compute_screening_general = None
+            compute_scdf = None
 
         test_type = test_module.test_type
         try:
+            if test_module.code == 'scdf':
+                if compute_scdf:
+                    result = compute_scdf(input_data)
+                else:
+                    result = {
+                        'note': 'compute_scdf not available; missing module',
+                        'raw': input_data,
+                    }
+                return {'test_type': 'scdf', 'result': result, 'timestamp': str(datetime.now())}
+
             if test_type == 'bdi' or test_module.code == 'bdi-ii':
                 responses = input_data.get('responses', {})
                 if compute_bdi:
@@ -370,6 +429,25 @@ class ExecuteTestView(APIView):
                 else:
                     result = {'note': 'compute_bai not available; missing module'}
                 return {'test_type': 'bai', 'result': result, 'timestamp': str(datetime.now())}
+
+            # In-house holistic screenings (non-licensed)
+            if test_module.code == 'wellness' or test_type == 'holistic_screening':
+                # Route by code to avoid collisions with other holistic_screening entries
+                if test_module.code == 'wellness':
+                    responses = input_data.get('responses', {})
+                    if compute_wellness_assessment:
+                        result = compute_wellness_assessment({'fecha': input_data.get('fecha'), 'responses': responses})
+                    else:
+                        result = {'note': 'compute_wellness_assessment not available; missing module'}
+                    return {'test_type': 'holistic_screening', 'result': result, 'timestamp': str(datetime.now())}
+
+                if test_module.code == 'screening-general':
+                    responses = input_data.get('responses', {})
+                    if compute_screening_general:
+                        result = compute_screening_general({'fecha': input_data.get('fecha'), 'responses': responses})
+                    else:
+                        result = {'note': 'compute_screening_general not available; missing module'}
+                    return {'test_type': 'holistic_screening', 'result': result, 'timestamp': str(datetime.now())}
             # Astrología Cabalística (se calcula en el frontend con astronomy-engine)
             if test_type == 'astrology' or test_module.code == 'cabalistic-astrology':
                 nombre = input_data.get('nombre') or input_data.get('full_name') or ''

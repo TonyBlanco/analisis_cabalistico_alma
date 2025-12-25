@@ -169,14 +169,33 @@ export default function ClinicalContextHeader() {
             {activePatient ? (editorLoading ? 'Cargando…' : 'Editar paciente') : 'Pacientes'}
           </button>
 
+          <button
+            onClick={() => {
+              const ap = getActivePatient();
+              const qs = ap?.id ? `?patient_id=${ap.id}` : '';
+              router.push(`/dashboard/therapist/scdf${qs}`);
+            }}
+            className="inline-flex items-center px-2 py-1 rounded bg-gray-900 text-white text-xs hover:bg-gray-800 transition-colors"
+            title="Abrir SCDF"
+          >
+            SCDF
+          </button>
+
           {showEditor && activePatient && (
             <PatientProfileEditor
               profile={profile ? {
+                full_name: profile.full_name || null,
                 legal_full_name: profile.legal_full_name || '',
                 birth_date: profile.birth_date || '',
                 birth_time: profile.birth_time || '' ,
                 birth_city: profile.birth_city || '',
                 birth_country: profile.birth_country || '',
+                birth_latitude: profile.birth_latitude ?? null,
+                birth_longitude: profile.birth_longitude ?? null,
+                birth_timezone: profile.birth_timezone ?? null,
+                biologicalSex: profile.biologicalSex,
+                genderIdentity: profile.genderIdentity,
+                coordinates_valid: profile.coordinates_valid,
               } : null}
               patientId={String(activePatient.id)}
               initialFocus={editorFocusField}

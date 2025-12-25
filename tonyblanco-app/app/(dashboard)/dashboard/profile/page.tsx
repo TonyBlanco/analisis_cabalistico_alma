@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { fetchSession } from '@/lib/session';
 import { getUserRole } from '@/lib/getUserRole';
@@ -20,6 +20,7 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const redirectedRef = useRef(false);
   const [formData, setFormData] = useState({
     full_name: '',
     birth_date: '',
@@ -61,6 +62,14 @@ export default function ProfilePage() {
 
     load();
   }, []);
+
+  // Patients should use the dedicated patient account page to avoid conflicting forms.
+  useEffect(() => {
+    if (redirectedRef.current) return;
+    if (role !== 'patient') return;
+    redirectedRef.current = true;
+    router.replace('/dashboard/patient/account');
+  }, [role, router]);
 
   useRoleGuard({
     currentUserRole: role as 'admin' | 'therapist' | 'personal' | 'patient' | null,
@@ -171,6 +180,10 @@ export default function ProfilePage() {
         </div>
       </div>
     );
+  }
+
+  if (role === 'patient') {
+    return null;
   }
 
   if (!role) {

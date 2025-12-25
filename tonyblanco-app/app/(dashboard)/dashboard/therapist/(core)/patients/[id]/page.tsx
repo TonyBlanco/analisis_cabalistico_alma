@@ -1,17 +1,21 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import PatientProfileView from '@/components/patient/PatientProfileView';
 import PatientProfileEditor from '@/components/patient/PatientProfileEditor';
 import dynamic from 'next/dynamic'
 
+import { getApiBaseUrl } from '@/lib/api-base';
+import { getAuthToken } from '@/lib/api';
+
 const KabbalahPanel = dynamic(() => import('@/components/therapist/KabbalahPanel'), { ssr: false })
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://analisis-cabalistico-alma.onrender.com/api';
+const API_URL = getApiBaseUrl();
 
 export default function TherapistPatientDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const patientId = params.id as string;
 
   const [loading, setLoading] = useState(true);
@@ -23,16 +27,26 @@ export default function TherapistPatientDetailPage() {
   const [showEditor, setShowEditor] = useState(false);
 
   useEffect(() => {
-    if (patientId) {
-      loadData();
-    } else {
+    if (!patientId) {
       setErrors(['Missing patient id.']);
       setLoading(false);
+      return;
     }
-  }, [patientId]);
+
+    // Guard: this route is numeric-only. Prevent accidental navigation to
+    // /dashboard/therapist/patients/create (or other non-numeric segments).
+    if (!isNumericId(patientId)) {
+      router.replace('/dashboard/therapist/patients');
+      return;
+    }
+
+    if (patientId) {
+      loadData();
+    }
+  }, [patientId, router]);
 
   const loadData = async () => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
+    const token = getAuthToken();
     if (!token) {
       setErrors(['No auth token found.']);
       setLoading(false);
@@ -209,4 +223,8 @@ export default function TherapistPatientDetailPage() {
 function valueOrFallback(value: unknown): string {
   if (value === null || value === undefined || value === '') return 'N/A';
   return String(value);
+}
+
+function isNumericId(value: string): boolean {
+  return /^\d+$/.test(value);
 }

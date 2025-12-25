@@ -3,7 +3,10 @@
 import { useState, useEffect } from 'react';
 import DisclaimerModal from './DisclaimerModal';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://analisis-cabalistico-alma.onrender.com/api';
+import { getApiBaseUrl } from '@/lib/api-base';
+import { getAuthToken } from '@/lib/api';
+
+const API_URL = getApiBaseUrl();
 
 interface CreatePatientModalProps {
   open: boolean;
@@ -112,7 +115,7 @@ export default function CreatePatientModal({
     setLoading(true);
 
     try {
-      const token = localStorage.getItem('authToken');
+      const token = getAuthToken();
       const payload = {
         first_name: formData.first_name.trim(),
         last_name: formData.last_name.trim(),

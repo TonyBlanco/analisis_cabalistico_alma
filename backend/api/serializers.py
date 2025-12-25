@@ -60,6 +60,16 @@ class UserProfileDetailSerializer(serializers.ModelSerializer):
     """
 
     email = serializers.EmailField(source="user.email", read_only=True)
+    biologicalSex = serializers.ChoiceField(
+        source="biological_sex",
+        choices=UserProfile._meta.get_field("biological_sex").choices,
+        required=False,
+    )
+    genderIdentity = serializers.ChoiceField(
+        source="gender_identity",
+        choices=UserProfile._meta.get_field("gender_identity").choices,
+        required=False,
+    )
 
     class Meta:
         model = UserProfile
@@ -67,6 +77,8 @@ class UserProfileDetailSerializer(serializers.ModelSerializer):
             "legal_full_name",
             "full_name",
             "phone",
+            "biologicalSex",
+            "genderIdentity",
             "birth_date",
             "birth_time",
             "birth_city",

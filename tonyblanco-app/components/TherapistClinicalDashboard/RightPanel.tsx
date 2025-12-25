@@ -18,6 +18,8 @@ interface RightPanelProps {
   integrativeNotes: IntegrativeNote[];
   onAddNote: (text: string) => void;
   patientId?: string | number;
+  notesLoading?: boolean;
+  notesError?: string | null;
 }
 
 export default function RightPanel({
@@ -26,6 +28,8 @@ export default function RightPanel({
   integrativeNotes,
   onAddNote,
   patientId,
+  notesLoading,
+  notesError,
 }: RightPanelProps) {
   const normalizedPatientId =
     patientId === undefined || patientId === null || patientId === ''
@@ -175,7 +179,7 @@ export default function RightPanel({
               Abrir catalogo de tests
             </Link>
           </div>
-          <AssignedTestsSection />
+          <AssignedTestsSection patientId={normalizedPatientId} />
         </div>
       )}
 
@@ -185,7 +189,12 @@ export default function RightPanel({
           <p className="text-xs text-gray-500">
             Notas humanas unicamente. Sin automatizacion ni interpretacion.
           </p>
-          <IntegrativeNotesForm onAddNote={onAddNote} />
+          {!normalizedPatientId ? (
+            <p className="text-xs text-gray-600">Selecciona un paciente para guardar notas.</p>
+          ) : null}
+          {notesError ? <p className="text-xs text-red-600">{notesError}</p> : null}
+          {notesLoading ? <p className="text-xs text-gray-500">Cargando notas…</p> : null}
+          <IntegrativeNotesForm onAddNote={onAddNote} disabled={!normalizedPatientId} />
           <div className="space-y-2">
             {integrativeNotes.length === 0 && (
               <p className="text-xs text-gray-500">
@@ -210,7 +219,13 @@ export default function RightPanel({
   );
 }
 
-function IntegrativeNotesForm({ onAddNote }: { onAddNote: (text: string) => void }) {
+function IntegrativeNotesForm({
+  onAddNote,
+  disabled,
+}: {
+  onAddNote: (text: string) => void;
+  disabled?: boolean;
+}) {
   const [text, setText] = React.useState('');
 
   return (
@@ -219,18 +234,20 @@ function IntegrativeNotesForm({ onAddNote }: { onAddNote: (text: string) => void
         value={text}
         onChange={(event) => setText(event.target.value)}
         rows={4}
-        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900"
+        disabled={disabled}
+        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 disabled:opacity-60"
         placeholder="Escribe una observacion consultiva."
       />
       <button
         type="button"
+        disabled={disabled}
         onClick={() => {
           const trimmed = text.trim();
           if (!trimmed) return;
           onAddNote(trimmed);
           setText('');
         }}
-        className="px-3 py-2 text-xs font-medium text-white rounded-md hover:opacity-90"
+        className="px-3 py-2 text-xs font-medium text-white rounded-md hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed"
         style={{ backgroundColor: 'var(--accent-color)' }}
       >
         Guardar nota

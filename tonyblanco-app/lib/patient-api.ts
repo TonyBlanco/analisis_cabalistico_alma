@@ -4,7 +4,9 @@
  * Functions to interact with patient-related endpoints.
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://analisis-cabalistico-alma.onrender.com/api';
+import { getApiBaseUrl } from './api-base';
+
+const API_BASE_URL = getApiBaseUrl();
 
 // Obtiene el token de autenticación
 function getAuthToken(): string | null {
@@ -48,6 +50,7 @@ export interface Patient {
 
 export interface PatientProfileSummary {
   patient_id: number;
+  full_name?: string | null;
   legal_full_name: string | null;
   birth_date: string | null;
   birth_time?: string | null;
@@ -59,6 +62,7 @@ export interface PatientProfileSummary {
   consent_accepted_at: string | null;
   biologicalSex?: 'male' | 'female' | 'intersex' | 'unknown' | 'not_recorded';
   genderIdentity?: 'woman' | 'man' | 'non_binary' | 'other' | 'prefer_not_to_say' | 'not_recorded';
+  coordinates_valid?: boolean;
 }
 
 /**

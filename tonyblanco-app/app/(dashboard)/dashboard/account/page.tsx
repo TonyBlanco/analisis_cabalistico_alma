@@ -24,6 +24,7 @@ export default function AccountPage() {
   const router = useRouter();
   const [role, setRole] = useState<string | null>(null);
   const fetchedRef = useRef(false);
+  const redirectedRef = useRef(false);
   const [roleLoaded, setRoleLoaded] = useState(false);
   
   useRoleGuard({
@@ -116,6 +117,13 @@ export default function AccountPage() {
 
   // Load profile (once when role is loaded)
   useEffect(() => {
+    // Patients should use the dedicated patient account page to avoid conflicting forms.
+    if (!redirectedRef.current && roleLoaded && role === 'patient') {
+      redirectedRef.current = true;
+      router.replace('/dashboard/patient/account');
+      return;
+    }
+
     if (fetchedRef.current) return;
     if (!roleLoaded || !role) return;
     fetchedRef.current = true;
@@ -163,6 +171,10 @@ export default function AccountPage() {
 
     loadProfile();
   }, [router, roleLoaded, role]);
+
+  if (roleLoaded && role === 'patient') {
+    return null;
+  }
 
   const handleSave = async () => {
     setErrors({});

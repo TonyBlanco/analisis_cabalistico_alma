@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { getAvailableTests, getTestResults, executeTest } from '@/lib/test-api';
 import { TestModule, ExecuteTestRequest } from '@/lib/test-types';
+import { clinicalTestsRegistry } from '@/lib/clinicalTests.registry';
 
 /**
  * Patient Assigned Tests Section
@@ -21,6 +22,14 @@ export default function PatientAssignedTestsSection() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [executingTestCode, setExecutingTestCode] = useState<string | null>(null);
+
+  const routeByTestCode = useState(() => {
+    const map = new Map<string, string>();
+    for (const entry of clinicalTestsRegistry) {
+      if (entry.patient_route) map.set(entry.test_code, entry.patient_route);
+    }
+    return map;
+  })[0];
 
   useEffect(() => {
     fetchAssignedTests();
@@ -66,6 +75,15 @@ export default function PatientAssignedTestsSection() {
 
   const handleExecuteTest = async (test: TestModule) => {
     if (executingTestCode) return; // Prevent double execution
+
+    const route = routeByTestCode.get(test.code);
+    if (route) {
+      if (!confirm(`¿Deseas comenzar el test "${test.name}"?`)) {
+        return;
+      }
+      router.push(route);
+      return;
+    }
 
     // Confirm execution
     if (!confirm(`¿Deseas comenzar el test "${test.name}"?`)) {

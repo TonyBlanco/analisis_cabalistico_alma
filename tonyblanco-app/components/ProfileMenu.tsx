@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { fetchSession } from '@/lib/session';
+import { getUserRole } from '@/lib/getUserRole';
 import { clearAuthState } from '@/lib/auth-state';
 import Link from 'next/link';
 
@@ -17,6 +18,7 @@ export default function ProfileMenu() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [role, setRole] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -24,6 +26,10 @@ export default function ProfileMenu() {
       if (session.user) {
         setUser(session.user);
       }
+    });
+
+    getUserRole().then((userRole) => {
+      setRole(userRole);
     });
   }, []);
 
@@ -71,6 +77,8 @@ export default function ProfileMenu() {
     .toUpperCase()
     .slice(0, 2);
 
+  const accountHref = role === 'patient' ? '/dashboard/patient/account' : '/dashboard/account';
+
   return (
     <div className="relative" ref={menuRef}>
       <button
@@ -101,7 +109,7 @@ export default function ProfileMenu() {
       {isOpen && (
         <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 py-1 z-50">
           <Link
-            href="/dashboard/account"
+            href={accountHref}
             onClick={() => setIsOpen(false)}
             className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
           >

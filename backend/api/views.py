@@ -332,6 +332,8 @@ class UserProfileMeView(APIView):
             "birth_country",
             "birth_latitude",
             "birth_longitude",
+            "biologicalSex",
+            "genderIdentity",
         }
         if fields_touched.intersection(relevant_fields):
             try:
@@ -339,6 +341,60 @@ class UserProfileMeView(APIView):
             except Exception:
                 profile.profile_version = 1
             profile.save(update_fields=["profile_version"])
+
+        # Si el usuario es un paciente con entidad Patient vinculada,
+        # sincronizar los datos del UserProfile para que el terapeuta vea lo mismo.
+        if getattr(profile, 'user_type', None) == 'patient':
+            try:
+                patient = Patient.objects.select_related('user').get(user=request.user, is_active=True)
+                changed_fields = []
+
+                # Identidad básica
+                desired_full_name = (getattr(profile, 'legal_full_name', None) or getattr(profile, 'full_name', None) or '').strip()
+                if desired_full_name and desired_full_name != (patient.full_name or ''):
+                    patient.full_name = desired_full_name
+                    changed_fields.append('full_name')
+
+                # Contacto
+                if getattr(profile, 'phone', '') != (patient.phone or ''):
+                    patient.phone = getattr(profile, 'phone', '') or ''
+                    changed_fields.append('phone')
+
+                # Nacimiento / geo
+                if getattr(profile, 'birth_date', None) and getattr(profile, 'birth_date', None) != patient.birth_date:
+                    patient.birth_date = profile.birth_date
+                    changed_fields.append('birth_date')
+                if getattr(profile, 'birth_time', None) != patient.birth_time:
+                    patient.birth_time = getattr(profile, 'birth_time', None)
+                    changed_fields.append('birth_time')
+                if getattr(profile, 'birth_city', '') != (patient.birth_city or ''):
+                    patient.birth_city = getattr(profile, 'birth_city', '') or ''
+                    changed_fields.append('birth_city')
+                if getattr(profile, 'birth_country', '') != (patient.birth_country or ''):
+                    patient.birth_country = getattr(profile, 'birth_country', '') or ''
+                    changed_fields.append('birth_country')
+                if getattr(profile, 'birth_latitude', None) is not None and getattr(profile, 'birth_latitude', None) != patient.birth_latitude:
+                    patient.birth_latitude = profile.birth_latitude
+                    changed_fields.append('birth_latitude')
+                if getattr(profile, 'birth_longitude', None) is not None and getattr(profile, 'birth_longitude', None) != patient.birth_longitude:
+                    patient.birth_longitude = profile.birth_longitude
+                    changed_fields.append('birth_longitude')
+                if getattr(profile, 'birth_timezone', '') != (patient.birth_timezone or ''):
+                    patient.birth_timezone = getattr(profile, 'birth_timezone', '') or ''
+                    changed_fields.append('birth_timezone')
+
+                if getattr(profile, 'biological_sex', None) != getattr(patient, 'biological_sex', None):
+                    patient.biological_sex = getattr(profile, 'biological_sex', None) or 'not_recorded'
+                    changed_fields.append('biological_sex')
+
+                if getattr(profile, 'gender_identity', None) != getattr(patient, 'gender_identity', None):
+                    patient.gender_identity = getattr(profile, 'gender_identity', None) or 'not_recorded'
+                    changed_fields.append('gender_identity')
+
+                if changed_fields:
+                    patient.save(update_fields=changed_fields)
+            except Patient.DoesNotExist:
+                pass
 
         return Response(UserProfileDetailSerializer(profile).data, status=status.HTTP_200_OK)
 
@@ -413,6 +469,12 @@ class UpdateProfileView(APIView):
             # Update profile fields
             if 'phone' in request.data:
                 profile.phone = request.data['phone']
+                profile_fields_changed = True
+            if 'biologicalSex' in request.data:
+                profile.biological_sex = request.data.get('biologicalSex') or 'not_recorded'
+                profile_fields_changed = True
+            if 'genderIdentity' in request.data:
+                profile.gender_identity = request.data.get('genderIdentity') or 'not_recorded'
                 profile_fields_changed = True
             if 'full_name' in request.data:
                 profile.full_name = request.data['full_name']
@@ -593,6 +655,8 @@ class UpdateProfileView(APIView):
                     profile.profile_version = 1
                 profile.save(update_fields=[
                     'phone',
+                    'biological_sex',
+                    'gender_identity',
                     'full_name',
                     'legal_full_name',
                     'birth_date',
@@ -606,6 +670,59 @@ class UpdateProfileView(APIView):
                     'consent_accepted_at',
                     'profile_version',
                 ])
+
+            # Si el usuario es paciente y existe Patient vinculado, sincronizar para que el terapeuta vea lo mismo.
+            if getattr(profile, 'user_type', None) == 'patient':
+                try:
+                    patient = Patient.objects.get(user=user, is_active=True)
+                    changed_fields = []
+
+                    desired_full_name = (getattr(profile, 'legal_full_name', None) or getattr(profile, 'full_name', None) or '').strip()
+                    if desired_full_name and desired_full_name != (patient.full_name or ''):
+                        patient.full_name = desired_full_name
+                        changed_fields.append('full_name')
+
+                    if getattr(profile, 'phone', '') != (patient.phone or ''):
+                        patient.phone = getattr(profile, 'phone', '') or ''
+                        changed_fields.append('phone')
+
+                    if getattr(profile, 'birth_date', None) and getattr(profile, 'birth_date', None) != patient.birth_date:
+                        patient.birth_date = profile.birth_date
+                        changed_fields.append('birth_date')
+                    if getattr(profile, 'birth_time', None) != patient.birth_time:
+                        patient.birth_time = getattr(profile, 'birth_time', None)
+                        changed_fields.append('birth_time')
+
+                    if getattr(profile, 'birth_city', '') != (patient.birth_city or ''):
+                        patient.birth_city = getattr(profile, 'birth_city', '') or ''
+                        changed_fields.append('birth_city')
+                    if getattr(profile, 'birth_country', '') != (patient.birth_country or ''):
+                        patient.birth_country = getattr(profile, 'birth_country', '') or ''
+                        changed_fields.append('birth_country')
+
+                    if getattr(profile, 'birth_latitude', None) is not None and getattr(profile, 'birth_latitude', None) != patient.birth_latitude:
+                        patient.birth_latitude = profile.birth_latitude
+                        changed_fields.append('birth_latitude')
+                    if getattr(profile, 'birth_longitude', None) is not None and getattr(profile, 'birth_longitude', None) != patient.birth_longitude:
+                        patient.birth_longitude = profile.birth_longitude
+                        changed_fields.append('birth_longitude')
+
+                    if getattr(profile, 'birth_timezone', '') != (patient.birth_timezone or ''):
+                        patient.birth_timezone = getattr(profile, 'birth_timezone', '') or ''
+                        changed_fields.append('birth_timezone')
+
+                    if getattr(profile, 'biological_sex', None) != getattr(patient, 'biological_sex', None):
+                        patient.biological_sex = getattr(profile, 'biological_sex', None) or 'not_recorded'
+                        changed_fields.append('biological_sex')
+
+                    if getattr(profile, 'gender_identity', None) != getattr(patient, 'gender_identity', None):
+                        patient.gender_identity = getattr(profile, 'gender_identity', None) or 'not_recorded'
+                        changed_fields.append('gender_identity')
+
+                    if changed_fields:
+                        patient.save(update_fields=changed_fields)
+                except Patient.DoesNotExist:
+                    pass
             
             return Response({
                 'success': True,
@@ -616,6 +733,8 @@ class UpdateProfileView(APIView):
                     'birth_latitude': float(profile.birth_latitude) if profile.birth_latitude else None,
                     'birth_longitude': float(profile.birth_longitude) if profile.birth_longitude else None,
                     'birth_timezone': profile.birth_timezone,
+                    'biologicalSex': getattr(profile, 'biological_sex', None),
+                    'genderIdentity': getattr(profile, 'gender_identity', None),
                 }
             })
             
@@ -1351,6 +1470,8 @@ class TherapistPatientProfileView(APIView):
             "birth_timezone": birth_timezone,
             "legal_full_name": None,
             "consent_accepted_at": None,
+            "biologicalSex": getattr(patient, "biological_sex", None),
+            "genderIdentity": getattr(patient, "gender_identity", None),
             # Validación de completitud
             "coordinates_valid": birth_lat is not None and birth_lng is not None,
         }
@@ -1362,6 +1483,12 @@ class TherapistPatientProfileView(APIView):
                 up, "full_name", None
             )
             profile_data["consent_accepted_at"] = getattr(up, "consent_accepted_at", None)
+
+            # Enriquecer demografía desde UserProfile si existe (fuente de verdad para pacientes con cuenta)
+            if getattr(up, "biological_sex", None):
+                profile_data["biologicalSex"] = getattr(up, "biological_sex", None)
+            if getattr(up, "gender_identity", None):
+                profile_data["genderIdentity"] = getattr(up, "gender_identity", None)
 
         return Response(profile_data, status=status.HTTP_200_OK)
 
@@ -1401,7 +1528,9 @@ class TherapistUpdatePatientProfileView(APIView):
             'birth_date': 'birth_date',
             'birth_time': 'birth_time',
             'birth_city': 'birth_city', 
-            'birth_country': 'birth_country'
+            'birth_country': 'birth_country',
+            'biologicalSex': 'biological_sex',
+            'genderIdentity': 'gender_identity',
         }
 
         # Actualizar campos del Patient model
@@ -1428,10 +1557,28 @@ class TherapistUpdatePatientProfileView(APIView):
 
         # Si el paciente tiene cuenta de usuario vinculada, actualizar UserProfile también
         user_profile_updated = False
-        if patient.user and hasattr(patient.user, "profile") and 'legal_full_name' in request.data:
-            patient.user.profile.legal_full_name = request.data['legal_full_name'] or None
-            patient.user.profile.save(update_fields=['legal_full_name', 'updated_at'] if hasattr(patient.user.profile, 'updated_at') else ['legal_full_name'])
-            user_profile_updated = True
+        if patient.user and hasattr(patient.user, "profile"):
+            up = patient.user.profile
+            update_fields = []
+
+            if 'legal_full_name' in request.data:
+                up.legal_full_name = request.data['legal_full_name'] or None
+                update_fields.append('legal_full_name')
+
+            if 'biologicalSex' in request.data and request.data.get('biologicalSex') is not None:
+                up.biological_sex = request.data.get('biologicalSex')
+                update_fields.append('biological_sex')
+
+            if 'genderIdentity' in request.data and request.data.get('genderIdentity') is not None:
+                up.gender_identity = request.data.get('genderIdentity')
+                update_fields.append('gender_identity')
+
+            if update_fields:
+                # Mantener updated_at si existe
+                if hasattr(up, 'updated_at'):
+                    update_fields.append('updated_at')
+                up.save(update_fields=update_fields)
+                user_profile_updated = True
 
         # Calcular estado de completitud del perfil
         profile_complete = bool(
@@ -1993,7 +2140,20 @@ class TherapistNoteListCreateView(generics.ListCreateAPIView):
         return TherapistNoteSerializer
     
     def get_queryset(self):
-        return TherapistNote.objects.filter(therapist=self.request.user)
+                qs = TherapistNote.objects.filter(therapist=self.request.user)
+                patient_id = self.request.query_params.get('patient')
+                ficha_id = self.request.query_params.get('ficha')
+                if patient_id:
+                    try:
+                        qs = qs.filter(patient_id=int(patient_id))
+                    except Exception:
+                        pass
+                if ficha_id:
+                    try:
+                        qs = qs.filter(ficha_id=int(ficha_id))
+                    except Exception:
+                        pass
+                return qs
     
     def perform_create(self, serializer):
         serializer.save(therapist=self.request.user)

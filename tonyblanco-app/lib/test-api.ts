@@ -1,5 +1,7 @@
 import { TestModule, TestResult, ExecuteTestRequest, ExecuteTestResponse, UserTestStats } from './test-types';
 
+export type { ExecuteTestRequest, ExecuteTestResponse };
+
 // Default to Render backend in production if env var is missing
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://analisis-cabalistico-alma.onrender.com/api';
 

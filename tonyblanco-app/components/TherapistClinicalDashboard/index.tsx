@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import PatientHeader from './PatientHeader';
 import ContextNav from './ContextNav';
 import CenterVisual from './CenterVisual';
@@ -8,6 +8,7 @@ import RightPanel from './RightPanel';
 import type { ContextSection, ContextSectionId, IntegrativeNote } from './types';
 import type { VisualizationState } from '@/components/BodySoulVisualization/types';
 import { usePanelManager } from '@/components/TherapistWorkspace/PanelManagerContext';
+import { createTherapistNote, listTherapistNotes } from '@/lib/therapist-notes-api';
 
 interface TherapistClinicalDashboardProps {
   onChangePatient: () => void;
@@ -56,18 +57,89 @@ export default function TherapistClinicalDashboard({
   const [activeSection, setActiveSection] = useState<ContextSectionId>('overview');
   const [visualizationState, setVisualizationState] = useState<VisualizationState | null>(null);
   const [integrativeNotes, setIntegrativeNotes] = useState<IntegrativeNote[]>([]);
+  const [notesLoading, setNotesLoading] = useState(false);
+  const [notesError, setNotesError] = useState<string | null>(null);
   const { openPanel } = usePanelManager();
 
-  const handleAddNote = useCallback((text: string) => {
-    setIntegrativeNotes((prev) => [
-      {
-        id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
-        text,
-        createdAt: new Date().toISOString(),
-      },
-      ...prev,
-    ]);
-  }, []);
+  const resolvedPatientId = useMemo(() => {
+    if (patientId === undefined || patientId === null || patientId === '') return null;
+    if (typeof patientId === 'string') {
+      const parsed = parseInt(patientId, 10);
+      return Number.isNaN(parsed) ? null : parsed;
+    }
+    if (typeof patientId === 'number') return patientId;
+    return null;
+  }, [patientId]);
+
+  useEffect(() => {
+    if (!resolvedPatientId) {
+      setIntegrativeNotes([]);
+      setNotesError(null);
+      return;
+    }
+
+    let cancelled = false;
+    setNotesLoading(true);
+    setNotesError(null);
+
+    listTherapistNotes(resolvedPatientId)
+      .then((data) => {
+        if (cancelled) return;
+        setIntegrativeNotes(
+          data.map((n) => ({
+            id: String(n.id),
+            text: [n.title, n.content].filter(Boolean).join('\n').trim(),
+            createdAt: (n.created_at || new Date().toISOString()) as string,
+          })),
+        );
+      })
+      .catch((err: any) => {
+        if (cancelled) return;
+        setNotesError(err?.message || 'No se pudieron cargar las notas');
+        setIntegrativeNotes([]);
+      })
+      .finally(() => {
+        if (cancelled) return;
+        setNotesLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [resolvedPatientId]);
+
+  const handleAddNote = useCallback(
+    (text: string) => {
+      const trimmed = (text || '').trim();
+      if (!trimmed || !resolvedPatientId) return;
+
+      setNotesError(null);
+      const firstLine = trimmed.split('\n')[0] || 'Nota integrativa';
+      const title = firstLine.slice(0, 80);
+
+      void createTherapistNote({
+        patientId: resolvedPatientId,
+        title,
+        content: trimmed,
+        tags: 'integrative',
+      })
+        .then((created) => {
+          setIntegrativeNotes((prev) => [
+            {
+              id: String(created.id),
+              text: [created.title, created.content].filter(Boolean).join('\n').trim(),
+              createdAt: (created.created_at || new Date().toISOString()) as string,
+            },
+            ...prev,
+          ]);
+        })
+        .catch((err: any) => {
+          console.error('Error saving therapist note:', err);
+          setNotesError(err?.message || 'No se pudo guardar la nota');
+        });
+    },
+    [resolvedPatientId],
+  );
 
   const handleViewHistory = () => {
     openPanel('history');
@@ -103,7 +175,12 @@ export default function TherapistClinicalDashboard({
           />
         </aside>
         <section className="min-h-[520px]">
-          <CenterVisual onStateChange={setVisualizationState} patientId={patientId} />
+          <CenterVisual
+            activeSection={activeSection}
+            onStateChange={setVisualizationState}
+            patientId={patientId}
+            onAddNote={handleAddNote}
+          />
         </section>
         <aside className="space-y-4">
           <RightPanel
@@ -112,6 +189,8 @@ export default function TherapistClinicalDashboard({
             integrativeNotes={integrativeNotes}
             onAddNote={handleAddNote}
             patientId={patientId}
+            notesLoading={notesLoading}
+            notesError={notesError}
           />
         </aside>
       </div>

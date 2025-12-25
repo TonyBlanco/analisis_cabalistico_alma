@@ -1,6 +1,7 @@
 // API Configuration and Utilities
-// Default to Render backend in production if env var is missing
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://analisis-cabalistico-alma.onrender.com/api';
+import { getApiBaseUrl } from './api-base';
+
+const API_URL = getApiBaseUrl();
 
 // Exportar como API_BASE_URL para compatibilidad
 export const API_BASE_URL = API_URL;
@@ -428,6 +429,9 @@ export const cancelSubscription = async (): Promise<{ message: string }> => {
 // ========================================
 
 export interface UserProfileData {
+  // Therapist update endpoint expects `full_name` for Patient.
+  // Patient self-service endpoints use `legal_full_name`.
+  full_name?: string;
   legal_full_name: string;
   birth_date: string;
   birth_time?: string;

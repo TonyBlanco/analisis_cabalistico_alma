@@ -380,31 +380,34 @@ export default function PatientSymbolicOverview({ patientId }: PatientSymbolicOv
         ) : (
           <div className="divide-y divide-gray-100">
             {overview.test_results.slice(0, 5).map((test) => (
-              <div key={test.id} className="px-6 py-4 hover:bg-gray-50 transition-colors">
+              <Link
+                key={test.id}
+                href={`/dashboard/therapist/tests/results/${test.id}`}
+                onClick={activatePatient}
+                className="block px-6 py-4 hover:bg-gray-50 transition-colors"
+              >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="font-medium text-gray-900">{test.test_name}</div>
                     {test.severity_label && (
-                      <span className={`inline-block text-xs px-2 py-1 rounded-full mt-2 ${getSeverityColor(test.severity_label)}`}>
+                      <span
+                        className={`inline-block text-xs px-2 py-1 rounded-full mt-2 ${getSeverityColor(test.severity_label)}`}
+                      >
                         {test.severity_label}
                       </span>
                     )}
                     <div className="text-xs text-gray-500 mt-2 flex items-center gap-2">
                       <Calendar className="h-3 w-3" />
-                      {test.completed_at 
+                      {test.completed_at
                         ? new Date(test.completed_at).toLocaleString('es-ES')
                         : '—'}
                     </div>
                   </div>
-                  <Link
-                    href={`/dashboard/therapist/tests?patient_id=${patientId}`}
-                    onClick={activatePatient}
-                    className="text-blue-600 hover:text-blue-700"
-                  >
+                  <span className="text-blue-600 hover:text-blue-700" aria-hidden="true">
                     <ChevronRight className="h-5 w-5" />
-                  </Link>
+                  </span>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, createContext, useContext, useCallback, ReactNode } from 'react';
+import { useState, createContext, useContext, useCallback, ReactNode } from 'react';
 import { CheckCircle, XCircle, AlertTriangle, Info, X, Mail } from 'lucide-react';
 
 // ============================================
@@ -42,7 +42,22 @@ export function useToast() {
   if (!context) {
     throw new Error('useToast must be used within a ToastProvider');
   }
-  return context;
+
+  const showToast = (input: { type: ToastType; message: string; title?: string; duration?: number }) => {
+    const title = (input.title || input.message || '').trim() || 'Notificación';
+    const message = input.title ? input.message : undefined;
+    context.addToast({
+      type: input.type,
+      title,
+      message,
+      duration: input.duration,
+    });
+  };
+
+  return {
+    ...context,
+    showToast,
+  };
 }
 
 // ============================================
@@ -90,7 +105,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return (
     <ToastContext.Provider value={{ toasts, addToast, removeToast, success, error, warning, info }}>
       {children}
-      <ToastContainer toasts={toasts} onRemove={removeToast} />
+      <InternalToastContainer toasts={toasts} onRemove={removeToast} />
     </ToastContext.Provider>
   );
 }
@@ -99,7 +114,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 // TOAST CONTAINER
 // ============================================
 
-function ToastContainer({ toasts, onRemove }: { toasts: Toast[]; onRemove: (id: string) => void }) {
+function InternalToastContainer({ toasts, onRemove }: { toasts: Toast[]; onRemove: (id: string) => void }) {
   if (toasts.length === 0) return null;
 
   return (
@@ -109,6 +124,17 @@ function ToastContainer({ toasts, onRemove }: { toasts: Toast[]; onRemove: (id: 
       ))}
     </div>
   );
+}
+
+// Legacy-compatible container API used by _legacy_app_backup pages.
+export function ToastContainer({
+  toasts,
+  removeToast,
+}: {
+  toasts: Toast[];
+  removeToast: (id: string) => void;
+}) {
+  return <InternalToastContainer toasts={toasts} onRemove={removeToast} />;
 }
 
 // ============================================

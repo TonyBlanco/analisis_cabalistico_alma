@@ -172,14 +172,16 @@ export const clinicalTestsRegistry: ClinicalTestRegistryEntry[] = [
     display_name: "Screening Psicologico General",
     domain: "Psicologia",
     family: "psicologicos",
-    implemented: false,
+    implemented: true,
+    patient_route: "/dashboard/patient/tests/screening-general",
   },
   {
     test_code: "wellness",
     display_name: "Wellness Assessment",
     domain: "Bienestar",
     family: "psicologicos",
-    implemented: false,
+    implemented: true,
+    patient_route: "/dashboard/patient/tests/wellness",
   },
   {
     test_code: "pai",

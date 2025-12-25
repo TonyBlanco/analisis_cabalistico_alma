@@ -376,6 +376,7 @@ export default function ActivePatientIndicator({ onSelectPatient }: ActivePatien
                 try {
                   setFormSaving(true);
                   await updatePatientProfile(activePatient.id, {
+                    full_name: formName.trim(),
                     legal_full_name: formName.trim(),
                     birth_date: formBirthDate || undefined,
                     birth_city: formBirthCity || undefined,

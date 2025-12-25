@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import Link from 'next/link';
 import { getActivePatientId, getActivePatientName } from '@/lib/active-patient';
 import { getPatientPreviousTests } from '@/lib/test-api';
 import { TestResult } from '@/lib/test-types';
@@ -13,20 +14,40 @@ import { TestResult } from '@/lib/test-types';
  * 
  * READ-ONLY: Just displays assigned tests, no actions yet.
  */
-export default function AssignedTestsSection() {
+export default function AssignedTestsSection({
+  patientId,
+  patientName,
+}: {
+  patientId?: string | number | null;
+  patientName?: string | null;
+} = {}) {
   const [assignedTests, setAssignedTests] = useState<TestResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activePatientId, setActivePatientIdState] = useState<number | null>(null);
   const [activePatientName, setActivePatientNameState] = useState<string | null>(null);
 
+  const resolvedPatientId = useMemo(() => {
+    if (patientId === undefined) return null;
+    if (patientId === null || patientId === '') return null;
+    if (typeof patientId === 'number') return patientId;
+    const parsed = parseInt(String(patientId), 10);
+    return Number.isNaN(parsed) ? null : parsed;
+  }, [patientId]);
+
   // Cargar paciente activo solo en cliente para evitar mismatches SSR/CSR
   useEffect(() => {
+    if (resolvedPatientId !== null) {
+      setActivePatientIdState(resolvedPatientId);
+      setActivePatientNameState(patientName ?? null);
+      return;
+    }
+
     const id = getActivePatientId();
     const name = getActivePatientName();
     setActivePatientIdState(id);
     setActivePatientNameState(name);
-  }, []);
+  }, [resolvedPatientId, patientName]);
 
   useEffect(() => {
     if (activePatientId) {
@@ -199,6 +220,7 @@ export default function AssignedTestsSection() {
           {assignedTests.map((result) => {
             // Determine status: completed (has result)
             const status = result.id ? 'completed' : 'pending';
+            const canViewResult = status === 'completed' && Boolean(result.id);
             const statusLabels = {
               completed: { label: 'Completado', className: 'bg-green-100 text-green-800' },
               pending: { label: 'Pendiente', className: 'bg-yellow-100 text-yellow-800' },
@@ -237,6 +259,17 @@ export default function AssignedTestsSection() {
                       )}
                     </div>
                   </div>
+
+                  {canViewResult && (
+                    <div className="ml-4 flex-shrink-0">
+                      <Link
+                        href={`/dashboard/therapist/tests/results/${result.id}`}
+                        className="text-sm text-blue-700 hover:text-blue-900 underline"
+                      >
+                        Ver resultado
+                      </Link>
+                    </div>
+                  )}
                 </div>
               </div>
             );

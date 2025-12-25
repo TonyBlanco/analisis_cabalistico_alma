@@ -13,10 +13,26 @@ import {
   AlertTriangle, ClipboardList, User, Calendar, Stethoscope, HelpCircle
 } from 'lucide-react';
 import TherapistRoute from '@/components/TherapistRoute';
-import { executeTest, type ExecuteTestRequest } from '@/lib/test-api';
+import { executeTest, getPatientPreviousTests, type ExecuteTestRequest } from '@/lib/test-api';
 import { useToast, ToastContainer } from '@/components/ui/toast';
 import SCDFHelpModal from '@/components/SCDFHelpModal';
 import { scdf_es as t } from '@/lib/i18n/es/scdf';
+import { createTherapistNote } from '@/lib/therapist-notes-api';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://analisis-cabalistico-alma.onrender.com/api';
+
+function computeAgeFromBirthDate(value: unknown): number {
+  if (typeof value !== 'string') return 0;
+  const birth = new Date(value);
+  if (Number.isNaN(birth.getTime())) return 0;
+  const now = new Date();
+  let age = now.getFullYear() - birth.getFullYear();
+  const m = now.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && now.getDate() < birth.getDate())) {
+    age -= 1;
+  }
+  return Math.max(0, age);
+}
 
 // Template JSON inicial (compatible con compute_scdf)
 const INITIAL_TEMPLATE = {
@@ -258,6 +274,47 @@ interface SCDFData {
   modules: SCDFModule[];
 }
 
+type ModuleEvidence = {
+  count: number;
+  summaries: string[];
+};
+
+const SCDF_MODULE_TEST_MAP: Record<string, string[]> = {
+  MOOD_001: ['phq-9', 'bdi-ii'],
+  ANXIETY_001: ['gad-7', 'bai'],
+  TRAUMA_001: ['ptsd-check'],
+  SUBSTANCE_001: ['substance-use'],
+  PERSONALITY_001: ['professional-pai', 'mcmi-iv'],
+  EATING_001: ['eating-disorder'],
+  SLEEP_001: ['insomnia-index', 'isi'],
+};
+
+function formatShortDate(value: unknown): string {
+  try {
+    if (!value) return '';
+    const d = new Date(String(value));
+    if (Number.isNaN(d.getTime())) return '';
+    return d.toLocaleDateString('es-ES');
+  } catch {
+    return '';
+  }
+}
+
+function summarizeTestResult(tr: any): string {
+  const fallbackCode = tr?.test_module?.code || tr?.test_module_code || tr?.test_id;
+  const name = tr?.test_module?.name || tr?.test_module_name || fallbackCode || 'Test';
+  const date = formatShortDate(tr?.created_at || tr?.completed_at || tr?.updated_at);
+  const computed = tr?.result_data?.result ?? tr?.result_data;
+  const score = computed?.total_score ?? computed?.puntuaciones?.total ?? computed?.puntuaciones?.total_score;
+  const severity = computed?.severity_label ?? computed?.interpretacion?.gravedad ?? computed?.interpretacion?.nivel;
+  const extras = [
+    typeof score === 'number' || typeof score === 'string' ? `puntaje ${score}` : null,
+    typeof severity === 'string' && severity.trim() ? severity.trim() : null,
+  ].filter(Boolean);
+  const tail = extras.length ? ` — ${extras.join(' · ')}` : '';
+  return `${name}${date ? ` (${date})` : ''}${tail}`;
+}
+
 export default function SCDFPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -271,6 +328,7 @@ export default function SCDFPage() {
   const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
   const [patient, setPatient] = useState<any>(null);
   const [helpModalOpen, setHelpModalOpen] = useState(false);
+  const [moduleEvidence, setModuleEvidence] = useState<Record<string, ModuleEvidence>>({});
 
   useEffect(() => {
     if (patientId) {
@@ -289,28 +347,92 @@ export default function SCDFPage() {
         return;
       }
 
-      const response = await fetch(`/api/patients/${patientId}/`, {
+      const response = await fetch(`${API_URL}/therapist/patients/${patientId}/profile/`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
+          Authorization: `Token ${token}`,
         },
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        setPatient(data);
-        // Pre-llenar datos del cliente
-        setScdfData(prev => ({
-          ...prev,
-          client_data: {
-            nombre: data.full_name || '',
-            edad: data.age || 0,
-            fecha: data.birth_date || new Date().toISOString().split('T')[0]
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        const message = body?.error || body?.detail || body?.message || `Error cargando paciente (${response.status})`;
+        showToast({ type: 'error', message });
+        return;
+      }
+
+      const data = await response.json();
+      setPatient(data);
+
+      const fullName = (data?.full_name || data?.legal_full_name || '').toString();
+      const birthDate = (data?.birth_date || '').toString();
+      const age = typeof data?.age === 'number' ? data.age : computeAgeFromBirthDate(birthDate);
+
+      // Pre-llenar datos del cliente (nombre + fecha de nacimiento)
+      setScdfData((prev) => ({
+        ...prev,
+        client_data: {
+          nombre: fullName,
+          edad: age || 0,
+          fecha: birthDate || new Date().toISOString().split('T')[0],
+        },
+      }));
+
+      // Importar tests previos del paciente y marcarlos para revisión
+      try {
+        const parsedPatientId = patientId ? parseInt(patientId, 10) : NaN;
+        if (!Number.isNaN(parsedPatientId)) {
+          const prev = await getPatientPreviousTests({ patient_id: parsedPatientId });
+          const results = Array.isArray(prev?.results) ? prev.results : [];
+
+          const byModule: Record<string, ModuleEvidence> = {};
+          for (const tr of results) {
+            const code = tr?.test_module?.code || (tr as any)?.test_module_code || (tr as any)?.test_id;
+            if (!code) continue;
+            for (const [moduleId, codes] of Object.entries(SCDF_MODULE_TEST_MAP)) {
+              if (!codes.includes(String(code))) continue;
+              const entry = byModule[moduleId] || { count: 0, summaries: [] };
+              entry.count += 1;
+              entry.summaries.push(summarizeTestResult(tr));
+              byModule[moduleId] = entry;
+            }
           }
-        }));
+          setModuleEvidence(byModule);
+
+          // Prefill an auto-criterion (review marker) per module with evidence
+          setScdfData((prevState) => ({
+            ...prevState,
+            modules: prevState.modules.map((m) => {
+              const evidence = byModule[m.module_id];
+              if (!evidence || evidence.count <= 0) return m;
+
+              const autoId = `AUTO_TESTS_${m.module_id}`;
+              const already = m.additional_criteria?.some((c) => c?.criterion_id === autoId);
+              if (already) return m;
+
+              const evidenceText = evidence.summaries.join('\n');
+              return {
+                ...m,
+                status: 'review',
+                additional_criteria: [
+                  ...(m.additional_criteria || []),
+                  {
+                    criterion_id: autoId,
+                    description: 'Resultados previos detectados (marcar para revisión)',
+                    met: false,
+                    evidence: evidenceText,
+                  },
+                ],
+              };
+            }),
+          }));
+        }
+      } catch (e) {
+        console.warn('Error importing previous tests into SCDF:', e);
       }
     } catch (err: any) {
       console.error('Error loading patient:', err);
+      showToast({ type: 'error', message: err?.message || 'Error cargando paciente' });
     } finally {
       setLoading(false);
     }
@@ -454,6 +576,24 @@ export default function SCDFPage() {
       };
 
       const result = await executeTest(payload);
+
+      const noteText = (clinicianNotes || '').trim();
+      if (noteText && patientId) {
+        try {
+          await createTherapistNote({
+            patientId: parseInt(patientId, 10),
+            title: 'SCDF - Notas del clínico',
+            content: noteText,
+            tags: 'scdf',
+          });
+        } catch (e: any) {
+          console.warn('Error saving SCDF notes to patient history:', e);
+          showToast({
+            type: 'error',
+            message: e?.message || 'La evaluación se guardó, pero falló guardar las notas en el historial.',
+          });
+        }
+      }
       
       showToast({
         type: 'success',
@@ -461,10 +601,18 @@ export default function SCDFPage() {
       });
 
       // Redirigir a resultados o página del paciente
+      try {
+        const resultId = (result as any)?.result_id;
+        if (resultId) {
+          router.push(`/dashboard/therapist/tests/results/${encodeURIComponent(String(resultId))}`);
+          return;
+        }
+      } catch {}
+
       if (patientId) {
-        router.push(`/patients/${patientId}`);
+        router.push(`/dashboard/therapist/patients/${encodeURIComponent(String(patientId))}`);
       } else {
-        router.push('/dashboard/tests');
+        router.push('/dashboard/therapist/patients');
       }
     } catch (err: any) {
       console.error('Error submitting SCDF:', err);
@@ -517,7 +665,7 @@ export default function SCDFPage() {
               <Button
                 variant="outline"
                 onClick={() => router.back()}
-                className="border-slate-700"
+                className="border-slate-700 bg-slate-950/30 text-slate-200 hover:bg-slate-900 hover:text-slate-100 disabled:opacity-100 disabled:text-slate-400 disabled:bg-slate-950/30"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 {t.buttons.back}
@@ -604,6 +752,10 @@ export default function SCDFPage() {
             {scdfData.modules.map((module) => {
               const isExpanded = expandedModules.has(module.module_id);
               const hasActiveCoreGate = module.core_gate.present;
+              const hasPrevTests = Boolean(moduleEvidence?.[module.module_id]?.count);
+              const prevTestsTitle = hasPrevTests
+                ? `Tests previos detectados:\n${(moduleEvidence[module.module_id]?.summaries || []).join('\n')}`
+                : '';
               
               return (
                 <Card 
@@ -615,10 +767,25 @@ export default function SCDFPage() {
                   <CardHeader className="cursor-pointer" onClick={() => toggleModule(module.module_id)}>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <CardTitle className="text-lg">{getModuleName(module.module_id, module.module_name)}</CardTitle>
+                        <CardTitle className="text-lg flex items-center gap-2">
+                          {getModuleName(module.module_id, module.module_name)}
+                          {hasPrevTests ? (
+                            <span
+                              className="inline-flex items-center gap-1 text-xs text-slate-200"
+                              title={prevTestsTitle}
+                            >
+                              <CheckCircle2 className="w-4 h-4 text-amber-400" />
+                              Revisar
+                            </span>
+                          ) : null}
+                        </CardTitle>
                         <Badge 
                           variant={hasActiveCoreGate ? "default" : "outline"}
-                          className={hasActiveCoreGate ? "bg-amber-600" : "border-slate-600"}
+                          className={
+                            hasActiveCoreGate
+                              ? 'bg-amber-600 text-white'
+                              : 'border-slate-500 text-slate-200 bg-slate-950/40'
+                          }
                         >
                           {hasActiveCoreGate ? (
                             <>
@@ -654,7 +821,7 @@ export default function SCDFPage() {
                         <Label className="text-slate-300 mb-2 block">Criterios Core Gate</Label>
                         <div className="space-y-2 bg-slate-800 p-3 rounded">
                           {module.core_gate.criteria.map((criterion, idx) => (
-                            <div key={idx} className="text-sm text-slate-400 flex items-center gap-2">
+                            <div key={idx} className="text-sm text-slate-200 flex items-center gap-2">
                               <span className="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center text-xs">
                                 {idx + 1}
                               </span>
@@ -673,7 +840,7 @@ export default function SCDFPage() {
                               variant="outline"
                               size="sm"
                               onClick={() => addCriterion(module.module_id)}
-                              className="border-slate-700 text-xs"
+                              className="border-slate-600 bg-slate-900 text-slate-100 hover:bg-slate-800 hover:text-white text-xs"
                             >
                               + {t.buttons.addCriterion}
                             </Button>
@@ -690,7 +857,7 @@ export default function SCDFPage() {
                                         onChange={(e) => updateCriterion(module.module_id, idx, 'met', e.target.checked)}
                                         className="w-4 h-4 rounded border-slate-600 bg-slate-700"
                                       />
-                                      <Label className="text-sm font-medium">
+                                      <Label className="text-sm font-medium text-slate-100">
                                         {criterion.criterion_id}
                                       </Label>
                                     </div>

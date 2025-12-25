@@ -5,7 +5,7 @@ import { ClipboardList, Loader2, Mail, CheckCircle, Info } from 'lucide-react';
 import { TEST_TYPES, type TestModule } from '@/lib/test-types';
 import { clinicalTestsRegistry } from '@/lib/clinicalTests.registry';
 import { getActivePatientId } from '@/lib/active-patient';
-import { useToast } from '@/components/ui/Toast';
+import { useToast } from '@/components/ui/toast';
 import ClinicalTestHelpModal from '@/components/ClinicalTestHelpModal';
 import { useRouter } from 'next/navigation';
 import { getAvailableTests } from '@/lib/test-api';

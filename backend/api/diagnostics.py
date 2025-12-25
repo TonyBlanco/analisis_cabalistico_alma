@@ -278,6 +278,352 @@ def compute_scl90(input_data: dict) -> dict:
     return result
 
 
+def compute_scdf(input_data: dict) -> dict:
+    """Compute a structured SCDF (internal clinical framework) result.
+
+    The frontend sends a JSON compatible with the legacy SCDF template:
+    - metadata
+    - client_data
+    - modules[] with core_gate, additional_criteria, exclusion_flags
+
+    This is NOT a licensed instrument; we produce summary metrics and a per-module breakdown.
+    """
+    metadata = input_data.get('metadata') or {}
+    client_data = input_data.get('client_data') or {}
+    modules = input_data.get('modules') or []
+
+    if not isinstance(modules, list):
+        modules = []
+
+    module_summaries = []
+    core_present_count = 0
+    additional_total = 0
+    additional_met_total = 0
+    exclusion_flags_true_total = 0
+
+    for m in modules:
+        if not isinstance(m, dict):
+            continue
+        module_id = m.get('module_id')
+        module_name = m.get('module_name')
+        core_gate = m.get('core_gate') if isinstance(m.get('core_gate'), dict) else {}
+        core_present = bool(core_gate.get('present'))
+        if core_present:
+            core_present_count += 1
+
+        additional_criteria = m.get('additional_criteria')
+        if not isinstance(additional_criteria, list):
+            additional_criteria = []
+        add_total = len(additional_criteria)
+        add_met = 0
+        for c in additional_criteria:
+            if isinstance(c, dict) and c.get('met') is True:
+                add_met += 1
+        additional_total += add_total
+        additional_met_total += add_met
+
+        exclusion_flags = m.get('exclusion_flags') if isinstance(m.get('exclusion_flags'), dict) else {}
+        exclusions_true = sum(1 for v in exclusion_flags.values() if bool(v))
+        exclusion_flags_true_total += exclusions_true
+
+        module_summaries.append(
+            {
+                'module_id': module_id,
+                'module_name': module_name,
+                'status': m.get('status'),
+                'core_gate_present': core_present,
+                'additional_criteria': {
+                    'total': add_total,
+                    'met': add_met,
+                },
+                'exclusion_flags_true': exclusions_true,
+            }
+        )
+
+    summary = {
+        'modules_total': len(module_summaries),
+        'core_gate_present': core_present_count,
+        'additional_criteria_total': additional_total,
+        'additional_criteria_met': additional_met_total,
+        'exclusion_flags_true_total': exclusion_flags_true_total,
+    }
+
+    return {
+        'codigo_evaluacion': _generate_code('SCDF'),
+        'fecha_evaluacion': (client_data.get('fecha') if isinstance(client_data, dict) else None)
+        or metadata.get('created_at')
+        or datetime.utcnow().strftime('%Y-%m-%d'),
+        'framework': {
+            'framework_name': metadata.get('framework_name'),
+            'framework_version': metadata.get('framework_version'),
+            'jurisdiction': metadata.get('jurisdiction'),
+            'based_on': metadata.get('based_on'),
+        },
+        'cliente': {
+            'nombre': client_data.get('nombre') if isinstance(client_data, dict) else None,
+            'edad': client_data.get('edad') if isinstance(client_data, dict) else None,
+            'fecha': client_data.get('fecha') if isinstance(client_data, dict) else None,
+        },
+        'resumen': summary,
+        'modulos': module_summaries,
+        # Keep the raw SCDF structure (without clinician_notes) for audit/review
+        'raw': {
+            'metadata': metadata,
+            'client_data': client_data,
+            'modules': modules,
+        },
+    }
+
+
+def compute_wellness_assessment(input_data: dict) -> dict:
+    """Compute an in-house Wellness Assessment (non-medical).
+
+    Expects:
+      - responses: dict(questionId -> 0..4)
+        (0=Nunca, 1=Rara vez, 2=A veces, 3=A menudo, 4=Casi siempre)
+
+    Returns:
+      - Overall wellbeing index (0..100)
+      - Domain averages (0..4) + percent (0..100)
+      - Strengths + focus areas
+      - Practical next steps (non-clinical)
+    """
+    responses = (input_data.get('responses', {}) or {})
+
+    domains = {
+        'sueño': ['w1', 'w2', 'w3'],
+        'energía': ['w4', 'w5'],
+        'estrés_regulación': ['w6', 'w7', 'w8'],
+        'estado_de_animo': ['w9', 'w10'],
+        'movimiento': ['w11', 'w12'],
+        'nutrición_hidratación': ['w13', 'w14'],
+        'conexión': ['w15', 'w16'],
+        'propósito': ['w17', 'w18'],
+        'atención_plena': ['w19', 'w20'],
+        'autocompasión': ['w21', 'w22'],
+    }
+
+    # Reverse-coded items (higher response means worse)
+    reverse_items = {'w6', 'w7', 'w10'}
+
+    def _as_int(val) -> int:
+        try:
+            return int(val)
+        except Exception:
+            return 0
+
+    def _normalize_value(qid: str) -> int:
+        v = _as_int(responses.get(qid, 0))
+        v = max(0, min(4, v))
+        if qid in reverse_items:
+            return 4 - v
+        return v
+
+    domain_scores = {}
+    all_vals = []
+    for domain, qids in domains.items():
+        vals = [_normalize_value(qid) for qid in qids]
+        all_vals.extend(vals)
+        avg = sum(vals) / (len(vals) or 1)
+        domain_scores[domain] = {
+            'avg_0_4': round(avg, 2),
+            'percent_0_100': int(round((avg / 4) * 100)),
+            'items': len(qids),
+        }
+
+    overall_avg = (sum(all_vals) / (len(all_vals) or 1))
+    wellbeing_index = int(round((overall_avg / 4) * 100))
+
+    # Strengths / focus areas
+    ranked = sorted(domain_scores.items(), key=lambda kv: kv[1]['avg_0_4'], reverse=True)
+    strengths = [name for name, _ in ranked[:2]]
+    focus_areas = [name for name, _ in ranked[-2:]][::-1]
+
+    # Gentle tiers
+    if wellbeing_index >= 75:
+        tier = 'Alto'
+        tier_note = 'Tu base de bienestar se ve sólida. Enfócate en sostener hábitos y afinar detalles.'
+    elif wellbeing_index >= 50:
+        tier = 'Medio'
+        tier_note = 'Hay elementos de bienestar presentes, pero con áreas claras para mejorar con acciones simples y consistentes.'
+    else:
+        tier = 'Bajo'
+        tier_note = 'Tu bienestar se ve comprometido. Prioriza descanso, regulación y apoyo; busca acompañamiento si lo necesitas.'
+
+    next_steps = []
+    # Domain-specific suggestions for the lowest focus areas
+    suggestions = {
+        'sueño': ['Rutina fija de sueño 5–7 días', 'Evitar pantallas 30–60 min antes de dormir'],
+        'energía': ['Micro-pauses de 2–3 min cada 90 min', 'Luz solar matinal 10–15 min'],
+        'estrés_regulación': ['Respiración 4-6 por 3 minutos', 'Registro breve: gatillo → emoción → necesidad'],
+        'estado_de_animo': ['Agenda 1 actividad gratificante diaria (10–20 min)', 'Reducir multitarea y sobrecarga'],
+        'movimiento': ['Caminata suave 15–25 min 3x/semana', 'Estiramientos 5 min al despertar'],
+        'nutrición_hidratación': ['Hidratación: 6–8 vasos/día (ajusta a tu caso)', 'Regularidad de comidas (sin perfeccionismo)'],
+        'conexión': ['1 contacto significativo por semana', 'Pedir apoyo concreto (qué, cuándo, cómo)'],
+        'propósito': ['Definir 1 valor guía y 1 acción semanal', 'Revisar metas: pequeñas y realistas'],
+        'atención_plena': ['Anclaje sensorial 5-4-3-2-1', 'Pausa consciente antes de comer (3 respiraciones)'],
+        'autocompasión': ['Hablarte como hablarías a un amigo', 'Escribir 3 logros/acciones pequeñas al día'],
+    }
+    for area in focus_areas:
+        next_steps.extend(suggestions.get(area, [])[:2])
+    # De-duplicate
+    dedup = []
+    for s in next_steps:
+        if s not in dedup:
+            dedup.append(s)
+    next_steps = dedup[:6]
+
+    result = {
+        'codigo_evaluacion': _generate_code('WELL'),
+        'fecha_evaluacion': input_data.get('fecha') or datetime.utcnow().strftime('%Y-%m-%d'),
+        'respuestas': responses,
+        'puntuaciones': {
+            'indice_bienestar_0_100': wellbeing_index,
+            'nivel': tier,
+            'dominios': domain_scores,
+        },
+        'interpretacion': {
+            'resumen': tier_note,
+            'fortalezas': strengths,
+            'areas_enfoque': focus_areas,
+        },
+        'alertas': {
+            'nota': 'Este cuestionario es orientativo y no constituye diagnóstico médico o psicológico.'
+        },
+        'recomendaciones': next_steps,
+        'validez': {
+            'completo': True,
+            'tiempo_ok': True
+        }
+    }
+    return result
+
+
+def compute_screening_general(input_data: dict) -> dict:
+    """Compute an in-house general psychological screening (non-diagnostic).
+
+    Expects:
+      - responses: dict(questionId -> 0..3)
+        (0=Nada, 1=Leve, 2=Moderado, 3=Intenso)
+
+    Returns a structured summary with domain scores, flags and suggested next steps.
+    """
+    responses = (input_data.get('responses', {}) or {})
+
+    domains = {
+        'ansiedad_preocupacion': ['s1', 's2', 's3', 's4', 's5'],
+        'estado_de_animo': ['s6', 's7', 's8', 's9', 's10'],
+        'trauma_estrés': ['s11', 's12', 's13', 's14'],
+        'rumiacion_control': ['s15', 's16', 's17', 's18'],
+        'somatizacion': ['s19', 's20', 's21', 's22'],
+        'funcionamiento': ['s23', 's24', 's25', 's26'],
+        'recursos': ['s27', 's28', 's29', 's30'],
+    }
+
+    reverse_items = {'s27', 's28', 's29', 's30'}  # resources: higher is better
+
+    def _as_int(val) -> int:
+        try:
+            return int(val)
+        except Exception:
+            return 0
+
+    def _clamp_0_3(v: int) -> int:
+        return max(0, min(3, v))
+
+    def _value(qid: str) -> int:
+        v = _clamp_0_3(_as_int(responses.get(qid, 0)))
+        if qid in reverse_items:
+            return 3 - v
+        return v
+
+    domain_scores = {}
+    total_distress = 0
+    total_items = 0
+    for domain, qids in domains.items():
+        vals = [_value(qid) for qid in qids]
+        total = sum(vals)
+        total_distress += total
+        total_items += len(qids)
+        domain_scores[domain] = {
+            'sum_0_3n': total,
+            'avg_0_3': round(total / (len(qids) or 1), 2),
+            'items': len(qids),
+        }
+
+    avg_distress = total_distress / (total_items or 1)
+    distress_index_0_100 = int(round((avg_distress / 3) * 100))
+
+    # Safety flag: self-harm/suicidal ideation item is s10
+    safety_raw = _clamp_0_3(_as_int(responses.get('s10', 0)))
+    safety_flag = safety_raw >= 1
+
+    # Focus areas: top 2 domains by avg (excluding resources if present)
+    ranked = sorted(domain_scores.items(), key=lambda kv: kv[1]['avg_0_3'], reverse=True)
+    focus = [name for name, _ in ranked[:2]]
+
+    if distress_index_0_100 >= 70:
+        tier = 'Alto'
+        summary = 'Se observa malestar elevado en varias áreas. Conviene priorizar contención, regulación y acompañamiento.'
+    elif distress_index_0_100 >= 40:
+        tier = 'Medio'
+        summary = 'Se observan áreas de malestar moderado. Puede ser útil organizar prioridades y hábitos de apoyo.'
+    else:
+        tier = 'Bajo'
+        summary = 'Se observa malestar bajo o acotado. Puede ser un buen momento para consolidar recursos y prevención.'
+
+    recommendations = []
+    if safety_flag:
+        recommendations.append('Si estás en riesgo o te sientes en peligro, busca ayuda inmediata (servicios de emergencia o una línea de crisis local).')
+        recommendations.append('Contacta a tu terapeuta o a un profesional de salud mental lo antes posible para apoyo.')
+
+    domain_actions = {
+        'ansiedad_preocupacion': ['Limitar “tiempo de preocupación” (10 min/día)', 'Respiración lenta 4-6 por 3–5 min'],
+        'estado_de_animo': ['Rutina diaria mínima (sueño, comida, movimiento)', 'Planificar 1 actividad significativa diaria'],
+        'trauma_estrés': ['Técnicas de grounding (5-4-3-2-1)', 'Evitar exposición innecesaria a disparadores en pico'],
+        'rumiacion_control': ['Anotar pensamientos repetitivos y “soltar” (no resolver todo)', 'Practicar aceptación de incertidumbre en micro-pasos'],
+        'somatizacion': ['Chequeo cuerpo: tensión, respiración, postura', 'Movimiento suave + hidratación'],
+        'funcionamiento': ['Elegir 1 tarea prioritaria por bloque', 'Reducir demandas temporales y pedir apoyo'],
+        'recursos': ['Identificar 2 apoyos concretos (personas/espacios)', 'Definir un plan semanal pequeño y sostenible'],
+    }
+    for f in focus:
+        recommendations.extend(domain_actions.get(f, [])[:2])
+
+    # De-duplicate and cap
+    dedup = []
+    for s in recommendations:
+        if s not in dedup:
+            dedup.append(s)
+    recommendations = dedup[:8]
+
+    result = {
+        'codigo_evaluacion': _generate_code('SCRN'),
+        'fecha_evaluacion': input_data.get('fecha') or datetime.utcnow().strftime('%Y-%m-%d'),
+        'respuestas': responses,
+        'puntuaciones': {
+            'indice_malestar_0_100': distress_index_0_100,
+            'nivel': tier,
+            'total_distress': total_distress,
+            'dominios': domain_scores,
+        },
+        'interpretacion': {
+            'resumen': summary,
+            'areas_enfoque': focus,
+            'nota': 'Cuestionario orientativo para conversación terapéutica; no es diagnóstico.',
+        },
+        'alertas': {
+            'ideacion_autolesion': safety_flag,
+            'nivel_item_s10': safety_raw,
+        },
+        'recomendaciones': recommendations,
+        'validez': {
+            'completo': True,
+            'tiempo_ok': True
+        }
+    }
+    return result
+
+
 def compute_stai(input_data: dict) -> dict:
     """Compute a simplified STAI result (state and trait)"""
     responses = input_data.get('responses', {}) or {}

@@ -8,6 +8,7 @@ import { getActivePatientId } from '@/lib/active-patient';
 import { useToast } from '@/components/ui/Toast';
 import ClinicalTestHelpModal from '@/components/ClinicalTestHelpModal';
 import { useRouter } from 'next/navigation';
+import { getAvailableTests } from '@/lib/test-api';
 
 interface TestCatalogSectionProps {
   onTestAssigned?: () => void;
@@ -21,6 +22,7 @@ type CatalogTest = TestModule & {
   available_for_personal?: boolean;
   mode?: string;
   domain?: string;
+  requires_license?: boolean;
 };
 
 /**
@@ -53,30 +55,51 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
     setLoading(true);
     setError(null);
     try {
-      const mapped = clinicalTestsRegistry.map<CatalogTest>((entry, idx) => ({
-        id: idx + 1,
-        code: entry.test_code,
-        name: entry.display_name,
-        description:
-          entry.guidance?.what ||
-          entry.domain ||
-          'Instrumento clínico',
-        test_type: TEST_TYPES.BASIC,
-        required_access_level: 'professional',
-        is_active: true,
-        available_for_therapists: true,
-        available_for_personal: entry.family === 'psicologicos',
-        uses_per_month: null,
-        icon: '',
-        order: idx,
-        estimated_duration: 5,
-        is_available: true,
-        user_access: null,
-        implemented: entry.implemented,
-        domainLabel: entry.domain,
-        family: entry.family,
-      }));
-      setTests(mapped);
+      // Prefer backend truth to avoid code mismatches.
+      const remote = await getAvailableTests().catch(() => null);
+      if (remote?.tests && Array.isArray(remote.tests)) {
+        const mapped = remote.tests.map<CatalogTest>((t) => {
+          const meta = clinicalTestsRegistry.find((e) => e.test_code === t.code) || null;
+          const family: CatalogTest['family'] =
+            meta?.family ||
+            (['basic', 'numerology', 'compatibility', 'career', 'spiritual', 'health', 'financial', 'family', 'purpose', 'past_life'].includes(String(t.test_type))
+              ? 'cabalisticos'
+              : 'psicologicos');
+          return {
+            ...t,
+            implemented: meta?.implemented ?? false,
+            domainLabel: meta?.domain,
+            family,
+            // Ensure we keep the backend license flag if present
+            requires_license: (t as any).requires_license === true,
+          };
+        });
+        setTests(mapped);
+      } else {
+        // Fallback (offline/dev): static registry only.
+        const mapped = clinicalTestsRegistry.map<CatalogTest>((entry, idx) => ({
+          id: idx + 1,
+          code: entry.test_code,
+          name: entry.display_name,
+          description: entry.guidance?.what || entry.domain || 'Instrumento clínico',
+          test_type: TEST_TYPES.BASIC,
+          required_access_level: 'professional',
+          is_active: true,
+          available_for_therapists: true,
+          available_for_personal: entry.family === 'psicologicos',
+          uses_per_month: null,
+          icon: '',
+          order: idx,
+          estimated_duration: 5,
+          is_available: true,
+          user_access: null,
+          implemented: entry.implemented,
+          domainLabel: entry.domain,
+          family: entry.family,
+          requires_license: false,
+        }));
+        setTests(mapped);
+      }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error al cargar catálogo de tests';
       setError(message);
@@ -160,11 +183,13 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
     disabled,
     isAssigning,
     isImplemented,
+    requiresLicense,
   }: {
     onAssign: () => void;
     disabled: boolean;
     isAssigning: boolean;
     isImplemented: boolean;
+    requiresLicense: boolean;
   }) => {
     if (!activePatientId) {
       return (
@@ -183,9 +208,15 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
         disabled={disabled}
         className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-white rounded-md hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
         style={{ backgroundColor: '#1f6c8f' }}
-        title={!isImplemented ? 'Este test está marcado como “En desarrollo”.' : undefined}
+        title={
+          requiresLicense
+            ? 'Este instrumento requiere licencia. Carga contenido licenciado y habilita el acceso correspondiente.'
+            : !isImplemented
+              ? 'Este test está marcado como “En desarrollo”.'
+              : undefined
+        }
       >
-        {isAssigning ? 'Asignando...' : !isImplemented ? 'En desarrollo' : 'Asignar'}
+        {isAssigning ? 'Asignando...' : requiresLicense ? 'Requiere licencia' : !isImplemented ? 'En desarrollo' : 'Asignar'}
       </button>
     );
   };
@@ -327,13 +358,16 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
                         (() => {
                           const isAssigning = assigningTestCode === test.code;
                           const isImplemented = (test as any).implemented !== false;
-                          const disabled = isAssigning || !isImplemented;
+                          const requiresLicense = (test as any).requires_license === true;
+                          // Only allow assignment for patient_self tests that are implemented and not licensed-only.
+                          const disabled = isAssigning || !isImplemented || requiresLicense;
                           return (
                         <AssignTestButton
                           onAssign={() => handleAssignTest(test)}
                               disabled={disabled}
                               isAssigning={isAssigning}
                               isImplemented={isImplemented}
+                              requiresLicense={requiresLicense}
                         />
                           );
                         })()

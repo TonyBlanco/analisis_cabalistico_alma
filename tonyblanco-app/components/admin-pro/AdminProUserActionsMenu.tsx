@@ -50,7 +50,7 @@ export function AdminProUserActionsMenu(props: {
       </button>
 
       {open ? (
-        <div className="absolute right-0 z-20 mt-1 w-48 overflow-hidden rounded-md border border-slate-200 bg-white shadow-sm">
+        <div className="absolute right-0 z-50 mt-1 w-48 overflow-hidden rounded-md border border-slate-200 bg-white shadow-sm">
           <button type="button" className={itemClass} onClick={() => (setOpen(false), onView())}>
             Ver detalle
           </button>

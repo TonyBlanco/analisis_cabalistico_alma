@@ -133,7 +133,7 @@ export function AdminProUsersTable(props: {
         </div>
       </div>
 
-      <div className="max-h-[520px] overflow-auto">
+      <div className="max-h-[520px] overflow-auto pr-3 [scrollbar-gutter:stable]">
         <table className="w-full border-collapse">
           <thead className="sticky top-0 z-10 bg-white">
             <tr>

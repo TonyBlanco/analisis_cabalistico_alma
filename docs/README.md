@@ -77,6 +77,11 @@ The system follows a modular architecture with clear separation of concerns:
    - ExperientialWorkspace (BioEmotional)
    - TarotWorkspace (Tarot readings)
 
+5. **Admin Workspace** (`/dashboard/admin`)
+   - Protected admin-only workspace
+   - Isolated UI shell (no global multi-role dashboard sidebar/header)
+   - Uses existing admin endpoints: `/api/admin/*`
+
 ---
 
 ## TreeStructuralState System (Phases 1-4) ✅

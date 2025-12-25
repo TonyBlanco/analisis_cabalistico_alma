@@ -149,13 +149,16 @@ export default function DashboardLayout({
 
   const sidebarItems = getSidebarItems(realUserRole);
 
-  // DEBUG: inspeccionar resolución de rol y menú lateral
-  console.log('🧭 realUserRole:', realUserRole);
-  console.log('🧭 sidebarItems:', sidebarItems);
-
   // Patient and Therapist have their own layouts with sidebars - skip main layout wrapper
   const isPatientRoute = pathname?.startsWith('/dashboard/patient');
   const isTherapistRoute = pathname?.startsWith('/dashboard/therapist');
+  const isAdminRoute = pathname?.startsWith('/dashboard/admin');
+
+  // Admin workspace must live in its own isolated space (no global dashboard sidebar/header).
+  // The admin page itself is already role-protected and renders its own UI shell.
+  if (isAdminRoute) {
+    return <div className={`${themeRole ? `role-${themeRole}` : ''}`}>{children}</div>;
+  }
   
   if (isPatientRoute && realUserRole === 'patient') {
     // Patient route: let patient/layout.tsx handle the sidebar

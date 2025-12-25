@@ -5,11 +5,11 @@ const AUTH_TOKEN_KEY = 'authToken';
 const USER_ROLE_KEY = 'userRole';
 const USERNAME_KEY = 'username';
 
-export type UserRole = 'therapist' | 'patient' | 'personal' | 'visitor';
+export type UserRole = 'admin' | 'therapist' | 'patient' | 'personal' | 'visitor';
 
 export interface MembershipStatus {
   membership_active: boolean;
-  user_type: 'personal' | 'therapist' | 'patient' | 'visitor';
+  user_type: 'admin' | 'personal' | 'therapist' | 'patient' | 'visitor';
   subscription_status: 'trial' | 'active' | 'canceled' | 'expired';
   subscription_plan: string;
   membership_expires: string | null;
@@ -114,7 +114,7 @@ export async function requireAuth(redirectTo: string = '/login'): Promise<boolea
 }
 
 export async function requireMembership(
-  allowedTypes?: ('personal' | 'therapist' | 'patient' | 'visitor')[],
+  allowedTypes?: ('admin' | 'personal' | 'therapist' | 'patient' | 'visitor')[],
   redirectTo: string = '/membership-expired'
 ): Promise<MembershipStatus | null> {
   const token = getAuthToken();

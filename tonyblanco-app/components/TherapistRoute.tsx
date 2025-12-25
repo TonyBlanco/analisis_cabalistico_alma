@@ -32,8 +32,8 @@ export default function TherapistRoute({ children }: TherapistRouteProps) {
         if (!role) {
           const membership = await checkMembership(token);
           if (membership?.user_type) {
-            setUserRole(membership.user_type as any);
-            role = membership.user_type as any;
+            setUserRole(membership.user_type);
+            role = membership.user_type;
           }
         }
 

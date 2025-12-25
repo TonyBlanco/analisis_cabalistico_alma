@@ -146,9 +146,18 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Permite que el frontend (Next.js) haga peticiones a este backend
 CORS_ALLOWED_ORIGINS = config(
     'CORS_ALLOWED_ORIGINS',
-    default='http://localhost:3000,http://localhost:3001',
+    # En producción, este valor debe ser provisto por env var.
+    # Incluimos defaults seguros para desarrollo y previews de Vercel.
+    default='http://localhost:3000,http://localhost:3001,https://*.vercel.app',
     cast=lambda v: [s.strip() for s in v.split(',')]
 )
+
+# Para deployments de preview en Vercel, es común que el dominio cambie.
+# Esta regex permite `https://<cualquier-subdominio>.vercel.app`.
+# Nota: si usas CORS_ALLOW_CREDENTIALS=True, no puedes usar "*"; la regex es la opción correcta.
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r'^https://.*\.vercel\.app$',
+]
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = [
     'accept',
@@ -165,7 +174,9 @@ CORS_ALLOW_HEADERS = [
 # CSRF - Permitir peticiones del frontend
 CSRF_TRUSTED_ORIGINS = config(
     'CSRF_TRUSTED_ORIGINS',
-    default='http://localhost:3000,http://localhost:3001',
+    # En producción, este valor debe ser provisto por env var.
+    # Agregamos wildcard para Vercel previews.
+    default='http://localhost:3000,http://localhost:3001,https://*.vercel.app',
     cast=lambda v: [s.strip() for s in v.split(',')]
 )
 

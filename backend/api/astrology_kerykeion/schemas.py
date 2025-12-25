@@ -6,6 +6,8 @@ from typing import Optional, Dict, List, Any
 from datetime import datetime
 from pydantic import BaseModel, Field, field_validator, ConfigDict
 
+from .params import normalize_house_system, normalize_zodiac_type
+
 
 class LocationSchema(BaseModel):
     """Ubicación de nacimiento"""
@@ -23,11 +25,24 @@ class KerykeionInputSchema(BaseModel):
     location: LocationSchema = Field(..., description="Ubicación de nacimiento")
     house_system: Optional[str] = Field(
         default="placidus",
-        description="Sistema de casas: placidus, equal, koch, whole_sign, regiomontanus, campanus"
+        description=(
+            "Sistema de casas: placidus, equal, koch, whole_sign, regiomontanus, campanus "
+            "o códigos: P, K, A/E, W, R, C"
+        )
     )
+    # Backward compatible (legacy field)
     zodiac_system: Optional[str] = Field(
         default="tropical",
-        description="Sistema zodiacal: tropical, sidereal"
+        description="(Legacy) Sistema zodiacal: tropical, sidereal"
+    )
+    # Preferred field (new)
+    zodiac_type: Optional[str] = Field(
+        default=None,
+        description="Sistema zodiacal: tropical, sidereal, draconic"
+    )
+    ayanamsha: Optional[str] = Field(
+        default=None,
+        description="Ayanamsha para sidereal (ej: lahiri). Opcional"
     )
     engine: str = Field(default="kerykeion", description="Motor de cálculo")
     engine_version: Optional[str] = Field(default="1.0.0", description="Versión del motor")
@@ -56,19 +71,43 @@ class KerykeionInputSchema(BaseModel):
     @classmethod
     def validate_house_system(cls, v):
         """Validar sistema de casas"""
-        valid_systems = ['placidus', 'equal', 'koch', 'whole_sign', 'regiomontanus', 'campanus']
-        if v and v not in valid_systems:
-            raise ValueError(f'house_system debe ser uno de: {", ".join(valid_systems)}')
-        return v
+        try:
+            # Accept both codes and canonical names; store canonical name.
+            return normalize_house_system(v)
+        except Exception as e:
+            raise ValueError(str(e))
 
     @field_validator('zodiac_system')
     @classmethod
     def validate_zodiac_system(cls, v):
         """Validar sistema zodiacal"""
-        valid_systems = ['tropical', 'sidereal']
-        if v and v not in valid_systems:
-            raise ValueError(f'zodiac_system debe ser uno de: {", ".join(valid_systems)}')
-        return v
+        # Keep legacy field strict-ish, but accept empty and normalize when present.
+        if v is None:
+            return v
+        zv = str(v).strip().lower()
+        if not zv:
+            return None
+        if zv not in ('tropical', 'sidereal'):
+            raise ValueError('zodiac_system debe ser uno de: tropical, sidereal')
+        return zv
+
+    @field_validator('zodiac_type')
+    @classmethod
+    def validate_zodiac_type(cls, v):
+        if v is None:
+            return v
+        try:
+            return normalize_zodiac_type(v)
+        except Exception as e:
+            raise ValueError(str(e))
+
+    @field_validator('ayanamsha')
+    @classmethod
+    def validate_ayanamsha(cls, v):
+        if v is None:
+            return v
+        s = str(v).strip().lower()
+        return s or None
 
 
 class PlanetOutputSchema(BaseModel):

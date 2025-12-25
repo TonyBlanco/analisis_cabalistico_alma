@@ -200,3 +200,9 @@ FRONTEND_URL = config('FRONTEND_URL', default='http://localhost:3000')
 # Gemini AI Configuration
 GEMINI_API_KEY = config('GEMINI_API_KEY', default='')
 GEMINI_MODEL = config('GEMINI_MODEL', default='gemini-1.5-flash')
+
+# Astrology Kerykeion - AI snippets (therapist in-session guidance)
+# When enabled, the backend may generate short AI-written (non-verbatim) summaries
+# for curated Sefaria references.
+KERYKEION_AI_SNIPPETS_ENABLED = config('KERYKEION_AI_SNIPPETS_ENABLED', default=False, cast=bool)
+KERYKEION_AI_SNIPPETS_MODEL = config('KERYKEION_AI_SNIPPETS_MODEL', default='')

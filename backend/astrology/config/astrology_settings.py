@@ -31,6 +31,7 @@ HOUSE_SYSTEMS = {
     "R": "Regiomontanus",
     "C": "Campanus",
     "A": "Equal",
+    "W": "Whole Sign",
     "V": "Vehlow",
     "X": "Axial Rotation",
     "H": "Azimuthal",

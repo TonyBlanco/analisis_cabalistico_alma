@@ -2,6 +2,8 @@ import type { NatalChartPayload } from '@/hooks/useNatalChart';
 
 interface NatalChartWheelProps {
   chart: NatalChartPayload;
+  accent?: 'blue' | 'amber' | 'emerald' | 'slate';
+  pending?: boolean;
 }
 
 const ZODIAC_SIGNS = [
@@ -28,8 +30,19 @@ const PLANET_SYMBOLS: Record<string, string> = {
  * 
  * NO calcula nada, solo visualiza datos del backend.
  */
-export default function NatalChartWheel({ chart }: NatalChartWheelProps) {
+export default function NatalChartWheel({ chart, accent = 'slate', pending = false }: NatalChartWheelProps) {
   const { planetas, casas } = chart;
+
+  const accentStrokeClass =
+    accent === 'blue'
+      ? 'text-blue-600'
+      : accent === 'amber'
+        ? 'text-amber-600'
+        : accent === 'emerald'
+          ? 'text-emerald-600'
+          : 'text-slate-600';
+
+  const wheelMutedClass = pending ? 'opacity-70' : 'opacity-100';
 
   // Normalize longitudes and detect overlapping planets.
   // If several planets share (almost) the exact same longitude, apply a tiny visual offset
@@ -96,15 +109,16 @@ export default function NatalChartWheel({ chart }: NatalChartWheelProps) {
 
   return (
     <div className="flex flex-col items-center">
-      <svg viewBox="0 0 200 200" className="w-full max-w-md h-auto">
+      <svg viewBox="0 0 200 200" className={`w-full max-w-md h-auto ${wheelMutedClass}`}>
         {/* Círculo exterior (signos) */}
         <circle
           cx="100"
           cy="100"
           r="90"
-          stroke="#94a3b8"
+          stroke="currentColor"
           strokeWidth="1"
           fill="none"
+          className="text-slate-400"
         />
         
         {/* Círculo medio (casas) */}
@@ -112,9 +126,10 @@ export default function NatalChartWheel({ chart }: NatalChartWheelProps) {
           cx="100"
           cy="100"
           r="75"
-          stroke="#cbd5e1"
+          stroke="currentColor"
           strokeWidth="1"
           fill="none"
+          className="text-slate-300"
         />
         
         {/* Círculo interior (centro) */}
@@ -122,9 +137,10 @@ export default function NatalChartWheel({ chart }: NatalChartWheelProps) {
           cx="100"
           cy="100"
           r="55"
-          stroke="#e2e8f0"
+          stroke="currentColor"
           strokeWidth="1"
           fill="white"
+          className="text-slate-200"
         />
 
         {/* Divisiones de signos (12 secciones de 30°) */}
@@ -139,8 +155,9 @@ export default function NatalChartWheel({ chart }: NatalChartWheelProps) {
               y1="100"
               x2={x2}
               y2={y2}
-              stroke="#e2e8f0"
+              stroke="currentColor"
               strokeWidth="0.5"
+              className="text-slate-200"
             />
           );
         })}
@@ -155,16 +172,18 @@ export default function NatalChartWheel({ chart }: NatalChartWheelProps) {
                 y1="100"
                 x2={pos.x}
                 y2={pos.y}
-                stroke="#64748b"
+                stroke="currentColor"
                 strokeWidth="1"
+                className={accentStrokeClass}
               />
               <text
                 x={pos.x}
                 y={pos.y}
                 fontSize="8"
-                fill="#475569"
+                fill="currentColor"
                 textAnchor="middle"
                 dominantBaseline="middle"
+                className={accentStrokeClass}
               >
                 {casa.numero}
               </text>
@@ -185,15 +204,17 @@ export default function NatalChartWheel({ chart }: NatalChartWheelProps) {
                 cx={pos.x}
                 cy={pos.y}
                 r="4"
-                fill={planeta.es_retrogrado ? '#ef4444' : '#3b82f6'}
+                fill="currentColor"
+                className={planeta.es_retrogrado ? 'text-red-500' : 'text-blue-500'}
               />
               <text
                 x={pos.x}
                 y={pos.y + 10}
                 fontSize="10"
-                fill="#1e293b"
+                fill="currentColor"
                 textAnchor="middle"
                 fontWeight="bold"
+                className="text-slate-800"
               >
                 {symbol}
               </text>
@@ -212,9 +233,10 @@ export default function NatalChartWheel({ chart }: NatalChartWheelProps) {
               x={x}
               y={y}
               fontSize="6"
-              fill="#64748b"
+              fill="currentColor"
               textAnchor="middle"
               dominantBaseline="middle"
+              className="text-slate-500"
             >
               {sign.slice(0, 3)}
             </text>

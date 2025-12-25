@@ -7,6 +7,12 @@ independientemente de cambios en Kerykeion
 from typing import Dict, List, Any, Optional
 from datetime import datetime
 
+from django.conf import settings
+
+from .mapper_cabala import map_planet_to_sefirot, map_sign_to_paths
+from .sefaria_refs import get_sefaria_refs_for_planet
+from .ai_snippets import kerykeion_snippet_ai
+
 
 def normalize_kerykeion_output(
     kerykeion_result: Dict[str, Any],
@@ -173,9 +179,12 @@ def normalize_kerykeion_output(
         })
     
     # Metadatos
+    zodiac_type = input_data.get('zodiac_type') or input_data.get('zodiac_system') or 'tropical'
     metadata = {
-        'sistema_casas': kerykeion_result.get('house_system', 'placidus'),
-        'fuente': 'kerykeion',
+        'sistema_casas': input_data.get('house_system', 'placidus'),
+        'zodiac_type': zodiac_type,
+        'ayanamsha': input_data.get('ayanamsha'),
+        'fuente': input_data.get('engine', 'kerykeion'),
         'calculated_at': datetime.utcnow().isoformat(),
         'version_engine': kerykeion_result.get('engine_version', '1.0.0'),
         'input_snapshot': {
@@ -188,13 +197,149 @@ def normalize_kerykeion_output(
             'timezone': input_data.get('location', {}).get('timezone')
         }
     }
+
+    # Cabalistic enrichment (technical, no narrative)
+    planet_std_to_title = {
+        'sun': 'Sun',
+        'moon': 'Moon',
+        'mercury': 'Mercury',
+        'venus': 'Venus',
+        'mars': 'Mars',
+        'jupiter': 'Jupiter',
+        'saturn': 'Saturn',
+        'uranus': 'Uranus',
+        'neptune': 'Neptune',
+        'pluto': 'Pluto',
+    }
+
+    sign_en_to_es = {
+        'Aries': 'Aries',
+        'Taurus': 'Tauro',
+        'Gemini': 'Géminis',
+        'Cancer': 'Cáncer',
+        'Leo': 'Leo',
+        'Virgo': 'Virgo',
+        'Libra': 'Libra',
+        'Scorpio': 'Escorpio',
+        'Sagittarius': 'Sagitario',
+        'Capricorn': 'Capricornio',
+        'Aquarius': 'Acuario',
+        'Pisces': 'Piscis',
+    }
+
+    cabalistic_planets: Dict[str, Any] = {}
+    letters_used: List[str] = []
+
+    letter_to_hebrew_char = {
+        'Alef': 'א',
+        'Bet': 'ב',
+        'Gimel': 'ג',
+        'Guimel': 'ג',
+        'Dalet': 'ד',
+        'He': 'ה',
+        'Vav': 'ו',
+        'Zayin': 'ז',
+        'Het': 'ח',
+        'Chet': 'ח',
+        'Tet': 'ט',
+        'Yod': 'י',
+        'Kaf': 'כ',
+        'Kaf/Jaf': 'כ',
+        'Lamed': 'ל',
+        'Mem': 'מ',
+        'Nun': 'נ',
+        'Samekh': 'ס',
+        'Sámej': 'ס',
+        'Ayin': 'ע',
+        'Pe': 'פ',
+        'Pe/Fe': 'פ',
+        'Tsadi': 'צ',
+        'Qof': 'ק',
+        'Resh': 'ר',
+        'Shin': 'ש',
+        'Tav': 'ת',
+    }
+
+    for p in planets_normalized:
+        pname = p.get('nombre')
+        if not pname:
+            continue
+
+        planet_title = planet_std_to_title.get(pname)
+        if not planet_title:
+            continue
+
+        sef = map_planet_to_sefirot(planet_title) or {}
+
+        sign_raw = p.get('signo') or ''
+        sign_es = sign_en_to_es.get(sign_raw, sign_raw)
+        paths = map_sign_to_paths(sign_es) or []
+        path = paths[0] if paths else None
+
+        # Attach hebrew char if we can
+        if path and path.get('hebrew_letter') and not path.get('hebrew_char'):
+            path_letter = path.get('hebrew_letter')
+            if isinstance(path_letter, str):
+                path['hebrew_char'] = letter_to_hebrew_char.get(path_letter)
+
+        if path and path.get('hebrew_letter'):
+            letters_used.append(path['hebrew_letter'])
+
+        refs = get_sefaria_refs_for_planet(planet_title)
+        # Optional in-session AI guidance. Never uses/stores Sefaria text; only metadata.
+        enable_ai_snippets = bool(getattr(settings, 'KERYKEION_AI_SNIPPETS_ENABLED', False))
+        if enable_ai_snippets and refs:
+            # Keep cost/latency bounded: generate only for the first curated ref.
+            first = refs[0]
+            try:
+                snippet = kerykeion_snippet_ai.generate_snippet(
+                    planet=planet_title,
+                    sign=sign_es,
+                    house=(p.get('casa') if isinstance(p.get('casa'), int) else None),
+                    sefira=(sef.get('sefira_name') if isinstance(sef, dict) else None),
+                    letter_name=(path.get('hebrew_letter') if path else None),
+                    letter_char=(path.get('hebrew_char') if path else None),
+                    attribute=(path.get('path_name') if path else None),
+                    ref_title=first.get('title', ''),
+                    ref_url=first.get('url', ''),
+                )
+                if snippet:
+                    first['snippet'] = snippet
+            except Exception:
+                # Best-effort only: do not break normalization if AI fails.
+                pass
+
+        cabalistic_planets[pname] = {
+            'sefira': sef or None,
+            'path': path,
+            # New stable schema requested by frontend
+            'planet_info': {
+                'planet': planet_title,
+                'sign_letter': (
+                    f"{path.get('hebrew_letter')} ({path.get('hebrew_char')})"
+                    if path and path.get('hebrew_letter') and path.get('hebrew_char')
+                    else (path.get('hebrew_letter') if path and path.get('hebrew_letter') else None)
+                ),
+                'path_id': (f"Path_{path.get('path_number')}" if path and path.get('path_number') else None),
+                'sefira': (sef.get('sefira_name') if isinstance(sef, dict) else None),
+                'sefaria_refs': refs,
+            },
+        }
+
+    cabalistic_data = {
+        'planets': cabalistic_planets,
+        'hebrew_letters': sorted(list(set([l for l in letters_used if l]))),
+        # Placeholder for future deterministic tikun signals (kept stable)
+        'tikun_signals': [],
+    }
     
     # Construir resultado normalizado
     return {
         'planetas': planets_normalized,
         'casas': houses_normalized,
         'aspectos': aspects_normalized,
-        'metadatos': metadata
+        'metadatos': metadata,
+        'cabalistic_data': cabalistic_data,
     }
 
 

@@ -12,6 +12,7 @@ export default function TherapistDashboard() {
   const router = useRouter();
   const [role, setRole] = useState<string | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
 
   useEffect(() => {
     fetchSession().then(() => {
@@ -26,6 +27,8 @@ export default function TherapistDashboard() {
 
   const handlePatientSelected = (patient: Patient) => {
     console.log('Patient selected:', patient);
+    setSelectedPatient(patient);
+    setPickerOpen(false);
   };
 
   if (role && role !== 'therapist' && role !== 'admin') {
@@ -34,7 +37,11 @@ export default function TherapistDashboard() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      <TherapistClinicalDashboard onChangePatient={() => setPickerOpen(true)} />
+      <TherapistClinicalDashboard 
+        onChangePatient={() => setPickerOpen(true)}
+        patientId={selectedPatient?.id}
+        patientName={selectedPatient?.legal_full_name || selectedPatient?.full_name || selectedPatient?.email}
+      />
 
       <PatientPicker
         open={pickerOpen}

@@ -3,7 +3,7 @@
 Adaptador entre Astrology Core (Swiss Ephemeris) y formato Kerykeion normalizado
 Usa el engine de Swiss Ephemeris directamente cuando Kerykeion falla
 """
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 from datetime import datetime
 from decimal import Decimal
 
@@ -24,7 +24,9 @@ def execute_with_astrology_core(
     lat: float,
     lng: float,
     timezone: str,
-    house_system: str = 'P'
+    house_system: str = 'P',
+    zodiac_type: str = 'tropical',
+    ayanamsha: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
     Ejecuta cálculo usando Astrology Core (Swiss Ephemeris directo)
@@ -52,16 +54,14 @@ def execute_with_astrology_core(
         "%Y-%m-%d %H:%M"
     )
     
-    # Mapear sistema de casas a código de Swiss Ephemeris
-    HOUSE_SYSTEM_MAP = {
-        'placidus': 'P',
-        'koch': 'K',
-        'equal': 'E',
-        'whole_sign': 'W',
-        'regiomontanus': 'R',
-        'campanus': 'C'
-    }
-    house_system_code = HOUSE_SYSTEM_MAP.get(house_system.lower(), 'P')
+    # Aceptar house_system como código (P/K/...) o nombre (placidus/...)
+    try:
+        from .params import house_system_to_engine_code, normalize_zodiac_type
+        house_system_code = house_system_to_engine_code(house_system)
+        zodiac_type_norm = normalize_zodiac_type(zodiac_type)
+    except Exception:
+        house_system_code = (house_system or 'P').upper() if isinstance(house_system, str) else 'P'
+        zodiac_type_norm = 'tropical'
     
     # Crear engine
     engine = NatalChartEngine()
@@ -74,7 +74,9 @@ def execute_with_astrology_core(
         longitude=Decimal(str(lng)),
         timezone=timezone,
         house_system=house_system_code,
-        zodiac_type='T',  # Tropical
+        zodiac_type='S' if zodiac_type_norm == 'sidereal' else 'T',
+        ayanamsha=ayanamsha,
+        draconic=(zodiac_type_norm == 'draconic'),
         include_minor_aspects=False
     )
     
@@ -142,7 +144,8 @@ def execute_with_astrology_core(
         'planets': planets,
         'houses': houses,
         'aspects': aspects,
-        'house_system': house_system,
+        'house_system': house_system_code,
+        'zodiac_type': zodiac_type_norm,
         'engine': 'swisseph',
         'engine_version': '2.10.3',
         'chart_svg': '',  # No generamos SVG con Swiss Ephemeris

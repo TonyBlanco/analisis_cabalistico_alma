@@ -215,6 +215,9 @@ npm run dev
 ```
 DJANGO_SECRET_KEY=<your-secret-key>
 GEMINI_API_KEY=<your-gemini-api-key>
+KERYKEION_AI_SNIPPETS_ENABLED=false
+# Optional: override model just for kerykeion snippets (defaults to GEMINI_MODEL)
+KERYKEION_AI_SNIPPETS_MODEL=
 DATABASE_URL=<postgresql-url-or-sqlite>
 ```
 

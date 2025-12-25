@@ -3,7 +3,7 @@
 
 from datetime import datetime
 from decimal import Decimal
-from typing import List
+from typing import List, Optional
 
 from .planets import PlanetsEngine
 from .houses import HousesEngine
@@ -13,6 +13,12 @@ from ..domain.chart import NatalChart
 from ..domain.planet_position import PlanetPosition
 from ..domain.house_position import HousePosition
 from ..config.astrology_settings import DEFAULT_HOUSE_SYSTEM, DEFAULT_ZODIAC_TYPE
+
+try:
+    import swisseph as swe
+    SWISSEPH_AVAILABLE = True
+except ImportError:
+    SWISSEPH_AVAILABLE = False
 
 
 class NatalChartEngine:
@@ -32,6 +38,8 @@ class NatalChartEngine:
         timezone: str = "UTC",
         house_system: str = DEFAULT_HOUSE_SYSTEM,
         zodiac_type: str = DEFAULT_ZODIAC_TYPE,
+        ayanamsha: Optional[str] = None,
+        draconic: bool = False,
         include_minor_aspects: bool = False
     ) -> NatalChart:
         """
@@ -64,18 +72,49 @@ class NatalChartEngine:
         # Convert birth time to Julian Day
         jd = EphemerisUtils.datetime_to_julian_day(birth_datetime)
 
+        # Swiss Ephemeris flags (sidereal support)
+        planet_flags = None
+        house_flags = 0
+
+        if zodiac_type == 'S' and SWISSEPH_AVAILABLE:
+            # Configure sidereal mode (default: Lahiri)
+            sid_mode = getattr(swe, 'SIDM_LAHIRI', None)
+            if ayanamsha:
+                ay = ayanamsha.strip().lower()
+                sid_mode = {
+                    'lahiri': getattr(swe, 'SIDM_LAHIRI', sid_mode),
+                    'fagan_bradley': getattr(swe, 'SIDM_FAGAN_BRADLEY', sid_mode),
+                    'krishnamurti': getattr(swe, 'SIDM_KRISHNAMURTI', sid_mode),
+                    'raman': getattr(swe, 'SIDM_RAMAN', sid_mode),
+                    'yukteshwar': getattr(swe, 'SIDM_YUKTESHWAR', sid_mode),
+                }.get(ay, sid_mode)
+
+            if sid_mode is not None:
+                swe.set_sid_mode(sid_mode)
+
+            planet_flags = swe.FLG_SPEED | swe.FLG_SWIEPH | swe.FLG_SIDEREAL
+            house_flags = swe.FLG_SIDEREAL
+
         # Calculate planet positions
-        planets = self._calculate_all_planets(jd, float(latitude), float(longitude))
+        planets = self._calculate_all_planets(jd, float(latitude), float(longitude), flags=planet_flags)
         chart.planets = planets
 
         # Calculate house cusps
         houses = self.houses_engine.calculate_house_cusps(
-            jd, float(latitude), float(longitude), house_system
+            jd, float(latitude), float(longitude), house_system, flags=house_flags
         )
         chart.houses = houses
 
         # Assign houses to planets
         self._assign_houses_to_planets(planets, houses)
+
+        # Draconic transformation: shift all longitudes by North Node.
+        # This keeps aspects invariant (relative angles unchanged).
+        if draconic:
+            node = self.planets_engine.calculate_planet_position(
+                'north_node', jd, float(latitude), float(longitude), flags=planet_flags
+            )
+            self._apply_draconic_shift(planets, houses, node.longitude)
 
         # Calculate aspects
         aspects = self.aspects_engine.calculate_aspects(planets, include_minor_aspects)
@@ -87,7 +126,8 @@ class NatalChartEngine:
         self,
         jd: float,
         latitude: float,
-        longitude: float
+        longitude: float,
+        flags: Optional[int] = None,
     ) -> List[PlanetPosition]:
         """Calculate positions for all planets"""
         planets = []
@@ -99,7 +139,7 @@ class NatalChartEngine:
         for planet_name in planet_names:
             try:
                 planet_pos = self.planets_engine.calculate_planet_position(
-                    planet_name, jd, latitude, longitude
+                    planet_name, jd, latitude, longitude, flags=flags
                 )
                 planets.append(planet_pos)
             except Exception as e:
@@ -107,6 +147,31 @@ class NatalChartEngine:
                 # Continue with other planets
 
         return planets
+
+    def _apply_draconic_shift(
+        self,
+        planets: List[PlanetPosition],
+        houses: List[HousePosition],
+        north_node_longitude: Decimal,
+    ) -> None:
+        """Shift all chart longitudes by the North Node longitude (draconic chart)."""
+        offset = north_node_longitude
+
+        def norm360(v: Decimal) -> Decimal:
+            v = v % Decimal('360')
+            if v < 0:
+                v += Decimal('360')
+            return v
+
+        for planet in planets:
+            new_lon = norm360(planet.longitude - offset)
+            planet.longitude = new_lon
+            planet.sign, planet.sign_degree = self.planets_engine._get_zodiac_sign(new_lon)
+
+        for house in houses:
+            new_lon = norm360(house.longitude - offset)
+            house.longitude = new_lon
+            house.sign, house.sign_degree = self.houses_engine._get_zodiac_sign(new_lon)
 
     def _assign_houses_to_planets(
         self,

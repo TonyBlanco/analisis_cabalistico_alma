@@ -11,6 +11,7 @@ import { getActivePatientId } from '@/lib/active-patient';
 export default function AstrologyWorkspace() {
   const [activeView, setActiveView] = useState<AstrologyViewMode>('visual');
   const [houseSystem, setHouseSystem] = useState<string>('P'); // P=Placidus default
+  const [zodiacType, setZodiacType] = useState<string>('tropical');
   const [activePatientId, setActivePatientId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -73,7 +74,7 @@ export default function AstrologyWorkspace() {
 
     switch (activeView) {
       case 'visual':
-        return <AstrologyVisualCore patientId={activePatientId} />;
+        return <AstrologyVisualCore patientId={activePatientId} houseSystem={houseSystem} zodiacType={zodiacType} />;
       case 'correspondences':
         return (
           <section className="flex-1 bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
@@ -112,7 +113,14 @@ export default function AstrologyWorkspace() {
       </header>
 
       <div className="flex">
-        <AstrologySidebar activeView={activeView} onViewChange={setActiveView} houseSystem={houseSystem} setHouseSystem={setHouseSystem} />
+        <AstrologySidebar
+          activeView={activeView}
+          onViewChange={setActiveView}
+          houseSystem={houseSystem}
+          setHouseSystem={setHouseSystem}
+          zodiacType={zodiacType}
+          setZodiacType={setZodiacType}
+        />
         <main className="flex-1 px-6 py-6">
           <div className="mb-4 rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700">
             Observacional. Con interpretación asistida, sin predicción clínica, sin automatización decisoria.

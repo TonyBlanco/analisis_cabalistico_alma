@@ -106,6 +106,8 @@ from .patient_status_views import (
     PatientStatusUpdateView,
     PatientArchiveView,
 )
+from .patient_symbolic_overview_views import PatientSymbolicOverviewView
+from .patient_holistic_export_views import PatientHolisticExportsView
 from .symbolic_views import TreeStructuralStateView
 from .utils.symbolic_interpreter_ai import (
     generate_symbolic_interpretation_view,
@@ -155,6 +157,8 @@ urlpatterns = [
     path('therapist/patients/<int:pk>/profile/validation/', PatientProfileValidationView.as_view(), name='patient_profile_validation'),
     path('therapist/patients/<int:pk>/status/', PatientStatusUpdateView.as_view(), name='patient_status_update'),
     path('therapist/patients/<int:pk>/archive/', PatientArchiveView.as_view(), name='patient_archive'),
+    path('therapist/patients/<int:id>/symbolic-overview/', PatientSymbolicOverviewView.as_view(), name='patient_symbolic_overview'),
+    path('therapist/patients/<int:id>/holistic-exports/', PatientHolisticExportsView.as_view(), name='patient_holistic_exports'),
     path('therapist/patients/<int:id>/tarot-analysis/', TarotAnalysisView.as_view(), name='tarot_analysis'),
     path('tarot/cabalistic-correspondence/', TarotCabalisticCorrespondenceView.as_view(), name='tarot_cabalistic_correspondence'),
     path('therapist/patients/<int:id>/tarot-analysis/generate-and-save/', GenerateAndSaveTarotAnalysisView.as_view(), name='tarot_analysis_generate_and_save'),

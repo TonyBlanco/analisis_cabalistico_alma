@@ -6,6 +6,7 @@ Fallback a Swiss Ephemeris directo si Kerykeion falla
 from datetime import datetime
 from .schemas import KerykeionInputSchema, KerykeionOutputSchema, PlanetOutputSchema, HouseOutputSchema, AspectOutputSchema, CabalisticMappingSchema
 from .mapper_cabala import build_cabalistic_mapping
+from .params import normalize_params
 
 # Try import Kerykeion
 try:
@@ -29,14 +30,14 @@ def execute_kerykeion(input_data: KerykeionInputSchema) -> KerykeionOutputSchema
     Returns:
         Resultado del cálculo en formato estándar Kerykeion
     """
-    # Intentar con Kerykeion primero
-    if KERYKEION_AVAILABLE:
-        try:
-            return _execute_with_kerykeion(input_data)
-        except Exception as e:
-            print(f"Kerykeion falló, usando Swiss Ephemeris directo: {e}")
-    
-    # Fallback a Swiss Ephemeris directo
+    params = normalize_params(
+        house_system=input_data.house_system,
+        zodiac_type=input_data.zodiac_type,
+        zodiac_system=input_data.zodiac_system,
+        ayanamsha=input_data.ayanamsha,
+    )
+
+    # Prefer Swiss Ephemeris core when available so house systems + zodiac types are honored.
     if ASTROLOGY_CORE_AVAILABLE:
         try:
             result_dict = execute_with_astrology_core(
@@ -47,15 +48,20 @@ def execute_kerykeion(input_data: KerykeionInputSchema) -> KerykeionOutputSchema
                 lat=input_data.location.lat,
                 lng=input_data.location.lng,
                 timezone=input_data.location.timezone,
-                house_system=input_data.house_system or 'placidus'
+                house_system=params.house_system_code,
+                zodiac_type=params.zodiac_type,
+                ayanamsha=params.ayanamsha,
             )
-            
-            # Convertir a schema
+
             return KerykeionOutputSchema(**result_dict)
         except Exception as e:
             raise RuntimeError(f"Error en cálculo astrológico: {e}")
-    
-    raise RuntimeError("Ni Kerykeion ni Swiss Ephemeris están disponibles")
+
+    # Fallback: Kerykeion library (limited configurability)
+    if KERYKEION_AVAILABLE:
+        return _execute_with_kerykeion(input_data)
+
+    raise RuntimeError("Ni Swiss Ephemeris (Astrology Core) ni Kerykeion están disponibles")
 
 
 def _execute_with_kerykeion(input_data: KerykeionInputSchema) -> KerykeionOutputSchema:

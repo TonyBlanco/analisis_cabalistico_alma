@@ -13,6 +13,7 @@
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@google/generative-ai": "^0.24.1",
+    "@heroicons/react": "^2.2.0",
     "@mui/icons-material": "^7.3.6",
     "@mui/material": "^7.3.6",
     "@radix-ui/react-slot": "^1.2.4",
@@ -28,7 +29,8 @@
     "openai": "^6.10.0",
     "react": "19.2.0",
     "react-dom": "19.2.0",
-    "tailwind-merge": "^3.4.0"
+    "tailwind-merge": "^3.4.0",
+    "tonyblanco-app": "file:"
   },
   "devDependencies": {
     "@playwright/test": "^1.40.0",

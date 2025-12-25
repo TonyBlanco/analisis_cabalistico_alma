@@ -11,6 +11,8 @@ import { usePanelManager } from '@/components/TherapistWorkspace/PanelManagerCon
 
 interface TherapistClinicalDashboardProps {
   onChangePatient: () => void;
+  patientId?: string | number;
+  patientName?: string;
 }
 
 const contextSections: ContextSection[] = [
@@ -48,6 +50,8 @@ const contextSections: ContextSection[] = [
 
 export default function TherapistClinicalDashboard({
   onChangePatient,
+  patientId,
+  patientName,
 }: TherapistClinicalDashboardProps) {
   const [activeSection, setActiveSection] = useState<ContextSectionId>('overview');
   const [visualizationState, setVisualizationState] = useState<VisualizationState | null>(null);
@@ -87,6 +91,7 @@ export default function TherapistClinicalDashboard({
         onNewSession={handleNewSession}
         onViewHistory={handleViewHistory}
         onChangePatient={onChangePatient}
+        patientName={patientName}
       />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[240px_minmax(0,1fr)_320px]">
@@ -98,7 +103,7 @@ export default function TherapistClinicalDashboard({
           />
         </aside>
         <section className="min-h-[520px]">
-          <CenterVisual onStateChange={setVisualizationState} />
+          <CenterVisual onStateChange={setVisualizationState} patientId={patientId} />
         </section>
         <aside className="space-y-4">
           <RightPanel

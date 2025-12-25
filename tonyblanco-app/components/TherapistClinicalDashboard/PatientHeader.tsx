@@ -9,6 +9,7 @@ interface PatientHeaderProps {
   onNewSession: () => void;
   onViewHistory: () => void;
   onChangePatient: () => void;
+  patientName?: string;
 }
 
 const formatAge = (birthDate: string | null) => {
@@ -60,6 +61,7 @@ export default function PatientHeader({
   onNewSession,
   onViewHistory,
   onChangePatient,
+  patientName,
 }: PatientHeaderProps) {
   const [activePatient, setActivePatient] = useState<{ id: number; name: string | null } | null>(
     null,

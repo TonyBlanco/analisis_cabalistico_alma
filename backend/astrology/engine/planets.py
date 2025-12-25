@@ -36,7 +36,8 @@ class PlanetsEngine:
         jd: float,
         latitude: float = 0,
         longitude: float = 0,
-        altitude: float = 0
+        altitude: float = 0,
+        flags: Optional[int] = None,
     ) -> PlanetPosition:
         """
         Calculate planet position for given Julian Day
@@ -57,12 +58,12 @@ class PlanetsEngine:
         planet_id = PLANET_IDS[planet_name]
 
         # Calculate planet position
-        # flags: SEFLG_SPEED (calculate speed) | SEFLG_SWIEPH (use Swiss Ephemeris)
-        flags = swe.FLG_SPEED | swe.FLG_SWIEPH
+        # Default flags: SPEED (calculate speed) | SWIEPH (use Swiss Ephemeris)
+        eff_flags = flags if flags is not None else (swe.FLG_SPEED | swe.FLG_SWIEPH)
 
         try:
             # Get planet position
-            result = swe.calc(jd, planet_id, flags)
+            result = swe.calc(jd, planet_id, eff_flags)
 
             # Result may be either a flat sequence [lon, lat, dist, sp_lon, sp_lat, sp_dist]
             # or a tuple where the first element is that sequence and the second a status code (common in some swisseph bindings).
@@ -118,14 +119,19 @@ class PlanetsEngine:
 
     def _get_zodiac_sign(self, longitude: Decimal) -> Tuple[str, Decimal]:
         """Get zodiac sign and degree within sign"""
+        # Decimal '%' keeps the sign of the dividend; normalize to [0, 360)
+        lon = longitude % Decimal('360')
+        if lon < 0:
+            lon += Decimal('360')
+
         signs = [
             "aries", "taurus", "gemini", "cancer", "leo", "virgo",
             "libra", "scorpio", "sagittarius", "capricorn", "aquarius", "pisces"
         ]
 
-        sign_index = int(longitude // 30)
+        sign_index = int(lon // 30)
         sign = signs[sign_index % 12]
-        sign_degree = longitude % 30
+        sign_degree = lon - (Decimal(sign_index) * Decimal('30'))
 
         return sign, sign_degree
 

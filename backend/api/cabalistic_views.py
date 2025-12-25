@@ -273,6 +273,7 @@ class KerykeionAnalysisView(APIView):
                 'status': 'ok',
                 'calculated_at': natal_chart.calculated_at.isoformat(),
                 'house_system': natal_chart.house_system,
+                'zodiac_type': (natal_chart.input_snapshot or {}).get('zodiac_type', 'tropical'),
                 'source': natal_chart.source,
                 'chart': natal_chart.chart_payload
             }
@@ -345,6 +346,22 @@ class KerykeionAnalysisView(APIView):
                     status=status.HTTP_400_BAD_REQUEST
                 )
             
+            # Normalizar parámetros opcionales desde request (birth data siempre desde perfil)
+            from .astrology_kerykeion.params import normalize_params
+
+            try:
+                params = normalize_params(
+                    house_system=request.data.get('house_system'),
+                    zodiac_type=request.data.get('zodiac_type'),
+                    zodiac_system=request.data.get('zodiac_system'),
+                    ayanamsha=request.data.get('ayanamsha'),
+                )
+            except ValueError as e:
+                return Response(
+                    {'error': 'Parámetros inválidos', 'details': str(e)},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
             # Construir input desde el perfil del paciente
             input_data_dict = {
                 'birth_date': patient.birth_date.strftime('%Y-%m-%d'),
@@ -356,8 +373,13 @@ class KerykeionAnalysisView(APIView):
                     'lng': float(patient.birth_longitude),
                     'timezone': patient.birth_timezone
                 },
-                'house_system': request.data.get('house_system', 'placidus'),
-                'zodiac_system': 'tropical',
+                # Persist canonical house system name (e.g. 'placidus')
+                'house_system': params.house_system_name,
+                # Backward-compatible field for schema
+                'zodiac_system': 'sidereal' if params.zodiac_type == 'sidereal' else 'tropical',
+                # Preferred field
+                'zodiac_type': params.zodiac_type,
+                'ayanamsha': params.ayanamsha,
                 'engine': 'kerykeion',
                 'engine_version': '1.0.0'
             }
@@ -450,6 +472,7 @@ class KerykeionAnalysisView(APIView):
                 'status': 'ok',
                 'calculated_at': natal_chart.calculated_at.isoformat(),
                 'house_system': natal_chart.house_system,
+                'zodiac_type': (natal_chart.input_snapshot or {}).get('zodiac_type', 'tropical'),
                 'source': natal_chart.source,
                 'chart': normalized_chart
             }

@@ -3,10 +3,16 @@ import { test, expect } from '@playwright/test';
 // This test verifies that selecting a House System and clicking "Calcular carta natal"
 // sends a POST request that contains the mapped `house_system` value.
 
-test('Astrology: house system selection is sent on calculate', async ({ page }) => {
+test('Astrology: house system selection is sent on calculate', async ({ page }, testInfo) => {
   const patientId = 12345; // fake patient id for e2e
   // Use backend API base for routes (default to local API server)
   const apiBase = process.env.API_BASE_URL || 'http://localhost:8000/api';
+
+  const appBase =
+    testInfo.project.use.baseURL ||
+    process.env.E2E_BASE_URL ||
+    process.env.PLAYWRIGHT_BASE_URL ||
+    'http://localhost:3000';
 
   // Set auth token and active patient in localStorage (ensure it's present during CSR hydration)
   await page.addInitScript(() => {
@@ -149,7 +155,10 @@ test('Astrology: house system selection is sent on calculate', async ({ page }) 
   // Attach console, pageerror and network listeners to capture client-side errors and failed requests
   page.on('console', (msg) => console.log('PAGE CONSOLE:', msg.text()));
   page.on('pageerror', (err) => console.log('PAGE ERROR:', err.message));
-  page.on('requestfailed', (req) => console.log('REQUEST FAILED:', req.url(), req.failure() && req.failure().errorText));
+  page.on('requestfailed', (req) => {
+    const failure = req.failure();
+    console.log('REQUEST FAILED:', req.url(), failure?.errorText);
+  });
   page.on('response', (res) => {
     if (res.status() === 401 || res.status() === 403 || res.status() === 404) {
       console.log('RESPONSE', res.status(), res.url());
@@ -157,7 +166,7 @@ test('Astrology: house system selection is sent on calculate', async ({ page }) 
   });
 
   // Go to the astrology workspace
-  const resp = await page.goto('/dashboard/therapist/astrologia');
+  const resp = await page.goto(new URL('/dashboard/therapist/astrologia', appBase).toString());
   console.log('goto status', resp && resp.status());
 
   // Ensure active patient id is set in localStorage and reload to pick it up in client code
@@ -181,8 +190,8 @@ test('Astrology: house system selection is sent on calculate', async ({ page }) 
     const select = document.querySelector('select') as HTMLSelectElement | null;
     if (!select) throw new Error('Select not found');
     const selected = select.value;
-    const map: Record<string, string> = { P: 'placidus', K: 'koch', E: 'equal', W: 'whole', R: 'regiomontanus' };
-    const body = { house_system: map[selected] || 'placidus' };
+    // New contract: backend accepts short codes directly (e.g. 'W', 'P', 'E')
+    const body = { house_system: selected };
     await fetch(`/api/therapist/patients/${patientId}/astrology-kerykeion/`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Token test-token` },
@@ -197,5 +206,5 @@ test('Astrology: house system selection is sent on calculate', async ({ page }) 
   }
 
   expect(capturedBody).not.toBeNull();
-  expect(capturedBody.house_system).toBe('whole');
+  expect(capturedBody.house_system).toBe('W');
 });

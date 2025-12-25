@@ -7,6 +7,8 @@ interface AstrologySidebarProps {
   onViewChange: (view: AstrologyViewMode) => void;
   houseSystem: string;
   setHouseSystem: (s: string) => void;
+  zodiacType: string;
+  setZodiacType: (s: string) => void;
 }
 
 const sections: Array<{ id: AstrologyViewMode; label: string; enabled: boolean }> = [
@@ -23,7 +25,13 @@ const HOUSE_OPTIONS: Array<{ code: string; name: string; desc?: string }> = [
   { code: 'R', name: 'Regiomontanus', desc: 'Astrología horaria y tradicional.' },
 ];
 
-export default function AstrologySidebar({ activeView, onViewChange, houseSystem, setHouseSystem }: AstrologySidebarProps) {
+const ZODIAC_OPTIONS: Array<{ code: string; name: string; desc?: string }> = [
+  { code: 'tropical', name: 'Tropical', desc: 'Estándar occidental. Referencia para visualización clínica.' },
+  { code: 'sidereal', name: 'Sideral', desc: 'Usa ayanamsha (backend). Tradiciones védicas/estrellas fijas.' },
+  { code: 'draconic', name: 'Dracónico', desc: 'Transformación por Nodo Norte. Útil para lectura simbólica.' },
+];
+
+export default function AstrologySidebar({ activeView, onViewChange, houseSystem, setHouseSystem, zodiacType, setZodiacType }: AstrologySidebarProps) {
   return (
     <aside className="w-72 border-r border-gray-200 bg-white flex flex-col">
       <div className="px-4 py-4 border-b border-gray-200">
@@ -69,6 +77,22 @@ export default function AstrologySidebar({ activeView, onViewChange, houseSystem
             ))}
           </select>
           <p className="text-xs text-gray-500 mt-2">{HOUSE_OPTIONS.find((h) => h.code === houseSystem)?.desc}</p>
+          <p className="text-[11px] text-gray-400 mt-1">La selección se aplica al recalcular la carta.</p>
+        </div>
+
+        <div className="pt-2 border-t border-gray-100">
+          <label className="block text-xs font-semibold text-gray-600 mb-2">Zodiaco</label>
+          <select
+            value={zodiacType}
+            onChange={(e) => setZodiacType(e.target.value)}
+            className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm"
+          >
+            {ZODIAC_OPTIONS.map((opt) => (
+              <option key={opt.code} value={opt.code}>{opt.name}</option>
+            ))}
+          </select>
+          <p className="text-xs text-gray-500 mt-2">{ZODIAC_OPTIONS.find((z) => z.code === zodiacType)?.desc}</p>
+          <p className="text-[11px] text-gray-400 mt-1">La selección se aplica al recalcular la carta.</p>
         </div>
       </div>
       <div className="px-4 py-3 border-t border-gray-200 text-[11px] text-gray-500">

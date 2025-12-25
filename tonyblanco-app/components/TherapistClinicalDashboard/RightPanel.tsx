@@ -27,6 +27,11 @@ export default function RightPanel({
   onAddNote,
   patientId,
 }: RightPanelProps) {
+  const normalizedPatientId =
+    patientId === undefined || patientId === null || patientId === ''
+      ? null
+      : String(patientId);
+
   const selectedRegion =
     bodyRegions.find((region) => region.id === visualizationState?.selectedBodyRegionId) || null;
   const selectedSefirah =
@@ -159,6 +164,16 @@ export default function RightPanel({
             <p className="text-xs text-gray-500">
               Vista en solo lectura de tests asignados. Sin metricas automaticas.
             </p>
+            <Link
+              href={
+                normalizedPatientId
+                  ? `/dashboard/therapist/tests?patient_id=${encodeURIComponent(normalizedPatientId)}`
+                  : '/dashboard/therapist/tests'
+              }
+              className="inline-flex items-center text-xs font-medium text-blue-600 hover:text-blue-800"
+            >
+              Abrir catalogo de tests
+            </Link>
           </div>
           <AssignedTestsSection />
         </div>

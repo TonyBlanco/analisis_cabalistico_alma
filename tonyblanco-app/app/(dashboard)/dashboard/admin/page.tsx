@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { getUserRole } from '@/lib/getUserRole';
 import { fetchSession } from '@/lib/session';
-import { AdminWorkspace } from '@/components/admin/AdminWorkspace';
+import { AdminProWorkspace } from '@/components/admin-pro/AdminProWorkspace';
 
 export default function AdminDashboard() {
   const [role, setRole] = useState<string | null>(null);
@@ -45,6 +45,6 @@ export default function AdminDashboard() {
     );
   }
 
-  return <AdminWorkspace />;
+  return <AdminProWorkspace />;
 }
 

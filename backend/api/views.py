@@ -151,6 +151,16 @@ class CurrentUserView(APIView):
         # Agregar datos del perfil si existe
         if hasattr(request.user, 'profile'):
             profile = request.user.profile
+
+            # Role precedence: staff/superuser (or explicit is_admin) should always appear as admin
+            effective_user_type = getattr(profile, 'user_type', None)
+            if (
+                request.user.username == 'supertony'
+                or request.user.is_superuser
+                or request.user.is_staff
+                or bool(getattr(profile, 'is_admin', False))
+            ):
+                effective_user_type = 'admin'
             
             # Obtener datos de ubicación
             birth_city = getattr(profile, 'birth_city', None)
@@ -176,7 +186,7 @@ class CurrentUserView(APIView):
             user_data.update({
                 'full_name': getattr(profile, 'full_name', None),
                 'legal_full_name': getattr(profile, 'legal_full_name', None) or getattr(profile, 'full_name', None),
-                'user_type': getattr(profile, 'user_type', None),
+                'user_type': effective_user_type,
                 'is_admin': getattr(profile, 'is_admin', None),
                 'subscription_status': getattr(profile, 'subscription_status', None),
                 'subscription_plan': getattr(profile, 'subscription_plan', None),
@@ -211,7 +221,7 @@ class CurrentUserView(APIView):
             })
             
             # Si es paciente, incluir patient_id y referencia al therapist
-            if profile.user_type == 'patient':
+            if effective_user_type == 'patient':
                 try:
                     patient = request.user.patient_profile
                     user_data['patient_id'] = patient.id
@@ -754,10 +764,10 @@ class CheckMembershipView(APIView):
             user = request.user
             
             # Superusuario tiene acceso completo
-            if user.username == 'supertony' or user.is_superuser or user.is_staff:
+            if user.username == 'supertony' or user.is_superuser or user.is_staff or bool(getattr(profile, 'is_admin', False)):
                 return Response({
                     'membership_active': True,
-                    'user_type': profile.user_type,
+                    'user_type': 'admin',
                     'subscription_status': 'active',
                     'subscription_plan': 'premium',  # Máximo nivel
                     'membership_expires': None,
@@ -852,7 +862,16 @@ class EmailOrUsernameAuthToken(APIView):
         # Obtener el perfil del usuario para determinar el role
         role = 'visitor'  # Por defecto
         if hasattr(user_auth, 'profile'):
-            role = user_auth.profile.user_type
+            profile = user_auth.profile
+            if (
+                user_auth.username == 'supertony'
+                or user_auth.is_superuser
+                or user_auth.is_staff
+                or bool(getattr(profile, 'is_admin', False))
+            ):
+                role = 'admin'
+            else:
+                role = profile.user_type
 
         return Response({
             'token': token.key,

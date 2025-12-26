@@ -1,15 +1,35 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Sparkles } from 'lucide-react';
 import CabalAppliedSidebar from './CabalAppliedSidebar';
 import CabalAppliedVisualCore from './CabalAppliedVisualCore';
-import CabalaAplicadaHistoryList from './CabalaAplicadaHistoryList';
 import type { CabalSectionId } from './types';
+import CabalAppliedToolsPanel, { type CabalaToolsTabId } from './CabalAppliedToolsPanel';
+import type { CabalaAplicadaWorkspaceExportState } from './CabalAppliedVisualCore';
 
 export default function CabalAppliedWorkspace() {
   const [activeSection, setActiveSection] = useState<CabalSectionId>('tree');
+  const [activeTool, setActiveTool] = useState<CabalaToolsTabId>('history');
+  const [workspaceState, setWorkspaceState] = useState<CabalaAplicadaWorkspaceExportState>({
+    patientId: null,
+    patientName: null,
+    patientBirthDate: null,
+    selectedMethodId: null,
+    treeState: null,
+    backendStructuralState: null,
+    pdfSummary: {
+      sefirotActivas: [],
+      senderosActivos: [],
+      repeticiones: [],
+    },
+  });
+  const [lastSnapshotRecordId, setLastSnapshotRecordId] = useState<string | null>(null);
+
+  const handleWorkspaceStateChange = useCallback((next: CabalaAplicadaWorkspaceExportState) => {
+    setWorkspaceState(next);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -23,12 +43,43 @@ export default function CabalAppliedWorkspace() {
             <h1 className="text-2xl font-semibold text-gray-900">Cabala Aplicada</h1>
           </div>
         </div>
-        <Link
-          href="/dashboard/therapist"
-          className="text-sm font-medium text-gray-700 bg-gray-100 rounded-md px-3 py-2 hover:bg-gray-200"
-        >
-          Volver al espacio clinico
-        </Link>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setActiveTool('history')}
+            className="rounded-md border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          >
+            Historial
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTool('snapshot')}
+            className="rounded-md border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          >
+            Snapshot
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTool('interpretation')}
+            className="rounded-md border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          >
+            Interpretación
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTool('pdf')}
+            className="rounded-md border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          >
+            PDF
+          </button>
+
+          <Link
+            href="/dashboard/therapist"
+            className="ml-3 text-sm font-medium text-gray-700 bg-gray-100 rounded-md px-3 py-2 hover:bg-gray-200"
+          >
+            Volver al espacio clinico
+          </Link>
+        </div>
       </header>
 
       <div className="flex">
@@ -38,31 +89,17 @@ export default function CabalAppliedWorkspace() {
             Observacional. Sin interpretacion, sin automatizacion, sin diagnostico.
           </div>
           <div className="flex gap-6 items-start">
-            <CabalAppliedVisualCore activeSection={activeSection} />
-            <aside className="w-72 space-y-4">
-              <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-                <h3 className="text-sm font-semibold text-gray-900">Historial (Cabala Aplicada)</h3>
-                <p className="mt-1 text-xs text-gray-600">Ejecuciones guardadas para el paciente activo.</p>
-                <div className="mt-3">
-                  <CabalaAplicadaHistoryList />
-                </div>
-              </div>
-              <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-                <h3 className="text-sm font-semibold text-gray-900">Panel interno</h3>
-                <p className="text-xs text-gray-600">
-                  Espacio reservado para notas humanas y recursos consultivos.
-                </p>
-              </div>
-              <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-                <h3 className="text-sm font-semibold text-gray-900">Seccion activa</h3>
-                <p className="text-xs text-gray-600">
-                  {activeSection === 'tree' && 'Arbol de la Vida'}
-                  {activeSection === 'gematria' && 'Gematria (placeholder)'}
-                  {activeSection === 'synthesis' && 'Sintesis humana'}
-                  {activeSection === 'resources' && 'Recursos de referencia'}
-                </p>
-              </div>
-            </aside>
+            <CabalAppliedVisualCore
+              activeSection={activeSection}
+              onWorkspaceStateChange={handleWorkspaceStateChange}
+            />
+            <CabalAppliedToolsPanel
+              activeTab={activeTool}
+              onChangeTab={setActiveTool}
+              workspaceState={workspaceState}
+              lastSnapshotRecordId={lastSnapshotRecordId}
+              onSnapshotSaved={(id) => setLastSnapshotRecordId(id)}
+            />
           </div>
         </main>
       </div>

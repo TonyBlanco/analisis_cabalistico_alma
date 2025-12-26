@@ -125,7 +125,11 @@ export default function SCID5ClinicalModule() {
     if (!patientId || aiLoading[sectionKey]) return;
 
     setAiLoading(prev => ({ ...prev, [sectionKey]: true }));
-    setAiError(prev => ({ ...prev, [sectionKey]: undefined }));
+    setAiError((prev) => {
+      const next = { ...prev };
+      delete next[sectionKey];
+      return next;
+    });
 
     try {
       const response = await fetch(`${API_BASE_URL}/analysis-records/scid5-ai-assistant/?patient_id=${patientId}`, {

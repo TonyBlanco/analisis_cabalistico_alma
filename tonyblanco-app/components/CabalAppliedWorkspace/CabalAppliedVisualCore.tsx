@@ -26,10 +26,21 @@ import { ejecutarMetodoTemurah, adaptTemurahToTree } from '../../../src/symbolic
 import { ejecutarMetodoNotarikon, adaptNotarikonToTree } from '../../../src/symbolic/methods/notarikon';
 
 // Symbolic Interpretation AI
-import { SymbolicInterpretationPanel } from '@/components/SymbolicInterpretation';
-import { generateAISymbolicInterpretation } from '@/lib/api/symbolic-interpreter-api';
-import type { SymbolicInterpretation } from '../../../src/symbolic/tree/symbolic-interpreter.types';
 import { saveCabalaAplicadaMethodRecord } from '@/lib/cabala-aplicada-api';
+
+export type CabalaAplicadaWorkspaceExportState = {
+  patientId: number | null;
+  patientName: string | null;
+  patientBirthDate: string | null;
+  selectedMethodId: string | null;
+  treeState: TreeStructuralState | null;
+  backendStructuralState: Record<string, unknown> | null;
+  pdfSummary: {
+    sefirotActivas: Array<{ id: string; indice?: number | null; peso?: number | null }>;
+    senderosActivos: Array<{ from: string; to: string; peso?: number | null }>;
+    repeticiones: Array<{ id: string; tipo?: string | null; veces?: number | null }>;
+  };
+};
 
 // ============================================================================
 // PITAGORAS PROFESSIONAL REPORT COMPONENTS (UI ONLY)
@@ -375,19 +386,18 @@ function PitagorasReport({
 
 interface CabalAppliedVisualCoreProps {
   activeSection: CabalSectionId;
+  onWorkspaceStateChange?: (state: CabalaAplicadaWorkspaceExportState) => void;
 }
 
-export default function CabalAppliedVisualCore({ activeSection }: CabalAppliedVisualCoreProps) {
+export default function CabalAppliedVisualCore({
+  activeSection,
+  onWorkspaceStateChange,
+}: CabalAppliedVisualCoreProps) {
   const [activePatientId, setActivePatientId] = useState<number | null>(null);
   const [patientProfile, setPatientProfile] = useState<PatientProfileSummary | null>(null);
   const [pitagorasState, setPitagorasState] = useState<PitagorasSymbolicState | null>(null);
   const [treeStructuralState, setTreeStructuralState] = useState<TreeStructuralState | null>(null);
   const [selectedMethod, setSelectedMethod] = useState<string>('pitagoras');
-  
-  // Symbolic Interpretation AI state
-  const [symbolicInterpretation, setSymbolicInterpretation] = useState<SymbolicInterpretation | null>(null);
-  const [isInterpretationLoading, setIsInterpretationLoading] = useState(false);
-  const [showInterpretationPanel, setShowInterpretationPanel] = useState(false);
 
   const METHODS = useMemo(() => [
     { id: 'pitagoras', name: 'Pitágoras', run: (input: any) => ejecutarMetodoPitagorico(input as any) },
@@ -469,41 +479,13 @@ export default function CabalAppliedVisualCore({ activeSection }: CabalAppliedVi
           method_output: (estado as unknown as Record<string, unknown>) ?? null,
           tree_state: (treeState as unknown as Record<string, unknown>) ?? null,
           backend_structural_state: (state as unknown as Record<string, unknown>) ?? null,
-          symbolic_interpretation: (symbolicInterpretation as unknown as Record<string, unknown>) ?? null,
+          symbolic_interpretation: null,
         }).catch((e) => {
           console.warn('No se pudo guardar Cabala Aplicada en historial:', e);
         });
       }
-      
-      // Clear previous interpretation when method changes
-      setSymbolicInterpretation(null);
-      setShowInterpretationPanel(false);
     } catch (err) {
       console.error('Error ejecutando método simbólico:', err);
-    }
-  }
-  
-  async function handleRequestInterpretation() {
-    if (!treeStructuralState) {
-      console.warn('No TreeStructuralState available for interpretation');
-      return;
-    }
-    
-    setIsInterpretationLoading(true);
-    setShowInterpretationPanel(true);
-    
-    try {
-      const interpretation = await generateAISymbolicInterpretation({
-        treeState: treeStructuralState,
-        safetyLevel: 'educational',
-        focusAreas: ['flows', 'sefirot-roles'],
-      });
-      
-      setSymbolicInterpretation(interpretation);
-    } catch (error) {
-      console.error('Error generating symbolic interpretation:', error);
-    } finally {
-      setIsInterpretationLoading(false);
     }
   }
 
@@ -548,6 +530,54 @@ export default function CabalAppliedVisualCore({ activeSection }: CabalAppliedVi
   );
 
   const { state, loading } = useTreeStructuralState(treeInput);
+
+  useEffect(() => {
+    const sefirotActivas =
+      state?.sefirot_activas?.map((item: any) => ({
+        id: String(item?.id_canonico ?? ''),
+        indice: item?.indice ?? null,
+        peso: item?.peso ?? null,
+      }))?.filter((x: any) => x.id) ?? [];
+
+    const senderosActivosRaw: Array<{ from: string; to: string; peso?: number | null } | null> =
+      state?.senderos_activos?.map((item: any) => {
+        const from = item?.endpoints?.from_sefira;
+        const to = item?.endpoints?.to_sefira;
+        if (!from || !to) return null;
+        return {
+          from: String(from),
+          to: String(to),
+          peso: item?.peso ?? null,
+        };
+      }) ?? [];
+
+    const senderosActivos: Array<{ from: string; to: string; peso?: number | null }> = senderosActivosRaw.filter(
+      (x): x is { from: string; to: string; peso?: number | null } => x !== null
+    );
+
+    const repeticiones =
+      state?.repeticiones
+        ?.map((item: any) => ({
+          id: String(item?.simbolo_id ?? ''),
+          tipo: item?.tipo ?? null,
+          veces: item?.veces ?? null,
+        }))
+        ?.filter((x: any) => x.id) ?? [];
+
+    onWorkspaceStateChange?.({
+      patientId: activePatientId ?? null,
+      patientName: patientProfile?.legal_full_name ?? null,
+      patientBirthDate: patientProfile?.birth_date ?? null,
+      selectedMethodId: selectedMethod ?? null,
+      treeState: treeStructuralState ?? null,
+      backendStructuralState: (state as unknown as Record<string, unknown>) ?? null,
+      pdfSummary: {
+        sefirotActivas,
+        senderosActivos,
+        repeticiones,
+      },
+    });
+  }, [activePatientId, patientProfile?.legal_full_name, selectedMethod, treeStructuralState, state, onWorkspaceStateChange]);
 
   // Ensure typed arrays matching Tree types
   const highlightedSefirot = useMemo(() => {
@@ -647,41 +677,42 @@ export default function CabalAppliedVisualCore({ activeSection }: CabalAppliedVi
         </div>
       ) : (
         <>
-          <div className="mt-6 rounded-lg border border-gray-200 bg-gray-50 p-4">
-            <div className="relative w-full h-72">
-              {treeStructuralState ? (
-                // TreeStructuralState v0.1 con flechas (Pitágoras ejecutado)
-                <TreeWithFlows
-                  treeState={treeStructuralState}
-                  size="responsive"
-                  className="absolute inset-0 h-full w-full"
-                />
-              ) : (
-                // Fallback: árbol legacy con backend highlights
-                <>
-                  <TreeOfLifeSVG
-                    highlightedSefirot={[]}
-                    highlightedPaths={[]}
-                    emphasis="soft"
-                    size="responsive"
-                    className="absolute inset-0 h-full w-full opacity-40 pointer-events-none"
-                  />
-                  <TreeOfLifeSVG
-                    highlightedSefirot={highlightedSefirot}
-                    highlightedPaths={highlightedPaths}
-                    highlightedSefirotOpacity={highlightedSefirotOpacity}
-                    highlightedPathOpacity={highlightedPathOpacity}
-                    repeatedSefirot={repeatedSefirot}
-                    repeatedPaths={repeatedPaths}
-                    emphasis="strong"
-                    dimUnrelated={true}
+          <div id="cabala-aplicada-export-visual" className="mt-6 space-y-4">
+            <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+              <div id="cabala-aplicada-export-tree" className="relative w-full h-72">
+                {treeStructuralState ? (
+                  // TreeStructuralState v0.1 con flechas (Pitágoras ejecutado)
+                  <TreeWithFlows
+                    treeState={treeStructuralState}
                     size="responsive"
                     className="absolute inset-0 h-full w-full"
                   />
-                </>
-              )}
+                ) : (
+                  // Fallback: árbol legacy con backend highlights
+                  <>
+                    <TreeOfLifeSVG
+                      highlightedSefirot={[]}
+                      highlightedPaths={[]}
+                      emphasis="soft"
+                      size="responsive"
+                      className="absolute inset-0 h-full w-full opacity-40 pointer-events-none"
+                    />
+                    <TreeOfLifeSVG
+                      highlightedSefirot={highlightedSefirot}
+                      highlightedPaths={highlightedPaths}
+                      highlightedSefirotOpacity={highlightedSefirotOpacity}
+                      highlightedPathOpacity={highlightedPathOpacity}
+                      repeatedSefirot={repeatedSefirot}
+                      repeatedPaths={repeatedPaths}
+                      emphasis="strong"
+                      dimUnrelated={true}
+                      size="responsive"
+                      className="absolute inset-0 h-full w-full"
+                    />
+                  </>
+                )}
+              </div>
             </div>
-          </div>
           {activePatientId && (
             <div className="mt-4 flex items-center gap-3">
               <label className="sr-only">Método cabalístico</label>
@@ -708,32 +739,7 @@ export default function CabalAppliedVisualCore({ activeSection }: CabalAppliedVi
               <span className="text-xs text-gray-500">Ejecutar manualmente el método seleccionado (solo lectura, formativo)</span>
             </div>
           )}
-          
-          {/* Symbolic Interpretation AI Panel */}
-          {treeStructuralState && (
-            <div className="mt-6">
-              {!showInterpretationPanel && (
-                <button
-                  onClick={() => setShowInterpretationPanel(true)}
-                  className="w-full rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-3 text-sm font-medium text-white hover:from-purple-700 hover:to-indigo-700 transition-all shadow-md flex items-center justify-center gap-2"
-                >
-                  <Sparkles className="h-4 w-4" />
-                  Activar Lectura Simbólica Asistida (IA)
-                </button>
-              )}
-              
-              {showInterpretationPanel && (
-                <SymbolicInterpretationPanel
-                  interpretation={symbolicInterpretation}
-                  isLoading={isInterpretationLoading}
-                  onRequestInterpretation={handleRequestInterpretation}
-                  onClose={() => setShowInterpretationPanel(false)}
-                />
-              )}
-            </div>
-          )}
-          
-          <div className="mt-6 grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-2">
             <div className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-700">
               <div className="text-xs uppercase tracking-wide text-gray-500">Sefirot activas</div>
               <div className="mt-2 text-xs">
@@ -813,6 +819,7 @@ export default function CabalAppliedVisualCore({ activeSection }: CabalAppliedVi
               treeLoading={loading}
             />
           )}
+          </div>
         </>
       )}
     </section>

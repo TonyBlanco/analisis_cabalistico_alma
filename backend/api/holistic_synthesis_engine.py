@@ -13,9 +13,6 @@ logger = logging.getLogger(__name__)
 
 
 class HolisticSynthesisEngine:
-
-
-class HolisticSynthesisEngine:
     """
     Motor que sintetiza evaluaciones holísticas no clínicas
     """

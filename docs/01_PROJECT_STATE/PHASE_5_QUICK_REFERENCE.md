@@ -78,6 +78,18 @@ BioEmotionalExperientialWorkspace (index.tsx)
       ├─ passes referenceSnippets
       ├─ passes copy callbacks
       ├─ passes isReadOnly
+
+   ---
+
+   ## 📄 PDF export (canonical)
+
+   - Principle: the PDF export path must not reuse Tailwind/UI CSS.
+   - Cabala Aplicada exports the Tree as SVG→PDF (vector) and renders patient/structural data as plain `jsPDF` text.
+   - Validation: abort export if the serialized SVG contains `oklab()`, `oklch()`, `lab()`, `hsl()`, or `var(...)`.
+
+   Entrypoints:
+   - [SVG→PDF generator](../../tonyblanco-app/components/CabalAppliedWorkspace/cabalaAplicadaPdf.ts)
+   - [Tree export hook](../../tonyblanco-app/components/CabalAppliedWorkspace/CabalAppliedVisualCore.tsx)
       │
       └─→ HolisticCrossPanel (in analysis state)
           ├─ fetches observations (bio signals)

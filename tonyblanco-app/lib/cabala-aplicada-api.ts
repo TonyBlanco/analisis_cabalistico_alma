@@ -10,10 +10,14 @@ export type CabalaAplicadaMethodRecordPayload = {
   symbolic_interpretation?: Record<string, unknown> | null;
 };
 
+export type CabalaAplicadaSavedRecord = {
+  id: string;
+};
+
 export async function saveCabalaAplicadaMethodRecord(
   patientId: number,
   payload: CabalaAplicadaMethodRecordPayload
-): Promise<void> {
+): Promise<CabalaAplicadaSavedRecord> {
   const token = getAuthToken();
   if (!token) {
     throw new Error('Not authenticated');
@@ -42,4 +46,13 @@ export async function saveCabalaAplicadaMethodRecord(
     }
     throw new Error(msg);
   }
+
+  const data = (await res.json().catch(() => null)) as any;
+  const record = data?.record;
+  const id = record?.id;
+  if (typeof id === 'string' && id) {
+    return { id };
+  }
+  // Fallback: keep best-effort semantics while still returning a stable shape.
+  return { id: '' };
 }

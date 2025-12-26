@@ -181,6 +181,18 @@ export default function ClinicalContextHeader() {
             SCDF
           </button>
 
+          <button
+            onClick={() => {
+              const ap = getActivePatient();
+              const qs = ap?.id ? `?patient_id=${ap.id}` : '';
+              router.push(`/dashboard/therapist/scid5${qs}`);
+            }}
+            className="inline-flex items-center px-2 py-1 rounded bg-emerald-600 text-white text-xs hover:bg-emerald-700 transition-colors"
+            title="Abrir SCID-5"
+          >
+            SCID-5
+          </button>
+
           {showEditor && activePatient && (
             <PatientProfileEditor
               profile={profile ? {

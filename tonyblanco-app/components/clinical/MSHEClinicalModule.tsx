@@ -3,6 +3,9 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { API_BASE_URL, getAuthToken } from '@/lib/api';
+import { generateMSHEPDF } from '@lib/pdfUtils';
+import MSHETrainingModal from './MSHETrainingModal';
+import { Download, HelpCircle } from 'lucide-react';
 
 interface HolisticWeights {
   kabbalah_numerology: number;
@@ -90,6 +93,8 @@ export default function MSHEClinicalModule() {
   const [therapistNotes, setTherapistNotes] = useState('');
   const [therapistSummary, setTherapistSummary] = useState('');
   const [isValidated, setIsValidated] = useState(false);
+  const [isTrainingModalOpen, setIsTrainingModalOpen] = useState(false);
+  const [isExportingPDF, setIsExportingPDF] = useState(false);
 
   // Load therapist configuration
   useEffect(() => {
@@ -231,6 +236,28 @@ export default function MSHEClinicalModule() {
     }
   };
 
+  const exportToPDF = async () => {
+    if (!analysisRecord || !isValidated) {
+      alert('Debe validar la evaluación antes de exportar el PDF');
+      return;
+    }
+
+    setIsExportingPDF(true);
+    try {
+      // Get patient name (this would need to be fetched from patient data)
+      // For now, using a placeholder - in real implementation, fetch patient details
+      const patientName = `Paciente ${patientId}`;
+      const therapistName = 'Terapeuta'; // This should come from user context
+
+      await generateMSHEPDF(analysisRecord, patientName, therapistName);
+    } catch (error) {
+      console.error('Error exporting PDF:', error);
+      alert('Error al exportar PDF');
+    } finally {
+      setIsExportingPDF(false);
+    }
+  };
+
   const resetWeights = () => {
     setWeights({
       kabbalah_numerology: 0.20,
@@ -255,17 +282,51 @@ export default function MSHEClinicalModule() {
   return (
     <div className="space-y-6">
       {/* Header with badges */}
-      <div className="flex items-center gap-3">
-        <span className="rounded-full bg-purple-100 px-3 py-1 text-sm font-medium text-purple-800">
-          Motor de Síntesis Holística
-        </span>
-        <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-800">
-          Evaluativo · IA asistida
-        </span>
-        <span className="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-600">
-          Última actualización: {synthesisResult?.metadata.computed_at ?
-            new Date(synthesisResult.metadata.computed_at).toLocaleString('es-ES') : 'Nunca'}
-        </span>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <span className="rounded-full bg-purple-100 px-3 py-1 text-sm font-medium text-purple-800">
+            Motor de Síntesis Holística
+          </span>
+          <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-800">
+            Evaluativo · IA asistida
+          </span>
+          <span className="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-600">
+            Última actualización: {synthesisResult?.metadata.computed_at ?
+              new Date(synthesisResult.metadata.computed_at).toLocaleString('es-ES') : 'Nunca'}
+          </span>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setIsTrainingModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
+            title="Uso Responsable - Formación y Gobernanza"
+          >
+            <HelpCircle className="w-4 h-4" />
+            Uso Responsable
+          </button>
+
+          {synthesisResult && isValidated && (
+            <button
+              onClick={exportToPDF}
+              disabled={isExportingPDF}
+              className="flex items-center gap-2 px-4 py-2 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isExportingPDF ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  Exportando...
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4" />
+                  Exportar PDF
+                </>
+              )}
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Weight Configuration */}
@@ -550,6 +611,12 @@ export default function MSHEClinicalModule() {
           </div>
         </div>
       </div>
+
+      {/* Training Modal */}
+      <MSHETrainingModal
+        isOpen={isTrainingModalOpen}
+        onClose={() => setIsTrainingModalOpen(false)}
+      />
     </div>
   );
 }

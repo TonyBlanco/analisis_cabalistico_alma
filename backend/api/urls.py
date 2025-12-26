@@ -100,6 +100,7 @@ from .analysis_views import (
     UpdateAnalysisAnnotationsView,
     HolisticSynthesisView,
     TherapistHolisticConfigView,
+    SCID5AIAssistantView,
 )
 from .patient_profile_views import (
     TherapistUpdatePatientProfileView,
@@ -247,6 +248,9 @@ urlpatterns = [
     # Motor de Síntesis Holística Evaluativa (MSHE)
     path('analysis-records/holistic-synthesis/', HolisticSynthesisView.as_view(), name='holistic_synthesis'),
     path('therapist/holistic-config/', TherapistHolisticConfigView.as_view(), name='therapist_holistic_config'),
+    
+    # Asistente IA para SCID-5 Holístico
+    path('analysis-records/scid5-ai-assistant/', SCID5AIAssistantView.as_view(), name='scid5_ai_assistant'),
 
     # Dominio bio-emocional & árbol transgeneracional (aislado)
     path('bioemotional/', include('api.bioemotional.urls', namespace='bioemotional')),

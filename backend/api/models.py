@@ -1159,3 +1159,64 @@ class UserResourceAccess(models.Model):
         if self.source != 'assigned_by_therapist' and self.assigned_by:
             raise ValidationError('assigned_by should only be set when source is assigned_by_therapist')
 
+
+# ========== CONFIGURACIONES DE TERAPEUTAS ==========
+
+class TherapistHolisticConfig(models.Model):
+    """
+    Configuración de pesos para el Motor de Síntesis Holística Evaluativa (MSHE).
+    Cada terapeuta puede personalizar los pesos de los diferentes módulos.
+    """
+    therapist = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='holistic_config',
+        help_text="Terapeuta propietario de esta configuración"
+    )
+
+    weights = models.JSONField(
+        default=dict,
+        help_text="Pesos para cada módulo holístico (deben sumar 1.0)"
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Configuración Holística del Terapeuta"
+        verbose_name_plural = "Configuraciones Holísticas de Terapeutas"
+
+    @staticmethod
+    def get_default_weights():
+        """Retorna los pesos por defecto recomendados"""
+        return {
+            'kabbalah_numerology': 0.20,
+            'tarot_evolutivo': 0.20,
+            'astrologia_terapeutica': 0.20,
+            'transgeneracional': 0.20,
+            'biodecodificacion': 0.20
+        }
+
+    def clean(self):
+        """Validar que los pesos sumen 1.0"""
+        from django.core.exceptions import ValidationError
+
+        if not isinstance(self.weights, dict):
+            raise ValidationError('Los pesos deben ser un diccionario JSON')
+
+        total = sum(self.weights.values())
+        if abs(total - 1.0) > 0.001:
+            raise ValidationError(f'Los pesos deben sumar 1.0, actualmente suman {total}')
+
+        # Validar pesos individuales
+        for key, value in self.weights.items():
+            if not isinstance(value, (int, float)) or value < 0 or value > 1:
+                raise ValidationError(f'Peso inválido para {key}: {value}')
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f'Configuración MSHE de {self.therapist.username}'
+

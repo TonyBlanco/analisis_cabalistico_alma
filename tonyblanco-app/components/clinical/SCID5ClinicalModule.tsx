@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { getActivePatient } from '@/lib/active-patient';
 import { API_BASE_URL, getAuthToken } from '@/lib/api';
+import { Brain, Lightbulb, AlertTriangle, CheckCircle } from 'lucide-react';
 
 type SectionKey =
   | 'emotional_vitality'
@@ -26,6 +27,16 @@ interface HolisticData {
   holistic_exploration: Record<SectionKey, SectionData>;
   additional_observations: string;
   holistic_summary: string;
+}
+
+interface AIAssistanceResponse {
+  section: string;
+  depth_level: number;
+  suggested_questions: Array<{ q: string; intent: string }>;
+  symbolic_correlations: Array<{ source: string; note: string }>;
+  draft_section_synthesis: string;
+  ethical_guardrails: string[];
+  therapist_actions: Array<{ action: string; why: string }>;
 }
 
 const SECTIONS: Record<SectionKey, { title: string; description: string }> = {
@@ -82,6 +93,12 @@ export default function SCID5ClinicalModule() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
+  // AI Assistant state
+  const [aiDepthLevel, setAiDepthLevel] = useState<1 | 2 | 3>(1);
+  const [aiAssistance, setAiAssistance] = useState<Record<string, AIAssistanceResponse>>({});
+  const [aiLoading, setAiLoading] = useState<Record<string, boolean>>({});
+  const [aiError, setAiError] = useState<Record<string, string>>({});
+
   const patientId = searchParams?.get('patient_id');
   const activePatient = getActivePatient();
 
@@ -102,6 +119,42 @@ export default function SCID5ClinicalModule() {
         },
       },
     }));
+  };
+
+  const requestAIAssistance = async (sectionKey: SectionKey) => {
+    if (!patientId || aiLoading[sectionKey]) return;
+
+    setAiLoading(prev => ({ ...prev, [sectionKey]: true }));
+    setAiError(prev => ({ ...prev, [sectionKey]: undefined }));
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/analysis-records/scid5-ai-assistant/?patient_id=${patientId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${getAuthToken()}`,
+        },
+        body: JSON.stringify({
+          scid5_data: data,
+          depth_level: aiDepthLevel,
+          active_section: sectionKey,
+        }),
+      });
+
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.error || 'Error obteniendo asistencia IA');
+      }
+
+      const assistance: AIAssistanceResponse = await response.json();
+      setAiAssistance(prev => ({ ...prev, [sectionKey]: assistance }));
+
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
+      setAiError(prev => ({ ...prev, [sectionKey]: errorMessage }));
+    } finally {
+      setAiLoading(prev => ({ ...prev, [sectionKey]: false }));
+    }
   };
 
   const handleSave = async () => {
@@ -157,6 +210,32 @@ export default function SCID5ClinicalModule() {
             Paciente: {activePatient.name} (ID: {activePatient.id})
           </p>
         )}
+
+        {/* AI Assistant Configuration */}
+        <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="flex items-center gap-2 mb-3">
+            <Brain className="h-5 w-5 text-blue-600" />
+            <h3 className="font-medium text-blue-900">Asistente IA Holístico</h3>
+          </div>
+          <div className="flex items-center gap-4">
+            <label className="text-sm font-medium text-gray-700">
+              Nivel de profundidad:
+            </label>
+            <select
+              value={aiDepthLevel}
+              onChange={(e) => setAiDepthLevel(parseInt(e.target.value) as 1 | 2 | 3)}
+              className="border border-gray-300 rounded-md p-1 text-sm"
+            >
+              <option value={1}>Básico (2-3 preguntas)</option>
+              <option value={2}>Profundo (4-6 preguntas)</option>
+              <option value={3}>Avanzado (6-10 preguntas)</option>
+            </select>
+          </div>
+          <p className="text-xs text-blue-700 mt-2">
+            El asistente IA sugiere preguntas, correlaciones simbólicas y borradores revisables.
+            Todas las sugerencias requieren validación y edición por parte del terapeuta.
+          </p>
+        </div>
       </div>
 
       {error && (
@@ -177,11 +256,117 @@ export default function SCID5ClinicalModule() {
           const sectionData = data.holistic_exploration[key];
           return (
             <details key={key} className="bg-white border border-gray-200 rounded-lg">
-              <summary className="cursor-pointer p-4 font-medium text-gray-900 hover:bg-gray-50">
-                {section.title}
+              <summary className="cursor-pointer p-4 font-medium text-gray-900 hover:bg-gray-50 flex justify-between items-center">
+                <span>{section.title}</span>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    requestAIAssistance(key);
+                  }}
+                  disabled={aiLoading[key]}
+                  className="flex items-center gap-2 px-3 py-1 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 disabled:opacity-50 text-sm"
+                >
+                  <Lightbulb className="h-4 w-4" />
+                  {aiLoading[key] ? 'Cargando...' : 'Asistente IA'}
+                </button>
               </summary>
               <div className="p-4 border-t border-gray-200 space-y-4">
                 <p className="text-sm text-gray-600">{section.description}</p>
+
+                {/* AI Assistance Panel */}
+                {(aiAssistance[key] || aiError[key]) && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-3">
+                    <div className="flex items-center gap-2">
+                      <Brain className="h-4 w-4 text-blue-600" />
+                      <h4 className="font-medium text-blue-900">Asistencia IA - Nivel {aiAssistance[key]?.depth_level || aiDepthLevel}</h4>
+                    </div>
+
+                    {aiError[key] && (
+                      <div className="bg-red-50 border border-red-200 rounded p-3">
+                        <p className="text-sm text-red-700">{aiError[key]}</p>
+                      </div>
+                    )}
+
+                    {aiAssistance[key] && (
+                      <>
+                        {/* Suggested Questions */}
+                        {aiAssistance[key].suggested_questions.length > 0 && (
+                          <div>
+                            <h5 className="font-medium text-blue-800 mb-2">Preguntas sugeridas:</h5>
+                            <ul className="space-y-2">
+                              {aiAssistance[key].suggested_questions.map((q, idx) => (
+                                <li key={idx} className="bg-white p-3 rounded border border-blue-100">
+                                  <p className="text-sm font-medium text-gray-900 mb-1">"{q.q}"</p>
+                                  <p className="text-xs text-gray-600">Propósito: {q.intent}</p>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {/* Symbolic Correlations */}
+                        {aiAssistance[key].symbolic_correlations.length > 0 && (
+                          <div>
+                            <h5 className="font-medium text-blue-800 mb-2">Correlaciones simbólicas:</h5>
+                            <ul className="space-y-2">
+                              {aiAssistance[key].symbolic_correlations.map((corr, idx) => (
+                                <li key={idx} className="bg-white p-3 rounded border border-blue-100">
+                                  <span className="inline-block px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded mb-1">
+                                    {corr.source.toUpperCase()}
+                                  </span>
+                                  <p className="text-sm text-gray-700">{corr.note}</p>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {/* Draft Synthesis */}
+                        {aiAssistance[key].draft_section_synthesis && (
+                          <div>
+                            <h5 className="font-medium text-blue-800 mb-2">Borrador de síntesis (editable):</h5>
+                            <div className="bg-white p-3 rounded border border-blue-100">
+                              <p className="text-sm text-gray-700 italic">{aiAssistance[key].draft_section_synthesis}</p>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Ethical Guardrails */}
+                        {aiAssistance[key].ethical_guardrails.length > 0 && (
+                          <div>
+                            <h5 className="font-medium text-amber-800 mb-2 flex items-center gap-2">
+                              <AlertTriangle className="h-4 w-4" />
+                              Recordatorios éticos:
+                            </h5>
+                            <ul className="space-y-1">
+                              {aiAssistance[key].ethical_guardrails.map((guard, idx) => (
+                                <li key={idx} className="text-sm text-amber-700 flex items-start gap-2">
+                                  <CheckCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                                  {guard}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {/* Therapist Actions */}
+                        {aiAssistance[key].therapist_actions.length > 0 && (
+                          <div>
+                            <h5 className="font-medium text-green-800 mb-2">Acciones sugeridas:</h5>
+                            <ul className="space-y-2">
+                              {aiAssistance[key].therapist_actions.map((action, idx) => (
+                                <li key={idx} className="bg-white p-3 rounded border border-green-100">
+                                  <p className="text-sm font-medium text-gray-900 mb-1">{action.action}</p>
+                                  <p className="text-xs text-gray-600">{action.why}</p>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <label className="flex items-center gap-2">

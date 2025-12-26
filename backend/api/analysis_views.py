@@ -356,6 +356,342 @@ class HolisticSynthesisView(APIView):
             )
 
 
+# ========== ASISTENTE IA PARA SCID-5 HOLÍSTICO ==========
+
+class SCID5AIAssistant:
+    """Asistente IA para SCID-5 Holístico - Capa Asistente, no central"""
+
+    def __init__(self, patient, therapist):
+        self.patient = patient
+        self.therapist = therapist
+
+        # Configurar Gemini
+        self.genai = None
+        try:
+            import google.generativeai as genai_local
+            self.genai = genai_local
+        except ImportError:
+            pass
+
+        from django.conf import settings
+        self.api_key = getattr(settings, 'GEMINI_API_KEY', None)
+        self.model_name = getattr(settings, 'GEMINI_MODEL', 'gemini-2.0-flash')
+        self.enabled = bool(self.api_key and self.genai)
+
+    def _get_contextual_data(self):
+        """Obtiene datos contextuales del paciente para correlaciones"""
+        context = {}
+
+        # MSHE - síntesis holística
+        try:
+            mshe_records = AnalysisRecord.objects.filter(
+                patient=self.patient,
+                kind='holistic_evaluative_synthesis',
+                module_code='MSHE'
+            ).order_by('-created_at')[:1]
+
+            if mshe_records:
+                mshe_data = mshe_records[0].computed_result
+                if isinstance(mshe_data, dict):
+                    context['mshe'] = {
+                        'ejes': mshe_data.get('axis_contributions', {}),
+                        'evolucion': mshe_data.get('evolution_patterns', {}),
+                        'patrones_persistentes': mshe_data.get('persistent_patterns', [])
+                    }
+        except Exception:
+            pass
+
+        # Cábala/Numerología
+        try:
+            cabala_records = AnalysisRecord.objects.filter(
+                patient=self.patient,
+                kind__in=['cabalistic_analysis', 'numerological_analysis']
+            ).order_by('-created_at')[:1]
+
+            if cabala_records:
+                cabala_data = cabala_records[0].computed_result
+                if isinstance(cabala_data, dict):
+                    context['cabala'] = cabala_data
+        except Exception:
+            pass
+
+        # Tarot
+        try:
+            tarot_records = AnalysisRecord.objects.filter(
+                patient=self.patient,
+                kind='tarot_analysis'
+            ).order_by('-created_at')[:1]
+
+            if tarot_records:
+                tarot_data = tarot_records[0].computed_result
+                if isinstance(tarot_data, dict):
+                    context['tarot'] = tarot_data
+        except Exception:
+            pass
+
+        # Astrología
+        try:
+            astrology_records = AnalysisRecord.objects.filter(
+                patient=self.patient,
+                kind='astrology_kerykeion'
+            ).order_by('-created_at')[:1]
+
+            if astrology_records:
+                astrology_data = astrology_records[0].computed_result
+                if isinstance(astrology_data, dict):
+                    context['astrology'] = astrology_data
+        except Exception:
+            pass
+
+        # Transgeneracional
+        try:
+            transgenerational_records = AnalysisRecord.objects.filter(
+                patient=self.patient,
+                kind='transgenerational_analysis'
+            ).order_by('-created_at')[:1]
+
+            if transgenerational_records:
+                trans_data = transgenerational_records[0].computed_result
+                if isinstance(trans_data, dict):
+                    context['transgenerational'] = trans_data
+        except Exception:
+            pass
+
+        # Biodecodificación
+        try:
+            bio_records = AnalysisRecord.objects.filter(
+                patient=self.patient,
+                kind='biodecoding_analysis'
+            ).order_by('-created_at')[:1]
+
+            if bio_records:
+                bio_data = bio_records[0].computed_result
+                if isinstance(bio_data, dict):
+                    context['biodecoding'] = bio_data
+        except Exception:
+            pass
+
+        return context
+
+    def _build_prompt(self, scid5_data, depth_level, active_section, context_data):
+        """Construye el prompt para Gemini basado en el contexto"""
+
+        section_map = {
+            'emotional_vitality': 'Estado emocional y vitalidad',
+            'anxiety_calm': 'Ansiedad, preocupación y calma interior',
+            'meaning_reality': 'Experiencia de realidad y significado',
+            'impact_memory': 'Experiencias de impacto, memoria y estrés',
+            'self_regulation': 'Autorregulación y conducta',
+            'identity_relationships': 'Patrones de identidad y relación'
+        }
+
+        section_name = section_map.get(active_section, active_section or 'general')
+
+        # Extraer datos de la sección activa
+        section_data = scid5_data.get('holistic_exploration', {}).get(active_section, {})
+        explorado = section_data.get('explorado', False)
+        patrones = section_data.get('patrones_observados', False)
+        intensidad = section_data.get('intensidad_experiencial', 'no_aplica')
+        notas = section_data.get('notas_observacionales', '')
+
+        # Construir contexto disponible
+        context_parts = []
+        if 'mshe' in context_data:
+            context_parts.append(f"MSHE disponible: {context_data['mshe']}")
+        if 'cabala' in context_data:
+            context_parts.append("Cábala/Numerología disponible")
+        if 'tarot' in context_data:
+            context_parts.append("Tarot disponible")
+        if 'astrology' in context_data:
+            context_parts.append("Astrología disponible")
+        if 'transgenerational' in context_data:
+            context_parts.append("Análisis transgeneracional disponible")
+        if 'biodecoding' in context_data:
+            context_parts.append("Biodecodificación disponible")
+
+        context_str = "; ".join(context_parts) if context_parts else "Sin datos contextuales adicionales"
+
+        # Nivel de profundidad
+        depth_config = {
+            1: "NIVEL 1 — BÁSICO: 2–3 preguntas suaves, 1 hipótesis orientativa máximo, sin correlaciones complejas",
+            2: "NIVEL 2 — PROFUNDO: 4–6 preguntas (incluye cuerpo, relación, propósito), correlación simple con MSHE y un módulo extra",
+            3: "NIVEL 3 — AVANZADO: 6–10 preguntas, correlación multi-módulo, identifica tensión central + pregunta integradora, propone mini-síntesis revisable"
+        }
+
+        prompt = f"""Eres una IA especializada en acompañamiento holístico estructurado para SCID-5.
+Tu función es asistir al terapeuta durante una entrevista/exploración, proponiendo preguntas profundas no inductivas, correlaciones simbólicas entre módulos, clarificaciones de lenguaje, y síntesis orientativas revisables.
+
+REGLAS ÉTICAS (NO NEGOCIABLES):
+❌ No diagnosticar (médico o psicológico)
+❌ No usar DSM, CIE o terminología clínica de patología
+❌ No usar palabras: "enfermedad", "trastorno", "síndrome", "certeza", "pronóstico"
+❌ No prescribir tratamientos
+❌ No afirmar causalidad biológica
+❌ No predecir eventos futuros
+❌ No inducir respuestas ("¿es cierto que…?")
+❌ No sustituir el criterio del terapeuta
+
+LENGUAJE OBLIGATORIO: Usa siempre "posible lectura simbólica", "hipótesis orientativa", "resonancia observada", "pregunta exploratoria", "área de atención consciente", "proceso en curso", "esto requiere contexto y validación humana"
+
+DATOS ACTUALES DEL SCID-5:
+- Sección activa: {section_name}
+- Explorada: {"Sí" if explorado else "No"}
+- Patrones observados: {"Sí" if patrones else "No"}
+- Intensidad: {intensidad}
+- Notas: {notas[:200]}...
+
+CONTEXTO DISPONIBLE: {context_str}
+
+PROFUNDIDAD SOLICITADA: {depth_config[depth_level]}
+
+INSTRUCCIONES DE RESPUESTA:
+Debes responder ÚNICAMENTE con un JSON válido en este formato exacto:
+
+{{
+  "section": "{section_name}",
+  "depth_level": {depth_level},
+  "suggested_questions": [
+    {{"q": "pregunta completa", "intent": "breve explicación del propósito"}}
+  ],
+  "symbolic_correlations": [
+    {{"source": "MSHE|tarot|astrology|kabbalah|transgenerational|biodecoding", "note": "descripción simbólica"}}
+  ],
+  "draft_section_synthesis": "3-5 líneas de síntesis revisable, no conclusiva",
+  "ethical_guardrails": [
+    "recordatorio ético si aplica"
+  ],
+  "therapist_actions": [
+    {{"action": "acción sugerida", "why": "razón"}}
+  ]
+}}
+
+IMPORTANTE:
+- Máximo 10 preguntas
+- Preguntas abiertas, no inductivas
+- Correlaciones como "posibilidad" no como "verdad"
+- Síntesis para que el terapeuta edite
+- JSON válido sin texto adicional"""
+
+        return prompt
+
+    def generate_assistance(self, scid5_data, depth_level, active_section):
+        """Genera asistencia IA para SCID-5"""
+
+        if not self.enabled:
+            # Respuesta fallback cuando Gemini no está disponible
+            return {
+                "section": active_section or "general",
+                "depth_level": depth_level,
+                "suggested_questions": [
+                    {
+                        "q": "¿Cómo describes tu experiencia en esta área?",
+                        "intent": "Pregunta inicial abierta para explorar la vivencia subjetiva"
+                    }
+                ],
+                "symbolic_correlations": [],
+                "draft_section_synthesis": "Esta sección requiere más exploración para elaborar una síntesis orientativa.",
+                "ethical_guardrails": [
+                    "Recuerda: esta es asistencia simbólica, no diagnóstica"
+                ],
+                "therapist_actions": [
+                    {
+                        "action": "Continuar exploración con preguntas abiertas",
+                        "why": "Para profundizar sin inducir respuestas específicas"
+                    }
+                ]
+            }
+
+        try:
+            # Obtener datos contextuales
+            context_data = self._get_contextual_data()
+
+            # Construir prompt
+            prompt = self._build_prompt(scid5_data, depth_level, active_section, context_data)
+
+            # Configurar modelo
+            import google.generativeai as genai
+            genai.configure(api_key=self.api_key)
+            model = genai.GenerativeModel(
+                self.model_name,
+                generation_config={
+                    'temperature': 0.7,
+                    'max_output_tokens': 2048,
+                }
+            )
+
+            # Generar respuesta
+            response = model.generate_content(prompt)
+            response_text = response.text.strip()
+
+            # Limpiar respuesta (remover posibles markdown)
+            if response_text.startswith('```json'):
+                response_text = response_text[7:]
+            if response_text.endswith('```'):
+                response_text = response_text[:-3]
+            response_text = response_text.strip()
+
+            # Parsear JSON
+            try:
+                result = json.loads(response_text)
+                # Validar estructura básica
+                required_keys = ['section', 'depth_level', 'suggested_questions', 'symbolic_correlations', 'draft_section_synthesis', 'ethical_guardrails', 'therapist_actions']
+                for key in required_keys:
+                    if key not in result:
+                        raise ValueError(f"Missing required key: {key}")
+
+                return result
+
+            except (json.JSONDecodeError, ValueError) as e:
+                logger.warning(f"Invalid AI response format: {e}, response: {response_text}")
+                # Fallback
+                return {
+                    "section": active_section or "general",
+                    "depth_level": depth_level,
+                    "suggested_questions": [
+                        {
+                            "q": "¿Cómo describes tu experiencia en esta área?",
+                            "intent": "Pregunta inicial abierta para explorar la vivencia subjetiva"
+                        }
+                    ],
+                    "symbolic_correlations": [],
+                    "draft_section_synthesis": "La IA generó una respuesta con formato inválido. Se requiere validación manual.",
+                    "ethical_guardrails": [
+                        "Verificar respuesta IA antes de usar",
+                        "Mantener lenguaje consultivo y simbólico"
+                    ],
+                    "therapist_actions": [
+                        {
+                            "action": "Revisar y adaptar sugerencias IA",
+                            "why": "Asegurar alineación con principios éticos"
+                        }
+                    ]
+                }
+
+        except Exception as e:
+            logger.exception("Error generando asistencia SCID-5 IA")
+            return {
+                "section": active_section or "general",
+                "depth_level": depth_level,
+                "suggested_questions": [
+                    {
+                        "q": "¿Qué aspectos de esta área te gustaría explorar?",
+                        "intent": "Pregunta abierta para guiar la exploración"
+                    }
+                ],
+                "symbolic_correlations": [],
+                "draft_section_synthesis": "Error temporal en el asistente IA. Continuar con exploración clínica estándar.",
+                "ethical_guardrails": [
+                    "El asistente IA no está disponible temporalmente"
+                ],
+                "therapist_actions": [
+                    {
+                        "action": "Proceder con entrevista clínica estándar",
+                        "why": "Mantener continuidad del proceso terapéutico"
+                    }
+                ]
+            }
+
+
 class TherapistHolisticConfigView(APIView):
     """
     GET /api/therapist/holistic-config/
@@ -420,3 +756,70 @@ class TherapistHolisticConfigView(APIView):
             'created': created,
             'updated_at': config.updated_at
         })
+
+
+class SCID5AIAssistantView(APIView):
+    """
+    POST /api/analysis-records/scid5-ai-assistant/?patient_id={id}
+
+    Terapeuta: Obtiene asistencia IA para SCID-5 Holístico.
+    Requiere: role = therapist, ownership del paciente.
+    Retorna: JSON estructurado con sugerencias, correlaciones y síntesis.
+    """
+    permission_classes = [IsAuthenticated, IsTherapist]
+
+    def post(self, request):
+        therapist = request.user
+        patient_id = request.query_params.get('patient_id')
+
+        if not patient_id:
+            return Response(
+                {'error': 'patient_id es requerido en query params.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Validar ownership del paciente
+        try:
+            patient = Patient.objects.get(pk=patient_id, therapist=therapist)
+        except Patient.DoesNotExist:
+            return Response(
+                {'error': 'Paciente no encontrado o no tienes permisos.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Extraer datos del request
+        scid5_data = request.data.get('scid5_data', {})
+        depth_level = request.data.get('depth_level', 1)
+        active_section = request.data.get('active_section', '')
+
+        if not isinstance(scid5_data, dict):
+            return Response(
+                {'error': 'scid5_data debe ser un objeto JSON válido.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if depth_level not in [1, 2, 3]:
+            return Response(
+                {'error': 'depth_level debe ser 1, 2 o 3.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            # Crear motor de asistencia IA
+            assistant = SCID5AIAssistant(patient, therapist)
+
+            # Generar asistencia
+            assistance_result = assistant.generate_assistance(
+                scid5_data=scid5_data,
+                depth_level=depth_level,
+                active_section=active_section
+            )
+
+            return Response(assistance_result, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            logger.exception("Error en SCID5AIAssistantView")
+            return Response(
+                {'error': f'Error interno del servidor: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

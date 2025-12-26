@@ -17,6 +17,7 @@ from .models import (
     CabalisticAnalysis,
     Resource,
     UserResourceAccess,
+    TherapistHolisticConfig,
 )
 from .birth_data_model import UserBirthData
 from django.contrib.auth.models import User

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, ClipboardList, FileText, Folder, TrendingUp, User } from 'lucide-react';
+import { Home, ClipboardList, FileText, Folder, TrendingUp, User, Heart } from 'lucide-react';
 
 export default function PatientSidebar() {
   const pathname = usePathname();
@@ -11,6 +11,7 @@ export default function PatientSidebar() {
     { href: '/dashboard/patient', label: 'Inicio', icon: Home },
     { href: '/dashboard/patient/tests', label: 'Tests', icon: ClipboardList },
     { href: '/dashboard/patient/results', label: 'Resultados', icon: FileText },
+    { href: '/dashboard/patient/holistic-summary', label: 'Síntesis Holística', icon: Heart },
     { href: '/dashboard/patient/resources', label: 'Recursos', icon: Folder },
     { href: '/dashboard/patient/process', label: 'Proceso', icon: TrendingUp },
     { href: '/dashboard/patient/account', label: 'Cuenta', icon: User },

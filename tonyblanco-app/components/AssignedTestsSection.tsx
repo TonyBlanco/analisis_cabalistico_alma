@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import { getActivePatientId, getActivePatientName } from '@/lib/active-patient';
-import { getPatientPreviousTests } from '@/lib/test-api';
+import { getTestResultsForPatient } from '@/lib/test-api';
 import { TestResult } from '@/lib/test-types';
 
 /**
@@ -72,17 +72,34 @@ export default function AssignedTestsSection({
     };
   }, [activePatientId]);
 
-  const fetchAssignedTests = async () => {
+  useEffect(() => {
+    // Patient completes tests in a different session, so refresh on focus/visibility.
+    const refresh = () => {
+      if (activePatientId) {
+        fetchAssignedTests();
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (!document.hidden) refresh();
+    };
+
+    window.addEventListener('focus', refresh);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      window.removeEventListener('focus', refresh);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [activePatientId]);
+
+  const fetchAssignedTests = useCallback(async () => {
     if (!activePatientId) return;
 
     setLoading(true);
     setError(null);
 
     try {
-      const response = await getPatientPreviousTests({
-        patient_id: activePatientId,
-      });
-      const remoteResults = response.results || [];
+      const remoteResults = await getTestResultsForPatient({ patient_id: activePatientId });
 
       // Recupera asignaciones locales (pendientes) registradas tras la asignación.
       let localAssignments: Array<TestResult> = [];
@@ -135,7 +152,7 @@ export default function AssignedTestsSection({
     } finally {
       setLoading(false);
     }
-  };
+  }, [activePatientId]);
 
   if (!activePatientId) {
     return (

@@ -624,6 +624,131 @@ def compute_screening_general(input_data: dict) -> dict:
     return result
 
 
+def compute_past_lives(input_data: dict) -> dict:
+    """Compute symbolic (non-diagnostic) aggregation for Past Lives exploration.
+
+    Expects:
+      - responses: dict(questionId -> 1..5)
+      - open_reflection: optional str
+
+    Returns EXACT schema:
+      {
+        symbolic_resonance_level: 'low'|'medium'|'high',
+        dominant_themes: string[],
+        reflection_axes: string[],
+        summary_text: string
+      }
+    """
+    responses = (input_data.get('responses', {}) or {})
+    open_reflection = input_data.get('open_reflection')
+    if not isinstance(open_reflection, str):
+        open_reflection = ''
+    open_reflection = open_reflection.strip()
+
+    sections = {
+        's1': 'Sensación de continuidad del alma',
+        's2': 'Emociones sin causa aparente',
+        's3': 'Patrones repetitivos de vida',
+        's4': 'Afinidades históricas y simbólicas',
+        's5': 'Sueños y memorias internas',
+        's6': 'Misión, sentido y aprendizaje',
+    }
+
+    def _as_int(val) -> int:
+        try:
+            return int(val)
+        except Exception:
+            return 0
+
+    def _clamp_1_5(v: int) -> int:
+        return max(1, min(5, v))
+
+    # Collect per-section values based on question ids like "pl_s3_q4"
+    per_section_vals = {sid: [] for sid in sections.keys()}
+    all_vals = []
+    for qid, raw in responses.items():
+        qid_str = str(qid)
+        v = _clamp_1_5(_as_int(raw))
+        all_vals.append(v)
+
+        # Extract section id "sN" from "pl_sN_qM"
+        sid = None
+        parts = qid_str.split('_')
+        for p in parts:
+            if p in sections:
+                sid = p
+                break
+        if sid and sid in per_section_vals:
+            per_section_vals[sid].append(v)
+
+    def _avg(vals: list[int]) -> float:
+        return (sum(vals) / (len(vals) or 1))
+
+    section_avgs = {sid: _avg(vals) for sid, vals in per_section_vals.items()}
+    global_avg = _avg(all_vals)
+
+    if global_avg <= 2.4:
+        resonance = 'low'
+        resonance_label = 'Baja'
+    elif global_avg <= 3.6:
+        resonance = 'medium'
+        resonance_label = 'Media'
+    else:
+        resonance = 'high'
+        resonance_label = 'Alta'
+
+    ranked = sorted(section_avgs.items(), key=lambda kv: kv[1], reverse=True)
+    dominant_themes: list[str] = []
+    # Strongest sections (symbolic themes)
+    for sid, avg in ranked:
+        if avg >= 3.6:
+            dominant_themes.append(sections[sid])
+        if len(dominant_themes) >= 2:
+            break
+    # Add one "integration" pointer from the weakest section
+    weakest_sid, weakest_avg = sorted(section_avgs.items(), key=lambda kv: kv[1])[0]
+    if len(dominant_themes) < 3 and weakest_avg <= 2.8:
+        dominant_themes.append(f"Área a integrar: {sections[weakest_sid]}")
+    dominant_themes = dominant_themes[:3]
+
+    reflection_axes: list[str] = []
+    # Always provide 3 neutral prompts (axes)
+    reflection_axes.append('¿Qué emoción o sensación aparece con más frecuencia y qué necesita ser escuchado?')
+    reflection_axes.append('¿Qué patrón se repite y qué aprendizaje podrías estar intentando integrar hoy?')
+    if open_reflection:
+        reflection_axes.append('Vuelve a tu reflexión escrita: subraya 2 frases y observa qué tema central se repite.')
+    else:
+        reflection_axes.append('Si lo deseas, escribe una breve escena/sueño recurrente y observa qué símbolo destaca.')
+    reflection_axes = reflection_axes[:3]
+
+    top_sid, top_avg = ranked[0]
+    summary_lines = []
+    summary_lines.append(
+        'Resultado simbólico y orientativo (no diagnóstico): este cuestionario no afirma hechos históricos literales.'
+    )
+    summary_lines.append(
+        f"Resonancia simbólica global: {resonance_label} (promedio {global_avg:.2f} en escala 1–5)."
+    )
+    summary_lines.append(
+        f"Tema más destacado: {sections[top_sid]} (promedio {top_avg:.2f})."
+    )
+    if weakest_avg <= 2.8:
+        summary_lines.append(
+            f"Área que podría invitar a integración: {sections[weakest_sid]} (promedio {weakest_avg:.2f})."
+        )
+    summary_lines.append(
+        'Sugerencia: usa estos hallazgos como mapa de conversación y reflexión; si estás trabajando con terapeuta, compártelos para contextualizarlos.'
+    )
+    summary_text = '\n'.join(summary_lines)
+
+    return {
+        'symbolic_resonance_level': resonance,
+        'dominant_themes': dominant_themes,
+        'reflection_axes': reflection_axes,
+        'summary_text': summary_text,
+    }
+
+
 def compute_stai(input_data: dict) -> dict:
     """Compute a simplified STAI result (state and trait)"""
     responses = input_data.get('responses', {}) or {}

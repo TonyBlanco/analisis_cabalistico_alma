@@ -98,7 +98,9 @@ class TestModule(models.Model):
                 return False
 
         # Verificar nivel de acceso
-        user_level = profile.subscription_plan or 'free'
+        # Therapists are not capped by plan (functional full access), but we still keep
+        # explicit restrictions (availability flags + licenses) above.
+        user_level = 'premium' if profile.user_type == 'therapist' else (profile.subscription_plan or 'free')
         
         access_hierarchy = {
             'free': 0,

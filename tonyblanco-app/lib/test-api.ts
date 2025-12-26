@@ -1,9 +1,9 @@
 import { TestModule, TestResult, ExecuteTestRequest, ExecuteTestResponse, UserTestStats } from './test-types';
+import { getApiBaseUrl } from './api-base';
 
 export type { ExecuteTestRequest, ExecuteTestResponse };
 
-// Default to Render backend in production if env var is missing
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://analisis-cabalistico-alma.onrender.com/api';
+const API_BASE_URL = getApiBaseUrl();
 
 // Obtiene el token de autenticación
 function getAuthToken(): string | null {
@@ -163,6 +163,32 @@ export async function getTestResults(filters?: {
 }
 
 /**
+ * Obtiene resultados guardados para un paciente específico (vista terapeuta).
+ * Soporta respuestas paginadas ({ results }) o arrays.
+ */
+export async function getTestResultsForPatient(params: {
+  patient_id: number;
+  test_code?: string;
+}): Promise<TestResult[]> {
+  const queryParams = new URLSearchParams();
+  queryParams.append('patient_id', params.patient_id.toString());
+  if (params.test_code) queryParams.append('test_code', params.test_code);
+
+  const url = `${API_BASE_URL}/tests/results/?${queryParams.toString()}`;
+  const response = await fetch(url, {
+    headers: getAuthHeaders(),
+    cache: 'no-store',
+  });
+
+  if (!response.ok) {
+    throw new Error('Error al obtener resultados del paciente');
+  }
+
+  const data = await response.json();
+  return Array.isArray(data) ? data : (data?.results || []);
+}
+
+/**
  * Obtiene un resultado específico
  */
 export async function getTestResult(id: number): Promise<TestResult> {
@@ -262,6 +288,7 @@ export async function getPatientPreviousTests(params: {
 
   const response = await fetch(`${API_BASE_URL}/tests/patient-previous/?${queryParams.toString()}`, {
     headers: getAuthHeaders(),
+    cache: 'no-store',
   });
 
   if (!response.ok) {

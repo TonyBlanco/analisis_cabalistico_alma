@@ -56,18 +56,25 @@ class AvailableTestsView(APIView):
         else:
             # patient / personal → ONLY patient_self tests
             tests = tests.filter(available_for_personal=True)
-        
-        # Additional filtering by subscription/access level.
-        # IMPORTANT: Also include tests granted via special access (assigned by therapist).
-        special_access_codes = set(
-            UserTestAccess.objects.filter(user=user, has_special_access=True)
-            .values_list('test_module__code', flat=True)
-        )
-        filtered_tests = [
-            test
-            for test in tests
-            if (test.is_available_for_user(user) or test.code in special_access_codes)
-        ]
+
+        # Filtering behavior differs by role:
+        # - Therapists/Admin: return the full visible catalog. Access is enforced via
+        #   `user_access.can_use` and the hardened validators on execution.
+        #   This keeps the UI stable as new tests are added without needing code changes.
+        # - Personal/Patient: only return tests the user can actually use, plus any
+        #   tests granted via special access (assigned by therapist).
+        if is_admin or profile.user_type == 'therapist':
+            filtered_tests = list(tests)
+        else:
+            special_access_codes = set(
+                UserTestAccess.objects.filter(user=user, has_special_access=True)
+                .values_list('test_module__code', flat=True)
+            )
+            filtered_tests = [
+                test
+                for test in tests
+                if (test.is_available_for_user(user) or test.code in special_access_codes)
+            ]
         
         serializer = TestModuleSerializer(
             filtered_tests, 
@@ -206,6 +213,32 @@ class ExecuteTestView(APIView):
             'user_type': profile.user_type
         }
         execution_mode = self._infer_execution_mode(test_module, request_context)
+
+
+        # Safety rails (defense-in-depth): therapists never run patient_self; and
+        # therapist_clinical requires patient_id.
+        # These are also enforced by centralized validators, but keeping them here
+        # makes behavior deterministic even if inference/validation changes.
+        if profile.user_type == 'therapist':
+            if execution_mode == 'patient_self':
+                return Response(
+                    {
+                        'error': 'No autorizado para ejecución personal',
+                        'message': 'Los terapeutas no pueden ejecutar tests en modo patient_self',
+                        'execution_mode': execution_mode,
+                        'user_role': 'therapist'
+                    },
+                    status=status.HTTP_403_FORBIDDEN
+                )
+            if execution_mode == 'therapist_clinical' and not patient_id:
+                return Response(
+                    {
+                        'error': 'patient_id requerido',
+                        'message': 'patient_id es obligatorio para ejecución en modo therapist_clinical',
+                        'execution_mode': execution_mode
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
         
         # PHASE 2: Apply hardened validators (using centralized validators)
         try:
@@ -340,6 +373,7 @@ class ExecuteTestView(APIView):
         compute_pai = None
         compute_wellness_assessment = None
         compute_screening_general = None
+        compute_past_lives = None
         compute_scdf = None
         try:
             # optional internal modules; if missing, we'll continue with None placeholders
@@ -356,12 +390,14 @@ class ExecuteTestView(APIView):
                 compute_scid5,
                 compute_wellness_assessment,
                 compute_screening_general,
+                compute_past_lives,
                 compute_scdf,
             )
         except Exception:
             compute_bdi = compute_bai = compute_scl90 = compute_stai = compute_mcmi4 = compute_scid5 = None
             compute_wellness_assessment = None
             compute_screening_general = None
+            compute_past_lives = None
             compute_scdf = None
 
         test_type = test_module.test_type
@@ -448,6 +484,22 @@ class ExecuteTestView(APIView):
                     else:
                         result = {'note': 'compute_screening_general not available; missing module'}
                     return {'test_type': 'holistic_screening', 'result': result, 'timestamp': str(datetime.now())}
+
+                if test_module.code == 'past-lives':
+                    responses = input_data.get('responses', {})
+                    if compute_past_lives:
+                        # Return direct schema (not wrapped) to match required result_data contract.
+                        return compute_past_lives({
+                            'fecha': input_data.get('fecha'),
+                            'responses': responses,
+                            'open_reflection': input_data.get('open_reflection'),
+                        })
+                    return {
+                        'symbolic_resonance_level': 'medium',
+                        'dominant_themes': [],
+                        'reflection_axes': [],
+                        'summary_text': 'compute_past_lives not available; missing module',
+                    }
             # Astrología Cabalística (se calcula en el frontend con astronomy-engine)
             if test_type == 'astrology' or test_module.code == 'cabalistic-astrology':
                 nombre = input_data.get('nombre') or input_data.get('full_name') or ''
@@ -811,10 +863,18 @@ class PatientPreviousTestsView(APIView):
         patient_id = request.query_params.get('patient_id')
         patient_name = request.query_params.get('patient_name')
         patient_birth_date = request.query_params.get('patient_birth_date')
+
+        # Normalize patient_id early (query params are strings)
+        patient_id_int = None
+        if patient_id is not None:
+            try:
+                patient_id_int = int(str(patient_id).strip())
+            except Exception:
+                patient_id_int = None
         
         # PHASE 5: patient_id is required for therapist searches (ensures ownership validation)
         if not is_admin:
-            if not patient_id:
+            if not patient_id_int:
                 return Response(
                     {
                         'error': 'patient_id requerido',
@@ -825,7 +885,7 @@ class PatientPreviousTestsView(APIView):
             
             # PHASE 5: Validate patient ownership using hardened validator
             try:
-                patient = validate_patient_ownership(user, patient_id)
+                patient = validate_patient_ownership(user, patient_id_int)
                 patient_name = patient.full_name
                 patient_birth_date = str(patient.birth_date)
             except PermissionDenied as e:
@@ -838,9 +898,9 @@ class PatientPreviousTestsView(APIView):
                     status=status.HTTP_400_BAD_REQUEST
                 )
             
-            if patient_id:
+            if patient_id_int:
                 try:
-                    patient = Patient.objects.get(id=patient_id)
+                    patient = Patient.objects.get(id=patient_id_int)
                     patient_name = patient.full_name
                     patient_birth_date = str(patient.birth_date)
                 except Patient.DoesNotExist:
@@ -860,12 +920,12 @@ class PatientPreviousTestsView(APIView):
         ).select_related('test_module', 'user').order_by('-created_at')
         
         # Si el usuario es terapeuta (o admin con patient_id), también buscar tests ya vinculados a este paciente
-        if (profile.user_type == 'therapist' or is_admin) and patient_id:
+        if (profile.user_type == 'therapist' or is_admin) and patient_id_int:
             try:
                 if is_admin:
-                    patient = Patient.objects.get(id=patient_id)
+                    patient = Patient.objects.get(id=patient_id_int)
                 else:
-                    patient = Patient.objects.get(id=patient_id, therapist=user)
+                    patient = Patient.objects.get(id=patient_id_int, therapist=user)
                 
                 patient_results = TestResult.objects.filter(patient=patient).select_related('test_module', 'user').order_by('-created_at')
                 # Combinar resultados

@@ -55,51 +55,73 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
     setLoading(true);
     setError(null);
     try {
-      // Prefer backend truth to avoid code mismatches.
+      // Build a stable catalog from the declarative registry, then overlay backend truth.
+      // This ensures therapists still see placeholder tests even if the backend only returns active/implemented ones.
+      const registryMapped = clinicalTestsRegistry.map<CatalogTest>((entry, idx) => ({
+        id: idx + 1,
+        code: entry.test_code,
+        name: entry.display_name,
+        description: entry.guidance?.what || entry.domain || 'Instrumento clínico',
+        test_type: TEST_TYPES.BASIC,
+        required_access_level: 'professional',
+        is_active: true,
+        available_for_therapists: true,
+        available_for_personal: entry.family === 'psicologicos',
+        uses_per_month: null,
+        icon: '',
+        order: idx,
+        estimated_duration: 5,
+        is_available: true,
+        user_access: null,
+        implemented: entry.implemented,
+        domainLabel: entry.domain,
+        family: entry.family,
+        requires_license: false,
+      }));
+
       const remote = await getAvailableTests().catch(() => null);
-      if (remote?.tests && Array.isArray(remote.tests)) {
-        const mapped = remote.tests.map<CatalogTest>((t) => {
-          const meta = clinicalTestsRegistry.find((e) => e.test_code === t.code) || null;
+      const remoteTests: TestModule[] = Array.isArray(remote?.tests) ? remote!.tests : [];
+      const remoteByCode = new Map(remoteTests.map((t) => [t.code, t]));
+
+      const mergedFromRegistry = registryMapped.map<CatalogTest>((local) => {
+        const remoteHit = remoteByCode.get(local.code);
+        if (!remoteHit) return local;
+
+        const meta = clinicalTestsRegistry.find((e) => e.test_code === remoteHit.code) || null;
+        const family: CatalogTest['family'] =
+          meta?.family ||
+          (['basic', 'numerology', 'compatibility', 'career', 'spiritual', 'health', 'financial', 'family', 'purpose', 'past_life'].includes(String(remoteHit.test_type))
+            ? 'cabalisticos'
+            : 'psicologicos');
+
+        return {
+          ...local,
+          ...remoteHit,
+          implemented: meta?.implemented ?? local.implemented,
+          domainLabel: meta?.domain ?? local.domainLabel,
+          family,
+          requires_license: (remoteHit as any).requires_license === true,
+        };
+      });
+
+      const registryCodes = new Set(registryMapped.map((t) => t.code));
+      const remoteOnly = remoteTests
+        .filter((t) => !registryCodes.has(t.code))
+        .map<CatalogTest>((t) => {
           const family: CatalogTest['family'] =
-            meta?.family ||
-            (['basic', 'numerology', 'compatibility', 'career', 'spiritual', 'health', 'financial', 'family', 'purpose', 'past_life'].includes(String(t.test_type))
+            ['basic', 'numerology', 'compatibility', 'career', 'spiritual', 'health', 'financial', 'family', 'purpose', 'past_life'].includes(String(t.test_type))
               ? 'cabalisticos'
-              : 'psicologicos');
+              : 'psicologicos';
           return {
             ...t,
-            implemented: meta?.implemented ?? false,
-            domainLabel: meta?.domain,
+            implemented: true,
+            domainLabel: (t as any).domainLabel || (t as any).domain || undefined,
             family,
-            // Ensure we keep the backend license flag if present
             requires_license: (t as any).requires_license === true,
           };
         });
-        setTests(mapped);
-      } else {
-        // Fallback (offline/dev): static registry only.
-        const mapped = clinicalTestsRegistry.map<CatalogTest>((entry, idx) => ({
-          id: idx + 1,
-          code: entry.test_code,
-          name: entry.display_name,
-          description: entry.guidance?.what || entry.domain || 'Instrumento clínico',
-          test_type: TEST_TYPES.BASIC,
-          required_access_level: 'professional',
-          is_active: true,
-          available_for_therapists: true,
-          available_for_personal: entry.family === 'psicologicos',
-          uses_per_month: null,
-          icon: '',
-          order: idx,
-          estimated_duration: 5,
-          is_available: true,
-          user_access: null,
-          implemented: entry.implemented,
-          domainLabel: entry.domain,
-          family: entry.family,
-          requires_license: false,
-        }));
-        setTests(mapped);
-      }
+
+      setTests([...mergedFromRegistry, ...remoteOnly]);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error al cargar catálogo de tests';
       setError(message);

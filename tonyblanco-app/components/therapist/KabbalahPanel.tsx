@@ -17,7 +17,8 @@ export default function KabbalahPanel({ patientId }: { patientId: string }) {
         if (res && res.kabbalah_engine) {
           setEngine(res.kabbalah_engine)
         } else {
-          setError('No hay interpretación kabbalística disponible')
+          // Endpoint not available or returned null: hide the panel gracefully.
+          setError('Interpretación kabbalística no disponible en este entorno.')
         }
       })
       .catch((e) => {
@@ -33,7 +34,7 @@ export default function KabbalahPanel({ patientId }: { patientId: string }) {
   }, [patientId])
 
   if (loading) return <div className="p-4">Cargando interpretación kabbalística…</div>
-  if (error) return <div className="p-4 text-red-600">{error}</div>
+  if (error) return <div className="p-4 text-gray-600">{error}</div>
   if (!engine) return null
 
   const ranking = engine['72_names']?.ranking || []

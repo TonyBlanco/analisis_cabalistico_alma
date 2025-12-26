@@ -193,6 +193,18 @@ export default function ClinicalContextHeader() {
             SCID-5
           </button>
 
+          <button
+            onClick={() => {
+              const ap = getActivePatient();
+              const qs = ap?.id ? `?patient_id=${ap.id}` : '';
+              router.push(`/dashboard/therapist/mshe${qs}`);
+            }}
+            className="inline-flex items-center px-2 py-1 rounded bg-purple-600 text-white text-xs hover:bg-purple-700 transition-colors"
+            title="Motor de Síntesis Holística Evaluativa"
+          >
+            MSHE
+          </button>
+
           {showEditor && activePatient && (
             <PatientProfileEditor
               profile={profile ? {

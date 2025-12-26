@@ -1,0 +1,555 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { API_BASE_URL, getAuthToken } from '@/lib/api';
+
+interface HolisticWeights {
+  kabbalah_numerology: number;
+  tarot_evolutivo: number;
+  astrologia_terapeutica: number;
+  transgeneracional: number;
+  biodecodificacion: number;
+}
+
+interface SynthesisResult {
+  scores: Record<string, number>;
+  color_alerts: Record<string, string>;
+  axis_contributions: Record<string, any[]>;
+  ai_input_data: any;
+  metadata: {
+    total_records: number;
+    weights_used: HolisticWeights;
+    computed_at: string;
+    patient_id: number;
+    therapist_id: number;
+  };
+}
+
+interface AIAnalysis {
+  dominant_themes: string[];
+  priority_axes: string[];
+  recurrent_patterns: string[];
+  areas_of_progress: string[];
+  areas_of_stagnation: string[];
+  evaluated_summary: string;
+  confidence_level: 'low' | 'medium' | 'high';
+  limits_notice: string;
+}
+
+interface AnalysisRecord {
+  id: string;
+  kind: string;
+  computed_result: SynthesisResult;
+  raw_input: {
+    ai_analysis: AIAnalysis;
+  };
+  therapist_annotations?: {
+    summary?: string;
+    notes?: string;
+    therapist_validation?: boolean;
+  };
+  created_at: string;
+}
+
+const AXIS_NAMES: Record<string, string> = {
+  identity_purpose: 'Identidad y Propósito',
+  emotion_regulation: 'Emoción y Regulación',
+  relationships_bonds: 'Relaciones y Vínculos',
+  vital_energy: 'Energía Vital y Cuerpo Simbólico',
+  cycles_change: 'Ciclos y Procesos de Cambio',
+  memory_lineage: 'Memoria y Linaje Transgeneracional'
+};
+
+const COLOR_CLASSES: Record<string, string> = {
+  verde: 'bg-green-100 text-green-800 border-green-200',
+  amarillo: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+  naranja: 'bg-orange-100 text-orange-800 border-orange-200',
+  rojo: 'bg-red-100 text-red-800 border-red-200'
+};
+
+export default function MSHEClinicalModule() {
+  const searchParams = useSearchParams();
+  const patientId = searchParams.get('patient_id');
+
+  const [weights, setWeights] = useState<HolisticWeights>({
+    kabbalah_numerology: 0.20,
+    tarot_evolutivo: 0.20,
+    astrologia_terapeutica: 0.20,
+    transgeneracional: 0.20,
+    biodecodificacion: 0.20
+  });
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [synthesisResult, setSynthesisResult] = useState<SynthesisResult | null>(null);
+  const [aiAnalysis, setAiAnalysis] = useState<AIAnalysis | null>(null);
+  const [analysisRecord, setAnalysisRecord] = useState<AnalysisRecord | null>(null);
+  const [evolutionHistory, setEvolutionHistory] = useState<AnalysisRecord[]>([]);
+  const [activeTab, setActiveTab] = useState<'synthesis' | 'evolution'>('synthesis');
+  const [therapistNotes, setTherapistNotes] = useState('');
+  const [therapistSummary, setTherapistSummary] = useState('');
+  const [isValidated, setIsValidated] = useState(false);
+
+  // Load therapist configuration
+  useEffect(() => {
+    loadTherapistConfig();
+  }, []);
+
+  // Load evolution history when patient changes
+  useEffect(() => {
+    if (patientId) {
+      loadEvolutionHistory();
+    }
+  }, [patientId]);
+
+  const loadTherapistConfig = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/therapist/holistic-config/`, {
+        headers: {
+          'Authorization': `Bearer ${getAuthToken()}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setWeights(data.weights);
+      }
+    } catch (error) {
+      console.error('Error loading therapist config:', error);
+    }
+  };
+
+  const saveTherapistConfig = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/therapist/holistic-config/`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${getAuthToken()}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ weights })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save configuration');
+      }
+    } catch (error) {
+      console.error('Error saving therapist config:', error);
+      alert('Error al guardar configuración');
+    }
+  };
+
+  const loadEvolutionHistory = async () => {
+    if (!patientId) return;
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/analysis-records/?patient_id=${patientId}`, {
+        headers: {
+          'Authorization': `Bearer ${getAuthToken()}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const msheRecords = data.results.filter((r: AnalysisRecord) =>
+          r.kind === 'holistic_evaluative_synthesis'
+        );
+        setEvolutionHistory(msheRecords);
+      }
+    } catch (error) {
+      console.error('Error loading evolution history:', error);
+    }
+  };
+
+  const generateSynthesis = async () => {
+    if (!patientId) {
+      alert('Paciente no seleccionado');
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/analysis-records/holistic-synthesis/?patient_id=${patientId}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Token ${localStorage.getItem('authToken')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Error generating synthesis');
+      }
+
+      const record: AnalysisRecord = await response.json();
+      setAnalysisRecord(record);
+      setSynthesisResult(record.computed_result);
+      setAiAnalysis(record.raw_input.ai_analysis);
+
+      // Load updated history
+      await loadEvolutionHistory();
+
+    } catch (error) {
+      console.error('Error generating synthesis:', error);
+      alert('Error al generar síntesis: ' + (error as Error).message);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const saveTherapistValidation = async () => {
+    if (!analysisRecord) return;
+
+    try {
+      const annotations = {
+        summary: therapistSummary,
+        notes: therapistNotes,
+        therapist_validation: isValidated
+      };
+
+      const response = await fetch(`${API_BASE_URL}/analysis-records/${analysisRecord.id}/annotations/`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${getAuthToken()}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ therapist_annotations: annotations })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save validation');
+      }
+
+      alert('Validación guardada exitosamente');
+    } catch (error) {
+      console.error('Error saving validation:', error);
+      alert('Error al guardar validación');
+    }
+  };
+
+  const resetWeights = () => {
+    setWeights({
+      kabbalah_numerology: 0.20,
+      tarot_evolutivo: 0.20,
+      astrologia_terapeutica: 0.20,
+      transgeneracional: 0.20,
+      biodecodificacion: 0.20
+    });
+  };
+
+  const totalWeight = Object.values(weights).reduce((sum, w) => sum + w, 0);
+  const isWeightsValid = Math.abs(totalWeight - 1.0) < 0.001;
+
+  if (!patientId) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-500">Selecciona un paciente para usar el Motor de Síntesis Holística Evaluativa</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Header with badges */}
+      <div className="flex items-center gap-3">
+        <span className="rounded-full bg-purple-100 px-3 py-1 text-sm font-medium text-purple-800">
+          Motor de Síntesis Holística
+        </span>
+        <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-800">
+          Evaluativo · IA asistida
+        </span>
+        <span className="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-600">
+          Última actualización: {synthesisResult?.metadata.computed_at ?
+            new Date(synthesisResult.metadata.computed_at).toLocaleString('es-ES') : 'Nunca'}
+        </span>
+      </div>
+
+      {/* Weight Configuration */}
+      <div className="bg-white rounded-lg shadow p-6">
+        <h3 className="text-lg font-semibold mb-4">Configuración de Pesos</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {Object.entries(weights).map(([key, value]) => (
+            <div key={key}>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {key.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                max="1"
+                value={value}
+                onChange={(e) => setWeights(prev => ({
+                  ...prev,
+                  [key]: parseFloat(e.target.value) || 0
+                }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+              />
+            </div>
+          ))}
+        </div>
+        <div className="mt-4 flex items-center justify-between">
+          <div className="text-sm">
+            Total: <span className={totalWeight === 1.0 ? 'text-green-600 font-medium' : 'text-red-600 font-medium'}>
+              {(totalWeight * 100).toFixed(1)}%
+            </span>
+            {totalWeight !== 1.0 && <span className="text-red-500 ml-2">(Debe ser 100%)</span>}
+          </div>
+          <div className="space-x-2">
+            <button
+              onClick={resetWeights}
+              className="px-4 py-2 text-sm text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
+            >
+              Restaurar pesos recomendados
+            </button>
+            <button
+              onClick={saveTherapistConfig}
+              disabled={!isWeightsValid}
+              className="px-4 py-2 text-sm bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Guardar configuración
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Generate Button */}
+      <div className="bg-white rounded-lg shadow p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-semibold">Generar Síntesis Holística</h3>
+            <p className="text-sm text-gray-600 mt-1">
+              Analizará automáticamente todos los registros no clínicos del paciente
+            </p>
+          </div>
+          <button
+            onClick={generateSynthesis}
+            disabled={isGenerating || !isWeightsValid}
+            className="px-6 py-3 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            {isGenerating ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                Generando...
+              </>
+            ) : (
+              'Generar Síntesis'
+            )}
+          </button>
+        </div>
+      </div>
+
+      {/* Results */}
+      {synthesisResult && (
+        <div className="space-y-6">
+          {/* Tab Navigation */}
+          <div className="border-b border-gray-200">
+            <nav className="-mb-px flex space-x-8">
+              <button
+                onClick={() => setActiveTab('synthesis')}
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'synthesis'
+                    ? 'border-purple-500 text-purple-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Síntesis Actual
+              </button>
+              <button
+                onClick={() => setActiveTab('evolution')}
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'evolution'
+                    ? 'border-purple-500 text-purple-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Evolución ({evolutionHistory.length})
+              </button>
+            </nav>
+          </div>
+
+          {activeTab === 'synthesis' && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Radar Chart / Scores */}
+              <div className="bg-white rounded-lg shadow p-6">
+                <h3 className="text-lg font-semibold mb-4">Evaluación por Ejes Holísticos</h3>
+                <div className="space-y-3">
+                  {Object.entries(synthesisResult.scores).map(([axis, score]) => (
+                    <div key={axis} className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-sm font-medium text-gray-900">
+                            {AXIS_NAMES[axis] || axis}
+                          </span>
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium border ${COLOR_CLASSES[synthesisResult.color_alerts[axis]]}`}>
+                            {score.toFixed(1)}
+                          </span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div
+                            className="bg-purple-600 h-2 rounded-full"
+                            style={{ width: `${score}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-4 text-xs text-gray-500">
+                  Los colores indican nivel de atención simbólica, no gravedad clínica.
+                </div>
+              </div>
+
+              {/* AI Analysis */}
+              <div className="bg-white rounded-lg shadow p-6">
+                <h3 className="text-lg font-semibold mb-4">Análisis IA</h3>
+                {aiAnalysis ? (
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="font-medium text-gray-900">Temas Dominantes</h4>
+                      <ul className="mt-1 text-sm text-gray-600 list-disc list-inside">
+                        {aiAnalysis.dominant_themes.map((theme, idx) => (
+                          <li key={idx}>{theme}</li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div>
+                      <h4 className="font-medium text-gray-900">Ejes Prioritarios</h4>
+                      <ul className="mt-1 text-sm text-gray-600 list-disc list-inside">
+                        {aiAnalysis.priority_axes.map((axis, idx) => (
+                          <li key={idx}>{AXIS_NAMES[axis] || axis}</li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div>
+                      <h4 className="font-medium text-gray-900">Conclusión Evaluativa</h4>
+                      <p className="mt-1 text-sm text-gray-600">{aiAnalysis.evaluated_summary}</p>
+                      <p className="mt-2 text-xs text-gray-500">{aiAnalysis.limits_notice}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-gray-500">Análisis IA no disponible</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'evolution' && (
+            <div className="bg-white rounded-lg shadow p-6">
+              <h3 className="text-lg font-semibold mb-4">Historial de Evolución</h3>
+              {evolutionHistory.length > 0 ? (
+                <div className="space-y-4">
+                  {evolutionHistory.map((record, idx) => (
+                    <div key={record.id} className="border rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-medium">
+                          Evaluación {evolutionHistory.length - idx}
+                        </span>
+                        <span className="text-sm text-gray-500">
+                          {new Date(record.created_at).toLocaleDateString('es-ES')}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
+                        {Object.entries(record.computed_result.scores).map(([axis, score]) => (
+                          <div key={axis} className="flex justify-between">
+                            <span className="text-gray-600">{AXIS_NAMES[axis]?.split(' ')[0]}:</span>
+                            <span className="font-medium">{score.toFixed(1)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500">No hay historial de evaluaciones previas</p>
+              )}
+            </div>
+          )}
+
+          {/* Therapist Validation */}
+          <div className="bg-white rounded-lg shadow p-6">
+            <h3 className="text-lg font-semibold mb-4">Validación del Terapeuta</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Resumen del terapeuta
+                </label>
+                <textarea
+                  value={therapistSummary}
+                  onChange={(e) => setTherapistSummary(e.target.value)}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  placeholder="Resumen profesional de la evaluación..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Notas adicionales
+                </label>
+                <textarea
+                  value={therapistNotes}
+                  onChange={(e) => setTherapistNotes(e.target.value)}
+                  rows={4}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  placeholder="Notas privadas del terapeuta..."
+                />
+              </div>
+
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="therapist_validation"
+                  checked={isValidated}
+                  onChange={(e) => setIsValidated(e.target.checked)}
+                  className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                />
+                <label htmlFor="therapist_validation" className="ml-2 text-sm text-gray-900">
+                  Valido esta evaluación como completa y profesional
+                </label>
+              </div>
+
+              <div className="flex justify-end">
+                <button
+                  onClick={saveTherapistValidation}
+                  disabled={!isValidated}
+                  className="px-6 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Guardar Validación
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Ethical Notice */}
+      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+        <div className="flex">
+          <div className="flex-shrink-0">
+            <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
+          </div>
+          <div className="ml-3">
+            <h3 className="text-sm font-medium text-yellow-800">
+              Aviso Ético Importante
+            </h3>
+            <div className="mt-2 text-sm text-yellow-700">
+              <p>
+                Esta evaluación es simbólica y holística. No sustituye evaluaciones médicas ni psicológicas.
+                Las conclusiones son orientativas y requieren discernimiento humano.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

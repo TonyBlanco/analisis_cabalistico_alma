@@ -915,3 +915,78 @@ class AssignResourceSerializer(serializers.Serializer):
         if not Resource.objects.filter(id=value).exists():
             raise serializers.ValidationError('Resource does not exist')
         return value
+
+
+class AnalysisRecordSerializer(serializers.ModelSerializer):
+    """Serializer for AnalysisRecord model with ownership validation."""
+    
+    class Meta:
+        model = AnalysisRecord
+        fields = [
+            'id', 'kind', 'module_code', 'role_context', 'execution_mode',
+            'birth_data_snapshot', 'algorithm_snapshot', 'raw_input', 'computed_result',
+            'legacy_output', 'therapist_annotations', 'visibility', 'created_at',
+            'created_by_user', 'subject_user', 'therapist', 'patient', 'test_result', 'cabalistic_analysis'
+        ]
+        read_only_fields = ['id', 'created_at', 'created_by_user']
+    
+    def validate(self, data):
+        """Validate ownership and required fields based on execution_mode."""
+        request = self.context.get('request')
+        if not request or not request.user:
+            raise serializers.ValidationError('Request context required')
+        
+        user = request.user
+        execution_mode = data.get('execution_mode')
+        
+        # Set created_by_user
+        data['created_by_user'] = user
+        
+        # Validate execution_mode
+        if execution_mode == 'therapist_clinical':
+            # Must have therapist and patient
+            if not data.get('therapist'):
+                data['therapist'] = user
+            if not data.get('patient'):
+                raise serializers.ValidationError('patient is required for therapist_clinical mode')
+            
+            # Validate therapist owns patient
+            patient = data.get('patient')
+            if patient and patient.therapist != user:
+                raise serializers.ValidationError('You do not own this patient')
+        
+        elif execution_mode == 'patient_self':
+            # Patient executing on themselves
+            data['subject_user'] = user
+        
+        # Validate required snapshots
+        if not data.get('birth_data_snapshot'):
+            raise serializers.ValidationError('birth_data_snapshot is required')
+        if not data.get('algorithm_snapshot'):
+            raise serializers.ValidationError('algorithm_snapshot is required')
+        
+        return data
+
+
+class TherapistHolisticConfigSerializer(serializers.ModelSerializer):
+    """Serializer for TherapistHolisticConfig model."""
+    
+    class Meta:
+        model = TherapistHolisticConfig
+        fields = ['therapist', 'weights', 'created_at', 'updated_at']
+        read_only_fields = ['therapist', 'created_at', 'updated_at']
+    
+    def validate_weights(self, value):
+        """Validate that weights sum to 1.0."""
+        if not isinstance(value, dict):
+            raise serializers.ValidationError('Weights must be a dictionary')
+        
+        total = sum(value.values())
+        if abs(total - 1.0) > 0.001:
+            raise serializers.ValidationError(f'Weights must sum to 1.0, currently sum to {total}')
+        
+        for key, weight in value.items():
+            if not isinstance(weight, (int, float)) or weight < 0 or weight > 1:
+                raise serializers.ValidationError(f'Invalid weight for {key}: {weight}')
+        
+        return value

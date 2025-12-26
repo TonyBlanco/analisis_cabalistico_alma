@@ -841,6 +841,7 @@ class AnalysisRecord(models.Model):
         ('kabbalah', 'Kabbalah'),
         ('astrology', 'Astrology'),
         ('legacy', 'Legacy'),
+        ('holistic_evaluative_synthesis', 'Holistic Evaluative Synthesis'),
     ]
 
     ROLE_CONTEXT_CHOICES = [
@@ -1005,6 +1006,56 @@ class AnalysisRecord(models.Model):
 
     def __str__(self) -> str:  # pragma: no cover - representación simple
         return f'{self.kind}::{self.module_code} [{self.id}]'
+
+
+class TherapistHolisticConfig(models.Model):
+    """Configuración de pesos para Motor de Síntesis Holística Evaluativa (MSHE)"""
+    
+    therapist = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='holistic_config',
+        help_text='Terapeuta propietario de esta configuración'
+    )
+    
+    # Pesos por disciplina (deben sumar 1.0)
+    weights = models.JSONField(
+        default=dict,
+        help_text='Pesos por disciplina: {"kabbalah_numerology": 0.20, "tarot_evolutivo": 0.20, "astrologia_terapeutica": 0.20, "transgeneracional": 0.20, "biodecodificacion": 0.20}'
+    )
+    
+    # Metadata
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = 'Configuración Holística del Terapeuta'
+        verbose_name_plural = 'Configuraciones Holísticas de Terapeutas'
+    
+    def __str__(self):
+        return f"Config MSHE - {self.therapist.username}"
+    
+    def clean(self):
+        """Validar que los pesos sumen 1.0"""
+        from django.core.exceptions import ValidationError
+        total = sum(self.weights.values())
+        if abs(total - 1.0) > 0.001:  # Tolerancia para errores de punto flotante
+            raise ValidationError(f'Los pesos deben sumar 1.0, actualmente suman {total}')
+    
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
+    
+    @staticmethod
+    def get_default_weights():
+        """Pesos recomendados por defecto"""
+        return {
+            "kabbalah_numerology": 0.20,
+            "tarot_evolutivo": 0.20,
+            "astrologia_terapeutica": 0.20,
+            "transgeneracional": 0.20,
+            "biodecodificacion": 0.20
+        }
 
 
 class Resource(models.Model):

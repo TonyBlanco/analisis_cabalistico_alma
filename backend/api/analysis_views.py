@@ -264,3 +264,159 @@ class AnalysisRecordDetailView(generics.RetrieveAPIView):
             | Q(patient__therapist=user)
             | Q(patient__user=user)
         )
+
+
+# ========== VISTAS PARA MOTOR DE SÍNTESIS HOLÍSTICA EVALUATIVA (MSHE) ==========
+
+class HolisticSynthesisView(APIView):
+    """
+    POST /api/analysis-records/holistic-synthesis/?patient_id={id}
+
+    Terapeuta: Genera síntesis holística evaluativa automática.
+    Lee todos los analysis-records no clínicos del paciente.
+    Requiere: role = therapist, ownership del paciente.
+    """
+    permission_classes = [IsAuthenticated, IsTherapist]
+
+    def post(self, request):
+        therapist = request.user
+        patient_id = request.query_params.get('patient_id')
+
+        if not patient_id:
+            return Response(
+                {'error': 'patient_id es requerido en query params.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Validar ownership del paciente
+        try:
+            patient = Patient.objects.get(pk=patient_id, therapist=therapist)
+        except Patient.DoesNotExist:
+            return Response(
+                {'error': 'Paciente no encontrado o no tienes permisos.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        try:
+            # Importar aquí para evitar dependencias circulares
+            from .holistic_synthesis_engine import HolisticSynthesisEngine
+
+            # Crear motor de síntesis
+            engine = HolisticSynthesisEngine(patient, therapist)
+
+            # Computar síntesis
+            synthesis_data = engine.compute_synthesis()
+
+            # Generar análisis IA
+            ai_analysis = engine.generate_ai_analysis(synthesis_data)
+
+            # Preparar datos para guardar
+            raw_input = {
+                'holistic_synthesis': {
+                    'scores': synthesis_data['scores'],
+                    'color_alerts': synthesis_data['color_alerts'],
+                    'axis_contributions': synthesis_data['axis_contributions'],
+                    'metadata': synthesis_data['metadata']
+                },
+                'ai_analysis': ai_analysis
+            }
+
+            # Crear AnalysisRecord
+            analysis_record = AnalysisRecord.objects.create(
+                kind='holistic_evaluative_synthesis',
+                module_code='MSHE',
+                role_context='therapist',
+                execution_mode='therapist_clinical',
+                birth_data_snapshot={},  # No aplica para síntesis
+                algorithm_snapshot={
+                    'engine': 'HolisticSynthesisEngine',
+                    'version': '1.0',
+                    'build_hash': None,
+                    'params': {
+                        'weights': synthesis_data['metadata']['weights_used']
+                    }
+                },
+                raw_input=raw_input,
+                computed_result=synthesis_data,
+                visibility='therapist',
+                created_by_user=therapist,
+                therapist=therapist,
+                patient=patient
+            )
+
+            # Serializar respuesta
+            serializer = AnalysisRecordSerializer(analysis_record, context={'request': request})
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            logger.exception("Error en HolisticSynthesisView.post")
+            return Response(
+                {'error': f'Error generando síntesis holística: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class TherapistHolisticConfigView(APIView):
+    """
+    GET /api/therapist/holistic-config/
+    PUT /api/therapist/holistic-config/
+
+    Terapeuta: Gestiona configuración de pesos MSHE.
+    """
+    permission_classes = [IsAuthenticated, IsTherapist]
+
+    def get(self, request):
+        therapist = request.user
+
+        try:
+            from .models import TherapistHolisticConfig
+            config = TherapistHolisticConfig.objects.get(therapist=therapist)
+            return Response({
+                'weights': config.weights,
+                'created_at': config.created_at,
+                'updated_at': config.updated_at
+            })
+        except TherapistHolisticConfig.DoesNotExist:
+            # Retornar configuración por defecto
+            from .models import TherapistHolisticConfig
+            default_weights = TherapistHolisticConfig.get_default_weights()
+            return Response({
+                'weights': default_weights,
+                'message': 'Usando pesos por defecto'
+            })
+
+    def put(self, request):
+        therapist = request.user
+        weights = request.data.get('weights', {})
+
+        # Validar que los pesos sumen 1.0
+        total = sum(weights.values())
+        if abs(total - 1.0) > 0.001:
+            return Response(
+                {'error': f'Los pesos deben sumar 1.0, actualmente suman {total}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Validar pesos individuales
+        for key, value in weights.items():
+            if not isinstance(value, (int, float)) or value < 0 or value > 1:
+                return Response(
+                    {'error': f'Peso inválido para {key}: {value}'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+        from .models import TherapistHolisticConfig
+        config, created = TherapistHolisticConfig.objects.get_or_create(
+            therapist=therapist,
+            defaults={'weights': weights}
+        )
+
+        if not created:
+            config.weights = weights
+            config.save()
+
+        return Response({
+            'weights': config.weights,
+            'created': created,
+            'updated_at': config.updated_at
+        })

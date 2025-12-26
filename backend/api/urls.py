@@ -98,6 +98,8 @@ from .analysis_views import (
     AnalysisRecordListCreateView,
     AnalysisRecordDetailView,
     UpdateAnalysisAnnotationsView,
+    HolisticSynthesisView,
+    TherapistHolisticConfigView,
 )
 from .patient_profile_views import (
     TherapistUpdatePatientProfileView,
@@ -241,6 +243,10 @@ urlpatterns = [
     path('analysis-records/', AnalysisRecordListCreateView.as_view(), name='analysisrecord_list_create'),
     path('analysis-records/<uuid:pk>/', AnalysisRecordDetailView.as_view(), name='analysisrecord_detail'),
     path('analysis-records/<uuid:pk>/annotations/', UpdateAnalysisAnnotationsView.as_view(), name='analysisrecord_annotations'),
+    
+    # Motor de Síntesis Holística Evaluativa (MSHE)
+    path('analysis-records/holistic-synthesis/', HolisticSynthesisView.as_view(), name='holistic_synthesis'),
+    path('therapist/holistic-config/', TherapistHolisticConfigView.as_view(), name='therapist_holistic_config'),
 
     # Dominio bio-emocional & árbol transgeneracional (aislado)
     path('bioemotional/', include('api.bioemotional.urls', namespace='bioemotional')),

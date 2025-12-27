@@ -72,3 +72,26 @@ html, body {
   animation: slide-in-right 0.3s ease-out;
 }
 
+/* Print layout for exports (frontend-only) */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #111827 !important;
+    font-family: 'Times New Roman', serif;
+  }
+  a[href]:after {
+    content: " (" attr(href) ")";
+    font-size: 10px;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-header {
+    display: block !important;
+    margin-bottom: 12px;
+    border-bottom: 1px solid #d1d5db;
+    padding-bottom: 8px;
+    font-size: 12px;
+  }
+}
+

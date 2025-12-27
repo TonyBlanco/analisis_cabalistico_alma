@@ -217,4 +217,5 @@ GEMINI_MODEL = config('GEMINI_MODEL', default='gemini-1.5-flash')
 # When enabled, the backend may generate short AI-written (non-verbatim) summaries
 # for curated Sefaria references.
 KERYKEION_AI_SNIPPETS_ENABLED = config('KERYKEION_AI_SNIPPETS_ENABLED', default=False, cast=bool)
+ASTRO_MULTITECH_ENABLED = config('ASTRO_MULTITECH_ENABLED', default=True, cast=bool)
 KERYKEION_AI_SNIPPETS_MODEL = config('KERYKEION_AI_SNIPPETS_MODEL', default='')

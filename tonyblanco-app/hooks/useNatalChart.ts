@@ -76,8 +76,23 @@ export interface NatalChartPayload {
   cabalistic_data?: CabalisticData;
 }
 
+export interface MultiTechLayerPayload {
+  reference_date?: string;
+  method?: string;
+  chart?: NatalChartPayload | null;
+}
+
+export interface MultiTechAnalysisResult {
+  meta?: Record<string, any>;
+  natal?: NatalChartPayload | null;
+  transits?: NatalChartPayload | null;
+  solarReturn?: MultiTechLayerPayload | null;
+  progressions?: MultiTechLayerPayload | null;
+}
+
 interface UseNatalChartReturn {
   chart: NatalChartPayload | null;
+  analysisResult: MultiTechAnalysisResult | null;
   loading: boolean;
   error: string | null;
   missingFields: string[] | null;
@@ -120,6 +135,7 @@ function normalizePayload(payload: any): NatalChartPayload | null {
  */
 export function useNatalChart(patientId: string | undefined): UseNatalChartReturn {
   const [chart, setChart] = useState<NatalChartPayload | null>(null);
+  const [analysisResult, setAnalysisResult] = useState<MultiTechAnalysisResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [missingFields, setMissingFields] = useState<string[] | null>(null);
@@ -156,6 +172,7 @@ export function useNatalChart(patientId: string | undefined): UseNatalChartRetur
       if (response.status === 404) {
         // No hay carta calculada (estado esperado)
         setChart(null);
+        setAnalysisResult(null);
         setLoading(false);
         return;
       }
@@ -198,9 +215,11 @@ export function useNatalChart(patientId: string | undefined): UseNatalChartRetur
       }
 
       setChart(normalizePayload(payload));
+      setAnalysisResult(data.analysis_result ?? data.analysisResult ?? null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al cargar carta natal');
       setChart(null);
+      setAnalysisResult(null);
     } finally {
       setLoading(false);
     }
@@ -287,6 +306,7 @@ export function useNatalChart(patientId: string | undefined): UseNatalChartRetur
       }
 
       setChart(normalizePayload(payload));
+      setAnalysisResult(data.analysis_result ?? data.analysisResult ?? null);
       setError(null);
       setMissingFields(null);
     } catch (err) {
@@ -302,6 +322,7 @@ export function useNatalChart(patientId: string | undefined): UseNatalChartRetur
 
   return {
     chart,
+    analysisResult,
     loading,
     error,
     missingFields,

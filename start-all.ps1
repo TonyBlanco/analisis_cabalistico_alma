@@ -84,7 +84,7 @@ Start-Process pwsh -ArgumentList "-NoExit", "-Command", "& '$PSScriptRoot\start-
 function Test-BackendReady {
 	param([string]$Url = "http://127.0.0.1:8000/api/")
 	try {
-		$resp = Invoke-WebRequest -Uri $Url -Method GET -TimeoutSec 3 -UseBasicParsing
+		$null = Invoke-WebRequest -Uri $Url -Method GET -TimeoutSec 3 -UseBasicParsing
 		return $true
 	} catch {
 		return $false
@@ -112,7 +112,7 @@ Start-Process pwsh -ArgumentList "-NoExit", "-Command", "& '$PSScriptRoot\start-
 function Test-FlaskReady {
 	param([string]$Url = "http://localhost:5000/api/salud")
 	try {
-		$resp = Invoke-WebRequest -Uri $Url -Method GET -TimeoutSec 3 -UseBasicParsing
+		$null = Invoke-WebRequest -Uri $Url -Method GET -TimeoutSec 3 -UseBasicParsing
 		return $true
 	} catch {
 		return $false

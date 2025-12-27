@@ -6,9 +6,23 @@ No se mezclan visualizaciones, cálculos ni narrativas entre workspaces.
 
 ---
 
-## Contexto Clinico Global
-Todos los workspaces se muestran bajo contexto clinico con paciente activo.
-Ningun workspace opera sin conciencia del paciente seleccionado.
+## Contexto Clínico Global
+Todos los workspaces se muestran bajo contexto clínico con paciente activo.
+Ningún workspace opera sin conciencia del paciente seleccionado.
+
+---
+
+## Modos (no clínicos)
+Algunos workspaces pueden exponer un selector explícito de modo.
+
+- **Observacional**: visualización/consulta. Sin correspondencias ni síntesis.
+- **Training / Investigativo**: habilita correspondencias explicativas y síntesis estructurada (uso educativo / no clínico).
+- **Clínico**: fuera del alcance de los SWM; vive en el Core Workspace.
+
+Reglas transversales:
+- No hay diagnóstico.
+- No hay automatización decisoria.
+- No se persisten resultados clínicos.
 
 ---
 
@@ -28,12 +42,15 @@ No incluye:
 ---
 
 ## Astrología Workspace
-**Propósito:** Observación astrológica visual.
+**Propósito:** Observación astrológica visual y exploración simbólica.
 
 Incluye:
-- Carta astral
+- Carta astral (visual)
 - Signos, casas y planetas
-- Correspondencias astrológicas
+
+Modos internos:
+- **Observacional**: solo visual.
+- **Training / Investigativo**: activa correspondencias simbólicas explicativas y síntesis estructurada (no clínica).
 
 No incluye:
 - Tarot
@@ -62,10 +79,8 @@ No se incrustan visualizaciones de un workspace dentro de otro.
 
 ---
 
-## Nota sobre IA (Futuro)
-La interpretacion simbolica puede ser asistida por IA,
+## Nota sobre IA (si aplica)
+La IA puede asistir en redacción/organización de material simbólico bajo un modo formativo,
 pero nunca es predictiva ni automatizada.
-Estos límites permiten:
-- Análisis simbólico cruzado por IA
-- Diagnóstico holístico no clínico
-- Preservar claridad semántica y terapéutica
+El terapeuta/analista humano mantiene el control interpretativo.
+

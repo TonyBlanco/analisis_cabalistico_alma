@@ -5,6 +5,7 @@ The symbolic system provides visualization and exploration of symbolic layers (T
 
 ## 2. Architectural Layers
 - Workspace: Defines context, permissions, and patient scope for symbolic modules.
+- Workspace Mode (optional): Some SWM UIs may expose an explicit `mode` (e.g. `observational` vs `training`) to gate correspondences/synthesis while keeping the default observational flow intact.
 - Visual Core: Renders and orchestrates visual layers without clinical logic.
 - Plugins: Modular visual layers (Tarot today, Astrology and others later) composed into the core.
 - Canonical Symbolic Data (CABALA_JSON): Source of truth for symbolic definitions and correspondences.
@@ -113,3 +114,6 @@ Future enhancements may include:
 - Explicit patient context
 - Reusability and composability
 - Ethical and clinical boundaries
+
+Related docs:
+- `docs/architecture/TRAINING_INTERPRETATIVE_PHASE.md`

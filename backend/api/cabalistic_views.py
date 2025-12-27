@@ -17,6 +17,7 @@ from .utils.tarot_service import analyze_archetype_vs_clinical
 from .astrology_kerykeion.service import execute_kerykeion
 from .astrology_kerykeion.schemas import KerykeionInputSchema, LocationSchema
 from .astrology_kerykeion.normalizer import normalize_kerykeion_output
+from .astrology_kerykeion.multi_tech import build_multitech_payload, multitech_enabled
 from .permissions import IsTherapist
 from .synthesis_engine import SynthesisEngine
 from pydantic import ValidationError
@@ -373,6 +374,17 @@ class KerykeionAnalysisView(APIView):
                 'source': natal_chart.source,
                 'chart': natal_chart.chart_payload
             }
+
+            # Optional multi-tech payload (natal + transits + solar return + progressions)
+            if multitech_enabled():
+                try:
+                    if isinstance(natal_chart.chart_payload, dict) and isinstance(natal_chart.input_snapshot, dict):
+                        response_data['analysis_result'] = build_multitech_payload(
+                            natal_chart=natal_chart.chart_payload,
+                            input_data=natal_chart.input_snapshot,
+                        )
+                except Exception as e:
+                    logger.error(f"Error generando payload multi-tech (GET) para paciente {id}: {str(e)}", exc_info=True)
             
             return Response(response_data, status=status.HTTP_200_OK)
             
@@ -572,6 +584,16 @@ class KerykeionAnalysisView(APIView):
                 'source': natal_chart.source,
                 'chart': normalized_chart
             }
+
+            # Optional multi-tech payload (natal + transits + solar return + progressions)
+            if multitech_enabled():
+                try:
+                    response_data['analysis_result'] = build_multitech_payload(
+                        natal_chart=normalized_chart,
+                        input_data=input_data_dict,
+                    )
+                except Exception as e:
+                    logger.error(f"Error generando payload multi-tech (POST) para paciente {id}: {str(e)}", exc_info=True)
             
             return Response(response_data, status=status.HTTP_200_OK)
             

@@ -3,6 +3,10 @@
 Purpose:
 AstrologyWorkspace provides a dedicated visual container for astrology-only exploration.
 
+Modes:
+- Observational: visual-only (no structured interpretation panel)
+- Training / Interpretative: enables a non-clinical interpretation panel with 5 teaching methods (accordion)
+
 Why separate from Tarot:
 This workspace is isolated to avoid mixing symbolic narratives and to keep inputs clean for future analysis.
 

@@ -10,6 +10,7 @@ import HousesTable from './HousesTable';
 import AspectsTable from './AspectsTable';
 import { AlertCircle, Loader2, CheckCircle } from 'lucide-react';
 import { getHebrewLetterForSign } from '@/lib/kabbalah-sign-letters';
+import AstrologyVisualPro from './AstrologyVisualPro';
 
 interface AstrologyVisualTabProps {
   patientId: string | undefined;
@@ -32,7 +33,7 @@ interface AstrologyVisualTabProps {
  * - Validación de campos faltantes con mensaje claro
  */
 export default function AstrologyVisualTab({ patientId, houseSystem, zodiacType }: AstrologyVisualTabProps) {
-  const { chart, loading, error, missingFields, calculateChart } = useNatalChart(patientId);
+  const { chart, analysisResult, loading, error, missingFields, calculateChart } = useNatalChart(patientId);
   // When an explicit houseSystem is passed prop, prefer it when calculating
   const handleCalculate = async () => {
     await calculateChart(houseSystem, zodiacType);
@@ -127,7 +128,7 @@ export default function AstrologyVisualTab({ patientId, houseSystem, zodiacType 
           <div>
             <h3 className="text-lg font-semibold text-gray-900">Astrología (Visual)</h3>
             <p className="text-xs text-gray-500">
-              Representación astrológica observacional. No constituye diagnóstico ni predicción.
+              Evaluación holística astrológica. Lectura simbólica para orientación personal.
             </p>
           </div>
         </div>
@@ -139,7 +140,7 @@ export default function AstrologyVisualTab({ patientId, houseSystem, zodiacType 
               <AlertCircle className="h-12 w-12 text-amber-500" />
               <div className="text-center max-w-md">
                 <p className="text-gray-900 font-medium mb-2">
-                  Faltan datos en el perfil del paciente
+                  Faltan datos en el perfil del consultante
                 </p>
                 <p className="text-sm text-gray-600 mb-4">
                   Los siguientes campos son requeridos para calcular la carta natal:
@@ -152,7 +153,7 @@ export default function AstrologyVisualTab({ patientId, houseSystem, zodiacType 
                   ))}
                 </ul>
                 <p className="text-xs text-gray-500 mt-4">
-                  Completa el perfil del paciente antes de calcular la carta natal
+                  Completa el perfil del consultante antes de calcular la carta natal
                 </p>
               </div>
             </>
@@ -173,10 +174,10 @@ export default function AstrologyVisualTab({ patientId, houseSystem, zodiacType 
                   </svg>
                 </div>
                 <p className="text-gray-900 font-medium mb-2">
-                  Este paciente aún no tiene una carta natal calculada
+                  Este consultante aún no tiene una carta natal calculada
                 </p>
                 <p className="text-sm text-gray-600 mb-6">
-                  Calcula la carta natal a partir de los datos del perfil del paciente
+                  Calcula la carta natal a partir de los datos del perfil del consultante
                 </p>
               </div>
               
@@ -235,7 +236,7 @@ export default function AstrologyVisualTab({ patientId, houseSystem, zodiacType 
   const describeHouseSystem = (code: string | undefined) => {
     switch (code) {
       case 'P':
-        return 'Placidus: cúspides variables (enfoque moderno/clínico).';
+        return 'Placidus: cúspides variables (enfoque moderno).';
       case 'K':
         return 'Koch: variación topocéntrica; sensibilidad a latitud/tiempo.';
       case 'E':
@@ -314,7 +315,8 @@ export default function AstrologyVisualTab({ patientId, houseSystem, zodiacType 
       lines.push('');
     });
 
-    lines.push('Nota: Uso observacional. No constituye diagnóstico ni predicción.');
+    lines.push('Aviso importante: análisis holístico y simbólico con fines de orientación personal.');
+    lines.push('No es un sistema médico y no sustituye evaluación, tratamiento ni asesoramiento sanitario.');
     return lines.join('\n');
   };
 
@@ -324,7 +326,12 @@ export default function AstrologyVisualTab({ patientId, houseSystem, zodiacType 
         <div>
           <h3 className="text-lg font-semibold text-gray-900">Astrología (Visual)</h3>
           <p className="text-xs text-gray-500">
-            Representación astrológica observacional. No constituye diagnóstico ni predicción.
+            Evaluación holística astrológica. Lectura simbólica para orientación personal.
+          </p>
+          <p className="mt-2 text-[11px] text-blue-700">
+            <a href="/dashboard/astrology-study" className="underline font-semibold">
+              Abrir Astrology Study / Lab (modo académico, sin consultantes reales)
+            </a>
           </p>
         </div>
         <div className="flex items-center gap-4">
@@ -359,7 +366,7 @@ export default function AstrologyVisualTab({ patientId, houseSystem, zodiacType 
               onClick={handleCalculate}
               disabled={loading || !hasCompleteProfile}
               className="mt-2 w-full px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs font-medium"
-              title={!hasCompleteProfile ? 'Completa el perfil del paciente para recalcular' : ''}
+              title={!hasCompleteProfile ? 'Completa el perfil del consultante para recalcular' : ''}
             >
               {loading ? 'Recalculando…' : 'Recalcular'}
             </button>
@@ -367,11 +374,11 @@ export default function AstrologyVisualTab({ patientId, houseSystem, zodiacType 
 
           <div className={hasCompleteProfile ? "text-xs text-green-700 bg-green-50 border border-green-200 rounded-md px-3 py-2" : "text-xs text-gray-700 bg-gray-50 border border-gray-200 rounded-md px-3 py-2"}>
             {patientLoading ? (
-              <p className="text-sm text-gray-600">Cargando paciente…</p>
+              <p className="text-sm text-gray-600">Cargando consultante…</p>
             ) : patientProfile ? (
               <div className="min-w-[220px]">
                 <div className="font-medium text-sm text-gray-900">
-                  {patientProfile.legal_full_name || 'Paciente'}
+                  {patientProfile.legal_full_name || 'Consultante'}
                   {hasCompleteProfile && (
                     <span className="ml-2 inline-flex items-center text-green-600" title="Perfil completo para cálculo">
                       <CheckCircle className="w-4 h-4" />
@@ -392,12 +399,12 @@ export default function AstrologyVisualTab({ patientId, houseSystem, zodiacType 
                     }}
                     className="mt-2 text-xs text-amber-700 underline"
                   >
-                    Completar perfil
+                    Completar perfil del consultante
                   </button>
                 )}
               </div>
             ) : (
-              <div className="text-xs text-gray-500">No hay paciente activo</div>
+              <div className="text-xs text-gray-500">No hay consultante activo</div>
             )}
           </div>
         </div>
@@ -583,13 +590,23 @@ export default function AstrologyVisualTab({ patientId, houseSystem, zodiacType 
           </div>
           <AspectsTable aspectos={chart.aspectos} />
         </div>
+
+        {/* Visual Pro: overlays y filtros solo visuales (sin recálculo) */}
+        <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+          <AstrologyVisualPro
+            chart={chart}
+            analysisResult={analysisResult ?? null}
+            hasRealConsultante={Boolean(patientId)}
+          />
+        </div>
       </div>
 
       {/* Mensaje de gobernanza (obligatorio) */}
       <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
         <p className="text-sm text-blue-900 text-center">
-          Representación astrológica observacional.<br />
-          No constituye diagnóstico ni predicción.
+          Aviso importante:<br />
+          Este módulo ofrece análisis astrológico y simbólico con fines holísticos y de orientación personal.<br />
+          No es un sistema médico y no sustituye evaluación, tratamiento ni asesoramiento sanitario.
         </p>
       </div>
     </section>

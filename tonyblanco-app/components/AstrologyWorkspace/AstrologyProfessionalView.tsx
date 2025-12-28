@@ -243,9 +243,13 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
     const s = () => setShowSolarReturn(true);
     window.addEventListener('open-secondary-progressions', p as EventListener);
     window.addEventListener('open-solar-return', s as EventListener);
-    // A18 events
-    const cs = () => setShowCompareSolarReturn(true);
-    const cp = () => setShowCompareProgressions(true);
+    // A18 events - only open compare panels if snapshots exist
+    const cs = () => {
+      if (solarReturnSnapshot || (analysis_result && analysis_result.solarReturn && analysis_result.solarReturn.chart)) setShowCompareSolarReturn(true);
+    };
+    const cp = () => {
+      if (progressionsSnapshot || (analysis_result && analysis_result.progressions && analysis_result.progressions.chart)) setShowCompareProgressions(true);
+    };
     window.addEventListener('open-compare-natal-solar-return', cs as EventListener);
     window.addEventListener('open-compare-natal-progressions', cp as EventListener);
     return () => {
@@ -321,11 +325,19 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
         throw new Error(String(err));
       }
       if (refetch) await refetch();
+      // mark layer active for immediate UI feedback
+      setActiveLayers((prev) => {
+        const next = new Set(prev);
+        next.add(layer);
+        return next;
+      });
+      return true;
     } catch (e) {
       // eslint-disable-next-line no-console
       console.error('Error calculating layer:', e);
       // fallback: attempt a generic calculateChart refresh
       if (calculateChart) await calculateChart();
+      return false;
     }
   };
 
@@ -718,26 +730,28 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                           if (!consultante?.id) return;
                           if (!consultante?.fecha_nacimiento) { setProgressionsError('Se requiere una carta natal válida para observar progresiones.'); return; }
                           try {
-                            setProgressionsLoading(true);
-                            setProgressionsError(null);
-                            const token = getAuthToken(); if (!token) throw new Error('No auth');
+                              setProgressionsLoading(true);
+                              setProgressionsError(null);
+                              const token = getAuthToken(); if (!token) throw new Error('No auth');
 
-                            // Use existing backend contract for progressions: layer 'progressions' with method 'secondary' and reference_date
-                            const body: any = { layer: 'progressions', method: 'secondary', reference_date: progressedTargetDate };
-                            const resp = await fetch(`${apiURL}/therapist/patients/${consultante.id}/astrology-kerykeion/`, {
-                              method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Token ${token}` }, body: JSON.stringify(body)
-                            });
-                            if (!resp.ok) { const txt = await resp.text().catch(() => 'error'); throw new Error(txt); }
-                            const data = await resp.json();
-                            const payload = data.chart || data.chart_payload || data;
-                            const pw = normalizeNatalForWheel(payload);
-                            setProgressionsSnapshot({ observed_target_date: progressedTargetDate, progressed_datetime: progressedTargetDate, planets: pw.planets });
-                          } catch (err) {
-                            // eslint-disable-next-line no-console
-                            console.error('Progressions generation failed', err);
-                            setProgressionsError((err as any)?.message || 'Error calculando progresiones');
-                            setProgressionsSnapshot(null);
-                          } finally { setProgressionsLoading(false); }
+                              // Use existing backend contract for progressions: layer 'progressions' with method 'secondary' and reference_date
+                              const body: any = { layer: 'progressions', method: 'secondary', reference_date: progressedTargetDate };
+                              const resp = await fetch(`${apiURL}/therapist/patients/${consultante.id}/astrology-kerykeion/`, {
+                                method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Token ${token}` }, body: JSON.stringify(body)
+                              });
+                              if (!resp.ok) { const txt = await resp.text().catch(() => 'error'); throw new Error(txt); }
+                              const data = await resp.json();
+                              const payload = data.chart || data.chart_payload || data;
+                              const pw = normalizeNatalForWheel(payload);
+                              setProgressionsSnapshot({ observed_target_date: progressedTargetDate, progressed_datetime: progressedTargetDate, planets: pw.planets });
+                              // ensure UI layer toggles to show progressions
+                              setActiveLayers((prev) => { const n = new Set(prev); n.add('progressions'); return n; });
+                            } catch (err) {
+                              // eslint-disable-next-line no-console
+                              console.error('Progressions generation failed', err);
+                              setProgressionsError((err as any)?.message || 'Error calculando progresiones');
+                              setProgressionsSnapshot(null);
+                            } finally { setProgressionsLoading(false); }
                         }}>{progressionsLoading ? 'Calculando...' : 'Recalcular'}</button>
 
                         <button className="px-3 py-1 rounded border bg-white text-sm" onClick={() => { setProgressionsSnapshot(null); setProgressionsError(null); }}>Limpiar</button>
@@ -777,6 +791,8 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                             const payload = data.chart || data.chart_payload || data;
                             const rw = normalizeNatalForWheel(payload);
                             setSolarReturnSnapshot({ target_year: solarReturnYear, return_datetime_exact: payload?.metadatos?.calculated_at || new Date().toISOString(), planets: rw.planets, houses: rw.houses });
+                            // ensure UI layer toggles to show solar return immediately
+                            setActiveLayers((prev) => { const n = new Set(prev); n.add('solarReturn'); return n; });
                           } catch (err) {
                             // eslint-disable-next-line no-console
                             console.error('Solar return failed', err);
@@ -857,6 +873,8 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                           // Normalize to wheel data and keep only planets for overlay
                           const tw = normalizeNatalForWheel(payload);
                           setTransitsSnapshot({ observed_datetime: advancedTransitDate, base_type: transitBaseType, planets: tw.planets });
+                          // ensure UI layer toggles to show transits immediately
+                          setActiveLayers((prev) => { const n = new Set(prev); n.add('transits'); return n; });
                         } catch (err) {
                           // eslint-disable-next-line no-console
                           console.error('Transits generation failed', err);

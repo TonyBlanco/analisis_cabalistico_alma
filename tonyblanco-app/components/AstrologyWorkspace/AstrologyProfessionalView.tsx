@@ -11,12 +11,15 @@ import AstroDoubleWheelAdvanced from '@/components/astrology/AstroDoubleWheelAdv
 import AstrologySidebar from './AstrologySidebar';
 import { getTherapistPatients } from '@/lib/patient-api';
 import { computeSynastryAspects } from '@/components/astrology/astro-geometry';
+import { computeCompositeFromTwoNatal } from '@/components/astrology/composite';
 import PsychologicalAnalysisPanel from './PsychologicalAnalysisPanel';
 import { getAuthToken } from '@/lib/auth';
 import type { ActiveConsultante } from '@/hooks/useActiveConsultante';
 import AstroWheelAdvanced from '@/components/astrology/AstroWheelAdvanced';
 import { normalizeNatalForWheel } from '@/components/astrology/normalizer';
 import CalculationStatusPanel from './CalculationStatusPanel';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 
 interface Props {
   consultante: ActiveConsultante;
@@ -51,6 +54,15 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
     progressions: Boolean(progressions),
   }), [natal, transits, solarReturn, progressions]);
 
+  // Synastry / partner-related UI state (declare before effects that reference them)
+  const [synastryEnabled, setSynastryEnabled] = useState<boolean>(false);
+  const [partnerList, setPartnerList] = useState<any[]>([]);
+  const [selectedPartnerId, setSelectedPartnerId] = useState<string | null>(null);
+  const [partnerChart, setPartnerChart] = useState<any | null>(null);
+  const [partnerLoading, setPartnerLoading] = useState<boolean>(false);
+  const [partnerLoadError, setPartnerLoadError] = useState<string | null>(null);
+  const [synastryAspects, setSynastryAspects] = useState<any[]>([]);
+
   // Local UI state for sidebar selectors (visual only)
   const [houseSystem, setHouseSystem] = useState<string>(natal?.metadatos?.sistema_casas || 'P');
   const [zodiacType, setZodiacType] = useState<string>(natal?.metadatos?.zodiac_type || 'tropical');
@@ -66,15 +78,63 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
     });
   }, [houseSystem, zodiacType, consultante?.id, calculateChart]);
 
+  // Auto-load therapist patients when synastry UI is enabled to avoid a 'blocked' select
+  React.useEffect(() => {
+    if (!synastryEnabled) return;
+    let mounted = true;
+    (async () => {
+      try {
+        setPartnerLoading(true);
+        setPartnerLoadError(null);
+        const list = await getTherapistPatients();
+        if (!mounted) return;
+        setPartnerList(list || []);
+      } catch (e: any) {
+        // eslint-disable-next-line no-console
+        console.error('Could not fetch patients on enable', e);
+        if (!mounted) return;
+        setPartnerList([]);
+        setPartnerLoadError(String((e && e.message) || e || 'Error cargando pacientes'));
+      } finally {
+        if (mounted) setPartnerLoading(false);
+      }
+    })();
+    return () => { mounted = false; };
+  }, [synastryEnabled]);
+
   const [orb, setOrb] = useState<number>(6);
   const [visiblePlanets, setVisiblePlanets] = useState<Record<string, boolean>>(() => ({}));
   const [visibleAspects, setVisibleAspects] = useState<Record<string, boolean>>(() => ({}));
   const [showAsteroids, setShowAsteroids] = useState<boolean>(false);
-  const [synastryEnabled, setSynastryEnabled] = useState<boolean>(false);
-  const [partnerList, setPartnerList] = useState<any[]>([]);
-  const [selectedPartnerId, setSelectedPartnerId] = useState<string | null>(null);
-  const [partnerChart, setPartnerChart] = useState<any | null>(null);
-  const [synastryAspects, setSynastryAspects] = useState<any[]>([]);
+  const [compositeChart, setCompositeChart] = useState<any | null>(null);
+  const [davisonChart, setDavisonChart] = useState<any | null>(null);
+  const [davisonGenerating, setDavisonGenerating] = useState<boolean>(false);
+  const [davisonError, setDavisonError] = useState<string | null>(null);
+
+  // Advanced Transits (A16.3)
+  const [showAdvancedTransits, setShowAdvancedTransits] = useState<boolean>(false);
+  const [transitBaseType, setTransitBaseType] = useState<'natal' | 'composite_chart' | 'davison_chart'>('natal');
+  const [advancedTransitDate, setAdvancedTransitDate] = useState<string>(new Date().toISOString().slice(0, 10));
+  const [transitsSnapshot, setTransitsSnapshot] = useState<any | null>(null);
+  const [transitLoading, setTransitLoading] = useState<boolean>(false);
+  const [transitError, setTransitError] = useState<string | null>(null);
+
+  // A17: Progresiones Secundarias + Retorno Solar
+  const [showSecondaryProgressions, setShowSecondaryProgressions] = useState<boolean>(false);
+  const [progressedTargetDate, setProgressedTargetDate] = useState<string>(new Date().toISOString().slice(0, 10));
+  const [progressionsSnapshot, setProgressionsSnapshot] = useState<any | null>(null);
+  const [progressionsLoading, setProgressionsLoading] = useState<boolean>(false);
+  const [progressionsError, setProgressionsError] = useState<string | null>(null);
+
+  // A18: Comparative UI panels
+  const [showCompareSolarReturn, setShowCompareSolarReturn] = useState<boolean>(false);
+  const [showCompareProgressions, setShowCompareProgressions] = useState<boolean>(false);
+
+  const [showSolarReturn, setShowSolarReturn] = useState<boolean>(false);
+  const [solarReturnYear, setSolarReturnYear] = useState<number>(new Date().getFullYear());
+  const [solarReturnSnapshot, setSolarReturnSnapshot] = useState<any | null>(null);
+  const [solarReturnLoading, setSolarReturnLoading] = useState<boolean>(false);
+  const [solarReturnError, setSolarReturnError] = useState<string | null>(null);
 
   const togglePlanet = (key: string) => setVisiblePlanets((p) => ({ ...p, [key]: !p[key] }));
   const toggleAspect = (key: string) => setVisibleAspects((a) => ({ ...a, [key]: !a[key] }));
@@ -138,11 +198,62 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
     console.info('ASTRO_LOG', entry);
   };
 
+  // Export helper for comparative views (A18)
+  const exportComparativeAsPDF = async (elementId: string, filename = 'comparativa.pdf') => {
+    try {
+      const el = document.getElementById(elementId);
+      if (!el) throw new Error('Elemento no encontrado para exportar');
+      const canvas = await html2canvas(el, { useCORS: true, backgroundColor: '#ffffff', scale: 2 });
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({ orientation: 'landscape' });
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      // Small permitted holistic notice at top
+      pdf.setFontSize(10);
+      pdf.text('Observación holística — Propósito profesional', 10, 10);
+      pdf.addImage(imgData, 'PNG', 0, 14, pdfWidth, pdfHeight);
+      pdf.save(filename);
+    } catch (err: any) {
+      // eslint-disable-next-line no-console
+      console.error('Export failed', err);
+      // Minimal user feedback
+      // eslint-disable-next-line no-alert
+      alert('Error exportando comparativa: ' + (err?.message || err));
+    }
+  };
+
   // open modal via global event from sidebar button
   React.useEffect(() => {
     const handler = () => setShowRecalcModal(true);
     window.addEventListener('open-recalc-modal', handler as EventListener);
     return () => window.removeEventListener('open-recalc-modal', handler as EventListener);
+  }, []);
+
+  // Listen for sidebar event to open Advanced Transits panel
+  React.useEffect(() => {
+    const h = () => setShowAdvancedTransits(true);
+    window.addEventListener('open-advanced-transits', h as EventListener);
+    return () => window.removeEventListener('open-advanced-transits', h as EventListener);
+  }, []);
+
+  // Listen for events to open A17 panels
+  React.useEffect(() => {
+    const p = () => setShowSecondaryProgressions(true);
+    const s = () => setShowSolarReturn(true);
+    window.addEventListener('open-secondary-progressions', p as EventListener);
+    window.addEventListener('open-solar-return', s as EventListener);
+    // A18 events
+    const cs = () => setShowCompareSolarReturn(true);
+    const cp = () => setShowCompareProgressions(true);
+    window.addEventListener('open-compare-natal-solar-return', cs as EventListener);
+    window.addEventListener('open-compare-natal-progressions', cp as EventListener);
+    return () => {
+      window.removeEventListener('open-secondary-progressions', p as EventListener);
+      window.removeEventListener('open-solar-return', s as EventListener);
+      window.removeEventListener('open-compare-natal-solar-return', cs as EventListener);
+      window.removeEventListener('open-compare-natal-progressions', cp as EventListener);
+    };
   }, []);
 
   const performRecalculation = async (housesCode: string, zodiacCode: string) => {
@@ -411,14 +522,21 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                     <div className="mt-3">
                       <button className="px-2 py-1 text-sm rounded border mr-2" onClick={async () => {
                         try {
+                          setPartnerLoading(true);
+                          setPartnerLoadError(null);
                           const list = await getTherapistPatients();
                           setPartnerList(list || []);
                         } catch (e) {
                           // eslint-disable-next-line no-console
                           console.error('Could not fetch patients', e);
                           setPartnerList([]);
+                          setPartnerLoadError(String((e as any)?.message || e));
+                        } finally {
+                          setPartnerLoading(false);
                         }
                       }}>Cargar lista de pacientes</button>
+                      {partnerLoading ? <span className="ml-2 text-xs text-gray-500">Cargando...</span> : null}
+                      {partnerLoadError ? <span className="ml-2 text-xs text-red-500">{partnerLoadError}</span> : null}
                       <select value={selectedPartnerId ?? ''} onChange={async (e) => {
                         const v = e.target.value || null; setSelectedPartnerId(v);
                         if (!v) { setPartnerChart(null); setSynastryAspects([]); return; }
@@ -449,6 +567,390 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                         ))}
                       </select>
                     </div>
+                      <div className="mt-2 flex items-center gap-2">
+                      <button className="px-2 py-1 rounded border bg-white text-sm" onClick={() => {
+                        // compute composite from loaded partnerChart
+                        if (!partnerChart) return;
+                        const cmp = computeCompositeFromTwoNatal(natal, partnerChart);
+                        setCompositeChart(cmp);
+                      }}>Generar Carta Compuesta</button>
+                      <button className="px-2 py-1 rounded border bg-white text-sm" onClick={async () => {
+                        // Generate Carta Davison using midpoint of time & space and Swiss Ephemeris via existing endpoint
+                        // Only allow when a persisted partner is selected/loaded from therapist patients
+                        if (!partnerChart) { setDavisonError('Seleccione una pareja válida de la lista.'); return; }
+                        try {
+                          setDavisonGenerating(true);
+                          setDavisonError(null);
+                          const token = getAuthToken();
+                          if (!token) throw new Error('No auth');
+
+                          // Build participant snapshot helper
+                          const buildSnapshot = (payload: any, consultanteObj: any) => {
+                            const snap = (payload && payload.metadatos && payload.metadatos.input_snapshot) || null;
+                            if (snap) return snap;
+                            // Fallback to consultante object if provided
+                            if (!consultanteObj) return null;
+                            return {
+                              id: consultanteObj.id ?? null,
+                              full_name: consultanteObj.nombre_completo ?? consultanteObj.full_name ?? null,
+                              birth_date: consultanteObj.fecha_nacimiento ?? consultanteObj.birth_date ?? null,
+                              birth_time: consultanteObj.hora_nacimiento ?? consultanteObj.birth_time ?? null,
+                              birth_timezone: consultanteObj.timezone ?? consultanteObj.birth_timezone ?? null,
+                              birth_city: consultanteObj.ciudad ?? consultanteObj.city ?? null,
+                              birth_country: consultanteObj.pais ?? consultanteObj.country ?? null,
+                              birth_latitude: Number(consultanteObj.lat ?? consultanteObj.birth_latitude ?? consultanteObj.latitude ?? null),
+                              birth_longitude: Number(consultanteObj.long ?? consultanteObj.lon ?? consultanteObj.birth_longitude ?? consultanteObj.longitude ?? null),
+                              snapshot_id: consultanteObj.snapshot_id ?? null,
+                            };
+                          };
+
+                          const snapA = buildSnapshot(natal, consultante);
+                          // determine partner consultante object candidate: prefer selected partner id -> partnerChart
+                          const partnerConsultanteObj = partnerList.find(p => String(p.id) === String(selectedPartnerId)) || partnerChart;
+                          const snapB = buildSnapshot(partnerChart, partnerConsultanteObj);
+
+                          if (!snapA || !snapB) {
+                            throw new Error('Datos insuficientes para calcular Carta Davison (faltan fecha/hora/coords).');
+                          }
+
+                          // Request davison calculation via existing endpoint (backend will compute midpoint and use Swiss Ephemeris)
+                          const body: any = {
+                            method: 'davison',
+                            participants: [snapA, snapB],
+                            house_system: houseSystem,
+                            zodiac_type: zodiacType,
+                            meta: {
+                              type: 'davison',
+                              source: `${snapA.id || snapA.full_name || 'A'}+${snapB.id || snapB.full_name || 'B'}`,
+                              event_basis: 'midpoint_time_space',
+                            },
+                          };
+
+                          const resp = await fetch(`${apiURL}/therapist/patients/${consultante.id}/astrology-kerykeion/`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': `Token ${token}` },
+                            body: JSON.stringify(body),
+                          });
+
+                          if (!resp.ok) {
+                            const txt = await resp.text().catch(() => 'error');
+                            throw new Error(txt);
+                          }
+
+                          const data = await resp.json();
+                          const payload = data.chart || data.chart_payload || data;
+                          // store as davison chart snapshot
+                          setDavisonChart(payload || null);
+                        } catch (err) {
+                          // eslint-disable-next-line no-console
+                          console.error('Davison generation failed', err);
+                          setDavisonChart(null);
+                          setDavisonError((err as any)?.message || 'Error generando Carta Davison');
+                        } finally {
+                          setDavisonGenerating(false);
+                        }
+                      }}>Generar Carta Davison</button>
+                      <button className="px-2 py-1 rounded border bg-white text-sm" onClick={() => { setCompositeChart(null); }}>Cerrar Compuesta</button>
+                    </div>
+
+                    {davisonError ? (
+                      <div className="mt-3 text-sm text-red-600">{davisonError}</div>
+                    ) : null}
+
+                    {compositeChart ? (
+                      <div className="mt-3">
+                        <div className="mb-2 text-sm font-semibold">Carta Compuesta · Observación Relacional</div>
+                        {(() => {
+                          const cw = normalizeNatalForWheel(compositeChart);
+                          return (
+                            <AstroWheelAdvanced
+                              size={720}
+                              ascendantDeg={cw.ascendantDeg ?? 0}
+                              houses={cw.houses}
+                              planets={cw.planets}
+                              asteroids={[] as any}
+                              showAspects={true}
+                              orbDeg={orb}
+                              titleRight={`Compuesta · Observación Relacional`}
+                              transitPlanets={transitsSnapshot && transitBaseType === 'composite_chart' ? transitsSnapshot.planets : undefined}
+                            />
+                          );
+                        })()}
+                      </div>
+                    ) : null}
+
+                    {davisonChart ? (
+                      <div className="mt-4 bg-white border rounded p-3">
+                        <div className="mb-2 text-sm font-semibold">Carta Davison</div>
+                        <div className="text-xs text-gray-700 mb-2">La Carta Davison representa el evento relacional calculado a partir del punto medio real de tiempo y espacio.</div>
+                        {(() => {
+                          const dw = normalizeNatalForWheel(davisonChart);
+                          return (
+                            <AstroWheelAdvanced
+                              size={720}
+                              ascendantDeg={dw.ascendantDeg ?? 0}
+                              houses={dw.houses}
+                              planets={dw.planets}
+                              asteroids={[] as any}
+                              showAspects={true}
+                              orbDeg={orb}
+                              titleRight={`Carta Davison`}
+                              transitPlanets={transitsSnapshot && transitBaseType === 'davison_chart' ? transitsSnapshot.planets : undefined}
+                            />
+                          );
+                        })()}
+                      </div>
+                    ) : null}
+
+                  {/* Secondary Progressions Panel (A17.1) */}
+                  {showSecondaryProgressions ? (
+                    <div className="mt-4 bg-white border rounded p-3">
+                      <div className="mb-2 text-sm font-semibold">Progresiones Secundarias (Observación)</div>
+                      <div className="text-xs text-gray-700 mb-2">Superposición de posiciones progresadas para una fecha objetivo. No es predictivo.</div>
+
+                      <div className="mb-2">
+                        <label className="block text-xs text-gray-600">Fecha objetivo</label>
+                        <input type="date" value={progressedTargetDate} onChange={(e) => setProgressedTargetDate(e.target.value)} className="mt-1 rounded border px-2 py-1 text-sm" />
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <button className="px-3 py-1 rounded bg-blue-600 text-white text-sm" onClick={async () => {
+                          if (!consultante?.id) return;
+                          if (!consultante?.fecha_nacimiento) { setProgressionsError('Se requiere una carta natal válida para observar progresiones.'); return; }
+                          try {
+                            setProgressionsLoading(true);
+                            setProgressionsError(null);
+                            const token = getAuthToken(); if (!token) throw new Error('No auth');
+
+                            // Use existing backend contract for progressions: layer 'progressions' with method 'secondary' and reference_date
+                            const body: any = { layer: 'progressions', method: 'secondary', reference_date: progressedTargetDate };
+                            const resp = await fetch(`${apiURL}/therapist/patients/${consultante.id}/astrology-kerykeion/`, {
+                              method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Token ${token}` }, body: JSON.stringify(body)
+                            });
+                            if (!resp.ok) { const txt = await resp.text().catch(() => 'error'); throw new Error(txt); }
+                            const data = await resp.json();
+                            const payload = data.chart || data.chart_payload || data;
+                            const pw = normalizeNatalForWheel(payload);
+                            setProgressionsSnapshot({ observed_target_date: progressedTargetDate, progressed_datetime: progressedTargetDate, planets: pw.planets });
+                          } catch (err) {
+                            // eslint-disable-next-line no-console
+                            console.error('Progressions generation failed', err);
+                            setProgressionsError((err as any)?.message || 'Error calculando progresiones');
+                            setProgressionsSnapshot(null);
+                          } finally { setProgressionsLoading(false); }
+                        }}>{progressionsLoading ? 'Calculando...' : 'Recalcular'}</button>
+
+                        <button className="px-3 py-1 rounded border bg-white text-sm" onClick={() => { setProgressionsSnapshot(null); setProgressionsError(null); }}>Limpiar</button>
+                      </div>
+
+                      {progressionsError ? <div className="mt-2 text-xs text-red-600">{progressionsError}</div> : null}
+                      {progressionsSnapshot ? <div className="mt-2 text-xs text-gray-600">Progresada: {progressionsSnapshot.progressed_datetime}</div> : null}
+                    </div>
+                  ) : null}
+
+                  {/* Solar Return Panel (A17.2) */}
+                  {showSolarReturn ? (
+                    <div className="mt-4 bg-white border rounded p-3">
+                      <div className="mb-2 text-sm font-semibold">Retorno Solar (Observación anual)</div>
+                      <div className="text-xs text-gray-700 mb-2">Carta calculada para el instante exacto de retorno del Sol a su posición natal. No es predictivo.</div>
+
+                      <div className="mb-2">
+                        <label className="block text-xs text-gray-600">Año objetivo</label>
+                        <input type="number" value={solarReturnYear} onChange={(e) => setSolarReturnYear(Number(e.target.value))} className="mt-1 rounded border px-2 py-1 text-sm" />
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <button className="px-3 py-1 rounded bg-blue-600 text-white text-sm" onClick={async () => {
+                          if (!consultante?.id) return;
+                          if (!consultante?.fecha_nacimiento) { setSolarReturnError('Se requiere una carta natal válida para observar retornos.'); return; }
+                          try {
+                            setSolarReturnLoading(true); setSolarReturnError(null);
+                            const token = getAuthToken(); if (!token) throw new Error('No auth');
+
+                            // Reuse existing contract: method 'solar_return' with target year
+                            const body: any = { method: 'solar_return', year: solarReturnYear };
+                            const resp = await fetch(`${apiURL}/therapist/patients/${consultante.id}/astrology-kerykeion/`, {
+                              method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Token ${token}` }, body: JSON.stringify(body)
+                            });
+                            if (!resp.ok) { const txt = await resp.text().catch(() => 'error'); throw new Error(txt); }
+                            const data = await resp.json();
+                            const payload = data.chart || data.chart_payload || data;
+                            const rw = normalizeNatalForWheel(payload);
+                            setSolarReturnSnapshot({ target_year: solarReturnYear, return_datetime_exact: payload?.metadatos?.calculated_at || new Date().toISOString(), planets: rw.planets, houses: rw.houses });
+                          } catch (err) {
+                            // eslint-disable-next-line no-console
+                            console.error('Solar return failed', err);
+                            setSolarReturnError((err as any)?.message || 'No se pudo calcular el retorno para el año seleccionado.');
+                            setSolarReturnSnapshot(null);
+                          } finally { setSolarReturnLoading(false); }
+                        }}>{solarReturnLoading ? 'Calculando...' : 'Calcular Retorno'}</button>
+
+                        <button className="px-3 py-1 rounded border bg-white text-sm" onClick={() => { setSolarReturnSnapshot(null); setSolarReturnError(null); }}>Limpiar</button>
+                      </div>
+
+                      {solarReturnError ? <div className="mt-2 text-xs text-red-600">{solarReturnError}</div> : null}
+                      {solarReturnSnapshot ? <div className="mt-2 text-xs text-gray-600">Instante: {solarReturnSnapshot.return_datetime_exact}</div> : null}
+                    </div>
+                  ) : null}
+
+                {/* Advanced Transits Panel (A16.3) */}
+                {showAdvancedTransits ? (
+                  <div className="mt-4 bg-white border rounded p-3">
+                    <div className="mb-2 text-sm font-semibold">Tránsitos Avanzados (Observación temporal)</div>
+                    <div className="text-xs text-gray-700 mb-2">Superposición de posiciones planetarias en una fecha concreta sobre una carta base. No es predictivo.</div>
+
+                    {/* Base selector */}
+                    <div className="mb-2 text-sm">
+                      <label className="block text-xs text-gray-600">Carta base</label>
+                      <select value={transitBaseType} onChange={(e) => setTransitBaseType(e.target.value as any)} className="mt-1 rounded border px-2 py-1 text-sm">
+                        <option value="natal">Natal</option>
+                        <option value="composite_chart" disabled={!compositeChart}>Compuesta</option>
+                        <option value="davison_chart" disabled={!davisonChart}>Davison</option>
+                      </select>
+                      {(!compositeChart && transitBaseType === 'composite_chart') || (!davisonChart && transitBaseType === 'davison_chart') ? (
+                        <div className="mt-1 text-xs text-red-600">Selecciona una carta base (Natal, Compuesta o Davison) para observar tránsitos.</div>
+                      ) : null}
+                    </div>
+
+                    {/* Date selector */}
+                    <div className="mb-3">
+                      <label className="block text-xs text-gray-600">Fecha de observación</label>
+                      <input type="date" value={advancedTransitDate} onChange={(e) => setAdvancedTransitDate(e.target.value)} className="mt-1 rounded border px-2 py-1 text-sm" />
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button className="px-3 py-1 rounded bg-blue-600 text-white text-sm" onClick={async () => {
+                        // Recalculate transits overlay using existing backend endpoint
+                        if (!consultante?.id) return;
+                        // validate base availability
+                        if (transitBaseType === 'composite_chart' && !compositeChart) { setTransitError('Selecciona una carta base válida.'); return; }
+                        if (transitBaseType === 'davison_chart' && !davisonChart) { setTransitError('Selecciona una carta base válida.'); return; }
+
+                        try {
+                          setTransitLoading(true);
+                          setTransitError(null);
+                          const token = getAuthToken();
+                          if (!token) throw new Error('No auth');
+
+                          let body: any = { reference_date: advancedTransitDate };
+                          if (transitBaseType === 'natal') {
+                            body.layer = 'transits';
+                          } else {
+                            // Send a method request reusing backend flexible API: method 'transits' with base chart payload
+                            body.method = 'transits';
+                            body.base_chart = transitBaseType === 'composite_chart' ? (compositeChart) : (davisonChart);
+                          }
+
+                          const resp = await fetch(`${apiURL}/therapist/patients/${consultante.id}/astrology-kerykeion/`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': `Token ${token}` },
+                            body: JSON.stringify(body),
+                          });
+
+                          if (!resp.ok) {
+                            const txt = await resp.text().catch(() => 'error');
+                            throw new Error(txt);
+                          }
+
+                          const data = await resp.json();
+                          const payload = data.chart || data.chart_payload || data;
+                          // Normalize to wheel data and keep only planets for overlay
+                          const tw = normalizeNatalForWheel(payload);
+                          setTransitsSnapshot({ observed_datetime: advancedTransitDate, base_type: transitBaseType, planets: tw.planets });
+                        } catch (err) {
+                          // eslint-disable-next-line no-console
+                          console.error('Transits generation failed', err);
+                          setTransitError((err as any)?.message || 'Error calculando tránsitos');
+                          setTransitsSnapshot(null);
+                        } finally {
+                          setTransitLoading(false);
+                        }
+                      }} disabled={transitLoading || (transitBaseType !== 'natal' && transitBaseType === 'composite_chart' && !compositeChart) || (transitBaseType !== 'natal' && transitBaseType === 'davison_chart' && !davisonChart)}>
+                        {transitLoading ? 'Calculando...' : 'Recalcular'}
+                      </button>
+
+                      <button className="px-3 py-1 rounded border bg-white text-sm" onClick={() => { setTransitsSnapshot(null); setTransitError(null); }}>Limpiar</button>
+                    </div>
+
+                    {transitError ? <div className="mt-2 text-xs text-red-600">{transitError}</div> : null}
+                    {transitsSnapshot ? <div className="mt-2 text-xs text-gray-600">Observación: {transitsSnapshot.observed_datetime}</div> : null}
+                  </div>
+                ) : null}
+
+                {/* A18: Comparative Panels */}
+                {showCompareSolarReturn ? (
+                  <div id="compare-solar-return" className="mt-4 bg-white border rounded p-3">
+                    <div className="mb-2 flex items-center justify-between">
+                      <div>
+                        <div className="text-sm font-semibold">Comparativa — Natal ↔ Retorno Solar</div>
+                        <div className="text-xs text-gray-600">Doble rueda comparativa (observación). No es predictiva.</div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button className="px-2 py-1 rounded border bg-white text-sm" onClick={() => setShowCompareSolarReturn(false)}>Cerrar</button>
+                        <button className="px-2 py-1 rounded bg-blue-600 text-white text-sm" onClick={() => exportComparativeAsPDF('compare-solar-return', `comparativa_solar_${consultante?.id || 'x'}.pdf`)}>Exportar PDF</button>
+                      </div>
+                    </div>
+                    <div>
+                      {(() => {
+                        const compared = solarReturnSnapshot ? { planets: solarReturnSnapshot.planets, houses: solarReturnSnapshot.houses } : (analysis_result?.solarReturn?.chart ? normalizeNatalForWheel(analysis_result.solarReturn.chart) : null);
+                        if (!compared) return <div className="text-xs text-gray-600">No hay Retorno Solar calculado. Calcula uno desde el panel de Retorno Solar.</div>;
+                        const baseWheel = normalizeNatalForWheel(natal as any);
+                        const compWheel = (compared.planets ? { ascendantDeg: (compared as any).ascendantDeg ?? 0, houses: (compared as any).houses ?? (compared as any).houses, planets: (compared as any).planets } : compared) as any;
+                        return (
+                          <AstroDoubleWheelAdvanced
+                            size={920}
+                            baseAscDeg={baseWheel.ascendantDeg ?? 0}
+                            baseHouses={baseWheel.houses}
+                            basePlanets={baseWheel.planets}
+                            comparedAscDeg={compWheel.ascendantDeg ?? 0}
+                            comparedPlanets={compWheel.planets ?? []}
+                            showAsteroids={false}
+                            asteroidsBase={baseWheel.asteroids ?? []}
+                            asteroidsCompared={compWheel.asteroids ?? []}
+                            orbDeg={orb}
+                          />
+                        );
+                      })()}
+                    </div>
+                  </div>
+                ) : null}
+
+                {showCompareProgressions ? (
+                  <div id="compare-progressions" className="mt-4 bg-white border rounded p-3">
+                    <div className="mb-2 flex items-center justify-between">
+                      <div>
+                        <div className="text-sm font-semibold">Comparativa — Natal ↔ Progresiones (overlay)</div>
+                        <div className="text-xs text-gray-600">Natal con superposición de posiciones progresadas. Observación únicamente.</div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button className="px-2 py-1 rounded border bg-white text-sm" onClick={() => setShowCompareProgressions(false)}>Cerrar</button>
+                        <button className="px-2 py-1 rounded bg-blue-600 text-white text-sm" onClick={() => exportComparativeAsPDF('compare-progressions', `comparativa_progresiones_${consultante?.id || 'x'}.pdf`)}>Exportar PDF</button>
+                      </div>
+                    </div>
+                    <div>
+                      {progressionsSnapshot ? (
+                        (() => {
+                          const baseWheel = normalizeNatalForWheel(natal as any);
+                          return (
+                            <AstroWheelAdvanced
+                              size={920}
+                              ascendantDeg={baseWheel.ascendantDeg ?? 0}
+                              houses={baseWheel.houses}
+                              planets={baseWheel.planets}
+                              asteroids={[]}
+                              showAspects={true}
+                              orbDeg={orb}
+                              transitPlanets={progressionsSnapshot.planets}
+                            />
+                          );
+                        })()
+                      ) : (
+                        <div className="text-xs text-gray-600">No hay progresiones calculadas. Calcula una progresión desde el panel de Progresiones.</div>
+                      )}
+                    </div>
+                  </div>
+                ) : null}
+
                     {synastryAspects.length > 0 ? (
                       <div className="mt-3 text-xs">
                         <strong>Aspectos de sinastría:</strong> {synastryAspects.length}
@@ -506,6 +1008,8 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                          </div>
                        </div>
                      ) : null}
+
+                    
 
                      {/* Comparison controls */}
                      <div className="mb-3 flex items-center justify-between">
@@ -622,23 +1126,36 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                               ) : null}
                               {/* base (front) */}
                               <div style={{ position: 'absolute', inset: 0 }}>
-                                <AstroWheelAdvanced size={920} ascendantDeg={baseWheel.ascendantDeg ?? 0} houses={baseWheel.houses} planets={baseWheel.planets} asteroids={baseWheel.asteroids ?? []} showAspects={true} orbDeg={orb} titleRight={`${meta.sistema_casas || 'placidus'} · ${meta.zodiac_type || 'tropical'}`} />
+                                <AstroWheelAdvanced
+                                  size={920}
+                                  ascendantDeg={baseWheel.ascendantDeg ?? 0}
+                                  houses={baseWheel.houses}
+                                  planets={baseWheel.planets}
+                                  asteroids={baseWheel.asteroids ?? []}
+                                  showAspects={true}
+                                  orbDeg={orb}
+                                  titleRight={`${meta.sistema_casas || 'placidus'} · ${meta.zodiac_type || 'tropical'}`}
+                                  transitPlanets={
+                                    progressionsSnapshot ? progressionsSnapshot.planets : (transitsSnapshot && transitBaseType === 'natal' ? transitsSnapshot.planets : undefined)
+                                  }
+                                />
                               </div>
                             </div>
                           );
                         }
 
                         return (
-                          <AstroWheelAdvanced
-                            size={920}
-                            ascendantDeg={wheel.ascendantDeg}
-                            houses={wheel.houses}
-                            planets={wheel.planets}
-                            asteroids={showAsteroids ? (wheel.asteroids ?? []) : []}
-                            showAspects={true}
-                            orbDeg={orb}
-                            titleRight={`${meta.sistema_casas || 'placidus'} · ${meta.zodiac_type || 'tropical'}`}
-                          />
+                                <AstroWheelAdvanced
+                                  size={920}
+                                  ascendantDeg={wheel.ascendantDeg}
+                                  houses={wheel.houses}
+                                  planets={wheel.planets}
+                                  asteroids={showAsteroids ? (wheel.asteroids ?? []) : []}
+                                  showAspects={true}
+                                  orbDeg={orb}
+                                  titleRight={`${meta.sistema_casas || 'placidus'} · ${meta.zodiac_type || 'tropical'}`}
+                                  transitPlanets={transitsSnapshot && transitBaseType === 'natal' ? transitsSnapshot.planets : undefined}
+                                />
                         );
                       })()
                     ) : null)

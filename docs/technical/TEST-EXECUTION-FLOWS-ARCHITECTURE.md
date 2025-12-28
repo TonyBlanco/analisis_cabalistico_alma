@@ -15,7 +15,7 @@ Existen DOS Y SOLO DOS flujos de ejecución de tests que NUNCA deben mezclarse:
 - Iniciados y ejecutados SOLO por el terapeuta
 - NUNCA asignados al paciente
 - NUNCA aparecen en el portal del paciente
-- Guardados directamente como registros clínicos
+- Guardados directamente como registros holísticos
 
 ---
 
@@ -103,7 +103,7 @@ TEST_EXECUTION_MODE_MAP: Record<string, TestExecutionMode>
 
 #### Estados
 - `draft` - Borrador en progreso
-- `saved` - Guardado como registro clínico
+- `saved` - Guardado como registro holístico
 - `reviewed` - Revisado por terapeuta
 
 #### Vinculación
@@ -128,7 +128,7 @@ TEST_EXECUTION_MODE_MAP: Record<string, TestExecutionMode>
   └─ Catálogo de Tests
 
 🏥 Evaluaciones Clínicas del Terapeuta
-  └─ SCDF - Framework Clínico
+  └─ SCDF - Framework Holístico
   └─ Entrevista Clínica Integrativa
 ```
 

@@ -190,7 +190,7 @@ export default function RightPanel({
             Notas humanas unicamente. Sin automatizacion ni interpretacion.
           </p>
           {!normalizedPatientId ? (
-            <p className="text-xs text-gray-600">Selecciona un paciente para guardar notas.</p>
+            <p className="text-xs text-gray-600">Selecciona un consultante para guardar notas.</p>
           ) : null}
           {notesError ? <p className="text-xs text-red-600">{notesError}</p> : null}
           {notesLoading ? <p className="text-xs text-gray-500">Cargando notas…</p> : null}

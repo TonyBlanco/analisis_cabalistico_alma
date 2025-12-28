@@ -128,7 +128,7 @@ export default function TherapistTestResultPage({ params }: { params: { id: stri
 
   const NotesCard = clinicianNotes ? (
     <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-      <h2 className="text-lg font-semibold text-gray-900">Notas del clínico</h2>
+      <h2 className="text-lg font-semibold text-gray-900">Notas del profesional</h2>
       <p className="text-sm text-gray-700 mt-2 whitespace-pre-line">{clinicianNotes}</p>
     </div>
   ) : null;
@@ -169,7 +169,7 @@ export default function TherapistTestResultPage({ params }: { params: { id: stri
           <div className="bg-white border border-amber-200 rounded-lg p-6 shadow-sm">
             <h2 className="text-lg font-semibold text-amber-800">Alerta preventiva</h2>
             <p className="text-sm text-amber-700 mt-2">
-              Se detectaron respuestas positivas en un ítem de seguridad. Recomienda seguimiento clínico acorde a protocolos locales.
+              Se detectaron respuestas positivas en un ítem de seguridad. Recomienda seguimiento holístico acorde a protocolos locales.
             </p>
           </div>
         )}
@@ -196,7 +196,7 @@ export default function TherapistTestResultPage({ params }: { params: { id: stri
             </div>
           </div>
 
-          <p className="text-xs text-gray-500">Este resultado es orientativo y no constituye diagnóstico.</p>
+          <p className="text-xs text-gray-500">Este resultado es orientativo y no constituye lectura.</p>
         </div>
       </div>
     );
@@ -220,7 +220,7 @@ export default function TherapistTestResultPage({ params }: { params: { id: stri
               Volver
             </button>
           </div>
-          <p className="text-sm text-gray-600 mt-2">Cuestionario interno orientativo (no diagnóstico).</p>
+          <p className="text-sm text-gray-600 mt-2">Cuestionario interno orientativo (no lectura).</p>
         </div>
 
         {NotesCard}
@@ -295,7 +295,7 @@ export default function TherapistTestResultPage({ params }: { params: { id: stri
               Volver
             </button>
           </div>
-          <p className="text-sm text-gray-600 mt-2">Cuestionario interno orientativo (no diagnóstico).</p>
+          <p className="text-sm text-gray-600 mt-2">Cuestionario interno orientativo (no lectura).</p>
         </div>
 
         {NotesCard}
@@ -359,7 +359,7 @@ export default function TherapistTestResultPage({ params }: { params: { id: stri
   if (testCode === 'phq-9') {
     return renderSimpleScore({
       heading: 'PHQ-9 — Resultado',
-      note: 'Cuestionario de cribado de depresión (orientativo, no diagnóstico).',
+      note: 'Cuestionario de cribado de depresión (orientativo, no lectura).',
       maxScore: 27,
       computed: computed as SimpleScoredComputed,
       showSuicidalAlert: true,
@@ -369,7 +369,7 @@ export default function TherapistTestResultPage({ params }: { params: { id: stri
   if (testCode === 'gad-7') {
     return renderSimpleScore({
       heading: 'GAD-7 — Resultado',
-      note: 'Cuestionario de cribado de ansiedad generalizada (orientativo, no diagnóstico).',
+      note: 'Cuestionario de cribado de ansiedad generalizada (orientativo, no lectura).',
       maxScore: 21,
       computed: computed as SimpleScoredComputed,
     });
@@ -378,7 +378,7 @@ export default function TherapistTestResultPage({ params }: { params: { id: stri
   if (testCode === 'bai') {
     return renderSimpleScore({
       heading: 'BAI — Resultado',
-      note: 'Inventario de ansiedad (orientativo, no diagnóstico).',
+      note: 'Inventario de ansiedad (orientativo, no lectura).',
       maxScore: 63,
       computed: computed as SimpleScoredComputed,
     });
@@ -387,7 +387,7 @@ export default function TherapistTestResultPage({ params }: { params: { id: stri
   if (testCode === 'bdi-ii') {
     return renderSimpleScore({
       heading: 'BDI-II — Resultado',
-      note: 'Inventario de depresión (orientativo, no diagnóstico).',
+      note: 'Inventario de depresión (orientativo, no lectura).',
       maxScore: 63,
       computed: computed as SimpleScoredComputed,
       showSuicidalAlert: true,
@@ -397,7 +397,7 @@ export default function TherapistTestResultPage({ params }: { params: { id: stri
   if (testCode === 'isi') {
     return renderSimpleScore({
       heading: 'ISI — Resultado',
-      note: 'Índice de severidad del insomnio (orientativo, no diagnóstico).',
+      note: 'Índice de severidad del insomnio (orientativo, no lectura).',
       maxScore: 28,
       computed: computed as SimpleScoredComputed,
     });

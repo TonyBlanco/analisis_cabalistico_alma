@@ -92,12 +92,12 @@ export default function PatientHeader({
     };
   }, []);
 
-  const displayName = activePatient?.name || (activePatient ? `Paciente #${activePatient.id}` : '');
-  const patientIdLabel = activePatient ? `ID ${activePatient.id}` : 'Sin paciente activo';
+  const displayName = activePatient?.name || (activePatient ? `Consultante #${activePatient.id}` : '');
+  const patientIdLabel = activePatient ? `ID ${activePatient.id}` : 'Sin consultante activo';
 
   const avatarLabel = useMemo(() => {
     if (!activePatient) return 'NA';
-    return initialsFromName(activePatient.name || `P ${activePatient.id}`);
+    return initialsFromName(activePatient.name || `C ${activePatient.id}`);
   }, [activePatient]);
 
   const consentLabel =
@@ -115,7 +115,7 @@ export default function PatientHeader({
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">
-                {displayName || 'Selecciona un paciente'}
+                {displayName || 'Selecciona un consultante'}
               </h1>
               <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
                 {patientIdLabel}
@@ -174,7 +174,7 @@ export default function PatientHeader({
             onClick={onChangePatient}
             className="px-3 py-2 text-xs font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
           >
-            Cambiar paciente
+            Cambiar consultante
           </button>
         </div>
       </div>

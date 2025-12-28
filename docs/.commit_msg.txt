@@ -1,0 +1,10 @@
+feat(astrology): stable professional astrology module (A1–A14)
+
+- Advanced SVG wheel (single & double)
+- Swiss Ephemeris integration (read-only)
+- Canonical consultant identity enforcement
+- Natal + Asteroids (Ceres, Pallas, Juno, Vesta)
+- Double Wheel (synastry base)
+- Progressive method architecture (locked states)
+- Visual hierarchy & aspect rendering
+- Holistic, non-clinical terminology enforced

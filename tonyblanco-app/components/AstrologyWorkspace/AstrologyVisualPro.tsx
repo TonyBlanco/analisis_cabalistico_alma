@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { MultiTechAnalysisResult, NatalChartPayload } from '@/hooks/useNatalChart';
 import AstrologyHolisticDisclaimer from './AstrologyHolisticDisclaimer';
-import { useAstrologyMode } from '@/components/AstrologyMode/AstrologyModeContext';
 
 type AspectEntry = NonNullable<NatalChartPayload['aspectos']>[number];
 
@@ -49,8 +48,6 @@ type VisualProState = {
   orb: number;
 };
 
-type UsageMode = 'PROFESSIONAL' | 'TRAINING';
-
 function formatAspect(aspect: AspectEntry) {
   const p1 = PLANET_LABELS[aspect.planeta1] || aspect.planeta1;
   const p2 = PLANET_LABELS[aspect.planeta2] || aspect.planeta2;
@@ -63,17 +60,22 @@ interface AstrologyVisualProProps {
   chart: NatalChartPayload;
   analysisResult?: MultiTechAnalysisResult | null;
   hasRealConsultante?: boolean;
+  activeLayers?: Set<string>;
+  onLayerToggle?: (layerName: string) => void;
 }
 
-export default function AstrologyVisualPro({ chart, analysisResult, hasRealConsultante = false }: AstrologyVisualProProps) {
-  const { mode } = useAstrologyMode();
+export default function AstrologyVisualPro({
+  chart,
+  analysisResult,
+  hasRealConsultante = false,
+  activeLayers,
+  onLayerToggle,
+}: AstrologyVisualProProps) {
   const analysis = analysisResult ?? null;
   const natalChart = analysis?.natal || chart;
   const transitsChart = analysis?.transits || null;
   const solarReturnChart = analysis?.solarReturn?.chart || null;
   const progressionsChart = analysis?.progressions?.chart || null;
-
-  const usageMode: UsageMode = mode === 'TRAINING' ? 'TRAINING' : 'PROFESSIONAL';
 
   const hasNatal = Boolean(chart);
   const hasTransits = Boolean(analysisResult?.transits);
@@ -86,6 +88,8 @@ export default function AstrologyVisualPro({ chart, analysisResult, hasRealConsu
     solarReturn: hasSolarReturn,
     progressions: hasProgressions,
   };
+
+  const hasExternalLayers = Boolean(activeLayers && onLayerToggle);
 
   const [visualState, setVisualState] = useState<VisualProState>(() => ({
     layers: {
@@ -132,8 +136,15 @@ export default function AstrologyVisualPro({ chart, analysisResult, hasRealConsu
       { id: 'solarReturn' as const, chart: solarReturnChart },
       { id: 'progressions' as const, chart: progressionsChart },
     ];
-    return layers.filter((layer) => visualState.layers[layer.id] && layer.chart);
-  }, [natalChart, transitsChart, solarReturnChart, progressionsChart, visualState.layers]);
+    return layers.filter((layer) => {
+      const isActive = layer.id === 'natal'
+        ? true
+        : hasExternalLayers
+          ? activeLayers!.has(layer.id)
+          : visualState.layers[layer.id];
+      return isActive && layer.chart;
+    });
+  }, [natalChart, transitsChart, solarReturnChart, progressionsChart, visualState.layers, hasExternalLayers, activeLayers]);
 
   const aspects: AspectEntry[] = useMemo(() => {
     return activeCharts.flatMap((layer) => {
@@ -184,7 +195,7 @@ export default function AstrologyVisualPro({ chart, analysisResult, hasRealConsu
     selectedAspectIndex != null ? filteredAspects.find((a) => a._idx === selectedAspectIndex) : undefined;
 
   const meta = natalChart.metadatos || {};
-  const showSimulationBanner = !hasRealConsultante;
+  const showSimulationBanner = false;
 
   return (
     <section className="mt-6 rounded-xl border border-gray-200 bg-white shadow-sm">
@@ -195,25 +206,14 @@ export default function AstrologyVisualPro({ chart, analysisResult, hasRealConsu
           <p className="text-xs text-gray-600 mt-1">
             No se recalcula nada. Los controles filtran visibilidad; los datos permanecen idénticos al resultado original.
           </p>
-          {showSimulationBanner ? (
-            <p className="text-xs text-gray-600 mt-1">
-              🟡 Simulacion academica — Study / Lab (sin consultantes reales)
-            </p>
-          ) : (
-            <p className="text-xs text-gray-600 mt-1">
-              🟢 Datos reales del consultante — visualizacion profesional (solo lectura)
-            </p>
-          )}
-          {usageMode === 'TRAINING' ? (
-            <p className="text-[11px] text-amber-700 mt-1">
-              Modo training: ayudas educativas activas. El modo no oculta datos reales.
-            </p>
-          ) : null}
+          <p className="text-xs text-gray-600 mt-1">
+            🟢 Datos reales del consultante — visualizacion profesional (solo lectura)
+          </p>
         </div>
         <div className="text-[11px] text-gray-500">
           <p>House: {meta.sistema_casas || '-'}</p>
           <p>Zodiaco: {meta.zodiac_type || '-'}</p>
-          <p>Engine: {meta.fuente || meta.source || 'kerykeion/swisseph'}</p>
+          <p>Engine: {meta.fuente || 'kerykeion/swisseph'}</p>
         </div>
       </div>
       <div className="px-4 pt-4">
@@ -234,16 +234,24 @@ export default function AstrologyVisualPro({ chart, analysisResult, hasRealConsu
               };
               const available = overlayAvailable[key];
               const showComingSoon = !available;
+              const isChecked = key === 'natal'
+                ? true
+                : hasExternalLayers
+                  ? activeLayers!.has(key)
+                  : visualState.layers[key];
+              const onToggle = hasExternalLayers
+                ? () => onLayerToggle!(key)
+                : () => handleOverlayToggle(key);
               return (
                 <label key={key} className={`flex items-center justify-between rounded-md px-2 py-2 ${available ? 'bg-gray-50' : 'bg-gray-100'}`}>
                   <span className="text-gray-800">{labelMap[key]}</span>
                   <div className="flex items-center gap-2">
-                    {showComingSoon && <span className="text-[11px] text-gray-500">Próximamente</span>}
+                    {/* removed "Próximamente" banner for professional view */}
                     <input
                       type="checkbox"
-                      checked={visualState.layers[key]}
+                      checked={isChecked}
                       disabled={!available || key === 'natal'}
-                      onChange={() => handleOverlayToggle(key)}
+                      onChange={onToggle}
                       className="h-4 w-4"
                     />
                   </div>
@@ -346,9 +354,9 @@ export default function AstrologyVisualPro({ chart, analysisResult, hasRealConsu
             <p>Tipo: Carta natal (visual)</p>
             <p>Sistema de casas: {meta.sistema_casas || '-'}</p>
             <p>Zodiaco: {meta.zodiac_type || '-'}</p>
-            <p>Engine: {meta.fuente || meta.source || 'kerykeion/swisseph'}</p>
+            <p>Engine: {meta.fuente || 'kerykeion/swisseph'}</p>
             <p>Versión engine: {meta.version_engine || '-'}</p>
-            <p>Ephemeris: {meta.ephemeris_path || meta.ayanamsha || 'No declarado (solo lectura)'}</p>
+            <p>Ephemeris / Ayanamsha: {meta.ayanamsha || 'No declarado (solo lectura)'}</p>
           </div>
         </div>
       </div>

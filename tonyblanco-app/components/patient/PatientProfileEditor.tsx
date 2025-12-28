@@ -155,7 +155,7 @@ export default function PatientProfileEditor({ profile, patientId, onSave, onClo
     <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4 overflow-y-auto">
       <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl max-h-[calc(100svh-2rem)] flex flex-col">
         <div className="flex justify-between items-center px-5 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">Editar paciente</h2>
+          <h2 className="text-lg font-semibold text-gray-900">Editar consultante</h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600"

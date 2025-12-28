@@ -44,7 +44,7 @@ export default function AstrologySynthesisTab({
 
   const template = useMemo(() => {
     const parts: string[] = [];
-    parts.push('Síntesis (Training / Investigativo) — Uso educativo / no médico');
+    parts.push('Síntesis (Formativo / Investigativo) — Uso educativo / no médico');
     parts.push('Interpretación asistida con fines formativos. No médica.');
     parts.push('');
     parts.push('Contexto técnico (observacional):');
@@ -138,7 +138,7 @@ export default function AstrologySynthesisTab({
     <section className="flex-1 bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
       <div className="flex items-start justify-between gap-4 mb-4">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900">Síntesis (Training / Investigativo)</h3>
+          <h3 className="text-lg font-semibold text-gray-900">Síntesis (Formativo / Investigativo)</h3>
           <p className="text-xs text-gray-600 mt-1">
             Interpretación asistida con fines formativos. No médica. La síntesis final es del analista humano.
           </p>

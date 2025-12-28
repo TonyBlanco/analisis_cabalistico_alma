@@ -98,6 +98,8 @@ interface UseNatalChartReturn {
   missingFields: string[] | null;
   calculateChart: (houseSystem?: string, zodiacType?: string) => Promise<void>;
   refetch: () => Promise<void>;
+  activeLayers: Set<string>;
+  handleLayerToggle: (layerName: string) => void;
 }
 
 function normalizePlanetName(name: unknown): string {
@@ -129,7 +131,7 @@ function normalizePayload(payload: any): NatalChartPayload | null {
  * 
  * RESPONSABILIDADES:
  * - GET: Recuperar carta natal existente
- * - POST: Calcular nueva carta desde perfil del paciente
+ * - POST: Calcular nueva carta desde perfil del consultante
  * - Manejo de estados (loading, error, empty)
  * - NO hace caching global, cada instancia es independiente
  */
@@ -139,6 +141,7 @@ export function useNatalChart(patientId: string | undefined): UseNatalChartRetur
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [missingFields, setMissingFields] = useState<string[] | null>(null);
+  const [activeLayers, setActiveLayers] = useState<Set<string>>(new Set());
 
   const apiURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
@@ -267,7 +270,7 @@ export function useNatalChart(patientId: string | undefined): UseNatalChartRetur
         const errorData = await response.json();
         if (errorData.missing_fields) {
           setMissingFields(errorData.missing_fields);
-          setError(errorData.error || 'Faltan campos en el perfil del paciente');
+          setError(errorData.error || 'Faltan campos en el perfil del consultante');
           return;
         }
       }
@@ -316,9 +319,34 @@ export function useNatalChart(patientId: string | undefined): UseNatalChartRetur
     }
   }, [patientId, apiURL]);
 
+  const handleLayerToggle = (layerName: string) => {
+    setActiveLayers((prev) => {
+      const newLayers = new Set(prev);
+      if (newLayers.has(layerName)) {
+        newLayers.delete(layerName);
+      } else {
+        newLayers.add(layerName);
+      }
+      return newLayers;
+    });
+  };
+
   useEffect(() => {
     fetchChart();
   }, [fetchChart]);
+
+  useEffect(() => {
+    if (!analysisResult) return;
+    setActiveLayers((prev) => {
+      if (prev.size > 0) return prev;
+      const next = new Set<string>();
+      next.add('natal');
+      if (analysisResult.transits) next.add('transits');
+      if (analysisResult.solarReturn) next.add('solarReturn');
+      if (analysisResult.progressions) next.add('progressions');
+      return next;
+    });
+  }, [analysisResult]);
 
   return {
     chart,
@@ -328,5 +356,7 @@ export function useNatalChart(patientId: string | undefined): UseNatalChartRetur
     missingFields,
     calculateChart,
     refetch: fetchChart,
+    activeLayers,
+    handleLayerToggle,
   };
 }

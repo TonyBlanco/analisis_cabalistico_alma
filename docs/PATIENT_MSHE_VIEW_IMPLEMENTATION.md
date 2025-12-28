@@ -1,30 +1,30 @@
-# PATIENT MSHE VIEW IMPLEMENTATION
+# CONSULTANTE MSHE VIEW IMPLEMENTATION
 
 ## Overview
-Patient read-only view of MSHE (Motor de Síntesis Holística Evaluativa) holistic synthesis results.
+Consultante read-only view of MSHE (Motor de Síntesis Holística Evaluativa) holistic synthesis results.
 
 ## Requirements
-- **Read-only access**: Patients can only view MSHE results, no editing capabilities
-- **Therapist validation required**: Only displays MSHE records validated by therapist
-- **Patient-safe language**: No technical details, softened color alerts, narrative format
+- **Read-only access**: Consultantes can only view MSHE results, no editing capabilities
+- **Professional validation required**: Only displays MSHE records validated by professional
+- **Consultante-safe language**: No technical details, softened color alerts, narrative format
 - **Ethical disclaimers**: Clear warnings that this is not medical advice
 - **Evolution tracking**: Shows personal process indicators over time
 
 ## Implementation Details
 
 ### Route
-- **Path**: `/dashboard/patient/holistic-summary`
-- **Layout**: Uses patient dashboard layout with sidebar navigation
-- **Authentication**: Requires patient authentication with Bearer token
+- **Path**: `/dashboard/consultante/holistic-summary`
+- **Layout**: Uses consultante dashboard layout with sidebar navigation
+- **Authentication**: Requires consultante authentication with Bearer token
 
 ### Components
 
-#### PatientHolisticSummary (`/components/patient/PatientHolisticSummary.tsx`)
+#### ConsultanteHolisticSummary (`/components/consultante/ConsultanteHolisticSummary.tsx`)
 Main component that fetches and displays MSHE data.
 
 **Key Features:**
 - Fetches validated MSHE records from `/analysis-records/` endpoint
-- Filters for `kind: 'holistic_evaluative_synthesis'` with therapist validation
+- Filters for `kind: 'holistic_evaluative_synthesis'` with professional validation
 - Displays most recent validated synthesis
 - Shows evolution data if multiple records exist
 
@@ -37,7 +37,7 @@ interface HolisticSynthesis {
   metadata: {
     total_records: number;
     computed_at: string;
-    patient_id: number;
+    consultante_id: number;
   };
 }
 
@@ -53,7 +53,7 @@ interface AIAnalysis {
 }
 ```
 
-#### PatientSidebar Update
+#### ConsultanteSidebar Update
 - Added "Síntesis Holística" navigation item with Heart icon
 - Positioned after "Resultados" in the menu
 - Uses violet color scheme for active state
@@ -61,15 +61,15 @@ interface AIAnalysis {
 ### UI/UX Design
 
 #### Areas of Attention Section
-- Displays 6 holistic axes with patient-friendly names
+- Displays 6 holistic axes with consultante-friendly names
 - Color-coded alerts with softened language:
   - Verde → "Área integrada"
   - Amarillo → "Área en proceso"
   - Naranja → "Área que merece atención consciente"
   - Rojo → "Área importante para explorar con acompañamiento"
 
-#### Therapist Summary
-- Direct display of therapist's validated summary
+#### Professional Summary
+- Direct display of professional's validated summary
 - Presented as "Lectura Integrada" in narrative format
 
 #### Symbolic Reading
@@ -88,9 +88,9 @@ interface AIAnalysis {
 - Suggests professional accompaniment when needed
 
 ### Security & Safety
-- **Validation Filter**: Only shows records with `therapist_annotations.therapist_validation: true`
-- **No Technical Data**: Scores, weights, and technical details hidden from patient view
-- **Safe Language**: All content uses patient-friendly, non-clinical terminology
+- **Validation Filter**: Only shows records with `professional_annotations.professional_validation: true`
+- **No Technical Data**: Scores, weights, and technical details hidden from consultante view
+- **Safe Language**: All content uses consultante-friendly, non-clinical terminology
 - **Error Handling**: Graceful handling when no validated MSHE exists
 
 ### API Integration
@@ -100,9 +100,9 @@ interface AIAnalysis {
 - **Error Handling**: User-friendly error messages
 
 ### Navigation
-- Added to patient sidebar menu
-- Accessible via `/dashboard/patient/holistic-summary`
-- Integrated with existing patient dashboard layout
+- Added to consultante sidebar menu
+- Accessible via `/dashboard/consultante/holistic-summary`
+- Integrated with existing consultante dashboard layout
 
 ## Testing
 - Build verification: ✅ TypeScript compilation successful
@@ -111,12 +111,12 @@ interface AIAnalysis {
 - Authentication: ✅ Uses existing auth system
 
 ## Files Created/Modified
-- `tonyblanco-app/components/patient/PatientHolisticSummary.tsx` (NEW)
-- `tonyblanco-app/app/(dashboard)/dashboard/patient/holistic-summary/page.tsx` (NEW)
-- `tonyblanco-app/app/(dashboard)/dashboard/patient/components/PatientSidebar.tsx` (MODIFIED)
+- `tonyblanco-app/components/consultante/ConsultanteHolisticSummary.tsx` (NEW)
+- `tonyblanco-app/app/(dashboard)/dashboard/consultante/holistic-summary/page.tsx` (NEW)
+- `tonyblanco-app/app/(dashboard)/dashboard/consultante/components/ConsultanteSidebar.tsx` (MODIFIED)
 
 ## Commit
-`feat: Implement patient read-only view of MSHE holistic synthesis`
+`feat: Implement consultante read-only view of MSHE holistic synthesis`
 
 ## Status
 ✅ IMPLEMENTED & COMMITTED

@@ -42,7 +42,7 @@ export default function PatientPicker({ open, onClose, onSelect }: PatientPicker
       const data = await getTherapistPatients();
       setPatients(data);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al cargar pacientes';
+      const errorMessage = err instanceof Error ? err.message : 'Error al cargar consultantes';
       setError(errorMessage);
       console.error('Error fetching patients:', err);
     } finally {
@@ -91,7 +91,7 @@ export default function PatientPicker({ open, onClose, onSelect }: PatientPicker
         {/* Header */}
         <div className="border-b border-gray-200 px-6 py-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900">Seleccionar paciente</h2>
+            <h2 className="text-lg font-semibold text-gray-900">Seleccionar consultante</h2>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -119,7 +119,7 @@ export default function PatientPicker({ open, onClose, onSelect }: PatientPicker
         <div className="flex-1 overflow-y-auto px-6 py-4">
           {loading && (
             <div className="text-center py-8">
-              <p className="text-sm text-gray-500">Cargando pacientes...</p>
+              <p className="text-sm text-gray-500">Cargando consultantes...</p>
             </div>
           )}
 
@@ -137,8 +137,8 @@ export default function PatientPicker({ open, onClose, onSelect }: PatientPicker
 
           {!loading && !error && filteredPatients.length === 0 && (
             <div className="text-center py-8">
-              <p className="text-sm text-gray-500">
-                {searchQuery ? 'No se encontraron pacientes con ese criterio de búsqueda.' : 'No hay pacientes disponibles.'}
+                <p className="text-sm text-gray-500">
+                {searchQuery ? 'No se encontraron consultantes con ese criterio de búsqueda.' : 'No hay consultantes disponibles.'}
               </p>
             </div>
           )}

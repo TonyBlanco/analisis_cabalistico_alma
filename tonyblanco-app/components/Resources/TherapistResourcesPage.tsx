@@ -74,11 +74,11 @@ export default function TherapistResourcesPage() {
 
   const handleUnassign = async (resourceId: number) => {
     if (!activePatient) {
-      alert('Debes seleccionar un paciente activo primero');
+      alert('Debes seleccionar un consultante activo primero');
       return;
     }
 
-    if (!confirm('¿Desasignar este recurso del paciente?')) {
+    if (!confirm('¿Desasignar este recurso del consultante?')) {
       return;
     }
 
@@ -132,18 +132,18 @@ export default function TherapistResourcesPage() {
               Recursos
             </h1>
             <p className="text-sm sm:text-base text-gray-600">
-              Gestiona y asigna recursos educativos a tus pacientes
+              Gestiona y asigna recursos educativos a tus consultantes
             </p>
           </div>
         </div>
         {activePatient && (
           <div className="mt-4 pt-4 border-t border-gray-200">
             <p className="text-sm text-gray-600">
-              Paciente activo: <span className="font-medium text-gray-900">{activePatient.name}</span>
+              Consultante activo: <span className="font-medium text-gray-900">{activePatient.name}</span>
             </p>
             {assignedToActivePatient.length > 0 && (
               <p className="text-xs text-gray-500 mt-1">
-                {assignedToActivePatient.length} recurso(s) asignado(s) a este paciente
+                {assignedToActivePatient.length} recurso(s) asignado(s) a este consultante
               </p>
             )}
           </div>

@@ -28,11 +28,11 @@ export default function SymbolicCrossView({ dataset, events }: SymbolicCrossView
     <div className="space-y-4">
       <div className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-700">
         <div className="text-xs uppercase tracking-wide text-gray-500">
-          Historial Simbolico del Paciente
+          Historial Simbolico del Consultante
         </div>
         <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-gray-500">
           <span className="rounded-full bg-gray-100 px-2 py-1">
-            Paciente: {dataset.patientId}
+            Consultante: {dataset.patientId}
           </span>
           <span className="rounded-full bg-gray-100 px-2 py-1">
             Eventos: {activeEvents.length}

@@ -46,7 +46,7 @@
 
 ## Aislamiento arquitectónico (estado actual)
 - Cálculo encapsulado en `backend/astrology/engine/*` y `swisseph_adapter`; UI no realiza cálculos directos.
-- Endpoint clínico usa adapter `api/astrology_kerykeion/service.py` → `normalize_kerykeion_output` → persiste snapshot en `AstrologyNatalChart`.
+- Endpoint holístico usa adapter `api/astrology_kerykeion/service.py` → `normalize_kerykeion_output` → persiste snapshot en `AstrologyNatalChart`.
 - Acoplamientos:
   - Path de efemérides sin centralizar (comentado) → riesgo de dependencias externas ocultas.
   - `engine_version` definida en adapter en vez de consultarse de `swisseph` instalado.

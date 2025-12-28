@@ -117,13 +117,13 @@ export default function DashboardLayout({
           { href: '/dashboard/admin', label: 'Administración' },
           { href: '/dashboard/therapist', label: 'Terapeuta' },
           { href: '/dashboard/personal', label: 'Personal' },
-          { href: '/dashboard/patient', label: 'Paciente' },
+          { href: '/dashboard/patient', label: 'Consultante' },
         ];
       case 'therapist':
         // Therapist: ONLY therapist dashboard + patients management
         return [
-          { href: '/dashboard/therapist', label: 'Workspace Clínico' },
-          { href: '/dashboard/therapist/patients', label: 'Pacientes' },
+          { href: '/dashboard/therapist', label: 'Workspace Holístico' },
+          { href: '/dashboard/therapist/patients', label: 'Consultantes' },
         ];
       case 'personal':
         // Personal: exploration and growth dashboard
@@ -140,7 +140,7 @@ export default function DashboardLayout({
       case 'patient':
         // Patient: ONLY patient dashboard
         return [
-          { href: '/dashboard/patient', label: 'Panel de Paciente' },
+          { href: '/dashboard/patient', label: 'Panel de Consultante' },
         ];
       default:
         return [];

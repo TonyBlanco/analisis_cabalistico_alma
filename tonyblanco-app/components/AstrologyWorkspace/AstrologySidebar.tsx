@@ -1,116 +1,109 @@
 'use client';
 
-import type { AstrologyViewMode, AstrologyWorkspaceMode } from './types';
+import ASTRO_METHODS from '@/lib/astrologyMethods';
 
 interface AstrologySidebarProps {
-  activeView: AstrologyViewMode;
-  onViewChange: (view: AstrologyViewMode) => void;
-  workspaceMode: AstrologyWorkspaceMode;
-  setWorkspaceMode: (mode: AstrologyWorkspaceMode) => void;
   houseSystem: string;
   setHouseSystem: (s: string) => void;
   zodiacType: string;
   setZodiacType: (s: string) => void;
+  showAsteroids?: boolean;
+  setShowAsteroids?: (v: boolean) => void;
+  synastryEnabled?: boolean;
+  setSynastryEnabled?: (v: boolean) => void;
 }
 
 const HOUSE_OPTIONS: Array<{ code: string; name: string; desc?: string }> = [
   { code: 'P', name: 'Placidus', desc: 'Predeterminado (actualmente activo).' },
   { code: 'K', name: 'Koch', desc: 'Mayor sensibilidad a latitud/tiempo en la cúspide.' },
   { code: 'E', name: 'Equal (Casas Iguales)', desc: 'Simplificación estructural (útil para lectura simbólica).' },
-  { code: 'W', name: 'Whole Sign', desc: 'Recomendado para Kabbalah: cada casa = un signo completo.' },
+  { code: 'W', name: 'Whole Sign', desc: 'Cada casa = un signo completo.' },
   { code: 'R', name: 'Regiomontanus', desc: 'Tradicional/horaria.' },
 ];
 
 const ZODIAC_OPTIONS: Array<{ code: string; name: string; desc?: string }> = [
   { code: 'tropical', name: 'Tropical', desc: 'Estándar occidental.' },
-  { code: 'sidereal', name: 'Sideral', desc: 'Usa ayanamsha (backend). Tradiciones védicas/estrellas fijas.' },
+  { code: 'sidereal', name: 'Sideral', desc: 'Usa ayanamsha (backend).' },
   { code: 'draconic', name: 'Dracónico', desc: 'Rotación por Nodo Norte (lectura simbólica).' },
 ];
 
 export default function AstrologySidebar({
-  activeView,
-  onViewChange,
-  workspaceMode,
-  setWorkspaceMode,
   houseSystem,
   setHouseSystem,
   zodiacType,
   setZodiacType,
+  showAsteroids = false,
+  setShowAsteroids,
+  synastryEnabled = false,
+  setSynastryEnabled,
 }: AstrologySidebarProps) {
-  const sections: Array<{ id: AstrologyViewMode; label: string; enabled: boolean; helper?: string }> = [
-    { id: 'visual', label: 'Visual', enabled: true },
-    {
-      id: 'training',
-      label: 'Interpretación (Training)',
-      enabled: workspaceMode === 'training',
-      helper: 'Disponible en Training',
-    },
-  ];
-
   return (
     <aside className="w-72 border-r border-gray-200 bg-white flex flex-col">
       <div className="px-4 py-4 border-b border-gray-200">
         <p className="text-xs uppercase tracking-wide text-gray-500">Workspace simbólico</p>
-        <h2 className="text-lg font-semibold text-gray-900">Astrología</h2>
-
-        <div className="mt-3">
-          <label className="block text-xs font-semibold text-gray-600 mb-2">Modo</label>
-          <div className="inline-flex w-full rounded-md border border-gray-200 bg-gray-50 p-1">
-            <button
-              type="button"
-              onClick={() => setWorkspaceMode('observational')}
-              className={`flex-1 rounded-md px-2 py-2 text-xs font-semibold transition-colors ${
-                workspaceMode === 'observational'
-                  ? 'bg-white border border-gray-200 text-gray-900'
-                  : 'text-gray-600 hover:bg-white/70'
-              }`}
-            >
-              Observacional
-            </button>
-            <button
-              type="button"
-              onClick={() => setWorkspaceMode('training')}
-              className={`flex-1 rounded-md px-2 py-2 text-xs font-semibold transition-colors ${
-                workspaceMode === 'training'
-                  ? 'bg-amber-50 border border-amber-200 text-amber-900'
-                  : 'text-gray-600 hover:bg-white/70'
-              }`}
-            >
-              Training / Interpretativa
-            </button>
-          </div>
-          <p className="mt-2 text-[11px] text-gray-500">
-            En Training se habilitan métodos de interpretación simbólica (formativos). Sin evaluación médica. Sin decisiones automáticas.
-          </p>
-        </div>
+        <h2 className="text-lg font-semibold text-gray-900">Astrología Profesional</h2>
+        <p className="text-xs text-gray-500 mt-1">Motor Swiss Ephemeris — Solo lectura</p>
       </div>
 
-      <div className="flex-1 px-3 py-4 space-y-4">
-        <div className="space-y-2">
-          {sections.map((section) => (
-            <button
-              key={section.id}
-              type="button"
-              disabled={!section.enabled}
-              onClick={() => section.enabled && onViewChange(section.id)}
-              className={`w-full text-left rounded-md px-3 py-2 text-sm transition-colors ${
-                section.enabled
-                  ? activeView === section.id
-                    ? 'bg-blue-50 border border-blue-200 text-blue-900'
-                    : 'border border-transparent text-gray-700 hover:bg-gray-50'
-                  : 'border border-transparent text-gray-400 cursor-not-allowed'
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium">{section.label}</p>
-                  <p className="text-[11px] text-gray-500">
-                    {section.enabled ? (activeView === section.id ? 'Activo' : 'Disponible') : section.helper || 'Deshabilitado'}
-                  </p>
+      <div className="flex-1 px-3 py-3 space-y-4 overflow-y-auto">
+        {/* Tipo de Carta */}
+        <div className="pt-2 border-t border-gray-100">
+          <label className="block text-xs font-semibold text-gray-600 mb-2">Tipo de Carta</label>
+          <div className="space-y-1 text-xs">
+            {ASTRO_METHODS.filter(m => m.category === 'natal').map((m) => (
+              <div key={m.id} className={`flex items-center justify-between px-2 py-1 border rounded ${m.status === 'active' ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200 opacity-80'}`}>
+                <div className="text-sm">{m.name}</div>
+                <div className="text-xs text-gray-500">
+                  {m.status === 'active' ? 'activo' : m.status === 'locked' ? '🔒 bloqueado' : 'próximamente'}
                 </div>
               </div>
-            </button>
-          ))}
+            ))}
+          </div>
+        </div>
+
+        {/* Sinastría y Parejas */}
+        <div className="pt-2 border-t border-gray-100">
+          <label className="block text-xs font-semibold text-gray-600 mb-2">Sinastría</label>
+          <div className="space-y-1 text-[11px]">
+            <div className="flex items-center justify-between px-2 py-1 border rounded bg-white">
+              <div className="text-[13px]">Doble Rueda</div>
+              <label className="inline-flex items-center gap-2 text-sm">
+                <input type="checkbox" checked={Boolean(synastryEnabled)} onChange={(e) => setSynastryEnabled && setSynastryEnabled(e.target.checked)} />
+              </label>
+            </div>
+            <div className="px-2 py-1 bg-gray-50 border border-gray-200 rounded opacity-60 text-[11px]">Compuesta (próximo)</div>
+            <div className="px-2 py-1 bg-gray-50 border border-gray-200 rounded opacity-60 text-[11px]">Davison (próximo)</div>
+          </div>
+        </div>
+
+        {/* Pronóstico */}
+        <div className="pt-2 border-t border-gray-100">
+          <label className="block text-xs font-semibold text-gray-600 mb-2">Pronóstico</label>
+          <div className="space-y-1 text-[11px]">
+            <div className="px-2 py-1 bg-gray-50 border border-gray-200 rounded opacity-50">🔒 Tránsitos</div>
+            <div className="px-2 py-1 bg-gray-50 border border-gray-200 rounded opacity-50">🔒 Progresiones</div>
+            <div className="px-2 py-1 bg-gray-50 border border-gray-200 rounded opacity-50">🔒 Arco Solar</div>
+          </div>
+        </div>
+
+        {/* Retornos */}
+        <div className="pt-2 border-t border-gray-100">
+          <label className="block text-xs font-semibold text-gray-600 mb-2">Retornos</label>
+          <div className="space-y-1 text-[11px]">
+            <div className="px-2 py-1 bg-gray-50 border border-gray-200 rounded opacity-50">🔒 Solar</div>
+            <div className="px-2 py-1 bg-gray-50 border border-gray-200 rounded opacity-50">🔒 Lunar</div>
+            <div className="px-2 py-1 bg-gray-50 border border-gray-200 rounded opacity-50">🔒 Planetarios</div>
+          </div>
+        </div>
+
+        {/* Especiales */}
+        <div className="pt-2 border-t border-gray-100">
+          <label className="block text-xs font-semibold text-gray-600 mb-2">Técnicas Especiales</label>
+          <div className="space-y-1 text-[11px]">
+            <div className="px-2 py-1 bg-gray-50 border border-gray-200 rounded opacity-50">🔒 Armónicos</div>
+            <div className="px-2 py-1 bg-gray-50 border border-gray-200 rounded opacity-50">🔒 Persona Charts</div>
+            <div className="px-2 py-1 bg-gray-50 border border-gray-200 rounded opacity-50">🔒 Relocación</div>
+          </div>
         </div>
 
         <div className="pt-2 border-t border-gray-100">
@@ -144,12 +137,42 @@ export default function AstrologySidebar({
           <p className="text-xs text-gray-500 mt-2">{ZODIAC_OPTIONS.find((z) => z.code === zodiacType)?.desc}</p>
           <p className="text-[11px] text-gray-400 mt-1">La selección se aplica al recalcular la carta.</p>
         </div>
+
+        {/* Objetos */}
+        <div className="pt-2 border-t border-gray-100">
+          <label className="block text-xs font-semibold text-gray-600 mb-2">Objetos</label>
+          <div className="space-y-1 text-xs">
+            <div className="px-2 py-1 bg-green-50 border border-green-200 rounded">
+              <span className="font-medium">✅ Planetas</span>
+            </div>
+            <div className="flex items-center justify-between px-2 py-1 border rounded">
+              <div className="text-[13px]">🔒 Puntos matemáticos</div>
+              <div className="text-xs text-gray-400">(coming)</div>
+            </div>
+            <div className="flex items-center justify-between px-2 py-1 border rounded">
+              <label className="inline-flex items-center gap-2 text-sm">
+                <input type="checkbox" checked={Boolean(showAsteroids)} onChange={(e) => setShowAsteroids && setShowAsteroids(e.target.checked)} />
+                <span className="text-[13px]">Asteroides</span>
+              </label>
+            </div>
+            <div className="px-2 py-1 bg-gray-50 border border-gray-200 rounded opacity-50 text-[11px]">🔒 Estrellas fijas</div>
+          </div>
+        </div>
       </div>
 
       <div className="px-4 py-3 border-t border-gray-200 text-[11px] text-gray-500">
-        {workspaceMode === 'training'
-          ? 'Modo Training / Interpretativa. Uso educativo / no médico. Sin automatización decisoria.'
-          : 'Modo Observacional. Solo visual. Sin interpretación estructurada.'}
+        Visualización profesional del consultante con datos reales. Próximas fases activarán cálculos avanzados.
+      </div>
+      {/* Recalcular control (UI only triggers modal in parent) */}
+      <div className="px-4 py-3 border-t border-gray-200">
+        <button
+          type="button"
+          onClick={() => { if (typeof window !== 'undefined') { (window as any).dispatchEvent(new CustomEvent('open-recalc-modal')); } }}
+          className="w-full bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-2 rounded-md text-sm"
+        >
+          🔁 Recalcular carta
+        </button>
+        <p className="text-xs text-gray-400 mt-2">Recalcular solo con confirmación explícita. La carta base se conservará.</p>
       </div>
     </aside>
   );

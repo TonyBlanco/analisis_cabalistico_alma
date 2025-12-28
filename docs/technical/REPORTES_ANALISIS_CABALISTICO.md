@@ -38,7 +38,7 @@ Documentación completa de los reportes de análisis cabalístico: cuáles está
 #### **Dónde se Usa:**
 - `/tests/complete-numerology` - Página de Numerología Completa
 - `/tests/results/[id]` - Vista de resultados de tests
-- `/therapist/patients/[id]` - Ficha del paciente (modo terapeuta)
+- `/therapist/patients/[id]` - Ficha del consultante (modo profesional)
 
 #### **Características:**
 - ✅ Soporte para tema claro (terapeuta) y oscuro (personal)
@@ -77,21 +77,21 @@ Documentación completa de los reportes de análisis cabalístico: cuáles está
 ---
 
 ### 3. **Visualización de Tarot (Inline)** ⚠️
-- **Componente**: Inline en página del paciente
+- **Componente**: Inline en página del consultante
 - **Ubicación**: `tonyblanco-app/app/therapist/patients/[id]/page.tsx`
 - **Método**: Tarot Terapéutico Cruzado
 - **Estado**: ⚠️ **Parcial - Falta Componente Dedicado**
 
 #### **Contenido Actual:**
 - ✅ Arcano de Vida (número, nombre, letra hebrea, sendero)
-- ✅ Test Clínico Cruzado (nombre, severidad, fecha)
+- ✅ Test Holístico Cruzado (nombre, severidad, fecha)
 - ✅ Análisis de Sombra
 - ✅ Acciones Sanadoras (lista)
 - ✅ Mensaje Integrador
 
 #### **Limitaciones:**
 - ❌ No tiene componente de reporte reutilizable
-- ❌ Solo se muestra inline en la ficha del paciente
+- ❌ Solo se muestra inline en la ficha del consultante
 - ❌ No se puede exportar o compartir
 - ❌ No tiene visualización del Árbol de la Vida integrada
 
@@ -169,7 +169,7 @@ interface GematriaReportProps {
 - **Estado**: ❌ **No Implementado**
 
 #### **Contenido Propuesto:**
-- [ ] Encabezado con información del paciente
+- [ ] Encabezado con información del consultante
 - [ ] Sección 1: Arcano de Vida
   - Carta del Tarot (imagen)
   - Número, nombre, letra hebrea
@@ -177,7 +177,7 @@ interface GematriaReportProps {
   - Significado terapéutico
   - Meditación asociada
 - [ ] Sección 2: Diagnóstico Cruzado
-  - Test clínico utilizado
+  - Test holístico utilizado
   - Severidad y fecha
   - Síntomas identificados
 - [ ] Sección 3: Análisis de Sombra
@@ -234,7 +234,7 @@ interface TarotTherapeuticReportProps {
   - Sefirot a trabajar
   - Senderos a activar
   - Prácticas específicas
-- [ ] Integración con tests clínicos:
+- [ ] Integración con tests holísticos:
   - Correlación síntomas ↔ Sefirot
   - Bloqueos identificados
 - [ ] Exportación a PDF/JSON
@@ -402,7 +402,7 @@ interface BaseReportProps {
   // Datos del análisis
   analysisData: any;
   
-  // Información del paciente/cliente
+  // Información del consultante/cliente
   clientName?: string;
   birthDate?: string;
   
@@ -475,7 +475,7 @@ interface BaseReportProps {
 1. Crear componente `TarotTherapeuticReport.tsx`
 2. Integrar con `tarot-arcana.ts` (ya existe)
 3. Usar `TreeOfLifeTarot.tsx` para visualización
-4. Agregar botón "Ver Reporte Completo" en ficha del paciente
+4. Agregar botón "Ver Reporte Completo" en ficha del consultante
 5. Mejorar visualización del análisis cruzado
 
 ### **Para Reporte de Mapa del Alma:**

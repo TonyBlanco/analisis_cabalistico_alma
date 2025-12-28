@@ -63,7 +63,7 @@ export default function ScreeningGeneralPage() {
           {screeningGeneralDefinition.purpose}. Tiempo estimado {screeningGeneralDefinition.estimated_time_minutes} minutos.
         </p>
         <p className="text-xs text-gray-500 mt-2">
-          Nota: cuestionario orientativo para conversación terapéutica. No constituye diagnóstico.
+          Nota: cuestionario orientativo para conversación terapéutica. Es una lectura holística.
         </p>
 
         <div className="mt-4 text-xs text-gray-500">

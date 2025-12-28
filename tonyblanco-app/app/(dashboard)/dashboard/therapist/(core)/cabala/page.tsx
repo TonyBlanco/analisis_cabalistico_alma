@@ -38,7 +38,7 @@ export default function CabalisticCatalogPage() {
     {
       code: 'arbol-vida',
       name: 'Árbol de la Vida',
-      description: 'Análisis cabalístico completo del Árbol de la Vida, mapeo de sefirot y senderos energéticos del paciente.',
+      description: 'Análisis cabalístico completo del Árbol de la Vida, mapeo de sefirot y senderos energéticos del consultante.',
       requiredFields: ['nombre completo', 'fecha de nacimiento', 'ciudad de nacimiento', 'país de nacimiento'],
     },
     {
@@ -56,13 +56,13 @@ export default function CabalisticCatalogPage() {
     {
       code: 'ciclos-vida',
       name: 'Ciclos de Vida',
-      description: 'Análisis de ciclos numéricos y etapas evolutivas del paciente basado en fecha de nacimiento.',
+      description: 'Análisis de ciclos numéricos y etapas evolutivas del consultante basado en fecha de nacimiento.',
       requiredFields: ['nombre completo', 'fecha de nacimiento', 'ciudad de nacimiento', 'país de nacimiento'],
     },
     {
       code: 'correcciones-espirituales',
       name: 'Correcciones Espirituales',
-      description: 'Identificación de patrones kármicos y correcciones espirituales específicas del paciente.',
+      description: 'Identificación de patrones kármicos y correcciones espirituales específicas del consultante.',
       requiredFields: ['nombre completo', 'fecha de nacimiento', 'ciudad de nacimiento', 'país de nacimiento'],
     },
     {
@@ -105,7 +105,7 @@ export default function CabalisticCatalogPage() {
 
   const validatePatientData = (module: CabalisticModule): { isValid: boolean; missingFields: string[] } => {
     if (!patientData) {
-      return { isValid: false, missingFields: ['Datos del paciente no disponibles'] };
+      return { isValid: false, missingFields: ['Datos del consultante no disponibles'] };
     }
 
     const missingFields: string[] = [];
@@ -143,7 +143,7 @@ export default function CabalisticCatalogPage() {
 
     // Check active patient
     if (!activePatientId) {
-      setError('Por favor, selecciona un paciente activo antes de ejecutar un análisis cabalístico.');
+      setError('Por favor, selecciona un consultante activo antes de ejecutar un análisis cabalístico.');
       return;
     }
 
@@ -159,7 +159,7 @@ export default function CabalisticCatalogPage() {
     const patientValidation = validatePatientData(module);
     if (!patientValidation.isValid) {
       setError(
-        `El paciente no tiene la información requerida: ${patientValidation.missingFields.join(', ')}. Por favor, completa los datos del paciente antes de ejecutar este análisis.`
+        `El consultante no tiene la información requerida: ${patientValidation.missingFields.join(', ')}. Por favor, completa los datos del consultante antes de ejecutar este análisis.`
       );
       return;
     }
@@ -236,7 +236,7 @@ export default function CabalisticCatalogPage() {
               Cábala Aplicada
             </h1>
             <p className="text-sm sm:text-base text-gray-600">
-              Análisis cabalísticos avanzados para pacientes
+              Análisis cabalísticos avanzados para consultantes
             </p>
           </div>
         </div>
@@ -246,13 +246,13 @@ export default function CabalisticCatalogPage() {
       {activePatientId && activePatientName ? (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <p className="text-sm text-blue-800">
-            <strong>Paciente activo:</strong> {activePatientName}
+            <strong>Consultante activo:</strong> {activePatientName}
           </p>
         </div>
       ) : (
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
           <p className="text-sm text-yellow-800">
-            <strong>Atención:</strong> Por favor, selecciona un paciente activo desde el workspace principal para ejecutar análisis cabalísticos.
+            <strong>Atención:</strong> Por favor, selecciona un consultante activo desde el workspace principal para ejecutar análisis cabalísticos.
           </p>
           <button
             onClick={() => router.push('/dashboard/therapist')}
@@ -327,9 +327,9 @@ export default function CabalisticCatalogPage() {
                 {isExecuting
                   ? 'Ejecutando...'
                   : !canExecute
-                  ? 'Selecciona un paciente'
+                  ? 'Selecciona un consultante'
                   : !patientValidation.isValid
-                  ? 'Completa datos del paciente'
+                  ? 'Completa datos del consultante'
                   : 'Ejecutar análisis'}
               </button>
             </div>

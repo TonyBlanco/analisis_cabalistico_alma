@@ -147,8 +147,8 @@ export default function TherapistPatientPhq9Page() {
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white border border-gray-200 rounded-lg p-6">
-          <h1 className="text-xl font-semibold text-gray-900">PHQ-9 (paciente)</h1>
-          <p className="text-sm text-gray-600 mt-2">No hay resultados registrados para este paciente.</p>
+          <h1 className="text-xl font-semibold text-gray-900">PHQ-9 (consultante)</h1>
+          <p className="text-sm text-gray-600 mt-2">No hay resultados registrados para este consultante.</p>
         </div>
       </div>
     );
@@ -162,9 +162,9 @@ export default function TherapistPatientPhq9Page() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-        <h1 className="text-2xl font-semibold text-gray-900">PHQ-9 — Resultado del paciente</h1>
+        <h1 className="text-2xl font-semibold text-gray-900">PHQ-9 — Resultado del consultante</h1>
         <p className="text-sm text-gray-600 mt-2">
-          Seguimiento de cribado. Este resultado no es un diagnóstico.
+          Seguimiento de cribado. Este resultado no es una lectura.
         </p>
         <div className="mt-3">
           <button
@@ -205,13 +205,13 @@ export default function TherapistPatientPhq9Page() {
         {suicidalFlag && (
           <div className="rounded-md border border-amber-200 bg-amber-50 p-4">
             <p className="text-sm text-amber-800">
-              Respuesta positiva en el ítem 9. Requiere seguimiento clínico. Interpretar con calma y coordinar acción profesional según protocolo.
+              Respuesta positiva en el ítem 9. Requiere seguimiento holístico. Interpretar con calma y coordinar acción profesional según protocolo.
             </p>
           </div>
         )}
 
         <div className="border-t border-gray-200 pt-4">
-          <h3 className="text-sm font-semibold text-gray-900 mb-2">Respuestas del paciente</h3>
+          <h3 className="text-sm font-semibold text-gray-900 mb-2">Respuestas del consultante</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-700">
             {Object.entries(rawAnswers).map(([key, value]) => (
               <div key={key} className={`rounded-md border px-3 py-2 ${key === "q9" ? "border-amber-300 bg-amber-50" : "border-gray-200 bg-white"}`}>
@@ -256,7 +256,7 @@ export default function TherapistPatientPhq9Page() {
         </div>
 
         <p className="text-xs text-gray-500">
-          Este resultado no es un diagnóstico.
+          Este resultado no es una lectura.
         </p>
       </div>
       {openHelp && (

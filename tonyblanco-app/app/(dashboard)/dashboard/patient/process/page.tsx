@@ -130,7 +130,7 @@ export default function PatientProcessPage() {
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <p className="text-sm text-blue-700">
           <strong>Nota:</strong> Este espacio refleja el progreso de tu proceso personal. 
-          No es un diagnóstico médico ni clínico, sino una guía de tu camino de crecimiento.
+          No es una lectura holística ni médica, sino una guía de tu camino de crecimiento.
         </p>
       </div>
     </div>

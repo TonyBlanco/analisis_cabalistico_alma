@@ -47,11 +47,11 @@ export default function TherapistTestsPage() {
         </div>
         <div className="flex items-center flex-wrap gap-2">
           <p className="text-sm text-gray-600">
-            Visualiza y asigna tests disponibles. El catálogo es global; la asignación usa el paciente activo.
+            Visualiza y asigna tests disponibles. El catálogo es global; la asignación usa el consultante activo.
           </p>
           {mounted && resolvedPatientId && (
             <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-green-50 text-green-700 border border-green-100">
-              Paciente: {resolvedPatientName || resolvedPatientId}
+              Consultante: {resolvedPatientName || resolvedPatientId}
             </span>
           )}
         </div>
@@ -61,24 +61,24 @@ export default function TherapistTestsPage() {
         <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
         <div className="text-sm text-blue-900 space-y-1">
           {!mounted ? (
-            <p className="font-medium">Cargando informaci¢n del paciente...</p>
+            <p className="font-medium">Cargando información del consultante...</p>
           ) : !resolvedPatientId ? (
             <>
-              <p className="font-medium">Seleccione un paciente activo para asignar tests.</p>
+              <p className="font-medium">Seleccione un consultante activo para asignar tests.</p>
               <p className="text-xs text-blue-700">
-                Vuelva al Workspace, elija un paciente y regrese con el contexto ?patient_id=ID.
+                Vuelva al Workspace, elija un consultante y regrese con el contexto ?patient_id=ID.
               </p>
             </>
           ) : (
             <>
               <p className="font-medium">Cómo asignar tests:</p>
               <ol className="list-decimal list-inside space-y-1 text-blue-800">
-                <li>Pestaña "Asignables al paciente"</li>
+                <li>Pestaña "Asignables al consultante"</li>
                 <li>Clic en "Asignar" en el test deseado</li>
                 <li>Confirmación y listo</li>
               </ol>
               <p className="text-xs text-blue-700 mt-2">
-                ℹ️ Los tests asignados aparecerán automáticamente en el panel del paciente.
+                ℹ️ Los tests asignados aparecerán automáticamente en el panel del consultante.
               </p>
             </>
           )}

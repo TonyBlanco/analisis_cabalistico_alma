@@ -5,13 +5,13 @@ This contract defines the canonical data shapes that future AI agents will
 consume for symbolic, holistic analysis. It is data-only and non-clinical.
 
 Data flow
-Paciente → Eventos simbólicos (Timeline) → Sistemas simbólicos
+Consultante → Eventos simbólicos (Timeline) → Sistemas simbólicos
 → Cruce transversal (patrones) → Salida IA (sugerencias / hipótesis).
 
 Scope and boundaries
 - No diagnosis, no clinical claims, no medical interpretation.
 - No AI execution in this phase.
-- Inputs are observational, symbolic, and patient-context aware.
+- Inputs are observational, symbolic, and consultante-context aware.
 
 Systems consumed
 - Thoth

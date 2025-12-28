@@ -103,7 +103,7 @@ export default function BaiPatientResultPage() {
       <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
         <h1 className="text-2xl font-semibold text-gray-900">BAI — Resultado</h1>
         <p className="text-sm text-gray-600 mt-2">
-          Inventario de ansiedad de Beck. Este resultado no es un diagnóstico.
+          Inventario de ansiedad de Beck. Este resultado es una lectura orientativa.
         </p>
       </div>
 
@@ -133,7 +133,7 @@ export default function BaiPatientResultPage() {
         </div>
 
         <p className="text-xs text-gray-500">
-          Este resultado no es un diagnóstico.
+          Este resultado es una lectura orientativa.
         </p>
       </div>
     </div>

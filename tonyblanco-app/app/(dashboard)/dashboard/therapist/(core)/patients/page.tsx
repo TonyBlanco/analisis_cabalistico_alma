@@ -12,7 +12,7 @@ import CreatePatientModal from '@/components/CreatePatientModal';
  * 
  * A) Patient Creation (Therapist Only)
  * - Lists patients assigned to therapist
- * - Button: "Crear Paciente"
+ * - Button: "Crear Consultante"
  */
 export default function TherapistPatientsPage() {
   const router = useRouter();
@@ -54,7 +54,7 @@ export default function TherapistPatientsPage() {
       const data = await getTherapistPatients();
       setPatients(data);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al cargar pacientes';
+      const errorMessage = err instanceof Error ? err.message : 'Error al cargar consultantes';
       setError(errorMessage);
       console.error('Error fetching patients:', err);
     } finally {
@@ -89,10 +89,10 @@ export default function TherapistPatientsPage() {
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-semibold text-gray-900 mb-2">
-              Gestión de Pacientes
+              Gestión de Consultantes
             </h1>
             <p className="text-sm sm:text-base text-gray-600">
-              Administra los pacientes asignados a tu cuenta
+              Administra los consultantes asignados a tu cuenta
             </p>
           </div>
           <button
@@ -100,20 +100,20 @@ export default function TherapistPatientsPage() {
             className="px-4 py-2 text-sm font-medium text-white rounded-md hover:opacity-90 transition-opacity shadow-sm"
             style={{ backgroundColor: 'var(--accent-color)' }}
           >
-            Crear Paciente
+            Crear Consultante
           </button>
         </div>
       </div>
 
       {/* Patient List */}
       <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Pacientes</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Consultantes</h2>
 
         {loadingPatients ? (
           <div className="text-center py-12">
             <div className="inline-block animate-pulse">
               <div className="h-2 w-32 bg-gray-200 rounded mb-2"></div>
-              <p className="text-sm text-gray-500 mt-2">Cargando pacientes...</p>
+              <p className="text-sm text-gray-500 mt-2">Cargando consultantes...</p>
             </div>
           </div>
         ) : error ? (
@@ -129,10 +129,10 @@ export default function TherapistPatientsPage() {
         ) : patients.length === 0 ? (
           <div className="border border-gray-200 border-dashed rounded-lg p-12 text-center">
             <p className="text-gray-500 text-sm">
-              No tienes pacientes registrados aún.
+              No tienes consultantes registrados aún.
             </p>
             <p className="text-gray-400 text-xs mt-2">
-              Haz clic en "Crear Paciente" para comenzar.
+              Haz clic en "Crear Consultante" para comenzar.
             </p>
           </div>
         ) : (

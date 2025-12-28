@@ -76,7 +76,7 @@ export default function AstrologyCorrespondencesTab({ patientId }: { patientId: 
     <section className="flex-1 bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
       <div className="flex items-start justify-between gap-4 mb-4">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900">Correspondencias (Training / Investigativo)</h3>
+          <h3 className="text-lg font-semibold text-gray-900">Correspondencias (Formativo / Investigativo)</h3>
           <p className="text-xs text-gray-600 mt-1">
             Correspondencias tradicionales explicativas. Uso educativo / no médico. No implica causalidad ni conclusiones.
           </p>
@@ -129,7 +129,7 @@ export default function AstrologyCorrespondencesTab({ patientId }: { patientId: 
       </div>
 
       <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-xs text-gray-700">
-        <p className="font-semibold text-gray-900 mb-1">Guía de uso (Training)</p>
+        <p className="font-semibold text-gray-900 mb-1">Guía de uso (Formativo)</p>
         <ul className="list-disc pl-5 space-y-1">
           <li>Lee “factor → correspondencia” como mapa simbólico, no como afirmación médica.</li>
           <li>La síntesis final siempre es del analista humano; la UI solo organiza material.</li>

@@ -148,7 +148,7 @@ export default function CreatePatientModal({
           setError('Por favor, corrige los errores en el formulario');
           return;
         }
-        throw new Error(data.error || data.message || 'Error al crear paciente');
+        throw new Error(data.error || data.message || 'Error al crear consultante');
       }
 
       // Success - show credentials
@@ -162,7 +162,7 @@ export default function CreatePatientModal({
         onSuccess();
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al crear el paciente';
+      const errorMessage = err instanceof Error ? err.message : 'Error al crear el consultante';
       setError(errorMessage);
       console.error('Create patient error:', err);
     } finally {
@@ -216,7 +216,7 @@ export default function CreatePatientModal({
           {/* Header */}
           <div className="flex items-start justify-between mb-6">
             <div>
-              <h2 className="text-xl font-semibold text-gray-900">Crear Nuevo Paciente</h2>
+              <h2 className="text-xl font-semibold text-gray-900">Crear Nuevo Consultante</h2>
               <p className="text-sm text-gray-600 mt-1">
                 El sistema generará automáticamente el username y contraseña temporal
               </p>
@@ -237,10 +237,10 @@ export default function CreatePatientModal({
             <div className="space-y-4">
               <div className="bg-green-50 border border-green-200 rounded-md p-4">
                 <p className="text-sm font-medium text-green-800 mb-2">
-                  ✓ Paciente creado exitosamente
+                  ✓ Consultante creado exitosamente
                 </p>
                 <p className="text-sm text-green-700">
-                  Las credenciales se han enviado por email al paciente.
+                  Las credenciales se han enviado por email al consultante.
                 </p>
               </div>
               <div className="bg-gray-50 border border-gray-200 rounded-md p-4">
@@ -355,7 +355,7 @@ export default function CreatePatientModal({
                 <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
                   <p className="text-sm text-blue-800">
                     <strong>Nota:</strong> El sistema generará automáticamente un username único (formato: PAT-XXXX)
-                    y una contraseña temporal segura. Las credenciales se enviarán al email del paciente.
+                      y una contraseña temporal segura. Las credenciales se enviarán al email del consultante.
                   </p>
                 </div>
 
@@ -374,7 +374,7 @@ export default function CreatePatientModal({
                     className="px-6 py-2 text-sm font-medium text-white rounded-md transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
                     style={{ backgroundColor: 'var(--accent-color)' }}
                   >
-                    {loading ? 'Creando paciente...' : 'Crear Paciente'}
+                    {loading ? 'Creando consultante...' : 'Crear Consultante'}
                   </button>
                 </div>
               </form>

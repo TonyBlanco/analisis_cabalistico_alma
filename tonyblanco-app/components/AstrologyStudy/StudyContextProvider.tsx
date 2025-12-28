@@ -13,28 +13,29 @@ const StudyContext = createContext<StudyContextValue | null>(null);
 
 const SAMPLE_CHART: NatalChartPayload = {
   planetas: [
-    { nombre: 'sun', signo: 'Capricornio', casa: 10, longitud_ecliptica: 279.7, velocidad: 1 },
-    { nombre: 'moon', signo: 'Géminis', casa: 3, longitud_ecliptica: 83.1, velocidad: 13 },
-    { nombre: 'saturn', signo: 'Virgo', casa: 6, longitud_ecliptica: 176.9, velocidad: 0.05 },
-    { nombre: 'venus', signo: 'Acuario', casa: 11, longitud_ecliptica: 310.3, velocidad: 1.2 },
+    { nombre: 'sun', signo: 'Capricornio', grados: 279.7, longitud_ecliptica: 279.7, casa: 10, es_retrogrado: false },
+    { nombre: 'moon', signo: 'Géminis', grados: 83.1, longitud_ecliptica: 83.1, casa: 3, es_retrogrado: false },
+    { nombre: 'saturn', signo: 'Virgo', grados: 176.9, longitud_ecliptica: 176.9, casa: 6, es_retrogrado: false },
+    { nombre: 'venus', signo: 'Acuario', grados: 310.3, longitud_ecliptica: 310.3, casa: 11, es_retrogrado: false },
   ],
   casas: Array.from({ length: 12 }, (_, i) => ({
     numero: i + 1,
-    signo: ['Cap', 'Acu', 'Pis', 'Ari', 'Tau', 'Gémi', 'Cán', 'Leo', 'Vir', 'Lib', 'Esc', 'Sag'][i] || '',
-    cuspide: i * 30,
+    signo: ['Capricornio', 'Acuario', 'Piscis', 'Aries', 'Tauro', 'Géminis', 'Cáncer', 'Leo', 'Virgo', 'Libra', 'Escorpio', 'Sagitario'][i] || '',
+    cuspide_grados: i * 30,
+    cuspide_longitud: i * 30,
   })),
   aspectos: [
-    { planeta1: 'sun', planeta2: 'moon', tipo: 'trine', orbe: 3.5 },
-    { planeta1: 'sun', planeta2: 'saturn', tipo: 'trine', orbe: 2.2 },
-    { planeta1: 'venus', planeta2: 'mars', tipo: 'square', orbe: 4.1 },
+    { planeta1: 'sun', planeta2: 'moon', tipo: 'trine', orbe: 3.5, es_aplicativo: false },
+    { planeta1: 'sun', planeta2: 'saturn', tipo: 'trine', orbe: 2.2, es_aplicativo: false },
+    { planeta1: 'venus', planeta2: 'mars', tipo: 'square', orbe: 4.1, es_aplicativo: false },
   ],
   metadatos: {
     sistema_casas: 'P',
     zodiac_type: 'tropical',
     fuente: 'kerykeion/swisseph',
     version_engine: '1.x',
-    ephemeris_path: 'local (sim)',
     calculated_at: new Date().toISOString(),
+    input_snapshot: null,
   },
 };
 

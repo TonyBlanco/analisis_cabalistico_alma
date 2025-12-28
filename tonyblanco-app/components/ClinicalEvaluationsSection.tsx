@@ -12,10 +12,10 @@ import { generateWithGemini } from '@/lib/gemini-config';
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://analisis-cabalistico-alma.onrender.com/api';
 
 /**
- * Clinical Evaluations Section Component
+ * Holistic Evaluations Section Component
  * 
- * Displays therapist_clinical tests with "Execute" button.
- * Only executes when active patient is selected.
+ * Displays therapist_holistic tests with "Execute" button.
+ * Only executes when active consultante is selected.
  * Opens a modal/form to collect input data for the test execution.
  */
 export default function ClinicalEvaluationsSection() {
@@ -90,13 +90,13 @@ export default function ClinicalEvaluationsSection() {
         );
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.detail || errorData.message || 'Error al cargar evaluaciones clínicas');
+          throw new Error(errorData.detail || errorData.message || 'Error al cargar evaluaciones holísticas');
         }
         const data = await response.json();
         const items = Array.isArray(data) ? data : (data?.results || []);
         setAnalysisRecords(items);
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Error al cargar evaluaciones clínicas';
+        const errorMessage = err instanceof Error ? err.message : 'Error al cargar evaluaciones holísticas';
         setAnalysisError(errorMessage);
         setAnalysisRecords([]);
       } finally {
@@ -176,7 +176,7 @@ export default function ClinicalEvaluationsSection() {
       );
       setTests(clinicalTests);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al cargar evaluaciones clínicas';
+      const errorMessage = err instanceof Error ? err.message : 'Error al cargar evaluaciones holísticas';
       setError(errorMessage);
       console.error('Error fetching clinical tests:', err);
     } finally {
@@ -198,7 +198,7 @@ export default function ClinicalEvaluationsSection() {
 
   const handleExecuteTest = async (test: TestModule) => {
     if (!activePatientId) {
-      alert('Por favor, selecciona un paciente activo antes de ejecutar una evaluación clínica.');
+      alert('Por favor, selecciona un consultante activo antes de ejecutar una evaluación holística.');
       return;
     }
 
@@ -282,15 +282,15 @@ export default function ClinicalEvaluationsSection() {
     const therapistNotes = notes && notes.trim() ? notes.trim() : 'N/A';
 
     return [
-      'Eres un asistente clinico para uso exclusivo del terapeuta.',
+      'Eres un asistente holístico para uso exclusivo del terapeuta.',
       'Usa solo la informacion provista; no inventes datos.',
-      'No diagnosticos ni prescripciones.',
+      'No lecturas ni prescripciones.',
       'Devuelve en espanol con la estructura exacta:',
       'Observaciones clave:',
       '- ...',
       'Patrones detectados:',
       '- ...',
-      'Hipotesis terapeuticas (no diagnosticos):',
+      'Hipotesis terapeuticas (no lecturas):',
       '- ...',
       'Sugerencias de exploracion (no prescripciones):',
       '- ...',
@@ -343,11 +343,11 @@ export default function ClinicalEvaluationsSection() {
   if (loading) {
     return (
       <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Evaluaciones Clínicas</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Evaluaciones Holísticas</h2>
         <div className="text-center py-12">
           <div className="inline-block animate-pulse">
             <div className="h-2 w-40 bg-gray-200 rounded mb-2"></div>
-            <p className="text-sm text-gray-500 mt-2">Cargando evaluaciones clínicas...</p>
+            <p className="text-sm text-gray-500 mt-2">Cargando evaluaciones holísticas...</p>
           </div>
         </div>
       </div>
@@ -357,7 +357,7 @@ export default function ClinicalEvaluationsSection() {
   if (error) {
     return (
       <div className="bg-white border border-gray-200 rounded-lg p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Evaluaciones Clínicas</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Evaluaciones Holísticas</h2>
         <div className="bg-red-50 border border-red-200 rounded-md p-4">
           <p className="text-sm text-red-800">{error}</p>
           <button
@@ -375,10 +375,10 @@ export default function ClinicalEvaluationsSection() {
     <>
       <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
         <div className="mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">Evaluaciones Clínicas</h2>
+          <h2 className="text-lg font-semibold text-gray-900">Evaluaciones Holísticas</h2>
           {activePatientName && (
             <p className="text-sm text-gray-500 mt-1">
-              Paciente activo:{' '}
+              Consultante activo:{' '}
               <span className="font-medium">{activePatientName}</span>
             </p>
           )}
@@ -386,7 +386,7 @@ export default function ClinicalEvaluationsSection() {
 
         {tests.length === 0 ? (
           <div className="border border-gray-200 border-dashed rounded-lg p-12 text-center">
-            <p className="text-sm text-gray-500">No hay evaluaciones clínicas disponibles.</p>
+            <p className="text-sm text-gray-500">No hay evaluaciones holísticas disponibles.</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -403,7 +403,7 @@ export default function ClinicalEvaluationsSection() {
                     )}
                     <div className="flex items-center gap-3 mt-2">
                       <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded">
-                        Evaluación clínica
+                        Evaluación holística
                       </span>
                       {test.test_type && (
                         <span className="text-xs text-gray-500">{test.test_type}</span>
@@ -425,15 +425,15 @@ export default function ClinicalEvaluationsSection() {
         )}
 
         <div className="mt-6 border-t border-gray-200 pt-4">
-          <h3 className="text-sm font-semibold text-gray-900 mb-3">Evaluaciones Clinicas Registradas</h3>
+          <h3 className="text-sm font-semibold text-gray-900 mb-3">Evaluaciones Holísticas Registradas</h3>
           {analysisLoading && (
-            <p className="text-sm text-gray-500">Cargando evaluaciones clinicas...</p>
+            <p className="text-sm text-gray-500">Cargando evaluaciones holísticas...</p>
           )}
           {!analysisLoading && analysisError && (
             <p className="text-sm text-red-600">{analysisError}</p>
           )}
           {!analysisLoading && !analysisError && analysisRecords.length === 0 && (
-            <p className="text-sm text-gray-500">No hay evaluaciones clinicas registradas.</p>
+            <p className="text-sm text-gray-500">No hay evaluaciones holísticas registradas.</p>
           )}
           {!analysisLoading && !analysisError && analysisRecords.length > 0 && (
             <div className="space-y-3">
@@ -478,8 +478,8 @@ export default function ClinicalEvaluationsSection() {
         <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">Síntesis Clínica</h3>
-              <p className="text-xs text-gray-500">Análisis clínico — uso exclusivo del terapeuta</p>
+              <h3 className="text-lg font-semibold text-gray-900">Síntesis Holística</h3>
+              <p className="text-xs text-gray-500">Análisis holístico — uso exclusivo del terapeuta</p>
             </div>
             <button
               onClick={() => setSelectedAnalysisId(null)}
@@ -560,14 +560,14 @@ export default function ClinicalEvaluationsSection() {
                       }
                     );
                     if (!response.ok) {
-                      throw new Error('No se pudo guardar la nota clínica.');
+                      throw new Error('No se pudo guardar la nota holística.');
                     }
                     const updated = await response.json();
                     setAnalysisDetail(updated);
                     setNotes(String(updated?.annotations || updated?.notes || notes));
                     setNotesMessage({ type: 'success', text: 'Notas guardadas correctamente.' });
                   } catch {
-                    setNotesMessage({ type: 'error', text: 'No se pudo guardar la nota clínica.' });
+                    setNotesMessage({ type: 'error', text: 'No se pudo guardar la nota holística.' });
                   } finally {
                     setSavingNotes(false);
                   }
@@ -581,7 +581,7 @@ export default function ClinicalEvaluationsSection() {
               <div className="border-t border-gray-200 pt-4">
                 <h4 className="text-sm font-semibold text-gray-900 mb-2">Narrativa asistida (IA)</h4>
                 <p className="text-xs text-gray-500 mb-3">
-                  Contenido generado por IA como apoyo al criterio clinico.
+                  Contenido generado por IA como apoyo al criterio holístico.
                 </p>
                 <button
                   type="button"
@@ -590,7 +590,7 @@ export default function ClinicalEvaluationsSection() {
                   className="px-4 py-2 text-sm font-medium text-white rounded-md hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
                   style={{ backgroundColor: 'var(--accent-color)' }}
                 >
-                  {aiLoading ? 'Generando...' : 'Generar narrativa clinica (IA)'}
+                  {aiLoading ? 'Generando...' : 'Generar narrativa holística (IA)'}
                 </button>
 
                 {aiError && (
@@ -637,13 +637,13 @@ export default function ClinicalEvaluationsSection() {
             className="bg-white rounded-lg shadow-lg max-w-md w-full mx-4 p-6"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Ejecutar Evaluación Clínica</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Ejecutar Evaluación Holística</h3>
             
             {patientData ? (
               <>
                 <div className="mb-4 space-y-2">
                   <p className="text-sm text-gray-600">
-                    <strong>Paciente:</strong> {patientData.full_name || patientData.first_name || 'N/A'}
+                    <strong>Consultante:</strong> {patientData.full_name || patientData.first_name || 'N/A'}
                   </p>
                   {patientData.birth_date && (
                     <p className="text-sm text-gray-600">
@@ -652,15 +652,15 @@ export default function ClinicalEvaluationsSection() {
                   )}
                 </div>
                 <p className="text-sm text-gray-600 mb-4">
-                  ¿Deseas ejecutar la evaluación <strong>"{testToExecute.name}"</strong> para este paciente?
+                  ¿Deseas ejecutar la evaluación <strong>"{testToExecute.name}"</strong> para este consultante?
                 </p>
                 <p className="text-xs text-gray-500 mb-4">
-                  Nota: Los datos del paciente se utilizarán para la evaluación. Los resultados se guardarán automáticamente.
+                  Nota: Los datos del consultante se utilizarán para la evaluación. Los resultados se guardarán automáticamente.
                 </p>
               </>
             ) : (
               <p className="text-sm text-gray-600 mb-4">
-                Cargando datos del paciente...
+                Cargando datos del consultante...
               </p>
             )}
 
@@ -713,7 +713,7 @@ function ExecuteTestButton({
       <button
         disabled
         className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-400 bg-gray-100 rounded-md cursor-not-allowed"
-        title="Selecciona un paciente activo para ejecutar evaluaciones"
+        title="Selecciona un consultante activo para ejecutar evaluaciones"
       >
         Ejecutar
       </button>

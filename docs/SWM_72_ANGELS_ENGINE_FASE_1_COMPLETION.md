@@ -27,7 +27,7 @@
 - **birth_date**: Fecha de nacimiento
 - **natal_angel**: ForeignKey a Angel (nullable)
 - **secondary_angels**: ManyToManyField a Angel
-- **notes**: Texto descriptivo (no clínico)
+- **notes**: Texto descriptivo (holístico)
 - **created_at/updated_at**: Timestamps
 
 ### 🏗️ **Arquitectura Implementada**

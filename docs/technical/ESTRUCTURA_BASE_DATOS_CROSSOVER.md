@@ -43,7 +43,7 @@ Documentación completa de la estructura de la base de datos, archivos que la ut
 #### 3. **Patient**
 - **Tabla**: `api_patient`
 - **Relación**: `ForeignKey` a `User` (therapist) + `ForeignKey` opcional a `User` (user)
-- **Descripción**: Paciente de un terapeuta - Ficha clínica holística
+- **Descripción**: Consultante de un profesional - Ficha holística integral
 
 **Campos Principales:**
 ```python
@@ -60,18 +60,18 @@ Documentación completa de la estructura de la base de datos, archivos que la ut
 ```
 
 **Relaciones:**
-- `patient.test_results` → TestResult (tests clínicos)
+- `patient.test_results` → TestResult (tests holísticos)
 - `patient.cabalistic_analyses` → CabalisticAnalysis (análisis cabalísticos)
 - `patient.sessions` → Session (sesiones terapéuticas)
 - `patient.therapist_notes` → TherapistNote
 
 **Archivos que lo Usan:**
 - `backend/api/models.py` (definición)
-- `backend/api/views.py` (CRUD pacientes)
+- `backend/api/views.py` (CRUD consultantes)
 - `backend/api/cabalistic_views.py` (análisis cabalísticos)
 - `backend/api/utils/tarot_service.py` (análisis de Tarot)
 - `backend/api/utils/holistic_ai.py` (reportes holísticos)
-- `tonyblanco-app/app/therapist/patients/[id]/page.tsx` (ficha del paciente)
+- `tonyblanco-app/app/therapist/patients/[id]/page.tsx` (ficha del consultante)
 
 ---
 
@@ -230,7 +230,7 @@ User (Django Auth)
 
 ### **1. Tarot Terapéutico Cruzado** 🎴
 
-**Función**: Cruza el Arcano de Vida (calculado por fecha de nacimiento) con tests clínicos del paciente.
+**Función**: Cruza el Arcano de Vida (calculado por fecha de nacimiento) con tests holísticos del consultante.
 
 **Archivo**: `backend/api/utils/tarot_service.py`
 
@@ -243,7 +243,7 @@ User (Django Auth)
    - Suma todos los dígitos: day + month + year
    - Reduce a 1-22 → Arcano (0-21)
 
-2. Busca Tests Clínicos:
+2. Busca Tests Holísticos:
    - TestResult.objects.filter(patient=patient)
    - O si no hay: TestResult.objects.filter(user=patient.user)
    - Ordena por created_at DESC (más reciente primero)
@@ -253,7 +253,7 @@ User (Django Auth)
 
 4. Genera Análisis con IA:
    - TarotTherapeuticAI.analyze_archetype_vs_clinical()
-   - Input: Arcano + Test Clínico
+   - Input: Arcano + Test Holístico
    - Output: 
      * analisis_sombra (cómo el arquetipo agrava el síntoma)
      * acciones_sanadoras (prescripciones terapéuticas)
@@ -275,7 +275,7 @@ User (Django Auth)
 
 ### **2. Reporte Holístico con IA** 🧠
 
-**Función**: Cruza todos los datos del paciente (tests, análisis cabalísticos, historial) para generar un reporte completo.
+**Función**: Cruza todos los datos del consultante (tests, análisis cabalísticos, historial) para generar un reporte completo.
 
 **Archivo**: `backend/api/utils/holistic_ai.py`
 
@@ -283,19 +283,19 @@ User (Django Auth)
 
 **Proceso de Cross-Over:**
 ```python
-1. Recopila Datos del Paciente:
+1. Recopila Datos del Consultante:
    - Patient: name, birth_date, main_complaint, clinical_history
-   - TestResult: Todos los tests del paciente
+   - TestResult: Todos los tests del consultante
    - CabalisticAnalysis: Todos los análisis cabalísticos
 
 2. Organiza por Categorías:
-   - Tests Clínicos (PHQ-9, GAD-7, etc.)
+   - Tests Holísticos (PHQ-9, GAD-7, etc.)
    - Análisis Cabalísticos (Gematria, Tarot, etc.)
-   - Historial Clínico
+   - Historial Holístico
 
 3. Genera Reporte con IA (Gemini):
    - Analiza correlaciones entre:
-     * Síntomas clínicos ↔ Sefirot
+     * Síntomas holísticos ↔ Sefirot
      * Tests ↔ Análisis Cabalísticos
      * Patrones temporales
    - Genera recomendaciones integradas
@@ -315,13 +315,13 @@ User (Django Auth)
 
 ### **3. Correlación Tests ↔ Sefirot** ⚡
 
-**Función**: Mapea resultados de tests clínicos a Sefirot del Árbol de la Vida.
+**Función**: Mapea resultados de tests holísticos a Sefirot del Árbol de la Vida.
 
 **Archivo**: `backend/api/utils/clinical_scorer.py` y `backend/cabala_py/soul_analytics.py`
 
 **Proceso de Cross-Over:**
 ```python
-1. Calcula Score Clínico:
+1. Calcula Score Holístico:
    - TestResult.score → Severidad
    - TestResult.clinical_diagnosis → Diagnóstico
 
@@ -429,7 +429,7 @@ User (Django Auth)
 - `backend/api/test_models.py` - TestModule, TestResult, UserTestAccess
 
 #### **Vistas/APIs:**
-- `backend/api/views.py` - CRUD usuarios, pacientes, fichas
+- `backend/api/views.py` - CRUD usuarios, consultantes, fichas
 - `backend/api/test_views.py` - Ejecución y guardado de tests
 - `backend/api/cabalistic_views.py` - CRUD análisis cabalísticos
 - `backend/api/tarot_views.py` - Análisis de Tarot
@@ -454,7 +454,7 @@ User (Django Auth)
 ### **Frontend (Next.js/TypeScript)**
 
 #### **Páginas:**
-- `tonyblanco-app/app/therapist/patients/[id]/page.tsx` - **Ficha del paciente (principal cross-over)**
+- `tonyblanco-app/app/therapist/patients/[id]/page.tsx` - **Ficha del consultante (principal cross-over)**
 - `tonyblanco-app/app/tests/results/[id]/page.tsx` - Visualización de resultados
 - `tonyblanco-app/app/dashboard/tools/gematria/page.tsx` - Calculadora Gematría
 - `tonyblanco-app/app/dashboard/tools/tarot/page.tsx` - Tarot Terapéutico
@@ -472,7 +472,7 @@ User (Django Auth)
 
 ## 🔍 **QUERIES PRINCIPALES DE CROSS-OVER**
 
-### **1. Obtener Tests Clínicos de un Paciente:**
+### **1. Obtener Tests Holísticos de un Consultante:**
 ```python
 # backend/api/utils/tarot_service.py
 test_results = TestResult.objects.filter(
@@ -486,7 +486,7 @@ if not test_results.exists() and patient.user:
     ).order_by('-created_at')
 ```
 
-### **2. Obtener Análisis Cabalísticos de un Paciente:**
+### **2. Obtener Análisis Cabalísticos de un Consultante:**
 ```python
 # backend/api/cabalistic_views.py
 analyses = CabalisticAnalysis.objects.filter(
@@ -518,7 +518,7 @@ cabalistic_analyses = CabalisticAnalysis.objects.filter(
 ).order_by('-created_at')
 ```
 
-### **4. Buscar Paciente por Terapeuta:**
+### **4. Buscar Consultante por Profesional:**
 ```python
 # backend/api/views.py
 patients = Patient.objects.filter(
@@ -558,14 +558,14 @@ unique_together = [
 
 ## 🎯 **CASOS DE USO DE CROSS-OVER**
 
-### **Caso 1: Terapeuta ve Ficha del Paciente**
+### **Caso 1: Profesional ve Ficha del Consultante**
 ```
 1. GET /api/therapist/patients/<id>/
    → Patient + TestResult + CabalisticAnalysis
 
 2. Frontend muestra:
    - Datos personales (Patient)
-   - Tests clínicos (TestResult)
+   - Tests holísticos (TestResult)
    - Análisis cabalísticos (CabalisticAnalysis)
    - Correlaciones visuales
 ```
@@ -601,13 +601,13 @@ unique_together = [
 ### **Validaciones de Acceso:**
 
 ```python
-# Solo el terapeuta puede ver sus pacientes
+# Solo el profesional puede ver sus consultantes
 patient = get_object_or_404(
     Patient.objects.filter(therapist=request.user),
     id=id
 )
 
-# Solo el terapeuta puede crear análisis para sus pacientes
+# Solo el profesional puede crear análisis para sus consultantes
 analysis = CabalisticAnalysis.objects.create(
     patient=patient,  # Ya validado que es del terapeuta
     therapist=request.user
@@ -621,7 +621,7 @@ analysis = CabalisticAnalysis.objects.create(
 1. **Patient.user** es opcional: Un paciente puede tener cuenta de login o no
 2. **TestResult.patient** es opcional: Los tests pueden ser personales o para pacientes
 3. **CabalisticAnalysis** siempre requiere Patient: Solo se crea desde ficha del paciente
-4. **Cross-over principal**: Tarot ↔ Tests Clínicos (en `tarot_service.py`)
+4. **Cross-over principal**: Tarot ↔ Tests Holísticos (en `tarot_service.py`)
 5. **Reportes holísticos**: Cruzan todos los datos (en `holistic_ai.py`)
 
 ---

@@ -1,6 +1,6 @@
 # SOURCE OF TRUTH
 
-La fuente de verdad normativa clinica vigente es: AUDITORIA CABALA APP 12182025.md.
+La fuente de verdad normativa holística vigente es: AUDITORIA CABALA APP 12182025.md.
 ../01_PROJECT_STATE/PROJECT_STATE_CURRENT.md es valido como referencia de estado operativo y simbolico.
 Los documentos de arquitectura y evolucion simbolica son complementarios.
 Toda implementacion debe alinearse estrictamente con la auditoria vigente.
@@ -8,7 +8,7 @@ Toda implementacion debe alinearse estrictamente con la auditoria vigente.
 
 El desarrollo del Sistema Simbólico (Tarot–Árbol–Astrología) continúa
 en documentos específicos de arquitectura simbólica.
-No altera la arquitectura clínica ni los flujos sellados descritos aquí.
+No altera la arquitectura holística ni los flujos sellados descritos aquí.
 
 ### Actualización (2025-12-23)
 
@@ -22,7 +22,7 @@ para el Árbol de la Vida cabalístico:
 - **Phase 4**: Professional Kabbalistic Analyst Prompt (upgrade a nivel profesional)
 
 **Reglas de Seguridad (NO NEGOCIABLES)**:
-- ❌ NO diagnosis clínico
+- ❌ NO lectura holística
 - ❌ NO consejos personales
 - ❌ NO etiquetas psicológicas
 - ❌ NO determinismo
@@ -41,7 +41,7 @@ para el Árbol de la Vida cabalístico:
 - 356f92ce (Phase 3: AI Interpreter)
 - Pendiente (Phase 4: Professional Prompt)
 
-Esta implementación NO afecta flujos clínicos ni arquitectura sellada.
+Esta implementación NO afecta flujos holísticos ni arquitectura sellada.
 Es un módulo simbólico aislado con validación de seguridad de 5 capas.
 
 ## DOCUMENTATION GOVERNANCE (PERMANENT RULE)

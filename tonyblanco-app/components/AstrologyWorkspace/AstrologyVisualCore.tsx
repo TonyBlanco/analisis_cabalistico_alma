@@ -3,7 +3,7 @@
 import AstrologyVisualTab from './AstrologyVisualTab';
 
 interface AstrologyVisualCoreProps {
-  patientId?: number | null;
+  patientId?: string | undefined;
   houseSystem?: string;
   zodiacType?: string;
 }
@@ -11,7 +11,7 @@ interface AstrologyVisualCoreProps {
 export default function AstrologyVisualCore(props: AstrologyVisualCoreProps) {
   return (
     <AstrologyVisualTab
-      patientId={props.patientId?.toString()}
+      patientId={props.patientId}
       houseSystem={props.houseSystem}
       zodiacType={props.zodiacType}
     />

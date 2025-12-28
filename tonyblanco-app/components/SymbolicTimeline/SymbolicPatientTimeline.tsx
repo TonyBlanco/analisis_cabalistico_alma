@@ -22,7 +22,7 @@ function groupEventsByDate(events: SymbolicTimelineEvent[]) {
 
 export default function SymbolicPatientTimeline({
   patientId,
-  title = 'Historial Simbolico del Paciente',
+  title = 'Historial Simbolico del Consultante',
 }: SymbolicPatientTimelineProps) {
   const [events, setEvents] = useState<SymbolicTimelineEvent[]>([]);
 
@@ -43,7 +43,7 @@ export default function SymbolicPatientTimeline({
     return (
       <section className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-600">
         <div className="text-xs uppercase tracking-wide text-gray-500">{title}</div>
-        <p className="mt-2">Paciente no seleccionado.</p>
+        <p className="mt-2">Consultante no seleccionado.</p>
       </section>
     );
   }

@@ -2,7 +2,7 @@
 
 ## Overview
 
-SCID-5 (Structured Clinical Interview for DSM-5) module implemented as a holistic exploration tool for therapists in the clinical workspace.
+SCID-5 (Structured Clinical Interview for DSM-5) module implemented as a holistic exploration tool for professionals in the holistic workspace.
 
 **Status**: ✅ Implemented and committed (commit: f45c8ae3)
 
@@ -12,9 +12,9 @@ SCID-5 (Structured Clinical Interview for DSM-5) module implemented as a holisti
 
 - ✅ No new endpoints created
 - ✅ Uses existing `analysis-records` API
-- ✅ Respects therapist_clinical execution mode
+- ✅ Respects professional holistic execution mode
 - ✅ No auto-diagnosis or scoring
-- ✅ Patient ownership and security validations
+- ✅ Consultante ownership and security validations
 - ✅ No impact on existing tests or SCDF
 
 ## Implementation Details
@@ -22,19 +22,19 @@ SCID-5 (Structured Clinical Interview for DSM-5) module implemented as a holisti
 ### Frontend Components
 
 #### Button Integration
-- **File**: `tonyblanco-app/components/clinical/ClinicalContextHeader.tsx`
+- **File**: `tonyblanco-app/components/holistic/HolisticContextHeader.tsx`
 - **Location**: Added next to SCDF button
-- **Visibility**: Therapists only, with active patient
+- **Visibility**: Professionals only, with active consultante
 - **Styling**: Emerald color scheme (distinct from SCDF)
 
 #### Pages
-- **Route**: `/dashboard/therapist/scid5`
+- **Route**: `/dashboard/professional/scid5`
 - **Files**:
-  - `tonyblanco-app/app/(dashboard)/dashboard/therapist/(core)/scid5/page.tsx`
-  - `tonyblanco-app/app/(dashboard)/dashboard/therapist/(core)/scid5/scid5-client.tsx`
+  - `tonyblanco-app/app/(dashboard)/dashboard/professional/(core)/scid5/page.tsx`
+  - `tonyblanco-app/app/(dashboard)/dashboard/professional/(core)/scid5/scid5-client.tsx`
 
 #### Main Component
-- **File**: `tonyblanco-app/components/clinical/SCID5ClinicalModule.tsx`
+- **File**: `tonyblanco-app/components/holistic/SCID5HolisticModule.tsx`
 - **Features**:
   - 6 accordion sections for holistic exploration
   - Boolean fields: explorado, patrones_observados
@@ -51,7 +51,7 @@ SCID-5 (Structured Clinical Interview for DSM-5) module implemented as a holisti
   ```json
   {
     "kind": "holistic_exploration",
-    "patient": <patient_id>,
+    "consultante": <consultante_id>,
     "raw_input": {
       "holistic_exploration": {
         "emotional_vitality": {...},
@@ -65,15 +65,15 @@ SCID-5 (Structured Clinical Interview for DSM-5) module implemented as a holisti
   ```
 
 #### Security
-- Therapist authentication required
-- Patient ownership validation
+- Professional authentication required
+- Consultante ownership validation
 - No self-evaluation allowed
 - AnalysisRecord serializer handles permissions
 
 ## User Experience
 
 ### Access Pattern
-1. Therapist selects patient in workspace
+1. Professional selects consultante in workspace
 2. SCID-5 button appears in header (next to SCDF)
 3. Click opens holistic exploration form
 4. Form guides through 6 areas + summary
@@ -87,21 +87,21 @@ SCID-5 (Structured Clinical Interview for DSM-5) module implemented as a holisti
 - **Self-Regulation**: Impulse and behavior management
 - **Identity & Relationships**: Self and other patterns
 - **Additional Observations**: Cultural, spiritual, contextual factors
-- **Holistic Summary**: Therapist's integrative synthesis
+- **Holistic Summary**: Professional's integrative synthesis
 
 ## Validation Rules
 
-- Patient ID required in URL params
+- Consultante ID required in URL params
 - All sections optional but summary required
 - Notes mandatory if patterns observed
 - Real-time validation prevents incomplete saves
 
 ## Future Integration
 
-- Records visible in patient's analysis history
-- Compatible with SCDF for clinical synthesis
-- Exportable for clinical records
-- Therapist annotations support
+- Records visible in consultante's analysis history
+- Compatible with SCDF for holistic synthesis
+- Exportable for holistic records
+- Professional annotations support
 
 ## Testing
 
@@ -114,5 +114,5 @@ SCID-5 (Structured Clinical Interview for DSM-5) module implemented as a holisti
 
 - No diagnostic claims or automated interpretations
 - Holistic framework emphasizes human judgment
-- Ethical considerations for clinical tool usage
+- Ethical considerations for holistic tool usage
 - Data stored securely with existing permissions

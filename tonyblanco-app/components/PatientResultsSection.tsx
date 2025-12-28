@@ -67,7 +67,7 @@ export default function PatientResultsSection() {
   if (loading) {
     return (
       <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Resultados del Paciente</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Resultados del Consultante</h2>
         <div className="text-center py-12">
           <div className="inline-block animate-pulse">
             <div className="h-2 w-32 bg-gray-200 rounded mb-2"></div>
@@ -81,7 +81,7 @@ export default function PatientResultsSection() {
   if (error) {
     return (
       <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Resultados del Paciente</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Resultados del Consultante</h2>
         <div className="bg-red-50 border border-red-200 rounded-md p-4">
           <p className="text-sm text-red-800">{error}</p>
           <button
@@ -98,12 +98,12 @@ export default function PatientResultsSection() {
   return (
     <>
       <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Resultados del Paciente</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Resultados del Consultante</h2>
 
         {results.length === 0 ? (
           <div className="border border-gray-200 border-dashed rounded-lg p-12 text-center">
-            <p className="text-gray-500 text-sm">
-              El paciente aún no ha completado ningún test.
+              <p className="text-gray-500 text-sm">
+              El consultante aún no ha completado ningún test.
             </p>
             <p className="text-gray-400 text-xs mt-2">
               Los resultados aparecerán aquí una vez que completes los tests asignados.

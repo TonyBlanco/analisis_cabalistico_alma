@@ -239,10 +239,10 @@ export default function ExportHistoryList({
     downloadFile(`${base}.json`, JSON.stringify(exportObj, null, 2), 'application/json;charset=utf-8');
   };
 
-  if (!resolvedPatientId) {
+    if (!resolvedPatientId) {
     return (
       <div className="rounded-md border border-dashed border-gray-200 p-3 text-xs text-gray-500">
-        Selecciona un paciente para ver su historial de exports.
+        Selecciona un consultante para ver su historial de exports.
       </div>
     );
   }
@@ -278,7 +278,7 @@ export default function ExportHistoryList({
                 type="button"
                 onClick={() => handleEditClinical(item.id)}
                 className="inline-flex items-center gap-1 rounded-md border border-gray-200 bg-white px-2 py-1 text-[11px] text-gray-700 hover:bg-gray-50"
-                title="Editar diagnóstico/hipótesis y recomendaciones"
+                title="Editar lectura/hipótesis y recomendaciones"
               >
                 <Pencil className="h-3 w-3" />
                 Editar
@@ -307,7 +307,7 @@ export default function ExportHistoryList({
           {editingId === item.id && (
             <div className="mt-3 space-y-2 rounded-md border border-gray-200 bg-white p-3">
               <div className="space-y-1">
-                <p className="text-[11px] font-semibold text-gray-700">Notas clínicas</p>
+                <p className="text-[11px] font-semibold text-gray-700">Notas consultivas</p>
                 <textarea
                   value={annotations.clinical_notes ?? ''}
                   onChange={(e) => setAnnotations((prev) => ({ ...prev, clinical_notes: e.target.value }))}
@@ -317,7 +317,7 @@ export default function ExportHistoryList({
                 />
               </div>
               <div className="space-y-1">
-                <p className="text-[11px] font-semibold text-gray-700">Diagnóstico / hipótesis</p>
+                <p className="text-[11px] font-semibold text-gray-700">Lectura / hipótesis</p>
                 <textarea
                   value={annotations.diagnosis_hypotheses ?? ''}
                   onChange={(e) => setAnnotations((prev) => ({ ...prev, diagnosis_hypotheses: e.target.value }))}
@@ -355,7 +355,7 @@ export default function ExportHistoryList({
                 </button>
               </div>
               <p className="text-[11px] text-gray-500">
-                Esto se guarda en el historial del paciente y se inyecta en el PDF del export.
+                Esto se guarda en el historial holístico del consultante y se inyecta en el PDF del export.
               </p>
             </div>
           )}

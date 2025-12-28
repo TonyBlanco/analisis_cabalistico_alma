@@ -96,7 +96,7 @@ export default function ScreeningGeneralResultPage() {
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
         <h1 className="text-2xl font-semibold text-gray-900">Screening Psicológico General — Resultado</h1>
-        <p className="text-sm text-gray-600 mt-2">Cuestionario orientativo. No constituye diagnóstico.</p>
+        <p className="text-sm text-gray-600 mt-2">Cuestionario orientativo. Es una lectura holística.</p>
       </div>
 
       {safety && (

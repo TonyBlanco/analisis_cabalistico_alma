@@ -63,7 +63,7 @@ interface Hypothesis {
  *
  * Route: /dashboard/therapist/bioemotional
  *
- * Módulo clínico **solo terapeuta**, dependiente de paciente activo.
+ * Módulo holístico **solo profesional**, dependiente de consultante activo.
  * Todas las acciones requieren interacción explícita del terapeuta.
  */
 export default function TherapistBioEmotionalPage() {
@@ -76,7 +76,7 @@ export default function TherapistBioEmotionalPage() {
 
   const [activeTab, setActiveTab] = useState<TabId>('dictionary');
 
-  // Paciente activo (solo lectura desde util existente)
+  // Consultante activo (solo lectura desde util existente)
   const [activePatientId, setActivePatientId] = useState<number | null>(null);
 
   // Estado del diccionario / autocomplete
@@ -131,7 +131,7 @@ export default function TherapistBioEmotionalPage() {
     };
   }, []);
 
-  // Cargar hipótesis cuando haya paciente activo
+  // Cargar hipótesis cuando haya consultante activo
   useEffect(() => {
     if (!activePatientId) {
       setHypotheses([]);
@@ -156,7 +156,7 @@ export default function TherapistBioEmotionalPage() {
         );
         if (res.status === 403) {
           setHypothesesAccessDenied(true);
-          setHypothesesError('No tienes permiso para ver las hipótesis de este paciente.');
+          setHypothesesError('No tienes permiso para ver las hipótesis de este consultante.');
           setHypotheses([]);
           return;
         }
@@ -281,7 +281,7 @@ export default function TherapistBioEmotionalPage() {
       );
       if (res.status === 403) {
         setHypothesesAccessDenied(true);
-        setHypothesesError('No tienes permiso para ver las hipótesis de este paciente.');
+        setHypothesesError('No tienes permiso para ver las hipótesis de este consultante.');
         setHypotheses([]);
         return;
       }
@@ -298,7 +298,7 @@ export default function TherapistBioEmotionalPage() {
   const handleCreateHypothesis = async (event: FormEvent) => {
     event.preventDefault();
     if (!activePatientId) {
-      setFormError('Selecciona un paciente activo antes de crear una hipótesis.');
+      setFormError('Selecciona un consultante activo antes de crear una hipótesis.');
       return;
     }
 
@@ -453,12 +453,12 @@ export default function TherapistBioEmotionalPage() {
           Bio-Emoción & Árbol Transgeneracional
         </h1>
         <p className="text-sm text-gray-600 max-w-3xl">
-          Espacio clínico para explorar patrones bio-emocionales y transgeneracionales del
-          paciente, de forma estructurada y auditabile, sin diagnósticos automáticos.
+          Espacio holístico para explorar patrones bio-emocionales y transgeneracionales del
+          consultante, de forma estructurada y auditabile, sin lecturas automáticas.
         </p>
       </div>
 
-      {/* Paciente activo (no modificar comportamiento, solo reutilizar) */}
+      {/* Consultante activo (no modificar comportamiento, solo reutilizar) */}
       <ActivePatientIndicator />
 
       {/* Tabs de sección */}
@@ -503,8 +503,8 @@ export default function TherapistBioEmotionalPage() {
         {activeTab === 'dictionary' && (
           <div className="space-y-4">
             <p className="text-sm text-gray-700">
-              Explora el diccionario bio-emocional para apoyar tu análisis clínico. Esta sección es
-              solo de lectura; cualquier interpretación o uso clínico debe ser redactado por ti.
+              Explora el diccionario bio-emocional para apoyar tu análisis holístico. Esta sección es
+              solo de lectura; cualquier interpretación o uso holístico debe ser redactado por ti.
             </p>
 
             <div className="space-y-3">
@@ -630,7 +630,7 @@ export default function TherapistBioEmotionalPage() {
                           </p>
                         )}
                         <p className="text-xs text-gray-500">
-                          Este contenido es solo de referencia. Cualquier hipótesis o uso clínico
+                          Este contenido es solo de referencia. Cualquier hipótesis o uso holístico
                           debe ser redactado manualmente por ti.
                         </p>
                       </div>
@@ -656,7 +656,7 @@ export default function TherapistBioEmotionalPage() {
         {activeTab === 'tree' && (
           <div className="space-y-3">
             <p className="text-sm text-gray-700">
-              Aquí se representará el árbol transgeneracional del paciente (personas y eventos
+              Aquí se representará el árbol transgeneracional del consultante (personas y eventos
               clave). Todas las altas/bajas/modificaciones requieren tu acción explícita.
             </p>
             <div className="border border-dashed border-gray-300 rounded-md p-4 text-sm text-gray-500">
@@ -678,18 +678,18 @@ export default function TherapistBioEmotionalPage() {
           <div className="space-y-6">
             <p className="text-sm text-gray-700">
               En esta sección puedes registrar y actualizar hipótesis bio-transgeneracionales
-              estructuradas para el paciente activo. No hay diagnósticos automáticos ni scoring.
+              estructuradas para el consultante activo. No hay lecturas automáticas ni scoring.
             </p>
 
             {hypothesesAccessDenied && (
               <div className="border border-red-200 bg-red-50 text-red-700 text-sm rounded-md p-3">
-                No tienes permiso para ver o editar hipótesis para este paciente.
+                No tienes permiso para ver o editar hipótesis para este consultante.
               </div>
             )}
 
             {!activePatientId && (
               <div className="border border-yellow-200 bg-yellow-50 text-yellow-800 text-sm rounded-md p-3">
-                Selecciona un paciente activo en el panel superior antes de trabajar con hipótesis.
+                Selecciona un consultante activo en el panel superior antes de trabajar con hipótesis.
               </div>
             )}
 
@@ -705,13 +705,13 @@ export default function TherapistBioEmotionalPage() {
               <div className="flex items-center justify-between gap-2">
                 <h2 className="text-sm font-semibold text-gray-900">Hipótesis registradas</h2>
                 {hypothesesLoading && (
-                  <p className="text-xs text-gray-500">Cargando hipótesis del paciente…</p>
+                  <p className="text-xs text-gray-500">Cargando hipótesis del consultante…</p>
                 )}
               </div>
 
               {hypotheses.length === 0 && !hypothesesLoading && activePatientId && (
                 <p className="text-sm text-gray-500">
-                  Aún no has registrado hipótesis para este paciente.
+                  Aún no has registrado hipótesis para este consultante.
                 </p>
               )}
 

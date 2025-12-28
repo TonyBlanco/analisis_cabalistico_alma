@@ -1,21 +1,17 @@
 'use client';
 
-import { useState, useSyncExternalStore } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { Telescope } from 'lucide-react';
 import AstrologySidebar from './AstrologySidebar';
 import AstrologyVisualCore from './AstrologyVisualCore';
-import AstrologyTrainingInterpretationPanel from './AstrologyTrainingInterpretationPanel';
-import type { AstrologyViewMode, AstrologyWorkspaceMode } from './types';
-import { getActivePatientId } from '@/lib/active-patient';
+import useActiveConsultante from '@/hooks/useActiveConsultante';
 
 function subscribeToActivePatient(callback: () => void) {
   if (typeof window === 'undefined') return () => {};
-
   const handler: EventListener = () => callback();
   window.addEventListener('storage', handler);
   window.addEventListener('activePatientChanged', handler);
-
   return () => {
     window.removeEventListener('storage', handler);
     window.removeEventListener('activePatientChanged', handler);
@@ -23,24 +19,13 @@ function subscribeToActivePatient(callback: () => void) {
 }
 
 export default function AstrologyWorkspace() {
-  const [activeView, setActiveView] = useState<AstrologyViewMode>('visual');
-  const [workspaceMode, setWorkspaceMode] = useState<AstrologyWorkspaceMode>('observational');
   const [houseSystem, setHouseSystem] = useState<string>('P');
   const [zodiacType, setZodiacType] = useState<string>('tropical');
 
-  const activePatientId = useSyncExternalStore(subscribeToActivePatient, getActivePatientId, () => null);
-
-  const handleSetWorkspaceMode = (mode: AstrologyWorkspaceMode) => {
-    setWorkspaceMode(mode);
-    if (mode === 'observational') {
-      setActiveView('visual');
-    } else if (mode === 'training') {
-      setActiveView('training');
-    }
-  };
+  const consultante = useActiveConsultante();
 
   const renderContent = () => {
-    if (!activePatientId) {
+    if (!consultante) {
       return (
         <section className="flex-1 bg-white border border-gray-200 rounded-xl p-12 shadow-sm text-center">
           <div className="mb-8">
@@ -48,9 +33,9 @@ export default function AstrologyWorkspace() {
               <Telescope className="h-12 w-12 text-white" />
             </div>
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Selecciona un consultante</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Identidad no seleccionada</h2>
           <p className="text-gray-600 mb-6">
-            Para ver la carta natal, primero selecciona un consultante activo desde el dashboard.
+            Para ver la carta natal, primero seleccione una identidad válida desde el dashboard.
           </p>
           <Link
             href="/dashboard/therapist"
@@ -62,28 +47,7 @@ export default function AstrologyWorkspace() {
       );
     }
 
-    if (activeView === 'visual') {
-      return <AstrologyVisualCore patientId={activePatientId} houseSystem={houseSystem} zodiacType={zodiacType} />;
-    }
-
-    if (activeView === 'training') {
-      if (workspaceMode !== 'training') {
-        return (
-          <section className="flex-1 bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-            <p className="text-gray-700 font-medium">Interpretación disponible solo en Modo Training / Interpretativa.</p>
-          </section>
-        );
-      }
-      return (
-        <AstrologyTrainingInterpretationPanel
-          patientId={activePatientId.toString()}
-          houseSystem={houseSystem}
-          zodiacType={zodiacType}
-        />
-      );
-    }
-
-    return null;
+    return <AstrologyVisualCore patientId={consultante.id} houseSystem={houseSystem} zodiacType={zodiacType} />;
   };
 
   return (
@@ -95,18 +59,7 @@ export default function AstrologyWorkspace() {
           </span>
           <div>
             <p className="text-xs uppercase tracking-wide text-gray-500">Workspace simbólico</p>
-            <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-semibold text-gray-900">Astrología</h1>
-              {workspaceMode === 'training' ? (
-                <span className="inline-flex items-center rounded-md border border-amber-200 bg-amber-50 px-2 py-1 text-[11px] font-semibold text-amber-800">
-                  Modo Training / Interpretativa
-                </span>
-              ) : (
-                <span className="inline-flex items-center rounded-md border border-gray-200 bg-gray-50 px-2 py-1 text-[11px] font-semibold text-gray-700">
-                  Modo Observacional
-                </span>
-              )}
-            </div>
+            <h1 className="text-2xl font-semibold text-gray-900">Astrología — Visualización profesional del consultante</h1>
           </div>
         </div>
         <Link
@@ -119,10 +72,6 @@ export default function AstrologyWorkspace() {
 
       <div className="flex">
         <AstrologySidebar
-          activeView={activeView}
-          onViewChange={setActiveView}
-          workspaceMode={workspaceMode}
-          setWorkspaceMode={handleSetWorkspaceMode}
           houseSystem={houseSystem}
           setHouseSystem={setHouseSystem}
           zodiacType={zodiacType}
@@ -130,19 +79,6 @@ export default function AstrologyWorkspace() {
         />
 
         <main className="flex-1 px-6 py-6">
-          {workspaceMode === 'training' ? (
-            <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-              <span className="font-semibold">Modo Training / Interpretativa:</span> Interpretación simbólica estructurada con fines formativos.
-              <span className="ml-2 inline-flex items-center rounded-md border border-amber-200 bg-white px-2 py-0.5 text-[11px] font-semibold text-amber-800">
-                Uso educativo / no médico
-              </span>
-            </div>
-          ) : (
-            <div className="mb-4 rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700">
-              Modo Observacional: observación visual. Sin interpretación estructurada. No médico.
-            </div>
-          )}
-
           <div className="flex gap-6 items-start">{renderContent()}</div>
         </main>
       </div>

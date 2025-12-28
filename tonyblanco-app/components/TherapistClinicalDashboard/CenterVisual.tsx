@@ -22,7 +22,7 @@ export default function CenterVisual({
   onAddNote,
 }: CenterVisualProps) {
   const titleMap: Record<ContextSectionId, string> = {
-    overview: 'Resumen simbólico del paciente',
+    overview: 'Resumen simbólico del consultante',
     'clinical-history': 'Historia clínica',
     bioemotional: 'Bio-Emoción',
     visualization: 'Body-Soul',
@@ -91,7 +91,7 @@ export default function CenterVisual({
       ) : (
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center text-gray-500">
-            <p className="text-sm">Selecciona un paciente para ver su resumen simbólico</p>
+            <p className="text-sm">Selecciona un consultante para ver su resumen simbólico</p>
           </div>
         </div>
       )}

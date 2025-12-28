@@ -3,10 +3,10 @@
 **Alcance**
 - Laboratorio simulado para practicar lectura estructural.
 - Solo usa datasets simulados o marcados como `research`.
-- No opera sobre pacientes reales ni historias clínicas.
+- No opera sobre consultantes reales ni historias holísticas.
 
 **Prohibiciones**
-- No diagnóstico, no predicción aplicada, no scoring clínico.
+- No lectura, no orientación aplicada, no scoring holístico.
 - No persiste resultados ni genera endpoints nuevos.
 - No modifica el motor astronómico ni el adapter sellado.
 
@@ -19,7 +19,7 @@
 - Mode Switch vive dentro del módulo de Astrología (localStorage `astro_mode`).
 - Sandbox se bloquea si detecta datos reales (“Sandbox no disponible con datos reales”).
 - Eventos mínimos registrados en frontend: MODE_SWITCH, SANDBOX_ENTER_CONFIRM, SANDBOX_SCORE_VIEW, EXPORT_CLICK, PRINT_OPEN (buffer localStorage 200 eventos).
-- Sandbox reside en el espacio Astrology Study / Lab, no en el workspace clínico con pacientes.
+- Sandbox reside en el espacio Astrology Study / Lab, no en el workspace holístico con consultantes.
 
 **Export/Print**
 - Export CSV/TXT desde frontend (config + tablas + scores + disclaimer).
@@ -28,4 +28,4 @@
 **Mensajes obligatorios**
 - “Simulación educativa. No predicción real.”
 - “No se recalcula nada. Sin endpoints nuevos.”
-- “No se usan pacientes reales en Sandbox/Research.”
+- "No se usan consultantes reales en Sandbox/Research."

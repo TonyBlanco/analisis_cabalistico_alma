@@ -93,7 +93,7 @@ export default function WellnessResultPage() {
       <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
         <h1 className="text-2xl font-semibold text-gray-900">Wellness Assessment — Resultado</h1>
         <p className="text-sm text-gray-600 mt-2">
-          Resultado orientativo de bienestar. No constituye diagnóstico.
+          Resultado orientativo de bienestar. Es una lectura holística.
         </p>
       </div>
 

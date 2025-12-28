@@ -65,29 +65,29 @@ Calcula los valores numéricos de palabras o textos en hebreo usando diferentes 
 - **Estado**: ✅ **Activo y Funcional**
 
 #### **¿Qué hace?**
-Realiza un diagnóstico cruzado entre el Arcano de Vida (calculado por fecha de nacimiento) y la sintomatología clínica del paciente:
+Realiza una lectura cruzada entre el Arcano de Vida (calculado por fecha de nacimiento) y la sintomatología holística del consultante:
 
 1. **Calcula el Arcano de Vida**: Suma la fecha completa de nacimiento → Reduce a 1-22 → Muestra el Arcano Mayor correspondiente
-2. **Diagnóstico Cruzado**: Compara el arquetipo nativo con los síntomas de tests clínicos (GAD-7, PHQ-9, etc.)
+2. **Lectura Cruzada**: Compara el arquetipo nativo con los síntomas de tests holísticos (GAD-7, PHQ-9, etc.)
 3. **Análisis de Sombra**: Identifica cómo el arquetipo está contribuyendo al desequilibrio
-4. **Prescripción Terapéutica**: Sugiere acciones sanadoras basadas en el elemento complementario
+4. **Orientación Terapéutica**: Sugiere acciones sanadoras basadas en el elemento complementario
 
 #### **Funcionalidades:**
 - ✅ Calculadora de Sendero Personal (fecha de nacimiento → Arcano)
 - ✅ Visualizador Interactivo del Árbol de la Vida
 - ✅ Muestra la carta del Tarot correspondiente al sendero
 - ✅ Hover sobre senderos muestra información del Arcano
-- ✅ Integración con tests clínicos del paciente
+- ✅ Integración con tests holísticos del consultante
 - ✅ Análisis con IA (Google Gemini) para:
   - Análisis de Sombra
   - Acciones Sanadoras
   - Mensaje Integrador
-- ✅ Guardado de análisis en ficha del paciente
-- ✅ Protocolo Clínico educativo
+- ✅ Guardado de análisis en ficha del consultante
+- ✅ Protocolo Holístico educativo
 
 #### **Datos de Entrada:**
 - Fecha de nacimiento (YYYY-MM-DD)
-- Tests clínicos recientes del paciente (opcional, para diagnóstico cruzado)
+- Tests holísticos recientes del consultante (opcional, para lectura cruzada)
 
 #### **Datos de Salida:**
 - Número del Arcano de Vida (0-21)
@@ -95,7 +95,7 @@ Realiza un diagnóstico cruzado entre el Arcano de Vida (calculado por fecha de 
 - Letra hebrea correspondiente
 - Sendero en el Árbol de la Vida
 - Significado terapéutico
-- Análisis de sombra (si hay tests clínicos)
+- Análisis de sombra (si hay tests holísticos)
 - Acciones sanadoras
 - Mensaje integrador
 

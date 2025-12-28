@@ -1,10 +1,10 @@
 # Symbolic System Architecture
 
 ## 1. Purpose
-The symbolic system provides visualization and exploration of symbolic layers (Tarot, Tree of Life, Cabala) within a governed clinical workspace. It is designed for therapist-guided observation without automated interpretation.
+The symbolic system provides visualization and exploration of symbolic layers (Tarot, Tree of Life, Cabala) within a governed holistic workspace. It is designed for professional-guided observation without automated interpretation.
 
 ## 2. Architectural Layers
-- Workspace: Defines context, permissions, and patient scope for symbolic modules.
+- Workspace: Defines context, permissions, and consultante scope for symbolic modules.
 - Workspace Mode (optional): Some SWM UIs may expose an explicit `mode` (e.g. `observational` vs `training`) to gate correspondences/synthesis while keeping the default observational flow intact.
 - Visual Core: Renders and orchestrates visual layers without clinical logic.
 - Plugins: Modular visual layers (Tarot today, Astrology and others later) composed into the core.
@@ -15,14 +15,14 @@ The Core Symbolic Layer lives in `src/symbolic/` as the single source of truth f
 
 ## 3. Data Flow
 ```
-PatientContext
+ConsultanteContext
   -> Workspace
     -> Visual Core
       -> Adapter
         -> Plugin
           -> Visual Motor
 ```
-PatientContext provides cross-over reference only (non-clinical) and does not drive interpretation.
+ConsultanteContext provides cross-over reference only (non-clinical) and does not drive interpretation.
 
 ## 4. Role of Plugins and Adapters
 Tarot exists as a plugin to keep symbolic layers modular, reusable, and independent of workspace logic. Adapters bridge workspace context into plugins without coupling. Visual layers remain interpretation-free to preserve governance boundaries.

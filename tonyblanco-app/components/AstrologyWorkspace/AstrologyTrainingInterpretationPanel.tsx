@@ -81,7 +81,7 @@ function buildTrainingSynthesisTemplate(params: {
   const saturn = getPlanet('saturn');
 
   const lines: string[] = [];
-  lines.push('Interpretación simbólica — Modo Training (No médico)');
+  lines.push('Interpretación simbólica — Modo formativo (No médico)');
   lines.push('Uso educativo y formativo. Sin evaluación médica. Sin decisiones automáticas.');
   lines.push('');
   lines.push('Aviso importante: análisis holístico y simbólico con fines de orientación personal.');
@@ -222,8 +222,8 @@ export default function AstrologyTrainingInterpretationPanel(props: {
               {safeText(p.signo)} · Casa {safeText(p.casa)} · {formatDegrees(p.grados)}
             </p>
           </div>
-          <span className="inline-flex items-center rounded-md border border-amber-200 bg-amber-50 px-2 py-1 text-[11px] font-semibold text-amber-800">
-            Training
+            <span className="inline-flex items-center rounded-md border border-amber-200 bg-amber-50 px-2 py-1 text-[11px] font-semibold text-amber-800">
+            Formativo
           </span>
         </div>
 
@@ -254,7 +254,7 @@ export default function AstrologyTrainingInterpretationPanel(props: {
       <section className="flex-1 bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
         <div className="flex flex-col items-center justify-center min-h-[360px] gap-4">
           <Loader2 className="h-10 w-10 text-blue-500 animate-spin" />
-          <p className="text-gray-600">Cargando modo Training…</p>
+          <p className="text-gray-600">Cargando modo formativo…</p>
         </div>
       </section>
     );
@@ -265,7 +265,7 @@ export default function AstrologyTrainingInterpretationPanel(props: {
       <section className="flex-1 bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
         <div className="flex flex-col items-center justify-center min-h-[360px] gap-3">
           <AlertCircle className="h-10 w-10 text-red-500" />
-          <p className="text-red-700 font-medium">No se pudo cargar el modo Training</p>
+          <p className="text-red-700 font-medium">No se pudo cargar el modo formativo</p>
           <p className="text-sm text-gray-600">{error}</p>
         </div>
       </section>
@@ -280,7 +280,7 @@ export default function AstrologyTrainingInterpretationPanel(props: {
           <div>
             <p className="text-gray-900 font-semibold">No hay carta natal disponible</p>
             <p className="text-sm text-gray-600 mt-1">
-              Calcula la carta en “Visual” y vuelve para usar los métodos de interpretación en Training.
+              Calcula la carta en “Visual” y vuelve para usar los métodos de interpretación formativa.
             </p>
           </div>
         </div>
@@ -293,7 +293,7 @@ export default function AstrologyTrainingInterpretationPanel(props: {
       <div className="rounded-xl border border-amber-200 bg-amber-50 p-5 shadow-sm mb-4">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h3 className="text-lg font-semibold text-amber-950">Interpretación simbólica – Modo Training (No médico)</h3>
+            <h3 className="text-lg font-semibold text-amber-950">Interpretación simbólica – Modo formativo (No médico)</h3>
             <p className="text-sm text-amber-900 mt-1">
               Uso educativo y formativo. Sin evaluación médica. Sin predicción determinista. Sin scoring. Sin decisiones automáticas.
             </p>
@@ -384,7 +384,7 @@ export default function AstrologyTrainingInterpretationPanel(props: {
         </DetailsSection>
 
         <DetailsSection
-          title="MÉTODO 2 — Preguntas Guía (Training)"
+          title="MÉTODO 2 — Preguntas Guía (Formativo)"
           subtitle="Preguntas abiertas para observación y análisis humano (no inductivas)."
         >
           <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">

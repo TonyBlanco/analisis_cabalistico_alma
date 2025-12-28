@@ -156,8 +156,8 @@ export default function TherapistPatientBdi2Page() {
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white border border-gray-200 rounded-lg p-6">
-          <h1 className="text-xl font-semibold text-gray-900">BDI-II (paciente)</h1>
-          <p className="text-sm text-gray-600 mt-2">No hay resultados registrados para este paciente.</p>
+          <h1 className="text-xl font-semibold text-gray-900">BDI-II (consultante)</h1>
+          <p className="text-sm text-gray-600 mt-2">No hay resultados registrados para este consultante.</p>
         </div>
       </div>
     );
@@ -172,9 +172,9 @@ export default function TherapistPatientBdi2Page() {
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900">BDI-II — Resultado del paciente</h1>
+          <h1 className="text-2xl font-semibold text-gray-900">BDI-II — Resultado del consultante</h1>
           <p className="text-sm text-gray-600 mt-1">
-            Seguimiento de cribado. Este resultado no es un diagnóstico.
+            Seguimiento de cribado. Este resultado no es una lectura.
           </p>
           <p className="text-xs text-gray-500">Fecha: {formatDate(result.created_at)}</p>
         </div>
@@ -184,7 +184,7 @@ export default function TherapistPatientBdi2Page() {
           className="px-4 py-2 text-sm font-medium text-white rounded-md hover:opacity-90 transition-opacity"
           style={{ backgroundColor: "var(--accent-color)" }}
         >
-          Guía clínica BDI-II
+          Guía holística BDI-II
         </button>
       </div>
 
@@ -216,13 +216,13 @@ export default function TherapistPatientBdi2Page() {
         {suicidalFlag && (
           <div className="rounded-md border border-amber-200 bg-amber-50 p-4">
             <p className="text-sm text-amber-800">
-              Respuestas positivas en ítem de ideación suicida. Requiere valoración clínica según protocolo.
+              Respuestas positivas en ítem de ideación suicida. Requiere valoración holística según protocolo.
             </p>
           </div>
         )}
 
         <div className="border-t border-gray-200 pt-4">
-          <h3 className="text-sm font-semibold text-gray-900 mb-2">Respuestas del paciente</h3>
+          <h3 className="text-sm font-semibold text-gray-900 mb-2">Respuestas del consultante</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-700">
             {Object.entries(rawAnswers).map(([key, value]) => (
               <div key={key} className={`rounded-md border px-3 py-2 ${key === "q9" ? "border-amber-300 bg-amber-50" : "border-gray-200 bg-white"}`}>
@@ -267,7 +267,7 @@ export default function TherapistPatientBdi2Page() {
         </div>
 
         <p className="text-xs text-gray-500">
-          Este resultado no es un diagnóstico.
+          Este resultado no es una lectura.
         </p>
       </div>
 
@@ -279,8 +279,8 @@ export default function TherapistPatientBdi2Page() {
           >
             <div className="flex items-start justify-between">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">Guía clínica BDI-II</h3>
-                <p className="text-xs text-gray-500">Instrumento de severidad, no diagnóstico.</p>
+                <h3 className="text-lg font-semibold text-gray-900">Guía holística BDI-II</h3>
+                <p className="text-xs text-gray-500">Instrumento de severidad, no lectura.</p>
               </div>
               <button
                 onClick={() => setShowGuidance(false)}
@@ -294,7 +294,7 @@ export default function TherapistPatientBdi2Page() {
               <p>Interpretación (0–63): mínima (0–13), leve (14–19), moderada (20–28), grave (29–63).</p>
               <p>Diferencias vs PHQ-9: mayor detalle sintomático y énfasis en severidad.</p>
               <p>Considerar evaluación adicional ante puntajes moderados/altos o ítem de ideación suicida.</p>
-              <p>Recordatorio: herramienta de cribado; interpretar siempre con juicio clínico.</p>
+              <p>Recordatorio: herramienta de cribado; interpretar siempre con juicio holístico.</p>
             </div>
             <div className="text-xs text-gray-500">
               Uso informativo. No genera decisiones automáticas ni recomendaciones.

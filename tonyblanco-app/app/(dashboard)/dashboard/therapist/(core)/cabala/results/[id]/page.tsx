@@ -144,7 +144,7 @@ export default function TherapistCabalisticResultPage() {
               {result.test_module?.name || 'Análisis Cabalístico'}
             </h1>
             <p className="text-sm text-gray-600">
-              Paciente: <span className="font-medium">{clientName}</span>
+              Consultante: <span className="font-medium">{clientName}</span>
             </p>
             <p className="text-xs text-gray-500 mt-1">
               {new Date(result.created_at).toLocaleDateString('es-ES', {

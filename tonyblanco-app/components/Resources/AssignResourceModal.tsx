@@ -52,7 +52,7 @@ export default function AssignResourceModal({
       const data = await getTherapistPatients();
       setPatients(data);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al cargar pacientes';
+      const errorMessage = err instanceof Error ? err.message : 'Error al cargar consultantes';
       setError(errorMessage);
       console.error('Error fetching patients:', err);
     } finally {
@@ -62,7 +62,7 @@ export default function AssignResourceModal({
 
   const handleConfirm = () => {
     if (!selectedPatientId) {
-      setError('Debes seleccionar un paciente');
+      setError('Debes seleccionar un consultante');
       return;
     }
     onConfirm(selectedPatientId, notes);
@@ -88,11 +88,11 @@ export default function AssignResourceModal({
 
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Seleccionar paciente <span className="text-red-500">*</span>
+            Seleccionar consultante <span className="text-red-500">*</span>
           </label>
           {loading ? (
             <div className="border border-gray-300 rounded-md p-3 text-center">
-              <p className="text-sm text-gray-500">Cargando pacientes...</p>
+              <p className="text-sm text-gray-500">Cargando consultantes...</p>
             </div>
           ) : error ? (
             <div className="border border-red-300 bg-red-50 rounded-md p-3">
@@ -100,7 +100,7 @@ export default function AssignResourceModal({
             </div>
           ) : patients.length === 0 ? (
             <div className="border border-gray-300 rounded-md p-3 text-center">
-              <p className="text-sm text-gray-500">No hay pacientes disponibles</p>
+              <p className="text-sm text-gray-500">No hay consultantes disponibles</p>
             </div>
           ) : (
             <select
@@ -108,7 +108,7 @@ export default function AssignResourceModal({
               onChange={(e) => setSelectedPatientId(parseInt(e.target.value, 10))}
               className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400"
             >
-              <option value="">-- Selecciona un paciente --</option>
+              <option value="">-- Selecciona un consultante --</option>
               {patients.map((patient) => (
                 <option key={patient.id} value={patient.id}>
                   {patient.full_name || `${patient.first_name} ${patient.last_name}`}
@@ -125,7 +125,7 @@ export default function AssignResourceModal({
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            placeholder="Añade notas o instrucciones para el paciente..."
+            placeholder="Añade notas o instrucciones para el consultante..."
             rows={3}
             className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400"
           />

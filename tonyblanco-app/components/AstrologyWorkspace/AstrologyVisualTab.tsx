@@ -10,7 +10,7 @@ import HousesTable from './HousesTable';
 import AspectsTable from './AspectsTable';
 import { AlertCircle, Loader2, CheckCircle } from 'lucide-react';
 import { getHebrewLetterForSign } from '@/lib/kabbalah-sign-letters';
-import AstrologyVisualPro from './AstrologyVisualPro';
+import AstrologyVisualProReal from './AstrologyVisualProReal';
 
 interface AstrologyVisualTabProps {
   patientId: string | undefined;
@@ -33,7 +33,7 @@ interface AstrologyVisualTabProps {
  * - Validación de campos faltantes con mensaje claro
  */
 export default function AstrologyVisualTab({ patientId, houseSystem, zodiacType }: AstrologyVisualTabProps) {
-  const { chart, analysisResult, loading, error, missingFields, calculateChart } = useNatalChart(patientId);
+  const { chart, analysisResult, loading, error, missingFields, calculateChart, activeLayers, handleLayerToggle } = useNatalChart(patientId);
   // When an explicit houseSystem is passed prop, prefer it when calculating
   const handleCalculate = async () => {
     await calculateChart(houseSystem, zodiacType);
@@ -328,11 +328,6 @@ export default function AstrologyVisualTab({ patientId, houseSystem, zodiacType 
           <p className="text-xs text-gray-500">
             Evaluación holística astrológica. Lectura simbólica para orientación personal.
           </p>
-          <p className="mt-2 text-[11px] text-blue-700">
-            <a href="/dashboard/astrology-study" className="underline font-semibold">
-              Abrir Astrology Study / Lab (modo académico, sin consultantes reales)
-            </a>
-          </p>
         </div>
         <div className="flex items-center gap-4">
           <div className="text-right text-xs text-gray-500">
@@ -593,10 +588,11 @@ export default function AstrologyVisualTab({ patientId, houseSystem, zodiacType 
 
         {/* Visual Pro: overlays y filtros solo visuales (sin recálculo) */}
         <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-          <AstrologyVisualPro
+          <AstrologyVisualProReal
             chart={chart}
             analysisResult={analysisResult ?? null}
-            hasRealConsultante={Boolean(patientId)}
+            activeLayers={activeLayers}
+            onLayerToggle={handleLayerToggle}
           />
         </div>
       </div>

@@ -1,7 +1,7 @@
 # Patient Symbolic Overview - Implementation Summary
 
 ## Resumen
-Se ha reemplazado el dummy "Body/Soul Visualizer" en el dashboard del terapeuta con un **overview real y funcional** que muestra el estado de análisis simbólico de cada paciente.
+Se ha reemplazado el dummy "Body/Soul Visualizer" en el dashboard del profesional con un **overview real y funcional** que muestra el estado de análisis simbólico de cada consultante.
 
 ## Backend
 
@@ -13,7 +13,7 @@ Se ha reemplazado el dummy "Body/Soul Visualizer" en el dashboard del terapeuta 
 ```json
 {
   "patient_id": 5,
-  "patient_name": "Paciente tres",
+  "patient_name": "Consultante tres",
   "has_natal_chart": true,
   "natal_chart_summary": {
     "calculated_at": "2025-12-25T14:30:00",
@@ -49,7 +49,7 @@ Se ha reemplazado el dummy "Body/Soul Visualizer" en el dashboard del terapeuta 
 1. **Astrología (carta natal)** - Revisa si existe `AstrologyNatalChart`
 2. **Tarot** - Revisa análisis cabalísticos de tipo `tarot`
 3. **Cábala** - Revisa análisis de tipo `gematria`, `soul-map`, `astrology`
-4. **Tests psicométricos** - Revisa `TestResult` del paciente
+4. **Tests psicométricos** - Revisa `TestResult` del consultante
 
 **Score de completitud:** Calcula porcentaje de módulos completados (0-100%)
 
@@ -83,14 +83,14 @@ Se ha reemplazado el dummy "Body/Soul Visualizer" en el dashboard del terapeuta 
 
 4. `components/TherapistClinicalDashboard/PatientHeader.tsx`
    - Acepta prop opcional `patientName`
-   - Muestra iniciales y nombre del paciente seleccionado
+   - Muestra iniciales y nombre del consultante seleccionado
 
 ## Flujo de Uso
 
 1. **Terapeuta abre `/dashboard/therapist`**
-2. **Click en "Cambiar paciente"** → Abre `PatientPicker`
-3. **Selecciona un paciente** → Se actualiza el estado
-4. **Dashboard muestra overview simbólico del paciente:**
+2. **Click en "Cambiar consultante"** → Abre `PatientPicker`
+3. **Selecciona un consultante** → Se actualiza el estado
+4. **Dashboard muestra overview simbólico del consultante:**
    - Score de completitud (ej: 75%)
    - Módulos completados: Astrología ✓, Tarot ✓, Tests ✓
    - Módulos faltantes: Cábala Aplicada ⚠️
@@ -131,10 +131,10 @@ path(
 
 ## Próximos Pasos Sugeridos
 
-1. **Persistir paciente activo** en localStorage para mantener selección entre recargas
+1. **Persistir consultante activo** en localStorage para mantener selección entre recargas
 2. **Añadir filtros** por tipo de análisis o fecha
 3. **Drill-down** a análisis individuales desde el overview
-4. **Gráficos de progreso** del paciente a lo largo del tiempo
+4. **Gráficos de progreso** del consultante a lo largo del tiempo
 5. **Export PDF** del resumen simbólico completo
 6. **Notificaciones** cuando falten módulos críticos
 7. **Integrar con `/dashboard/therapist/cabala-aplicada`** para que muestre el overview filtrado

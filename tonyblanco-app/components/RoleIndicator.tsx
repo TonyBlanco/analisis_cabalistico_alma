@@ -7,7 +7,7 @@ const roleLabels: Record<string, string> = {
   admin: 'Administrador',
   therapist: 'Terapeuta',
   personal: 'Personal',
-  patient: 'Paciente',
+  patient: 'Consultante',
 };
 
 export default function RoleIndicator() {

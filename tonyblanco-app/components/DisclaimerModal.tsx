@@ -35,7 +35,7 @@ export default function DisclaimerModal({
           content: (
             <div className="space-y-4 text-sm text-gray-700">
               <p className="font-semibold text-gray-900">
-                Antes de crear una cuenta de paciente, es importante que comprenda lo siguiente:
+                Antes de crear una cuenta de consultante, es importante que comprenda lo siguiente:
               </p>
               
               <div className="space-y-3">
@@ -69,16 +69,16 @@ export default function DisclaimerModal({
                 <div>
                   <h3 className="font-medium text-gray-900 mb-2">4. Participación Consciente</h3>
                   <p>
-                    El paciente debe participar de manera consciente y voluntaria en todos los procesos.
-                    El paciente tiene derecho a rechazar cualquier análisis o intervención que no desee realizar.
+                    El consultante debe participar de manera consciente y voluntaria en todos los procesos.
+                    El consultante tiene derecho a rechazar cualquier análisis o intervención que no desee realizar.
                   </p>
                 </div>
 
                 <div>
                   <h3 className="font-medium text-gray-900 mb-2">5. Responsabilidad del Terapeuta</h3>
                   <p>
-                    El terapeuta es responsable de informar adecuadamente al paciente sobre la naturaleza de los
-                    servicios y obtener su consentimiento informado. El terapeuta debe asegurarse de que el paciente
+                    El terapeuta es responsable de informar adecuadamente al consultante sobre la naturaleza de los
+                    servicios y obtener su consentimiento informado. El terapeuta debe asegurarse de que el consultante
                     comprende que estos servicios son complementarios y no diagnósticos.
                   </p>
                 </div>
@@ -86,7 +86,7 @@ export default function DisclaimerModal({
                 <div>
                   <h3 className="font-medium text-gray-900 mb-2">6. Confidencialidad</h3>
                   <p>
-                    Todos los datos del paciente se manejan con estricta confidencialidad según la normativa
+                    Todos los datos del consultante se manejan con estricta confidencialidad según la normativa
                     vigente de protección de datos personales.
                   </p>
                 </div>
@@ -94,7 +94,7 @@ export default function DisclaimerModal({
 
               <div className="bg-gray-50 border border-gray-200 rounded-md p-4 mt-4">
                 <p className="text-sm font-medium text-gray-900">
-                  Al continuar, confirmo que he leído y comprendido este aviso, y que crearé la cuenta del paciente
+                  Al continuar, confirmo que he leído y comprendido este aviso, y que crearé la cuenta del consultante
                   con la información adecuada sobre la naturaleza de estos servicios.
                 </p>
               </div>
@@ -110,7 +110,7 @@ export default function DisclaimerModal({
               <p className="font-semibold text-gray-900">
                 Antes de crear una cuenta profesional, debe leer y aceptar los siguientes términos:
               </p>
-              
+
               <div className="space-y-3">
                 <div>
                   <h3 className="font-medium text-gray-900 mb-2">1. Responsabilidad Profesional</h3>
@@ -124,17 +124,17 @@ export default function DisclaimerModal({
                 <div>
                   <h3 className="font-medium text-gray-900 mb-2">2. Naturaleza de los Servicios</h3>
                   <p>
-                    Esta plataforma proporciona herramientas de exploracion holistica y evaluacion integral que son
+                    Esta plataforma proporciona herramientas de exploracion holistica y evaluación integral que son
                     <strong> complementarias y orientativas</strong>. No deben utilizarse como único método de
-                    evaluacion o acompanamiento. Los servicios NO constituyen dictamen medico o psicologico.
+                    evaluación o acompañamiento. Los servicios NO constituyen dictamen médico o psicológico.
                   </p>
                 </div>
 
                 <div>
                   <h3 className="font-medium text-gray-900 mb-2">3. Consentimiento Informado</h3>
                   <p>
-                    Es su responsabilidad obtener el consentimiento informado de sus pacientes antes de utilizar
-                    estas herramientas. Debe informar claramente a sus pacientes sobre la naturaleza complementaria
+                    Es su responsabilidad obtener el consentimiento informado de sus consultantes antes de utilizar
+                    estas herramientas. Debe informar claramente a sus consultantes sobre la naturaleza complementaria
                     y orientativa de los servicios.
                   </p>
                 </div>
@@ -143,14 +143,14 @@ export default function DisclaimerModal({
                   <h3 className="font-medium text-gray-900 mb-2">4. No Sustituye la Atención Sanitaria</h3>
                   <p>
                     Los análisis y evaluaciones proporcionados por esta plataforma NO sustituyen la atención médica,
-                    psicológica o psiquiátrica profesional. Debe asegurarse de que sus pacientes comprendan esto.
+                    psicológica o psiquiátrica profesional. Debe asegurarse de que sus consultantes comprendan esto.
                   </p>
                 </div>
 
                 <div>
                   <h3 className="font-medium text-gray-900 mb-2">5. Confidencialidad y Protección de Datos</h3>
                   <p>
-                    Es responsable de mantener la confidencialidad de los datos de sus pacientes y cumplir con
+                    Es responsable de mantener la confidencialidad de los datos de sus consultantes y cumplir con
                     todas las normativas aplicables de protección de datos personales (RGPD, etc.).
                   </p>
                 </div>
@@ -158,7 +158,7 @@ export default function DisclaimerModal({
                 <div>
                   <h3 className="font-medium text-gray-900 mb-2">6. Uso Ético</h3>
                   <p>
-                    Debe utilizar esta plataforma de manera ética, respetando los derechos de sus pacientes y
+                    Debe utilizar esta plataforma de manera ética, respetando los derechos de sus consultantes y
                     manteniendo los estándares profesionales más altos.
                   </p>
                 </div>

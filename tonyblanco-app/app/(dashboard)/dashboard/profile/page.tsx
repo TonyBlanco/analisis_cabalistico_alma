@@ -194,7 +194,7 @@ export default function ProfilePage() {
     admin: 'Administrador',
     therapist: 'Terapeuta',
     personal: 'Usuario Personal',
-    patient: 'Paciente',
+    patient: 'Consultante',
   };
 
   return (

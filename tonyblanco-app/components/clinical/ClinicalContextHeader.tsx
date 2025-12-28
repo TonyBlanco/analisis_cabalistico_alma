@@ -21,14 +21,14 @@ const WORKSPACE_LABELS: Record<string, string> = {
   'transgeneracional-profundo': 'Transgeneracional Profundo',
   scdf: 'SCDF',
   tests: 'Tests',
-  patients: 'Pacientes',
+  patients: 'Consultantes',
 };
 
 function formatWorkspaceLabel(pathname: string | null): string {
-  if (!pathname) return 'Workspace clinico';
+  if (!pathname) return 'Workspace consultivo';
   const segments = pathname.split('/').filter(Boolean);
   const last = segments[segments.length - 1];
-  return WORKSPACE_LABELS[last] ?? 'Workspace clinico';
+  return WORKSPACE_LABELS[last] ?? 'Workspace consultivo';
 }
 
 export default function ClinicalContextHeader() {
@@ -156,7 +156,7 @@ export default function ClinicalContextHeader() {
         </div>
         <div className="flex flex-wrap items-center gap-3 text-xs text-gray-600">
           <span className="font-medium text-gray-900">
-            {activePatient?.name || 'Paciente no seleccionado'}
+            {activePatient?.name || 'Consultante no seleccionado'}
           </span>
           <span>ID: {activePatient?.id ?? '—'}</span>
           <span>Fecha de nacimiento: {birthDateLabel}</span>
@@ -164,9 +164,9 @@ export default function ClinicalContextHeader() {
           <button
             onClick={() => (activePatient ? openEditorForActivePatient() : router.push('/dashboard/therapist/patients'))}
             className="ml-2 inline-flex items-center px-2 py-1 rounded bg-indigo-600 text-white text-xs hover:bg-indigo-700 transition-colors"
-            title={activePatient ? 'Editar paciente activo' : 'Ir a Gestión de Pacientes'}
+            title={activePatient ? 'Editar consultante activo' : 'Ir a Gestión de Consultantes'}
           >
-            {activePatient ? (editorLoading ? 'Cargando…' : 'Editar paciente') : 'Pacientes'}
+            {activePatient ? (editorLoading ? 'Cargando…' : 'Editar consultante') : 'Consultantes'}
           </button>
 
           <button

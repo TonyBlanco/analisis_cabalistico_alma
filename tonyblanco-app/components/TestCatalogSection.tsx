@@ -26,7 +26,7 @@ type CatalogTest = TestModule & {
 };
 
 /**
- * Catálogo clínico global: muestra todos los tests sin ocultar por estado.
+ * Catálogo holístico global: muestra todos los tests sin ocultar por estado.
  * El patient_id solo afecta acciones (asignar) y estados calculados externamente.
  */
 export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectionProps = {}) {
@@ -61,7 +61,7 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
         id: idx + 1,
         code: entry.test_code,
         name: entry.display_name,
-        description: entry.guidance?.what || entry.domain || 'Instrumento clínico',
+        description: entry.guidance?.what || entry.domain || 'Instrumento holístico',
         test_type: TEST_TYPES.BASIC,
         required_access_level: 'professional',
         is_active: true,
@@ -145,8 +145,8 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
   const handleAssignTest = (test: TestModule) => {
     if (!activePatientId) {
       toast.warning(
-        'Selecciona un paciente',
-        'Debes seleccionar un paciente activo antes de asignar un test.'
+        'Selecciona un consultante',
+        'Debes seleccionar un consultante activo antes de asignar un test.'
       );
       return;
     }
@@ -218,7 +218,7 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
         <button
           disabled
           className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-400 bg-gray-100 rounded-md cursor-not-allowed"
-          title="Selecciona un paciente activo para asignar tests"
+          title="Selecciona un consultante activo para asignar tests"
         >
           Asignar
         </button>
@@ -302,12 +302,12 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
           <ClipboardList className="w-5 h-5 text-[#1f6c8f]" />
           <div>
             <h2 className="text-lg font-semibold text-gray-900">Catálogo de Tests</h2>
-            <p className="text-sm text-gray-500">Inventario clínico global — acciones según paciente activo.</p>
+            <p className="text-sm text-gray-500">Inventario holístico global — acciones según consultante activo.</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <span className="inline-flex items-center gap-1 text-xs px-3 py-1 rounded-full bg-gray-100 text-gray-700 border border-gray-200">
-            {mounted ? `Paciente: ${activePatientId ? `ID ${activePatientId}` : 'Selecciona un paciente'}` : ''}
+            {mounted ? `Consultante: ${activePatientId ? `ID ${activePatientId}` : 'Selecciona un consultante'}` : ''}
           </span>
           <button
             className="text-sm text-[#1f6c8f] hover:underline"
@@ -348,9 +348,9 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
                             <div className="flex-1">
                       <div className="flex items-center gap-3 mb-1">
                         <span className={`text-xs px-2 py-1 rounded-full ${isTherapistOnly ? 'bg-slate-100 text-slate-700' : 'bg-emerald-50 text-emerald-700'}`}>
-                          {isTherapistOnly ? 'Clínico (terapeuta)' : 'Asignable al paciente'}
+                          {isTherapistOnly ? 'Holístico (profesional)' : 'Asignable al consultante'}
                         </span>
-                        <span className="text-xs text-gray-500">{(test as any).domainLabel || test.domain || 'Dominio clínico'}</span>
+                        <span className="text-xs text-gray-500">{(test as any).domainLabel || test.domain || 'Dominio holístico'}</span>
                         {(test as any).implemented === false && (
                           <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-600 border border-gray-200">
                             En desarrollo
@@ -367,14 +367,14 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
                         type="button"
                         onClick={() => setHelpTestCode(test.code)}
                         className="p-2 rounded-full border border-gray-200 text-[#1f6c8f] hover:bg-gray-50"
-                        aria-label="Ver guía clínica"
+                        aria-label="Ver guía holística"
                         title="Ver guía clínica"
                       >
                         <Info className="w-4 h-4" />
                       </button>
                       {isTherapistOnly ? (
                         <span className="text-xs text-gray-500 px-2 py-1 rounded border border-gray-200">
-                          Ejecutar desde flujos clínicos
+                          Ejecutar desde flujos holísticos
                         </span>
                       ) : (
                         (() => {
@@ -419,7 +419,7 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
           >
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Confirmar asignación</h3>
             <p className="text-sm text-gray-600 mb-4">
-              ¿Deseas asignar el test <strong>&quot;{testToAssign.name}&quot;</strong> al paciente activo?
+              ¿Deseas asignar el test <strong>&quot;{testToAssign.name}&quot;</strong> al consultante activo?
             </p>
             <div className="flex items-center gap-3 justify-end">
               <button
@@ -455,7 +455,7 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
             </div>
             <h3 className="text-xl font-semibold text-gray-900 mb-2">¡Test asignado correctamente!</h3>
             <p className="text-gray-600 mb-4">
-              <strong>&quot;{lastAssignedTest}&quot;</strong> ha sido asignado al paciente.
+              <strong>&quot;{lastAssignedTest}&quot;</strong> ha sido asignado al consultante.
             </p>
             <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
               <div className="flex items-center justify-center gap-2 text-blue-700 mb-1">
@@ -463,7 +463,7 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
                 <span className="font-medium">Notificación enviada</span>
               </div>
               <p className="text-sm text-blue-600">
-                El paciente ha recibido un email con las instrucciones para completar el test.
+                El consultante ha recibido un email con las instrucciones para completar el test.
               </p>
             </div>
             <button

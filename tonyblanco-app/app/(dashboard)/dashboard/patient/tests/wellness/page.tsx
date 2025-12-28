@@ -63,7 +63,7 @@ export default function WellnessAssessmentPage() {
           {wellnessDefinition.purpose}. Tiempo estimado {wellnessDefinition.estimated_time_minutes} minutos.
         </p>
         <p className="text-xs text-gray-500 mt-2">
-          Nota: cuestionario orientativo de bienestar. No constituye diagnóstico.
+          Nota: cuestionario orientativo de bienestar. Es una lectura holística.
         </p>
 
         <div className="mt-4 text-xs text-gray-500">

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type { MultiTechAnalysisResult, NatalChartPayload } from '@/hooks/useNatalChart';
 import NatalChartSVGPro from './chart/NatalChartSVGAdvanced';
 import { buildAdvancedInputFromPayload } from './chart/chartLayoutEngine';
@@ -150,8 +150,8 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
     return s;
   });
   const [symbolicDoubleWheel, setSymbolicDoubleWheel] = useState<boolean>(false);
-  const [symbolicSolarReturnYear, setSymbolicSolarReturnYear] = useState<number>(new Date().getFullYear());
-  const [symbolicLunarReturnDate, setSymbolicLunarReturnDate] = useState<string>(new Date().toISOString().slice(0, 10));
+  const [symbolicSolarReturnYear, setSymbolicSolarReturnYear] = useState<number | null>(null);
+  const [symbolicLunarReturnDate, setSymbolicLunarReturnDate] = useState<string | null>(null);
 
   const [activeTab, setActiveTab] = useState<'visual' | 'psych'>('visual');
 
@@ -379,10 +379,78 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
 
   const annualLayers = useMemo(() => {
     const layers: Array<{ key: 'solarReturn' | 'lunarReturn'; label?: string }> = [];
-    if (activeLayers.has('solarReturnSymbolic')) layers.push({ key: 'solarReturn', label: `Retorno Solar · ${symbolicSolarReturnYear}` });
-    if (activeLayers.has('lunarReturnSymbolic')) layers.push({ key: 'lunarReturn', label: `Retorno Lunar · ${symbolicLunarReturnDate}` });
+    if (symbolicSolarReturnYear !== null) layers.push({ key: 'solarReturn', label: `Retorno Solar · ${symbolicSolarReturnYear}` });
+    if (symbolicLunarReturnDate) layers.push({ key: 'lunarReturn', label: `Retorno Lunar · ${symbolicLunarReturnDate}` });
     return layers;
-  }, [activeLayers, symbolicSolarReturnYear, symbolicLunarReturnDate]);
+  }, [symbolicSolarReturnYear, symbolicLunarReturnDate]);
+
+  const secondaryLayer = useMemo(() => {
+    const order = ['transits', 'progressions', 'solarArc', 'return_solar', 'return_lunar'] as const;
+    for (const key of order) {
+      if (activeLayers.has(key)) return key;
+    }
+    return null;
+  }, [activeLayers]);
+
+  const secondaryLayerLabel = useMemo(() => {
+    if (!secondaryLayer) return null;
+    if (secondaryLayer === 'transits') return 'Tránsitos (lectura simbólica)';
+    if (secondaryLayer === 'progressions') return 'Progresiones (lectura simbólica)';
+    if (secondaryLayer === 'solarArc') return 'Arco Solar (lectura simbólica)';
+    if (secondaryLayer === 'return_solar') return 'Retorno Solar (lectura simbólica)';
+    return 'Retorno Lunar (lectura simbólica)';
+  }, [secondaryLayer]);
+
+  const secondaryPlanets = useMemo(() => {
+    if (!secondaryLayer) return null;
+    try {
+      if (secondaryLayer === 'transits') {
+        if (transitsSnapshot && transitBaseType === 'natal') return transitsSnapshot.planets ?? null;
+        if (analysis_result?.transits) return normalizeNatalForWheel(analysis_result.transits as any).planets ?? null;
+        return null;
+      }
+      if (secondaryLayer === 'progressions') {
+        if (progressionsSnapshot) return progressionsSnapshot.planets ?? null;
+        if (analysis_result?.progressions?.chart) return normalizeNatalForWheel(analysis_result.progressions.chart as any).planets ?? null;
+        return null;
+      }
+      if (secondaryLayer === 'return_solar') {
+        if (solarReturnSnapshot) return solarReturnSnapshot.planets ?? null;
+        if (analysis_result?.solarReturn?.chart) return normalizeNatalForWheel(analysis_result.solarReturn.chart as any).planets ?? null;
+        return null;
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  }, [secondaryLayer, transitsSnapshot, transitBaseType, analysis_result, progressionsSnapshot, solarReturnSnapshot]);
+
+  // Bridge: year/date presence -> activeLayers (UI + engine)
+  useEffect(() => {
+    setActiveLayers((prev) => {
+      const want = symbolicSolarReturnYear !== null;
+      const has = prev.has('return_solar');
+      if (want === has) return prev;
+      const next = new Set(prev);
+      if (want) next.add('return_solar');
+      else next.delete('return_solar');
+      pushLog({ event: 'LayerActivationEvent', layer: 'return_solar', mode: want ? 'symbolic' : 'off' });
+      return next;
+    });
+  }, [symbolicSolarReturnYear]);
+
+  useEffect(() => {
+    setActiveLayers((prev) => {
+      const want = Boolean(symbolicLunarReturnDate);
+      const has = prev.has('return_lunar');
+      if (want === has) return prev;
+      const next = new Set(prev);
+      if (want) next.add('return_lunar');
+      else next.delete('return_lunar');
+      pushLog({ event: 'LayerActivationEvent', layer: 'return_lunar', mode: want ? 'symbolic' : 'off' });
+      return next;
+    });
+  }, [symbolicLunarReturnDate]);
 
   return (
     <div className="flex h-full bg-gray-50">
@@ -1119,9 +1187,10 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                      transits: activeLayers.has('transits'),
                      progressions: activeLayers.has('progressions'),
                      solarArc: activeLayers.has('solarArc'),
-                     solarReturn: activeLayers.has('solarReturnSymbolic'),
-                     lunarReturn: activeLayers.has('lunarReturnSymbolic'),
+                     solarReturn: activeLayers.has('return_solar'),
+                     lunarReturn: activeLayers.has('return_lunar'),
                    }}
+                   secondaryLayerKey={secondaryLayer}
                    houseSystem={houseSystem}
                    zodiacType={zodiacType}
                    canRecalculate={Boolean(calculateChart)}
@@ -1295,35 +1364,48 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                                   planets={baseWheel.planets}
                                   asteroids={baseWheel.asteroids ?? []}
                                   showAspects={true}
-                                   orbDeg={orb}
-                                   temporalLayers={temporalLayers}
-                                   annualLayers={annualLayers}
-                                   symbolicDoubleWheel={symbolicDoubleWheel}
-                                   titleRight={`${meta.sistema_casas || 'placidus'} · ${meta.zodiac_type || 'tropical'}`}
-                                   transitPlanets={
-                                     progressionsSnapshot ? progressionsSnapshot.planets : (transitsSnapshot && transitBaseType === 'natal' ? transitsSnapshot.planets : undefined)
-                                   }
-                                 />
+                                    orbDeg={orb}
+                                    temporalLayers={temporalLayers}
+                                    annualLayers={annualLayers}
+                                    symbolicDoubleWheel={symbolicDoubleWheel}
+                                    secondaryLayer={secondaryLayer && secondaryLayerLabel ? { key: secondaryLayer, label: secondaryLayerLabel, mode: 'symbolic' } : null}
+                                    secondaryPlanets={secondaryPlanets ?? undefined}
+                                    titleRight={`${meta.sistema_casas || 'placidus'} · ${meta.zodiac_type || 'tropical'}`}
+                                    transitPlanets={
+                                      progressionsSnapshot ? progressionsSnapshot.planets : (transitsSnapshot && transitBaseType === 'natal' ? transitsSnapshot.planets : undefined)
+                                    }
+                                  />
                               </div>
                             </div>
                           );
                         }
 
                         return (
-                                <AstroWheelAdvanced
-                                  size={920}
-                                  ascendantDeg={wheel.ascendantDeg}
-                                  houses={wheel.houses}
-                                  planets={wheel.planets}
-                                  asteroids={showAsteroids ? (wheel.asteroids ?? []) : []}
-                                  showAspects={true}
-                                   orbDeg={orb}
-                                   temporalLayers={temporalLayers}
-                                   annualLayers={annualLayers}
-                                   symbolicDoubleWheel={symbolicDoubleWheel}
-                                   titleRight={`${meta.sistema_casas || 'placidus'} · ${meta.zodiac_type || 'tropical'}`}
-                                   transitPlanets={transitsSnapshot && transitBaseType === 'natal' ? transitsSnapshot.planets : undefined}
-                                 />
+                          <div>
+                            {secondaryLayer && secondaryLayerLabel ? (
+                              <div className="mb-2 text-xs text-gray-700">
+                                <span className="inline-block bg-slate-50 border border-slate-200 text-slate-700 px-2 py-1 rounded">
+                                  Modo Doble Rueda activo · Natal + {secondaryLayerLabel}
+                                </span>
+                              </div>
+                            ) : null}
+                            <AstroWheelAdvanced
+                              size={920}
+                              ascendantDeg={wheel.ascendantDeg}
+                              houses={wheel.houses}
+                              planets={wheel.planets}
+                              asteroids={showAsteroids ? (wheel.asteroids ?? []) : []}
+                              showAspects={true}
+                               orbDeg={orb}
+                               temporalLayers={temporalLayers}
+                               annualLayers={annualLayers}
+                               symbolicDoubleWheel={symbolicDoubleWheel}
+                               secondaryLayer={secondaryLayer && secondaryLayerLabel ? { key: secondaryLayer, label: secondaryLayerLabel, mode: 'symbolic' } : null}
+                               secondaryPlanets={secondaryPlanets ?? undefined}
+                               titleRight={`${meta.sistema_casas || 'placidus'} · ${meta.zodiac_type || 'tropical'}`}
+                               transitPlanets={transitsSnapshot && transitBaseType === 'natal' ? transitsSnapshot.planets : undefined}
+                             />
+                          </div>
                         );
                       })()
                     ) : (
@@ -1344,8 +1426,9 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                            temporalLayers={temporalLayers}
                            annualLayers={annualLayers}
                            symbolicDoubleWheel={symbolicDoubleWheel}
+                           secondaryLayer={secondaryLayer && secondaryLayerLabel ? { key: secondaryLayer, label: secondaryLayerLabel, mode: 'symbolic' } : null}
                            titleRight="Pendiente · solo lectura"
-                         />
+                        />
                       )
                     ))
                   )}

@@ -31,6 +31,12 @@ type Props = {
     key: "solarReturn" | "lunarReturn";
     label?: string;
   }>;
+  secondaryLayer?: {
+    key: "transits" | "progressions" | "solarArc" | "return_solar" | "return_lunar";
+    label: string;
+    mode?: "symbolic" | "real";
+  } | null;
+  secondaryPlanets?: PlanetPoint[];
 };
 
 const DEFAULT_ZODIAC = ["♈","♉","♊","♋","♌","♍","♎","♏","♐","♑","♒","♓"];
@@ -40,6 +46,7 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
   ascendantDeg,
   houses,
   planets,
+  transitPlanets,
   // optional asteroids layer
   asteroids = [],
   showAspects = true,
@@ -49,6 +56,8 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
   temporalLayers = [],
   symbolicDoubleWheel = false,
   annualLayers = [],
+  secondaryLayer = null,
+  secondaryPlanets,
 }) => {
   const isPlaceholder = visualMode === "placeholder";
   const opts: WheelOptions = useMemo(() => ({
@@ -421,6 +430,84 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
     return <g>{items}</g>;
   };
 
+  const renderSecondaryWheel = () => {
+    if (!secondaryLayer) return null;
+
+    const tooltip = `Modo Doble Rueda activo — Natal + ${secondaryLayer.label}. La rueda externa representa una capa simbólica sin cálculo astronómico real.`;
+    const maxR = cx - 8;
+    const innerR = Math.min(maxR - 22, rings.outer + 18);
+    const outerR = Math.min(maxR, innerR + 26);
+    const glyphR = Math.min(maxR - 10, outerR - 10);
+
+    const styles: Record<string, { stroke: string; opacity: number; width: number; dash?: string; glyphSize: number }> = {
+      transits: { stroke: "#94a3b8", opacity: 0.55, width: 1.5, dash: "7 6", glyphSize: 14 },
+      progressions: { stroke: "#64748b", opacity: 0.5, width: 1.6, glyphSize: 14 },
+      solarArc: { stroke: "#475569", opacity: 0.46, width: 1.6, dash: "1 6", glyphSize: 14 },
+      return_solar: { stroke: "#a78bfa", opacity: 0.48, width: 1.8, glyphSize: 14 },
+      return_lunar: { stroke: "#f59e0b", opacity: 0.46, width: 1.7, dash: "4 6", glyphSize: 14 },
+    };
+
+    const st = styles[secondaryLayer.key] ?? styles.transits;
+    const pts = (secondaryPlanets && secondaryPlanets.length > 0) ? secondaryPlanets : (transitPlanets && transitPlanets.length > 0 ? transitPlanets : []);
+
+    const renderPlanetsSecondary = () => {
+      if (!pts || pts.length === 0) return null;
+      const priority = new Set(["sun", "moon", "mercury", "venus", "mars"]);
+      return (
+        <g>
+          {pts
+            .filter((p) => priority.has(String(p.key).toLowerCase()))
+            .map((p) => {
+              const pt = degToPoint(p.degree, glyphR, cx);
+              return (
+                <text
+                  key={`sec-pl-${p.key}`}
+                  x={pt.x}
+                  y={pt.y}
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  fontSize={st.glyphSize}
+                  fill={st.stroke}
+                  opacity={Math.min(0.85, st.opacity + 0.25)}
+                  style={{ fontFamily: 'Inter, ui-sans-serif, system-ui' }}
+                >
+                  {p.glyph}
+                </text>
+              );
+            })}
+        </g>
+      );
+    };
+
+    const marker = (deg: number, id: string) => {
+      const a = degToPoint(deg, outerR - 4, cx);
+      const b = degToPoint(deg, outerR + 4, cx);
+      return (
+        <line
+          key={`sec-${id}`}
+          x1={a.x} y1={a.y}
+          x2={b.x} y2={b.y}
+          stroke={st.stroke}
+          strokeWidth={1.1}
+          opacity={Math.min(0.7, st.opacity + 0.12)}
+        />
+      );
+    };
+
+    return (
+      <g>
+        <title>{tooltip}</title>
+        <circle cx={cx} cy={cx} r={innerR} fill="none" stroke="#e5e7eb" strokeWidth={1.1} opacity={0.9} />
+        <circle cx={cx} cy={cx} r={outerR} fill="none" stroke={st.stroke} strokeWidth={st.width} opacity={st.opacity} strokeDasharray={st.dash || undefined} />
+        {marker(0, "north")}
+        {marker(90, "east")}
+        {marker(180, "south")}
+        {marker(270, "west")}
+        {renderPlanetsSecondary()}
+      </g>
+    );
+  };
+
   const renderPlanets = () => {
     // Glifo + label sin “botón”
     return (
@@ -550,14 +637,15 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
 
       <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
         <div className="w-full overflow-auto">
-            <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-              {/* Rotación global por ASC */}
-              <g transform={`rotate(${geo.rotationDeg} ${cx} ${cx})`}>
-                {renderTemporalLayers()}
-                {renderAnnualLayers()}
-                {renderBaseRings()}
-                {renderDegreeTicks()}
-                {renderZodiac()}
+          <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+            {/* Rotación global por ASC */}
+            <g transform={`rotate(${geo.rotationDeg} ${cx} ${cx})`}>
+              {renderSecondaryWheel()}
+              {renderTemporalLayers()}
+              {renderAnnualLayers()}
+              {renderBaseRings()}
+              {renderDegreeTicks()}
+              {renderZodiac()}
                 {renderHouseLines()}
                 {renderHouseNumbers()}
               {renderAspects()}

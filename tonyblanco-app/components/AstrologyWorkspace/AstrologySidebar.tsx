@@ -16,10 +16,10 @@ interface AstrologySidebarProps {
   onToggleLayer?: (layer: string) => void;
   symbolicDoubleWheel?: boolean;
   setSymbolicDoubleWheel?: (v: boolean) => void;
-  symbolicSolarReturnYear?: number;
-  setSymbolicSolarReturnYear?: (v: number) => void;
-  symbolicLunarReturnDate?: string;
-  setSymbolicLunarReturnDate?: (v: string) => void;
+  symbolicSolarReturnYear?: number | null;
+  setSymbolicSolarReturnYear?: (v: number | null) => void;
+  symbolicLunarReturnDate?: string | null;
+  setSymbolicLunarReturnDate?: (v: string | null) => void;
 }
 
 const HOUSE_OPTIONS: Array<{ code: string; name: string; desc?: string }> = [
@@ -62,8 +62,8 @@ export default function AstrologySidebar({
   );
   const canUseSymbolicDoubleWheel = canUseForecast && hasAnySymbolicTemporalLayer;
   const canUseReturns = canUseForecast;
-  const isSolarReturnActive = isLayerActive('solarReturnSymbolic');
-  const isLunarReturnActive = isLayerActive('lunarReturnSymbolic');
+  const isSolarReturnActive = isLayerActive('return_solar');
+  const isLunarReturnActive = isLayerActive('return_lunar');
 
   const ForecastItem = ({
     layer,
@@ -183,7 +183,11 @@ export default function AstrologySidebar({
                   <input
                     type="checkbox"
                     checked={Boolean(isSolarReturnActive)}
-                    onChange={() => onToggleLayer && onToggleLayer('solarReturnSymbolic')}
+                    onChange={(e) => {
+                      const next = e.target.checked;
+                      if (onToggleLayer) onToggleLayer('return_solar');
+                      if (setSymbolicSolarReturnYear) setSymbolicSolarReturnYear(next ? (symbolicSolarReturnYear ?? new Date().getFullYear()) : null);
+                    }}
                     disabled={!canUseReturns}
                     title={!canUseReturns ? 'Requiere identidad válida (fecha de nacimiento)' : 'Activar capa anual simbólica (solo visual)'}
                   />
@@ -195,7 +199,11 @@ export default function AstrologySidebar({
                   type="number"
                   className="w-24 rounded border border-gray-200 px-2 py-1 text-[12px]"
                   value={symbolicSolarReturnYear ?? new Date().getFullYear()}
-                  onChange={(e) => setSymbolicSolarReturnYear && setSymbolicSolarReturnYear(Number(e.target.value))}
+                  onChange={(e) => {
+                    if (!setSymbolicSolarReturnYear) return;
+                    const value = Number(e.target.value);
+                    setSymbolicSolarReturnYear(Number.isFinite(value) ? value : null);
+                  }}
                   disabled={!canUseReturns}
                   min={1900}
                   max={2100}
@@ -215,7 +223,11 @@ export default function AstrologySidebar({
                   <input
                     type="checkbox"
                     checked={Boolean(isLunarReturnActive)}
-                    onChange={() => onToggleLayer && onToggleLayer('lunarReturnSymbolic')}
+                    onChange={(e) => {
+                      const next = e.target.checked;
+                      if (onToggleLayer) onToggleLayer('return_lunar');
+                      if (setSymbolicLunarReturnDate) setSymbolicLunarReturnDate(next ? (symbolicLunarReturnDate ?? new Date().toISOString().slice(0, 10)) : null);
+                    }}
                     disabled={!canUseReturns}
                     title={!canUseReturns ? 'Requiere identidad válida (fecha de nacimiento)' : 'Activar capa mensual simbólica (solo visual)'}
                   />
@@ -227,7 +239,7 @@ export default function AstrologySidebar({
                   type="date"
                   className="rounded border border-gray-200 px-2 py-1 text-[12px]"
                   value={symbolicLunarReturnDate ?? new Date().toISOString().slice(0, 10)}
-                  onChange={(e) => setSymbolicLunarReturnDate && setSymbolicLunarReturnDate(e.target.value)}
+                  onChange={(e) => setSymbolicLunarReturnDate && setSymbolicLunarReturnDate(e.target.value || null)}
                   disabled={!canUseReturns}
                 />
               </div>

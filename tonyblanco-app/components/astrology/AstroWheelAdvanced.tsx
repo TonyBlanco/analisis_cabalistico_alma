@@ -23,6 +23,7 @@ type Props = {
   orbDeg?: number;
   titleRight?: string;           // "placidus · tropical"
   visualMode?: "normal" | "placeholder";
+  visualStyle?: "classic" | "huber";
   temporalLayers?: Array<{
     key: "transits" | "progressions" | "solarArc";
     label?: string;
@@ -67,6 +68,7 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
   orbDeg = 6,
   titleRight,
   visualMode = "normal",
+  visualStyle = "classic",
   temporalLayers = [],
   symbolicDoubleWheel = false,
   annualLayers = [],
@@ -83,6 +85,7 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
   showComparisonAspects = true,
 }) => {
   const isPlaceholder = visualMode === "placeholder";
+  const isHuber = visualStyle === "huber";
   const comparisonEnabled = Boolean(comparisonWheel?.enabled);
   const opts: WheelOptions = useMemo(() => ({
     size,
@@ -112,6 +115,110 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
   const cx = geo.center;
   const { rings } = geo;
   const [hoverKey, setHoverKey] = useState<string | null>(null);
+
+  const huberAspectStyle = (kind: "CONJ" | "SEXT" | "SQR" | "TRI" | "OPP") => {
+    // semantic palette: tension vs harmonic vs neutral (Huber-style emphasis)
+    switch (kind) {
+      case "SQR": return { stroke: "#dc2626", width: 3.2, opacity: 0.38 }; // tensión
+      case "OPP": return { stroke: "#ef4444", width: 3.2, opacity: 0.34 }; // polaridad
+      case "TRI": return { stroke: "#16a34a", width: 3.0, opacity: 0.34 }; // armónico
+      case "SEXT": return { stroke: "#0ea5e9", width: 2.8, opacity: 0.32 }; // armónico suave
+      case "CONJ": return { stroke: "#7c3aed", width: 3.0, opacity: 0.3 }; // foco
+      default: return { stroke: "#64748b", width: 2.6, opacity: 0.28 };
+    }
+  };
+
+  const huberHouseBands = useMemo(() => {
+    if (!isHuber) return null;
+    if (!houses || houses.length !== 12) return null;
+
+    const outerR = rings.houseOuter;
+    const innerR = rings.houseInner - 18; // wider radial band inward
+    const fillA = isPlaceholder ? "rgba(148,163,184,0.10)" : "rgba(99,102,241,0.08)";
+    const fillB = isPlaceholder ? "rgba(148,163,184,0.06)" : "rgba(124,58,237,0.06)";
+
+    const donutSeg = (startDeg: number, endDeg: number) => {
+      const a0 = normalizeDeg(startDeg);
+      const a1 = normalizeDeg(endDeg);
+      const delta = (a1 - a0 + 360) % 360;
+      const largeArc = delta > 180 ? 1 : 0;
+
+      const p0o = degToPoint(a0, outerR, cx);
+      const p1o = degToPoint(a1, outerR, cx);
+      const p1i = degToPoint(a1, innerR, cx);
+      const p0i = degToPoint(a0, innerR, cx);
+
+      return `M ${p0o.x} ${p0o.y} A ${outerR} ${outerR} 0 ${largeArc} 1 ${p1o.x} ${p1o.y} L ${p1i.x} ${p1i.y} A ${innerR} ${innerR} 0 ${largeArc} 0 ${p0i.x} ${p0i.y} Z`;
+    };
+
+    return (
+      <g>
+        {houses.map((cusp, idx) => {
+          const next = houses[(idx + 1) % 12];
+          const d = donutSeg(cusp, next);
+          return (
+            <path
+              key={`huber-house-band-${idx}`}
+              d={d}
+              fill={idx % 2 === 0 ? fillA : fillB}
+              stroke="none"
+            />
+          );
+        })}
+        <circle cx={cx} cy={cx} r={outerR} fill="none" stroke={isPlaceholder ? "#94a3b8" : "#6366f1"} opacity={isPlaceholder ? 0.22 : 0.18} strokeWidth={2} />
+        <circle cx={cx} cy={cx} r={innerR} fill="none" stroke={isPlaceholder ? "#94a3b8" : "#7c3aed"} opacity={isPlaceholder ? 0.18 : 0.14} strokeWidth={1.6} />
+      </g>
+    );
+  }, [isHuber, houses, rings.houseOuter, rings.houseInner, cx, isPlaceholder]);
+
+  const huberCentersOfGravity = useMemo(() => {
+    if (!isHuber) return null;
+    if (!planets || planets.length === 0) return null;
+
+    const pick = (pts: PlanetPoint[]) => {
+      const valid = pts.filter((p) => Number.isFinite(p.degree));
+      if (valid.length === 0) return null;
+      let sx = 0;
+      let sy = 0;
+      for (const p of valid) {
+        const rad = (normalizeDeg(p.degree) * Math.PI) / 180;
+        sx += Math.cos(rad);
+        sy += Math.sin(rad);
+      }
+      const ang = Math.atan2(sy, sx);
+      return normalizeDeg((ang * 180) / Math.PI);
+    };
+
+    const personalKeys = new Set(["sun", "moon", "mercury", "venus", "mars"]);
+    const natalPersonal = planets.filter((p) => personalKeys.has(String(p.key).toLowerCase()));
+    const natalDeg = pick(natalPersonal.length > 0 ? natalPersonal : planets);
+
+    const secondaryDeg = secondaryPlanets && secondaryPlanets.length > 0 ? pick(secondaryPlanets) : null;
+    const r = Math.max(22, rings.centerHole - 26);
+    const tooltip = "Centro de gravedad (lectura psicológica simbólica). No corresponde a un cálculo astronómico nuevo.";
+
+    const node = (deg: number, label: string, stroke: string, fill: string) => {
+      const p = degToPoint(deg, r, cx);
+      return (
+        <g>
+          <circle cx={p.x} cy={p.y} r={10} fill={fill} stroke={stroke} strokeWidth={2} opacity={0.85}>
+            <title>{tooltip}</title>
+          </circle>
+          <text x={p.x} y={p.y} textAnchor="middle" dominantBaseline="middle" fontSize={9.5} fill="#111827" opacity={0.9} style={{ fontFamily: 'Inter, ui-sans-serif, system-ui' }}>
+            {label}
+            <title>{tooltip}</title>
+          </text>
+        </g>
+      );
+    };
+
+    return (
+      <g>
+        {natalDeg !== null ? node(natalDeg, "CG", "#7c3aed", "rgba(124,58,237,0.12)") : null}
+        {secondaryDeg !== null ? node(secondaryDeg, "cg", "#0ea5e9", "rgba(14,165,233,0.10)") : null}
+      </g>
+    );
+  }, [isHuber, planets, secondaryPlanets, rings.centerHole, cx]);
 
   // stacking radial offsets to avoid glyph collisions (preserve real angle)
   const planetPositions = useMemo(() => {
@@ -610,6 +717,9 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
               const pt = degToPoint(p.degree, glyphR, cx);
               return (
                 <g key={`sec-pl-${p.key}`}>
+                  {isHuber ? (
+                    <circle cx={pt.x} cy={pt.y} r={14} fill="rgba(255,255,255,0.88)" stroke={st.stroke} strokeWidth={1.3} opacity={0.75} />
+                  ) : null}
                   {crossAspectSecondaryKeys && crossAspectSecondaryKeys.has(p.key) ? (
                     <>
                       <circle cx={pt.x} cy={pt.y} r={12} fill="none" stroke={st.stroke} strokeWidth={2} opacity={0.22} />
@@ -621,7 +731,7 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
                     y={pt.y}
                     textAnchor="middle"
                     dominantBaseline="middle"
-                    fontSize={st.glyphSize}
+                    fontSize={isHuber ? st.glyphSize + 2 : st.glyphSize}
                     fill={st.stroke}
                     opacity={Math.min(0.85, st.opacity + 0.25)}
                     style={{ fontFamily: 'Inter, ui-sans-serif, system-ui' }}
@@ -718,7 +828,13 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
     const outerR = maxR - 12;
     const innerR = rings.planetRing;
 
-    const styleByKind: Record<string, { stroke: string; opacity: number; width: number }> = {
+    const styleByKind: Record<string, { stroke: string; opacity: number; width: number }> = isHuber ? {
+      TRI: huberAspectStyle("TRI"),
+      SEXT: huberAspectStyle("SEXT"),
+      SQR: huberAspectStyle("SQR"),
+      OPP: huberAspectStyle("OPP"),
+      CONJ: huberAspectStyle("CONJ"),
+    } : {
       TRI: { stroke: "#16a34a", opacity: 0.22, width: 1.6 },  // armónico
       SEXT: { stroke: "#0ea5e9", opacity: 0.2, width: 1.5 },  // armónico suave
       SQR: { stroke: "#dc2626", opacity: 0.22, width: 1.6 },  // tensión
@@ -743,7 +859,7 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
               stroke={st.stroke}
               strokeWidth={st.width}
               opacity={st.opacity}
-              strokeDasharray="3 8"
+              strokeDasharray={isHuber ? "2 6" : "3 8"}
             >
               <title>{tooltip}</title>
             </line>
@@ -770,6 +886,9 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
 
           return (
             <g key={`pl-${p.key}`}>
+              {isHuber ? (
+                <circle cx={pt.x} cy={pt.y} r={16} fill="rgba(255,255,255,0.92)" stroke="#111827" strokeWidth={1.4} opacity={isPlaceholder ? 0.75 : 0.9} />
+              ) : null}
               {personaMode && new Set(['sun','moon','mercury','venus','mars']).has(String(p.key).toLowerCase()) ? (
                 <circle cx={pt.x} cy={pt.y} r={14} fill="none" stroke="#a78bfa" strokeWidth={2} opacity={0.16} />
               ) : null}
@@ -790,7 +909,7 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
                   y={pt.y}
                   textAnchor="middle"
                   dominantBaseline="middle"
-                  fontSize={18}
+                  fontSize={isHuber ? 20 : 18}
                   fill="#111"
                   style={{ fontFamily: 'Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial' }}
                 >
@@ -854,7 +973,7 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
 
       const a = degToPoint(p1.degree, rings.aspectRing, cx);
       const b = degToPoint(p2.degree, rings.aspectRing, cx);
-      const st = aspectStyle(asp);
+      const st = isHuber ? huberAspectStyle(asp.kind) : aspectStyle(asp);
 
       lines.push(
         <line
@@ -903,11 +1022,13 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
               {renderBaseRings()}
               {renderDegreeTicks()}
               {renderZodiac()}
+              {huberHouseBands}
                 {renderHouseLines()}
                 {renderHouseNumbers()}
                 {renderRelocationOverlay()}
                 {renderHarmonicOverlay()}
                 {renderMathPoints()}
+                {huberCentersOfGravity}
                 {renderAspects()}
                 {renderAsteroids()}
                 {renderPlanets()}

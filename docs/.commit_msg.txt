@@ -1,1 +1,1 @@
-feat(astrology): enable symbolic forecast layers without recalculation
+feat(astrology): enable Huber visual style as symbolic overlay

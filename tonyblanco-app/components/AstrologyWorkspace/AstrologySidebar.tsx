@@ -26,6 +26,8 @@ interface AstrologySidebarProps {
   setHarmonicOrder?: (v: 5 | 7 | 9) => void;
   relocationCity?: string;
   setRelocationCity?: (v: string) => void;
+  visualStyle?: 'classic' | 'huber';
+  setVisualStyle?: (v: 'classic' | 'huber') => void;
 }
 
 const HOUSE_OPTIONS: Array<{ code: string; name: string; desc?: string }> = [
@@ -66,6 +68,8 @@ export default function AstrologySidebar({
   setHarmonicOrder,
   relocationCity = 'Madrid (placeholder)',
   setRelocationCity,
+  visualStyle = 'classic',
+  setVisualStyle,
 }: AstrologySidebarProps) {
   const canUseForecast = Boolean(hasIdentity);
   const isLayerActive = (layer: string) => Boolean(activeLayers && activeLayers.has(layer));
@@ -127,12 +131,29 @@ export default function AstrologySidebar({
           <label className="block text-xs font-semibold text-gray-600 mb-2">Tipo de Carta</label>
           <div className="space-y-1 text-xs">
             {ASTRO_METHODS.filter(m => m.category === 'natal').map((m) => (
-              <div key={m.id} className={`flex items-center justify-between px-2 py-1 border rounded ${m.status === 'active' ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200 opacity-80'}`}>
-                <div className="text-sm">{m.name}</div>
-                <div className="text-xs text-gray-500">
-                  {m.status === 'active' ? 'activo' : m.status === 'locked' ? '🔒 bloqueado' : 'próximamente'}
+              m.id === 'huber' ? (
+                <div key={m.id} className={`flex items-center justify-between px-2 py-1 border rounded ${canUseForecast ? 'bg-white border-gray-200' : 'bg-gray-50 border-gray-200 opacity-60'}`}>
+                  <div className="text-sm" title="Disponible en modo simbólico. Cambia la representación visual sin recalcular ni modificar datos.">
+                    {m.name} · <span className="text-gray-500">disponible en modo simbólico</span>
+                  </div>
+                  <label className="inline-flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={visualStyle === 'huber'}
+                      onChange={(e) => setVisualStyle && setVisualStyle(e.target.checked ? 'huber' : 'classic')}
+                      disabled={!canUseForecast}
+                      title={!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : 'Estilo HUBER: lectura psicológica simbólica (no astronómica). No recalcula ni modifica datos.'}
+                    />
+                  </label>
                 </div>
-              </div>
+              ) : (
+                <div key={m.id} className={`flex items-center justify-between px-2 py-1 border rounded ${m.status === 'active' ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200 opacity-80'}`}>
+                  <div className="text-sm">{m.name}</div>
+                  <div className="text-xs text-gray-500">
+                    {m.status === 'active' ? 'activo' : m.status === 'locked' ? '🔒 bloqueado' : 'próximamente'}
+                  </div>
+                </div>
+              )
             ))}
           </div>
         </div>

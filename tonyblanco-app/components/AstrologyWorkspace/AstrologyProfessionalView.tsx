@@ -28,6 +28,8 @@ interface Props {
   refetch?: () => Promise<void>;
 }
 
+type ChartVisualStyle = 'classic' | 'huber';
+
 export default function AstrologyProfessionalView({ consultante, chart, analysis_result, calculateChart, refetch }: Props) {
   // Audit log (controlled, local-only): helps verify incoming data shapes
   if (typeof window !== 'undefined') {
@@ -157,6 +159,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
   const [relocationCity, setRelocationCity] = useState<string>('Madrid (placeholder)');
   const [solarReturnCompareEnabled, setSolarReturnCompareEnabled] = useState<boolean>(false);
   const [solarReturnCompareYearB, setSolarReturnCompareYearB] = useState<number | null>(null);
+  const [visualStyle, setVisualStyle] = useState<ChartVisualStyle>('classic');
 
   const [activeTab, setActiveTab] = useState<'visual' | 'psych'>('visual');
 
@@ -779,6 +782,8 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
           setHarmonicOrder={setHarmonicOrder}
           relocationCity={relocationCity}
           setRelocationCity={setRelocationCity}
+          visualStyle={visualStyle}
+          setVisualStyle={setVisualStyle}
         />
       </aside>
 
@@ -792,6 +797,11 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
             {isSymbolicReadingMode ? (
               <div className="mt-2 inline-flex items-center rounded border border-indigo-100 bg-indigo-50 px-3 py-2 text-xs text-indigo-900">
                 Modo lectura simbolica activa. No se estan realizando calculos astronomicos.
+              </div>
+            ) : null}
+            {visualStyle === 'huber' ? (
+              <div className="mt-2 inline-flex items-center rounded border border-violet-100 bg-violet-50 px-3 py-2 text-xs text-violet-900" title="Lectura psicológica simbólica (no astronómica).">
+                🧠 Estilo HUBER activo · Lectura psicológica simbólica (no astronómica)
               </div>
             ) : null}
           </header>
@@ -1888,6 +1898,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                               asteroids={showAsteroids ? (wheel.asteroids ?? []) : []}
                               showAspects={true}
                                orbDeg={orb}
+                               visualStyle={visualStyle}
                                temporalLayers={temporalLayers}
                                annualLayers={annualLayers}
                                symbolicDoubleWheel={symbolicDoubleWheel}
@@ -1923,6 +1934,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                           showAspects={false}
                            orbDeg={orb}
                            visualMode="placeholder"
+                           visualStyle={visualStyle}
                            temporalLayers={temporalLayers}
                            annualLayers={annualLayers}
                            symbolicDoubleWheel={symbolicDoubleWheel}

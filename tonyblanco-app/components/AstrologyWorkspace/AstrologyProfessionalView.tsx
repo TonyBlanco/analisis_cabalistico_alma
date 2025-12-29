@@ -1131,7 +1131,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                   {/* Professional ActionBar & Context (therapist-only) */}
                   {isTherapist ? (
                     <div className="mb-4">
-                      <div className="flex items-center justify-between bg-white border rounded p-3">
+                      <div data-professional-actionbar className="flex items-center justify-between bg-white border rounded p-3">
                             <button className="px-3 py-1 rounded bg-gray-800 text-white text-sm" onClick={() => exportProfessionalPDF(`lectura_${consultante?.id || 'x'}.pdf`)}>Exportar PDF</button>
                           <button className="px-3 py-1 rounded bg-blue-600 text-white text-sm" onClick={async () => {
                             try {

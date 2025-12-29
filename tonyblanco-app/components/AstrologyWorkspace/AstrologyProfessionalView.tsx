@@ -34,6 +34,8 @@ type PersonaMode = 'off' | 'social' | 'professional' | 'intimate';
 type RelocationMode = 'off' | 'home' | 'work' | 'travel' | 'abroad';
 type AdvancedObjectsState = { nodes: boolean; fortune: boolean; symbolicPoints: boolean };
 type FixedStarsState = { primary: boolean; secondary: boolean };
+type RelationshipMode = 'off' | 'couple' | 'family' | 'work' | 'social';
+type RelationshipRole = 'active' | 'reactive';
 
 export default function AstrologyProfessionalView({ consultante, chart, analysis_result, calculateChart, refetch }: Props) {
   // Audit log (controlled, local-only): helps verify incoming data shapes
@@ -165,6 +167,8 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
   const [relocationMode, setRelocationMode] = useState<RelocationMode>('off');
   const [advancedObjects, setAdvancedObjects] = useState<AdvancedObjectsState>({ nodes: false, fortune: false, symbolicPoints: false });
   const [fixedStars, setFixedStars] = useState<FixedStarsState>({ primary: false, secondary: false });
+  const [relationshipMode, setRelationshipMode] = useState<RelationshipMode>('off');
+  const [relationshipRole, setRelationshipRole] = useState<RelationshipRole>('active');
   const [solarReturnCompareEnabled, setSolarReturnCompareEnabled] = useState<boolean>(false);
   const [solarReturnCompareYearB, setSolarReturnCompareYearB] = useState<number | null>(null);
   const [visualStyle, setVisualStyle] = useState<ChartVisualStyle>('classic');
@@ -330,6 +334,30 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
       return next;
     });
   }, [fixedStars, hasIdentity]);
+
+  useEffect(() => {
+    // Relationships are symbolic-only and require identity; keep activeLayers in sync
+    if (!hasIdentity) {
+      if (relationshipMode !== 'off') setRelationshipMode('off');
+      setActiveLayers((prev) => {
+        if (!prev.has('relationships')) return prev;
+        const next = new Set(prev);
+        next.delete('relationships');
+        return next;
+      });
+      return;
+    }
+
+    setActiveLayers((prev) => {
+      const want = relationshipMode !== 'off';
+      const has = prev.has('relationships');
+      if (want === has) return prev;
+      const next = new Set(prev);
+      if (want) next.add('relationships');
+      else next.delete('relationships');
+      return next;
+    });
+  }, [relationshipMode, hasIdentity]);
 
   // Layer inputs
   const [transitDate, setTransitDate] = useState<string>(new Date().toISOString().slice(0, 10));
@@ -931,6 +959,10 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
           setAdvancedObjects={setAdvancedObjects}
           fixedStars={fixedStars}
           setFixedStars={setFixedStars}
+          relationshipMode={relationshipMode}
+          setRelationshipMode={setRelationshipMode}
+          relationshipRole={relationshipRole}
+          setRelationshipRole={setRelationshipRole}
           visualStyle={visualStyle}
           setVisualStyle={setVisualStyle}
         />
@@ -1770,6 +1802,8 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                    relocationMode={relocationMode}
                    advancedObjects={advancedObjects}
                    fixedStars={fixedStars}
+                   relationshipMode={relationshipMode}
+                   relationshipRole={relationshipRole}
                    secondaryLayerKey={secondaryLayer}
                    comparisonEnabled={Boolean(synastryEnabled)}
                    comparisonAspectsEnabled={Boolean(synastryEnabled)}
@@ -2069,6 +2103,8 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                                showMathPoints={activeLayers.has('mathPoints')}
                                advancedObjects={advancedObjects}
                                fixedStars={fixedStars}
+                               relationshipMode={relationshipMode}
+                               relationshipRole={relationshipRole}
                                titleRight={`${meta.sistema_casas || 'placidus'} · ${meta.zodiac_type || 'tropical'}`}
                                transitPlanets={transitsSnapshot && transitBaseType === 'natal' ? transitsSnapshot.planets : undefined}
                              />
@@ -2106,6 +2142,8 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                            showMathPoints={activeLayers.has('mathPoints')}
                            advancedObjects={advancedObjects}
                            fixedStars={fixedStars}
+                           relationshipMode={relationshipMode}
+                           relationshipRole={relationshipRole}
                            titleRight="Pendiente · solo lectura"
                         />
                       )

@@ -32,6 +32,10 @@ interface AstrologySidebarProps {
   setAdvancedObjects?: (v: { nodes: boolean; fortune: boolean; symbolicPoints: boolean }) => void;
   fixedStars?: { primary: boolean; secondary: boolean };
   setFixedStars?: (v: { primary: boolean; secondary: boolean }) => void;
+  relationshipMode?: 'off' | 'couple' | 'family' | 'work' | 'social';
+  setRelationshipMode?: (v: 'off' | 'couple' | 'family' | 'work' | 'social') => void;
+  relationshipRole?: 'active' | 'reactive';
+  setRelationshipRole?: (v: 'active' | 'reactive') => void;
   visualStyle?: 'classic' | 'huber';
   setVisualStyle?: (v: 'classic' | 'huber') => void;
 }
@@ -80,6 +84,10 @@ export default function AstrologySidebar({
   setAdvancedObjects,
   fixedStars = { primary: false, secondary: false },
   setFixedStars,
+  relationshipMode = 'off',
+  setRelationshipMode,
+  relationshipRole = 'active',
+  setRelationshipRole,
   visualStyle = 'classic',
   setVisualStyle,
 }: AstrologySidebarProps) {
@@ -96,6 +104,7 @@ export default function AstrologySidebar({
   const isHarmonicsActive = harmonicMode !== 'off' && isLayerActive('harmonics');
   const isPersonaActive = personaMode !== 'off' && isLayerActive('persona');
   const isRelocationActive = relocationMode !== 'off' && isLayerActive('relocation');
+  const isRelationshipsActive = relationshipMode !== 'off' && isLayerActive('relationships');
   const isAdvancedObjectsActive = Boolean(advancedObjects.nodes || advancedObjects.fortune || advancedObjects.symbolicPoints);
   const hasSecondaryLayer = Boolean(activeLayers && (
     activeLayers.has('transits') ||
@@ -560,6 +569,56 @@ export default function AstrologySidebar({
                 </label>
               </div>
               <div className="mt-2 text-[11px] text-gray-500">Arquetipos (educativo y no fatalista).</div>
+            </div>
+
+            <div className={`px-2 py-2 border rounded ${canUseForecast ? 'bg-white border-gray-200' : 'bg-gray-50 border-gray-200 opacity-60'}`}>
+              <div className="flex items-center justify-between">
+                <div
+                  className="text-[13px]"
+                  title="Relaciones (modo simbólico): muestra dinámicas psicológicas del vínculo. No evalúa compatibilidad ni predice resultados."
+                >
+                  Relaciones · <span className="text-gray-500">modo simbólico</span>
+                </div>
+                <label className="inline-flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(isRelationshipsActive)}
+                    onChange={() => setRelationshipMode && setRelationshipMode(isRelationshipsActive ? 'off' : 'couple')}
+                    disabled={!canUseForecast}
+                    title={!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : 'Relaciones (modo simbólico): dinámicas psicológicas del vínculo. No compatibilidad ni predicción.'}
+                  />
+                </label>
+              </div>
+              <div className="mt-2 flex items-center justify-between gap-2">
+                <div className="text-[11px] text-gray-500">Enfoque</div>
+                <select
+                  className="rounded border border-gray-200 bg-white px-2 py-1 text-[12px]"
+                  value={relationshipMode}
+                  onChange={(e) => setRelationshipMode && setRelationshipMode(e.target.value as any)}
+                  disabled={!canUseForecast || relationshipMode === 'off'}
+                  title={!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : 'Selecciona el enfoque vincular (simbólico). No predice resultados.'}
+                >
+                  <option value="off">Off</option>
+                  <option value="couple">Pareja · espejo y aprendizaje</option>
+                  <option value="family">Familia · roles y pertenencia</option>
+                  <option value="work">Trabajo · cooperación y función</option>
+                  <option value="social">Social · intercambio y adaptación</option>
+                </select>
+              </div>
+              <div className="mt-2 flex items-center justify-between gap-2">
+                <div className="text-[11px] text-gray-500">Rol</div>
+                <select
+                  className="rounded border border-gray-200 bg-white px-2 py-1 text-[12px]"
+                  value={relationshipRole}
+                  onChange={(e) => setRelationshipRole && setRelationshipRole(e.target.value as any)}
+                  disabled={!canUseForecast || relationshipMode === 'off'}
+                  title={!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : 'Rol simbólico del consultante: activo o reactivo.'}
+                >
+                  <option value="active">Activo</option>
+                  <option value="reactive">Reactivo</option>
+                </select>
+              </div>
+              <div className="mt-2 text-[11px] text-gray-500">Dinámicas (proyección/sombra/complemento) — educativo, no determinista.</div>
             </div>
           </div>
         </div>

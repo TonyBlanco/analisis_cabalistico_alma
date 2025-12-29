@@ -21,6 +21,8 @@ type Props = {
   relocationMode?: 'off' | 'home' | 'work' | 'travel' | 'abroad';
   advancedObjects?: { nodes: boolean; fortune: boolean; symbolicPoints: boolean };
   fixedStars?: { primary: boolean; secondary: boolean };
+  relationshipMode?: 'off' | 'couple' | 'family' | 'work' | 'social';
+  relationshipRole?: 'active' | 'reactive';
   houseSystem: string;
   zodiacType: string;
   canRecalculate: boolean; // whether UI has ability to trigger recalculation (we will NOT trigger)
@@ -38,7 +40,7 @@ const Dot: React.FC<{ type: DotType }> = ({ type }) => {
   return <span className="inline-block w-3 h-3 rounded-full bg-rose-400 mr-2 opacity-70" />;
 };
 
-export default function CalculationStatusPanel({ overlays, activeLayers, symbolicLayers, harmonicMode = 'off', personaMode = 'off', relocationMode = 'off', advancedObjects = { nodes: false, fortune: false, symbolicPoints: false }, fixedStars = { primary: false, secondary: false }, houseSystem, zodiacType, canRecalculate, secondaryLayerKey = null, comparisonEnabled = false, comparisonAspectsEnabled = false }: Props) {
+export default function CalculationStatusPanel({ overlays, activeLayers, symbolicLayers, harmonicMode = 'off', personaMode = 'off', relocationMode = 'off', advancedObjects = { nodes: false, fortune: false, symbolicPoints: false }, fixedStars = { primary: false, secondary: false }, relationshipMode = 'off', relationshipRole = 'active', houseSystem, zodiacType, canRecalculate, secondaryLayerKey = null, comparisonEnabled = false, comparisonAspectsEnabled = false }: Props) {
   const [helper, setHelper] = useState<string | null>(null);
   const symbolicTooltip = 'Capa simbólica activa. No corresponde a un cálculo astronómico real.';
   const annualSymbolicTooltip = 'Capa anual/mensual activa (lectura simbólica) — sin recalcular carta base.';
@@ -281,6 +283,31 @@ export default function CalculationStatusPanel({ overlays, activeLayers, symboli
                 <Dot type={fixedStars.primary ? 'symbolic' : 'available'} />
                 <span className="flex-1">Estrellas fijas</span>
                 <span className="text-xs text-gray-400">{fixedStars.primary ? 'Activo (lectura simbólica)' : 'pendiente'}</span>
+              </button>
+            </li>
+
+            <li className="flex items-center">
+              <button
+                onClick={() => handleClickSymbolicInfo('Relaciones (modo simbólico): muestra dinámicas psicológicas del vínculo. No evalúa compatibilidad ni predice resultados.')}
+                className="flex items-center w-full text-left"
+                title={relationshipMode !== 'off' ? 'Relaciones (modo simbólico): dinámicas psicológicas del vínculo. No compatibilidad ni predicción.' : undefined}
+              >
+                <Dot type={relationshipMode !== 'off' ? 'symbolic' : 'available'} />
+                <span className="flex-1">Relaciones</span>
+                <span className="text-xs text-gray-400">
+                  {relationshipMode !== 'off'
+                    ? (() => {
+                      const label =
+                        relationshipMode === 'couple' ? 'Pareja' :
+                          relationshipMode === 'family' ? 'Familia' :
+                            relationshipMode === 'work' ? 'Trabajo' :
+                              relationshipMode === 'social' ? 'Social' :
+                                'Activo';
+                      const role = relationshipRole === 'reactive' ? 'Reactivo' : 'Activo';
+                      return `Activo (lectura simbólica) · ${label} · Rol: ${role}`;
+                    })()
+                    : 'pendiente'}
+                </span>
               </button>
             </li>
           </ul>

@@ -1,1 +1,1 @@
-feat(astrology): add symbolic fixed stars layer (archetypal, non-predictive)
+feat(astrology): add symbolic advanced relationships overlay (psychological)

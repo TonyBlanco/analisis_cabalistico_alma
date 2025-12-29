@@ -48,6 +48,8 @@ type Props = {
   showMathPoints?: boolean;
   advancedObjects?: { nodes: boolean; fortune: boolean; symbolicPoints: boolean };
   fixedStars?: { primary: boolean; secondary: boolean };
+  relationshipMode?: "off" | "couple" | "family" | "work" | "social";
+  relationshipRole?: "active" | "reactive";
   comparisonWheel?: {
     enabled: boolean;
     planets: PlanetPoint[];
@@ -85,6 +87,8 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
   showMathPoints = false,
   advancedObjects,
   fixedStars,
+  relationshipMode = "off",
+  relationshipRole = "active",
   comparisonWheel,
   showComparisonAspects = true,
 }) => {
@@ -94,6 +98,8 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
   const relocationRotation = relocation?.rotationDeg ?? 0;
   const advObjects = advancedObjects ?? { nodes: showMathPoints, fortune: false, symbolicPoints: showMathPoints };
   const stars = fixedStars ?? { primary: false, secondary: false };
+  const relMode = relationshipMode;
+  const relRole = relationshipRole;
   const comparisonEnabled = Boolean(comparisonWheel?.enabled);
   const opts: WheelOptions = useMemo(() => ({
     size,
@@ -1137,6 +1143,238 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
     );
   };
 
+  const renderRelationshipsOverlay = () => {
+    if (relMode === "off") return null;
+
+    const tooltipGeneral = "Relaciones (modo simbólico): muestra dinámicas psicológicas del vínculo. No evalúa compatibilidad ni predice resultados.";
+
+    const asc = normalizeDeg((houses && houses.length === 12) ? houses[0] : (Number.isFinite(ascendantDeg) ? ascendantDeg : 0));
+    const desc = normalizeDeg(asc + 180);
+    const mc = normalizeDeg((houses && houses.length === 12) ? houses[9] : (asc + 90));
+    const ic = normalizeDeg(mc + 180);
+
+    const alpha = isHuber ? 0.75 : 1;
+    const strokeBase =
+      relMode === "couple" ? "#a78bfa" :
+        relMode === "family" ? "#f59e0b" :
+          relMode === "work" ? "#60a5fa" :
+            relMode === "social" ? "#34d399" :
+              "#94a3b8";
+
+    const fillBase =
+      relMode === "couple" ? "rgba(167,139,250,0.08)" :
+        relMode === "family" ? "rgba(245,158,11,0.08)" :
+          relMode === "work" ? "rgba(96,165,250,0.08)" :
+            relMode === "social" ? "rgba(52,211,153,0.07)" :
+              "rgba(148,163,184,0.06)";
+
+    const bandOuter = Math.max(rings.houseInner + 18, rings.houseOuter - 3);
+    const bandInner = Math.min(bandOuter - 18, rings.houseInner + 4);
+
+    const donutSeg = (startDeg: number, endDeg: number) => {
+      const a0 = normalizeDeg(startDeg);
+      const a1 = normalizeDeg(endDeg);
+      const delta = (a1 - a0 + 360) % 360;
+      const largeArc = delta > 180 ? 1 : 0;
+
+      const p0o = degToPoint(a0, bandOuter, cx);
+      const p1o = degToPoint(a1, bandOuter, cx);
+      const p1i = degToPoint(a1, bandInner, cx);
+      const p0i = degToPoint(a0, bandInner, cx);
+
+      return `M ${p0o.x} ${p0o.y} A ${bandOuter} ${bandOuter} 0 ${largeArc} 1 ${p1o.x} ${p1o.y} L ${p1i.x} ${p1i.y} A ${bandInner} ${bandInner} 0 ${largeArc} 0 ${p0i.x} ${p0i.y} Z`;
+    };
+
+    const axis = (deg: number, key: string, labelA: string, labelB: string) => {
+      const pA = degToPoint(deg, bandOuter + 10, cx);
+      const pB = degToPoint(normalizeDeg(deg + 180), bandOuter + 10, cx);
+      const lA = degToPoint(deg, bandOuter, cx);
+      const lB = degToPoint(normalizeDeg(deg + 180), bandOuter, cx);
+      return (
+        <g key={key} opacity={0.65 * alpha}>
+          <line
+            x1={lA.x} y1={lA.y}
+            x2={lB.x} y2={lB.y}
+            stroke={strokeBase}
+            strokeWidth={1.2}
+            opacity={0.22}
+            strokeDasharray="6 10"
+          />
+          <text x={pA.x} y={pA.y} textAnchor="middle" dominantBaseline="middle" fontSize={10} fill={strokeBase} opacity={0.55} style={{ fontFamily: "Inter, ui-sans-serif, system-ui" }}>
+            {labelA}
+          </text>
+          <text x={pB.x} y={pB.y} textAnchor="middle" dominantBaseline="middle" fontSize={10} fill={strokeBase} opacity={0.55} style={{ fontFamily: "Inter, ui-sans-serif, system-ui" }}>
+            {labelB}
+          </text>
+        </g>
+      );
+    };
+
+    const segAround = (centerDeg: number, widthDeg: number) => {
+      const start = normalizeDeg(centerDeg - widthDeg / 2);
+      const end = normalizeDeg(centerDeg + widthDeg / 2);
+      return donutSeg(start, end);
+    };
+
+    const fieldSegs: Array<{ key: string; d: string; title: string }> = (() => {
+      if (relMode === "couple") {
+        return [
+          { key: "couple-asc", d: segAround(asc, 70), title: "Pareja: eje Yo–Otro (simbólico). Encuentro, espejo y aprendizaje mutuo." },
+          { key: "couple-desc", d: segAround(desc, 70), title: "Pareja: zona de espejo (simbólico). No predice resultados." },
+        ];
+      }
+      if (relMode === "family") {
+        return [
+          { key: "family-ic", d: segAround(ic, 90), title: "Familia: pertenencia y raíces (simbólico). Roles, herencia y vínculo." },
+          { key: "family-mc", d: segAround(mc, 90), title: "Familia: rol y responsabilidad (simbólico). No es determinista." },
+        ];
+      }
+      if (relMode === "work") {
+        return [
+          { key: "work-mc", d: segAround(normalizeDeg(mc + 45), 90), title: "Trabajo: cooperación y función (simbólico). Autoridad y organización." },
+        ];
+      }
+      if (relMode === "social") {
+        return [
+          { key: "social-net", d: segAround(normalizeDeg(asc + 30), 120), title: "Social: intercambio y adaptación (simbólico). Red de contactos." },
+        ];
+      }
+      return [];
+    })();
+
+    const hashKey = (key: string) => {
+      const s = String(key || "");
+      let h = 0;
+      for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+      return h;
+    };
+
+    const planetDeg = (p: PlanetPoint) => {
+      if (Number.isFinite(p.degree) && !isPlaceholder) return normalizeDeg(p.degree);
+      return normalizeDeg((hashKey(p.key) * 137 + 23) % 360);
+    };
+
+    const keyLabel = (k: string) => String(k || "").toLowerCase();
+    const priority = new Set(["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn"]);
+    const ptsForPairs = planets.filter((p) => priority.has(keyLabel(p.key))).slice(0, 10);
+
+    const pairs: Array<{ a: PlanetPoint; b: PlanetPoint; kind: "projection" | "shadow" | "complement" }> = [];
+    for (let i = 0; i < ptsForPairs.length; i++) {
+      for (let j = i + 1; j < ptsForPairs.length; j++) {
+        const a = ptsForPairs[i];
+        const b = ptsForPairs[j];
+        const d = shortestAngle(planetDeg(a), planetDeg(b));
+        if (Math.abs(d - 180) <= 12) {
+          const kind: "projection" | "shadow" | "complement" =
+            relRole === "reactive" ? "shadow" :
+              relMode === "couple" ? "projection" :
+                relMode === "family" ? "shadow" :
+                  "complement";
+          pairs.push({ a, b, kind });
+          if (pairs.length >= 10) break;
+        }
+      }
+      if (pairs.length >= 10) break;
+    }
+
+    const kindLabel = (k: "projection" | "shadow" | "complement") =>
+      k === "projection" ? "Dinámica de proyección" : (k === "shadow" ? "Sombra" : "Complemento");
+
+    const kindTooltip = (k: "projection" | "shadow" | "complement") =>
+      k === "projection"
+        ? "Dinámica de proyección: lo no integrado se busca en el otro (simbólico)."
+        : (k === "shadow"
+          ? "Dinámica de sombra: contenido no reconocido pide integración (simbólico)."
+          : "Dinámica de complemento: complementariedad creativa (simbólico).");
+
+    const crossLines = pairs.map((p, idx) => {
+      const aDeg = planetDeg(p.a);
+      const bDeg = planetDeg(p.b);
+      const aPt = degToPoint(aDeg, rings.planetRing, cx);
+      const bPt = degToPoint(bDeg, rings.planetRing, cx);
+      const tt = `${kindLabel(p.kind)} — ${String(p.a.key)} ↔ ${String(p.b.key)}. ${kindTooltip(p.kind)} No es predictivo.`;
+      return (
+        <g key={`rel-cross-${idx}`} opacity={0.6 * alpha}>
+          <title>{tt}</title>
+          <line
+            x1={aPt.x} y1={aPt.y}
+            x2={bPt.x} y2={bPt.y}
+            stroke={strokeBase}
+            strokeWidth={1.1}
+            opacity={0.14}
+            strokeDasharray="3 10"
+          />
+        </g>
+      );
+    });
+
+    const doubleWheelLinks = (() => {
+      if (!secondaryLayer) return null;
+      const pts = (secondaryPlanets && secondaryPlanets.length > 0) ? secondaryPlanets : (transitPlanets && transitPlanets.length > 0 ? transitPlanets : []);
+      if (!pts || pts.length === 0) return null;
+
+      const maxR = cx - 8 - (comparisonEnabled ? 46 : 0);
+      const outerR = Math.min(maxR, Math.min(maxR - 22, rings.outer + 18) + 26);
+      const glyphR = Math.min(maxR - 10, outerR - 10);
+
+      const byKey = new Map<string, PlanetPoint>();
+      pts.forEach((p) => byKey.set(keyLabel(p.key), p));
+
+      const lines: React.ReactNode[] = [];
+      for (const p of planets.filter((x) => priority.has(keyLabel(x.key))).slice(0, 6)) {
+        const other = byKey.get(keyLabel(p.key));
+        if (!other) continue;
+
+        const aPt = degToPoint(planetDeg(p), rings.planetRing, cx);
+        const bPt = degToPoint(planetDeg(other), glyphR, cx);
+        const tt = `Vínculo simbólico (doble rueda): ${String(p.key)} ↔ ${String(other.key)}. No es un aspecto matemático.`;
+        lines.push(
+          <g key={`rel-dw-${p.key}`} opacity={0.55 * alpha}>
+            <title>{tt}</title>
+            <line
+              x1={aPt.x} y1={aPt.y}
+              x2={bPt.x} y2={bPt.y}
+              stroke={strokeBase}
+              strokeWidth={1.1}
+              opacity={0.1}
+              strokeDasharray="2 12"
+            />
+          </g>
+        );
+      }
+      return <g>{lines}</g>;
+    })();
+
+    const socialNodes = (() => {
+      if (relMode !== "social") return null;
+      const base = normalizeDeg(asc + (hashKey(planets[0]?.key ?? "x") % 360));
+      const nodes = Array.from({ length: Math.min(10, Math.max(6, planets.length)) }, (_, i) => {
+        const deg = normalizeDeg(base + i * 33 + (hashKey(planets[i]?.key ?? `n${i}`) % 17));
+        const pt = degToPoint(deg, bandOuter + 14, cx);
+        return (
+          <circle key={`rel-node-${i}`} cx={pt.x} cy={pt.y} r={3.2} fill={strokeBase} opacity={0.18} />
+        );
+      });
+      return <g opacity={0.9 * alpha}>{nodes}</g>;
+    })();
+
+    return (
+      <g>
+        <title>{tooltipGeneral}</title>
+        {axis(asc, "rel-axis-yo-otro", "Yo", "Otro")}
+        {axis(mc, "rel-axis-proj-int", "Proyección", "Integración")}
+        {fieldSegs.map((s) => (
+          <path key={s.key} d={s.d} fill={fillBase} stroke="none" opacity={0.9 * alpha}>
+            <title>{s.title}</title>
+          </path>
+        ))}
+        {socialNodes}
+        {crossLines}
+        {doubleWheelLinks}
+      </g>
+    );
+  };
+
   const renderSecondaryWheel = () => {
     if (!secondaryLayer) return null;
 
@@ -1611,6 +1849,7 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
               {renderRelocationOverlay()}
               {renderAdvancedObjects()}
               {renderFixedStars()}
+              {renderRelationshipsOverlay()}
               {huberHouseBands}
                 {renderHouseLines()}
                 {renderHouseNumbers()}

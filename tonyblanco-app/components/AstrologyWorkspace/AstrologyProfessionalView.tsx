@@ -2035,7 +2035,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                                     secondaryLayer={secondaryLayer && secondaryLayerLabel ? { key: secondaryLayer, label: secondaryLayerLabel, mode: 'symbolic' } : null}
                                     secondaryPlanets={secondaryPlanets ?? undefined}
                                     comparisonWheel={comparisonWheel}
-                                    showComparisonAspects={synastryEnabled}
+                                    showComparisonAspects={false}
                                     symbolicPlanetaryLayer={activeLayers.has('planetary')}
                                     harmonicOrder={harmonicOrder}
                                     personaMode={personaMode}
@@ -2132,7 +2132,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                                crossAspectNatalKeys={crossAspectNatalKeysToPass}
                                crossAspectSecondaryKeys={showCrossAspects ? crossAspects.secondaryKeys : undefined}
                                comparisonWheel={comparisonWheel}
-                               showComparisonAspects={synastryEnabled}
+                               showComparisonAspects={false}
                                symbolicPlanetaryLayer={activeLayers.has('planetary')}
                                harmonicOrder={harmonicOrder}
                                personaMode={personaMode}
@@ -2172,7 +2172,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                            crossAspectNatalKeys={showCrossAspects ? crossAspects.natalKeys : undefined}
                            crossAspectSecondaryKeys={showCrossAspects ? crossAspects.secondaryKeys : undefined}
                            comparisonWheel={comparisonWheel}
-                           showComparisonAspects={synastryEnabled}
+                           showComparisonAspects={false}
                            symbolicPlanetaryLayer={activeLayers.has('planetary')}
                            harmonicOrder={harmonicOrder}
                            personaMode={personaMode}

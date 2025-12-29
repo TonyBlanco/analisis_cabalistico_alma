@@ -1,1 +1,1 @@
-fix(astrology): enable synastry double wheel overlay with selected partner
+feat(astrology): enable double wheel + symbolic forecast layers (visual-only)

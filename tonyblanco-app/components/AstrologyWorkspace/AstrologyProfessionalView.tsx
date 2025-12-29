@@ -152,6 +152,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
   const [symbolicDoubleWheel, setSymbolicDoubleWheel] = useState<boolean>(false);
   const [symbolicSolarReturnYear, setSymbolicSolarReturnYear] = useState<number | null>(null);
   const [symbolicLunarReturnDate, setSymbolicLunarReturnDate] = useState<string | null>(null);
+  const [showCrossAspects, setShowCrossAspects] = useState<boolean>(false);
 
   const [activeTab, setActiveTab] = useState<'visual' | 'psych'>('visual');
 
@@ -425,6 +426,123 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
     }
   }, [secondaryLayer, transitsSnapshot, transitBaseType, analysis_result, progressionsSnapshot, solarReturnSnapshot]);
 
+  type CrossAspectKind = 'CONJ' | 'OPP' | 'SQR' | 'TRI' | 'SEXT';
+  type CrossAspectHit = {
+    id: string;
+    natalKey: string;
+    natalGlyph: string;
+    layerKey: string;
+    layerLabel: string;
+    secondaryKey?: string;
+    secondaryGlyph?: string;
+    kind: CrossAspectKind;
+    mode: 'computed' | 'symbolic-only';
+  };
+
+  const crossAspects = useMemo(() => {
+    const empty = {
+      mode: 'off' as const,
+      hits: [] as CrossAspectHit[],
+      natalKeys: new Set<string>(),
+      secondaryKeys: new Set<string>(),
+      kindLabel: {
+        CONJ: 'Conjunción',
+        OPP: 'Oposición',
+        SQR: 'Cuadratura',
+        TRI: 'Trígono',
+        SEXT: 'Sextil',
+      } as Record<CrossAspectKind, string>,
+    };
+
+    if (!showCrossAspects || !secondaryLayer || !secondaryLayerLabel || !natal) return empty;
+
+    const personal = new Set(['sun', 'moon', 'mercury', 'venus', 'mars']);
+    const natalCandidates = normalizeNatalForWheel(natal as any).planets.filter((p) => personal.has(String(p.key).toLowerCase()));
+
+    if (secondaryPlanets && secondaryPlanets.length > 0) {
+      const secondaryCandidates = secondaryPlanets.filter((p: any) => personal.has(String(p.key).toLowerCase()));
+      const syn = computeSynastryAspects(natalCandidates, secondaryCandidates, 8, 6)
+        .slice()
+        .sort((a, b) => a.orb - b.orb)
+        .slice(0, 15);
+
+      const hits: CrossAspectHit[] = syn.map((a) => {
+        const n = natalCandidates.find((p: any) => p.key === a.p1Key);
+        const s = secondaryCandidates.find((p: any) => p.key === a.p2Key);
+        return {
+          id: `${a.p1Key}-${a.p2Key}-${a.kind}`,
+          natalKey: a.p1Key,
+          natalGlyph: n?.glyph ?? '•',
+          layerKey: secondaryLayer,
+          layerLabel: secondaryLayerLabel,
+          secondaryKey: a.p2Key,
+          secondaryGlyph: s?.glyph ?? '•',
+          kind: a.kind as CrossAspectKind,
+          mode: 'computed',
+        };
+      });
+
+      return {
+        mode: 'computed' as const,
+        hits,
+        natalKeys: new Set(hits.map((h) => h.natalKey)),
+        secondaryKeys: new Set(hits.map((h) => h.secondaryKey).filter(Boolean) as string[]),
+        kindLabel: empty.kindLabel,
+      };
+    }
+
+    const symbolicTargetsByLayer: Record<string, Array<{ natal: string; kind: CrossAspectKind }>> = {
+      transits: [
+        { natal: 'sun', kind: 'SQR' },
+        { natal: 'moon', kind: 'OPP' },
+        { natal: 'mercury', kind: 'CONJ' },
+        { natal: 'venus', kind: 'SEXT' },
+        { natal: 'mars', kind: 'TRI' },
+      ],
+      progressions: [
+        { natal: 'moon', kind: 'CONJ' },
+        { natal: 'mercury', kind: 'SEXT' },
+        { natal: 'venus', kind: 'TRI' },
+      ],
+      solarArc: [
+        { natal: 'sun', kind: 'CONJ' },
+        { natal: 'mars', kind: 'SQR' },
+      ],
+      return_solar: [
+        { natal: 'sun', kind: 'CONJ' },
+        { natal: 'moon', kind: 'SEXT' },
+      ],
+      return_lunar: [
+        { natal: 'moon', kind: 'CONJ' },
+        { natal: 'venus', kind: 'SEXT' },
+      ],
+    };
+
+    const hits: CrossAspectHit[] = (symbolicTargetsByLayer[secondaryLayer] ?? [])
+      .map((t) => {
+        const n = natalCandidates.find((p) => String(p.key).toLowerCase() === t.natal);
+        if (!n) return null;
+        return {
+          id: `${t.natal}-${secondaryLayer}-${t.kind}`,
+          natalKey: n.key,
+          natalGlyph: n.glyph,
+          layerKey: secondaryLayer,
+          layerLabel: secondaryLayerLabel,
+          kind: t.kind,
+          mode: 'symbolic-only',
+        } as CrossAspectHit;
+      })
+      .filter(Boolean) as CrossAspectHit[];
+
+    return {
+      mode: 'symbolic-only' as const,
+      hits: hits.slice(0, 15),
+      natalKeys: new Set(hits.map((h) => h.natalKey)),
+      secondaryKeys: new Set<string>(),
+      kindLabel: empty.kindLabel,
+    };
+  }, [showCrossAspects, secondaryLayer, secondaryLayerLabel, secondaryPlanets, natal]);
+
   // Bridge: year/date presence -> activeLayers (UI + engine)
   useEffect(() => {
     setActiveLayers((prev) => {
@@ -477,6 +595,8 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
           setSymbolicSolarReturnYear={setSymbolicSolarReturnYear}
           symbolicLunarReturnDate={symbolicLunarReturnDate}
           setSymbolicLunarReturnDate={setSymbolicLunarReturnDate}
+          showCrossAspects={showCrossAspects}
+          setShowCrossAspects={setShowCrossAspects}
         />
       </aside>
 
@@ -1389,6 +1509,36 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                                 </span>
                               </div>
                             ) : null}
+                            {showCrossAspects && secondaryLayer && secondaryLayerLabel ? (
+                              <div className="mb-3 bg-white border border-gray-200 rounded p-3 text-xs">
+                                <div className="flex items-start justify-between gap-3">
+                                  <div>
+                                    <div className="text-sm font-semibold">Aspectos cruzados (simbólicos)</div>
+                                    <div className="text-[12px] text-gray-500">
+                                      {crossAspects.mode === 'symbolic-only' ? 'Modo: aproximación simbólica (sin grados)' : 'Modo: basado en geometría disponible'}
+                                    </div>
+                                  </div>
+                                  <div className="text-[12px] text-gray-500" title="Esto representa ejes simbólicos de tensión/integración. No predice eventos.">
+                                    Lectura no predictiva
+                                  </div>
+                                </div>
+                                {crossAspects.hits.length > 0 ? (
+                                  <ul className="mt-2 space-y-1">
+                                    {crossAspects.hits.slice(0, 15).map((h) => (
+                                      <li
+                                        key={h.id}
+                                        className="text-[13px] text-gray-700"
+                                        title="Esto representa un eje de tensión/integración simbólica. No predice eventos."
+                                      >
+                                        Natal: {h.natalGlyph} ↔ Capa: {h.secondaryGlyph ? `${h.secondaryGlyph} ` : ''}{h.layerLabel} — {crossAspects.kindLabel[h.kind]} · Activación simbólica
+                                      </li>
+                                    ))}
+                                  </ul>
+                                ) : (
+                                  <div className="mt-2 text-[12px] text-gray-600">No hay hits simbólicos disponibles para la capa activa.</div>
+                                )}
+                              </div>
+                            ) : null}
                             <AstroWheelAdvanced
                               size={920}
                               ascendantDeg={wheel.ascendantDeg}
@@ -1402,6 +1552,8 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                                symbolicDoubleWheel={symbolicDoubleWheel}
                                secondaryLayer={secondaryLayer && secondaryLayerLabel ? { key: secondaryLayer, label: secondaryLayerLabel, mode: 'symbolic' } : null}
                                secondaryPlanets={secondaryPlanets ?? undefined}
+                               crossAspectNatalKeys={showCrossAspects ? crossAspects.natalKeys : undefined}
+                               crossAspectSecondaryKeys={showCrossAspects ? crossAspects.secondaryKeys : undefined}
                                titleRight={`${meta.sistema_casas || 'placidus'} · ${meta.zodiac_type || 'tropical'}`}
                                transitPlanets={transitsSnapshot && transitBaseType === 'natal' ? transitsSnapshot.planets : undefined}
                              />
@@ -1427,6 +1579,8 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                            annualLayers={annualLayers}
                            symbolicDoubleWheel={symbolicDoubleWheel}
                            secondaryLayer={secondaryLayer && secondaryLayerLabel ? { key: secondaryLayer, label: secondaryLayerLabel, mode: 'symbolic' } : null}
+                           crossAspectNatalKeys={showCrossAspects ? crossAspects.natalKeys : undefined}
+                           crossAspectSecondaryKeys={showCrossAspects ? crossAspects.secondaryKeys : undefined}
                            titleRight="Pendiente · solo lectura"
                         />
                       )

@@ -37,6 +37,8 @@ type Props = {
     mode?: "symbolic" | "real";
   } | null;
   secondaryPlanets?: PlanetPoint[];
+  crossAspectNatalKeys?: Set<string>;
+  crossAspectSecondaryKeys?: Set<string>;
 };
 
 const DEFAULT_ZODIAC = ["♈","♉","♊","♋","♌","♍","♎","♏","♐","♑","♒","♓"];
@@ -58,6 +60,8 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
   annualLayers = [],
   secondaryLayer = null,
   secondaryPlanets,
+  crossAspectNatalKeys,
+  crossAspectSecondaryKeys,
 }) => {
   const isPlaceholder = visualMode === "placeholder";
   const opts: WheelOptions = useMemo(() => ({
@@ -460,19 +464,26 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
             .map((p) => {
               const pt = degToPoint(p.degree, glyphR, cx);
               return (
-                <text
-                  key={`sec-pl-${p.key}`}
-                  x={pt.x}
-                  y={pt.y}
-                  textAnchor="middle"
-                  dominantBaseline="middle"
-                  fontSize={st.glyphSize}
-                  fill={st.stroke}
-                  opacity={Math.min(0.85, st.opacity + 0.25)}
-                  style={{ fontFamily: 'Inter, ui-sans-serif, system-ui' }}
-                >
-                  {p.glyph}
-                </text>
+                <g key={`sec-pl-${p.key}`}>
+                  {crossAspectSecondaryKeys && crossAspectSecondaryKeys.has(p.key) ? (
+                    <>
+                      <circle cx={pt.x} cy={pt.y} r={12} fill="none" stroke={st.stroke} strokeWidth={2} opacity={0.22} />
+                      <text x={pt.x + 12} y={pt.y - 10} fontSize={9} fill={st.stroke} opacity={0.65} style={{ fontFamily: 'Inter, ui-sans-serif, system-ui' }}>AS</text>
+                    </>
+                  ) : null}
+                  <text
+                    x={pt.x}
+                    y={pt.y}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    fontSize={st.glyphSize}
+                    fill={st.stroke}
+                    opacity={Math.min(0.85, st.opacity + 0.25)}
+                    style={{ fontFamily: 'Inter, ui-sans-serif, system-ui' }}
+                  >
+                    {p.glyph}
+                  </text>
+                </g>
               );
             })}
         </g>
@@ -525,6 +536,12 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
 
           return (
             <g key={`pl-${p.key}`}>
+              {crossAspectNatalKeys && crossAspectNatalKeys.has(p.key) ? (
+                <>
+                  <circle cx={pt.x} cy={pt.y} r={13} fill="none" stroke="#60a5fa" strokeWidth={2} opacity={0.22} />
+                  <text x={pt.x + 12} y={pt.y - 10} fontSize={9} fill="#60a5fa" opacity={0.7} style={{ fontFamily: 'Inter, ui-sans-serif, system-ui' }}>AS</text>
+                </>
+              ) : null}
               {/* optional guide from base ring to stacked glyph */}
               { (pos && Math.abs((pos.radius || 0) - rings.planetRing) > 2) ? (
                 <line x1={basePt.x} y1={basePt.y} x2={pt.x} y2={pt.y} stroke="#d0d0d0" strokeWidth={0.8} opacity={0.6} />

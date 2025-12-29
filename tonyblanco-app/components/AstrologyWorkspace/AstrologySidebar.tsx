@@ -20,6 +20,8 @@ interface AstrologySidebarProps {
   setSymbolicSolarReturnYear?: (v: number | null) => void;
   symbolicLunarReturnDate?: string | null;
   setSymbolicLunarReturnDate?: (v: string | null) => void;
+  showCrossAspects?: boolean;
+  setShowCrossAspects?: (v: boolean) => void;
 }
 
 const HOUSE_OPTIONS: Array<{ code: string; name: string; desc?: string }> = [
@@ -54,6 +56,8 @@ export default function AstrologySidebar({
   setSymbolicSolarReturnYear,
   symbolicLunarReturnDate,
   setSymbolicLunarReturnDate,
+  showCrossAspects = false,
+  setShowCrossAspects,
 }: AstrologySidebarProps) {
   const canUseForecast = Boolean(hasIdentity);
   const isLayerActive = (layer: string) => Boolean(activeLayers && activeLayers.has(layer));
@@ -64,6 +68,13 @@ export default function AstrologySidebar({
   const canUseReturns = canUseForecast;
   const isSolarReturnActive = isLayerActive('return_solar');
   const isLunarReturnActive = isLayerActive('return_lunar');
+  const hasSecondaryLayer = Boolean(activeLayers && (
+    activeLayers.has('transits') ||
+    activeLayers.has('progressions') ||
+    activeLayers.has('solarArc') ||
+    activeLayers.has('return_solar') ||
+    activeLayers.has('return_lunar')
+  ));
 
   const ForecastItem = ({
     layer,
@@ -164,6 +175,23 @@ export default function AstrologySidebar({
               label="Arco Solar"
               tooltip="Desplazamiento simbólico uniforme usado como referencia estructural. No predice eventos."
             />
+            <div className={`flex items-center justify-between px-2 py-1 border rounded ${canUseForecast ? 'bg-white border-gray-200' : 'bg-gray-50 border-gray-200 opacity-60'}`}>
+              <div
+                className="text-[13px]"
+                title="Aspectos cruzados simbólicos entre carta natal y la capa activa. No predice eventos."
+              >
+                Aspectos cruzados · <span className="text-gray-500">simbólicos</span>
+              </div>
+              <label className="inline-flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={Boolean(showCrossAspects)}
+                  onChange={(e) => setShowCrossAspects && setShowCrossAspects(e.target.checked)}
+                  disabled={!canUseForecast}
+                  title={!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : (!hasSecondaryLayer ? 'Activa una capa secundaria para ver aspectos cruzados' : 'Mostrar aspectos cruzados (solo visual)')}
+                />
+              </label>
+            </div>
           </div>
         </div>
 

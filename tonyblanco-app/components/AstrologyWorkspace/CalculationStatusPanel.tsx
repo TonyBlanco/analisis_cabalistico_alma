@@ -20,6 +20,8 @@ type Props = {
   zodiacType: string;
   canRecalculate: boolean; // whether UI has ability to trigger recalculation (we will NOT trigger)
   secondaryLayerKey?: string | null;
+  comparisonEnabled?: boolean;
+  comparisonAspectsEnabled?: boolean;
 };
 
 type DotType = 'active' | 'available' | 'locked' | 'symbolic';
@@ -31,7 +33,7 @@ const Dot: React.FC<{ type: DotType }> = ({ type }) => {
   return <span className="inline-block w-3 h-3 rounded-full bg-rose-400 mr-2 opacity-70" />;
 };
 
-export default function CalculationStatusPanel({ overlays, activeLayers, symbolicLayers, houseSystem, zodiacType, canRecalculate, secondaryLayerKey = null }: Props) {
+export default function CalculationStatusPanel({ overlays, activeLayers, symbolicLayers, houseSystem, zodiacType, canRecalculate, secondaryLayerKey = null, comparisonEnabled = false, comparisonAspectsEnabled = false }: Props) {
   const [helper, setHelper] = useState<string | null>(null);
   const symbolicTooltip = 'Capa simbólica activa. No corresponde a un cálculo astronómico real.';
   const annualSymbolicTooltip = 'Capa anual/mensual activa (lectura simbólica) — sin recalcular carta base.';
@@ -117,6 +119,22 @@ export default function CalculationStatusPanel({ overlays, activeLayers, symboli
               <Dot type={calcState('natal', overlays.natal)} />
               <span className="flex-1">Carta Natal</span>
               <span className="text-xs text-gray-400">(base)</span>
+            </li>
+
+            <li className="flex items-center">
+              <button onClick={() => handleClickSymbolicInfo('Doble rueda simbólica de comparación (solo visual).')} className="flex items-center w-full text-left" title={comparisonEnabled ? 'Doble rueda simbólica de comparación (solo visual).' : undefined}>
+                <Dot type={comparisonEnabled ? 'symbolic' : 'available'} />
+                <span className="flex-1">Doble Rueda</span>
+                <span className="text-xs text-gray-400">{comparisonEnabled ? 'Activo (lectura simbólica)' : 'pendiente'}</span>
+              </button>
+            </li>
+
+            <li className="flex items-center">
+              <button onClick={() => handleClickSymbolicInfo('Aspecto simbólico (no matemático).')} className="flex items-center w-full text-left" title={comparisonAspectsEnabled ? 'Aspecto simbólico (no matemático).' : undefined}>
+                <Dot type={comparisonAspectsEnabled ? 'symbolic' : 'available'} />
+                <span className="flex-1">Aspectos cruzados</span>
+                <span className="text-xs text-gray-400">{comparisonAspectsEnabled ? 'Activo (simbólico)' : 'pendiente'}</span>
+              </button>
             </li>
 
             <li className="flex items-center">

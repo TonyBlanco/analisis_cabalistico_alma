@@ -675,6 +675,35 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
     return ((acc % 61) - 30);
   }, [relocationCity]);
 
+  const comparisonWheel = useMemo(() => {
+    const enabled = Boolean(synastryEnabled && !partnerChart);
+    if (!enabled || !natal) return { enabled: false as const, planets: [], label: '' };
+
+    const baseWheel = normalizeNatalForWheel(natal as any);
+    const placeholderPlanets = baseWheel.planets.map((p) => ({ ...p, degree: (p.degree + 30) % 360 }));
+
+    const fromActiveSession = () => {
+      if (!activeSessionId) return null;
+      const sess = sessions.find((x) => x.id === activeSessionId);
+      const wheel = sess?.chartPayload ? normalizeNatalForWheel(sess.chartPayload) : null;
+      if (!wheel) return null;
+      return { planets: wheel.planets, label: `Carta comparada — lectura simbólica (sesión ${activeSessionId})` };
+    };
+
+    const fromLastSession = () => {
+      const sess = sessions.slice().reverse().find((x) => Boolean(x.chartPayload));
+      if (!sess) return null;
+      const wheel = sess.chartPayload ? normalizeNatalForWheel(sess.chartPayload) : null;
+      if (!wheel) return null;
+      return { planets: wheel.planets, label: `Carta comparada — lectura simbólica (última sesión ${sess.id})` };
+    };
+
+    const best = fromActiveSession() || fromLastSession();
+    if (best) return { enabled: true as const, planets: best.planets, label: best.label };
+
+    return { enabled: true as const, planets: placeholderPlanets, label: 'Carta comparada — lectura simbólica (placeholder)' };
+  }, [synastryEnabled, partnerChart, natal, activeSessionId, sessions]);
+
   // Bridge: year/date presence -> activeLayers (UI + engine)
   useEffect(() => {
     setActiveLayers((prev) => {
@@ -1556,6 +1585,8 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                      mathPoints: activeLayers.has('mathPoints'),
                    }}
                    secondaryLayerKey={secondaryLayer}
+                   comparisonEnabled={Boolean(synastryEnabled)}
+                   comparisonAspectsEnabled={Boolean(synastryEnabled)}
                    houseSystem={houseSystem}
                    zodiacType={zodiacType}
                    canRecalculate={Boolean(calculateChart)}
@@ -1631,11 +1662,11 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                          </div>
                        ) : null}
                      </div>
-                  {hasChart && activeLayers.has('transits') && analysis_result?.transits ? (
+                  {!synastryEnabled && hasChart && activeLayers.has('transits') && analysis_result?.transits ? (
                     <AstrologyDoubleWheelSVG natal={natal!} overlay={analysis_result.transits} overlayLabel="Tránsitos" orbDegrees={orb} consultante={consultante} />
-                  ) : hasChart && activeLayers.has('progressions') && analysis_result?.progressions?.chart ? (
+                  ) : !synastryEnabled && hasChart && activeLayers.has('progressions') && analysis_result?.progressions?.chart ? (
                     <AstrologyDoubleWheelSVG natal={natal!} overlay={analysis_result.progressions.chart} overlayLabel="Progresiones (Secundarias)" orbDegrees={orb} consultante={consultante} />
-                  ) : hasChart && activeLayers.has('solarReturn') && analysis_result?.solarReturn?.chart ? (
+                  ) : !synastryEnabled && hasChart && activeLayers.has('solarReturn') && analysis_result?.solarReturn?.chart ? (
                     <AstrologyDoubleWheelSVG natal={natal!} overlay={analysis_result.solarReturn.chart} overlayLabel="Retorno Solar" orbDegrees={orb} consultante={consultante} />
                   ) : hasChart && synastryEnabled && partnerChart ? (
                     <div>
@@ -1690,6 +1721,17 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                         <div className="mt-3 text-xs text-gray-600">No se encontraron aspectos relacionales dentro de los orbes.</div>
                       )}
                     </div>
+                  ) : hasChart && synastryEnabled ? (
+                    <div className="mb-3 p-3 bg-white border rounded">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <div className="text-sm font-semibold">Doble Rueda — Comparación simbólica</div>
+                          <div className="text-xs text-gray-600">Interior: carta base · Exterior: carta comparada (lectura simbólica)</div>
+                        </div>
+                        <div className="text-xs text-gray-500">Sin cálculo · Solo visual</div>
+                      </div>
+                      <div className="mt-2 text-[12px] text-gray-500">{comparisonWheel.label}</div>
+                    </div>
                   ) : (
                     (hasChart && natal ? (
                       // Normalize natal payload into wheel data
@@ -1731,10 +1773,12 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                                     showAspects={true}
                                      orbDeg={orb}
                                      temporalLayers={temporalLayers}
-                                     annualLayers={annualLayers}
-                                     symbolicDoubleWheel={symbolicDoubleWheel}
+                                    annualLayers={annualLayers}
+                                    symbolicDoubleWheel={symbolicDoubleWheel}
                                     secondaryLayer={secondaryLayer && secondaryLayerLabel ? { key: secondaryLayer, label: secondaryLayerLabel, mode: 'symbolic' } : null}
                                     secondaryPlanets={secondaryPlanets ?? undefined}
+                                    comparisonWheel={comparisonWheel}
+                                    showComparisonAspects={synastryEnabled}
                                     symbolicPlanetaryLayer={activeLayers.has('planetary')}
                                     harmonicOrder={activeLayers.has('harmonics') ? harmonicOrder : undefined}
                                     personaMode={activeLayers.has('persona')}
@@ -1829,6 +1873,8 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                                secondaryPlanets={secondaryPlanets ?? undefined}
                                crossAspectNatalKeys={crossAspectNatalKeysToPass}
                                crossAspectSecondaryKeys={showCrossAspects ? crossAspects.secondaryKeys : undefined}
+                               comparisonWheel={comparisonWheel}
+                               showComparisonAspects={synastryEnabled}
                                symbolicPlanetaryLayer={activeLayers.has('planetary')}
                                harmonicOrder={activeLayers.has('harmonics') ? harmonicOrder : undefined}
                                personaMode={activeLayers.has('persona')}
@@ -1861,6 +1907,8 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                            secondaryLayer={secondaryLayer && secondaryLayerLabel ? { key: secondaryLayer, label: secondaryLayerLabel, mode: 'symbolic' } : null}
                            crossAspectNatalKeys={showCrossAspects ? crossAspects.natalKeys : undefined}
                            crossAspectSecondaryKeys={showCrossAspects ? crossAspects.secondaryKeys : undefined}
+                           comparisonWheel={comparisonWheel}
+                           showComparisonAspects={synastryEnabled}
                            symbolicPlanetaryLayer={activeLayers.has('planetary')}
                            harmonicOrder={activeLayers.has('harmonics') ? harmonicOrder : undefined}
                            personaMode={activeLayers.has('persona')}

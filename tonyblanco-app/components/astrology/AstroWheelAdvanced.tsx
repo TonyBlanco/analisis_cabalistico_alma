@@ -8,6 +8,7 @@ import {
   normalizeDeg,
   shortestAngle,
   computeAspects,
+  computeSynastryAspects,
   aspectStyle,
 } from "./astro-geometry";
 
@@ -44,6 +45,12 @@ type Props = {
   personaMode?: boolean;
   relocation?: { city: string; offsetDeg: number };
   showMathPoints?: boolean;
+  comparisonWheel?: {
+    enabled: boolean;
+    planets: PlanetPoint[];
+    label: string;
+  };
+  showComparisonAspects?: boolean;
 };
 
 const DEFAULT_ZODIAC = ["♈","♉","♊","♋","♌","♍","♎","♏","♐","♑","♒","♓"];
@@ -72,8 +79,11 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
   personaMode = false,
   relocation,
   showMathPoints = false,
+  comparisonWheel,
+  showComparisonAspects = true,
 }) => {
   const isPlaceholder = visualMode === "placeholder";
+  const comparisonEnabled = Boolean(comparisonWheel?.enabled);
   const opts: WheelOptions = useMemo(() => ({
     size,
     ascendantDeg: normalizeDeg(ascendantDeg),
@@ -573,7 +583,7 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
     if (!secondaryLayer) return null;
 
     const tooltip = `Modo Doble Rueda activo — Natal + ${secondaryLayer.label}. La rueda externa representa una capa simbólica sin cálculo astronómico real.`;
-    const maxR = cx - 8;
+    const maxR = cx - 8 - (comparisonEnabled ? 46 : 0);
     const innerR = Math.min(maxR - 22, rings.outer + 18);
     const outerR = Math.min(maxR, innerR + 26);
     const glyphR = Math.min(maxR - 10, outerR - 10);
@@ -650,6 +660,95 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
         {marker(180, "south")}
         {marker(270, "west")}
         {renderPlanetsSecondary()}
+      </g>
+    );
+  };
+
+  const renderComparisonWheel = () => {
+    if (!comparisonEnabled || !comparisonWheel?.planets || comparisonWheel.planets.length === 0) return null;
+    const tooltip = `${comparisonWheel.label} — lectura simbólica.`;
+
+    const maxR = cx - 8;
+    const outerR = maxR;
+    const innerR = Math.max(rings.outer + 24, outerR - 26);
+    const glyphR = innerR + 10;
+    const personal = new Set(["sun", "moon", "mercury", "venus", "mars"]);
+
+    return (
+      <g>
+        <title>{tooltip}</title>
+        <circle cx={cx} cy={cx} r={innerR} fill="none" stroke="#e5e7eb" strokeWidth={1.1} opacity={0.85} />
+        <circle cx={cx} cy={cx} r={outerR} fill="none" stroke="#94a3b8" strokeWidth={1.5} opacity={0.42} strokeDasharray="5 7" />
+        {comparisonWheel.planets
+          .filter((p) => personal.has(String(p.key).toLowerCase()))
+          .map((p) => {
+            const pt = degToPoint(p.degree, glyphR, cx);
+            return (
+              <text
+                key={`cmp-pl-${p.key}`}
+                x={pt.x}
+                y={pt.y}
+                textAnchor="middle"
+                dominantBaseline="middle"
+                fontSize={14}
+                fill="#64748b"
+                opacity={0.62}
+                style={{ fontFamily: 'Inter, ui-sans-serif, system-ui' }}
+              >
+                {p.glyph}
+              </text>
+            );
+          })}
+      </g>
+    );
+  };
+
+  const renderComparisonAspects = () => {
+    if (!comparisonEnabled || !showComparisonAspects || !comparisonWheel?.planets || comparisonWheel.planets.length === 0) return null;
+
+    const tooltip = 'Aspecto simbólico (no matemático)';
+    const personal = new Set(["sun", "moon", "mercury", "venus", "mars"]);
+    const natalCandidates = planets.filter((p) => personal.has(String(p.key).toLowerCase()));
+    const comparedCandidates = comparisonWheel.planets.filter((p) => personal.has(String(p.key).toLowerCase()));
+    if (natalCandidates.length === 0 || comparedCandidates.length === 0) return null;
+
+    const aspects = computeSynastryAspects(natalCandidates, comparedCandidates, 8, 6).slice(0, 18);
+
+    const maxR = cx - 8;
+    const outerR = maxR - 12;
+    const innerR = rings.planetRing;
+
+    const styleByKind: Record<string, { stroke: string; opacity: number; width: number }> = {
+      TRI: { stroke: "#16a34a", opacity: 0.22, width: 1.6 },  // armónico
+      SEXT: { stroke: "#0ea5e9", opacity: 0.2, width: 1.5 },  // armónico suave
+      SQR: { stroke: "#dc2626", opacity: 0.22, width: 1.6 },  // tensión
+      OPP: { stroke: "#dc2626", opacity: 0.2, width: 1.6 },   // tensión
+      CONJ: { stroke: "#64748b", opacity: 0.18, width: 1.4 }, // neutral
+    };
+
+    return (
+      <g>
+        {aspects.map((a, idx) => {
+          const p1 = natalCandidates.find((p) => p.key === a.p1Key);
+          const p2 = comparedCandidates.find((p) => p.key === a.p2Key);
+          if (!p1 || !p2) return null;
+          const A = degToPoint(p1.degree, innerR, cx);
+          const B = degToPoint(p2.degree, outerR, cx);
+          const st = styleByKind[a.kind] ?? styleByKind.CONJ;
+          return (
+            <line
+              key={`cmp-asp-${idx}-${a.p1Key}-${a.p2Key}-${a.kind}`}
+              x1={A.x} y1={A.y}
+              x2={B.x} y2={B.y}
+              stroke={st.stroke}
+              strokeWidth={st.width}
+              opacity={st.opacity}
+              strokeDasharray="3 8"
+            >
+              <title>{tooltip}</title>
+            </line>
+          );
+        })}
       </g>
     );
   };
@@ -792,16 +891,18 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
 
       <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
         <div className="w-full overflow-auto">
-            <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-              {/* Rotación global por ASC */}
-              <g transform={`rotate(${geo.rotationDeg} ${cx} ${cx})`}>
-                {renderSecondaryWheel()}
-                {renderTemporalLayers()}
-                {renderAnnualLayers()}
-                {renderPlanetaryLayer()}
-                {renderBaseRings()}
-                {renderDegreeTicks()}
-                {renderZodiac()}
+          <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+            {/* Rotación global por ASC */}
+            <g transform={`rotate(${geo.rotationDeg} ${cx} ${cx})`}>
+              {renderComparisonAspects()}
+              {renderSecondaryWheel()}
+              {renderTemporalLayers()}
+              {renderAnnualLayers()}
+              {renderComparisonWheel()}
+              {renderPlanetaryLayer()}
+              {renderBaseRings()}
+              {renderDegreeTicks()}
+              {renderZodiac()}
                 {renderHouseLines()}
                 {renderHouseNumbers()}
                 {renderRelocationOverlay()}

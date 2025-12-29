@@ -26,6 +26,7 @@ type Props = {
     key: "transits" | "progressions" | "solarArc";
     label?: string;
   }>;
+  symbolicDoubleWheel?: boolean;
 };
 
 const DEFAULT_ZODIAC = ["♈","♉","♊","♋","♌","♍","♎","♏","♐","♑","♒","♓"];
@@ -42,6 +43,7 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
   titleRight,
   visualMode = "normal",
   temporalLayers = [],
+  symbolicDoubleWheel = false,
 }) => {
   const isPlaceholder = visualMode === "placeholder";
   const opts: WheelOptions = useMemo(() => ({
@@ -284,6 +286,7 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
     const byKey = new Map(temporalLayers.map((l) => [l.key, l]));
     const order: Array<"transits" | "progressions" | "solarArc"> = ["transits", "progressions", "solarArc"];
     const symbolicTooltip = 'Capa simbólica activa. No corresponde a un cálculo astronómico real.';
+    const doubleWheelTooltip = 'Doble rueda simbólica. La rueda externa representa capas temporales sin cálculo astronómico real.';
 
     const styles: Record<string, { stroke: string; opacity: number; width: number; dash: string; dashOffset?: number; offset: number }> = {
       transits: { stroke: "#94a3b8", opacity: 0.62, width: 1.3, dash: "7 6", offset: 6 },
@@ -291,11 +294,18 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
       solarArc: { stroke: "#475569", opacity: 0.52, width: 1.4, dash: "1 6", dashOffset: 4, offset: 22 },
     };
 
+    const maxR = cx - 6;
+    const wantSymbolicDoubleWheel = Boolean(symbolicDoubleWheel);
+    const frameOuterR = Math.min(maxR, rings.outer + Math.max(32, Math.round(rings.outer * 0.1)));
+    const frameInnerR = Math.min(frameOuterR - 26, rings.outer + 4);
+    const canDrawFrame = wantSymbolicDoubleWheel && frameOuterR > frameInnerR + 10 && frameOuterR > rings.outer + 18;
+    const baseR = canDrawFrame ? frameInnerR + 6 : rings.outer;
+
     const items: React.ReactNode[] = [];
     for (const key of order) {
       if (!byKey.has(key)) continue;
       const st = styles[key];
-      const r = rings.outer + st.offset;
+      const r = canDrawFrame ? Math.min(frameOuterR - 6, baseR + st.offset) : (rings.outer + st.offset);
 
       // subtle markers at ASC/MC axes (purely visual, non-predictive)
       const marker = (deg: number, id: string) => {
@@ -309,6 +319,21 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
             stroke={st.stroke}
             strokeWidth={1.2}
             opacity={Math.min(0.7, st.opacity + 0.08)}
+          />
+        );
+      };
+
+      const solarArcArrow = () => {
+        if (key !== "solarArc") return null;
+        const tip = degToPoint(0, r + 8, cx);
+        const left = degToPoint(-7, r + 1, cx);
+        const right = degToPoint(7, r + 1, cx);
+        const points = `${tip.x},${tip.y} ${left.x},${left.y} ${right.x},${right.y}`;
+        return (
+          <polygon
+            points={points}
+            fill={st.stroke}
+            opacity={Math.min(0.65, st.opacity + 0.08)}
           />
         );
       };
@@ -328,6 +353,7 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
             strokeDashoffset={st.dashOffset}
             style={{ pointerEvents: "stroke" }}
           />
+          {solarArcArrow()}
           {marker(0, "north")}
           {marker(90, "east")}
           {marker(180, "south")}
@@ -336,7 +362,16 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
       );
     }
 
-    return <g>{items}</g>;
+    if (!canDrawFrame) return <g>{items}</g>;
+
+    return (
+      <g>
+        <title>{doubleWheelTooltip}</title>
+        <circle cx={cx} cy={cx} r={frameInnerR} fill="none" stroke="#e5e7eb" strokeWidth={1.2} opacity={0.95} />
+        <circle cx={cx} cy={cx} r={frameOuterR} fill="none" stroke="#cbd5e1" strokeWidth={1.4} opacity={0.7} />
+        {items}
+      </g>
+    );
   };
 
   const renderPlanets = () => {

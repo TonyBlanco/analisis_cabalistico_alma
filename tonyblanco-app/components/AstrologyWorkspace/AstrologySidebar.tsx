@@ -14,6 +14,8 @@ interface AstrologySidebarProps {
   hasIdentity?: boolean;
   activeLayers?: Set<string>;
   onToggleLayer?: (layer: string) => void;
+  symbolicDoubleWheel?: boolean;
+  setSymbolicDoubleWheel?: (v: boolean) => void;
 }
 
 const HOUSE_OPTIONS: Array<{ code: string; name: string; desc?: string }> = [
@@ -42,9 +44,15 @@ export default function AstrologySidebar({
   hasIdentity = false,
   activeLayers,
   onToggleLayer,
+  symbolicDoubleWheel = false,
+  setSymbolicDoubleWheel,
 }: AstrologySidebarProps) {
   const canUseForecast = Boolean(hasIdentity);
   const isLayerActive = (layer: string) => Boolean(activeLayers && activeLayers.has(layer));
+  const hasAnySymbolicTemporalLayer = Boolean(
+    activeLayers && (activeLayers.has('transits') || activeLayers.has('progressions') || activeLayers.has('solarArc'))
+  );
+  const canUseSymbolicDoubleWheel = canUseForecast && hasAnySymbolicTemporalLayer;
 
   const ForecastItem = ({
     layer,
@@ -113,6 +121,23 @@ export default function AstrologySidebar({
         <div className="pt-2 border-t border-gray-100">
           <label className="block text-xs font-semibold text-gray-600 mb-2">Pronóstico</label>
           <div className="space-y-1 text-[11px]">
+            <div className={`flex items-center justify-between px-2 py-1 border rounded ${canUseSymbolicDoubleWheel ? 'bg-white border-gray-200' : 'bg-gray-50 border-gray-200 opacity-60'}`}>
+              <div
+                className="text-[13px]"
+                title="Doble rueda simbólica. La rueda externa representa capas temporales sin cálculo astronómico real."
+              >
+                Doble rueda · <span className="text-gray-500">simbólica</span>
+              </div>
+              <label className="inline-flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={Boolean(symbolicDoubleWheel)}
+                  onChange={(e) => setSymbolicDoubleWheel && setSymbolicDoubleWheel(e.target.checked)}
+                  disabled={!canUseSymbolicDoubleWheel}
+                  title={!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : (!hasAnySymbolicTemporalLayer ? 'Activa al menos una capa temporal simbólica' : 'Doble rueda simbólica (solo visual)')}
+                />
+              </label>
+            </div>
             <ForecastItem
               layer="transits"
               label="Tránsitos"

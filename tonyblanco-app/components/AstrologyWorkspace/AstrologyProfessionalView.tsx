@@ -149,6 +149,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
     if (overlays.progressions) s.add('progressions');
     return s;
   });
+  const [symbolicDoubleWheel, setSymbolicDoubleWheel] = useState<boolean>(false);
 
   const [activeTab, setActiveTab] = useState<'visual' | 'psych'>('visual');
 
@@ -393,6 +394,8 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
           hasIdentity={hasIdentity}
           activeLayers={activeLayers}
           onToggleLayer={handleLayerToggle}
+          symbolicDoubleWheel={symbolicDoubleWheel}
+          setSymbolicDoubleWheel={setSymbolicDoubleWheel}
         />
       </aside>
 
@@ -1279,6 +1282,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                                   showAspects={true}
                                   orbDeg={orb}
                                   temporalLayers={temporalLayers}
+                                  symbolicDoubleWheel={symbolicDoubleWheel}
                                   titleRight={`${meta.sistema_casas || 'placidus'} · ${meta.zodiac_type || 'tropical'}`}
                                   transitPlanets={
                                     progressionsSnapshot ? progressionsSnapshot.planets : (transitsSnapshot && transitBaseType === 'natal' ? transitsSnapshot.planets : undefined)
@@ -1298,10 +1302,11 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                                   asteroids={showAsteroids ? (wheel.asteroids ?? []) : []}
                                   showAspects={true}
                                   orbDeg={orb}
-                                  temporalLayers={temporalLayers}
-                                  titleRight={`${meta.sistema_casas || 'placidus'} · ${meta.zodiac_type || 'tropical'}`}
-                                  transitPlanets={transitsSnapshot && transitBaseType === 'natal' ? transitsSnapshot.planets : undefined}
-                                />
+                                   temporalLayers={temporalLayers}
+                                   symbolicDoubleWheel={symbolicDoubleWheel}
+                                   titleRight={`${meta.sistema_casas || 'placidus'} · ${meta.zodiac_type || 'tropical'}`}
+                                   transitPlanets={transitsSnapshot && transitBaseType === 'natal' ? transitsSnapshot.planets : undefined}
+                                 />
                         );
                       })()
                     ) : (
@@ -1318,10 +1323,11 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                           asteroids={[]}
                           showAspects={false}
                           orbDeg={orb}
-                          visualMode="placeholder"
-                          temporalLayers={temporalLayers}
-                          titleRight="Pendiente · solo lectura"
-                        />
+                           visualMode="placeholder"
+                           temporalLayers={temporalLayers}
+                           symbolicDoubleWheel={symbolicDoubleWheel}
+                           titleRight="Pendiente · solo lectura"
+                         />
                       )
                     ))
                   )}

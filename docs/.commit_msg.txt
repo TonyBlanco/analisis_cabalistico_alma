@@ -1,1 +1,1 @@
-feat(astrology): enable Huber visual style as symbolic overlay
+feat(astrology): add symbolic solar and lunar return layers

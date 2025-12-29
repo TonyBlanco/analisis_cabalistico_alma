@@ -524,17 +524,56 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
 
     const order: Array<"solarReturn" | "solarReturnA" | "solarReturnB" | "lunarReturn"> = ["solarReturn", "solarReturnA", "solarReturnB", "lunarReturn"];
     const byKey = new Map(annualLayers.map((l) => [l.key, l]));
-    const tooltip = 'Capa anual/mensual simbólica activa — sin recalcular carta base. No corresponde a un cálculo astronómico real.';
+    const tooltipBase = 'Capa simbólica activa — sin recalcular carta base. No corresponde a un cálculo astronómico real.';
+    const tooltipSolar = 'Campo simbólico del año. Indica áreas de énfasis y aprendizaje.';
+    const tooltipLunar = 'Ritmo emocional mensual. Cambios internos y reacciones.';
 
     const maxR = cx - 6;
     const baseOuter = rings.outer + 34;
     const outerLimit = Math.min(maxR, baseOuter + 34);
 
     const styles: Record<string, { stroke: string; opacity: number; width: number; dash: string; offset: number }> = {
-      solarReturn: { stroke: "#a78bfa", opacity: 0.45, width: 2.0, dash: "", offset: 10 }, // annual
-      solarReturnA: { stroke: "#8b5cf6", opacity: 0.46, width: 2.1, dash: "", offset: 10 }, // annual (A)
-      solarReturnB: { stroke: "#a78bfa", opacity: 0.36, width: 2.0, dash: "6 6", offset: 18 }, // annual (B)
-      lunarReturn: { stroke: "#f59e0b", opacity: 0.42, width: 1.8, dash: "4 6", offset: 26 }, // monthly
+      // Retorno Solar: cálido (ámbar/dorado), no invasivo
+      solarReturn: { stroke: "#f59e0b", opacity: 0.42, width: 2.4, dash: "", offset: 10 }, // annual
+      solarReturnA: { stroke: "#f59e0b", opacity: 0.46, width: 2.5, dash: "", offset: 10 }, // annual (A)
+      solarReturnB: { stroke: "#d97706", opacity: 0.36, width: 2.4, dash: "6 6", offset: 18 }, // annual (B)
+      // Retorno Lunar: frío (azul/plateado) + pulso suave
+      lunarReturn: { stroke: "#60a5fa", opacity: 0.40, width: 2.0, dash: "3 7", offset: 26 }, // monthly
+    };
+
+    const pickHouseEmphasis = (seed: number, count: number) => {
+      const out: number[] = [];
+      const next = (s: number) => (s * 1103515245 + 12345) >>> 0;
+      let s = seed >>> 0;
+      while (out.length < count) {
+        s = next(s);
+        const idx = s % 12;
+        if (!out.includes(idx)) out.push(idx);
+      }
+      return out;
+    };
+
+    const parseYearFromLabel = (label?: string) => {
+      const m = String(label || '').match(/\b(19\d{2}|20\d{2}|21\d{2})\b/);
+      return m ? Number(m[1]) : null;
+    };
+
+    const parseMonthFromLabel = (label?: string) => {
+      const m = String(label || '').match(/\b(19\d{2}|20\d{2}|21\d{2})-(\d{2})\b/);
+      if (!m) return null;
+      const month = Number(m[2]);
+      if (!Number.isFinite(month) || month < 1 || month > 12) return null;
+      return month;
+    };
+
+    const arcAtRadius = (startDeg: number, endDeg: number, r: number) => {
+      const a0 = normalizeDeg(startDeg);
+      const a1 = normalizeDeg(endDeg);
+      const delta = (a1 - a0 + 360) % 360;
+      const largeArc = delta > 180 ? 1 : 0;
+      const p0 = degToPoint(a0, r, cx);
+      const p1 = degToPoint(a1, r, cx);
+      return `M ${p0.x} ${p0.y} A ${r} ${r} 0 ${largeArc} 1 ${p1.x} ${p1.y}`;
     };
 
     const items: React.ReactNode[] = [];
@@ -543,9 +582,49 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
       const layer = byKey.get(key);
       const st = styles[key];
       const r = Math.min(outerLimit - 6, baseOuter + st.offset);
+      const isSolar = key === "solarReturn" || key === "solarReturnA" || key === "solarReturnB";
+      const isLunar = key === "lunarReturn";
+      const tooltip = isSolar ? `${tooltipSolar} · ${tooltipBase}` : isLunar ? `${tooltipLunar} · ${tooltipBase}` : tooltipBase;
+
+      const emphasis = (() => {
+        if (!houses || houses.length !== 12) return null;
+        if (!isSolar && !isLunar) return null;
+
+        const year = parseYearFromLabel(layer?.label ?? '') ?? new Date().getFullYear();
+        const month = parseMonthFromLabel(layer?.label ?? '') ?? (new Date().getMonth() + 1);
+        const seed = isSolar ? year : (year * 100 + month);
+
+        const count = isSolar ? 3 : 2;
+        const picks = pickHouseEmphasis(seed, count);
+        const arcR = Math.max(rings.houseOuter + 6, r - 10);
+        const width = isSolar ? 5.0 : 3.2;
+        const opacity = isSolar ? 0.16 : 0.14;
+
+        return (
+          <g>
+            {picks.map((idx) => {
+              const start = houses[idx];
+              const end = houses[(idx + 1) % 12];
+              return (
+                <path
+                  key={`ret-emph-${key}-${idx}`}
+                  d={arcAtRadius(start, end, arcR)}
+                  fill="none"
+                  stroke={st.stroke}
+                  strokeWidth={width}
+                  strokeLinecap="round"
+                  opacity={opacity}
+                />
+              );
+            })}
+          </g>
+        );
+      })();
+
       items.push(
         <g key={`al-${key}`}>
           <title>{layer?.label ? `${tooltip} · ${layer.label}` : tooltip}</title>
+          {emphasis}
           <circle
             cx={cx}
             cy={cx}
@@ -556,7 +635,16 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
             opacity={st.opacity}
             strokeDasharray={st.dash || undefined}
             style={{ pointerEvents: "stroke" }}
-          />
+          >
+            {isLunar ? (
+              <animate
+                attributeName="stroke-opacity"
+                values={`${Math.max(0.12, st.opacity - 0.18)};${Math.min(0.65, st.opacity + 0.22)};${Math.max(0.12, st.opacity - 0.18)}`}
+                dur="2.4s"
+                repeatCount="indefinite"
+              />
+            ) : null}
+          </circle>
         </g>
       );
     }

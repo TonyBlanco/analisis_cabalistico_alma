@@ -7,7 +7,9 @@
 
 import { clearAuthState } from './auth-state';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://analisis-cabalistico-alma.onrender.com/api';
+import { getApiBaseUrl } from './api-base';
+
+const API_URL = getApiBaseUrl();
 
 export interface SessionUser {
   id: number;
@@ -70,7 +72,7 @@ export async function fetchSession(): Promise<SessionResponse> {
     // If successful, return the real user from backend
     if (response.ok && response.status !== 401) {
       const user = await response.json();
-      console.log('✅ /api/me returned real user:', user.username);
+      console.log('✅ session returned real user:', user.username);
       return {
         isAuthenticated: true,
         user,
@@ -89,7 +91,7 @@ export async function fetchSession(): Promise<SessionResponse> {
     }
 
     // Other errors
-    console.error('❌ /api/me failed:', response.status, response.statusText);
+    console.error('❌ session failed:', response.status, response.statusText);
     const errorText = await response.text().catch(() => '');
     console.error('Error response:', errorText);
     

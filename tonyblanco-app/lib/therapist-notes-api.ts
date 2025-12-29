@@ -1,4 +1,6 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://analisis-cabalistico-alma.onrender.com/api';
+import { getApiBaseUrl } from './api-base';
+
+const API_URL = getApiBaseUrl();
 
 export type TherapistNote = {
   id: number | string;

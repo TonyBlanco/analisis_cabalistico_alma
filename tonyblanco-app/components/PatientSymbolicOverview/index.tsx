@@ -12,8 +12,9 @@ import {
 } from 'lucide-react';
 import { setActivePatientId } from '@/lib/active-patient';
 import { openPrintableReport } from '@/lib/report-printing';
+import { getApiBaseUrl } from '@/lib/api-base';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://analisis-cabalistico-alma.onrender.com/api';
+const API_URL = getApiBaseUrl();
 
 interface NatalChartSummary {
   calculated_at: string | null;

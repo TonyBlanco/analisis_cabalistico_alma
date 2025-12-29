@@ -3,19 +3,24 @@ import React, { useState } from 'react';
 type Props = {
   overlays: { natal: boolean; transits: boolean; solarReturn: boolean; progressions: boolean };
   activeLayers: Set<string>;
+  symbolicLayers?: { natal: boolean; transits: boolean; progressions: boolean; solarArc: boolean };
   houseSystem: string;
   zodiacType: string;
   canRecalculate: boolean; // whether UI has ability to trigger recalculation (we will NOT trigger)
 };
 
-const Dot: React.FC<{ type: 'active' | 'available' | 'locked'; label?: string }> = ({ type }) => {
+type DotType = 'active' | 'available' | 'locked' | 'symbolic';
+
+const Dot: React.FC<{ type: DotType }> = ({ type }) => {
   if (type === 'active') return <span className="inline-block w-3 h-3 rounded-full bg-green-500 mr-2" />;
+  if (type === 'symbolic') return <span className="inline-block w-3 h-3 rounded-full bg-sky-500 mr-2 opacity-70" />;
   if (type === 'available') return <span className="inline-block w-3 h-3 rounded-full bg-gray-300 mr-2" />;
-  return <span className="inline-block w-3 h-3 text-xs mr-2">🔒</span>;
+  return <span className="inline-block w-3 h-3 rounded-full bg-rose-400 mr-2 opacity-70" />;
 };
 
-export default function CalculationStatusPanel({ overlays, activeLayers, houseSystem, zodiacType, canRecalculate }: Props) {
+export default function CalculationStatusPanel({ overlays, activeLayers, symbolicLayers, houseSystem, zodiacType, canRecalculate }: Props) {
   const [helper, setHelper] = useState<string | null>(null);
+  const symbolicTooltip = 'Capa simbólica activa. No corresponde a un cálculo astronómico real.';
 
   const handleClickWouldRecalc = (label: string, isLocked: boolean) => {
     if (isLocked) {
@@ -26,11 +31,40 @@ export default function CalculationStatusPanel({ overlays, activeLayers, houseSy
     window.setTimeout(() => setHelper(null), 6000);
   };
 
+  const handleClickSymbolicInfo = () => {
+    setHelper(symbolicTooltip);
+    window.setTimeout(() => setHelper(null), 6000);
+  };
+
+  const isSymbolicActive = (key: keyof NonNullable<Props['symbolicLayers']>) => {
+    if (!symbolicLayers) return false;
+    if (key === 'natal') return Boolean(symbolicLayers.natal);
+    return activeLayers.has(key) && Boolean(symbolicLayers[key]);
+  };
+
   const calcState = (key: string, overlayFlag: boolean) => {
-    const active = activeLayers.has(key) && overlayFlag;
-    if (active) return 'active' as const;
-    if (!overlayFlag) return canRecalculate ? 'available' as const : 'locked' as const;
-    return 'available' as const;
+    if (key === 'natal') {
+      if (overlayFlag) return 'active' as const;
+      if (isSymbolicActive('natal')) return 'symbolic' as const;
+      return 'available' as const;
+    }
+
+    const selected = activeLayers.has(key);
+    const symbolicActive =
+      key === 'transits'
+        ? isSymbolicActive('transits')
+        : key === 'progressions'
+          ? isSymbolicActive('progressions')
+          : key === 'solarArc'
+            ? isSymbolicActive('solarArc')
+            : false;
+
+    if (selected && overlayFlag) return 'active' as const;
+    if (symbolicActive) return 'symbolic' as const;
+    if (overlayFlag) return 'available' as const;
+
+    if (key === 'transits' || key === 'progressions' || key === 'solarArc') return 'available' as const;
+    return canRecalculate ? 'available' as const : 'locked' as const;
   };
 
   const systems = ['Placidus','Koch','Campanus','Regiomontanus','Whole Sign'];
@@ -57,18 +91,26 @@ export default function CalculationStatusPanel({ overlays, activeLayers, houseSy
             </li>
 
             <li className="flex items-center">
-              <button onClick={() => handleClickWouldRecalc('Tránsitos', !overlays.transits)} className="flex items-center w-full text-left">
+              <button onClick={handleClickSymbolicInfo} className="flex items-center w-full text-left" title={isSymbolicActive('transits') ? symbolicTooltip : undefined}>
                 <Dot type={calcState('transits', overlays.transits)} />
                 <span className="flex-1">Tránsitos</span>
-                <span className="text-xs text-gray-400">{overlays.transits ? '' : '(requiere recalcular)'}</span>
+                <span className="text-xs text-gray-400">{isSymbolicActive('transits') ? 'Activo (lectura simbólica)' : (overlays.transits ? '' : 'pendiente')}</span>
               </button>
             </li>
 
             <li className="flex items-center">
-              <button onClick={() => handleClickWouldRecalc('Progresiones Secundarias', !overlays.progressions)} className="flex items-center w-full text-left">
+              <button onClick={handleClickSymbolicInfo} className="flex items-center w-full text-left" title={isSymbolicActive('progressions') ? symbolicTooltip : undefined}>
                 <Dot type={calcState('progressions', overlays.progressions)} />
                 <span className="flex-1">Progresiones Secundarias</span>
-                <span className="text-xs text-gray-400">{overlays.progressions ? '' : '(requiere recalcular)'}</span>
+                <span className="text-xs text-gray-400">{isSymbolicActive('progressions') ? 'Activo (lectura simbólica)' : (overlays.progressions ? '' : 'pendiente')}</span>
+              </button>
+            </li>
+
+            <li className="flex items-center">
+              <button onClick={handleClickSymbolicInfo} className="flex items-center w-full text-left" title={isSymbolicActive('solarArc') ? symbolicTooltip : undefined}>
+                <Dot type={calcState('solarArc', false)} />
+                <span className="flex-1">Arco Solar</span>
+                <span className="text-xs text-gray-400">{isSymbolicActive('solarArc') ? 'Activo (lectura simbólica)' : 'pendiente'}</span>
               </button>
             </li>
 

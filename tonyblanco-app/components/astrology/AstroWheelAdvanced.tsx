@@ -16,6 +16,7 @@ type Props = {
   ascendantDeg: number;
   houses: HouseCusps;            // 12 cusp degrees
   planets: PlanetPoint[];        // ecliptic longitudes
+  transitPlanets?: PlanetPoint[];
   asteroids?: PlanetPoint[];
   showAspects?: boolean;
   orbDeg?: number;
@@ -282,11 +283,12 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
 
     const byKey = new Map(temporalLayers.map((l) => [l.key, l]));
     const order: Array<"transits" | "progressions" | "solarArc"> = ["transits", "progressions", "solarArc"];
+    const symbolicTooltip = 'Capa simbólica activa. No corresponde a un cálculo astronómico real.';
 
-    const styles: Record<string, { stroke: string; opacity: number; width: number; dash: string; offset: number }> = {
+    const styles: Record<string, { stroke: string; opacity: number; width: number; dash: string; dashOffset?: number; offset: number }> = {
       transits: { stroke: "#94a3b8", opacity: 0.62, width: 1.3, dash: "7 6", offset: 6 },
-      progressions: { stroke: "#64748b", opacity: 0.56, width: 1.4, dash: "3 5", offset: 14 },
-      solarArc: { stroke: "#475569", opacity: 0.52, width: 1.4, dash: "1 6", offset: 22 },
+      progressions: { stroke: "#64748b", opacity: 0.56, width: 1.4, dash: "", offset: 14 },
+      solarArc: { stroke: "#475569", opacity: 0.52, width: 1.4, dash: "1 6", dashOffset: 4, offset: 22 },
     };
 
     const items: React.ReactNode[] = [];
@@ -294,19 +296,6 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
       if (!byKey.has(key)) continue;
       const st = styles[key];
       const r = rings.outer + st.offset;
-      items.push(
-        <circle
-          key={`tl-ring-${key}`}
-          cx={cx}
-          cy={cx}
-          r={r}
-          fill="none"
-          stroke={st.stroke}
-          strokeWidth={st.width}
-          opacity={st.opacity}
-          strokeDasharray={st.dash}
-        />
-      );
 
       // subtle markers at ASC/MC axes (purely visual, non-predictive)
       const marker = (deg: number, id: string) => {
@@ -314,7 +303,7 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
         const b = degToPoint(deg, r + 4, cx);
         return (
           <line
-            key={`tl-${key}-${id}`}
+            key={id}
             x1={a.x} y1={a.y}
             x2={b.x} y2={b.y}
             stroke={st.stroke}
@@ -324,10 +313,27 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
         );
       };
 
-      items.push(marker(0, "north"));
-      items.push(marker(90, "east"));
-      items.push(marker(180, "south"));
-      items.push(marker(270, "west"));
+      items.push(
+        <g key={`tl-${key}`}>
+          <title>{symbolicTooltip}</title>
+          <circle
+            cx={cx}
+            cy={cx}
+            r={r}
+            fill="none"
+            stroke={st.stroke}
+            strokeWidth={st.width}
+            opacity={st.opacity}
+            strokeDasharray={st.dash || undefined}
+            strokeDashoffset={st.dashOffset}
+            style={{ pointerEvents: "stroke" }}
+          />
+          {marker(0, "north")}
+          {marker(90, "east")}
+          {marker(180, "south")}
+          {marker(270, "west")}
+        </g>
+      );
     }
 
     return <g>{items}</g>;

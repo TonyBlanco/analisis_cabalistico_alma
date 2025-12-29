@@ -344,7 +344,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
     }
   };
 
-  const meta = natal?.metadatos || {};
+  const meta = (natal?.metadatos as any) || {};
 
   // Prepare filtered data
   const planetsFiltered = (natal?.planetas || []).filter((p) => (visiblePlanets[String(p.nombre).toLowerCase().trim()] ?? true));
@@ -1095,7 +1095,19 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
               {activeTab === 'visual' ? (
                 <>
                  {/* Calculation status panel - UI only, read-only */}
-                 <CalculationStatusPanel overlays={overlays} activeLayers={activeLayers} houseSystem={houseSystem} zodiacType={zodiacType} canRecalculate={Boolean(calculateChart)} />
+                 <CalculationStatusPanel
+                   overlays={overlays}
+                   activeLayers={activeLayers}
+                   symbolicLayers={{
+                     natal: hasIdentity,
+                     transits: activeLayers.has('transits'),
+                     progressions: activeLayers.has('progressions'),
+                     solarArc: activeLayers.has('solarArc'),
+                   }}
+                   houseSystem={houseSystem}
+                   zodiacType={zodiacType}
+                   canRecalculate={Boolean(calculateChart)}
+                 />
                      {/* Recalculation modal (confirmation) */}
                      {showRecalcModal ? (
                        <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -1168,11 +1180,11 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                        ) : null}
                      </div>
                   {hasChart && activeLayers.has('transits') && analysis_result?.transits ? (
-                    <AstrologyDoubleWheelSVG natal={natal} overlay={analysis_result.transits} overlayLabel="Tránsitos" orbDegrees={orb} consultante={consultante} />
+                    <AstrologyDoubleWheelSVG natal={natal!} overlay={analysis_result.transits} overlayLabel="Tránsitos" orbDegrees={orb} consultante={consultante} />
                   ) : hasChart && activeLayers.has('progressions') && analysis_result?.progressions?.chart ? (
-                    <AstrologyDoubleWheelSVG natal={natal} overlay={analysis_result.progressions.chart} overlayLabel="Progresiones (Secundarias)" orbDegrees={orb} consultante={consultante} />
+                    <AstrologyDoubleWheelSVG natal={natal!} overlay={analysis_result.progressions.chart} overlayLabel="Progresiones (Secundarias)" orbDegrees={orb} consultante={consultante} />
                   ) : hasChart && activeLayers.has('solarReturn') && analysis_result?.solarReturn?.chart ? (
-                    <AstrologyDoubleWheelSVG natal={natal} overlay={analysis_result.solarReturn.chart} overlayLabel="Retorno Solar" orbDegrees={orb} consultante={consultante} />
+                    <AstrologyDoubleWheelSVG natal={natal!} overlay={analysis_result.solarReturn.chart} overlayLabel="Retorno Solar" orbDegrees={orb} consultante={consultante} />
                   ) : hasChart && synastryEnabled && partnerChart ? (
                     <div>
                       {/* Hero info for sinastry */}

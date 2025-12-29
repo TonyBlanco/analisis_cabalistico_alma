@@ -24,6 +24,8 @@ interface AstrologySidebarProps {
   setShowCrossAspects?: (v: boolean) => void;
   harmonicMode?: 'off' | 'h5' | 'h7' | 'h9';
   setHarmonicMode?: (v: 'off' | 'h5' | 'h7' | 'h9') => void;
+  personaMode?: 'off' | 'social' | 'professional' | 'intimate';
+  setPersonaMode?: (v: 'off' | 'social' | 'professional' | 'intimate') => void;
   relocationCity?: string;
   setRelocationCity?: (v: string) => void;
   visualStyle?: 'classic' | 'huber';
@@ -66,6 +68,8 @@ export default function AstrologySidebar({
   setShowCrossAspects,
   harmonicMode = 'off',
   setHarmonicMode,
+  personaMode = 'off',
+  setPersonaMode,
   relocationCity = 'Madrid (placeholder)',
   setRelocationCity,
   visualStyle = 'classic',
@@ -82,7 +86,7 @@ export default function AstrologySidebar({
   const isLunarReturnActive = isLayerActive('return_lunar');
   const isPlanetaryLayerActive = isLayerActive('planetary');
   const isHarmonicsActive = harmonicMode !== 'off' && isLayerActive('harmonics');
-  const isPersonaActive = isLayerActive('persona');
+  const isPersonaActive = personaMode !== 'off' && isLayerActive('persona');
   const isRelocationActive = isLayerActive('relocation');
   const isMathPointsActive = isLayerActive('mathPoints');
   const hasSecondaryLayer = Boolean(activeLayers && (
@@ -365,11 +369,29 @@ export default function AstrologySidebar({
                 <input
                   type="checkbox"
                   checked={Boolean(isPersonaActive)}
-                  onChange={() => onToggleLayer && onToggleLayer('persona')}
+                  onChange={() => setPersonaMode && setPersonaMode(isPersonaActive ? 'off' : 'social')}
                   disabled={!canUseForecast}
-                  title={!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : 'Persona Chart — lectura simbólica'}
+                  title={!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : 'Persona Chart (simbólico): representa la identidad que el individuo muestra o utiliza en un contexto específico. No es una carta astronómica.'}
                 />
               </label>
+            </div>
+            <div className={`mt-1 flex items-center justify-between gap-2 px-2 py-2 border rounded ${canUseForecast ? 'bg-white border-gray-200' : 'bg-gray-50 border-gray-200 opacity-60'}`}>
+              <div className="text-[11px] text-gray-500">Modo Persona</div>
+              <select
+                className="rounded border border-gray-200 bg-white px-2 py-1 text-[12px]"
+                value={personaMode}
+                onChange={(e) => {
+                  const v = e.target.value as 'off' | 'social' | 'professional' | 'intimate';
+                  setPersonaMode && setPersonaMode(v);
+                }}
+                disabled={!canUseForecast}
+                title={!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : 'Persona Chart (simbólico): representa la identidad visible/adaptativa según contexto. No es una carta astronómica.'}
+              >
+                <option value="off">Off</option>
+                <option value="social">Social · “Cómo me ven”</option>
+                <option value="professional">Profesional · “Cómo actúo”</option>
+                <option value="intimate">Íntimo · “Cómo me muestro cuando confío”</option>
+              </select>
             </div>
 
             <div className={`px-2 py-2 border rounded ${canUseForecast ? 'bg-white border-gray-200' : 'bg-gray-50 border-gray-200 opacity-60'}`}>

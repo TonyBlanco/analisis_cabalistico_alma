@@ -30,6 +30,7 @@ interface Props {
 
 type ChartVisualStyle = 'classic' | 'huber';
 type HarmonicMode = 'off' | 'h5' | 'h7' | 'h9';
+type PersonaMode = 'off' | 'social' | 'professional' | 'intimate';
 
 export default function AstrologyProfessionalView({ consultante, chart, analysis_result, calculateChart, refetch }: Props) {
   // Audit log (controlled, local-only): helps verify incoming data shapes
@@ -157,6 +158,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
   const [symbolicLunarReturnDate, setSymbolicLunarReturnDate] = useState<string | null>(null);
   const [showCrossAspects, setShowCrossAspects] = useState<boolean>(false);
   const [harmonicMode, setHarmonicMode] = useState<HarmonicMode>('off');
+  const [personaMode, setPersonaMode] = useState<PersonaMode>('off');
   const [relocationCity, setRelocationCity] = useState<string>('Madrid (placeholder)');
   const [solarReturnCompareEnabled, setSolarReturnCompareEnabled] = useState<boolean>(false);
   const [solarReturnCompareYearB, setSolarReturnCompareYearB] = useState<number | null>(null);
@@ -222,6 +224,30 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
       return next;
     });
   }, [harmonicMode, hasIdentity]);
+
+  useEffect(() => {
+    // Persona is symbolic-only and requires identity; keep activeLayers in sync
+    if (!hasIdentity) {
+      setPersonaMode('off');
+      setActiveLayers((prev) => {
+        if (!prev.has('persona')) return prev;
+        const next = new Set(prev);
+        next.delete('persona');
+        return next;
+      });
+      return;
+    }
+
+    setActiveLayers((prev) => {
+      const want = personaMode !== 'off';
+      const has = prev.has('persona');
+      if (want === has) return prev;
+      const next = new Set(prev);
+      if (want) next.add('persona');
+      else next.delete('persona');
+      return next;
+    });
+  }, [personaMode, hasIdentity]);
 
   // Layer inputs
   const [transitDate, setTransitDate] = useState<string>(new Date().toISOString().slice(0, 10));
@@ -812,6 +838,8 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
           setShowCrossAspects={setShowCrossAspects}
           harmonicMode={harmonicMode}
           setHarmonicMode={setHarmonicMode}
+          personaMode={personaMode}
+          setPersonaMode={setPersonaMode}
           relocationCity={relocationCity}
           setRelocationCity={setRelocationCity}
           visualStyle={visualStyle}
@@ -1649,6 +1677,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                      mathPoints: activeLayers.has('mathPoints'),
                    }}
                    harmonicMode={harmonicMode}
+                   personaMode={personaMode}
                    secondaryLayerKey={secondaryLayer}
                    comparisonEnabled={Boolean(synastryEnabled)}
                    comparisonAspectsEnabled={Boolean(synastryEnabled)}
@@ -1846,7 +1875,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                                     showComparisonAspects={synastryEnabled}
                                     symbolicPlanetaryLayer={activeLayers.has('planetary')}
                                     harmonicOrder={harmonicOrder}
-                                    personaMode={activeLayers.has('persona')}
+                                    personaMode={personaMode}
                                     relocation={activeLayers.has('relocation') ? { city: relocationCity, offsetDeg: relocationOffsetDeg } : undefined}
                                     showMathPoints={activeLayers.has('mathPoints')}
                                     titleRight={`${meta.sistema_casas || 'placidus'} · ${meta.zodiac_type || 'tropical'}`}
@@ -1943,7 +1972,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                                showComparisonAspects={synastryEnabled}
                                symbolicPlanetaryLayer={activeLayers.has('planetary')}
                                harmonicOrder={harmonicOrder}
-                               personaMode={activeLayers.has('persona')}
+                               personaMode={personaMode}
                                relocation={activeLayers.has('relocation') ? { city: relocationCity, offsetDeg: relocationOffsetDeg } : undefined}
                                showMathPoints={activeLayers.has('mathPoints')}
                                titleRight={`${meta.sistema_casas || 'placidus'} · ${meta.zodiac_type || 'tropical'}`}
@@ -1978,7 +2007,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                            showComparisonAspects={synastryEnabled}
                            symbolicPlanetaryLayer={activeLayers.has('planetary')}
                            harmonicOrder={harmonicOrder}
-                           personaMode={activeLayers.has('persona')}
+                           personaMode={personaMode}
                            relocation={activeLayers.has('relocation') ? { city: relocationCity, offsetDeg: relocationOffsetDeg } : undefined}
                            showMathPoints={activeLayers.has('mathPoints')}
                            titleRight="Pendiente · solo lectura"

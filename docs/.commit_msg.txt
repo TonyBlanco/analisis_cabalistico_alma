@@ -1,1 +1,1 @@
-feat(astrology): enable symbolic harmonic layer (5/7/9) with radial grid and highlights
+feat(astrology): add symbolic persona chart overlay (social/professional/intimate)

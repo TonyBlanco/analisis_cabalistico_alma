@@ -43,7 +43,7 @@ type Props = {
   crossAspectSecondaryKeys?: Set<string>;
   symbolicPlanetaryLayer?: boolean;
   harmonicOrder?: 5 | 7 | 9;
-  personaMode?: boolean;
+  personaMode?: boolean | "off" | "social" | "professional" | "intimate";
   relocation?: { city: string; offsetDeg: number };
   showMathPoints?: boolean;
   comparisonWheel?: {
@@ -86,6 +86,7 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
 }) => {
   const isPlaceholder = visualMode === "placeholder";
   const isHuber = visualStyle === "huber";
+  const persona = (typeof personaMode === "string") ? personaMode : (personaMode ? "social" : "off");
   const comparisonEnabled = Boolean(comparisonWheel?.enabled);
   const opts: WheelOptions = useMemo(() => ({
     size,
@@ -1064,8 +1065,8 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
               {isHuber ? (
                 <circle cx={pt.x} cy={pt.y} r={16} fill="rgba(255,255,255,0.92)" stroke="#111827" strokeWidth={1.4} opacity={isPlaceholder ? 0.75 : 0.9} />
               ) : null}
-              {personaMode && new Set(['sun','moon','mercury','venus','mars']).has(String(p.key).toLowerCase()) ? (
-                <circle cx={pt.x} cy={pt.y} r={14} fill="none" stroke="#a78bfa" strokeWidth={2} opacity={0.16} />
+              {persona !== "off" && new Set(['sun','moon','mercury','venus','mars']).has(String(p.key).toLowerCase()) ? (
+                <circle cx={pt.x} cy={pt.y} r={14} fill="none" stroke={persona === "intimate" ? "#f59e0b" : "#a78bfa"} strokeWidth={2} opacity={persona === "professional" ? 0.2 : 0.16} />
               ) : null}
               {crossAspectNatalKeys && crossAspectNatalKeys.has(p.key) ? (
                 <>
@@ -1130,6 +1131,125 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
                   {a.label}
                 </text>
               ) : null}
+            </g>
+          );
+        })}
+      </g>
+    );
+  };
+
+  const renderPersonaOverlay = () => {
+    if (persona === "off") return null;
+
+    const tooltipBase = 'Persona Chart (simbólico): representa la identidad que el individuo muestra o utiliza en un contexto específico. No es una carta astronómica.';
+    const tooltipMode = persona === "social"
+      ? 'Social: “Cómo me ven”'
+      : persona === "professional"
+        ? 'Profesional: “Cómo actúo”'
+        : 'Íntimo: “Cómo me muestro cuando confío”';
+    const tooltip = `${tooltipBase} · ${tooltipMode}`;
+
+    const color = persona === "social"
+      ? "#94a3b8"    // gris perla
+      : persona === "professional"
+        ? "#a78bfa"  // violeta tenue
+        : "#f59e0b"; // cálido tenue
+
+    const opacity = persona === "social" ? 0.55 : persona === "professional" ? 0.5 : 0.42;
+    const glyphSize = persona === "professional" ? 15 : 14;
+    const r = rings.planetRing + 12;
+
+    const inArc = (deg: number, start: number, end: number) => {
+      const d = normalizeDeg(deg);
+      const a = normalizeDeg(start);
+      const b = normalizeDeg(end);
+      if (a <= b) return d >= a && d < b;
+      return d >= a || d < b;
+    };
+
+    const houseIndexOfDegree = (deg: number) => {
+      if (!houses || houses.length !== 12) return null;
+      for (let i = 0; i < 12; i++) {
+        const a = houses[i];
+        const b = houses[(i + 1) % 12];
+        if (inArc(deg, a, b)) return i + 1;
+      }
+      return null;
+    };
+
+    const hashKey = (key: string) => {
+      const s = String(key || '');
+      let h = 0;
+      for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+      return h;
+    };
+
+    const shiftFor = (p: PlanetPoint) => {
+      const personal = new Set(["sun", "moon", "mercury", "venus", "mars"]);
+      const k = String(p.key).toLowerCase();
+      const isPersonal = personal.has(k);
+
+      const baseDeg = (Number.isFinite(p.degree) ? normalizeDeg(p.degree) : normalizeDeg(hashKey(p.key) % 360));
+      const h = houseIndexOfDegree(baseDeg);
+
+      const jitter = ((hashKey(p.key) % 5) - 2); // -2..+2
+      if (persona === "social") {
+        const extra = (h === 1 || h === 3 || h === 7) ? 3 : 0;
+        return (isPersonal ? (8 + extra) : 4) + jitter * 0.6;
+      }
+      if (persona === "professional") {
+        const extra = (h === 6 || h === 10) ? 5 : 0;
+        return (isPersonal ? (7 + extra) : 4) + jitter * 0.4;
+      }
+      // intimate
+      return (isPersonal ? 4 : 3) + jitter * 0.3;
+    };
+
+    // Placeholder fallback: show a subtle ring + markers even if no planet data yet
+    if (!planets || planets.length === 0) {
+      const rr = rings.planetRing + 18;
+      return (
+        <g>
+          <title>{tooltip}</title>
+          <circle cx={cx} cy={cx} r={rr} fill="none" stroke={color} strokeWidth={2} opacity={0.22} strokeDasharray="2 8" />
+          {[0, 72, 144, 216, 288].map((deg) => {
+            const p = degToPoint(deg, rr, cx);
+            return <circle key={`persona-ph-${deg}`} cx={p.x} cy={p.y} r={2.2} fill={color} opacity={0.25} />;
+          })}
+        </g>
+      );
+    }
+
+    const personalKeys = new Set(["sun", "moon", "mercury", "venus", "mars"]);
+    const pts = planets.filter((p) => personalKeys.has(String(p.key).toLowerCase()));
+    const draws = pts.length > 0 ? pts : planets.slice(0, Math.min(8, planets.length));
+
+    return (
+      <g>
+        <title>{tooltip}</title>
+        {draws.map((p) => {
+          const deg = normalizeDeg(p.degree + shiftFor(p));
+          const pt = degToPoint(deg, r, cx);
+          const base = degToPoint(p.degree, rings.planetRing, cx);
+
+          return (
+            <g key={`persona-${p.key}`} opacity={opacity}>
+              {persona === "professional" ? (
+                <line x1={base.x} y1={base.y} x2={pt.x} y2={pt.y} stroke={color} strokeWidth={1.2} opacity={0.22} />
+              ) : null}
+              <circle cx={pt.x} cy={pt.y} r={10} fill="rgba(255,255,255,0.85)" stroke={color} strokeWidth={1.2} opacity={0.6} />
+              <text
+                x={pt.x}
+                y={pt.y}
+                textAnchor="middle"
+                dominantBaseline="middle"
+                fontSize={glyphSize}
+                fill={color}
+                opacity={opacity}
+                style={{ fontFamily: 'Inter, ui-sans-serif, system-ui' }}
+              >
+                {p.glyph}
+              </text>
             </g>
           );
         })}
@@ -1202,10 +1322,11 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
                 {renderHouseNumbers()}
                 {renderRelocationOverlay()}
                 {renderHarmonicOverlay()}
-                {renderMathPoints()}
-                {huberCentersOfGravity}
+              {renderMathPoints()}
+              {huberCentersOfGravity}
                 {renderAspects()}
                 {renderAsteroids()}
+                {renderPersonaOverlay()}
                 {renderPlanets()}
                 {renderAnglesLabels()}
               </g>

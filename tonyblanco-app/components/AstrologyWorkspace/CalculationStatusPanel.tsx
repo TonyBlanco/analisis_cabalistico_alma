@@ -17,6 +17,7 @@ type Props = {
     mathPoints: boolean;
   };
   harmonicMode?: 'off' | 'h5' | 'h7' | 'h9';
+  personaMode?: 'off' | 'social' | 'professional' | 'intimate';
   houseSystem: string;
   zodiacType: string;
   canRecalculate: boolean; // whether UI has ability to trigger recalculation (we will NOT trigger)
@@ -34,7 +35,7 @@ const Dot: React.FC<{ type: DotType }> = ({ type }) => {
   return <span className="inline-block w-3 h-3 rounded-full bg-rose-400 mr-2 opacity-70" />;
 };
 
-export default function CalculationStatusPanel({ overlays, activeLayers, symbolicLayers, harmonicMode = 'off', houseSystem, zodiacType, canRecalculate, secondaryLayerKey = null, comparisonEnabled = false, comparisonAspectsEnabled = false }: Props) {
+export default function CalculationStatusPanel({ overlays, activeLayers, symbolicLayers, harmonicMode = 'off', personaMode = 'off', houseSystem, zodiacType, canRecalculate, secondaryLayerKey = null, comparisonEnabled = false, comparisonAspectsEnabled = false }: Props) {
   const [helper, setHelper] = useState<string | null>(null);
   const symbolicTooltip = 'Capa simbólica activa. No corresponde a un cálculo astronómico real.';
   const annualSymbolicTooltip = 'Capa anual/mensual activa (lectura simbólica) — sin recalcular carta base.';
@@ -207,10 +208,18 @@ export default function CalculationStatusPanel({ overlays, activeLayers, symboli
             </li>
 
             <li className="flex items-center">
-              <button onClick={() => handleClickSymbolicInfo('Persona Chart — lectura simbólica. No crea una carta nueva.')} className="flex items-center w-full text-left" title={isSymbolicActive('persona') ? 'Persona Chart — lectura simbólica. No crea una carta nueva.' : undefined}>
+              <button
+                onClick={() => handleClickSymbolicInfo('Persona Chart (simbólico): representa la identidad que el individuo muestra o utiliza en un contexto específico. No es una carta astronómica.')}
+                className="flex items-center w-full text-left"
+                title={isSymbolicActive('persona') ? 'Persona Chart (simbólico): representa la identidad que el individuo muestra o utiliza en un contexto específico. No es una carta astronómica.' : undefined}
+              >
                 <Dot type={calcState('persona', false)} />
                 <span className="flex-1">Persona Chart</span>
-                <span className="text-xs text-gray-400">{isSymbolicActive('persona') ? 'Activo (lectura simbólica)' : 'pendiente'}</span>
+                <span className="text-xs text-gray-400">
+                  {isSymbolicActive('persona')
+                    ? (personaMode !== 'off' ? `Activo (lectura simbólica) · ${personaMode}` : 'Activo (lectura simbólica)')
+                    : 'pendiente'}
+                </span>
               </button>
             </li>
 

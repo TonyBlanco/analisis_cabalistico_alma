@@ -19,6 +19,7 @@ type Props = {
   harmonicMode?: 'off' | 'h5' | 'h7' | 'h9';
   personaMode?: 'off' | 'social' | 'professional' | 'intimate';
   relocationMode?: 'off' | 'home' | 'work' | 'travel' | 'abroad';
+  advancedObjects?: { nodes: boolean; fortune: boolean; symbolicPoints: boolean };
   houseSystem: string;
   zodiacType: string;
   canRecalculate: boolean; // whether UI has ability to trigger recalculation (we will NOT trigger)
@@ -36,7 +37,7 @@ const Dot: React.FC<{ type: DotType }> = ({ type }) => {
   return <span className="inline-block w-3 h-3 rounded-full bg-rose-400 mr-2 opacity-70" />;
 };
 
-export default function CalculationStatusPanel({ overlays, activeLayers, symbolicLayers, harmonicMode = 'off', personaMode = 'off', relocationMode = 'off', houseSystem, zodiacType, canRecalculate, secondaryLayerKey = null, comparisonEnabled = false, comparisonAspectsEnabled = false }: Props) {
+export default function CalculationStatusPanel({ overlays, activeLayers, symbolicLayers, harmonicMode = 'off', personaMode = 'off', relocationMode = 'off', advancedObjects = { nodes: false, fortune: false, symbolicPoints: false }, houseSystem, zodiacType, canRecalculate, secondaryLayerKey = null, comparisonEnabled = false, comparisonAspectsEnabled = false }: Props) {
   const [helper, setHelper] = useState<string | null>(null);
   const symbolicTooltip = 'Capa simbólica activa. No corresponde a un cálculo astronómico real.';
   const annualSymbolicTooltip = 'Capa anual/mensual activa (lectura simbólica) — sin recalcular carta base.';
@@ -249,10 +250,24 @@ export default function CalculationStatusPanel({ overlays, activeLayers, symboli
             </li>
 
             <li className="flex items-center">
-              <button onClick={() => handleClickSymbolicInfo('Puntos matemáticos (lectura simbólica). Placeholder sin grados ni cálculo astronómico real.')} className="flex items-center w-full text-left" title={isSymbolicActive('mathPoints') ? 'Puntos matemáticos (lectura simbólica). Placeholder sin grados ni cálculo astronómico real.' : undefined}>
+              <button
+                onClick={() => handleClickSymbolicInfo('Objetos avanzados (modo simbólico): marcadores de proceso psicológico. No son cálculos astronómicos.')}
+                className="flex items-center w-full text-left"
+                title={isSymbolicActive('mathPoints') ? 'Objetos avanzados (modo simbólico): marcadores de proceso psicológico. No son cálculos astronómicos.' : undefined}
+              >
                 <Dot type={calcState('mathPoints', false)} />
-                <span className="flex-1">Puntos matemáticos</span>
-                <span className="text-xs text-gray-400">{isSymbolicActive('mathPoints') ? 'Activo (lectura simbólica)' : 'pendiente'}</span>
+                <span className="flex-1">Objetos avanzados</span>
+                <span className="text-xs text-gray-400">
+                  {isSymbolicActive('mathPoints')
+                    ? (() => {
+                      const parts: string[] = [];
+                      if (advancedObjects.nodes) parts.push('Nodos');
+                      if (advancedObjects.fortune) parts.push('Fortuna');
+                      if (advancedObjects.symbolicPoints) parts.push('Puntos');
+                      return parts.length > 0 ? `Activo (lectura simbólica) · ${parts.join(' / ')}` : 'Activo (lectura simbólica)';
+                    })()
+                    : 'pendiente'}
+                </span>
               </button>
             </li>
           </ul>

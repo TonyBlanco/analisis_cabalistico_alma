@@ -28,6 +28,8 @@ interface AstrologySidebarProps {
   setPersonaMode?: (v: 'off' | 'social' | 'professional' | 'intimate') => void;
   relocationMode?: 'off' | 'home' | 'work' | 'travel' | 'abroad';
   setRelocationMode?: (v: 'off' | 'home' | 'work' | 'travel' | 'abroad') => void;
+  advancedObjects?: { nodes: boolean; fortune: boolean; symbolicPoints: boolean };
+  setAdvancedObjects?: (v: { nodes: boolean; fortune: boolean; symbolicPoints: boolean }) => void;
   visualStyle?: 'classic' | 'huber';
   setVisualStyle?: (v: 'classic' | 'huber') => void;
 }
@@ -72,6 +74,8 @@ export default function AstrologySidebar({
   setPersonaMode,
   relocationMode = 'off',
   setRelocationMode,
+  advancedObjects = { nodes: false, fortune: false, symbolicPoints: false },
+  setAdvancedObjects,
   visualStyle = 'classic',
   setVisualStyle,
 }: AstrologySidebarProps) {
@@ -88,7 +92,7 @@ export default function AstrologySidebar({
   const isHarmonicsActive = harmonicMode !== 'off' && isLayerActive('harmonics');
   const isPersonaActive = personaMode !== 'off' && isLayerActive('persona');
   const isRelocationActive = relocationMode !== 'off' && isLayerActive('relocation');
-  const isMathPointsActive = isLayerActive('mathPoints');
+  const isAdvancedObjectsActive = Boolean(advancedObjects.nodes || advancedObjects.fortune || advancedObjects.symbolicPoints);
   const hasSecondaryLayer = Boolean(activeLayers && (
     activeLayers.has('transits') ||
     activeLayers.has('progressions') ||
@@ -472,19 +476,46 @@ export default function AstrologySidebar({
             <div className="px-2 py-1 bg-green-50 border border-green-200 rounded">
               <span className="font-medium">✅ Planetas</span>
             </div>
-            <div className="flex items-center justify-between px-2 py-1 border rounded">
-              <div className="text-[13px]" title="Puntos matemáticos (lectura simbólica). Muestra nodos suaves sin grados ni cálculos.">
-                Puntos matemáticos · <span className="text-gray-500">lectura simbólica</span>
+            <div className={`px-2 py-2 border rounded ${canUseForecast ? 'bg-white border-gray-200' : 'bg-gray-50 border-gray-200 opacity-60'}`}>
+              <div className="flex items-center justify-between">
+                <div className="text-[13px]" title="Objetos avanzados (modo simbólico): marcadores de proceso psicológico. No son cálculos astronómicos.">
+                  Objetos avanzados · <span className="text-gray-500">disponible (simbólico)</span>
+                </div>
+                <span className="text-[11px] text-gray-500">{isAdvancedObjectsActive ? 'activo' : 'off'}</span>
               </div>
-              <label className="inline-flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  checked={Boolean(isMathPointsActive)}
-                  onChange={() => onToggleLayer && onToggleLayer('mathPoints')}
-                  disabled={!canUseForecast}
-                  title={!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : 'Puntos matemáticos (lectura simbólica)'}
-                />
-              </label>
+              <div className="mt-2 space-y-2">
+                <label className="flex items-center justify-between text-[13px]">
+                  <span title="Dirección simbólica de desarrollo y aprendizaje.">☑ Nodo Norte / Sur</span>
+                  <input
+                    type="checkbox"
+                    checked={Boolean(advancedObjects.nodes)}
+                    onChange={(e) => setAdvancedObjects && setAdvancedObjects({ ...advancedObjects, nodes: e.target.checked })}
+                    disabled={!canUseForecast}
+                    title={!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : 'Dirección simbólica de desarrollo y aprendizaje.'}
+                  />
+                </label>
+                <label className="flex items-center justify-between text-[13px]">
+                  <span title="Área de fluidez y facilidad experiencial.">☑ Parte de la Fortuna</span>
+                  <input
+                    type="checkbox"
+                    checked={Boolean(advancedObjects.fortune)}
+                    onChange={(e) => setAdvancedObjects && setAdvancedObjects({ ...advancedObjects, fortune: e.target.checked })}
+                    disabled={!canUseForecast}
+                    title={!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : 'Área de fluidez y facilidad experiencial.'}
+                  />
+                </label>
+                <label className="flex items-center justify-between text-[13px]">
+                  <span title="Marcadores de enfoque psicológico (no astronómicos).">☑ Puntos simbólicos</span>
+                  <input
+                    type="checkbox"
+                    checked={Boolean(advancedObjects.symbolicPoints)}
+                    onChange={(e) => setAdvancedObjects && setAdvancedObjects({ ...advancedObjects, symbolicPoints: e.target.checked })}
+                    disabled={!canUseForecast}
+                    title={!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : 'Marcadores de enfoque psicológico (no astronómicos).'}
+                  />
+                </label>
+              </div>
+              <div className="mt-2 text-[11px] text-gray-500">Marcadores simbólicos (sin grados ni cálculo astronómico real).</div>
             </div>
             <div className="flex items-center justify-between px-2 py-1 border rounded">
               <label className="inline-flex items-center gap-2 text-sm">

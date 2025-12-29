@@ -32,6 +32,7 @@ type ChartVisualStyle = 'classic' | 'huber';
 type HarmonicMode = 'off' | 'h5' | 'h7' | 'h9';
 type PersonaMode = 'off' | 'social' | 'professional' | 'intimate';
 type RelocationMode = 'off' | 'home' | 'work' | 'travel' | 'abroad';
+type AdvancedObjectsState = { nodes: boolean; fortune: boolean; symbolicPoints: boolean };
 
 export default function AstrologyProfessionalView({ consultante, chart, analysis_result, calculateChart, refetch }: Props) {
   // Audit log (controlled, local-only): helps verify incoming data shapes
@@ -161,6 +162,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
   const [harmonicMode, setHarmonicMode] = useState<HarmonicMode>('off');
   const [personaMode, setPersonaMode] = useState<PersonaMode>('off');
   const [relocationMode, setRelocationMode] = useState<RelocationMode>('off');
+  const [advancedObjects, setAdvancedObjects] = useState<AdvancedObjectsState>({ nodes: false, fortune: false, symbolicPoints: false });
   const [solarReturnCompareEnabled, setSolarReturnCompareEnabled] = useState<boolean>(false);
   const [solarReturnCompareYearB, setSolarReturnCompareYearB] = useState<number | null>(null);
   const [visualStyle, setVisualStyle] = useState<ChartVisualStyle>('classic');
@@ -273,6 +275,30 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
       return next;
     });
   }, [relocationMode, hasIdentity]);
+
+  useEffect(() => {
+    // Advanced objects are symbolic-only and require identity; keep activeLayers in sync
+    if (!hasIdentity) {
+      setAdvancedObjects({ nodes: false, fortune: false, symbolicPoints: false });
+      setActiveLayers((prev) => {
+        if (!prev.has('mathPoints')) return prev;
+        const next = new Set(prev);
+        next.delete('mathPoints');
+        return next;
+      });
+      return;
+    }
+
+    const want = Boolean(advancedObjects.nodes || advancedObjects.fortune || advancedObjects.symbolicPoints);
+    setActiveLayers((prev) => {
+      const has = prev.has('mathPoints');
+      if (want === has) return prev;
+      const next = new Set(prev);
+      if (want) next.add('mathPoints');
+      else next.delete('mathPoints');
+      return next;
+    });
+  }, [advancedObjects, hasIdentity]);
 
   // Layer inputs
   const [transitDate, setTransitDate] = useState<string>(new Date().toISOString().slice(0, 10));
@@ -870,6 +896,8 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
           setPersonaMode={setPersonaMode}
           relocationMode={relocationMode}
           setRelocationMode={setRelocationMode}
+          advancedObjects={advancedObjects}
+          setAdvancedObjects={setAdvancedObjects}
           visualStyle={visualStyle}
           setVisualStyle={setVisualStyle}
         />
@@ -1707,6 +1735,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                    harmonicMode={harmonicMode}
                    personaMode={personaMode}
                    relocationMode={relocationMode}
+                   advancedObjects={advancedObjects}
                    secondaryLayerKey={secondaryLayer}
                    comparisonEnabled={Boolean(synastryEnabled)}
                    comparisonAspectsEnabled={Boolean(synastryEnabled)}
@@ -2004,6 +2033,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                                personaMode={personaMode}
                                relocation={relocationParams ? { city: relocationParams.label, offsetDeg: relocationParams.offsetDeg, mode: relocationParams.mode, rotationDeg: relocationParams.rotationDeg } : undefined}
                                showMathPoints={activeLayers.has('mathPoints')}
+                               advancedObjects={advancedObjects}
                                titleRight={`${meta.sistema_casas || 'placidus'} · ${meta.zodiac_type || 'tropical'}`}
                                transitPlanets={transitsSnapshot && transitBaseType === 'natal' ? transitsSnapshot.planets : undefined}
                              />
@@ -2039,6 +2069,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                            personaMode={personaMode}
                            relocation={relocationParams ? { city: relocationParams.label, offsetDeg: relocationParams.offsetDeg, mode: relocationParams.mode, rotationDeg: relocationParams.rotationDeg } : undefined}
                            showMathPoints={activeLayers.has('mathPoints')}
+                           advancedObjects={advancedObjects}
                            titleRight="Pendiente · solo lectura"
                         />
                       )

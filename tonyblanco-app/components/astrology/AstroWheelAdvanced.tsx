@@ -46,6 +46,7 @@ type Props = {
   personaMode?: boolean | "off" | "social" | "professional" | "intimate";
   relocation?: { city: string; offsetDeg: number; mode?: "home" | "work" | "travel" | "abroad"; rotationDeg?: number };
   showMathPoints?: boolean;
+  advancedObjects?: { nodes: boolean; fortune: boolean; symbolicPoints: boolean };
   comparisonWheel?: {
     enabled: boolean;
     planets: PlanetPoint[];
@@ -81,6 +82,7 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
   personaMode = false,
   relocation,
   showMathPoints = false,
+  advancedObjects,
   comparisonWheel,
   showComparisonAspects = true,
 }) => {
@@ -88,6 +90,7 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
   const isHuber = visualStyle === "huber";
   const persona = (typeof personaMode === "string") ? personaMode : (personaMode ? "social" : "off");
   const relocationRotation = relocation?.rotationDeg ?? 0;
+  const advObjects = advancedObjects ?? { nodes: showMathPoints, fortune: false, symbolicPoints: showMathPoints };
   const comparisonEnabled = Boolean(comparisonWheel?.enabled);
   const opts: WheelOptions = useMemo(() => ({
     size,
@@ -930,6 +933,129 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
     );
   };
 
+  const renderAdvancedObjects = () => {
+    if (!advObjects.nodes && !advObjects.fortune && !advObjects.symbolicPoints) return null;
+
+    const r = Math.min(rings.zodiacGlyphRing - 10, rings.houseOuter + 18);
+
+    const hash = (s: string) => {
+      let h = 0;
+      for (let i = 0; i < s.length; i++) h = (h * 33 + s.charCodeAt(i)) >>> 0;
+      return h;
+    };
+
+    const byKey = new Map<string, PlanetPoint>();
+    planets.forEach((p) => byKey.set(String(p.key).toLowerCase(), p));
+    const sun = byKey.get("sun");
+    const moon = byKey.get("moon");
+
+    const baseAsc = normalizeDeg((houses && houses.length === 12) ? houses[0] : 0);
+    const baseSeed = normalizeDeg((Number.isFinite(ascendantDeg) ? ascendantDeg : baseAsc) + (planets.length > 0 ? hash(planets[0].key) % 360 : 0));
+
+    const vecAvgDeg = (a: number, b: number) => {
+      const ra = (normalizeDeg(a) * Math.PI) / 180;
+      const rb = (normalizeDeg(b) * Math.PI) / 180;
+      const x = Math.cos(ra) + Math.cos(rb);
+      const y = Math.sin(ra) + Math.sin(rb);
+      return normalizeDeg((Math.atan2(y, x) * 180) / Math.PI);
+    };
+
+    const midArcDeg = (startDeg: number, endDeg: number) => {
+      const a0 = normalizeDeg(startDeg);
+      const a1 = normalizeDeg(endDeg);
+      const span = (a1 - a0 + 360) % 360;
+      return normalizeDeg(a0 + span / 2);
+    };
+
+    const sunDeg = sun ? normalizeDeg(sun.degree) : null;
+    const moonDeg = moon ? normalizeDeg(moon.degree) : null;
+
+    const northNodeDeg = normalizeDeg((sunDeg ?? baseAsc) + 95);
+    const southNodeDeg = normalizeDeg(northNodeDeg + 180);
+    const fortunaDeg = (sunDeg !== null && moonDeg !== null)
+      ? vecAvgDeg(sunDeg, moonDeg)
+      : normalizeDeg((sunDeg ?? baseSeed) + 45);
+
+    const symbolicPointsDeg = (() => {
+      if (!houses || houses.length !== 12) return [60, 150, 240, 330];
+      const idx = [2, 5, 8, 11]; // casas 3/6/9/12
+      return idx.map((i) => midArcDeg(houses[i], houses[(i + 1) % 12]));
+    })();
+
+    const tooltipNodesN = "Dirección simbólica de desarrollo y aprendizaje.";
+    const tooltipNodesS = "Zona conocida, hábitos y memoria psicológica.";
+    const tooltipFortune = "Área de fluidez y facilidad experiencial.";
+    const tooltipPoints = "Marcadores de enfoque psicológico (no astronómicos).";
+
+    const nodeNorth = () => {
+      const p = degToPoint(northNodeDeg, r, cx);
+      const tip = degToPoint(northNodeDeg, r - 12, cx);
+      return (
+        <g>
+          <title>{tooltipNodesN}</title>
+          <circle cx={p.x} cy={p.y} r={7} fill="none" stroke="#8b5cf6" strokeWidth={1.6} opacity={0.55} />
+          <line x1={p.x} y1={p.y} x2={tip.x} y2={tip.y} stroke="#8b5cf6" strokeWidth={1.6} opacity={0.45} />
+        </g>
+      );
+    };
+
+    const nodeSouth = () => {
+      const p = degToPoint(southNodeDeg, r, cx);
+      return (
+        <g>
+          <title>{tooltipNodesS}</title>
+          <circle cx={p.x} cy={p.y} r={6.5} fill="rgba(139,92,246,0.18)" stroke="#8b5cf6" strokeWidth={1.4} opacity={0.5} />
+        </g>
+      );
+    };
+
+    const fortuna = () => {
+      const p = degToPoint(fortunaDeg, r, cx);
+      return (
+        <g>
+          <title>{tooltipFortune}</title>
+          <circle cx={p.x} cy={p.y} r={10} fill="rgba(245,158,11,0.10)" stroke="none" opacity={0.8} />
+          <circle cx={p.x} cy={p.y} r={4.2} fill="#f59e0b" opacity={0.55} />
+        </g>
+      );
+    };
+
+    const points = () => {
+      const color = "#64748b";
+      return (
+        <g>
+          <title>{tooltipPoints}</title>
+          {symbolicPointsDeg.map((deg, idx) => {
+            const p = degToPoint(deg, r, cx);
+            if (idx === 0) {
+              return <polygon key={`sp-${idx}`} points={`${p.x},${p.y - 5} ${p.x - 4.5},${p.y + 4.5} ${p.x + 4.5},${p.y + 4.5}`} fill={color} opacity={0.22} />;
+            }
+            if (idx === 1) {
+              return <rect key={`sp-${idx}`} x={p.x - 4} y={p.y - 4} width={8} height={8} fill={color} opacity={0.18} />;
+            }
+            if (idx === 2) {
+              return <polygon key={`sp-${idx}`} points={`${p.x},${p.y - 5.5} ${p.x + 5.5},${p.y} ${p.x},${p.y + 5.5} ${p.x - 5.5},${p.y}`} fill={color} opacity={0.18} />;
+            }
+            return <circle key={`sp-${idx}`} cx={p.x} cy={p.y} r={3.5} fill={color} opacity={0.16} />;
+          })}
+        </g>
+      );
+    };
+
+    return (
+      <g>
+        {advObjects.nodes ? (
+          <g>
+            {nodeNorth()}
+            {nodeSouth()}
+          </g>
+        ) : null}
+        {advObjects.fortune ? fortuna() : null}
+        {advObjects.symbolicPoints ? points() : null}
+      </g>
+    );
+  };
+
   const renderSecondaryWheel = () => {
     if (!secondaryLayer) return null;
 
@@ -1402,6 +1528,7 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
               {renderDegreeTicks()}
               {renderZodiac()}
               {renderRelocationOverlay()}
+              {renderAdvancedObjects()}
               {huberHouseBands}
                 {renderHouseLines()}
                 {renderHouseNumbers()}

@@ -1,1 +1,1 @@
-feat(astrology): add symbolic solar and lunar return layers
+feat(astrology): enable symbolic harmonic layer (5/7/9) with radial grid and highlights

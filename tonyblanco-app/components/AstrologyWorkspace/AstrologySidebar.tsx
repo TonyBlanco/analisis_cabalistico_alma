@@ -22,8 +22,8 @@ interface AstrologySidebarProps {
   setSymbolicLunarReturnDate?: (v: string | null) => void;
   showCrossAspects?: boolean;
   setShowCrossAspects?: (v: boolean) => void;
-  harmonicOrder?: 5 | 7 | 9;
-  setHarmonicOrder?: (v: 5 | 7 | 9) => void;
+  harmonicMode?: 'off' | 'h5' | 'h7' | 'h9';
+  setHarmonicMode?: (v: 'off' | 'h5' | 'h7' | 'h9') => void;
   relocationCity?: string;
   setRelocationCity?: (v: string) => void;
   visualStyle?: 'classic' | 'huber';
@@ -64,8 +64,8 @@ export default function AstrologySidebar({
   setSymbolicLunarReturnDate,
   showCrossAspects = false,
   setShowCrossAspects,
-  harmonicOrder = 5,
-  setHarmonicOrder,
+  harmonicMode = 'off',
+  setHarmonicMode,
   relocationCity = 'Madrid (placeholder)',
   setRelocationCity,
   visualStyle = 'classic',
@@ -81,7 +81,7 @@ export default function AstrologySidebar({
   const isSolarReturnActive = isLayerActive('return_solar');
   const isLunarReturnActive = isLayerActive('return_lunar');
   const isPlanetaryLayerActive = isLayerActive('planetary');
-  const isHarmonicsActive = isLayerActive('harmonics');
+  const isHarmonicsActive = harmonicMode !== 'off' && isLayerActive('harmonics');
   const isPersonaActive = isLayerActive('persona');
   const isRelocationActive = isLayerActive('relocation');
   const isMathPointsActive = isLayerActive('mathPoints');
@@ -330,31 +330,29 @@ export default function AstrologySidebar({
           <div className="space-y-1 text-[11px]">
             <div className={`px-2 py-2 border rounded ${canUseForecast ? 'bg-white border-gray-200' : 'bg-gray-50 border-gray-200 opacity-60'}`}>
               <div className="flex items-center justify-between">
-                <div className="text-[13px]" title="Visualización armónica simbólica. No matemática.">
-                  Armónicos · <span className="text-gray-500">visual</span>
+                <div
+                  className="text-[13px]"
+                  title="Armónicos (modo simbólico): representan patrones de resonancia psicológica. No son cálculos astronómicos."
+                >
+                  Armónicos · <span className="text-gray-500">disponible (simbólico)</span>
                 </div>
-                <label className="inline-flex items-center gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={Boolean(isHarmonicsActive)}
-                    onChange={() => onToggleLayer && onToggleLayer('harmonics')}
-                    disabled={!canUseForecast}
-                    title={!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : 'Visualización armónica simbólica. No matemática.'}
-                  />
-                </label>
               </div>
               <div className="mt-1 flex items-center justify-between gap-2">
-                <div className="text-[11px] text-gray-500">Orden</div>
+                <div className="text-[11px] text-gray-500">Modo</div>
                 <select
                   className="rounded border border-gray-200 bg-white px-2 py-1 text-[12px]"
-                  value={harmonicOrder}
-                  onChange={(e) => setHarmonicOrder && setHarmonicOrder(Number(e.target.value) as 5 | 7 | 9)}
-                  disabled={!canUseForecast || !isHarmonicsActive}
-                  title={!isHarmonicsActive ? 'Activa Armónicos para seleccionar' : 'Orden armónico simbólico'}
+                  value={harmonicMode}
+                  onChange={(e) => {
+                    const v = e.target.value as 'off' | 'h5' | 'h7' | 'h9';
+                    setHarmonicMode && setHarmonicMode(v);
+                  }}
+                  disabled={!canUseForecast}
+                  title={!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : 'Armónicos (modo simbólico): patrones de resonancia psicológica. No matemático ni predictivo.'}
                 >
-                  <option value={5}>5º</option>
-                  <option value={7}>7º</option>
-                  <option value={9}>9º</option>
+                  <option value="off">Off</option>
+                  <option value="h5">h5 · creatividad / voluntad / diseño</option>
+                  <option value="h7">h7 · búsqueda / refinamiento / misterio interior</option>
+                  <option value="h9">h9 · integración / visión / propósito</option>
                 </select>
               </div>
             </div>

@@ -116,6 +116,54 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
   const { rings } = geo;
   const [hoverKey, setHoverKey] = useState<string | null>(null);
 
+  const harmonicHighlight = useMemo(() => {
+    if (!harmonicOrder) return null;
+
+    const count = Math.max(3, Math.min(12, harmonicOrder));
+    const label = `H${count}`;
+
+    const hashKey = (key: string) => {
+      const s = String(key || '');
+      let h = 0;
+      for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+      return h;
+    };
+
+    const sectorForPlanet = (p: PlanetPoint) => {
+      const deg = (Number.isFinite(p.degree) && !isPlaceholder)
+        ? normalizeDeg(p.degree)
+        : normalizeDeg((hashKey(p.key) * 137 + count * 17) % 360);
+      const sectorSize = 360 / count;
+      return Math.max(0, Math.min(count - 1, Math.floor(deg / sectorSize)));
+    };
+
+    const collectAligned = (pts: PlanetPoint[]) => {
+      const sectors = new Map<number, string[]>();
+      for (const p of pts) {
+        const idx = sectorForPlanet(p);
+        const arr = sectors.get(idx) ?? [];
+        arr.push(p.key);
+        sectors.set(idx, arr);
+      }
+      const aligned = new Set<string>();
+      sectors.forEach((keys) => {
+        if (keys.length >= 2) keys.forEach((k) => aligned.add(k));
+      });
+      return aligned;
+    };
+
+    const secondaryPts = (secondaryPlanets && secondaryPlanets.length > 0)
+      ? secondaryPlanets
+      : ((transitPlanets && transitPlanets.length > 0) ? transitPlanets : []);
+
+    return {
+      count,
+      label,
+      natalKeys: collectAligned(planets),
+      secondaryKeys: collectAligned(secondaryPts),
+    };
+  }, [harmonicOrder, planets, secondaryPlanets, transitPlanets, isPlaceholder]);
+
   const huberAspectStyle = (kind: "CONJ" | "SEXT" | "SQR" | "TRI" | "OPP") => {
     // semantic palette: tension vs harmonic vs neutral (Huber-style emphasis)
     switch (kind) {
@@ -676,8 +724,9 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
 
   const renderHarmonicOverlay = () => {
     if (!harmonicOrder) return null;
-    const tooltip = `Visualización armónica simbólica (${harmonicOrder}º). No matemática.`;
+    const tooltip = `Armónicos (modo simbólico): patrones de resonancia psicológica (${harmonicOrder}º). No son cálculos astronómicos.`;
     const lines: React.ReactNode[] = [];
+    const nodes: React.ReactNode[] = [];
     const count = Math.max(3, Math.min(12, harmonicOrder));
     for (let i = 0; i < count; i++) {
       const deg = (360 / count) * i;
@@ -690,14 +739,36 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
           x2={b.x} y2={b.y}
           stroke="#0f172a"
           strokeWidth={1.1}
-          opacity={0.08}
+          opacity={isHuber ? 0.06 : 0.1}
         />
       );
+
+      const radii = [
+        rings.centerHole + 18,
+        (rings.centerHole + rings.houseInner) / 2,
+        rings.houseInner - 10,
+        rings.degreeTicksOuter - 16,
+      ].filter((r) => r > 0);
+
+      radii.forEach((r, idx2) => {
+        const p = degToPoint(deg, r, cx);
+        nodes.push(
+          <circle
+            key={`harm-node-${count}-${i}-${idx2}`}
+            cx={p.x}
+            cy={p.y}
+            r={1.8}
+            fill="#0f172a"
+            opacity={isHuber ? 0.06 : 0.1}
+          />
+        );
+      });
     }
     return (
       <g>
         <title>{tooltip}</title>
         {lines}
+        {nodes}
       </g>
     );
   };
@@ -805,6 +876,14 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
               const pt = degToPoint(p.degree, glyphR, cx);
               return (
                 <g key={`sec-pl-${p.key}`}>
+                  {harmonicHighlight && harmonicHighlight.secondaryKeys.has(p.key) ? (
+                    <>
+                      <circle cx={pt.x} cy={pt.y} r={18} fill="none" stroke={st.stroke} strokeWidth={2} opacity={0.12} />
+                      <text x={pt.x - 14} y={pt.y + 18} fontSize={8} fill={st.stroke} opacity={0.45} style={{ fontFamily: 'Inter, ui-sans-serif, system-ui' }}>
+                        {harmonicHighlight.label}
+                      </text>
+                    </>
+                  ) : null}
                   {isHuber ? (
                     <circle cx={pt.x} cy={pt.y} r={14} fill="rgba(255,255,255,0.88)" stroke={st.stroke} strokeWidth={1.3} opacity={0.75} />
                   ) : null}
@@ -974,6 +1053,14 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
 
           return (
             <g key={`pl-${p.key}`}>
+              {harmonicHighlight && harmonicHighlight.natalKeys.has(p.key) ? (
+                <>
+                  <circle cx={pt.x} cy={pt.y} r={isHuber ? 22 : 18} fill="none" stroke="#6366f1" strokeWidth={2} opacity={0.16} />
+                  <text x={pt.x - 14} y={pt.y + 18} fontSize={8.5} fill="#6366f1" opacity={0.6} style={{ fontFamily: 'Inter, ui-sans-serif, system-ui' }}>
+                    {harmonicHighlight.label}
+                  </text>
+                </>
+              ) : null}
               {isHuber ? (
                 <circle cx={pt.x} cy={pt.y} r={16} fill="rgba(255,255,255,0.92)" stroke="#111827" strokeWidth={1.4} opacity={isPlaceholder ? 0.75 : 0.9} />
               ) : null}

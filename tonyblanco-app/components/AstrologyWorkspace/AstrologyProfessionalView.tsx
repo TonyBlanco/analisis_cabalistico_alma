@@ -29,6 +29,7 @@ interface Props {
 }
 
 type ChartVisualStyle = 'classic' | 'huber';
+type HarmonicMode = 'off' | 'h5' | 'h7' | 'h9';
 
 export default function AstrologyProfessionalView({ consultante, chart, analysis_result, calculateChart, refetch }: Props) {
   // Audit log (controlled, local-only): helps verify incoming data shapes
@@ -155,7 +156,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
   const [symbolicSolarReturnYear, setSymbolicSolarReturnYear] = useState<number | null>(null);
   const [symbolicLunarReturnDate, setSymbolicLunarReturnDate] = useState<string | null>(null);
   const [showCrossAspects, setShowCrossAspects] = useState<boolean>(false);
-  const [harmonicOrder, setHarmonicOrder] = useState<5 | 7 | 9>(5);
+  const [harmonicMode, setHarmonicMode] = useState<HarmonicMode>('off');
   const [relocationCity, setRelocationCity] = useState<string>('Madrid (placeholder)');
   const [solarReturnCompareEnabled, setSolarReturnCompareEnabled] = useState<boolean>(false);
   const [solarReturnCompareYearB, setSolarReturnCompareYearB] = useState<number | null>(null);
@@ -190,6 +191,37 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
     ];
     return keys.some((k) => activeLayers.has(k));
   }, [hasIdentity, activeLayers]);
+
+  const harmonicOrder = useMemo(() => {
+    if (harmonicMode === 'h5') return 5 as const;
+    if (harmonicMode === 'h7') return 7 as const;
+    if (harmonicMode === 'h9') return 9 as const;
+    return undefined;
+  }, [harmonicMode]);
+
+  useEffect(() => {
+    // Harmonics are symbolic-only and require identity; keep activeLayers in sync
+    if (!hasIdentity) {
+      setHarmonicMode('off');
+      setActiveLayers((prev) => {
+        if (!prev.has('harmonics')) return prev;
+        const next = new Set(prev);
+        next.delete('harmonics');
+        return next;
+      });
+      return;
+    }
+
+    setActiveLayers((prev) => {
+      const want = harmonicMode !== 'off';
+      const has = prev.has('harmonics');
+      if (want === has) return prev;
+      const next = new Set(prev);
+      if (want) next.add('harmonics');
+      else next.delete('harmonics');
+      return next;
+    });
+  }, [harmonicMode, hasIdentity]);
 
   // Layer inputs
   const [transitDate, setTransitDate] = useState<string>(new Date().toISOString().slice(0, 10));
@@ -778,8 +810,8 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
           setSymbolicLunarReturnDate={setSymbolicLunarReturnDate}
           showCrossAspects={showCrossAspects}
           setShowCrossAspects={setShowCrossAspects}
-          harmonicOrder={harmonicOrder}
-          setHarmonicOrder={setHarmonicOrder}
+          harmonicMode={harmonicMode}
+          setHarmonicMode={setHarmonicMode}
           relocationCity={relocationCity}
           setRelocationCity={setRelocationCity}
           visualStyle={visualStyle}
@@ -1616,6 +1648,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                      relocation: activeLayers.has('relocation'),
                      mathPoints: activeLayers.has('mathPoints'),
                    }}
+                   harmonicMode={harmonicMode}
                    secondaryLayerKey={secondaryLayer}
                    comparisonEnabled={Boolean(synastryEnabled)}
                    comparisonAspectsEnabled={Boolean(synastryEnabled)}
@@ -1812,7 +1845,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                                     comparisonWheel={comparisonWheel}
                                     showComparisonAspects={synastryEnabled}
                                     symbolicPlanetaryLayer={activeLayers.has('planetary')}
-                                    harmonicOrder={activeLayers.has('harmonics') ? harmonicOrder : undefined}
+                                    harmonicOrder={harmonicOrder}
                                     personaMode={activeLayers.has('persona')}
                                     relocation={activeLayers.has('relocation') ? { city: relocationCity, offsetDeg: relocationOffsetDeg } : undefined}
                                     showMathPoints={activeLayers.has('mathPoints')}
@@ -1909,7 +1942,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                                comparisonWheel={comparisonWheel}
                                showComparisonAspects={synastryEnabled}
                                symbolicPlanetaryLayer={activeLayers.has('planetary')}
-                               harmonicOrder={activeLayers.has('harmonics') ? harmonicOrder : undefined}
+                               harmonicOrder={harmonicOrder}
                                personaMode={activeLayers.has('persona')}
                                relocation={activeLayers.has('relocation') ? { city: relocationCity, offsetDeg: relocationOffsetDeg } : undefined}
                                showMathPoints={activeLayers.has('mathPoints')}
@@ -1944,7 +1977,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                            comparisonWheel={comparisonWheel}
                            showComparisonAspects={synastryEnabled}
                            symbolicPlanetaryLayer={activeLayers.has('planetary')}
-                           harmonicOrder={activeLayers.has('harmonics') ? harmonicOrder : undefined}
+                           harmonicOrder={harmonicOrder}
                            personaMode={activeLayers.has('persona')}
                            relocation={activeLayers.has('relocation') ? { city: relocationCity, offsetDeg: relocationOffsetDeg } : undefined}
                            showMathPoints={activeLayers.has('mathPoints')}

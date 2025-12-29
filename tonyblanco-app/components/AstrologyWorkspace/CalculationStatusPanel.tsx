@@ -16,6 +16,7 @@ type Props = {
     relocation: boolean;
     mathPoints: boolean;
   };
+  harmonicMode?: 'off' | 'h5' | 'h7' | 'h9';
   houseSystem: string;
   zodiacType: string;
   canRecalculate: boolean; // whether UI has ability to trigger recalculation (we will NOT trigger)
@@ -33,7 +34,7 @@ const Dot: React.FC<{ type: DotType }> = ({ type }) => {
   return <span className="inline-block w-3 h-3 rounded-full bg-rose-400 mr-2 opacity-70" />;
 };
 
-export default function CalculationStatusPanel({ overlays, activeLayers, symbolicLayers, houseSystem, zodiacType, canRecalculate, secondaryLayerKey = null, comparisonEnabled = false, comparisonAspectsEnabled = false }: Props) {
+export default function CalculationStatusPanel({ overlays, activeLayers, symbolicLayers, harmonicMode = 'off', houseSystem, zodiacType, canRecalculate, secondaryLayerKey = null, comparisonEnabled = false, comparisonAspectsEnabled = false }: Props) {
   const [helper, setHelper] = useState<string | null>(null);
   const symbolicTooltip = 'Capa simbólica activa. No corresponde a un cálculo astronómico real.';
   const annualSymbolicTooltip = 'Capa anual/mensual activa (lectura simbólica) — sin recalcular carta base.';
@@ -190,10 +191,18 @@ export default function CalculationStatusPanel({ overlays, activeLayers, symboli
             </li>
 
             <li className="flex items-center">
-              <button onClick={() => handleClickSymbolicInfo('Visualización armónica simbólica. No matemática.')} className="flex items-center w-full text-left" title={isSymbolicActive('harmonics') ? 'Visualización armónica simbólica. No matemática.' : undefined}>
+              <button
+                onClick={() => handleClickSymbolicInfo('Armónicos (modo simbólico): representan patrones de resonancia psicológica. No son cálculos astronómicos.')}
+                className="flex items-center w-full text-left"
+                title={isSymbolicActive('harmonics') ? 'Armónicos (modo simbólico): representan patrones de resonancia psicológica. No son cálculos astronómicos.' : undefined}
+              >
                 <Dot type={calcState('harmonics', false)} />
                 <span className="flex-1">Armónicos</span>
-                <span className="text-xs text-gray-400">{isSymbolicActive('harmonics') ? 'Activo (lectura simbólica)' : 'pendiente'}</span>
+                <span className="text-xs text-gray-400">
+                  {isSymbolicActive('harmonics')
+                    ? (harmonicMode !== 'off' ? `Activo (lectura simbólica) · ${harmonicMode}` : 'Activo (lectura simbólica)')
+                    : 'pendiente'}
+                </span>
               </button>
             </li>
 

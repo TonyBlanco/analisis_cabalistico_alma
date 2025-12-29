@@ -171,6 +171,23 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
     });
   };
 
+  const isSymbolicReadingMode = useMemo(() => {
+    if (!hasIdentity) return false;
+    const keys = [
+      'transits',
+      'progressions',
+      'solarArc',
+      'return_solar',
+      'return_lunar',
+      'planetary',
+      'harmonics',
+      'persona',
+      'relocation',
+      'mathPoints',
+    ];
+    return keys.some((k) => activeLayers.has(k));
+  }, [hasIdentity, activeLayers]);
+
   // Layer inputs
   const [transitDate, setTransitDate] = useState<string>(new Date().toISOString().slice(0, 10));
   const [progressionDate, setProgressionDate] = useState<string>(new Date().toISOString().slice(0, 10));
@@ -772,6 +789,11 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
           <header className="mb-6">
             <h1 className="text-xl font-semibold text-gray-900">Carta Natal — Astrología Profesional</h1>
             <p className="text-sm text-gray-600 mt-1">Swiss Ephemeris · Solo lectura</p>
+            {isSymbolicReadingMode ? (
+              <div className="mt-2 inline-flex items-center rounded border border-indigo-100 bg-indigo-50 px-3 py-2 text-xs text-indigo-900">
+                Modo lectura simbolica activa. No se estan realizando calculos astronomicos.
+              </div>
+            ) : null}
           </header>
 
           {!hasChart ? (

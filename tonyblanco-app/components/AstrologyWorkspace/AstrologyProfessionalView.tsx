@@ -151,6 +151,13 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
 
   const [activeTab, setActiveTab] = useState<'visual' | 'psych'>('visual');
 
+  // Therapist-only UI state
+  const isTherapist = Boolean((consultante as any)?.role === 'therapist' || (consultante as any)?.is_therapist);
+  const [sharedSnapshotId, setSharedSnapshotId] = useState<string | null>(null);
+  const [worksheetRefs, setWorksheetRefs] = useState<any[]>([]);
+  const [showNotesModal, setShowNotesModal] = useState(false);
+  const [therapistNotes, setTherapistNotes] = useState<string>('');
+
   const handleLayerToggle = (layer: string) => {
     setActiveLayers((prev) => {
       const next = new Set(prev);
@@ -220,6 +227,74 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
       // Minimal user feedback
       // eslint-disable-next-line no-alert
       alert('Error exportando comparativa: ' + (err?.message || err));
+    }
+  };
+
+  // Helper: format ISO date to dd/mm/yyyy for UI
+  const fmtDate = (iso?: string | null) => {
+    try {
+      if (!iso) return '-';
+      return new Date(iso).toLocaleDateString('es-ES');
+    } catch (e) { return iso || '-'; }
+  };
+
+  // Professional export: include ActionBar context (but strip interactive buttons)
+  const exportProfessionalPDF = async (filename = `lectura_${consultante?.id || 'x'}.pdf`) => {
+    try {
+      const actionBar = document.querySelector('[data-professional-actionbar]') as HTMLElement | null;
+      const chartArea = document.getElementById('professional-chart-area');
+      if (!chartArea) throw new Error('Área de gráfico no encontrada');
+
+      // Clone nodes to compose printable snapshot
+      const container = document.createElement('div');
+      container.style.width = '1200px';
+      container.style.background = '#ffffff';
+      container.style.padding = '12px';
+
+      if (actionBar) {
+        const abClone = actionBar.cloneNode(true) as HTMLElement;
+        // remove interactive buttons
+        abClone.querySelectorAll('button').forEach((b) => b.remove());
+        container.appendChild(abClone);
+      }
+
+      const chartClone = chartArea.cloneNode(true) as HTMLElement;
+      container.appendChild(chartClone);
+
+      // Offscreen render target
+      container.style.position = 'fixed';
+      container.style.left = '-9999px';
+      document.body.appendChild(container);
+
+      const canvas = await html2canvas(container, { useCORS: true, backgroundColor: '#ffffff', scale: 2 });
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({ orientation: 'landscape' });
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+      // Header: Title + Method + Comparative + Date
+      pdf.setFontSize(14);
+      pdf.text('Lectura Astrológica Holística', 10, 12);
+      pdf.setFontSize(10);
+      const methodText = activeLayers.has('solarReturn') ? 'Retorno Solar' : activeLayers.has('progressions') ? 'Progresiones (Secundarias)' : activeLayers.has('transits') ? 'Tránsitos' : 'Natal';
+      const comparativaText = showCompareSolarReturn ? 'Natal ↔ Retorno Solar' : showCompareProgressions ? 'Natal ↔ Progresiones' : '-';
+      const referenceIso = (showCompareSolarReturn && (solarReturnSnapshot?.return_datetime_exact || analysis_result?.solarReturn?.chart?.metadatos?.reference_date)) || (showCompareProgressions && (progressionsSnapshot?.progressed_datetime || analysis_result?.progressions?.chart?.metadatos?.reference_date)) || (activeLayers.has('transits') && (transitsSnapshot?.observed_datetime || analysis_result?.transits?.metadatos?.reference_date)) || meta.calculated_at || new Date().toISOString();
+      pdf.text(`Método: ${methodText}`, 10, 20);
+      pdf.text(`Comparativa: ${comparativaText}`, 10, 26);
+      pdf.text(`Fecha de referencia: ${fmtDate(referenceIso)}`, 10, 32);
+      pdf.setFontSize(9);
+      pdf.text('Observación holística — Propósito profesional', 10, 38);
+
+      pdf.addImage(imgData, 'PNG', 0, 42, pdfWidth, pdfHeight - 42);
+      pdf.save(filename);
+
+      // cleanup
+      document.body.removeChild(container);
+    } catch (err: any) {
+      // eslint-disable-next-line no-console
+      console.error('Export professional failed', err);
+      alert('Error exportando PDF profesional: ' + (err?.message || err));
     }
   };
 
@@ -1051,7 +1126,103 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                            <button className="px-2 py-1 text-sm rounded border" onClick={() => { setCompareMode(false); setActiveSessionId(null); }}>❌ Cerrar comparación</button>
                          </div>
                        ) : null}
-                     </div>
+                    </div>
+
+                  {/* Professional ActionBar & Context (therapist-only) */}
+                  {isTherapist ? (
+                    <div className="mb-4">
+                      <div className="flex items-center justify-between bg-white border rounded p-3">
+                            <button className="px-3 py-1 rounded bg-gray-800 text-white text-sm" onClick={() => exportProfessionalPDF(`lectura_${consultante?.id || 'x'}.pdf`)}>Exportar PDF</button>
+                          <button className="px-3 py-1 rounded bg-blue-600 text-white text-sm" onClick={async () => {
+                            try {
+                              const payload = (() => {
+                                if (showCompareSolarReturn) return solarReturnSnapshot || (analysis_result && analysis_result.solarReturn && analysis_result.solarReturn.chart) || natal;
+                                if (showCompareProgressions) return progressionsSnapshot || (analysis_result && analysis_result.progressions && analysis_result.progressions.chart) || natal;
+                                if (activeLayers.has('transits')) return transitsSnapshot || analysis_result?.transits || natal;
+                                if (activeLayers.has('progressions')) return progressionsSnapshot || analysis_result?.progressions?.chart || natal;
+                                if (activeLayers.has('solarReturn')) return solarReturnSnapshot || analysis_result?.solarReturn?.chart || natal;
+                                return natal;
+                              })();
+                              const token = getAuthToken(); if (!token) throw new Error('No auth');
+                              const resp = await fetch(`${apiURL}/therapist/patients/${consultante.id}/astrology-kerykeion/`, {
+                                method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Token ${token}` },
+                                body: JSON.stringify({ action: 'save_snapshot', snapshot: { type: 'comparative', shared: true, chart: payload } }),
+                              });
+                              if (!resp.ok) throw new Error(await resp.text().catch(() => 'error'));
+                              const data = await resp.json();
+                              const sid = data.snapshot_id || data.id || (data && data.chart && data.chart.metadatos && data.chart.metadatos.input_snapshot && data.chart.metadatos.input_snapshot.id) || null;
+                              setSharedSnapshotId(sid ? String(sid) : null);
+                              alert('Lectura preparada y marcada como compartida.');
+                            } catch (err) {
+                              // eslint-disable-next-line no-console
+                              console.error('Send to client failed', err);
+                              alert('No se pudo preparar la lectura para el consultante.');
+                            }
+                          }}>Enviar al consultante</button>
+
+                          <button className="px-3 py-1 rounded bg-white border text-sm" onClick={async () => {
+                            try {
+                              const payload = { ref: (sharedSnapshotId || formatSnapshotId(natal) || `natal-${consultante?.id}`), added_at: new Date().toISOString(), patient_id: consultante?.id };
+                              const token = getAuthToken(); if (!token) throw new Error('No auth');
+                              const resp = await fetch(`${apiURL}/therapist/patients/${consultante.id}/astrology-kerykeion/`, {
+                                method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Token ${token}` },
+                                body: JSON.stringify({ action: 'add_to_worksheet', reference: payload }),
+                              });
+                              if (!resp.ok) throw new Error(await resp.text().catch(() => 'error'));
+                              const data = await resp.json();
+                              setWorksheetRefs((w) => [{ id: data.id || data.ref || payload.ref, ...payload }, ...w]);
+                              alert('Lectura añadida a hoja de trabajo.');
+                            } catch (err) {
+                              // eslint-disable-next-line no-console
+                              console.error('Add to worksheet failed', err);
+                              alert('No se pudo añadir a la hoja de trabajo.');
+                            }
+                          }}>Añadir a hoja de trabajo</button>
+
+                          <button className="px-3 py-1 rounded border bg-white text-sm" onClick={() => setShowNotesModal(true)}>Notas del terapeuta</button>
+                        </div>
+
+                        <div className="text-sm text-gray-600 text-right">
+                          <div><strong>Método:</strong> {activeLayers.has('solarReturn') ? 'Retorno Solar' : activeLayers.has('progressions') ? 'Progresiones (Secundarias)' : activeLayers.has('transits') ? 'Tránsitos' : 'Natal'}</div>
+                          <div><strong>Comparativa:</strong> {showCompareSolarReturn ? 'Natal ↔ Retorno Solar' : showCompareProgressions ? 'Natal ↔ Progresiones' : '—'}</div>
+                          <div><strong>Referencia:</strong> { (showCompareSolarReturn && (solarReturnSnapshot?.return_datetime_exact || analysis_result?.solarReturn?.chart?.metadatos?.reference_date)) || (showCompareProgressions && (progressionsSnapshot?.progressed_datetime || analysis_result?.progressions?.chart?.metadatos?.reference_date)) || (activeLayers.has('transits') && (transitsSnapshot?.observed_datetime || analysis_result?.transits?.metadatos?.reference_date)) || (meta.calculated_at ?? new Date().toISOString()) }</div>
+                          <div><strong>Estado:</strong> { (showCompareSolarReturn && (solarReturnSnapshot || analysis_result?.solarReturn?.chart)) || (showCompareProgressions && (progressionsSnapshot || analysis_result?.progressions?.chart)) || (activeLayers.has('transits') && (transitsSnapshot || analysis_result?.transits)) ? 'Calculado' : 'En caché' }</div>
+                        </div>
+                      </div>
+
+                      {/* Notes modal (simple) */}
+                      {showNotesModal ? (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center">
+                          <div className="absolute inset-0 bg-black opacity-30" onClick={() => setShowNotesModal(false)} />
+                          <div className="bg-white rounded-lg shadow-lg p-4 z-10 w-full max-w-xl">
+                            <h3 className="font-semibold">Notas del terapeuta</h3>
+                            <textarea className="w-full h-40 mt-2 p-2 border rounded" value={therapistNotes} onChange={(e) => setTherapistNotes(e.target.value)} />
+                            <div className="mt-3 flex justify-end gap-2">
+                              <button className="px-3 py-1 rounded border" onClick={() => setShowNotesModal(false)}>Cancelar</button>
+                              <button className="px-3 py-1 rounded bg-blue-600 text-white" onClick={async () => {
+                                try {
+                                  const token = getAuthToken(); if (!token) throw new Error('No auth');
+                                  const resp = await fetch(`${apiURL}/therapist/patients/${consultante.id}/astrology-kerykeion/`, {
+                                    method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Token ${token}` },
+                                    body: JSON.stringify({ action: 'save_note', note: therapistNotes, context: { snapshot_id: sharedSnapshotId } }),
+                                  });
+                                  if (!resp.ok) throw new Error(await resp.text().catch(() => 'error'));
+                                  setShowNotesModal(false);
+                                  alert('Nota guardada.');
+                                } catch (err) {
+                                  // eslint-disable-next-line no-console
+                                  console.error('Save note failed', err);
+                                  alert('No se pudo guardar la nota.');
+                                }
+                              }}>Guardar</button>
+                            </div>
+                          </div>
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : null}
+
+                  <div id="professional-chart-area">
                   {activeLayers.has('transits') && analysis_result?.transits ? (
                     <AstrologyDoubleWheelSVG natal={natal} overlay={analysis_result.transits} overlayLabel="Tránsitos" orbDegrees={orb} consultante={consultante} />
                   ) : activeLayers.has('progressions') && analysis_result?.progressions?.chart ? (
@@ -1186,7 +1357,9 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
             </div>
           </div>
 
-          {/* Datos Reales: Posiciones, Aspectos y Casas */}
+              </div>
+
+            {/* Datos Reales: Posiciones, Aspectos y Casas */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             {/* Tabla de Posiciones Planetarias */}
             <div className="bg-white border border-gray-200 rounded-lg p-4">

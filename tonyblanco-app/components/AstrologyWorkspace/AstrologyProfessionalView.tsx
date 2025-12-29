@@ -157,13 +157,8 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
       const next = new Set(prev);
       // natal is locked on
       if (layer === 'natal') return next;
-      // Only one external layer active at a time
-      if (next.has(layer)) {
-        next.delete(layer);
-      } else {
-        ['transits', 'progressions', 'solarReturn'].forEach((k) => next.delete(k));
-        next.add(layer);
-      }
+      if (next.has(layer)) next.delete(layer);
+      else next.add(layer);
       return next;
     });
   };
@@ -172,6 +167,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
   const [transitDate, setTransitDate] = useState<string>(new Date().toISOString().slice(0, 10));
   const [progressionDate, setProgressionDate] = useState<string>(new Date().toISOString().slice(0, 10));
   const [solarYear, setSolarYear] = useState<number>(new Date().getFullYear());
+  const [solarArcDate, setSolarArcDate] = useState<string>(new Date().toISOString().slice(0, 10));
 
   const apiURL = getApiBaseUrl();
 
@@ -370,6 +366,14 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
     return <span className={`${base} bg-slate-50 text-slate-700 border-slate-200`}>solo lectura</span>;
   };
 
+  const temporalLayers = useMemo(() => {
+    const layers: Array<{ key: 'transits' | 'progressions' | 'solarArc'; label?: string }> = [];
+    if (activeLayers.has('transits')) layers.push({ key: 'transits', label: `Tránsitos · ${transitDate}` });
+    if (activeLayers.has('progressions')) layers.push({ key: 'progressions', label: `Progresiones · ${progressionDate}` });
+    if (activeLayers.has('solarArc')) layers.push({ key: 'solarArc', label: `Arco Solar · ${solarArcDate}` });
+    return layers;
+  }, [activeLayers, transitDate, progressionDate, solarArcDate]);
+
   return (
     <div className="flex h-full bg-gray-50">
       {/* Sidebar (left) */}
@@ -386,6 +390,9 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
             if (!hasChart) return;
             setSynastryEnabled(enabled);
           }}
+          hasIdentity={hasIdentity}
+          activeLayers={activeLayers}
+          onToggleLayer={handleLayerToggle}
         />
       </aside>
 
@@ -479,12 +486,18 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                       </div>
                     </div>
                     <div>
-                      <input type="checkbox" checked={activeLayers.has('transits')} onChange={() => handleLayerToggle('transits')} disabled={!hasChart} title={!hasChart ? 'Carta pendiente: completa datos de nacimiento para habilitar acciones' : undefined} />
+                      <input
+                        type="checkbox"
+                        checked={activeLayers.has('transits')}
+                        onChange={() => handleLayerToggle('transits')}
+                        disabled={!hasIdentity}
+                        title={!hasIdentity ? 'Requiere identidad válida (fecha de nacimiento)' : 'Capa temporal simbólica que muestra activaciones externas en relación a la carta base. No predice eventos.'}
+                      />
                     </div>
                   </div>
                   <div className="mt-2 text-xs">
                     <label className="block">Fecha de referencia</label>
-                    <input type="date" value={transitDate} onChange={(e) => setTransitDate(e.target.value)} className="mt-1 w-full" />
+                    <input type="date" value={transitDate} onChange={(e) => setTransitDate(e.target.value)} className="mt-1 w-full" disabled={!hasIdentity} />
                     {!overlays.transits && (
                       <button
                         onClick={() => calculateLayer('transits')}
@@ -509,12 +522,18 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                       </div>
                     </div>
                     <div>
-                      <input type="checkbox" checked={activeLayers.has('progressions')} onChange={() => handleLayerToggle('progressions')} disabled={!hasChart} title={!hasChart ? 'Carta pendiente: completa datos de nacimiento para habilitar acciones' : undefined} />
+                      <input
+                        type="checkbox"
+                        checked={activeLayers.has('progressions')}
+                        onChange={() => handleLayerToggle('progressions')}
+                        disabled={!hasIdentity}
+                        title={!hasIdentity ? 'Requiere identidad válida (fecha de nacimiento)' : 'Representación simbólica del desarrollo interno a lo largo del tiempo. No predice eventos.'}
+                      />
                     </div>
                   </div>
                   <div className="mt-2 text-xs">
                     <label className="block">Fecha objetivo</label>
-                    <input type="date" value={progressionDate} onChange={(e) => setProgressionDate(e.target.value)} className="mt-1 w-full" />
+                    <input type="date" value={progressionDate} onChange={(e) => setProgressionDate(e.target.value)} className="mt-1 w-full" disabled={!hasIdentity} />
                     {!overlays.progressions && (
                       <button
                         onClick={() => calculateLayer('progressions')}
@@ -559,8 +578,60 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                     )}
                   </div>
                 </div>
+
+                {/* Arco Solar (lectura simbólica, sin predicción) */}
+                <div className="p-2 bg-white border rounded">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-sm font-medium">Arco Solar</div>
+                      <div className="text-xs text-gray-500 flex items-center gap-2">
+                        <span>Estado:</span>
+                        {!hasIdentity ? renderLayerStateBadge('pendiente') : renderLayerStateBadge('solo_lectura')}
+                      </div>
+                    </div>
+                    <div>
+                      <input
+                        type="checkbox"
+                        checked={activeLayers.has('solarArc')}
+                        onChange={() => handleLayerToggle('solarArc')}
+                        disabled={!hasIdentity}
+                        title={!hasIdentity ? 'Requiere identidad válida (fecha de nacimiento)' : 'Desplazamiento simbólico uniforme usado como referencia estructural. No predice eventos.'}
+                      />
+                    </div>
+                  </div>
+                  <div className="mt-2 text-xs">
+                    <label className="block">Fecha de referencia</label>
+                    <input type="date" value={solarArcDate} onChange={(e) => setSolarArcDate(e.target.value)} className="mt-1 w-full" disabled={!hasIdentity} />
+                  </div>
+                </div>
               </div>
             </div>
+
+            {temporalLayers.length > 0 ? (
+              <div className="mb-4 bg-white border border-gray-200 rounded-lg p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <div className="text-sm font-semibold text-gray-900">Lectura simbólica — capas temporales</div>
+                    <div className="mt-1 text-xs text-gray-600">Estas capas no predicen eventos; ayudan a observar dinámicas simbólicas en el tiempo.</div>
+                  </div>
+                  <div className="text-xs text-gray-500">{renderLayerStateBadge('solo_lectura')}</div>
+                </div>
+
+                <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-3">
+                  {temporalLayers.map((l) => (
+                    <div key={`temporal-${l.key}`} className="rounded-md border border-gray-200 bg-gray-50 p-3">
+                      <div className="text-xs font-semibold text-gray-900">{l.label || l.key}</div>
+                      <div className="mt-1 text-[11px] text-gray-600">
+                        {l.key === 'transits' ? 'Activaciones externas en relación a la carta base.' : null}
+                        {l.key === 'progressions' ? 'Desarrollo interno observado a lo largo del tiempo.' : null}
+                        {l.key === 'solarArc' ? 'Referencia estructural con desplazamiento simbólico uniforme.' : null}
+                      </div>
+                      <div className="mt-2 text-[11px] text-gray-500">No representa certezas ni resultados futuros.</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
 
             {/* Tabs: Visual / Psicológico */}
             <div>
@@ -1195,6 +1266,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                                   asteroids={baseWheel.asteroids ?? []}
                                   showAspects={true}
                                   orbDeg={orb}
+                                  temporalLayers={temporalLayers}
                                   titleRight={`${meta.sistema_casas || 'placidus'} · ${meta.zodiac_type || 'tropical'}`}
                                   transitPlanets={
                                     progressionsSnapshot ? progressionsSnapshot.planets : (transitsSnapshot && transitBaseType === 'natal' ? transitsSnapshot.planets : undefined)
@@ -1214,6 +1286,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                                   asteroids={showAsteroids ? (wheel.asteroids ?? []) : []}
                                   showAspects={true}
                                   orbDeg={orb}
+                                  temporalLayers={temporalLayers}
                                   titleRight={`${meta.sistema_casas || 'placidus'} · ${meta.zodiac_type || 'tropical'}`}
                                   transitPlanets={transitsSnapshot && transitBaseType === 'natal' ? transitsSnapshot.planets : undefined}
                                 />
@@ -1234,6 +1307,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                           showAspects={false}
                           orbDeg={orb}
                           visualMode="placeholder"
+                          temporalLayers={temporalLayers}
                           titleRight="Pendiente · solo lectura"
                         />
                       )

@@ -11,6 +11,9 @@ interface AstrologySidebarProps {
   setShowAsteroids?: (v: boolean) => void;
   synastryEnabled?: boolean;
   setSynastryEnabled?: (v: boolean) => void;
+  hasIdentity?: boolean;
+  activeLayers?: Set<string>;
+  onToggleLayer?: (layer: string) => void;
 }
 
 const HOUSE_OPTIONS: Array<{ code: string; name: string; desc?: string }> = [
@@ -36,7 +39,37 @@ export default function AstrologySidebar({
   setShowAsteroids,
   synastryEnabled = false,
   setSynastryEnabled,
+  hasIdentity = false,
+  activeLayers,
+  onToggleLayer,
 }: AstrologySidebarProps) {
+  const canUseForecast = Boolean(hasIdentity);
+  const isLayerActive = (layer: string) => Boolean(activeLayers && activeLayers.has(layer));
+
+  const ForecastItem = ({
+    layer,
+    label,
+    tooltip,
+  }: {
+    layer: 'transits' | 'progressions' | 'solarArc';
+    label: string;
+    tooltip: string;
+  }) => (
+    <div className={`flex items-center justify-between px-2 py-1 border rounded ${canUseForecast ? 'bg-white border-gray-200' : 'bg-gray-50 border-gray-200 opacity-60'}`}>
+      <div className="text-[13px]" title={tooltip}>
+        {label} · <span className="text-gray-500">lectura simbólica</span>
+      </div>
+      <label className="inline-flex items-center gap-2 text-sm">
+        <input
+          type="checkbox"
+          checked={isLayerActive(layer)}
+          onChange={() => onToggleLayer && onToggleLayer(layer)}
+          disabled={!canUseForecast}
+          title={!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : tooltip}
+        />
+      </label>
+    </div>
+  );
   return (
     <aside className="w-72 border-r border-gray-200 bg-white flex flex-col">
       <div className="px-4 py-4 border-b border-gray-200">
@@ -80,9 +113,21 @@ export default function AstrologySidebar({
         <div className="pt-2 border-t border-gray-100">
           <label className="block text-xs font-semibold text-gray-600 mb-2">Pronóstico</label>
           <div className="space-y-1 text-[11px]">
-            <div className="px-2 py-1 bg-gray-50 border border-gray-200 rounded opacity-50">🔒 Tránsitos</div>
-            <div className="px-2 py-1 bg-gray-50 border border-gray-200 rounded opacity-50">🔒 Progresiones</div>
-            <div className="px-2 py-1 bg-gray-50 border border-gray-200 rounded opacity-50">🔒 Arco Solar</div>
+            <ForecastItem
+              layer="transits"
+              label="Tránsitos"
+              tooltip="Capa temporal simbólica que muestra activaciones externas en relación a la carta base. No predice eventos."
+            />
+            <ForecastItem
+              layer="progressions"
+              label="Progresiones"
+              tooltip="Representación simbólica del desarrollo interno a lo largo del tiempo. No predice eventos."
+            />
+            <ForecastItem
+              layer="solarArc"
+              label="Arco Solar"
+              tooltip="Desplazamiento simbólico uniforme usado como referencia estructural. No predice eventos."
+            />
           </div>
         </div>
 

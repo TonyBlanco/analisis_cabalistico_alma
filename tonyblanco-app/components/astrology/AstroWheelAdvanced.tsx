@@ -21,6 +21,10 @@ type Props = {
   orbDeg?: number;
   titleRight?: string;           // "placidus · tropical"
   visualMode?: "normal" | "placeholder";
+  temporalLayers?: Array<{
+    key: "transits" | "progressions" | "solarArc";
+    label?: string;
+  }>;
 };
 
 const DEFAULT_ZODIAC = ["♈","♉","♊","♋","♌","♍","♎","♏","♐","♑","♒","♓"];
@@ -36,6 +40,7 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
   orbDeg = 6,
   titleRight,
   visualMode = "normal",
+  temporalLayers = [],
 }) => {
   const isPlaceholder = visualMode === "placeholder";
   const opts: WheelOptions = useMemo(() => ({
@@ -272,6 +277,62 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
     );
   };
 
+  const renderTemporalLayers = () => {
+    if (!temporalLayers || temporalLayers.length === 0) return null;
+
+    const byKey = new Map(temporalLayers.map((l) => [l.key, l]));
+    const order: Array<"transits" | "progressions" | "solarArc"> = ["transits", "progressions", "solarArc"];
+
+    const styles: Record<string, { stroke: string; opacity: number; width: number; dash: string; offset: number }> = {
+      transits: { stroke: "#94a3b8", opacity: 0.62, width: 1.3, dash: "7 6", offset: 6 },
+      progressions: { stroke: "#64748b", opacity: 0.56, width: 1.4, dash: "3 5", offset: 14 },
+      solarArc: { stroke: "#475569", opacity: 0.52, width: 1.4, dash: "1 6", offset: 22 },
+    };
+
+    const items: React.ReactNode[] = [];
+    for (const key of order) {
+      if (!byKey.has(key)) continue;
+      const st = styles[key];
+      const r = rings.outer + st.offset;
+      items.push(
+        <circle
+          key={`tl-ring-${key}`}
+          cx={cx}
+          cy={cx}
+          r={r}
+          fill="none"
+          stroke={st.stroke}
+          strokeWidth={st.width}
+          opacity={st.opacity}
+          strokeDasharray={st.dash}
+        />
+      );
+
+      // subtle markers at ASC/MC axes (purely visual, non-predictive)
+      const marker = (deg: number, id: string) => {
+        const a = degToPoint(deg, r - 4, cx);
+        const b = degToPoint(deg, r + 4, cx);
+        return (
+          <line
+            key={`tl-${key}-${id}`}
+            x1={a.x} y1={a.y}
+            x2={b.x} y2={b.y}
+            stroke={st.stroke}
+            strokeWidth={1.2}
+            opacity={Math.min(0.7, st.opacity + 0.08)}
+          />
+        );
+      };
+
+      items.push(marker(0, "north"));
+      items.push(marker(90, "east"));
+      items.push(marker(180, "south"));
+      items.push(marker(270, "west"));
+    }
+
+    return <g>{items}</g>;
+  };
+
   const renderPlanets = () => {
     // Glifo + label sin “botón”
     return (
@@ -404,6 +465,7 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
           <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
             {/* Rotación global por ASC */}
             <g transform={`rotate(${geo.rotationDeg} ${cx} ${cx})`}>
+              {renderTemporalLayers()}
               {renderBaseRings()}
               {renderDegreeTicks()}
               {renderZodiac()}

@@ -893,11 +893,18 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
   }, [relocationMode]);
 
   const comparisonWheel = useMemo(() => {
-    const enabled = Boolean(synastryEnabled && !partnerChart);
+    const enabled = Boolean(synastryEnabled);
     if (!enabled || !natal) return { enabled: false as const, planets: [], label: '' };
 
     const baseWheel = normalizeNatalForWheel(natal as any);
-    const placeholderPlanets = baseWheel.planets.map((p) => ({ ...p, degree: (p.degree + 30) % 360 }));
+
+    const fromPartnerChart = () => {
+      if (!partnerChart) return null;
+      const wheel = normalizeNatalForWheel(partnerChart);
+      if (!wheel || !wheel.planets || wheel.planets.length === 0) return null;
+      const labelName = partnerList.find(p => String(p.id) === String(selectedPartnerId))?.full_name || 'pareja';
+      return { planets: wheel.planets, label: `Carta comparada — ${labelName} (lectura simbólica)` };
+    };
 
     const fromActiveSession = () => {
       if (!activeSessionId) return null;
@@ -915,11 +922,12 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
       return { planets: wheel.planets, label: `Carta comparada — lectura simbólica (última sesión ${sess.id})` };
     };
 
-    const best = fromActiveSession() || fromLastSession();
+    const best = fromPartnerChart() || fromActiveSession() || fromLastSession();
     if (best) return { enabled: true as const, planets: best.planets, label: best.label };
 
-    return { enabled: true as const, planets: placeholderPlanets, label: 'Carta comparada — lectura simbólica (placeholder)' };
-  }, [synastryEnabled, partnerChart, natal, activeSessionId, sessions]);
+    // No secondary source selected: keep UI informative but avoid changing wheel geometry.
+    return { enabled: false as const, planets: [], label: 'Sin carta secundaria: selecciona una pareja o una sesión para comparar (solo visual).' };
+  }, [synastryEnabled, partnerChart, natal, activeSessionId, sessions, partnerList, selectedPartnerId]);
 
   // Bridge: year/date presence -> activeLayers (UI + engine)
   useEffect(() => {

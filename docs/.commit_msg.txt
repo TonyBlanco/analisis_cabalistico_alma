@@ -1,1 +1,1 @@
-feat(astrology): add symbolic development stages overlay (infancy to young adult)
+fix(astrology): enable synastry double wheel overlay with selected partner

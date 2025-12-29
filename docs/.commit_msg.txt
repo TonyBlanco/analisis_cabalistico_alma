@@ -1,1 +1,1 @@
-feat(astrology): add symbolic advanced relationships overlay (psychological)
+feat(astrology): add symbolic development stages overlay (infancy to young adult)

@@ -36,6 +36,8 @@ interface AstrologySidebarProps {
   setRelationshipMode?: (v: 'off' | 'couple' | 'family' | 'work' | 'social') => void;
   relationshipRole?: 'active' | 'reactive';
   setRelationshipRole?: (v: 'active' | 'reactive') => void;
+  developmentStage?: 'off' | 'early_childhood' | 'childhood_early' | 'childhood_middle' | 'adolescence' | 'young_adult';
+  setDevelopmentStage?: (v: 'off' | 'early_childhood' | 'childhood_early' | 'childhood_middle' | 'adolescence' | 'young_adult') => void;
   visualStyle?: 'classic' | 'huber';
   setVisualStyle?: (v: 'classic' | 'huber') => void;
 }
@@ -88,6 +90,8 @@ export default function AstrologySidebar({
   setRelationshipMode,
   relationshipRole = 'active',
   setRelationshipRole,
+  developmentStage = 'off',
+  setDevelopmentStage,
   visualStyle = 'classic',
   setVisualStyle,
 }: AstrologySidebarProps) {
@@ -105,6 +109,7 @@ export default function AstrologySidebar({
   const isPersonaActive = personaMode !== 'off' && isLayerActive('persona');
   const isRelocationActive = relocationMode !== 'off' && isLayerActive('relocation');
   const isRelationshipsActive = relationshipMode !== 'off' && isLayerActive('relationships');
+  const isDevelopmentActive = developmentStage !== 'off' && isLayerActive('development');
   const isAdvancedObjectsActive = Boolean(advancedObjects.nodes || advancedObjects.fortune || advancedObjects.symbolicPoints);
   const hasSecondaryLayer = Boolean(activeLayers && (
     activeLayers.has('transits') ||
@@ -619,6 +624,44 @@ export default function AstrologySidebar({
                 </select>
               </div>
               <div className="mt-2 text-[11px] text-gray-500">Dinámicas (proyección/sombra/complemento) — educativo, no determinista.</div>
+            </div>
+
+            <div className={`px-2 py-2 border rounded ${canUseForecast ? 'bg-white border-gray-200' : 'bg-gray-50 border-gray-200 opacity-60'}`}>
+              <div className="flex items-center justify-between">
+                <div
+                  className="text-[13px]"
+                  title="Desarrollo (modo simbólico): acompaña ritmos de crecimiento y aprendizaje. No diagnostica ni predice."
+                >
+                  Infancia &amp; Desarrollo · <span className="text-gray-500">modo simbólico</span>
+                </div>
+                <label className="inline-flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(isDevelopmentActive)}
+                    onChange={() => setDevelopmentStage && setDevelopmentStage(isDevelopmentActive ? 'off' : 'early_childhood')}
+                    disabled={!canUseForecast}
+                    title={!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : 'Desarrollo (modo simbólico): acompaña ritmos de crecimiento. No clínico, no determinista.'}
+                  />
+                </label>
+              </div>
+              <div className="mt-2 flex items-center justify-between gap-2">
+                <div className="text-[11px] text-gray-500">Etapa</div>
+                <select
+                  className="rounded border border-gray-200 bg-white px-2 py-1 text-[12px]"
+                  value={developmentStage}
+                  onChange={(e) => setDevelopmentStage && setDevelopmentStage(e.target.value as any)}
+                  disabled={!canUseForecast || developmentStage === 'off'}
+                  title={!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : 'Selecciona una etapa evolutiva (lectura educativa y acompañante). No diagnostica ni predice.'}
+                >
+                  <option value="off">Off</option>
+                  <option value="early_childhood">Primera infancia (0–3)</option>
+                  <option value="childhood_early">Infancia temprana (4–7)</option>
+                  <option value="childhood_middle">Infancia media (8–11)</option>
+                  <option value="adolescence">Adolescencia (12–18)</option>
+                  <option value="young_adult">Juventud temprana (18–25)</option>
+                </select>
+              </div>
+              <div className="mt-2 text-[11px] text-gray-500">Enfoque en necesidades evolutivas y acompañamiento (educativo, no clínico).</div>
             </div>
           </div>
         </div>

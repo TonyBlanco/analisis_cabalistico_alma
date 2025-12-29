@@ -50,6 +50,7 @@ type Props = {
   fixedStars?: { primary: boolean; secondary: boolean };
   relationshipMode?: "off" | "couple" | "family" | "work" | "social";
   relationshipRole?: "active" | "reactive";
+  developmentStage?: "off" | "early_childhood" | "childhood_early" | "childhood_middle" | "adolescence" | "young_adult";
   comparisonWheel?: {
     enabled: boolean;
     planets: PlanetPoint[];
@@ -89,6 +90,7 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
   fixedStars,
   relationshipMode = "off",
   relationshipRole = "active",
+  developmentStage = "off",
   comparisonWheel,
   showComparisonAspects = true,
 }) => {
@@ -100,6 +102,7 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
   const stars = fixedStars ?? { primary: false, secondary: false };
   const relMode = relationshipMode;
   const relRole = relationshipRole;
+  const devStage = developmentStage;
   const comparisonEnabled = Boolean(comparisonWheel?.enabled);
   const opts: WheelOptions = useMemo(() => ({
     size,
@@ -1375,6 +1378,158 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
     );
   };
 
+  const renderDevelopmentOverlay = () => {
+    if (devStage === "off") return null;
+
+    const tooltipGeneral = "Desarrollo (modo simbólico): acompaña ritmos de crecimiento y aprendizaje. No diagnostica ni predice.";
+
+    const stageLabel =
+      devStage === "early_childhood" ? "Primera infancia (0–3)" :
+        devStage === "childhood_early" ? "Infancia temprana (4–7)" :
+          devStage === "childhood_middle" ? "Infancia media (8–11)" :
+            devStage === "adolescence" ? "Adolescencia (12–18)" :
+              devStage === "young_adult" ? "Juventud temprana (18–25)" :
+                "Etapa";
+
+    const alpha = isHuber ? 0.75 : 1;
+    const strokeBase =
+      devStage === "early_childhood" ? "#fb923c" :
+        devStage === "childhood_early" ? "#f97316" :
+          devStage === "childhood_middle" ? "#f59e0b" :
+            devStage === "adolescence" ? "#a78bfa" :
+              devStage === "young_adult" ? "#60a5fa" :
+                "#94a3b8";
+
+    const fillA =
+      devStage === "early_childhood" ? "rgba(251,146,60,0.10)" :
+        devStage === "childhood_early" ? "rgba(249,115,22,0.10)" :
+          devStage === "childhood_middle" ? "rgba(245,158,11,0.10)" :
+            devStage === "adolescence" ? "rgba(167,139,250,0.10)" :
+              devStage === "young_adult" ? "rgba(96,165,250,0.10)" :
+                "rgba(148,163,184,0.08)";
+
+    const fillB =
+      devStage === "early_childhood" ? "rgba(251,146,60,0.04)" :
+        devStage === "childhood_early" ? "rgba(249,115,22,0.04)" :
+          devStage === "childhood_middle" ? "rgba(245,158,11,0.04)" :
+            devStage === "adolescence" ? "rgba(167,139,250,0.04)" :
+              devStage === "young_adult" ? "rgba(96,165,250,0.04)" :
+                "rgba(148,163,184,0.03)";
+
+    const cusps = (houses && houses.length === 12) ? houses.map((d) => normalizeDeg(d)) : Array.from({ length: 12 }, (_, i) => i * 30);
+    const cusp = (i: number) => cusps[(i + 12) % 12];
+
+    const bandOuter = Math.max(rings.houseInner + 22, rings.houseOuter - 2);
+    const bandInner = Math.min(bandOuter - 20, rings.houseInner + 6);
+
+    const donutSeg = (startDeg: number, endDeg: number) => {
+      const a0 = normalizeDeg(startDeg);
+      const a1 = normalizeDeg(endDeg);
+      const delta = (a1 - a0 + 360) % 360;
+      const largeArc = delta > 180 ? 1 : 0;
+
+      const p0o = degToPoint(a0, bandOuter, cx);
+      const p1o = degToPoint(a1, bandOuter, cx);
+      const p1i = degToPoint(a1, bandInner, cx);
+      const p0i = degToPoint(a0, bandInner, cx);
+
+      return `M ${p0o.x} ${p0o.y} A ${bandOuter} ${bandOuter} 0 ${largeArc} 1 ${p1o.x} ${p1o.y} L ${p1i.x} ${p1i.y} A ${bandInner} ${bandInner} 0 ${largeArc} 0 ${p0i.x} ${p0i.y} Z`;
+    };
+
+    const segByHouseRange = (fromHouseIdx0: number, toHouseIdx0: number) => {
+      // inclusive [from..to] in 0-based house index
+      const start = cusp(fromHouseIdx0);
+      const end = cusp(toHouseIdx0 + 1);
+      return donutSeg(start, end);
+    };
+
+    const segments: Array<{ key: string; d: string; title: string }> = (() => {
+      if (devStage === "early_childhood") {
+        return [{ key: "dev-0-3", d: segByHouseRange(0, 3), title: "Primera infancia: contención, seguridad y vínculo (simbólico). Enfoque en necesidades evolutivas." }];
+      }
+      if (devStage === "childhood_early") {
+        return [{ key: "dev-4-7", d: segByHouseRange(2, 4), title: "Infancia temprana: curiosidad, juego y expresión (simbólico). Acompañamiento educativo." }];
+      }
+      if (devStage === "childhood_middle") {
+        return [{ key: "dev-8-11", d: segByHouseRange(2, 5), title: "Infancia media: aprendizaje, hábitos y cooperación (simbólico). No diagnóstico." }];
+      }
+      if (devStage === "adolescence") {
+        return [
+          { key: "dev-12-18-a", d: segByHouseRange(4, 7), title: "Adolescencia: identidad, pertenencia y cambio (simbólico). Ritmos y foco evolutivo." },
+          { key: "dev-12-18-b", d: segByHouseRange(10, 10), title: "Adolescencia: grupo y proyecto (simbólico). Acompañamiento, no determinismo." },
+        ];
+      }
+      if (devStage === "young_adult") {
+        return [{ key: "dev-18-25", d: segByHouseRange(8, 9), title: "Juventud temprana: dirección, propósito y consolidación (simbólico)." }];
+      }
+      return [];
+    })();
+
+    const guideKeys: string[] = (() => {
+      if (devStage === "early_childhood") return ["moon"];
+      if (devStage === "childhood_early") return ["mercury", "venus"];
+      if (devStage === "childhood_middle") return ["mercury", "jupiter"];
+      if (devStage === "adolescence") return ["sun", "mars"];
+      if (devStage === "young_adult") return ["sun", "saturn"];
+      return ["sun"];
+    })();
+
+    const hashKey = (key: string) => {
+      const s = String(key || "");
+      let h = 0;
+      for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+      return h;
+    };
+
+    const planetDeg = (p: PlanetPoint | undefined) => {
+      if (p && Number.isFinite(p.degree) && !isPlaceholder) return normalizeDeg(p.degree);
+      return normalizeDeg((hashKey(p?.key ?? "x") * 137 + 29) % 360);
+    };
+
+    const planetByKeyLower = new Map<string, PlanetPoint>();
+    planets.forEach((p) => planetByKeyLower.set(String(p.key).toLowerCase(), p));
+
+    const guides = guideKeys
+      .map((k) => ({ key: k, p: planetByKeyLower.get(k) }))
+      .filter((x) => x.p || true);
+
+    const guideNodes = guides.map((g) => {
+      const deg = planetDeg(g.p);
+      const pt = degToPoint(deg, rings.planetRing, cx);
+      const label = g.p ? String(g.p.key) : g.key;
+      const tip = `Guía de etapa: ${label}. Planeta resaltado como foco de aprendizaje (lectura simbólica). No diagnóstico ni predicción.`;
+      return (
+        <g key={`dev-guide-${g.key}`} opacity={0.95 * alpha}>
+          <title>{tip}</title>
+          <circle cx={pt.x} cy={pt.y} r={22} fill="none" stroke={strokeBase} strokeWidth={2.2} opacity={0.12} />
+          <circle cx={pt.x} cy={pt.y} r={16} fill="none" stroke={strokeBase} strokeWidth={1.6} opacity={0.10} />
+        </g>
+      );
+    });
+
+    const gradId = `dev-grad-${devStage}`;
+
+    return (
+      <g>
+        <title>{`${tooltipGeneral} Etapa: ${stageLabel}.`}</title>
+        <defs>
+          <radialGradient id={gradId} cx="50%" cy="50%" r="60%">
+            <stop offset="0%" stopColor={fillA} />
+            <stop offset="100%" stopColor={fillB} />
+          </radialGradient>
+        </defs>
+        {segments.map((s) => (
+          <path key={s.key} d={s.d} fill={`url(#${gradId})`} stroke="none" opacity={0.95 * alpha}>
+            <title>{s.title}</title>
+          </path>
+        ))}
+        <circle cx={cx} cy={cx} r={bandOuter} fill="none" stroke={strokeBase} strokeWidth={1.1} opacity={0.12 * alpha} />
+        <circle cx={cx} cy={cx} r={bandInner} fill="none" stroke={strokeBase} strokeWidth={1.0} opacity={0.10 * alpha} />
+        {guideNodes}
+      </g>
+    );
+  };
+
   const renderSecondaryWheel = () => {
     if (!secondaryLayer) return null;
 
@@ -1850,6 +2005,7 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
               {renderAdvancedObjects()}
               {renderFixedStars()}
               {renderRelationshipsOverlay()}
+              {renderDevelopmentOverlay()}
               {huberHouseBands}
                 {renderHouseLines()}
                 {renderHouseNumbers()}

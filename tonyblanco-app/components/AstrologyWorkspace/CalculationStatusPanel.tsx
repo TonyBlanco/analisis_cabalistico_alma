@@ -23,6 +23,7 @@ type Props = {
   fixedStars?: { primary: boolean; secondary: boolean };
   relationshipMode?: 'off' | 'couple' | 'family' | 'work' | 'social';
   relationshipRole?: 'active' | 'reactive';
+  developmentStage?: 'off' | 'early_childhood' | 'childhood_early' | 'childhood_middle' | 'adolescence' | 'young_adult';
   houseSystem: string;
   zodiacType: string;
   canRecalculate: boolean; // whether UI has ability to trigger recalculation (we will NOT trigger)
@@ -40,7 +41,7 @@ const Dot: React.FC<{ type: DotType }> = ({ type }) => {
   return <span className="inline-block w-3 h-3 rounded-full bg-rose-400 mr-2 opacity-70" />;
 };
 
-export default function CalculationStatusPanel({ overlays, activeLayers, symbolicLayers, harmonicMode = 'off', personaMode = 'off', relocationMode = 'off', advancedObjects = { nodes: false, fortune: false, symbolicPoints: false }, fixedStars = { primary: false, secondary: false }, relationshipMode = 'off', relationshipRole = 'active', houseSystem, zodiacType, canRecalculate, secondaryLayerKey = null, comparisonEnabled = false, comparisonAspectsEnabled = false }: Props) {
+export default function CalculationStatusPanel({ overlays, activeLayers, symbolicLayers, harmonicMode = 'off', personaMode = 'off', relocationMode = 'off', advancedObjects = { nodes: false, fortune: false, symbolicPoints: false }, fixedStars = { primary: false, secondary: false }, relationshipMode = 'off', relationshipRole = 'active', developmentStage = 'off', houseSystem, zodiacType, canRecalculate, secondaryLayerKey = null, comparisonEnabled = false, comparisonAspectsEnabled = false }: Props) {
   const [helper, setHelper] = useState<string | null>(null);
   const symbolicTooltip = 'Capa simbólica activa. No corresponde a un cálculo astronómico real.';
   const annualSymbolicTooltip = 'Capa anual/mensual activa (lectura simbólica) — sin recalcular carta base.';
@@ -305,6 +306,31 @@ export default function CalculationStatusPanel({ overlays, activeLayers, symboli
                                 'Activo';
                       const role = relationshipRole === 'reactive' ? 'Reactivo' : 'Activo';
                       return `Activo (lectura simbólica) · ${label} · Rol: ${role}`;
+                    })()
+                    : 'pendiente'}
+                </span>
+              </button>
+            </li>
+
+            <li className="flex items-center">
+              <button
+                onClick={() => handleClickSymbolicInfo('Desarrollo (modo simbólico): acompaña ritmos de crecimiento y aprendizaje. No diagnostica ni predice.')}
+                className="flex items-center w-full text-left"
+                title={developmentStage !== 'off' ? 'Desarrollo (modo simbólico): acompaña ritmos de crecimiento y aprendizaje. No diagnostica ni predice.' : undefined}
+              >
+                <Dot type={developmentStage !== 'off' ? 'symbolic' : 'available'} />
+                <span className="flex-1">Infancia &amp; Desarrollo</span>
+                <span className="text-xs text-gray-400">
+                  {developmentStage !== 'off'
+                    ? (() => {
+                      const label =
+                        developmentStage === 'early_childhood' ? 'Primera infancia (0–3)' :
+                          developmentStage === 'childhood_early' ? 'Infancia temprana (4–7)' :
+                            developmentStage === 'childhood_middle' ? 'Infancia media (8–11)' :
+                              developmentStage === 'adolescence' ? 'Adolescencia (12–18)' :
+                                developmentStage === 'young_adult' ? 'Juventud temprana (18–25)' :
+                                  'Activo';
+                      return `Activo (lectura simbólica) · ${label}`;
                     })()
                     : 'pendiente'}
                 </span>

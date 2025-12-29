@@ -36,6 +36,7 @@ type AdvancedObjectsState = { nodes: boolean; fortune: boolean; symbolicPoints: 
 type FixedStarsState = { primary: boolean; secondary: boolean };
 type RelationshipMode = 'off' | 'couple' | 'family' | 'work' | 'social';
 type RelationshipRole = 'active' | 'reactive';
+type DevelopmentStage = 'off' | 'early_childhood' | 'childhood_early' | 'childhood_middle' | 'adolescence' | 'young_adult';
 
 export default function AstrologyProfessionalView({ consultante, chart, analysis_result, calculateChart, refetch }: Props) {
   // Audit log (controlled, local-only): helps verify incoming data shapes
@@ -169,6 +170,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
   const [fixedStars, setFixedStars] = useState<FixedStarsState>({ primary: false, secondary: false });
   const [relationshipMode, setRelationshipMode] = useState<RelationshipMode>('off');
   const [relationshipRole, setRelationshipRole] = useState<RelationshipRole>('active');
+  const [developmentStage, setDevelopmentStage] = useState<DevelopmentStage>('off');
   const [solarReturnCompareEnabled, setSolarReturnCompareEnabled] = useState<boolean>(false);
   const [solarReturnCompareYearB, setSolarReturnCompareYearB] = useState<number | null>(null);
   const [visualStyle, setVisualStyle] = useState<ChartVisualStyle>('classic');
@@ -358,6 +360,30 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
       return next;
     });
   }, [relationshipMode, hasIdentity]);
+
+  useEffect(() => {
+    // Development stages are symbolic-only and require identity; keep activeLayers in sync
+    if (!hasIdentity) {
+      if (developmentStage !== 'off') setDevelopmentStage('off');
+      setActiveLayers((prev) => {
+        if (!prev.has('development')) return prev;
+        const next = new Set(prev);
+        next.delete('development');
+        return next;
+      });
+      return;
+    }
+
+    setActiveLayers((prev) => {
+      const want = developmentStage !== 'off';
+      const has = prev.has('development');
+      if (want === has) return prev;
+      const next = new Set(prev);
+      if (want) next.add('development');
+      else next.delete('development');
+      return next;
+    });
+  }, [developmentStage, hasIdentity]);
 
   // Layer inputs
   const [transitDate, setTransitDate] = useState<string>(new Date().toISOString().slice(0, 10));
@@ -963,6 +989,8 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
           setRelationshipMode={setRelationshipMode}
           relationshipRole={relationshipRole}
           setRelationshipRole={setRelationshipRole}
+          developmentStage={developmentStage}
+          setDevelopmentStage={setDevelopmentStage}
           visualStyle={visualStyle}
           setVisualStyle={setVisualStyle}
         />
@@ -1804,6 +1832,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                    fixedStars={fixedStars}
                    relationshipMode={relationshipMode}
                    relationshipRole={relationshipRole}
+                   developmentStage={developmentStage}
                    secondaryLayerKey={secondaryLayer}
                    comparisonEnabled={Boolean(synastryEnabled)}
                    comparisonAspectsEnabled={Boolean(synastryEnabled)}
@@ -2105,6 +2134,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                                fixedStars={fixedStars}
                                relationshipMode={relationshipMode}
                                relationshipRole={relationshipRole}
+                               developmentStage={developmentStage}
                                titleRight={`${meta.sistema_casas || 'placidus'} · ${meta.zodiac_type || 'tropical'}`}
                                transitPlanets={transitsSnapshot && transitBaseType === 'natal' ? transitsSnapshot.planets : undefined}
                              />
@@ -2144,6 +2174,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                            fixedStars={fixedStars}
                            relationshipMode={relationshipMode}
                            relationshipRole={relationshipRole}
+                           developmentStage={developmentStage}
                            titleRight="Pendiente · solo lectura"
                         />
                       )

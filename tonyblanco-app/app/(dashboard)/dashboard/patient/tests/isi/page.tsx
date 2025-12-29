@@ -3,10 +3,11 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { isiDefinition } from "./isi.config";
+import { getApiBaseUrl } from "@/lib/api-base";
 
 type AnswerMap = Record<string, string>;
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://analisis-cabalistico-alma.onrender.com/api";
+const API_URL = getApiBaseUrl();
 
 export default function IsiPage() {
   const router = useRouter();

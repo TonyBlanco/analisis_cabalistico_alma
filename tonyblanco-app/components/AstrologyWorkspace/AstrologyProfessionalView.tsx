@@ -12,6 +12,7 @@ import { getTherapistPatients } from '@/lib/patient-api';
 import { computeSynastryAspects } from '@/components/astrology/astro-geometry';
 //import { computeCompositeFromTwoNatal } from '@/components/astrology/composite';
 import { getAuthToken } from '@/lib/auth';
+import { getApiBaseUrl } from '@/lib/api-base';
 import type { ActiveConsultante } from '@/hooks/useActiveConsultante';
 import AstroWheelAdvanced from '@/components/astrology/AstroWheelAdvanced';
 import { normalizeNatalForWheel } from '@/components/astrology/normalizer';
@@ -172,7 +173,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
   const [progressionDate, setProgressionDate] = useState<string>(new Date().toISOString().slice(0, 10));
   const [solarYear, setSolarYear] = useState<number>(new Date().getFullYear());
 
-  const apiURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+  const apiURL = getApiBaseUrl();
 
   // Calculation sessions (frontend-only) for preview/comparison
   type CalculationSession = {

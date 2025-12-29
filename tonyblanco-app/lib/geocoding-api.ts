@@ -6,6 +6,7 @@
  */
 
 import { getCitySearchVariations } from './utils/normalizeLocation';
+import { getApiBaseUrl } from './api-base';
 
 function getAuthHeaders(): HeadersInit {
   const token = localStorage.getItem('authToken');
@@ -25,7 +26,7 @@ export interface GeocodeResult {
   full_address: string;
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://analisis-cabalistico-alma.onrender.com/api';
+const API_BASE_URL = getApiBaseUrl();
 
 /**
  * Single geocoding attempt with the backend API

@@ -5,8 +5,9 @@ import { useRouter, useParams } from 'next/navigation';
 import { getUserRole } from '@/lib/getUserRole';
 import { getTestResult } from '@/lib/test-api';
 import { TestResult } from '@/lib/test-types';
+import { getApiBaseUrl } from '@/lib/api-base';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://analisis-cabalistico-alma.onrender.com/api';
+const API_URL = getApiBaseUrl();
 
 /**
  * Therapist Result Detail View

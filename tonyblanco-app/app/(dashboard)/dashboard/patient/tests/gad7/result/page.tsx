@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { getApiBaseUrl } from "@/lib/api-base";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://analisis-cabalistico-alma.onrender.com/api";
+const API_URL = getApiBaseUrl();
 
 type GAD7Result = {
   id?: number;

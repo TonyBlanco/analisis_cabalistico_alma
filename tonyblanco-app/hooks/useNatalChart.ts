@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getAuthToken } from '../lib/auth';
+import { getApiBaseUrl } from '../lib/api-base';
 
 interface Planet {
   nombre: string;
@@ -143,7 +144,7 @@ export function useNatalChart(patientId: string | undefined): UseNatalChartRetur
   const [missingFields, setMissingFields] = useState<string[] | null>(null);
   const [activeLayers, setActiveLayers] = useState<Set<string>>(new Set());
 
-  const apiURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+  const apiURL = getApiBaseUrl();
 
   const fetchChart = useCallback(async () => {
     if (!patientId) {

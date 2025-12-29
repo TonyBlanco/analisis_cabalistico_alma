@@ -5,8 +5,9 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { fetchSession } from '@/lib/session';
 import DisclaimerModal from '@/components/DisclaimerModal';
+import { getApiBaseUrl } from '@/lib/api-base';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://analisis-cabalistico-alma.onrender.com/api';
+const API_URL = getApiBaseUrl();
 
 export default function TherapistRegistrationPage() {
   const router = useRouter();

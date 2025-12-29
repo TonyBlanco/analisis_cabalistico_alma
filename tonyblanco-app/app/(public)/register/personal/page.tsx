@@ -4,8 +4,9 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { fetchSession } from '@/lib/session';
 import Link from 'next/link';
+import { getApiBaseUrl } from '@/lib/api-base';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://analisis-cabalistico-alma.onrender.com/api';
+const API_URL = getApiBaseUrl();
 
 export default function PersonalRegistrationPage() {
   const router = useRouter();

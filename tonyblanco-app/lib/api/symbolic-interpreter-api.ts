@@ -9,8 +9,9 @@ import type {
 } from '../../../src/symbolic/tree/symbolic-interpreter.types';
 import { generateSymbolicInterpretation, createFallbackInterpretation } from '../../../src/symbolic/tree/symbolic-interpreter';
 import type { TreeStructuralState } from '../../../src/symbolic/tree';
+import { getApiBaseUrl } from '../api-base';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+const API_BASE_URL = getApiBaseUrl();
 
 /**
  * Check if Symbolic Interpreter AI service is available

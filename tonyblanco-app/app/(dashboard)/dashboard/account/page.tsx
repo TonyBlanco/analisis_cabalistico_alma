@@ -7,6 +7,7 @@ import { getUserRole } from '@/lib/getUserRole';
 import { getUserProfile, updateUserProfile, UserProfileData } from '@/lib/api';
 import { clearAuthState } from '@/lib/auth-state';
 import { User, MapPin, Calendar, Lock, LogOut, AlertTriangle, CheckCircle, AlertCircle as AlertIcon } from 'lucide-react';
+import { getApiBaseUrl } from '@/lib/api-base';
 
 /**
  * Account Page (User Profile)
@@ -67,7 +68,7 @@ export default function AccountPage() {
   // Patient-only endpoints
   const fetchPatientAccountProfile = async (): Promise<UserProfileData> => {
     const token = getAuthToken();
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://analisis-cabalistico-alma.onrender.com/api'}/profile/me/`, {
+    const response = await fetch(`${getApiBaseUrl()}/profile/me/`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -85,7 +86,7 @@ export default function AccountPage() {
 
   const patchPatientAccountProfile = async (data: Partial<UserProfileData>): Promise<UserProfileData> => {
     const token = getAuthToken();
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://analisis-cabalistico-alma.onrender.com/api'}/profile/me/`, {
+    const response = await fetch(`${getApiBaseUrl()}/profile/me/`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',

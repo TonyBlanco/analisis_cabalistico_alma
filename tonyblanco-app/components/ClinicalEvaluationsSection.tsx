@@ -8,8 +8,9 @@ import { getPatientDetail } from '@/lib/assignment-api';
 import { validateProfileForAnalysis } from '@/lib/profile-validation';
 import ProfileCompletionModal from './ProfileCompletionModal';
 import { generateWithGemini } from '@/lib/gemini-config';
+import { getApiBaseUrl } from '@/lib/api-base';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://analisis-cabalistico-alma.onrender.com/api';
+const API_URL = getApiBaseUrl();
 
 /**
  * Holistic Evaluations Section Component

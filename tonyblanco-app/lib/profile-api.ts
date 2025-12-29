@@ -4,7 +4,9 @@
  * Functions to interact with profile-related endpoints.
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://analisis-cabalistico-alma.onrender.com/api';
+import { getApiBaseUrl } from './api-base';
+
+const API_BASE_URL = getApiBaseUrl();
 
 // Obtiene el token de autenticación
 function getAuthToken(): string | null {

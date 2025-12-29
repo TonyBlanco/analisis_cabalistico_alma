@@ -1,7 +1,8 @@
 // lib/api.ts
 import { getAuthToken } from './auth';
+import { getApiBaseUrl } from '../../lib/api-base';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE_URL = getApiBaseUrl().replace(/\/api$/, '');
 
 export interface CalculoRequest {
   nombre: string;

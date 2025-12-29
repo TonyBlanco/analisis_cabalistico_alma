@@ -2,8 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
+import { getApiBaseUrl } from "@/lib/api-base";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://analisis-cabalistico-alma.onrender.com/api";
+const API_URL = getApiBaseUrl();
 
 type BAIResult = {
   id?: number;

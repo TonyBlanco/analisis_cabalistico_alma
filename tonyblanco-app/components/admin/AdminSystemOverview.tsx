@@ -2,6 +2,7 @@
 
 import { AdminStats } from '@/lib/admin-api';
 import { Users, Activity, FileText, TrendingUp, Calendar, GraduationCap } from 'lucide-react';
+import { getApiBaseUrl } from '@/lib/api-base';
 
 interface AdminSystemOverviewProps {
   stats: AdminStats | null;
@@ -18,6 +19,8 @@ export default function AdminSystemOverview({ stats }: AdminSystemOverviewProps)
       </div>
     );
   }
+
+  const backendRoot = getApiBaseUrl().replace(/\/api$/, '');
 
   const kpiCards = [
     {
@@ -108,7 +111,7 @@ export default function AdminSystemOverview({ stats }: AdminSystemOverviewProps)
         <h3 className="text-md font-semibold text-gray-900 mb-4">Accesos Rápidos</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <a
-            href={`${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://127.0.0.1:8000'}/admin/`}
+            href={`${backendRoot}/admin/`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
@@ -120,7 +123,7 @@ export default function AdminSystemOverview({ stats }: AdminSystemOverviewProps)
             </div>
           </a>
           <a
-            href={`${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://127.0.0.1:8000'}/admin/courses/`}
+            href={`${backendRoot}/admin/courses/`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
@@ -132,7 +135,7 @@ export default function AdminSystemOverview({ stats }: AdminSystemOverviewProps)
             </div>
           </a>
           <a
-            href={`${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://127.0.0.1:8000'}/admin/api/testmodule/`}
+            href={`${backendRoot}/admin/api/testmodule/`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"

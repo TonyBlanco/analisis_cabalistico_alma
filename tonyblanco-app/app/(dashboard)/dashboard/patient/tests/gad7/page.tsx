@@ -3,10 +3,11 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { gad7Definition } from "./gad7.config";
+import { getApiBaseUrl } from "@/lib/api-base";
 
 type AnswerMap = Record<string, string>;
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://analisis-cabalistico-alma.onrender.com/api";
+const API_URL = getApiBaseUrl();
 
 export default function Gad7Page() {
   const router = useRouter();

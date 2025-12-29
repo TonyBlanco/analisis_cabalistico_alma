@@ -7,6 +7,7 @@
  */
 
 import { getAuthToken } from "../api";
+import { getApiBaseUrl } from "../api-base";
 
 export interface BioEmotionalDictionaryEntry {
   termino: string;
@@ -32,17 +33,10 @@ const BIOEMOTIONAL_DICTIONARY_URL = "/api/bioemotional/dictionary/";
 
 /**
  * Get backend base URL
- * In development: Django backend on port 8000
- * In production: Use environment variable or same origin
+ * Single source of truth: derived from API base URL.
  */
 function getBackendBaseUrl(): string {
-  // Check if we have an environment variable for backend URL
-  if (typeof window !== 'undefined') {
-    // Client-side
-    return process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:8000';
-  }
-  // Server-side
-  return process.env.BACKEND_URL || 'http://127.0.0.1:8000';
+  return getApiBaseUrl().replace(/\/api$/, '');
 }
 
 /**

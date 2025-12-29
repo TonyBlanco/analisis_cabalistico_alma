@@ -10,6 +10,7 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, Optional
 
 from django.conf import settings
+from django.utils import timezone
 
 from .schemas import KerykeionInputSchema
 from .service import execute_kerykeion
@@ -216,6 +217,23 @@ def build_multitech_payload(
     transits_chart["metadatos"]["technique"] = "transits"
 
     # Progressions (secondary progression: day-for-year)
+    # Normalize timezone-awareness for both reference and birth datetimes
+    tz_name = (input_data.get("location") or {}).get("timezone") or getattr(settings, "TIME_ZONE", "UTC")
+    try:
+        from zoneinfo import ZoneInfo
+        tzinfo = ZoneInfo(tz_name)
+    except Exception:
+        tzinfo = timezone.get_current_timezone()
+
+    if timezone.is_naive(ref_dt):
+        ref_dt = timezone.make_aware(ref_dt, tzinfo)
+    if timezone.is_naive(birth_dt):
+        birth_dt = timezone.make_aware(birth_dt, tzinfo)
+    else:
+        # If both are aware but use different tz, convert birth to ref's tz
+        if birth_dt.tzinfo and ref_dt.tzinfo and birth_dt.tzinfo != ref_dt.tzinfo:
+            birth_dt = birth_dt.astimezone(ref_dt.tzinfo)
+
     age_days = (ref_dt - birth_dt).total_seconds() / 86400.0
     progressed_dt = birth_dt + timedelta(days=age_days / 365.25)
     progressions_chart = _run_chart_at_datetime(input_data, progressed_dt)

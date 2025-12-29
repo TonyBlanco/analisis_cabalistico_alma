@@ -29,7 +29,7 @@ interface Props {
 }
 
 type ChartVisualStyle = 'classic' | 'huber';
-type HarmonicMode = 'off' | 'h5' | 'h7' | 'h9';
+type HarmonicMode = 'off' | 'h5' | 'h7' | 'h9' | 'h11' | 'h13' | 'h16';
 type PersonaMode = 'off' | 'social' | 'professional' | 'intimate';
 type RelocationMode = 'off' | 'home' | 'work' | 'travel' | 'abroad';
 type AdvancedObjectsState = { nodes: boolean; fortune: boolean; symbolicPoints: boolean };
@@ -201,6 +201,9 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
     if (harmonicMode === 'h5') return 5 as const;
     if (harmonicMode === 'h7') return 7 as const;
     if (harmonicMode === 'h9') return 9 as const;
+    if (harmonicMode === 'h11') return 11 as const;
+    if (harmonicMode === 'h13') return 13 as const;
+    if (harmonicMode === 'h16') return 16 as const;
     return undefined;
   }, [harmonicMode]);
 

@@ -22,8 +22,8 @@ interface AstrologySidebarProps {
   setSymbolicLunarReturnDate?: (v: string | null) => void;
   showCrossAspects?: boolean;
   setShowCrossAspects?: (v: boolean) => void;
-  harmonicMode?: 'off' | 'h5' | 'h7' | 'h9';
-  setHarmonicMode?: (v: 'off' | 'h5' | 'h7' | 'h9') => void;
+  harmonicMode?: 'off' | 'h5' | 'h7' | 'h9' | 'h11' | 'h13' | 'h16';
+  setHarmonicMode?: (v: 'off' | 'h5' | 'h7' | 'h9' | 'h11' | 'h13' | 'h16') => void;
   personaMode?: 'off' | 'social' | 'professional' | 'intimate';
   setPersonaMode?: (v: 'off' | 'social' | 'professional' | 'intimate') => void;
   relocationMode?: 'off' | 'home' | 'work' | 'travel' | 'abroad';
@@ -351,7 +351,7 @@ export default function AstrologySidebar({
                   className="rounded border border-gray-200 bg-white px-2 py-1 text-[12px]"
                   value={harmonicMode}
                   onChange={(e) => {
-                    const v = e.target.value as 'off' | 'h5' | 'h7' | 'h9';
+                    const v = e.target.value as 'off' | 'h5' | 'h7' | 'h9' | 'h11' | 'h13' | 'h16';
                     setHarmonicMode && setHarmonicMode(v);
                   }}
                   disabled={!canUseForecast}
@@ -361,6 +361,9 @@ export default function AstrologySidebar({
                   <option value="h5">h5 · creatividad / voluntad / diseño</option>
                   <option value="h7">h7 · búsqueda / refinamiento / misterio interior</option>
                   <option value="h9">h9 · integración / visión / propósito</option>
+                  <option value="h11">h11 · innovación / ruptura de patrón</option>
+                  <option value="h13">h13 · transformación / reconfiguración</option>
+                  <option value="h16">h16 · estructura / reconstrucción</option>
                 </select>
               </div>
             </div>

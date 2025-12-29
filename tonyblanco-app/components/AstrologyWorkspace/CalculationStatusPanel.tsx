@@ -16,7 +16,7 @@ type Props = {
     relocation: boolean;
     mathPoints: boolean;
   };
-  harmonicMode?: 'off' | 'h5' | 'h7' | 'h9';
+  harmonicMode?: 'off' | 'h5' | 'h7' | 'h9' | 'h11' | 'h13' | 'h16';
   personaMode?: 'off' | 'social' | 'professional' | 'intimate';
   relocationMode?: 'off' | 'home' | 'work' | 'travel' | 'abroad';
   advancedObjects?: { nodes: boolean; fortune: boolean; symbolicPoints: boolean };

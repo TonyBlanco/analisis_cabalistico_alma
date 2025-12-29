@@ -42,7 +42,7 @@ type Props = {
   crossAspectNatalKeys?: Set<string>;
   crossAspectSecondaryKeys?: Set<string>;
   symbolicPlanetaryLayer?: boolean;
-  harmonicOrder?: 5 | 7 | 9;
+  harmonicOrder?: 5 | 7 | 9 | 11 | 13 | 16;
   personaMode?: boolean | "off" | "social" | "professional" | "intimate";
   relocation?: { city: string; offsetDeg: number; mode?: "home" | "work" | "travel" | "abroad"; rotationDeg?: number };
   showMathPoints?: boolean;
@@ -124,7 +124,7 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
   const harmonicHighlight = useMemo(() => {
     if (!harmonicOrder) return null;
 
-    const count = Math.max(3, Math.min(12, harmonicOrder));
+    const count = Math.max(3, Math.min(24, harmonicOrder));
     const label = `H${count}`;
 
     const hashKey = (key: string) => {
@@ -732,7 +732,8 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
     const tooltip = `Armónicos (modo simbólico): patrones de resonancia psicológica (${harmonicOrder}º). No son cálculos astronómicos.`;
     const lines: React.ReactNode[] = [];
     const nodes: React.ReactNode[] = [];
-    const count = Math.max(3, Math.min(12, harmonicOrder));
+    const count = Math.max(3, Math.min(24, harmonicOrder));
+    const baseOpacity = count >= 13 ? 0.06 : 0.1;
     for (let i = 0; i < count; i++) {
       const deg = (360 / count) * i;
       const a = degToPoint(deg, rings.centerHole + 8, cx);
@@ -744,7 +745,7 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
           x2={b.x} y2={b.y}
           stroke="#0f172a"
           strokeWidth={1.1}
-          opacity={isHuber ? 0.06 : 0.1}
+          opacity={isHuber ? Math.min(0.06, baseOpacity) : baseOpacity}
         />
       );
 
@@ -764,7 +765,7 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
             cy={p.y}
             r={1.8}
             fill="#0f172a"
-            opacity={isHuber ? 0.06 : 0.1}
+            opacity={isHuber ? Math.min(0.06, baseOpacity) : baseOpacity}
           />
         );
       });

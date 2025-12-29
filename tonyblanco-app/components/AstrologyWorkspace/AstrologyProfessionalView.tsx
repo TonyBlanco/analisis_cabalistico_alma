@@ -398,9 +398,37 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
     if (secondaryLayer === 'transits') return 'Tránsitos (lectura simbólica)';
     if (secondaryLayer === 'progressions') return 'Progresiones (lectura simbólica)';
     if (secondaryLayer === 'solarArc') return 'Arco Solar (lectura simbólica)';
-    if (secondaryLayer === 'return_solar') return 'Retorno Solar (lectura simbólica)';
-    return 'Retorno Lunar (lectura simbólica)';
-  }, [secondaryLayer]);
+    if (secondaryLayer === 'return_solar') return `Retorno Solar · ${symbolicSolarReturnYear ?? new Date().getFullYear()} (lectura simbólica)`;
+    return `Retorno Lunar · ${(symbolicLunarReturnDate ?? new Date().toISOString().slice(0, 10)).slice(0, 7)} (lectura simbólica)`;
+  }, [secondaryLayer, symbolicSolarReturnYear, symbolicLunarReturnDate]);
+
+  const focusLabel = useMemo(() => {
+    const parts: string[] = [];
+    if (symbolicSolarReturnYear !== null) parts.push(`Año ${symbolicSolarReturnYear}`);
+    if (symbolicLunarReturnDate) {
+      const [y, m] = symbolicLunarReturnDate.split('-');
+      const monthIndex = Math.max(0, Math.min(11, (Number(m) || 1) - 1));
+      const monthNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+      parts.push(`Mes ${monthNames[monthIndex]} ${y || ''}`.trim());
+    }
+    if (parts.length === 0) return null;
+    return `Enfoque temporal simbólico: ${parts.join(' · ')}`;
+  }, [symbolicSolarReturnYear, symbolicLunarReturnDate]);
+
+  const lunarMonthIndex = useMemo(() => {
+    if (!symbolicLunarReturnDate) return new Date().getMonth();
+    const [, m] = symbolicLunarReturnDate.split('-');
+    return Math.max(0, Math.min(11, (Number(m) || 1) - 1));
+  }, [symbolicLunarReturnDate]);
+
+  const setLunarMonthIndex = (idx: number) => {
+    const monthIndex = Math.max(0, Math.min(11, idx));
+    const base = symbolicLunarReturnDate ?? new Date().toISOString().slice(0, 10);
+    const [y] = base.split('-');
+    const year = y || String(new Date().getFullYear());
+    const month = String(monthIndex + 1).padStart(2, '0');
+    setSymbolicLunarReturnDate(`${year}-${month}-01`);
+  };
 
   const secondaryPlanets = useMemo(() => {
     if (!secondaryLayer) return null;
@@ -834,6 +862,67 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                     </div>
                   ))}
                 </div>
+              </div>
+            ) : null}
+
+            {(symbolicSolarReturnYear !== null || symbolicLunarReturnDate) ? (
+              <div className="mb-4 bg-white border border-gray-200 rounded-lg p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <div className="text-sm font-semibold text-gray-900">Timeline temporal (lectura simbólica)</div>
+                    <div className="mt-1 text-xs text-gray-600">El timeline no cambia la carta; solo ajusta el enfoque temporal simbólico.</div>
+                  </div>
+                  <div className="text-xs text-gray-500">{renderLayerStateBadge('solo_lectura')}</div>
+                </div>
+
+                {focusLabel ? (
+                  <div className="mt-2 text-[12px] text-gray-700">{focusLabel}</div>
+                ) : null}
+
+                {symbolicSolarReturnYear !== null ? (
+                  <div className="mt-3 p-3 rounded border border-gray-200 bg-gray-50">
+                    <div className="flex items-center justify-between">
+                      <div className="text-[13px] font-medium text-gray-900">Timeline anual — Retorno Solar</div>
+                      <div className="text-xs text-gray-600">Año {symbolicSolarReturnYear}</div>
+                    </div>
+                    <input
+                      type="range"
+                      className="mt-2 w-full"
+                      min={symbolicSolarReturnYear - 5}
+                      max={symbolicSolarReturnYear + 5}
+                      value={symbolicSolarReturnYear}
+                      onChange={(e) => setSymbolicSolarReturnYear(Number(e.target.value))}
+                    />
+                    <div className="mt-1 flex justify-between text-[11px] text-gray-500">
+                      <span>{symbolicSolarReturnYear - 5}</span>
+                      <span>{symbolicSolarReturnYear}</span>
+                      <span>{symbolicSolarReturnYear + 5}</span>
+                    </div>
+                  </div>
+                ) : null}
+
+                {symbolicLunarReturnDate ? (
+                  <div className="mt-3 p-3 rounded border border-gray-200 bg-gray-50">
+                    <div className="flex items-center justify-between">
+                      <div className="text-[13px] font-medium text-gray-900">Timeline mensual — Retorno Lunar</div>
+                      <div className="text-xs text-gray-600">{symbolicLunarReturnDate.slice(0, 7)}</div>
+                    </div>
+                    <input
+                      type="range"
+                      className="mt-2 w-full"
+                      min={0}
+                      max={11}
+                      step={1}
+                      value={lunarMonthIndex}
+                      onChange={(e) => setLunarMonthIndex(Number(e.target.value))}
+                    />
+                    <div className="mt-1 grid grid-cols-6 gap-1 text-[10px] text-gray-500">
+                      {['E','F','M','A','M','J','J','A','S','O','N','D'].map((m, idx) => (
+                        <div key={`m-${idx}`} className={`text-center ${idx === lunarMonthIndex ? 'text-gray-900 font-semibold' : ''}`}>{m}</div>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
               </div>
             ) : null}
 

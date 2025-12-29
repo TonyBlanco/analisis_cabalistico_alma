@@ -411,11 +411,12 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
     const items: React.ReactNode[] = [];
     for (const key of order) {
       if (!byKey.has(key)) continue;
+      const layer = byKey.get(key);
       const st = styles[key];
       const r = Math.min(outerLimit - 6, baseOuter + st.offset);
       items.push(
         <g key={`al-${key}`}>
-          <title>{tooltip}</title>
+          <title>{layer?.label ? `${tooltip} · ${layer.label}` : tooltip}</title>
           <circle
             cx={cx}
             cy={cx}

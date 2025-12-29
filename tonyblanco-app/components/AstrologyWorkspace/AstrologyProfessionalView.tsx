@@ -153,6 +153,8 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
   const [symbolicSolarReturnYear, setSymbolicSolarReturnYear] = useState<number | null>(null);
   const [symbolicLunarReturnDate, setSymbolicLunarReturnDate] = useState<string | null>(null);
   const [showCrossAspects, setShowCrossAspects] = useState<boolean>(false);
+  const [harmonicOrder, setHarmonicOrder] = useState<5 | 7 | 9>(5);
+  const [relocationCity, setRelocationCity] = useState<string>('Madrid (placeholder)');
   const [solarReturnCompareEnabled, setSolarReturnCompareEnabled] = useState<boolean>(false);
   const [solarReturnCompareYearB, setSolarReturnCompareYearB] = useState<number | null>(null);
 
@@ -665,6 +667,14 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
     ? (solarReturnYearComparison ? solarReturnYearComparison.natalKeys : crossAspects.natalKeys)
     : undefined;
 
+  const relocationOffsetDeg = useMemo(() => {
+    const s = relocationCity || '';
+    let acc = 0;
+    for (let i = 0; i < s.length; i++) acc = (acc + s.charCodeAt(i) * (i + 1)) % 360;
+    // stable ±30° range, purely symbolic
+    return ((acc % 61) - 30);
+  }, [relocationCity]);
+
   // Bridge: year/date presence -> activeLayers (UI + engine)
   useEffect(() => {
     setActiveLayers((prev) => {
@@ -719,6 +729,10 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
           setSymbolicLunarReturnDate={setSymbolicLunarReturnDate}
           showCrossAspects={showCrossAspects}
           setShowCrossAspects={setShowCrossAspects}
+          harmonicOrder={harmonicOrder}
+          setHarmonicOrder={setHarmonicOrder}
+          relocationCity={relocationCity}
+          setRelocationCity={setRelocationCity}
         />
       </aside>
 
@@ -1535,6 +1549,11 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                      solarArc: activeLayers.has('solarArc'),
                      solarReturn: activeLayers.has('return_solar'),
                      lunarReturn: activeLayers.has('return_lunar'),
+                     planetary: activeLayers.has('planetary'),
+                     harmonics: activeLayers.has('harmonics'),
+                     persona: activeLayers.has('persona'),
+                     relocation: activeLayers.has('relocation'),
+                     mathPoints: activeLayers.has('mathPoints'),
                    }}
                    secondaryLayerKey={secondaryLayer}
                    houseSystem={houseSystem}
@@ -1703,19 +1722,24 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                               ) : null}
                               {/* base (front) */}
                               <div style={{ position: 'absolute', inset: 0 }}>
-                                <AstroWheelAdvanced
-                                  size={920}
-                                  ascendantDeg={baseWheel.ascendantDeg ?? 0}
-                                  houses={baseWheel.houses}
-                                  planets={baseWheel.planets}
-                                  asteroids={baseWheel.asteroids ?? []}
-                                  showAspects={true}
-                                    orbDeg={orb}
-                                    temporalLayers={temporalLayers}
-                                    annualLayers={annualLayers}
-                                    symbolicDoubleWheel={symbolicDoubleWheel}
+                                  <AstroWheelAdvanced
+                                    size={920}
+                                    ascendantDeg={baseWheel.ascendantDeg ?? 0}
+                                    houses={baseWheel.houses}
+                                    planets={baseWheel.planets}
+                                    asteroids={baseWheel.asteroids ?? []}
+                                    showAspects={true}
+                                     orbDeg={orb}
+                                     temporalLayers={temporalLayers}
+                                     annualLayers={annualLayers}
+                                     symbolicDoubleWheel={symbolicDoubleWheel}
                                     secondaryLayer={secondaryLayer && secondaryLayerLabel ? { key: secondaryLayer, label: secondaryLayerLabel, mode: 'symbolic' } : null}
                                     secondaryPlanets={secondaryPlanets ?? undefined}
+                                    symbolicPlanetaryLayer={activeLayers.has('planetary')}
+                                    harmonicOrder={activeLayers.has('harmonics') ? harmonicOrder : undefined}
+                                    personaMode={activeLayers.has('persona')}
+                                    relocation={activeLayers.has('relocation') ? { city: relocationCity, offsetDeg: relocationOffsetDeg } : undefined}
+                                    showMathPoints={activeLayers.has('mathPoints')}
                                     titleRight={`${meta.sistema_casas || 'placidus'} · ${meta.zodiac_type || 'tropical'}`}
                                     transitPlanets={
                                       progressionsSnapshot ? progressionsSnapshot.planets : (transitsSnapshot && transitBaseType === 'natal' ? transitsSnapshot.planets : undefined)
@@ -1805,6 +1829,11 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                                secondaryPlanets={secondaryPlanets ?? undefined}
                                crossAspectNatalKeys={crossAspectNatalKeysToPass}
                                crossAspectSecondaryKeys={showCrossAspects ? crossAspects.secondaryKeys : undefined}
+                               symbolicPlanetaryLayer={activeLayers.has('planetary')}
+                               harmonicOrder={activeLayers.has('harmonics') ? harmonicOrder : undefined}
+                               personaMode={activeLayers.has('persona')}
+                               relocation={activeLayers.has('relocation') ? { city: relocationCity, offsetDeg: relocationOffsetDeg } : undefined}
+                               showMathPoints={activeLayers.has('mathPoints')}
                                titleRight={`${meta.sistema_casas || 'placidus'} · ${meta.zodiac_type || 'tropical'}`}
                                transitPlanets={transitsSnapshot && transitBaseType === 'natal' ? transitsSnapshot.planets : undefined}
                              />
@@ -1832,6 +1861,11 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                            secondaryLayer={secondaryLayer && secondaryLayerLabel ? { key: secondaryLayer, label: secondaryLayerLabel, mode: 'symbolic' } : null}
                            crossAspectNatalKeys={showCrossAspects ? crossAspects.natalKeys : undefined}
                            crossAspectSecondaryKeys={showCrossAspects ? crossAspects.secondaryKeys : undefined}
+                           symbolicPlanetaryLayer={activeLayers.has('planetary')}
+                           harmonicOrder={activeLayers.has('harmonics') ? harmonicOrder : undefined}
+                           personaMode={activeLayers.has('persona')}
+                           relocation={activeLayers.has('relocation') ? { city: relocationCity, offsetDeg: relocationOffsetDeg } : undefined}
+                           showMathPoints={activeLayers.has('mathPoints')}
                            titleRight="Pendiente · solo lectura"
                         />
                       )

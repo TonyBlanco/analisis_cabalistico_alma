@@ -39,6 +39,11 @@ type Props = {
   secondaryPlanets?: PlanetPoint[];
   crossAspectNatalKeys?: Set<string>;
   crossAspectSecondaryKeys?: Set<string>;
+  symbolicPlanetaryLayer?: boolean;
+  harmonicOrder?: 5 | 7 | 9;
+  personaMode?: boolean;
+  relocation?: { city: string; offsetDeg: number };
+  showMathPoints?: boolean;
 };
 
 const DEFAULT_ZODIAC = ["♈","♉","♊","♋","♌","♍","♎","♏","♐","♑","♒","♓"];
@@ -62,6 +67,11 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
   secondaryPlanets,
   crossAspectNatalKeys,
   crossAspectSecondaryKeys,
+  symbolicPlanetaryLayer = false,
+  harmonicOrder,
+  personaMode = false,
+  relocation,
+  showMathPoints = false,
 }) => {
   const isPlaceholder = visualMode === "placeholder";
   const opts: WheelOptions = useMemo(() => ({
@@ -437,6 +447,128 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
     return <g>{items}</g>;
   };
 
+  const renderPlanetaryLayer = () => {
+    if (!symbolicPlanetaryLayer) return null;
+    const tooltip = 'Capa planetaria simbólica activa. No predictiva. No corresponde a un cálculo astronómico real.';
+    const r = Math.min(cx - 8, rings.outer + 6);
+    return (
+      <g>
+        <title>{tooltip}</title>
+        <circle
+          cx={cx}
+          cy={cx}
+          r={r}
+          fill="none"
+          stroke="#64748b"
+          strokeWidth={1.2}
+          opacity={0.22}
+          strokeDasharray="2 6"
+          style={{ pointerEvents: "stroke" }}
+        />
+      </g>
+    );
+  };
+
+  const renderHarmonicOverlay = () => {
+    if (!harmonicOrder) return null;
+    const tooltip = `Visualización armónica simbólica (${harmonicOrder}º). No matemática.`;
+    const lines: React.ReactNode[] = [];
+    const count = Math.max(3, Math.min(12, harmonicOrder));
+    for (let i = 0; i < count; i++) {
+      const deg = (360 / count) * i;
+      const a = degToPoint(deg, rings.centerHole + 8, cx);
+      const b = degToPoint(deg, rings.degreeTicksOuter - 8, cx);
+      lines.push(
+        <line
+          key={`harm-${count}-${i}`}
+          x1={a.x} y1={a.y}
+          x2={b.x} y2={b.y}
+          stroke="#0f172a"
+          strokeWidth={1.1}
+          opacity={0.08}
+        />
+      );
+    }
+    return (
+      <g>
+        <title>{tooltip}</title>
+        {lines}
+      </g>
+    );
+  };
+
+  const renderRelocationOverlay = () => {
+    if (!relocation) return null;
+    const tooltip = `Relocación simbólica (no astronómica) · ${relocation.city}. No recalcula ni cambia coordenadas reales.`;
+    const lines: React.ReactNode[] = [];
+    const base = relocation.offsetDeg || 0;
+    for (let i = 0; i < 12; i++) {
+      const deg = base + i * 30;
+      const a = degToPoint(deg, rings.houseInner, cx);
+      const b = degToPoint(deg, rings.houseOuter, cx);
+      lines.push(
+        <line
+          key={`rel-house-${i}`}
+          x1={a.x} y1={a.y}
+          x2={b.x} y2={b.y}
+          stroke="#14b8a6"
+          strokeWidth={1.2}
+          opacity={0.22}
+          strokeDasharray="5 7"
+        />
+      );
+    }
+    // symbolic axes markers
+    const axis = (deg: number, key: string) => {
+      const a = degToPoint(base + deg, rings.centerHole, cx);
+      const b = degToPoint(base + deg, rings.outer, cx);
+      return (
+        <line
+          key={key}
+          x1={a.x} y1={a.y}
+          x2={b.x} y2={b.y}
+          stroke="#14b8a6"
+          strokeWidth={1.4}
+          opacity={0.18}
+          strokeDasharray="10 8"
+        />
+      );
+    };
+
+    return (
+      <g>
+        <title>{tooltip}</title>
+        {axis(0, "rel-axis-asc")}
+        {axis(90, "rel-axis-mc")}
+        {lines}
+      </g>
+    );
+  };
+
+  const renderMathPoints = () => {
+    if (!showMathPoints) return null;
+    const tooltip = 'Puntos matemáticos (lectura simbólica). Posiciones placeholder, sin grados ni cálculo astronómico real.';
+    const r = rings.zodiacGlyphRing;
+    const node = (deg: number, glyph: string, key: string) => {
+      const p = degToPoint(deg, r, cx);
+      return (
+        <g key={key}>
+          <circle cx={p.x} cy={p.y} r={7} fill="none" stroke="#64748b" strokeWidth={1.4} opacity={0.28} />
+          <text x={p.x} y={p.y} textAnchor="middle" dominantBaseline="middle" fontSize={12} fill="#64748b" opacity={0.6} style={{ fontFamily: 'Inter, ui-sans-serif, system-ui' }}>
+            {glyph}
+          </text>
+        </g>
+      );
+    };
+    return (
+      <g>
+        <title>{tooltip}</title>
+        {node(0, "☊", "math-nn")}
+        {node(180, "☋", "math-sn")}
+      </g>
+    );
+  };
+
   const renderSecondaryWheel = () => {
     if (!secondaryLayer) return null;
 
@@ -539,6 +671,9 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
 
           return (
             <g key={`pl-${p.key}`}>
+              {personaMode && new Set(['sun','moon','mercury','venus','mars']).has(String(p.key).toLowerCase()) ? (
+                <circle cx={pt.x} cy={pt.y} r={14} fill="none" stroke="#a78bfa" strokeWidth={2} opacity={0.16} />
+              ) : null}
               {crossAspectNatalKeys && crossAspectNatalKeys.has(p.key) ? (
                 <>
                   <circle cx={pt.x} cy={pt.y} r={13} fill="none" stroke="#60a5fa" strokeWidth={2} opacity={0.22} />
@@ -657,23 +792,27 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
 
       <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
         <div className="w-full overflow-auto">
-          <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-            {/* Rotación global por ASC */}
-            <g transform={`rotate(${geo.rotationDeg} ${cx} ${cx})`}>
-              {renderSecondaryWheel()}
-              {renderTemporalLayers()}
-              {renderAnnualLayers()}
-              {renderBaseRings()}
-              {renderDegreeTicks()}
-              {renderZodiac()}
+            <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+              {/* Rotación global por ASC */}
+              <g transform={`rotate(${geo.rotationDeg} ${cx} ${cx})`}>
+                {renderSecondaryWheel()}
+                {renderTemporalLayers()}
+                {renderAnnualLayers()}
+                {renderPlanetaryLayer()}
+                {renderBaseRings()}
+                {renderDegreeTicks()}
+                {renderZodiac()}
                 {renderHouseLines()}
                 {renderHouseNumbers()}
-              {renderAspects()}
-              {renderAsteroids()}
-              {renderPlanets()}
-              {renderAnglesLabels()}
-            </g>
-          </svg>
+                {renderRelocationOverlay()}
+                {renderHarmonicOverlay()}
+                {renderMathPoints()}
+                {renderAspects()}
+                {renderAsteroids()}
+                {renderPlanets()}
+                {renderAnglesLabels()}
+              </g>
+            </svg>
         </div>
       </div>
     </div>

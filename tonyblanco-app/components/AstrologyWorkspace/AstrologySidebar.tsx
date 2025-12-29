@@ -22,6 +22,10 @@ interface AstrologySidebarProps {
   setSymbolicLunarReturnDate?: (v: string | null) => void;
   showCrossAspects?: boolean;
   setShowCrossAspects?: (v: boolean) => void;
+  harmonicOrder?: 5 | 7 | 9;
+  setHarmonicOrder?: (v: 5 | 7 | 9) => void;
+  relocationCity?: string;
+  setRelocationCity?: (v: string) => void;
 }
 
 const HOUSE_OPTIONS: Array<{ code: string; name: string; desc?: string }> = [
@@ -58,6 +62,10 @@ export default function AstrologySidebar({
   setSymbolicLunarReturnDate,
   showCrossAspects = false,
   setShowCrossAspects,
+  harmonicOrder = 5,
+  setHarmonicOrder,
+  relocationCity = 'Madrid (placeholder)',
+  setRelocationCity,
 }: AstrologySidebarProps) {
   const canUseForecast = Boolean(hasIdentity);
   const isLayerActive = (layer: string) => Boolean(activeLayers && activeLayers.has(layer));
@@ -68,6 +76,11 @@ export default function AstrologySidebar({
   const canUseReturns = canUseForecast;
   const isSolarReturnActive = isLayerActive('return_solar');
   const isLunarReturnActive = isLayerActive('return_lunar');
+  const isPlanetaryLayerActive = isLayerActive('planetary');
+  const isHarmonicsActive = isLayerActive('harmonics');
+  const isPersonaActive = isLayerActive('persona');
+  const isRelocationActive = isLayerActive('relocation');
+  const isMathPointsActive = isLayerActive('mathPoints');
   const hasSecondaryLayer = Boolean(activeLayers && (
     activeLayers.has('transits') ||
     activeLayers.has('progressions') ||
@@ -273,7 +286,20 @@ export default function AstrologySidebar({
               </div>
             </div>
 
-            <div className="px-2 py-1 bg-gray-50 border border-gray-200 rounded opacity-50">🔒 Planetarios</div>
+            <div className={`flex items-center justify-between px-2 py-1 border rounded ${canUseReturns ? 'bg-white border-gray-200' : 'bg-gray-50 border-gray-200 opacity-60'}`}>
+              <div className="text-[13px]" title="Capa planetaria simbólica. No predictiva. Usa los planetas ya visibles, sin efemérides ni fechas.">
+                Planetarios · <span className="text-gray-500">capa simbólica</span>
+              </div>
+              <label className="inline-flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={Boolean(isPlanetaryLayerActive)}
+                  onChange={() => onToggleLayer && onToggleLayer('planetary')}
+                  disabled={!canUseReturns}
+                  title={!canUseReturns ? 'Requiere identidad válida (fecha de nacimiento)' : 'Capa planetaria simbólica. No predictiva.'}
+                />
+              </label>
+            </div>
           </div>
         </div>
 
@@ -281,9 +307,84 @@ export default function AstrologySidebar({
         <div className="pt-2 border-t border-gray-100">
           <label className="block text-xs font-semibold text-gray-600 mb-2">Técnicas Especiales</label>
           <div className="space-y-1 text-[11px]">
-            <div className="px-2 py-1 bg-gray-50 border border-gray-200 rounded opacity-50">🔒 Armónicos</div>
-            <div className="px-2 py-1 bg-gray-50 border border-gray-200 rounded opacity-50">🔒 Persona Charts</div>
-            <div className="px-2 py-1 bg-gray-50 border border-gray-200 rounded opacity-50">🔒 Relocación</div>
+            <div className={`px-2 py-2 border rounded ${canUseForecast ? 'bg-white border-gray-200' : 'bg-gray-50 border-gray-200 opacity-60'}`}>
+              <div className="flex items-center justify-between">
+                <div className="text-[13px]" title="Visualización armónica simbólica. No matemática.">
+                  Armónicos · <span className="text-gray-500">visual</span>
+                </div>
+                <label className="inline-flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(isHarmonicsActive)}
+                    onChange={() => onToggleLayer && onToggleLayer('harmonics')}
+                    disabled={!canUseForecast}
+                    title={!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : 'Visualización armónica simbólica. No matemática.'}
+                  />
+                </label>
+              </div>
+              <div className="mt-1 flex items-center justify-between gap-2">
+                <div className="text-[11px] text-gray-500">Orden</div>
+                <select
+                  className="rounded border border-gray-200 bg-white px-2 py-1 text-[12px]"
+                  value={harmonicOrder}
+                  onChange={(e) => setHarmonicOrder && setHarmonicOrder(Number(e.target.value) as 5 | 7 | 9)}
+                  disabled={!canUseForecast || !isHarmonicsActive}
+                  title={!isHarmonicsActive ? 'Activa Armónicos para seleccionar' : 'Orden armónico simbólico'}
+                >
+                  <option value={5}>5º</option>
+                  <option value={7}>7º</option>
+                  <option value={9}>9º</option>
+                </select>
+              </div>
+            </div>
+
+            <div className={`flex items-center justify-between px-2 py-1 border rounded ${canUseForecast ? 'bg-white border-gray-200' : 'bg-gray-50 border-gray-200 opacity-60'}`}>
+              <div className="text-[13px]" title="Persona Chart — lectura simbólica. No crea una carta nueva; solo cambia el énfasis visual.">
+                Persona Chart · <span className="text-gray-500">lectura simbólica</span>
+              </div>
+              <label className="inline-flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={Boolean(isPersonaActive)}
+                  onChange={() => onToggleLayer && onToggleLayer('persona')}
+                  disabled={!canUseForecast}
+                  title={!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : 'Persona Chart — lectura simbólica'}
+                />
+              </label>
+            </div>
+
+            <div className={`px-2 py-2 border rounded ${canUseForecast ? 'bg-white border-gray-200' : 'bg-gray-50 border-gray-200 opacity-60'}`}>
+              <div className="flex items-center justify-between">
+                <div className="text-[13px]" title="Relocación simbólica (no astronómica). No cambia coordenadas reales ni recalcula.">
+                  Relocación · <span className="text-gray-500">simbólica</span>
+                </div>
+                <label className="inline-flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(isRelocationActive)}
+                    onChange={() => onToggleLayer && onToggleLayer('relocation')}
+                    disabled={!canUseForecast}
+                    title={!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : 'Relocación simbólica (no astronómica)'}
+                  />
+                </label>
+              </div>
+              <div className="mt-1 flex items-center justify-between gap-2">
+                <div className="text-[11px] text-gray-500">Ciudad</div>
+                <select
+                  className="rounded border border-gray-200 bg-white px-2 py-1 text-[12px]"
+                  value={relocationCity}
+                  onChange={(e) => setRelocationCity && setRelocationCity(e.target.value)}
+                  disabled={!canUseForecast || !isRelocationActive}
+                  title={!isRelocationActive ? 'Activa Relocación para seleccionar' : 'Relocación simbólica (placeholder)'}
+                >
+                  <option value="Madrid (placeholder)">Madrid (placeholder)</option>
+                  <option value="Ciudad de México (placeholder)">Ciudad de México (placeholder)</option>
+                  <option value="Buenos Aires (placeholder)">Buenos Aires (placeholder)</option>
+                  <option value="Bogotá (placeholder)">Bogotá (placeholder)</option>
+                </select>
+              </div>
+              <div className="mt-1 text-[11px] text-gray-500">Relocación simbólica (no astronómica)</div>
+            </div>
           </div>
         </div>
 
@@ -327,8 +428,18 @@ export default function AstrologySidebar({
               <span className="font-medium">✅ Planetas</span>
             </div>
             <div className="flex items-center justify-between px-2 py-1 border rounded">
-              <div className="text-[13px]">🔒 Puntos matemáticos</div>
-              <div className="text-xs text-gray-400">(coming)</div>
+              <div className="text-[13px]" title="Puntos matemáticos (lectura simbólica). Muestra nodos suaves sin grados ni cálculos.">
+                Puntos matemáticos · <span className="text-gray-500">lectura simbólica</span>
+              </div>
+              <label className="inline-flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={Boolean(isMathPointsActive)}
+                  onChange={() => onToggleLayer && onToggleLayer('mathPoints')}
+                  disabled={!canUseForecast}
+                  title={!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : 'Puntos matemáticos (lectura simbólica)'}
+                />
+              </label>
             </div>
             <div className="flex items-center justify-between px-2 py-1 border rounded">
               <label className="inline-flex items-center gap-2 text-sm">

@@ -3,7 +3,19 @@ import React, { useState } from 'react';
 type Props = {
   overlays: { natal: boolean; transits: boolean; solarReturn: boolean; progressions: boolean };
   activeLayers: Set<string>;
-  symbolicLayers?: { natal: boolean; transits: boolean; progressions: boolean; solarArc: boolean; solarReturn: boolean; lunarReturn: boolean };
+  symbolicLayers?: {
+    natal: boolean;
+    transits: boolean;
+    progressions: boolean;
+    solarArc: boolean;
+    solarReturn: boolean;
+    lunarReturn: boolean;
+    planetary: boolean;
+    harmonics: boolean;
+    persona: boolean;
+    relocation: boolean;
+    mathPoints: boolean;
+  };
   houseSystem: string;
   zodiacType: string;
   canRecalculate: boolean; // whether UI has ability to trigger recalculation (we will NOT trigger)
@@ -64,13 +76,23 @@ export default function CalculationStatusPanel({ overlays, activeLayers, symboli
               ? isSymbolicActive('solarReturn')
               : key === 'return_lunar'
                 ? isSymbolicActive('lunarReturn')
-              : false;
+                : key === 'planetary'
+                  ? isSymbolicActive('planetary')
+                  : key === 'harmonics'
+                    ? isSymbolicActive('harmonics')
+                    : key === 'persona'
+                      ? isSymbolicActive('persona')
+                      : key === 'relocation'
+                        ? isSymbolicActive('relocation')
+                        : key === 'mathPoints'
+                          ? isSymbolicActive('mathPoints')
+                : false;
 
     if (selected && overlayFlag) return 'active' as const;
     if (symbolicActive) return 'symbolic' as const;
     if (overlayFlag) return 'available' as const;
 
-    if (key === 'transits' || key === 'progressions' || key === 'solarArc' || key === 'return_solar' || key === 'return_lunar') return 'available' as const;
+    if (key === 'transits' || key === 'progressions' || key === 'solarArc' || key === 'return_solar' || key === 'return_lunar' || key === 'planetary' || key === 'harmonics' || key === 'persona' || key === 'relocation' || key === 'mathPoints') return 'available' as const;
     return canRecalculate ? 'available' as const : 'locked' as const;
   };
 
@@ -142,26 +164,42 @@ export default function CalculationStatusPanel({ overlays, activeLayers, symboli
             </li>
 
             <li className="flex items-center">
-              <button onClick={() => handleClickWouldRecalc('Armónicos', true)} className="flex items-center w-full text-left">
-                <Dot type={canRecalculate ? 'available' : 'locked'} />
+              <button onClick={() => handleClickSymbolicInfo('Capa planetaria simbólica activa. No predictiva.')} className="flex items-center w-full text-left" title={isSymbolicActive('planetary') ? 'Capa planetaria simbólica activa. No predictiva.' : undefined}>
+                <Dot type={calcState('planetary', false)} />
+                <span className="flex-1">Planetarios</span>
+                <span className="text-xs text-gray-400">{isSymbolicActive('planetary') ? 'Activo (lectura simbólica)' : 'pendiente'}</span>
+              </button>
+            </li>
+
+            <li className="flex items-center">
+              <button onClick={() => handleClickSymbolicInfo('Visualización armónica simbólica. No matemática.')} className="flex items-center w-full text-left" title={isSymbolicActive('harmonics') ? 'Visualización armónica simbólica. No matemática.' : undefined}>
+                <Dot type={calcState('harmonics', false)} />
                 <span className="flex-1">Armónicos</span>
-                <span className="text-xs text-gray-400">(opcional)</span>
+                <span className="text-xs text-gray-400">{isSymbolicActive('harmonics') ? 'Activo (lectura simbólica)' : 'pendiente'}</span>
               </button>
             </li>
 
             <li className="flex items-center">
-              <button onClick={() => handleClickWouldRecalc('Persona Charts', true)} className="flex items-center w-full text-left">
-                <Dot type={canRecalculate ? 'available' : 'locked'} />
-                <span className="flex-1">Persona Charts</span>
-                <span className="text-xs text-gray-400">(opcional)</span>
+              <button onClick={() => handleClickSymbolicInfo('Persona Chart — lectura simbólica. No crea una carta nueva.')} className="flex items-center w-full text-left" title={isSymbolicActive('persona') ? 'Persona Chart — lectura simbólica. No crea una carta nueva.' : undefined}>
+                <Dot type={calcState('persona', false)} />
+                <span className="flex-1">Persona Chart</span>
+                <span className="text-xs text-gray-400">{isSymbolicActive('persona') ? 'Activo (lectura simbólica)' : 'pendiente'}</span>
               </button>
             </li>
 
             <li className="flex items-center">
-              <button onClick={() => handleClickWouldRecalc('Relocación', true)} className="flex items-center w-full text-left">
-                <Dot type={canRecalculate ? 'available' : 'locked'} />
+              <button onClick={() => handleClickSymbolicInfo('Relocación simbólica (no astronómica). No recalcula ni cambia coordenadas reales.')} className="flex items-center w-full text-left" title={isSymbolicActive('relocation') ? 'Relocación simbólica (no astronómica). No recalcula ni cambia coordenadas reales.' : undefined}>
+                <Dot type={calcState('relocation', false)} />
                 <span className="flex-1">Relocación</span>
-                <span className="text-xs text-gray-400">(opcional)</span>
+                <span className="text-xs text-gray-400">{isSymbolicActive('relocation') ? 'Activo (lectura simbólica)' : 'pendiente'}</span>
+              </button>
+            </li>
+
+            <li className="flex items-center">
+              <button onClick={() => handleClickSymbolicInfo('Puntos matemáticos (lectura simbólica). Placeholder sin grados ni cálculo astronómico real.')} className="flex items-center w-full text-left" title={isSymbolicActive('mathPoints') ? 'Puntos matemáticos (lectura simbólica). Placeholder sin grados ni cálculo astronómico real.' : undefined}>
+                <Dot type={calcState('mathPoints', false)} />
+                <span className="flex-1">Puntos matemáticos</span>
+                <span className="text-xs text-gray-400">{isSymbolicActive('mathPoints') ? 'Activo (lectura simbólica)' : 'pendiente'}</span>
               </button>
             </li>
           </ul>

@@ -150,6 +150,8 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
     return s;
   });
   const [symbolicDoubleWheel, setSymbolicDoubleWheel] = useState<boolean>(false);
+  const [symbolicSolarReturnYear, setSymbolicSolarReturnYear] = useState<number>(new Date().getFullYear());
+  const [symbolicLunarReturnDate, setSymbolicLunarReturnDate] = useState<string>(new Date().toISOString().slice(0, 10));
 
   const [activeTab, setActiveTab] = useState<'visual' | 'psych'>('visual');
 
@@ -375,6 +377,13 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
     return layers;
   }, [activeLayers, transitDate, progressionDate, solarArcDate]);
 
+  const annualLayers = useMemo(() => {
+    const layers: Array<{ key: 'solarReturn' | 'lunarReturn'; label?: string }> = [];
+    if (activeLayers.has('solarReturnSymbolic')) layers.push({ key: 'solarReturn', label: `Retorno Solar · ${symbolicSolarReturnYear}` });
+    if (activeLayers.has('lunarReturnSymbolic')) layers.push({ key: 'lunarReturn', label: `Retorno Lunar · ${symbolicLunarReturnDate}` });
+    return layers;
+  }, [activeLayers, symbolicSolarReturnYear, symbolicLunarReturnDate]);
+
   return (
     <div className="flex h-full bg-gray-50">
       {/* Sidebar (left) */}
@@ -396,6 +405,10 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
           onToggleLayer={handleLayerToggle}
           symbolicDoubleWheel={symbolicDoubleWheel}
           setSymbolicDoubleWheel={setSymbolicDoubleWheel}
+          symbolicSolarReturnYear={symbolicSolarReturnYear}
+          setSymbolicSolarReturnYear={setSymbolicSolarReturnYear}
+          symbolicLunarReturnDate={symbolicLunarReturnDate}
+          setSymbolicLunarReturnDate={setSymbolicLunarReturnDate}
         />
       </aside>
 
@@ -1106,6 +1119,8 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                      transits: activeLayers.has('transits'),
                      progressions: activeLayers.has('progressions'),
                      solarArc: activeLayers.has('solarArc'),
+                     solarReturn: activeLayers.has('solarReturnSymbolic'),
+                     lunarReturn: activeLayers.has('lunarReturnSymbolic'),
                    }}
                    houseSystem={houseSystem}
                    zodiacType={zodiacType}
@@ -1280,14 +1295,15 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                                   planets={baseWheel.planets}
                                   asteroids={baseWheel.asteroids ?? []}
                                   showAspects={true}
-                                  orbDeg={orb}
-                                  temporalLayers={temporalLayers}
-                                  symbolicDoubleWheel={symbolicDoubleWheel}
-                                  titleRight={`${meta.sistema_casas || 'placidus'} · ${meta.zodiac_type || 'tropical'}`}
-                                  transitPlanets={
-                                    progressionsSnapshot ? progressionsSnapshot.planets : (transitsSnapshot && transitBaseType === 'natal' ? transitsSnapshot.planets : undefined)
-                                  }
-                                />
+                                   orbDeg={orb}
+                                   temporalLayers={temporalLayers}
+                                   annualLayers={annualLayers}
+                                   symbolicDoubleWheel={symbolicDoubleWheel}
+                                   titleRight={`${meta.sistema_casas || 'placidus'} · ${meta.zodiac_type || 'tropical'}`}
+                                   transitPlanets={
+                                     progressionsSnapshot ? progressionsSnapshot.planets : (transitsSnapshot && transitBaseType === 'natal' ? transitsSnapshot.planets : undefined)
+                                   }
+                                 />
                               </div>
                             </div>
                           );
@@ -1301,8 +1317,9 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                                   planets={wheel.planets}
                                   asteroids={showAsteroids ? (wheel.asteroids ?? []) : []}
                                   showAspects={true}
-                                  orbDeg={orb}
+                                   orbDeg={orb}
                                    temporalLayers={temporalLayers}
+                                   annualLayers={annualLayers}
                                    symbolicDoubleWheel={symbolicDoubleWheel}
                                    titleRight={`${meta.sistema_casas || 'placidus'} · ${meta.zodiac_type || 'tropical'}`}
                                    transitPlanets={transitsSnapshot && transitBaseType === 'natal' ? transitsSnapshot.planets : undefined}
@@ -1322,9 +1339,10 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                           planets={[]}
                           asteroids={[]}
                           showAspects={false}
-                          orbDeg={orb}
+                           orbDeg={orb}
                            visualMode="placeholder"
                            temporalLayers={temporalLayers}
+                           annualLayers={annualLayers}
                            symbolicDoubleWheel={symbolicDoubleWheel}
                            titleRight="Pendiente · solo lectura"
                          />

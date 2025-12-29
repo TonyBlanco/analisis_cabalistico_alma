@@ -27,6 +27,10 @@ type Props = {
     label?: string;
   }>;
   symbolicDoubleWheel?: boolean;
+  annualLayers?: Array<{
+    key: "solarReturn" | "lunarReturn";
+    label?: string;
+  }>;
 };
 
 const DEFAULT_ZODIAC = ["♈","♉","♊","♋","♌","♍","♎","♏","♐","♑","♒","♓"];
@@ -44,6 +48,7 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
   visualMode = "normal",
   temporalLayers = [],
   symbolicDoubleWheel = false,
+  annualLayers = [],
 }) => {
   const isPlaceholder = visualMode === "placeholder";
   const opts: WheelOptions = useMemo(() => ({
@@ -374,6 +379,48 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
     );
   };
 
+  const renderAnnualLayers = () => {
+    if (!annualLayers || annualLayers.length === 0) return null;
+
+    const order: Array<"solarReturn" | "lunarReturn"> = ["solarReturn", "lunarReturn"];
+    const byKey = new Map(annualLayers.map((l) => [l.key, l]));
+    const tooltip = 'Capa anual/mensual simbólica activa — sin recalcular carta base. No corresponde a un cálculo astronómico real.';
+
+    const maxR = cx - 6;
+    const baseOuter = rings.outer + 34;
+    const outerLimit = Math.min(maxR, baseOuter + 34);
+
+    const styles: Record<string, { stroke: string; opacity: number; width: number; dash: string; offset: number }> = {
+      solarReturn: { stroke: "#a78bfa", opacity: 0.45, width: 2.0, dash: "", offset: 10 }, // annual
+      lunarReturn: { stroke: "#f59e0b", opacity: 0.42, width: 1.8, dash: "4 6", offset: 22 }, // monthly
+    };
+
+    const items: React.ReactNode[] = [];
+    for (const key of order) {
+      if (!byKey.has(key)) continue;
+      const st = styles[key];
+      const r = Math.min(outerLimit - 6, baseOuter + st.offset);
+      items.push(
+        <g key={`al-${key}`}>
+          <title>{tooltip}</title>
+          <circle
+            cx={cx}
+            cy={cx}
+            r={r}
+            fill="none"
+            stroke={st.stroke}
+            strokeWidth={st.width}
+            opacity={st.opacity}
+            strokeDasharray={st.dash || undefined}
+            style={{ pointerEvents: "stroke" }}
+          />
+        </g>
+      );
+    }
+
+    return <g>{items}</g>;
+  };
+
   const renderPlanets = () => {
     // Glifo + label sin “botón”
     return (
@@ -503,15 +550,16 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
 
       <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
         <div className="w-full overflow-auto">
-          <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-            {/* Rotación global por ASC */}
-            <g transform={`rotate(${geo.rotationDeg} ${cx} ${cx})`}>
-              {renderTemporalLayers()}
-              {renderBaseRings()}
-              {renderDegreeTicks()}
-              {renderZodiac()}
-              {renderHouseLines()}
-              {renderHouseNumbers()}
+            <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+              {/* Rotación global por ASC */}
+              <g transform={`rotate(${geo.rotationDeg} ${cx} ${cx})`}>
+                {renderTemporalLayers()}
+                {renderAnnualLayers()}
+                {renderBaseRings()}
+                {renderDegreeTicks()}
+                {renderZodiac()}
+                {renderHouseLines()}
+                {renderHouseNumbers()}
               {renderAspects()}
               {renderAsteroids()}
               {renderPlanets()}

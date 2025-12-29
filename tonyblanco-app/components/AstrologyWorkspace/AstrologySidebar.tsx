@@ -16,6 +16,10 @@ interface AstrologySidebarProps {
   onToggleLayer?: (layer: string) => void;
   symbolicDoubleWheel?: boolean;
   setSymbolicDoubleWheel?: (v: boolean) => void;
+  symbolicSolarReturnYear?: number;
+  setSymbolicSolarReturnYear?: (v: number) => void;
+  symbolicLunarReturnDate?: string;
+  setSymbolicLunarReturnDate?: (v: string) => void;
 }
 
 const HOUSE_OPTIONS: Array<{ code: string; name: string; desc?: string }> = [
@@ -46,6 +50,10 @@ export default function AstrologySidebar({
   onToggleLayer,
   symbolicDoubleWheel = false,
   setSymbolicDoubleWheel,
+  symbolicSolarReturnYear,
+  setSymbolicSolarReturnYear,
+  symbolicLunarReturnDate,
+  setSymbolicLunarReturnDate,
 }: AstrologySidebarProps) {
   const canUseForecast = Boolean(hasIdentity);
   const isLayerActive = (layer: string) => Boolean(activeLayers && activeLayers.has(layer));
@@ -53,6 +61,9 @@ export default function AstrologySidebar({
     activeLayers && (activeLayers.has('transits') || activeLayers.has('progressions') || activeLayers.has('solarArc'))
   );
   const canUseSymbolicDoubleWheel = canUseForecast && hasAnySymbolicTemporalLayer;
+  const canUseReturns = canUseForecast;
+  const isSolarReturnActive = isLayerActive('solarReturnSymbolic');
+  const isLunarReturnActive = isLayerActive('lunarReturnSymbolic');
 
   const ForecastItem = ({
     layer,
@@ -160,8 +171,68 @@ export default function AstrologySidebar({
         <div className="pt-2 border-t border-gray-100">
           <label className="block text-xs font-semibold text-gray-600 mb-2">Retornos</label>
           <div className="space-y-1 text-[11px]">
-            <div className="px-2 py-1 bg-gray-50 border border-gray-200 rounded opacity-50">🔒 Solar</div>
-            <div className="px-2 py-1 bg-gray-50 border border-gray-200 rounded opacity-50">🔒 Lunar</div>
+            <div className={`px-2 py-2 border rounded ${canUseReturns ? 'bg-white border-gray-200' : 'bg-gray-50 border-gray-200 opacity-60'}`}>
+              <div className="flex items-center justify-between">
+                <div
+                  className="text-[13px]"
+                  title="Retorno Solar · capa anual simbólica. No corresponde a un cálculo astronómico real."
+                >
+                  Solar · <span className="text-gray-500">capa anual simbólica</span>
+                </div>
+                <label className="inline-flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(isSolarReturnActive)}
+                    onChange={() => onToggleLayer && onToggleLayer('solarReturnSymbolic')}
+                    disabled={!canUseReturns}
+                    title={!canUseReturns ? 'Requiere identidad válida (fecha de nacimiento)' : 'Activar capa anual simbólica (solo visual)'}
+                  />
+                </label>
+              </div>
+              <div className="mt-1 flex items-center justify-between gap-2">
+                <div className="text-[11px] text-gray-500">Año</div>
+                <input
+                  type="number"
+                  className="w-24 rounded border border-gray-200 px-2 py-1 text-[12px]"
+                  value={symbolicSolarReturnYear ?? new Date().getFullYear()}
+                  onChange={(e) => setSymbolicSolarReturnYear && setSymbolicSolarReturnYear(Number(e.target.value))}
+                  disabled={!canUseReturns}
+                  min={1900}
+                  max={2100}
+                />
+              </div>
+            </div>
+
+            <div className={`px-2 py-2 border rounded ${canUseReturns ? 'bg-white border-gray-200' : 'bg-gray-50 border-gray-200 opacity-60'}`}>
+              <div className="flex items-center justify-between">
+                <div
+                  className="text-[13px]"
+                  title="Retorno Lunar · capa mensual simbólica. No corresponde a un cálculo astronómico real."
+                >
+                  Lunar · <span className="text-gray-500">capa mensual simbólica</span>
+                </div>
+                <label className="inline-flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(isLunarReturnActive)}
+                    onChange={() => onToggleLayer && onToggleLayer('lunarReturnSymbolic')}
+                    disabled={!canUseReturns}
+                    title={!canUseReturns ? 'Requiere identidad válida (fecha de nacimiento)' : 'Activar capa mensual simbólica (solo visual)'}
+                  />
+                </label>
+              </div>
+              <div className="mt-1 flex items-center justify-between gap-2">
+                <div className="text-[11px] text-gray-500">Fecha</div>
+                <input
+                  type="date"
+                  className="rounded border border-gray-200 px-2 py-1 text-[12px]"
+                  value={symbolicLunarReturnDate ?? new Date().toISOString().slice(0, 10)}
+                  onChange={(e) => setSymbolicLunarReturnDate && setSymbolicLunarReturnDate(e.target.value)}
+                  disabled={!canUseReturns}
+                />
+              </div>
+            </div>
+
             <div className="px-2 py-1 bg-gray-50 border border-gray-200 rounded opacity-50">🔒 Planetarios</div>
           </div>
         </div>

@@ -20,6 +20,7 @@ type Props = {
   showAspects?: boolean;
   orbDeg?: number;
   titleRight?: string;           // "placidus · tropical"
+  visualMode?: "normal" | "placeholder";
 };
 
 const DEFAULT_ZODIAC = ["♈","♉","♊","♋","♌","♍","♎","♏","♐","♑","♒","♓"];
@@ -34,15 +35,17 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
   showAspects = true,
   orbDeg = 6,
   titleRight,
+  visualMode = "normal",
 }) => {
+  const isPlaceholder = visualMode === "placeholder";
   const opts: WheelOptions = useMemo(() => ({
     size,
     ascendantDeg: normalizeDeg(ascendantDeg),
     zodiacGlyphs: DEFAULT_ZODIAC,
-    showDegreeTicks: true,
+    showDegreeTicks: !isPlaceholder,
     majorTickEveryDeg: 10,
     minorTickEveryDeg: 1,
-  }), [size, ascendantDeg]);
+  }), [size, ascendantDeg, isPlaceholder]);
 
   const geo = useMemo(() => createWheelGeometry(opts), [opts]);
 
@@ -144,21 +147,21 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
           const s1 = degToPoint(sectorStart, rings.outer, cx);
           const s2 = degToPoint(sectorStart, rings.zodiacGlyphRing - 18, cx);
 
-          // glifo
-          const pt = degToPoint(mid, rings.zodiacGlyphRing, cx);
-
           return (
             <g key={`z-${i}`}>
-              <line x1={s1.x} y1={s1.y} x2={s2.x} y2={s2.y} stroke="#d0d0d0" strokeWidth={1} />
-              <text
-                x={pt.x} y={pt.y}
-                textAnchor="middle"
-                dominantBaseline="middle"
-                fontSize={22}
-                fill="#444"
-              >
-                {g}
-              </text>
+              <line x1={s1.x} y1={s1.y} x2={s2.x} y2={s2.y} stroke={isPlaceholder ? "#cbd5e1" : "#d0d0d0"} strokeWidth={1} opacity={isPlaceholder ? 0.75 : 1} />
+              {!isPlaceholder ? (
+                <text
+                  x={degToPoint(mid, rings.zodiacGlyphRing, cx).x}
+                  y={degToPoint(mid, rings.zodiacGlyphRing, cx).y}
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  fontSize={22}
+                  fill="#444"
+                >
+                  {g}
+                </text>
+              ) : null}
             </g>
           );
         })}
@@ -179,15 +182,15 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
               key={`hline-${idx}`}
               x1={p1.x} y1={p1.y}
               x2={p2.x} y2={p2.y}
-              stroke={strong ? "#333" : "#888"}
-              strokeWidth={strong ? 2.2 : 1.2}
-              opacity={strong ? 0.9 : 0.75}
+              stroke={strong ? (isPlaceholder ? "#6b7280" : "#333") : (isPlaceholder ? "#9ca3af" : "#888")}
+              strokeWidth={strong ? (isPlaceholder ? 1.8 : 2.2) : 1.2}
+              opacity={strong ? (isPlaceholder ? 0.55 : 0.9) : (isPlaceholder ? 0.42 : 0.75)}
             />
           );
         })}
         {/* círculo houseOuter e houseInner */}
-        <circle cx={cx} cy={cx} r={rings.houseOuter} fill="none" stroke="#333" strokeWidth={1.4} opacity={0.8} />
-        <circle cx={cx} cy={cx} r={rings.houseInner} fill="none" stroke="#333" strokeWidth={1.2} opacity={0.5} />
+        <circle cx={cx} cy={cx} r={rings.houseOuter} fill="none" stroke={isPlaceholder ? "#6b7280" : "#333"} strokeWidth={isPlaceholder ? 1.2 : 1.4} opacity={isPlaceholder ? 0.5 : 0.8} />
+        <circle cx={cx} cy={cx} r={rings.houseInner} fill="none" stroke={isPlaceholder ? "#6b7280" : "#333"} strokeWidth={isPlaceholder ? 1.1 : 1.2} opacity={isPlaceholder ? 0.32 : 0.5} />
       </g>
     );
   };
@@ -209,7 +212,8 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
           textAnchor="middle"
           dominantBaseline="middle"
           fontSize={12}
-          fill="#555"
+          fill={isPlaceholder ? "#6b7280" : "#555"}
+          opacity={isPlaceholder ? 0.65 : 1}
         >
           {i + 1}
         </text>
@@ -234,15 +238,38 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
           textAnchor="middle"
           dominantBaseline="middle"
           fontSize={13}
-          fill="#111"
+          fill={isPlaceholder ? "#374151" : "#111"}
           fontWeight={600}
+          opacity={isPlaceholder ? 0.7 : 1}
         >
           {label}
         </text>
       );
     };
 
-    return <g>{tag("ASC", asc)}{tag("DSC", dsc)}{tag("MC", mc)}{tag("IC", ic)}</g>;
+    const axisLine = (deg: number, key: string) => {
+      const a = degToPoint(deg, rings.centerHole, cx);
+      const b = degToPoint(deg, rings.outer, cx);
+      return (
+        <line
+          key={key}
+          x1={a.x} y1={a.y}
+          x2={b.x} y2={b.y}
+          stroke="#9ca3af"
+          strokeWidth={1.2}
+          opacity={0.55}
+          strokeDasharray="6 6"
+        />
+      );
+    };
+
+    return (
+      <g>
+        {isPlaceholder ? axisLine(asc, "axis-asc") : null}
+        {isPlaceholder ? axisLine(mc, "axis-mc") : null}
+        {tag("ASC", asc)}{tag("DSC", dsc)}{tag("MC", mc)}{tag("IC", ic)}
+      </g>
+    );
   };
 
   const renderPlanets = () => {
@@ -356,9 +383,9 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
 
   const renderBaseRings = () => (
     <g>
-      <circle cx={cx} cy={cx} r={rings.outer} fill="none" stroke="#222" strokeWidth={1.6} opacity={0.9} />
-      <circle cx={cx} cy={cx} r={rings.degreeTicksOuter} fill="none" stroke="#999" strokeWidth={0.8} opacity={0.55} />
-      <circle cx={cx} cy={cx} r={rings.centerHole} fill="none" stroke="#999" strokeWidth={0.8} opacity={0.35} />
+      <circle cx={cx} cy={cx} r={rings.outer} fill="none" stroke={isPlaceholder ? "#6b7280" : "#222"} strokeWidth={isPlaceholder ? 1.4 : 1.6} opacity={isPlaceholder ? 0.55 : 0.9} />
+      <circle cx={cx} cy={cx} r={rings.degreeTicksOuter} fill="none" stroke={isPlaceholder ? "#9ca3af" : "#999"} strokeWidth={0.8} opacity={isPlaceholder ? 0.3 : 0.55} />
+      <circle cx={cx} cy={cx} r={rings.centerHole} fill="none" stroke={isPlaceholder ? "#9ca3af" : "#999"} strokeWidth={0.8} opacity={isPlaceholder ? 0.25 : 0.35} />
     </g>
   );
 

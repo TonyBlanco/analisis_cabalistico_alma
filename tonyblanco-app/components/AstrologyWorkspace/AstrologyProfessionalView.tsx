@@ -2,7 +2,6 @@
 
 import React, { useMemo, useState } from 'react';
 import type { MultiTechAnalysisResult, NatalChartPayload } from '@/hooks/useNatalChart';
-import AstrologySymbolicReadingPanel from './AstrologySymbolicReadingPanel';
 import NatalChartSVGPro from './chart/NatalChartSVGAdvanced';
 import { buildAdvancedInputFromPayload } from './chart/chartLayoutEngine';
 import PsychologicalHoroscopeAdvanced from './psychological/PsychologicalHoroscopeAdvanced';
@@ -11,8 +10,7 @@ import AstroDoubleWheelAdvanced from '@/components/astrology/AstroDoubleWheelAdv
 import AstrologySidebar from './AstrologySidebar';
 import { getTherapistPatients } from '@/lib/patient-api';
 import { computeSynastryAspects } from '@/components/astrology/astro-geometry';
-import { computeCompositeFromTwoNatal } from '@/components/astrology/composite';
-import PsychologicalAnalysisPanel from './PsychologicalAnalysisPanel';
+//import { computeCompositeFromTwoNatal } from '@/components/astrology/composite';
 import { getAuthToken } from '@/lib/auth';
 import type { ActiveConsultante } from '@/hooks/useActiveConsultante';
 import AstroWheelAdvanced from '@/components/astrology/AstroWheelAdvanced';
@@ -43,6 +41,8 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
   }
 
   const natal = analysis_result?.natal ?? chart ?? null;
+  const hasChart = Boolean(natal);
+  const hasIdentity = Boolean(consultante?.fecha_nacimiento);
   const transits = analysis_result?.transits ?? null;
   const solarReturn = analysis_result?.solarReturn?.chart ?? null;
   const progressions = analysis_result?.progressions?.chart ?? null;
@@ -70,13 +70,13 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
   // When the user changes house system or zodiac type, trigger real recalculation via provided hook
   React.useEffect(() => {
     const fn = calculateChart;
-    if (!consultante?.id || !fn) return;
+    if (!hasChart || !consultante?.id || !fn) return;
     // Debounce-like behavior: call recalculation immediately on change
     Promise.resolve(fn(houseSystem, zodiacType)).catch((e) => {
       // eslint-disable-next-line no-console
       console.error('Error recalculating chart:', e);
     });
-  }, [houseSystem, zodiacType, consultante?.id, calculateChart]);
+  }, [hasChart, houseSystem, zodiacType, consultante?.id, calculateChart]);
 
   // Auto-load therapist patients when synastry UI is enabled to avoid a 'blocked' select
   React.useEffect(() => {
@@ -225,27 +225,45 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
 
   // open modal via global event from sidebar button
   React.useEffect(() => {
-    const handler = () => setShowRecalcModal(true);
+    const handler = () => {
+      if (!hasChart) return;
+      setShowRecalcModal(true);
+    };
     window.addEventListener('open-recalc-modal', handler as EventListener);
     return () => window.removeEventListener('open-recalc-modal', handler as EventListener);
-  }, []);
+  }, [hasChart]);
 
   // Listen for sidebar event to open Advanced Transits panel
   React.useEffect(() => {
-    const h = () => setShowAdvancedTransits(true);
+    const h = () => {
+      if (!hasChart) return;
+      setShowAdvancedTransits(true);
+    };
     window.addEventListener('open-advanced-transits', h as EventListener);
     return () => window.removeEventListener('open-advanced-transits', h as EventListener);
-  }, []);
+  }, [hasChart]);
 
   // Listen for events to open A17 panels
   React.useEffect(() => {
-    const p = () => setShowSecondaryProgressions(true);
-    const s = () => setShowSolarReturn(true);
+    const p = () => {
+      if (!hasChart) return;
+      setShowSecondaryProgressions(true);
+    };
+    const s = () => {
+      if (!hasChart) return;
+      setShowSolarReturn(true);
+    };
     window.addEventListener('open-secondary-progressions', p as EventListener);
     window.addEventListener('open-solar-return', s as EventListener);
     // A18 events
-    const cs = () => setShowCompareSolarReturn(true);
-    const cp = () => setShowCompareProgressions(true);
+    const cs = () => {
+      if (!hasChart) return;
+      setShowCompareSolarReturn(true);
+    };
+    const cp = () => {
+      if (!hasChart) return;
+      setShowCompareProgressions(true);
+    };
     window.addEventListener('open-compare-natal-solar-return', cs as EventListener);
     window.addEventListener('open-compare-natal-progressions', cp as EventListener);
     return () => {
@@ -254,10 +272,10 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
       window.removeEventListener('open-compare-natal-solar-return', cs as EventListener);
       window.removeEventListener('open-compare-natal-progressions', cp as EventListener);
     };
-  }, []);
+  }, [hasChart]);
 
   const performRecalculation = async (housesCode: string, zodiacCode: string) => {
-    if (!consultante?.id) return null;
+    if (!hasChart || !consultante?.id) return null;
     try {
       const token = getAuthToken();
       if (!token) throw new Error('No auth');
@@ -276,7 +294,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
 
       const session: CalculationSession = {
         id: `sess-${Date.now()}`,
-        base_snapshot_id: (natal?.metadatos && natal?.metadatos.input_snapshot && natal?.metadatos.input_snapshot.id) ? String(natal.metadatos.input_snapshot.id) : null,
+        base_snapshot_id: (natal?.metadatos && natal?.metadatos.input_snapshot && natal?.metadatos.input_snapshot.id) ? String(natal?.metadatos?.input_snapshot?.id) : null,
         method: { houses: housesCode, zodiac: zodiacCode },
         mode: 'preview',
         created_at: new Date().toISOString(),
@@ -298,7 +316,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
   };
 
   const calculateLayer = async (layer: 'transits' | 'progressions' | 'solarReturn') => {
-    if (!consultante?.id) return;
+    if (!hasChart || !consultante?.id) return;
     try {
       const body: any = { layer };
       if (layer === 'transits') body.reference_date = transitDate;
@@ -329,21 +347,11 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
     }
   };
 
-  // If no natal data at all, show an explanatory empty state (no backend calls)
-  if (!natal) {
-    return (
-      <div className="min-h-[360px] bg-white border border-gray-200 rounded-xl p-6 text-center">
-                <h2 className="text-xl font-semibold">Astrología Aplicada — Visualización profesional</h2>
-        <p className="mt-3 text-sm text-gray-600">No hay datos astrológicos disponibles para la identidad proporcionada.</p>
-      </div>
-    );
-  }
-
-  const meta = natal.metadatos || {};
+  const meta = natal?.metadatos || {};
 
   // Prepare filtered data
-  const planetsFiltered = (natal.planetas || []).filter((p) => (visiblePlanets[String(p.nombre).toLowerCase().trim()] ?? true));
-  const aspectosWithKey = (natal.aspectos || []).map((a, idx) => ({ ...a, _key: `${String(a.planeta1).toLowerCase().trim()}-${String(a.planeta2).toLowerCase().trim()}-${a.tipo}-${idx}` }));
+  const planetsFiltered = (natal?.planetas || []).filter((p) => (visiblePlanets[String(p.nombre).toLowerCase().trim()] ?? true));
+  const aspectosWithKey = (natal?.aspectos || []).map((a, idx) => ({ ...a, _key: `${String(a.planeta1).toLowerCase().trim()}-${String(a.planeta2).toLowerCase().trim()}-${a.tipo}-${idx}` }));
   const aspectosFiltered = aspectosWithKey.filter((a: any) => (visibleAspects[a._key] ?? true) && Math.abs(a.orbe || 0) <= orb);
 
   // Format snapshot ID
@@ -352,6 +360,13 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
     if (typeof snapshot === 'string') return snapshot.slice(0, 16);
     if (typeof snapshot === 'object' && snapshot.id) return String(snapshot.id).slice(0, 16);
     return JSON.stringify(snapshot).slice(0, 16);
+  };
+
+  const renderLayerStateBadge = (state: 'pendiente' | 'no_calculado' | 'solo_lectura') => {
+    const base = 'inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium border';
+    if (state === 'pendiente') return <span className={`${base} bg-amber-50 text-amber-800 border-amber-200`}>pendiente</span>;
+    if (state === 'no_calculado') return <span className={`${base} bg-gray-50 text-gray-700 border-gray-200`}>no calculado</span>;
+    return <span className={`${base} bg-slate-50 text-slate-700 border-slate-200`}>solo lectura</span>;
   };
 
   return (
@@ -365,8 +380,11 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
           setZodiacType={setZodiacType}
           showAsteroids={showAsteroids}
           setShowAsteroids={setShowAsteroids}
-          synastryEnabled={synastryEnabled}
-          setSynastryEnabled={setSynastryEnabled}
+          synastryEnabled={hasChart ? synastryEnabled : false}
+          setSynastryEnabled={(enabled) => {
+            if (!hasChart) return;
+            setSynastryEnabled(enabled);
+          }}
         />
       </aside>
 
@@ -378,6 +396,15 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
             <h1 className="text-xl font-semibold text-gray-900">Carta Natal — Astrología Profesional</h1>
             <p className="text-sm text-gray-600 mt-1">Swiss Ephemeris · Solo lectura</p>
           </header>
+
+          {!hasChart ? (
+            <div className="mb-6 bg-white border border-gray-200 rounded-lg p-4">
+              <div className="text-sm font-semibold text-gray-900">Carta natal pendiente</div>
+              <div className="mt-1 text-sm text-gray-600">
+                Este consultante aún no tiene datos astrológicos calculados. Completa fecha, hora y lugar de nacimiento para generar la carta.
+              </div>
+            </div>
+          ) : null}
 
           {/* Hero: Carta Natal (Centrada y Controlada) */}
           <div className="mb-6 bg-white border border-gray-200 rounded-lg p-6">
@@ -393,7 +420,8 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                     onClick={() => setShowRecalcModal(true)}
                     className={`px-3 py-1 rounded text-sm font-medium ${consultante?.id && calculateChart ? 'bg-yellow-500 hover:bg-yellow-600 text-white' : 'bg-gray-200 text-gray-700 cursor-not-allowed'}`}
                     aria-label="Recalcular carta"
-                    disabled={!consultante?.id}
+                    disabled={!consultante?.id || !calculateChart || !hasChart}
+                    title={!hasChart ? 'Carta pendiente: completa datos de nacimiento para habilitar acciones' : undefined}
                   >
                     🔁 Recalcular carta
                   </button>
@@ -409,7 +437,10 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                   <div className="flex items-start justify-between">
                     <div>
                       <div className="text-sm font-medium">Natal</div>
-                      <div className="text-xs text-gray-500">Estado: Disponible</div>
+                      <div className="text-xs text-gray-500 flex items-center gap-2">
+                        <span>Estado:</span>
+                        {hasChart ? renderLayerStateBadge('solo_lectura') : renderLayerStateBadge('pendiente')}
+                      </div>
                     </div>
                   </div>
                   <div className="mt-3 text-sm">
@@ -419,7 +450,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                         const c = consultante;
                         const name = c.nombre_completo;
                         const birth = c.fecha_nacimiento;
-                        const sun = (natal.planetas || []).find((p:any) => String(p.nombre).toLowerCase() === 'sun' || String(p.nombre).toLowerCase() === 'sol');
+                        const sun = (natal?.planetas || []).find((p:any) => String(p.nombre).toLowerCase() === 'sun' || String(p.nombre).toLowerCase() === 'sol');
                         const sign = sun?.signo ?? '-';
                         const coords = (typeof c.lat === 'number' || typeof c.long === 'number') ? `${c.lat ?? '-'} , ${c.long ?? '-'}` : '-';
 
@@ -441,17 +472,27 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="text-sm font-medium">Tránsitos</div>
-                      <div className="text-xs text-gray-500">Estado: {overlays.transits ? 'Disponible' : 'No calculado todavía'}</div>
+                      <div className="text-xs text-gray-500 flex items-center gap-2">
+                        <span>Estado:</span>
+                        {!hasChart ? renderLayerStateBadge('pendiente') : (overlays.transits ? renderLayerStateBadge('solo_lectura') : renderLayerStateBadge('no_calculado'))}
+                      </div>
                     </div>
                     <div>
-                      <input type="checkbox" checked={activeLayers.has('transits')} onChange={() => handleLayerToggle('transits')} />
+                      <input type="checkbox" checked={activeLayers.has('transits')} onChange={() => handleLayerToggle('transits')} disabled={!hasChart} title={!hasChart ? 'Carta pendiente: completa datos de nacimiento para habilitar acciones' : undefined} />
                     </div>
                   </div>
                   <div className="mt-2 text-xs">
                     <label className="block">Fecha de referencia</label>
                     <input type="date" value={transitDate} onChange={(e) => setTransitDate(e.target.value)} className="mt-1 w-full" />
                     {!overlays.transits && (
-                      <button onClick={() => calculateLayer('transits')} className="mt-2 px-3 py-1 bg-blue-600 text-white text-xs rounded">Calcular capa</button>
+                      <button
+                        onClick={() => calculateLayer('transits')}
+                        disabled={!hasChart}
+                        title={!hasChart ? 'Carta pendiente: completa datos de nacimiento para habilitar acciones' : undefined}
+                        className={`mt-2 px-3 py-1 text-xs rounded ${hasChart ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 cursor-not-allowed'}`}
+                      >
+                        Calcular capa
+                      </button>
                     )}
                   </div>
                 </div>
@@ -461,17 +502,27 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="text-sm font-medium">Progresiones (Secundarias)</div>
-                      <div className="text-xs text-gray-500">Estado: {overlays.progressions ? 'Disponible' : 'No calculado todavía'}</div>
+                      <div className="text-xs text-gray-500 flex items-center gap-2">
+                        <span>Estado:</span>
+                        {!hasChart ? renderLayerStateBadge('pendiente') : (overlays.progressions ? renderLayerStateBadge('solo_lectura') : renderLayerStateBadge('no_calculado'))}
+                      </div>
                     </div>
                     <div>
-                      <input type="checkbox" checked={activeLayers.has('progressions')} onChange={() => handleLayerToggle('progressions')} />
+                      <input type="checkbox" checked={activeLayers.has('progressions')} onChange={() => handleLayerToggle('progressions')} disabled={!hasChart} title={!hasChart ? 'Carta pendiente: completa datos de nacimiento para habilitar acciones' : undefined} />
                     </div>
                   </div>
                   <div className="mt-2 text-xs">
                     <label className="block">Fecha objetivo</label>
                     <input type="date" value={progressionDate} onChange={(e) => setProgressionDate(e.target.value)} className="mt-1 w-full" />
                     {!overlays.progressions && (
-                      <button onClick={() => calculateLayer('progressions')} className="mt-2 px-3 py-1 bg-blue-600 text-white text-xs rounded">Calcular capa</button>
+                      <button
+                        onClick={() => calculateLayer('progressions')}
+                        disabled={!hasChart}
+                        title={!hasChart ? 'Carta pendiente: completa datos de nacimiento para habilitar acciones' : undefined}
+                        className={`mt-2 px-3 py-1 text-xs rounded ${hasChart ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 cursor-not-allowed'}`}
+                      >
+                        Calcular capa
+                      </button>
                     )}
                   </div>
                 </div>
@@ -483,17 +534,27 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="text-sm font-medium">Retorno Solar</div>
-                      <div className="text-xs text-gray-500">Estado: {overlays.solarReturn ? 'Disponible' : 'No calculado todavía'}</div>
+                      <div className="text-xs text-gray-500 flex items-center gap-2">
+                        <span>Estado:</span>
+                        {!hasChart ? renderLayerStateBadge('pendiente') : (overlays.solarReturn ? renderLayerStateBadge('solo_lectura') : renderLayerStateBadge('no_calculado'))}
+                      </div>
                     </div>
                     <div>
-                      <input type="checkbox" checked={activeLayers.has('solarReturn')} onChange={() => handleLayerToggle('solarReturn')} />
+                      <input type="checkbox" checked={activeLayers.has('solarReturn')} onChange={() => handleLayerToggle('solarReturn')} disabled={!hasChart} title={!hasChart ? 'Carta pendiente: completa datos de nacimiento para habilitar acciones' : undefined} />
                     </div>
                   </div>
                   <div className="mt-2 text-xs">
                     <label className="block">Año</label>
                     <input type="number" value={solarYear} onChange={(e) => setSolarYear(Number(e.target.value))} className="mt-1 w-full" />
                     {!overlays.solarReturn && (
-                      <button onClick={() => calculateLayer('solarReturn')} className="mt-2 px-3 py-1 bg-blue-600 text-white text-xs rounded">Calcular capa</button>
+                      <button
+                        onClick={() => calculateLayer('solarReturn')}
+                        disabled={!hasChart}
+                        title={!hasChart ? 'Carta pendiente: completa datos de nacimiento para habilitar acciones' : undefined}
+                        className={`mt-2 px-3 py-1 text-xs rounded ${hasChart ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 cursor-not-allowed'}`}
+                      >
+                        Calcular capa
+                      </button>
                     )}
                   </div>
                 </div>
@@ -571,8 +632,8 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                       <button className="px-2 py-1 rounded border bg-white text-sm" onClick={() => {
                         // compute composite from loaded partnerChart
                         if (!partnerChart) return;
-                        const cmp = computeCompositeFromTwoNatal(natal, partnerChart);
-                        setCompositeChart(cmp);
+                       // const cmp = computeCompositeFromTwoNatal(natal, partnerChart);
+                       // setCompositeChart(cmp);
                       }}>Generar Carta Compuesta</button>
                       <button className="px-2 py-1 rounded border bg-white text-sm" onClick={async () => {
                         // Generate Carta Davison using midpoint of time & space and Swiss Ephemeris via existing endpoint
@@ -1034,13 +1095,13 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                          </div>
                        ) : null}
                      </div>
-                  {activeLayers.has('transits') && analysis_result?.transits ? (
+                  {hasChart && activeLayers.has('transits') && analysis_result?.transits ? (
                     <AstrologyDoubleWheelSVG natal={natal} overlay={analysis_result.transits} overlayLabel="Tránsitos" orbDegrees={orb} consultante={consultante} />
-                  ) : activeLayers.has('progressions') && analysis_result?.progressions?.chart ? (
+                  ) : hasChart && activeLayers.has('progressions') && analysis_result?.progressions?.chart ? (
                     <AstrologyDoubleWheelSVG natal={natal} overlay={analysis_result.progressions.chart} overlayLabel="Progresiones (Secundarias)" orbDegrees={orb} consultante={consultante} />
-                  ) : activeLayers.has('solarReturn') && analysis_result?.solarReturn?.chart ? (
+                  ) : hasChart && activeLayers.has('solarReturn') && analysis_result?.solarReturn?.chart ? (
                     <AstrologyDoubleWheelSVG natal={natal} overlay={analysis_result.solarReturn.chart} overlayLabel="Retorno Solar" orbDegrees={orb} consultante={consultante} />
-                  ) : synastryEnabled && partnerChart ? (
+                  ) : hasChart && synastryEnabled && partnerChart ? (
                     <div>
                       {/* Hero info for sinastry */}
                       <div className="mb-3 p-3 bg-white border rounded">
@@ -1094,11 +1155,10 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                       )}
                     </div>
                   ) : (
-                    (natal ? (
+                    (hasChart && natal ? (
                       // Normalize natal payload into wheel data
                       (() => {
                         const wheel = normalizeNatalForWheel(natal as any);
-                        const hasIdentity = consultante && consultante.fecha_nacimiento;
                         const housesOk = Array.isArray(wheel.houses) && wheel.houses.length === 12;
                         const planetsOk = Array.isArray(wheel.planets) && wheel.planets.length > 0;
 
@@ -1158,12 +1218,36 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                                 />
                         );
                       })()
-                    ) : null)
+                    ) : (
+                      !hasIdentity ? (
+                        <div className="p-6 text-center text-sm text-gray-600">
+                          Identidad no disponible — no se puede renderizar la rueda hasta que la identidad canónica tenga fecha de nacimiento válida.
+                        </div>
+                      ) : (
+                        <AstroWheelAdvanced
+                          size={920}
+                          ascendantDeg={0}
+                          houses={Array.from({ length: 12 }, (_, i) => i * 30)}
+                          planets={[]}
+                          asteroids={[]}
+                          showAspects={false}
+                          orbDeg={orb}
+                          visualMode="placeholder"
+                          titleRight="Pendiente · solo lectura"
+                        />
+                      )
+                    ))
                   )}
                 </>
               ) : (
                   // Advanced psychological panel uses deterministic psychEngine
-                  (natal ? <PsychologicalHoroscopeAdvanced advanced={buildAdvancedInputFromPayload(natal)!} /> : <PsychologicalAnalysisPanel natal={natal} analysis_result={analysis_result} consultante={consultante} />)
+                  (hasChart && natal ? (
+                    <PsychologicalHoroscopeAdvanced advanced={buildAdvancedInputFromPayload(natal)!} />
+                  ) : (
+                    <div className="p-6 text-center text-sm text-gray-600">
+                      Datos psicológicos pendientes — completa los datos de nacimiento para generar la lectura.
+                    </div>
+                  ))
               )}
             </div>
           </div>
@@ -1184,7 +1268,14 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                     </tr>
                   </thead>
                   <tbody>
-                    {(natal.planetas || []).map((p, idx) => (
+                    {!hasChart ? (
+                      <tr className="border-t border-gray-100">
+                        <td colSpan={4} className="p-3 text-center text-gray-600">
+                          Carta pendiente — posiciones planetarias no disponibles.
+                        </td>
+                      </tr>
+                    ) : null}
+                    {(natal?.planetas || []).map((p, idx) => (
                       <tr key={`planet-row-${idx}`} className="border-t border-gray-100">
                         <td className="p-2 font-medium">{String(p.nombre)}</td>
                         <td className="p-2">{p.signo}</td>
@@ -1201,7 +1292,12 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
             <div className="bg-white border border-gray-200 rounded-lg p-4">
               <h3 className="text-sm font-semibold mb-3">Aspectos (orbe ≤ {orb.toFixed(1)}°)</h3>
               <div className="space-y-2 max-h-96 overflow-y-auto">
-                {aspectosFiltered.map((a, idx) => (
+                {!hasChart ? (
+                  <div className="p-3 text-center text-sm text-gray-600">Carta pendiente — aspectos no disponibles.</div>
+                ) : aspectosFiltered.length === 0 ? (
+                  <div className="p-3 text-center text-sm text-gray-600">No hay aspectos dentro del orbe configurado.</div>
+                ) : null}
+                {hasChart && aspectosFiltered.map((a, idx) => (
                   <div key={`aspect-row-${idx}`} className="text-xs border-b border-gray-100 pb-2">
                     <div className="flex items-center justify-between">
                       <span className="font-medium">{a.planeta1} — {a.planeta2}</span>
@@ -1232,10 +1328,17 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                   </tr>
                 </thead>
                 <tbody>
-                  {(natal.casas || []).map((c: any, idx: number) => {
+                  {!hasChart ? (
+                    <tr className="border-t border-gray-100">
+                      <td colSpan={6} className="p-3 text-center text-gray-600">
+                        Carta pendiente — casas astrológicas no disponibles.
+                      </td>
+                    </tr>
+                  ) : null}
+                  {(natal?.casas || []).map((c: any, idx: number) => {
                     const houseNumber = c.numero ?? (idx + 1);
                     // Try to read mapping from cabalistic data if present
-                    const cab = (natal.cabalistic_data && (natal.cabalistic_data as any).houses && (natal.cabalistic_data as any).houses[String(houseNumber)]) || null;
+                    const cab = (natal?.cabalistic_data && (natal?.cabalistic_data as any).houses && (natal?.cabalistic_data as any).houses[String(houseNumber)]) || null;
                     // Fallback mapping (stable, non-interpretative)
                     const fallbackMap: Record<number, { sefira: string; hebrew: string }> = {
                       1: { sefira: 'Keter', hebrew: 'כתר' },
@@ -1291,7 +1394,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
               <div>
                 <label className="block text-xs font-medium mb-2">Planetas Visibles</label>
                 <div className="text-xs text-gray-600">
-                  {(natal.planetas || []).filter((p) => (visiblePlanets[String(p.nombre).toLowerCase().trim()] ?? true)).length} de {(natal.planetas || []).length}
+                  {(natal?.planetas || []).filter((p) => (visiblePlanets[String(p.nombre).toLowerCase().trim()] ?? true)).length} de {(natal?.planetas || []).length}
                 </div>
               </div>
 
@@ -1299,7 +1402,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
               <div>
                 <label className="block text-xs font-medium mb-2">Aspectos Visibles</label>
                 <div className="text-xs text-gray-600">
-                  {aspectosFiltered.length} de {(natal.aspectos || []).length}
+                  {aspectosFiltered.length} de {(natal?.aspectos || []).length}
                 </div>
               </div>
             </div>

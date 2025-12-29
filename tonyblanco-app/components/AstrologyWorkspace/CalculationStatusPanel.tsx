@@ -20,6 +20,7 @@ type Props = {
   personaMode?: 'off' | 'social' | 'professional' | 'intimate';
   relocationMode?: 'off' | 'home' | 'work' | 'travel' | 'abroad';
   advancedObjects?: { nodes: boolean; fortune: boolean; symbolicPoints: boolean };
+  fixedStars?: { primary: boolean; secondary: boolean };
   houseSystem: string;
   zodiacType: string;
   canRecalculate: boolean; // whether UI has ability to trigger recalculation (we will NOT trigger)
@@ -37,7 +38,7 @@ const Dot: React.FC<{ type: DotType }> = ({ type }) => {
   return <span className="inline-block w-3 h-3 rounded-full bg-rose-400 mr-2 opacity-70" />;
 };
 
-export default function CalculationStatusPanel({ overlays, activeLayers, symbolicLayers, harmonicMode = 'off', personaMode = 'off', relocationMode = 'off', advancedObjects = { nodes: false, fortune: false, symbolicPoints: false }, houseSystem, zodiacType, canRecalculate, secondaryLayerKey = null, comparisonEnabled = false, comparisonAspectsEnabled = false }: Props) {
+export default function CalculationStatusPanel({ overlays, activeLayers, symbolicLayers, harmonicMode = 'off', personaMode = 'off', relocationMode = 'off', advancedObjects = { nodes: false, fortune: false, symbolicPoints: false }, fixedStars = { primary: false, secondary: false }, houseSystem, zodiacType, canRecalculate, secondaryLayerKey = null, comparisonEnabled = false, comparisonAspectsEnabled = false }: Props) {
   const [helper, setHelper] = useState<string | null>(null);
   const symbolicTooltip = 'Capa simbólica activa. No corresponde a un cálculo astronómico real.';
   const annualSymbolicTooltip = 'Capa anual/mensual activa (lectura simbólica) — sin recalcular carta base.';
@@ -268,6 +269,18 @@ export default function CalculationStatusPanel({ overlays, activeLayers, symboli
                     })()
                     : 'pendiente'}
                 </span>
+              </button>
+            </li>
+
+            <li className="flex items-center">
+              <button
+                onClick={() => handleClickSymbolicInfo('Estrellas fijas (modo simbólico): arquetipos culturales utilizados como referencias psicológicas. No son predicciones.')}
+                className="flex items-center w-full text-left"
+                title={fixedStars.primary ? 'Estrellas fijas (modo simbólico): arquetipos culturales utilizados como referencias psicológicas. No son predicciones.' : undefined}
+              >
+                <Dot type={fixedStars.primary ? 'symbolic' : 'available'} />
+                <span className="flex-1">Estrellas fijas</span>
+                <span className="text-xs text-gray-400">{fixedStars.primary ? 'Activo (lectura simbólica)' : 'pendiente'}</span>
               </button>
             </li>
           </ul>

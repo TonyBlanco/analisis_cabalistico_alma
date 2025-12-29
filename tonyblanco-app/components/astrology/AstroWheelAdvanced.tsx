@@ -47,6 +47,7 @@ type Props = {
   relocation?: { city: string; offsetDeg: number; mode?: "home" | "work" | "travel" | "abroad"; rotationDeg?: number };
   showMathPoints?: boolean;
   advancedObjects?: { nodes: boolean; fortune: boolean; symbolicPoints: boolean };
+  fixedStars?: { primary: boolean; secondary: boolean };
   comparisonWheel?: {
     enabled: boolean;
     planets: PlanetPoint[];
@@ -83,6 +84,7 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
   relocation,
   showMathPoints = false,
   advancedObjects,
+  fixedStars,
   comparisonWheel,
   showComparisonAspects = true,
 }) => {
@@ -91,6 +93,7 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
   const persona = (typeof personaMode === "string") ? personaMode : (personaMode ? "social" : "off");
   const relocationRotation = relocation?.rotationDeg ?? 0;
   const advObjects = advancedObjects ?? { nodes: showMathPoints, fortune: false, symbolicPoints: showMathPoints };
+  const stars = fixedStars ?? { primary: false, secondary: false };
   const comparisonEnabled = Boolean(comparisonWheel?.enabled);
   const opts: WheelOptions = useMemo(() => ({
     size,
@@ -1057,6 +1060,83 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
     );
   };
 
+  const renderFixedStars = () => {
+    if (!stars.primary) return null;
+
+    const tooltipGeneral = 'Estrellas fijas (modo simbólico): arquetipos culturales utilizados como referencias psicológicas. No son predicciones.';
+
+    const byKey = new Map<string, PlanetPoint>();
+    planets.forEach((p) => byKey.set(String(p.key).toLowerCase(), p));
+    const sun = byKey.get("sun");
+
+    const asc = normalizeDeg((houses && houses.length === 12) ? houses[0] : (sun ? sun.degree : 0));
+    const mc = normalizeDeg((houses && houses.length === 12) ? houses[9] : (asc + 90));
+
+    const baseRef = sun ? normalizeDeg(sun.degree) : asc;
+
+    const defs: Array<{ key: string; name: string; angle: number; tooltip: string }> = [
+      { key: 'regulus', name: 'Regulus', angle: normalizeDeg(mc - 8), tooltip: 'Regulus: arquetipo de liderazgo y responsabilidad del corazón.' },
+      { key: 'spica', name: 'Spica', angle: normalizeDeg(baseRef + 150), tooltip: 'Spica: arquetipo de talento y protección simbólica.' },
+      { key: 'aldebaran', name: 'Aldebarán', angle: normalizeDeg(baseRef + 60), tooltip: 'Aldebarán: arquetipo de visión y desafío ético.' },
+      { key: 'antares', name: 'Antares', angle: normalizeDeg(baseRef + 210), tooltip: 'Antares: arquetipo de intensidad y confrontación consciente.' },
+      { key: 'fomalhaut', name: 'Fomalhaut', angle: normalizeDeg(baseRef + 300), tooltip: 'Fomalhaut: arquetipo de ideal e inspiración.' },
+    ];
+
+    const rStar = Math.min(cx - 10, rings.outer + 22);
+    const starColor = "#fbbf24"; // dorado suave
+    const starOpacity = isHuber ? 0.22 : 0.28;
+
+    const planetDeg = (p: PlanetPoint) => {
+      if (Number.isFinite(p.degree)) return normalizeDeg(p.degree);
+      return 0;
+    };
+
+    const nearestPlanet = (deg: number) => {
+      if (!planets || planets.length === 0) return null;
+      let best: { p: PlanetPoint; d: number } | null = null;
+      for (const p of planets) {
+        const d = shortestAngle(deg, planetDeg(p));
+        if (best === null || d < best.d) best = { p, d };
+      }
+      if (!best) return null;
+      return best.d <= 12 ? best : null;
+    };
+
+    return (
+      <g>
+        <title>{tooltipGeneral}</title>
+        {defs.map((s) => {
+          const pt = degToPoint(s.angle, rStar, cx);
+          const near = nearestPlanet(s.angle);
+          const planetPt = near ? degToPoint(planetDeg(near.p), rings.planetRing, cx) : null;
+          const lineTooltip = near ? `${s.name} — ${s.tooltip} Activado a través de ${String(near.p.key)} (simbólico).` : `${s.name} — ${s.tooltip}`;
+
+          return (
+            <g key={`fs-${s.key}`} opacity={starOpacity}>
+              <title>{lineTooltip}</title>
+              {planetPt ? (
+                <line
+                  x1={pt.x}
+                  y1={pt.y}
+                  x2={planetPt.x}
+                  y2={planetPt.y}
+                  stroke={starColor}
+                  strokeWidth={1}
+                  opacity={0.12}
+                  strokeDasharray="2 10"
+                />
+              ) : null}
+              <circle cx={pt.x} cy={pt.y} r={8} fill="rgba(251,191,36,0.06)" stroke="none" opacity={0.55} />
+              <text x={pt.x} y={pt.y} textAnchor="middle" dominantBaseline="middle" fontSize={12} fill={starColor} opacity={0.45} style={{ fontFamily: 'Inter, ui-sans-serif, system-ui' }}>
+                ✶
+              </text>
+            </g>
+          );
+        })}
+      </g>
+    );
+  };
+
   const renderSecondaryWheel = () => {
     if (!secondaryLayer) return null;
 
@@ -1530,6 +1610,7 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
               {renderZodiac()}
               {renderRelocationOverlay()}
               {renderAdvancedObjects()}
+              {renderFixedStars()}
               {huberHouseBands}
                 {renderHouseLines()}
                 {renderHouseNumbers()}

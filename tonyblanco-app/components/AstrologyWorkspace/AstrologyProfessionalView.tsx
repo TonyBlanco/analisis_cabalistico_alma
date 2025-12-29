@@ -33,6 +33,7 @@ type HarmonicMode = 'off' | 'h5' | 'h7' | 'h9' | 'h11' | 'h13' | 'h16';
 type PersonaMode = 'off' | 'social' | 'professional' | 'intimate';
 type RelocationMode = 'off' | 'home' | 'work' | 'travel' | 'abroad';
 type AdvancedObjectsState = { nodes: boolean; fortune: boolean; symbolicPoints: boolean };
+type FixedStarsState = { primary: boolean; secondary: boolean };
 
 export default function AstrologyProfessionalView({ consultante, chart, analysis_result, calculateChart, refetch }: Props) {
   // Audit log (controlled, local-only): helps verify incoming data shapes
@@ -163,6 +164,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
   const [personaMode, setPersonaMode] = useState<PersonaMode>('off');
   const [relocationMode, setRelocationMode] = useState<RelocationMode>('off');
   const [advancedObjects, setAdvancedObjects] = useState<AdvancedObjectsState>({ nodes: false, fortune: false, symbolicPoints: false });
+  const [fixedStars, setFixedStars] = useState<FixedStarsState>({ primary: false, secondary: false });
   const [solarReturnCompareEnabled, setSolarReturnCompareEnabled] = useState<boolean>(false);
   const [solarReturnCompareYearB, setSolarReturnCompareYearB] = useState<number | null>(null);
   const [visualStyle, setVisualStyle] = useState<ChartVisualStyle>('classic');
@@ -302,6 +304,32 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
       return next;
     });
   }, [advancedObjects, hasIdentity]);
+
+  useEffect(() => {
+    // Fixed stars are symbolic-only and require identity; keep activeLayers in sync
+    if (!hasIdentity) {
+      if (fixedStars.primary || fixedStars.secondary) {
+        setFixedStars({ primary: false, secondary: false });
+      }
+      setActiveLayers((prev) => {
+        if (!prev.has('fixedStars')) return prev;
+        const next = new Set(prev);
+        next.delete('fixedStars');
+        return next;
+      });
+      return;
+    }
+
+    const want = Boolean(fixedStars.primary || fixedStars.secondary);
+    setActiveLayers((prev) => {
+      const has = prev.has('fixedStars');
+      if (want === has) return prev;
+      const next = new Set(prev);
+      if (want) next.add('fixedStars');
+      else next.delete('fixedStars');
+      return next;
+    });
+  }, [fixedStars, hasIdentity]);
 
   // Layer inputs
   const [transitDate, setTransitDate] = useState<string>(new Date().toISOString().slice(0, 10));
@@ -901,6 +929,8 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
           setRelocationMode={setRelocationMode}
           advancedObjects={advancedObjects}
           setAdvancedObjects={setAdvancedObjects}
+          fixedStars={fixedStars}
+          setFixedStars={setFixedStars}
           visualStyle={visualStyle}
           setVisualStyle={setVisualStyle}
         />
@@ -1739,6 +1769,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                    personaMode={personaMode}
                    relocationMode={relocationMode}
                    advancedObjects={advancedObjects}
+                   fixedStars={fixedStars}
                    secondaryLayerKey={secondaryLayer}
                    comparisonEnabled={Boolean(synastryEnabled)}
                    comparisonAspectsEnabled={Boolean(synastryEnabled)}
@@ -2037,6 +2068,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                                relocation={relocationParams ? { city: relocationParams.label, offsetDeg: relocationParams.offsetDeg, mode: relocationParams.mode, rotationDeg: relocationParams.rotationDeg } : undefined}
                                showMathPoints={activeLayers.has('mathPoints')}
                                advancedObjects={advancedObjects}
+                               fixedStars={fixedStars}
                                titleRight={`${meta.sistema_casas || 'placidus'} · ${meta.zodiac_type || 'tropical'}`}
                                transitPlanets={transitsSnapshot && transitBaseType === 'natal' ? transitsSnapshot.planets : undefined}
                              />
@@ -2073,6 +2105,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                            relocation={relocationParams ? { city: relocationParams.label, offsetDeg: relocationParams.offsetDeg, mode: relocationParams.mode, rotationDeg: relocationParams.rotationDeg } : undefined}
                            showMathPoints={activeLayers.has('mathPoints')}
                            advancedObjects={advancedObjects}
+                           fixedStars={fixedStars}
                            titleRight="Pendiente · solo lectura"
                         />
                       )

@@ -1,1 +1,1 @@
-feat(astrology): extend symbolic harmonics to 11/13/16
+feat(astrology): add symbolic fixed stars layer (archetypal, non-predictive)

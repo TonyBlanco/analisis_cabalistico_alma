@@ -30,6 +30,8 @@ interface AstrologySidebarProps {
   setRelocationMode?: (v: 'off' | 'home' | 'work' | 'travel' | 'abroad') => void;
   advancedObjects?: { nodes: boolean; fortune: boolean; symbolicPoints: boolean };
   setAdvancedObjects?: (v: { nodes: boolean; fortune: boolean; symbolicPoints: boolean }) => void;
+  fixedStars?: { primary: boolean; secondary: boolean };
+  setFixedStars?: (v: { primary: boolean; secondary: boolean }) => void;
   visualStyle?: 'classic' | 'huber';
   setVisualStyle?: (v: 'classic' | 'huber') => void;
 }
@@ -76,6 +78,8 @@ export default function AstrologySidebar({
   setRelocationMode,
   advancedObjects = { nodes: false, fortune: false, symbolicPoints: false },
   setAdvancedObjects,
+  fixedStars = { primary: false, secondary: false },
+  setFixedStars,
   visualStyle = 'classic',
   setVisualStyle,
 }: AstrologySidebarProps) {
@@ -526,7 +530,37 @@ export default function AstrologySidebar({
                 <span className="text-[13px]">Asteroides</span>
               </label>
             </div>
-            <div className="px-2 py-1 bg-gray-50 border border-gray-200 rounded opacity-50 text-[11px]">🔒 Estrellas fijas</div>
+            <div className={`px-2 py-2 border rounded ${canUseForecast ? 'bg-white border-gray-200' : 'bg-gray-50 border-gray-200 opacity-60'}`}>
+              <div className="flex items-center justify-between">
+                <div className="text-[13px]" title="Estrellas fijas (modo simbólico): arquetipos culturales utilizados como referencias psicológicas. No son predicciones.">
+                  Estrellas fijas · <span className="text-gray-500">modo simbólico (arquetipos)</span>
+                </div>
+                <span className="text-[11px] text-gray-500">{fixedStars.primary ? 'activo' : 'off'}</span>
+              </div>
+              <div className="mt-2 space-y-2">
+                <label className="flex items-center justify-between text-[13px]">
+                  <span title="Estrellas principales (modo simbólico).">★ Estrellas principales</span>
+                  <input
+                    type="checkbox"
+                    checked={Boolean(fixedStars.primary)}
+                    onChange={(e) => setFixedStars && setFixedStars({ ...fixedStars, primary: e.target.checked })}
+                    disabled={!canUseForecast}
+                    title={!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : 'Estrellas fijas (modo simbólico): arquetipos culturales. No predictivo.'}
+                  />
+                </label>
+                <label className="flex items-center justify-between text-[13px] opacity-60">
+                  <span title="Placeholder: no implementar aún.">★ Estrellas secundarias (placeholder)</span>
+                  <input
+                    type="checkbox"
+                    checked={Boolean(fixedStars.secondary)}
+                    onChange={() => {}}
+                    disabled={true}
+                    title="Placeholder: no implementar aún."
+                  />
+                </label>
+              </div>
+              <div className="mt-2 text-[11px] text-gray-500">Arquetipos (educativo y no fatalista).</div>
+            </div>
           </div>
         </div>
       </div>

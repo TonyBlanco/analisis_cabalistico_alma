@@ -28,7 +28,7 @@ type Props = {
   }>;
   symbolicDoubleWheel?: boolean;
   annualLayers?: Array<{
-    key: "solarReturn" | "lunarReturn";
+    key: "solarReturn" | "solarReturnA" | "solarReturnB" | "lunarReturn";
     label?: string;
   }>;
   secondaryLayer?: {
@@ -395,7 +395,7 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
   const renderAnnualLayers = () => {
     if (!annualLayers || annualLayers.length === 0) return null;
 
-    const order: Array<"solarReturn" | "lunarReturn"> = ["solarReturn", "lunarReturn"];
+    const order: Array<"solarReturn" | "solarReturnA" | "solarReturnB" | "lunarReturn"> = ["solarReturn", "solarReturnA", "solarReturnB", "lunarReturn"];
     const byKey = new Map(annualLayers.map((l) => [l.key, l]));
     const tooltip = 'Capa anual/mensual simbólica activa — sin recalcular carta base. No corresponde a un cálculo astronómico real.';
 
@@ -405,7 +405,9 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
 
     const styles: Record<string, { stroke: string; opacity: number; width: number; dash: string; offset: number }> = {
       solarReturn: { stroke: "#a78bfa", opacity: 0.45, width: 2.0, dash: "", offset: 10 }, // annual
-      lunarReturn: { stroke: "#f59e0b", opacity: 0.42, width: 1.8, dash: "4 6", offset: 22 }, // monthly
+      solarReturnA: { stroke: "#8b5cf6", opacity: 0.46, width: 2.1, dash: "", offset: 10 }, // annual (A)
+      solarReturnB: { stroke: "#a78bfa", opacity: 0.36, width: 2.0, dash: "6 6", offset: 18 }, // annual (B)
+      lunarReturn: { stroke: "#f59e0b", opacity: 0.42, width: 1.8, dash: "4 6", offset: 26 }, // monthly
     };
 
     const items: React.ReactNode[] = [];

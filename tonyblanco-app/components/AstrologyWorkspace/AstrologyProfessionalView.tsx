@@ -153,6 +153,8 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
   const [symbolicSolarReturnYear, setSymbolicSolarReturnYear] = useState<number | null>(null);
   const [symbolicLunarReturnDate, setSymbolicLunarReturnDate] = useState<string | null>(null);
   const [showCrossAspects, setShowCrossAspects] = useState<boolean>(false);
+  const [solarReturnCompareEnabled, setSolarReturnCompareEnabled] = useState<boolean>(false);
+  const [solarReturnCompareYearB, setSolarReturnCompareYearB] = useState<number | null>(null);
 
   const [activeTab, setActiveTab] = useState<'visual' | 'psych'>('visual');
 
@@ -379,11 +381,27 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
   }, [activeLayers, transitDate, progressionDate, solarArcDate]);
 
   const annualLayers = useMemo(() => {
-    const layers: Array<{ key: 'solarReturn' | 'lunarReturn'; label?: string }> = [];
-    if (symbolicSolarReturnYear !== null) layers.push({ key: 'solarReturn', label: `Retorno Solar · ${symbolicSolarReturnYear}` });
+    const layers: Array<{ key: 'solarReturn' | 'solarReturnA' | 'solarReturnB' | 'lunarReturn'; label?: string }> = [];
+    if (symbolicSolarReturnYear !== null) {
+      if (solarReturnCompareEnabled && solarReturnCompareYearB !== null) {
+        layers.push({ key: 'solarReturnA', label: `Retorno Solar (A) · ${symbolicSolarReturnYear}` });
+        layers.push({ key: 'solarReturnB', label: `Retorno Solar (B) · ${solarReturnCompareYearB}` });
+      } else {
+        layers.push({ key: 'solarReturn', label: `Retorno Solar · ${symbolicSolarReturnYear}` });
+      }
+    }
     if (symbolicLunarReturnDate) layers.push({ key: 'lunarReturn', label: `Retorno Lunar · ${symbolicLunarReturnDate}` });
     return layers;
-  }, [symbolicSolarReturnYear, symbolicLunarReturnDate]);
+  }, [symbolicSolarReturnYear, solarReturnCompareEnabled, solarReturnCompareYearB, symbolicLunarReturnDate]);
+
+  useEffect(() => {
+    if (!solarReturnCompareEnabled) {
+      setSolarReturnCompareYearB(null);
+      return;
+    }
+    if (symbolicSolarReturnYear === null) return;
+    setSolarReturnCompareYearB((prev) => (prev === null ? symbolicSolarReturnYear - 1 : prev));
+  }, [solarReturnCompareEnabled, symbolicSolarReturnYear]);
 
   const secondaryLayer = useMemo(() => {
     const order = ['transits', 'progressions', 'solarArc', 'return_solar', 'return_lunar'] as const;
@@ -404,7 +422,10 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
 
   const focusLabel = useMemo(() => {
     const parts: string[] = [];
-    if (symbolicSolarReturnYear !== null) parts.push(`Año ${symbolicSolarReturnYear}`);
+    if (symbolicSolarReturnYear !== null) {
+      if (solarReturnCompareEnabled && solarReturnCompareYearB !== null) parts.push(`Año A ${symbolicSolarReturnYear} · Año B ${solarReturnCompareYearB}`);
+      else parts.push(`Año ${symbolicSolarReturnYear}`);
+    }
     if (symbolicLunarReturnDate) {
       const [y, m] = symbolicLunarReturnDate.split('-');
       const monthIndex = Math.max(0, Math.min(11, (Number(m) || 1) - 1));
@@ -413,7 +434,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
     }
     if (parts.length === 0) return null;
     return `Enfoque temporal simbólico: ${parts.join(' · ')}`;
-  }, [symbolicSolarReturnYear, symbolicLunarReturnDate]);
+  }, [symbolicSolarReturnYear, solarReturnCompareEnabled, solarReturnCompareYearB, symbolicLunarReturnDate]);
 
   const lunarMonthIndex = useMemo(() => {
     if (!symbolicLunarReturnDate) return new Date().getMonth();
@@ -570,6 +591,79 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
       kindLabel: empty.kindLabel,
     };
   }, [showCrossAspects, secondaryLayer, secondaryLayerLabel, secondaryPlanets, natal]);
+
+  const solarReturnYearComparison = useMemo(() => {
+    if (!showCrossAspects) return null;
+    if (!solarReturnCompareEnabled || symbolicSolarReturnYear === null || solarReturnCompareYearB === null) return null;
+    if (!natal) return null;
+
+    const personal = new Set(['sun', 'moon', 'mercury', 'venus', 'mars']);
+    const natalCandidates = normalizeNatalForWheel(natal as any).planets.filter((p) => personal.has(String(p.key).toLowerCase()));
+
+    const kindLabel: Record<CrossAspectKind, string> = {
+      CONJ: 'Conjunción',
+      OPP: 'Oposición',
+      SQR: 'Cuadratura',
+      TRI: 'Trígono',
+      SEXT: 'Sextil',
+    };
+
+    const targetsA: Array<{ natal: string; kind: CrossAspectKind }> = [
+      { natal: 'sun', kind: 'CONJ' },
+      { natal: 'moon', kind: 'SEXT' },
+      { natal: 'mercury', kind: 'TRI' },
+    ];
+    const targetsB: Array<{ natal: string; kind: CrossAspectKind }> = [
+      { natal: 'sun', kind: 'OPP' },
+      { natal: 'moon', kind: 'TRI' },
+      { natal: 'venus', kind: 'SEXT' },
+    ];
+
+    const mapTargets = (targets: Array<{ natal: string; kind: CrossAspectKind }>, yearLabel: string) =>
+      targets
+        .map((t) => {
+          const n = natalCandidates.find((p: any) => String(p.key).toLowerCase() === t.natal);
+          if (!n) return null;
+          return {
+            id: `${yearLabel}-${t.natal}-${t.kind}`,
+            natalKey: n.key,
+            natalGlyph: n.glyph,
+            layerKey: 'return_solar',
+            layerLabel: yearLabel,
+            kind: t.kind,
+            mode: 'symbolic-only',
+          } as CrossAspectHit;
+        })
+        .filter(Boolean) as CrossAspectHit[];
+
+    const labelA = `Retorno Solar (A) · ${symbolicSolarReturnYear}`;
+    const labelB = `Retorno Solar (B) · ${solarReturnCompareYearB}`;
+    const hitsA = mapTargets(targetsA, labelA);
+    const hitsB = mapTargets(targetsB, labelB);
+    const natalKeys = new Set<string>([...hitsA, ...hitsB].map((h) => h.natalKey));
+
+    const textByYear = {
+      A: 'Énfasis simbólico: consolidación y centrado identitario (no predictivo).',
+      B: 'Énfasis simbólico: ajuste y reorientación de prioridades (no predictivo).',
+    };
+
+    return { labelA, labelB, hitsA, hitsB, natalKeys, kindLabel, textByYear };
+  }, [showCrossAspects, solarReturnCompareEnabled, symbolicSolarReturnYear, solarReturnCompareYearB, natal]);
+
+  const effectiveSecondaryLayer = useMemo(() => {
+    const compareActive = solarReturnCompareEnabled && symbolicSolarReturnYear !== null && solarReturnCompareYearB !== null;
+    if (compareActive && secondaryLayer === 'return_solar') return null;
+    return secondaryLayer;
+  }, [solarReturnCompareEnabled, symbolicSolarReturnYear, solarReturnCompareYearB, secondaryLayer]);
+
+  const effectiveSecondaryLayerLabel = useMemo(() => {
+    if (!effectiveSecondaryLayer) return null;
+    return secondaryLayerLabel;
+  }, [effectiveSecondaryLayer, secondaryLayerLabel]);
+
+  const crossAspectNatalKeysToPass = showCrossAspects
+    ? (solarReturnYearComparison ? solarReturnYearComparison.natalKeys : crossAspects.natalKeys)
+    : undefined;
 
   // Bridge: year/date presence -> activeLayers (UI + engine)
   useEffect(() => {
@@ -885,6 +979,19 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                       <div className="text-[13px] font-medium text-gray-900">Timeline anual — Retorno Solar</div>
                       <div className="text-xs text-gray-600">Año {symbolicSolarReturnYear}</div>
                     </div>
+                    <div className="mt-2 flex items-center justify-between">
+                      <label className="inline-flex items-center gap-2 text-[12px] text-gray-700">
+                        <input
+                          type="checkbox"
+                          checked={Boolean(solarReturnCompareEnabled)}
+                          onChange={(e) => setSolarReturnCompareEnabled(e.target.checked)}
+                        />
+                        Comparar con otro año
+                      </label>
+                      {solarReturnCompareEnabled && solarReturnCompareYearB !== null ? (
+                        <div className="text-[12px] text-gray-600">Comparación anual simbólica</div>
+                      ) : null}
+                    </div>
                     <input
                       type="range"
                       className="mt-2 w-full"
@@ -898,6 +1005,36 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                       <span>{symbolicSolarReturnYear}</span>
                       <span>{symbolicSolarReturnYear + 5}</span>
                     </div>
+
+                    {solarReturnCompareEnabled && solarReturnCompareYearB !== null ? (
+                      <div className="mt-3 border-t border-gray-200 pt-3">
+                        <div className="flex items-center justify-between">
+                          <div className="text-[13px] font-medium text-gray-900">Año B (comparación)</div>
+                          <div className="text-xs text-gray-600">Año {solarReturnCompareYearB}</div>
+                        </div>
+                        <input
+                          type="range"
+                          className="mt-2 w-full"
+                          min={solarReturnCompareYearB - 5}
+                          max={solarReturnCompareYearB + 5}
+                          value={solarReturnCompareYearB}
+                          onChange={(e) => setSolarReturnCompareYearB(Number(e.target.value))}
+                        />
+                        <div className="mt-1 flex justify-between text-[11px] text-gray-500">
+                          <span>{solarReturnCompareYearB - 5}</span>
+                          <span>{solarReturnCompareYearB}</span>
+                          <span>{solarReturnCompareYearB + 5}</span>
+                        </div>
+                        <div className="mt-3 rounded border border-gray-200 bg-white p-3">
+                          <div className="text-[13px] font-semibold text-gray-900">Comparación anual simbólica</div>
+                          <div className="mt-1 text-[12px] text-gray-600">Compara climas simbólicos anuales; no compara eventos ni predice resultados.</div>
+                          <ul className="mt-2 space-y-1 text-[12px] text-gray-700">
+                            <li title="Texto descriptivo y no predictivo.">Año A — énfasis simbólico: consolidación y centrado identitario.</li>
+                            <li title="Texto descriptivo y no predictivo.">Año B — énfasis simbólico: ajuste y reorientación de prioridades.</li>
+                          </ul>
+                        </div>
+                      </div>
+                    ) : null}
                   </div>
                 ) : null}
 
@@ -1604,14 +1741,39 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                                   <div>
                                     <div className="text-sm font-semibold">Aspectos cruzados (simbólicos)</div>
                                     <div className="text-[12px] text-gray-500">
-                                      {crossAspects.mode === 'symbolic-only' ? 'Modo: aproximación simbólica (sin grados)' : 'Modo: basado en geometría disponible'}
+                                      {solarReturnYearComparison ? 'Modo: comparación anual (A/B) · aproximación simbólica' : (crossAspects.mode === 'symbolic-only' ? 'Modo: aproximación simbólica (sin grados)' : 'Modo: basado en geometría disponible')}
                                     </div>
                                   </div>
                                   <div className="text-[12px] text-gray-500" title="Esto representa ejes simbólicos de tensión/integración. No predice eventos.">
                                     Lectura no predictiva
                                   </div>
                                 </div>
-                                {crossAspects.hits.length > 0 ? (
+                                {solarReturnYearComparison ? (
+                                  <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    <div className="rounded border border-gray-200 bg-gray-50 p-2">
+                                      <div className="text-[12px] font-semibold text-gray-900">{solarReturnYearComparison.labelA}</div>
+                                      <div className="mt-1 text-[11px] text-gray-600">{solarReturnYearComparison.textByYear.A}</div>
+                                      <ul className="mt-2 space-y-1">
+                                        {solarReturnYearComparison.hitsA.slice(0, 10).map((h) => (
+                                          <li key={h.id} className="text-[12px] text-gray-700" title="Esto representa un eje de tensión/integración simbólica. No predice eventos.">
+                                            Natal: {h.natalGlyph} ↔ {solarReturnYearComparison.kindLabel[h.kind]} · Activación simbólica
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    </div>
+                                    <div className="rounded border border-gray-200 bg-gray-50 p-2">
+                                      <div className="text-[12px] font-semibold text-gray-900">{solarReturnYearComparison.labelB}</div>
+                                      <div className="mt-1 text-[11px] text-gray-600">{solarReturnYearComparison.textByYear.B}</div>
+                                      <ul className="mt-2 space-y-1">
+                                        {solarReturnYearComparison.hitsB.slice(0, 10).map((h) => (
+                                          <li key={h.id} className="text-[12px] text-gray-700" title="Esto representa un eje de tensión/integración simbólica. No predice eventos.">
+                                            Natal: {h.natalGlyph} ↔ {solarReturnYearComparison.kindLabel[h.kind]} · Activación simbólica
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    </div>
+                                  </div>
+                                ) : crossAspects.hits.length > 0 ? (
                                   <ul className="mt-2 space-y-1">
                                     {crossAspects.hits.slice(0, 15).map((h) => (
                                       <li
@@ -1639,9 +1801,9 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                                temporalLayers={temporalLayers}
                                annualLayers={annualLayers}
                                symbolicDoubleWheel={symbolicDoubleWheel}
-                               secondaryLayer={secondaryLayer && secondaryLayerLabel ? { key: secondaryLayer, label: secondaryLayerLabel, mode: 'symbolic' } : null}
+                               secondaryLayer={effectiveSecondaryLayer && effectiveSecondaryLayerLabel ? { key: effectiveSecondaryLayer, label: effectiveSecondaryLayerLabel, mode: 'symbolic' } : null}
                                secondaryPlanets={secondaryPlanets ?? undefined}
-                               crossAspectNatalKeys={showCrossAspects ? crossAspects.natalKeys : undefined}
+                               crossAspectNatalKeys={crossAspectNatalKeysToPass}
                                crossAspectSecondaryKeys={showCrossAspects ? crossAspects.secondaryKeys : undefined}
                                titleRight={`${meta.sistema_casas || 'placidus'} · ${meta.zodiac_type || 'tropical'}`}
                                transitPlanets={transitsSnapshot && transitBaseType === 'natal' ? transitsSnapshot.planets : undefined}

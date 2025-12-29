@@ -18,6 +18,7 @@ type Props = {
   };
   harmonicMode?: 'off' | 'h5' | 'h7' | 'h9';
   personaMode?: 'off' | 'social' | 'professional' | 'intimate';
+  relocationMode?: 'off' | 'home' | 'work' | 'travel' | 'abroad';
   houseSystem: string;
   zodiacType: string;
   canRecalculate: boolean; // whether UI has ability to trigger recalculation (we will NOT trigger)
@@ -35,7 +36,7 @@ const Dot: React.FC<{ type: DotType }> = ({ type }) => {
   return <span className="inline-block w-3 h-3 rounded-full bg-rose-400 mr-2 opacity-70" />;
 };
 
-export default function CalculationStatusPanel({ overlays, activeLayers, symbolicLayers, harmonicMode = 'off', personaMode = 'off', houseSystem, zodiacType, canRecalculate, secondaryLayerKey = null, comparisonEnabled = false, comparisonAspectsEnabled = false }: Props) {
+export default function CalculationStatusPanel({ overlays, activeLayers, symbolicLayers, harmonicMode = 'off', personaMode = 'off', relocationMode = 'off', houseSystem, zodiacType, canRecalculate, secondaryLayerKey = null, comparisonEnabled = false, comparisonAspectsEnabled = false }: Props) {
   const [helper, setHelper] = useState<string | null>(null);
   const symbolicTooltip = 'Capa simbólica activa. No corresponde a un cálculo astronómico real.';
   const annualSymbolicTooltip = 'Capa anual/mensual activa (lectura simbólica) — sin recalcular carta base.';
@@ -224,10 +225,26 @@ export default function CalculationStatusPanel({ overlays, activeLayers, symboli
             </li>
 
             <li className="flex items-center">
-              <button onClick={() => handleClickSymbolicInfo('Relocación simbólica (no astronómica). No recalcula ni cambia coordenadas reales.')} className="flex items-center w-full text-left" title={isSymbolicActive('relocation') ? 'Relocación simbólica (no astronómica). No recalcula ni cambia coordenadas reales.' : undefined}>
+              <button
+                onClick={() => handleClickSymbolicInfo('Relocación simbólica: describe cómo el entorno influye en la experiencia vital. No es una carta astronómica relocada.')}
+                className="flex items-center w-full text-left"
+                title={isSymbolicActive('relocation') ? 'Relocación simbólica: describe cómo el entorno influye en la experiencia vital. No es una carta astronómica relocada.' : undefined}
+              >
                 <Dot type={calcState('relocation', false)} />
                 <span className="flex-1">Relocación</span>
-                <span className="text-xs text-gray-400">{isSymbolicActive('relocation') ? 'Activo (lectura simbólica)' : 'pendiente'}</span>
+                <span className="text-xs text-gray-400">
+                  {isSymbolicActive('relocation')
+                    ? (() => {
+                      const label =
+                        relocationMode === 'home' ? 'Hogar' :
+                          relocationMode === 'work' ? 'Trabajo' :
+                            relocationMode === 'travel' ? 'Viaje' :
+                              relocationMode === 'abroad' ? 'Extranjero' :
+                                null;
+                      return label ? `Activo (lectura simbólica) · ${label}` : 'Activo (lectura simbólica)';
+                    })()
+                    : 'pendiente'}
+                </span>
               </button>
             </li>
 

@@ -44,7 +44,7 @@ type Props = {
   symbolicPlanetaryLayer?: boolean;
   harmonicOrder?: 5 | 7 | 9;
   personaMode?: boolean | "off" | "social" | "professional" | "intimate";
-  relocation?: { city: string; offsetDeg: number };
+  relocation?: { city: string; offsetDeg: number; mode?: "home" | "work" | "travel" | "abroad"; rotationDeg?: number };
   showMathPoints?: boolean;
   comparisonWheel?: {
     enabled: boolean;
@@ -87,6 +87,7 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
   const isPlaceholder = visualMode === "placeholder";
   const isHuber = visualStyle === "huber";
   const persona = (typeof personaMode === "string") ? personaMode : (personaMode ? "social" : "off");
+  const relocationRotation = relocation?.rotationDeg ?? 0;
   const comparisonEnabled = Boolean(comparisonWheel?.enabled);
   const opts: WheelOptions = useMemo(() => ({
     size,
@@ -776,9 +777,42 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
 
   const renderRelocationOverlay = () => {
     if (!relocation) return null;
-    const tooltip = `Relocación simbólica (no astronómica) · ${relocation.city}. No recalcula ni cambia coordenadas reales.`;
-    const lines: React.ReactNode[] = [];
+
+    const tooltipBase = 'Relocación simbólica: describe cómo el entorno influye en la experiencia vital. No es una carta astronómica relocada.';
+    const tooltipMode = (() => {
+      switch (relocation.mode) {
+        case "home": return 'Hogar: “Dónde me siento contenido”';
+        case "work": return 'Trabajo: “Dónde me organizo y produzco”';
+        case "travel": return 'Viaje: “Dónde exploro y aprendo”';
+        case "abroad": return 'Extranjero: “Dónde me transformo”';
+        default: return relocation.city ? `Entorno: ${relocation.city}` : 'Entorno simbólico';
+      }
+    })();
+    const tooltip = `${tooltipBase} · ${tooltipMode}`;
+
     const base = relocation.offsetDeg || 0;
+    const lines: React.ReactNode[] = [];
+
+    const theme = (() => {
+      switch (relocation.mode) {
+        case "home": return { stroke: "#f59e0b", fill: "rgba(245,158,11,0.06)", opacity: 0.22, dash: "6 6" }; // cálido
+        case "work": return { stroke: "#111827", fill: "rgba(17,24,39,0.05)", opacity: 0.24, dash: "" }; // contraste/recto
+        case "travel": return { stroke: "#0ea5e9", fill: "rgba(14,165,233,0.05)", opacity: 0.22, dash: "3 7" }; // movimiento
+        case "abroad": return { stroke: "#64748b", fill: "rgba(100,116,139,0.04)", opacity: 0.18, dash: "2 10" }; // distancia
+        default: return { stroke: "#14b8a6", fill: "rgba(20,184,166,0.04)", opacity: 0.2, dash: "5 7" };
+      }
+    })();
+
+    const targetHouses = (() => {
+      switch (relocation.mode) {
+        case "home": return [4, 1];
+        case "work": return [6, 10];
+        case "travel": return [3, 9];
+        case "abroad": return [9, 10, 11, 12];
+        default: return [];
+      }
+    })();
+
     for (let i = 0; i < 12; i++) {
       const deg = base + i * 30;
       const a = degToPoint(deg, rings.houseInner, cx);
@@ -788,14 +822,56 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
           key={`rel-house-${i}`}
           x1={a.x} y1={a.y}
           x2={b.x} y2={b.y}
-          stroke="#14b8a6"
-          strokeWidth={1.2}
-          opacity={0.22}
-          strokeDasharray="5 7"
-        />
+          stroke={theme.stroke}
+          strokeWidth={relocation.mode === "work" ? 1.6 : 1.2}
+          opacity={theme.opacity}
+          strokeDasharray={theme.dash || undefined}
+        >
+          {relocation.mode === "travel" ? (
+            <animate attributeName="stroke-dashoffset" values="0;20" dur="2.4s" repeatCount="indefinite" />
+          ) : null}
+        </line>
       );
     }
-    // symbolic axes markers
+
+    const donutSeg = (startDeg: number, endDeg: number, outerR: number, innerR: number) => {
+      const a0 = normalizeDeg(startDeg);
+      const a1 = normalizeDeg(endDeg);
+      const delta = (a1 - a0 + 360) % 360;
+      const largeArc = delta > 180 ? 1 : 0;
+
+      const p0o = degToPoint(a0, outerR, cx);
+      const p1o = degToPoint(a1, outerR, cx);
+      const p1i = degToPoint(a1, innerR, cx);
+      const p0i = degToPoint(a0, innerR, cx);
+
+      return `M ${p0o.x} ${p0o.y} A ${outerR} ${outerR} 0 ${largeArc} 1 ${p1o.x} ${p1o.y} L ${p1i.x} ${p1i.y} A ${innerR} ${innerR} 0 ${largeArc} 0 ${p0i.x} ${p0i.y} Z`;
+    };
+
+    const emphasis = (() => {
+      if (!houses || houses.length !== 12 || targetHouses.length === 0) return null;
+      const outerR = rings.houseOuter;
+      const innerR = rings.houseInner;
+      return (
+        <g>
+          {targetHouses.map((h) => {
+            const idx = Math.max(1, Math.min(12, h)) - 1;
+            const start = houses[idx];
+            const end = houses[(idx + 1) % 12];
+            return (
+              <path
+                key={`rel-emph-${relocation.mode}-${h}`}
+                d={donutSeg(start, end, outerR, innerR)}
+                fill={theme.fill}
+                stroke="none"
+                opacity={relocation.mode === "abroad" ? 0.55 : 1}
+              />
+            );
+          })}
+        </g>
+      );
+    })();
+
     const axis = (deg: number, key: string) => {
       const a = degToPoint(base + deg, rings.centerHole, cx);
       const b = degToPoint(base + deg, rings.outer, cx);
@@ -804,17 +880,25 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
           key={key}
           x1={a.x} y1={a.y}
           x2={b.x} y2={b.y}
-          stroke="#14b8a6"
-          strokeWidth={1.4}
-          opacity={0.18}
-          strokeDasharray="10 8"
+          stroke={theme.stroke}
+          strokeWidth={relocation.mode === "work" ? 1.8 : 1.3}
+          opacity={relocation.mode === "abroad" ? 0.16 : 0.22}
+          strokeDasharray={relocation.mode === "work" ? undefined : "6 6"}
         />
       );
     };
 
+    const wash = relocation.mode === "abroad"
+      ? <circle cx={cx} cy={cx} r={rings.outer + 18} fill="rgba(15,23,42,0.03)" />
+      : relocation.mode === "home"
+        ? <circle cx={cx} cy={cx} r={rings.outer + 18} fill="rgba(245,158,11,0.02)" />
+        : null;
+
     return (
       <g>
         <title>{tooltip}</title>
+        {wash}
+        {emphasis}
         {axis(0, "rel-axis-asc")}
         {axis(90, "rel-axis-mc")}
         {lines}
@@ -1307,7 +1391,7 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
         <div className="w-full overflow-auto">
           <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
             {/* Rotación global por ASC */}
-            <g transform={`rotate(${geo.rotationDeg} ${cx} ${cx})`}>
+            <g transform={`rotate(${geo.rotationDeg + relocationRotation} ${cx} ${cx})`}>
               {renderComparisonAspects()}
               {renderSecondaryWheel()}
               {renderTemporalLayers()}
@@ -1317,10 +1401,10 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
               {renderBaseRings()}
               {renderDegreeTicks()}
               {renderZodiac()}
+              {renderRelocationOverlay()}
               {huberHouseBands}
                 {renderHouseLines()}
                 {renderHouseNumbers()}
-                {renderRelocationOverlay()}
                 {renderHarmonicOverlay()}
               {renderMathPoints()}
               {huberCentersOfGravity}

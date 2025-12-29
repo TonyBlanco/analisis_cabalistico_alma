@@ -1,1 +1,1 @@
-feat(astrology): add symbolic persona chart overlay (social/professional/intimate)
+feat(astrology): add symbolic relocation overlay (home/work/travel/abroad)

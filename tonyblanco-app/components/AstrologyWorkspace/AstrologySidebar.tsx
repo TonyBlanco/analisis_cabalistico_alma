@@ -26,8 +26,8 @@ interface AstrologySidebarProps {
   setHarmonicMode?: (v: 'off' | 'h5' | 'h7' | 'h9') => void;
   personaMode?: 'off' | 'social' | 'professional' | 'intimate';
   setPersonaMode?: (v: 'off' | 'social' | 'professional' | 'intimate') => void;
-  relocationCity?: string;
-  setRelocationCity?: (v: string) => void;
+  relocationMode?: 'off' | 'home' | 'work' | 'travel' | 'abroad';
+  setRelocationMode?: (v: 'off' | 'home' | 'work' | 'travel' | 'abroad') => void;
   visualStyle?: 'classic' | 'huber';
   setVisualStyle?: (v: 'classic' | 'huber') => void;
 }
@@ -70,8 +70,8 @@ export default function AstrologySidebar({
   setHarmonicMode,
   personaMode = 'off',
   setPersonaMode,
-  relocationCity = 'Madrid (placeholder)',
-  setRelocationCity,
+  relocationMode = 'off',
+  setRelocationMode,
   visualStyle = 'classic',
   setVisualStyle,
 }: AstrologySidebarProps) {
@@ -87,7 +87,7 @@ export default function AstrologySidebar({
   const isPlanetaryLayerActive = isLayerActive('planetary');
   const isHarmonicsActive = harmonicMode !== 'off' && isLayerActive('harmonics');
   const isPersonaActive = personaMode !== 'off' && isLayerActive('persona');
-  const isRelocationActive = isLayerActive('relocation');
+  const isRelocationActive = relocationMode !== 'off' && isLayerActive('relocation');
   const isMathPointsActive = isLayerActive('mathPoints');
   const hasSecondaryLayer = Boolean(activeLayers && (
     activeLayers.has('transits') ||
@@ -403,25 +403,29 @@ export default function AstrologySidebar({
                   <input
                     type="checkbox"
                     checked={Boolean(isRelocationActive)}
-                    onChange={() => onToggleLayer && onToggleLayer('relocation')}
+                    onChange={() => setRelocationMode && setRelocationMode(isRelocationActive ? 'off' : 'home')}
                     disabled={!canUseForecast}
-                    title={!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : 'Relocación simbólica (no astronómica)'}
+                    title={!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : 'Relocación simbólica: describe cómo el entorno influye en la experiencia vital. No es una carta astronómica relocada.'}
                   />
                 </label>
               </div>
               <div className="mt-1 flex items-center justify-between gap-2">
-                <div className="text-[11px] text-gray-500">Ciudad</div>
+                <div className="text-[11px] text-gray-500">Entorno</div>
                 <select
                   className="rounded border border-gray-200 bg-white px-2 py-1 text-[12px]"
-                  value={relocationCity}
-                  onChange={(e) => setRelocationCity && setRelocationCity(e.target.value)}
-                  disabled={!canUseForecast || !isRelocationActive}
-                  title={!isRelocationActive ? 'Activa Relocación para seleccionar' : 'Relocación simbólica (placeholder)'}
+                  value={relocationMode}
+                  onChange={(e) => {
+                    const v = e.target.value as 'off' | 'home' | 'work' | 'travel' | 'abroad';
+                    setRelocationMode && setRelocationMode(v);
+                  }}
+                  disabled={!canUseForecast}
+                  title={!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : 'Relocación simbólica: describe cómo el entorno influye en la experiencia vital. No es una carta astronómica relocada.'}
                 >
-                  <option value="Madrid (placeholder)">Madrid (placeholder)</option>
-                  <option value="Ciudad de México (placeholder)">Ciudad de México (placeholder)</option>
-                  <option value="Buenos Aires (placeholder)">Buenos Aires (placeholder)</option>
-                  <option value="Bogotá (placeholder)">Bogotá (placeholder)</option>
+                  <option value="off">Off</option>
+                  <option value="home">Hogar · “Dónde me siento contenido”</option>
+                  <option value="work">Trabajo · “Dónde me organizo y produzco”</option>
+                  <option value="travel">Viaje · “Dónde exploro y aprendo”</option>
+                  <option value="abroad">Extranjero · “Dónde me transformo”</option>
                 </select>
               </div>
               <div className="mt-1 text-[11px] text-gray-500">Relocación simbólica (no astronómica)</div>

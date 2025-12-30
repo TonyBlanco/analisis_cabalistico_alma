@@ -76,7 +76,7 @@ export default function ResonanciaAncestralWorkspace() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const nowLabel = useMemo(() => new Date().toLocaleString('es-ES'), []);
+  const [nowLabel, setNowLabel] = useState<string | null>(null);
   const [openTooltipId, setOpenTooltipId] = useState<string | null>(null);
 
   const [filters, setFilters] = useState<{
@@ -164,6 +164,10 @@ export default function ResonanciaAncestralWorkspace() {
     return () => document.removeEventListener('pointerdown', onPointerDown);
   }, [openTooltipId]);
 
+  useEffect(() => {
+    setNowLabel(new Date().toLocaleString('es-ES'));
+  }, []);
+
   const neutralAnchorGraph = useMemo(() => {
     const nodes = new Set<string>();
     const edges = new Set<string>();
@@ -244,7 +248,7 @@ export default function ResonanciaAncestralWorkspace() {
             </div>
           ) : null}
           <div className="hidden md:block text-right">
-            <div className="text-xs text-gray-500">Fecha/hora: {nowLabel}</div>
+            <div className="text-xs text-gray-500">Fecha/hora: {nowLabel ?? '—'}</div>
           </div>
           <button
             type="button"

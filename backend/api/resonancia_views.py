@@ -13,6 +13,17 @@ from .serializers import ResonanciaObservationSerializer
 
 
 def _get_owned_patient_or_404(*, therapist, patient_id: str) -> Patient:
+    if patient_id is None:
+        raise Http404
+    try:
+        patient_id_str = str(patient_id)
+    except Exception:
+        raise Http404
+
+    # Patient.id es int en este proyecto; si no es un id numérico, tratamos como no encontrado.
+    if not patient_id_str.isdigit():
+        raise Http404
+
     patient = get_object_or_404(Patient, pk=patient_id, therapist=therapist)
     if patient.user_id and patient.user_id == therapist.id:
         # Bloquear autoevaluación (consistente con IsTherapistAndOwnsPatient).
@@ -57,6 +68,9 @@ class ResonanciaObservationListCreateView(generics.ListCreateAPIView):
         if not subject_id:
             return Response([], status=status.HTTP_200_OK)
 
+        if not str(subject_id).isdigit():
+            return Response([], status=status.HTTP_200_OK)
+
         try:
             return super().list(request, *args, **kwargs)
         except (Http404, PermissionDenied):
@@ -79,6 +93,9 @@ class ResonanciaObservationListCreateView(generics.ListCreateAPIView):
         subject_id = request.query_params.get('subject')
         if not subject_id:
             return Response({'error': 'subject es requerido.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not str(subject_id).isdigit():
+            return Response({'error': 'subject inválido.'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             patient = _get_owned_patient_or_404(therapist=request.user, patient_id=subject_id)

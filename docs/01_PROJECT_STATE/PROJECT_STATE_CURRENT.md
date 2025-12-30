@@ -58,6 +58,10 @@ El contrato tecnico de los Specialized Workspace Modules queda congelado como ba
 Documento vinculante:
 `../03_SWM_CONTRACTS/CONTRATO_TECNICO_SWM.md`
 
+### Auditoria — reintegracion post-T5
+
+- Reintegracion del SWM Resonancia Ancestral por ruta propia, sin tocar core clinico ni legacy. Correccion post-T5.
+
 ## Reglas clave
 - Admin no es actor clínico
 - execution_mode nunca viene del request

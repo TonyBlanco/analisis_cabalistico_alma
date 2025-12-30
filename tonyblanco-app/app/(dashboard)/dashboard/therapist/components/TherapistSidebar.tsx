@@ -106,6 +106,14 @@ const swmLaunchers = [
     icon: Telescope,
     enabled: true,
   },
+  {
+    id: 'resonancia-ancestral',
+    title: 'Resonancia Ancestral',
+    description: 'Cartografía simbólica — no clínica.',
+    href: '/dashboard/therapist/resonancia-ancestral',
+    icon: Activity,
+    enabled: true,
+  },
 ];
 
 export default function TherapistSidebar() {

@@ -124,6 +124,13 @@ export default function ResonanciaAncestralWorkspace() {
     tagsRaw: '',
   });
 
+  const [relationMatrixFilters, setRelationMatrixFilters] = useState<{
+    context?: ResonanciaObservationContext;
+    fromDate?: string;
+    toDate?: string;
+  }>({});
+  const [showPositionalGroups, setShowPositionalGroups] = useState(false);
+
   const identityLabel = useMemo(() => {
     if (!consultante) return null;
     const birth = consultante.fecha_nacimiento
@@ -292,6 +299,43 @@ export default function ResonanciaAncestralWorkspace() {
       edges,
     };
   }, [relations]);
+
+  const filteredRelationsForMatrix = useMemo(() => {
+    const contextFilter = relationMatrixFilters.context;
+    const fromDateRaw = relationMatrixFilters.fromDate;
+    const toDateRaw = relationMatrixFilters.toDate;
+
+    const fromTime = fromDateRaw ? new Date(`${fromDateRaw}T00:00:00`).getTime() : null;
+    const toTime = toDateRaw ? new Date(`${toDateRaw}T23:59:59.999`).getTime() : null;
+
+    return relations.filter((rel) => {
+      if (contextFilter && rel.context !== contextFilter) return false;
+
+      const createdTime = new Date(rel.created_at).getTime();
+      if (fromTime != null && createdTime < fromTime) return false;
+      if (toTime != null && createdTime > toTime) return false;
+
+      return true;
+    });
+  }, [relationMatrixFilters.context, relationMatrixFilters.fromDate, relationMatrixFilters.toDate, relations]);
+
+  const relationMatrixByPosition = useMemo(() => {
+    const map = new Map<number, ResonanciaRelation[]>();
+    for (let pos = 1; pos <= 9; pos += 1) map.set(pos, []);
+
+    const ordered = filteredRelationsForMatrix
+      .slice()
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+    for (const rel of ordered) {
+      const position = Number(rel.position);
+      const bucket = map.get(position);
+      if (!bucket) continue;
+      bucket.push(rel);
+    }
+
+    return map;
+  }, [filteredRelationsForMatrix]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -1324,11 +1368,11 @@ export default function ResonanciaAncestralWorkspace() {
                               ))}
                             </ul>
 
-                            <div className="rounded-lg border border-gray-200 bg-white p-3">
-                              <div className="text-sm font-semibold text-gray-900">Visualización neutral</div>
-                              <p className="mt-1 text-sm text-gray-600">
-                                Grafo simple basado en posiciones registradas (sin jerarquías ni inferencias).
-                              </p>
+                    <div className="rounded-lg border border-gray-200 bg-white p-3">
+                      <div className="text-sm font-semibold text-gray-900">Visualización neutral</div>
+                      <p className="mt-1 text-sm text-gray-600">
+                        Grafo simple basado en posiciones registradas (sin jerarquías ni inferencias).
+                      </p>
 
                               <div className="mt-3">
                                 <div className="text-xs font-medium text-gray-700">Nodos</div>
@@ -1369,6 +1413,163 @@ export default function ResonanciaAncestralWorkspace() {
                             </div>
                           </div>
                         ) : null}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 rounded-lg border border-gray-200 bg-white p-4">
+                    <div className="flex items-center gap-2">
+                      <h5 className="text-sm font-semibold text-gray-900">Matriz relacional simbólica</h5>
+                      <InfoTooltip
+                        id="rel_matrix_help"
+                        label="Matriz relacional simbólica: ayuda"
+                        openId={openTooltipId}
+                        setOpenId={setOpenTooltipId}
+                      >
+                        <strong>Matriz relacional simbólica</strong>
+                        <br />
+                        <br />
+                        Esta matriz organiza las posiciones relacionales declaradas por el terapeuta.
+                        <br />
+                        <br />
+                        • Cada celda representa una coordenada simbólica.
+                        <br />
+                        • La presencia indica que una relación fue registrada en esa posición.
+                        <br />
+                        <br />
+                        ⚠️ La matriz no explica, no interpreta ni establece causalidad.
+                        <br />
+                        <br />
+                        Su función es facilitar la observación profesional.
+                      </InfoTooltip>
+                    </div>
+
+                    <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-3">
+                      <label className="block">
+                        <span className="text-xs font-medium text-gray-700">Contexto</span>
+                        <select
+                          className="mt-1 w-full rounded-md border border-gray-200 bg-white px-2 py-2 text-sm text-gray-900"
+                          value={relationMatrixFilters.context ?? ''}
+                          onChange={(e) => {
+                            const next = (e.target.value || undefined) as ResonanciaObservationContext | undefined;
+                            setRelationMatrixFilters((prev) => ({ ...prev, context: next }));
+                          }}
+                        >
+                          <option value="">Todos</option>
+                          <option value="familiar">Familiar</option>
+                          <option value="relacional">Relacional</option>
+                          <option value="sistemico">Sistémico</option>
+                        </select>
+                      </label>
+
+                      <label className="block">
+                        <span className="text-xs font-medium text-gray-700">Desde (opcional)</span>
+                        <input
+                          type="date"
+                          className="mt-1 w-full rounded-md border border-gray-200 bg-white px-2 py-2 text-sm text-gray-900"
+                          value={relationMatrixFilters.fromDate ?? ''}
+                          onChange={(e) => setRelationMatrixFilters((prev) => ({ ...prev, fromDate: e.target.value || undefined }))}
+                        />
+                      </label>
+
+                      <label className="block">
+                        <span className="text-xs font-medium text-gray-700">Hasta (opcional)</span>
+                        <input
+                          type="date"
+                          className="mt-1 w-full rounded-md border border-gray-200 bg-white px-2 py-2 text-sm text-gray-900"
+                          value={relationMatrixFilters.toDate ?? ''}
+                          onChange={(e) => setRelationMatrixFilters((prev) => ({ ...prev, toDate: e.target.value || undefined }))}
+                        />
+                      </label>
+                    </div>
+
+                    <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                      <label className="inline-flex items-center gap-2 text-sm text-gray-700">
+                        <input
+                          type="checkbox"
+                          className="h-4 w-4 rounded border-gray-300 text-gray-900"
+                          checked={showPositionalGroups}
+                          onChange={(e) => setShowPositionalGroups(e.target.checked)}
+                        />
+                        Mostrar grupos posicionales compartidos
+                      </label>
+
+                      {showPositionalGroups ? (
+                        <div className="text-xs text-gray-600">
+                          Estas posiciones pertenecen a un mismo grupo estructural.
+                        </div>
+                      ) : null}
+                    </div>
+
+                    <div className="mt-4">
+                      {!filteredRelationsForMatrix.length ? (
+                        <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700">
+                          Sin relaciones para los filtros seleccionados. La matriz permanece visible.
+                        </div>
+                      ) : null}
+
+                      <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                        {(
+                          [
+                            { groupKey: 'A', positions: [1, 4, 7] as const },
+                            { groupKey: 'B', positions: [2, 5, 8] as const },
+                            { groupKey: 'C', positions: [3, 6, 9] as const },
+                          ] as const
+                        ).map((group) => (
+                          <div
+                            key={group.groupKey}
+                            className={[
+                              'rounded-lg border border-gray-200 bg-white p-2',
+                              showPositionalGroups ? 'ring-1 ring-gray-200' : '',
+                            ].join(' ')}
+                          >
+                            {showPositionalGroups ? (
+                              <div className="px-2 pb-2 text-xs font-medium text-gray-600">Grupo posicional compartido</div>
+                            ) : null}
+
+                            <div className="space-y-2">
+                              {group.positions.map((position) => {
+                                const items = relationMatrixByPosition.get(position) ?? [];
+                                return (
+                                  <div key={`pos-${position}`} className="rounded-md border border-gray-200 bg-gray-50 p-3">
+                                    <div className="flex items-center justify-between gap-2">
+                                      <div className="flex items-baseline gap-2">
+                                        <div className="text-xs font-semibold text-gray-600">Posición</div>
+                                        <div className="text-lg font-semibold tabular-nums text-gray-900">{position}</div>
+                                      </div>
+                                      <div className="text-xs text-gray-600">
+                                        {items.length} {items.length === 1 ? 'relación' : 'relaciones'}
+                                      </div>
+                                    </div>
+
+                                    {items.length ? (
+                                      <details className="mt-2">
+                                        <summary className="cursor-pointer select-none text-sm font-medium text-gray-800">
+                                          Ver relaciones
+                                        </summary>
+                                        <ul className="mt-2 space-y-2">
+                                          {items.map((rel) => (
+                                            <li key={rel.id} className="rounded-md border border-gray-200 bg-white px-3 py-2">
+                                              <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-gray-600">
+                                                <span className="rounded-full bg-gray-50 px-2 py-1">
+                                                  {new Date(rel.created_at).toLocaleString('es-ES')}
+                                                </span>
+                                                <span className="rounded-full bg-gray-50 px-2 py-1">{rel.context}</span>
+                                              </div>
+                                              <div className="mt-1 text-sm text-gray-900">{rel.to_label}</div>
+                                            </li>
+                                          ))}
+                                        </ul>
+                                      </details>
+                                    ) : (
+                                      <div className="mt-2 text-sm text-gray-600">Sin relaciones en esta posición.</div>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   </div>

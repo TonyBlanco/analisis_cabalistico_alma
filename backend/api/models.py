@@ -1287,3 +1287,53 @@ class ResonanciaObservation(models.Model):
     def __str__(self) -> str:  # pragma: no cover
         return f'ResonanciaObservation {self.type} ({self.subject_id})'
 
+
+class ResonanciaRelation(models.Model):
+    """Relación simbólica manual (Resonancia Ancestral).
+
+    Modelo aislado: persiste posicionamiento relacional simbólico 1-9 (sin inferencias, sin scoring).
+    """
+
+    CONTEXT_CHOICES = [
+        ('familiar', 'Familiar'),
+        ('relacional', 'Relacional'),
+        ('sistemico', 'Sistémico'),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    subject = models.ForeignKey(
+        Patient,
+        on_delete=models.CASCADE,
+        related_name='resonancia_relations',
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='resonancia_relations',
+        limit_choices_to={'profile__user_type': 'therapist'},
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    context = models.CharField(max_length=16, choices=CONTEXT_CHOICES)
+    from_ref = models.CharField(max_length=64, default='consultante')
+    to_label = models.CharField(max_length=160)
+    position = models.PositiveSmallIntegerField()
+
+    note = models.CharField(max_length=280, blank=True, default='')
+    tags = models.JSONField(default=list, blank=True)
+
+    class Meta:
+        verbose_name = 'Relación (Resonancia)'
+        verbose_name_plural = 'Relaciones (Resonancia)'
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['subject', '-created_at'], name='resrel_subj_created_idx'),
+            models.Index(fields=['author', '-created_at'], name='resrel_auth_created_idx'),
+            models.Index(fields=['subject', 'context'], name='resrel_subj_ctx_idx'),
+        ]
+
+    def __str__(self) -> str:  # pragma: no cover
+        return f'ResonanciaRelation {self.position} ({self.subject_id})'
+

@@ -6,11 +6,14 @@ import { Activity, HelpCircle } from 'lucide-react';
 import useActiveConsultante from '@/hooks/useActiveConsultante';
 import {
   createResonanciaObservation,
+  createResonanciaRelation,
   listResonanciaObservations,
+  listResonanciaRelations,
   type ResonanciaObservation,
   type ResonanciaObservationContext,
   type ResonanciaObservationState,
   type ResonanciaObservationType,
+  type ResonanciaRelation,
 } from '@/lib/api/resonancia';
 
 function parseCommaSeparatedList(raw: string, maxItems: number): string[] {
@@ -73,9 +76,13 @@ function InfoTooltip({
 export default function ResonanciaAncestralWorkspace() {
   const consultante = useActiveConsultante();
   const [observations, setObservations] = useState<ResonanciaObservation[]>([]);
+  const [relations, setRelations] = useState<ResonanciaRelation[]>([]);
   const [loading, setLoading] = useState(false);
+  const [relationsLoading, setRelationsLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [relationSaving, setRelationSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [relationsError, setRelationsError] = useState<string | null>(null);
   const [nowLabel, setNowLabel] = useState<string | null>(null);
   const [openTooltipId, setOpenTooltipId] = useState<string | null>(null);
 
@@ -101,6 +108,20 @@ export default function ResonanciaAncestralWorkspace() {
     statement: '',
     tagsRaw: '',
     anchorsRaw: '',
+  });
+
+  const [relationForm, setRelationForm] = useState<{
+    context: ResonanciaObservationContext;
+    toLabel: string;
+    position: number | null;
+    note: string;
+    tagsRaw: string;
+  }>({
+    context: 'relacional',
+    toLabel: '',
+    position: null,
+    note: '',
+    tagsRaw: '',
   });
 
   const identityLabel = useMemo(() => {
@@ -144,10 +165,40 @@ export default function ResonanciaAncestralWorkspace() {
   }, [consultante, filters.context, filters.state, filters.type]);
 
   useEffect(() => {
+    let isMounted = true;
+
+    async function run() {
+      if (!consultante?.id) return;
+      setRelationsLoading(true);
+      setRelationsError(null);
+      try {
+        const list = await listResonanciaRelations({ subjectId: consultante.id });
+        if (!isMounted) return;
+        setRelations(list);
+      } catch (err) {
+        if (!isMounted) return;
+        const message = err instanceof Error ? err.message : 'Error al cargar relaciones.';
+        setRelationsError(message);
+      } finally {
+        if (!isMounted) return;
+        setRelationsLoading(false);
+      }
+    }
+
+    run();
+    return () => {
+      isMounted = false;
+    };
+  }, [consultante]);
+
+  useEffect(() => {
     if (consultante?.id) return;
     setObservations([]);
     setError(null);
     setLoading(false);
+    setRelations([]);
+    setRelationsError(null);
+    setRelationsLoading(false);
   }, [consultante]);
 
   useEffect(() => {
@@ -225,6 +276,22 @@ export default function ResonanciaAncestralWorkspace() {
 
     return { byType, byContext, byTypeAndContext, timeline };
   }, [observations]);
+
+  const neutralRelationGraph = useMemo(() => {
+    const nodes = new Set<string>();
+    const edges: Array<{ toLabel: string; position: number; context: ResonanciaObservationContext }> = [];
+
+    nodes.add('Consultante');
+    for (const rel of relations) {
+      nodes.add(rel.to_label);
+      edges.push({ toLabel: rel.to_label, position: rel.position, context: rel.context });
+    }
+
+    return {
+      nodes: Array.from(nodes),
+      edges,
+    };
+  }, [relations]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -1050,6 +1117,262 @@ export default function ResonanciaAncestralWorkspace() {
                     {saving ? 'Guardando…' : 'Guardar observación'}
                   </button>
                 </form>
+
+                <div className="mt-6 border-t border-gray-200 pt-4">
+                  <div className="flex items-center gap-2">
+                    <h4 className="text-base font-semibold text-gray-900">Posicionamiento relacional (simbólico)</h4>
+                    <span className="text-xs text-gray-500">Define posiciones relacionales sin interpretación automática.</span>
+                  </div>
+
+                  <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+                    <div className="rounded-lg border border-gray-200 bg-white p-4">
+                      <div className="text-sm font-semibold text-gray-900">Keypad 1–9</div>
+                      <div className="mt-1 flex items-center gap-2 text-sm text-gray-600">
+                        <span>Seleccione una posición</span>
+                        <InfoTooltip
+                          id="rel_keypad_help"
+                          label="Posición relacional simbólica: ayuda"
+                          openId={openTooltipId}
+                          setOpenId={setOpenTooltipId}
+                        >
+                          <strong>Posición relacional simbólica</strong>
+                          <br />
+                          Esta selección indica una coordenada interna para organizar resonancias.
+                          <br />
+                          No representa una identidad personal.
+                          <br />
+                          Una misma persona puede ocupar posiciones distintas según el contexto y el sistema observado.
+                        </InfoTooltip>
+                      </div>
+
+                      <div className="mt-3 grid grid-cols-3 gap-2">
+                        {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((pos) => {
+                          const selected = relationForm.position === pos;
+                          return (
+                            <button
+                              key={pos}
+                              type="button"
+                              onClick={() => setRelationForm((prev) => ({ ...prev, position: pos }))}
+                              className={[
+                                'h-12 rounded-md border text-lg font-semibold',
+                                selected
+                                  ? 'border-gray-900 bg-gray-900 text-white'
+                                  : 'border-gray-200 bg-gray-50 text-gray-900 hover:bg-gray-100',
+                              ].join(' ')}
+                              aria-pressed={selected}
+                            >
+                              {pos}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      <div className="mt-4 space-y-3">
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                          <label className="block">
+                            <span className="text-xs font-medium text-gray-700">Entidad</span>
+                            <input
+                              className="mt-1 w-full rounded-md border border-gray-200 bg-gray-50 px-2 py-2 text-sm text-gray-700"
+                              value="Consultante"
+                              readOnly
+                            />
+                          </label>
+
+                          <label className="block">
+                            <span className="text-xs font-medium text-gray-700">Contexto</span>
+                            <select
+                              className="mt-1 w-full rounded-md border border-gray-200 bg-white px-2 py-2 text-sm text-gray-900"
+                              value={relationForm.context}
+                              onChange={(e) =>
+                                setRelationForm((prev) => ({ ...prev, context: e.target.value as ResonanciaObservationContext }))
+                              }
+                            >
+                              <option value="familiar">Familiar</option>
+                              <option value="relacional">Relacional</option>
+                              <option value="sistemico">Sistémico</option>
+                            </select>
+                          </label>
+                        </div>
+
+                        <label className="block">
+                          <span className="text-xs font-medium text-gray-700">¿Con quién resuena?</span>
+                          <input
+                            className="mt-1 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900"
+                            value={relationForm.toLabel}
+                            onChange={(e) => setRelationForm((prev) => ({ ...prev, toLabel: e.target.value }))}
+                            placeholder="Ej. hermano mayor, tío materno"
+                          />
+                        </label>
+
+                        <label className="block">
+                          <span className="text-xs font-medium text-gray-700">Nota (opcional)</span>
+                          <input
+                            className="mt-1 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900"
+                            value={relationForm.note}
+                            onChange={(e) => setRelationForm((prev) => ({ ...prev, note: e.target.value }))}
+                            placeholder="Observación breve (descriptiva)"
+                          />
+                        </label>
+
+                        <label className="block">
+                          <span className="text-xs font-medium text-gray-700">Tags (opcional, separados por comas)</span>
+                          <input
+                            className="mt-1 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900"
+                            value={relationForm.tagsRaw}
+                            onChange={(e) => setRelationForm((prev) => ({ ...prev, tagsRaw: e.target.value }))}
+                            placeholder="Ej. vínculo, continuidad, espejo"
+                          />
+                        </label>
+
+                        <button
+                          type="button"
+                          disabled={
+                            relationSaving ||
+                            !consultante?.id ||
+                            !relationForm.toLabel.trim() ||
+                            relationForm.position == null
+                          }
+                          onClick={async () => {
+                            if (!consultante?.id) return;
+                            if (relationForm.position == null) return;
+
+                            setRelationsError(null);
+                            setRelationSaving(true);
+                            try {
+                              const tags = parseCommaSeparatedList(relationForm.tagsRaw, 30);
+                              await createResonanciaRelation({
+                                subjectId: consultante.id,
+                                context: relationForm.context,
+                                toLabel: relationForm.toLabel,
+                                position: relationForm.position,
+                                note: relationForm.note,
+                                tags,
+                              });
+
+                              setRelationForm((prev) => ({
+                                ...prev,
+                                toLabel: '',
+                                position: null,
+                                note: '',
+                                tagsRaw: '',
+                              }));
+
+                              const list = await listResonanciaRelations({ subjectId: consultante.id });
+                              setRelations(list);
+                            } catch (err) {
+                              const message = err instanceof Error ? err.message : 'No se pudo guardar la relación.';
+                              setRelationsError(message);
+                            } finally {
+                              setRelationSaving(false);
+                            }
+                          }}
+                          className="inline-flex items-center justify-center rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:cursor-not-allowed disabled:bg-gray-300"
+                        >
+                          {relationSaving ? 'Guardando…' : 'Guardar relación'}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="rounded-lg border border-gray-200 bg-white p-4">
+                      <div className="text-sm font-semibold text-gray-900">Relaciones registradas</div>
+                      <p className="mt-1 text-sm text-gray-600">Listado observacional de posicionamientos (sin interpretación).</p>
+
+                      <div className="mt-3 space-y-3">
+                        {relationsError ? (
+                          <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-800">
+                            {relationsError}
+                          </div>
+                        ) : null}
+
+                        {relationsLoading ? <div className="text-sm text-gray-600">Cargando relaciones…</div> : null}
+
+                        {!relationsLoading && !relations.length ? (
+                          <div className="text-sm text-gray-600">Aún no hay relaciones registradas para este consultante.</div>
+                        ) : null}
+
+                        {!relationsLoading && relations.length ? (
+                          <div className="space-y-3">
+                            <ul className="space-y-2">
+                              {relations.map((rel) => (
+                                <li key={rel.id} className="rounded-lg border border-gray-200 bg-gray-50 p-3">
+                                  <div className="flex flex-wrap items-center gap-2 text-xs text-gray-600">
+                                    <span className="rounded-full bg-white px-2 py-1">
+                                      {new Date(rel.created_at).toLocaleString('es-ES')}
+                                    </span>
+                                    <span className="rounded-full bg-white px-2 py-1">{rel.context}</span>
+                                    <span className="rounded-full bg-white px-2 py-1">
+                                      Posición {rel.position}
+                                    </span>
+                                  </div>
+                                  <div className="mt-2 text-sm text-gray-900">
+                                    <strong>Con quién:</strong> {rel.to_label}
+                                  </div>
+                                  {rel.note ? <div className="mt-1 text-sm text-gray-700">{rel.note}</div> : null}
+                                  {rel.tags?.length ? (
+                                    <div className="mt-2 flex flex-wrap gap-2">
+                                      {rel.tags.map((tag) => (
+                                        <span
+                                          key={`${rel.id}-tag-${tag}`}
+                                          className="inline-flex items-center rounded-full bg-white px-2 py-1 text-xs text-gray-700"
+                                        >
+                                          {tag}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  ) : null}
+                                </li>
+                              ))}
+                            </ul>
+
+                            <div className="rounded-lg border border-gray-200 bg-white p-3">
+                              <div className="text-sm font-semibold text-gray-900">Visualización neutral</div>
+                              <p className="mt-1 text-sm text-gray-600">
+                                Grafo simple basado en posiciones registradas (sin jerarquías ni inferencias).
+                              </p>
+
+                              <div className="mt-3">
+                                <div className="text-xs font-medium text-gray-700">Nodos</div>
+                                <div className="mt-2 flex flex-wrap gap-2">
+                                  {neutralRelationGraph.nodes.map((node) => (
+                                    <span
+                                      key={`node-${node}`}
+                                      className="inline-flex items-center rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-700"
+                                    >
+                                      {node}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+
+                              <div className="mt-4">
+                                <div className="text-xs font-medium text-gray-700">Enlaces</div>
+                                {neutralRelationGraph.edges.length ? (
+                                  <ul className="mt-2 space-y-1 text-sm text-gray-700">
+                                    {neutralRelationGraph.edges.map((edge, idx) => (
+                                      <li
+                                        key={`${edge.toLabel}-${edge.position}-${idx}`}
+                                        className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-gray-50 px-2 py-1"
+                                      >
+                                        <span className="truncate">Consultante</span>
+                                        <span className="px-2 text-gray-400">↔</span>
+                                        <span className="truncate">{edge.toLabel}</span>
+                                        <span className="ml-auto rounded-full bg-white px-2 py-1 text-xs text-gray-700">
+                                          {edge.context} · {edge.position}
+                                        </span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                ) : (
+                                  <div className="mt-2 text-sm text-gray-600">Sin relaciones registradas aún.</div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ) : null}
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </section>
             </div>
 

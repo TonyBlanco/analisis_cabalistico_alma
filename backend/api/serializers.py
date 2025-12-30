@@ -19,6 +19,7 @@ from .models import (
     UserResourceAccess,
     TherapistHolisticConfig,
     ResonanciaObservation,
+    ResonanciaRelation,
 )
 from .birth_data_model import UserBirthData
 from django.contrib.auth.models import User
@@ -1051,3 +1052,73 @@ class ResonanciaObservationSerializer(serializers.ModelSerializer):
 
     def validate_tags(self, value):
         return self._clean_list(value, field_name='tags', max_items=30)
+
+
+class ResonanciaRelationSerializer(serializers.ModelSerializer):
+    """Serializer para ResonanciaRelation (posicionamiento relacional simbólico)."""
+
+    subject = serializers.PrimaryKeyRelatedField(read_only=True)
+    author = serializers.PrimaryKeyRelatedField(read_only=True)
+    from_ref = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = ResonanciaRelation
+        fields = [
+            'id',
+            'subject',
+            'author',
+            'created_at',
+            'updated_at',
+            'context',
+            'from_ref',
+            'to_label',
+            'position',
+            'note',
+            'tags',
+        ]
+        read_only_fields = ['id', 'author', 'from_ref', 'created_at', 'updated_at']
+
+    def validate_to_label(self, value):
+        cleaned = (value or '').strip()
+        if not cleaned:
+            raise serializers.ValidationError('to_label es obligatorio.')
+        return cleaned
+
+    def validate_position(self, value):
+        try:
+            position_int = int(value)
+        except Exception:
+            raise serializers.ValidationError('position debe ser un número entero.')
+
+        if position_int < 1 or position_int > 9:
+            raise serializers.ValidationError('position debe estar entre 1 y 9 (sin 0).')
+
+        return position_int
+
+    def validate_note(self, value):
+        cleaned = (value or '').strip()
+        if len(cleaned) > 280:
+            raise serializers.ValidationError('note máximo 280 caracteres.')
+        return cleaned
+
+    def validate_tags(self, value):
+        if value is None:
+            return []
+        if not isinstance(value, list):
+            raise serializers.ValidationError({'tags': 'Debe ser una lista.'})
+
+        cleaned: list[str] = []
+        for raw in value:
+            if raw is None:
+                continue
+            if not isinstance(raw, str):
+                raise serializers.ValidationError({'tags': 'Todos los elementos deben ser strings.'})
+            candidate = raw.strip()
+            if not candidate:
+                continue
+            cleaned.append(candidate)
+
+        if len(cleaned) > 30:
+            raise serializers.ValidationError({'tags': 'Máximo 30 elementos.'})
+
+        return cleaned

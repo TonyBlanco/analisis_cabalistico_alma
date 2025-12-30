@@ -20,6 +20,20 @@ export interface ResonanciaObservation {
   updated_at: string;
 }
 
+export interface ResonanciaRelation {
+  id: string;
+  subject: number | string;
+  author: number | string;
+  created_at: string;
+  updated_at: string;
+  context: ResonanciaObservationContext;
+  from_ref: string;
+  to_label: string;
+  position: number;
+  note: string;
+  tags: string[];
+}
+
 function buildHeaders(): HeadersInit {
   const token = getAuthToken();
   return {
@@ -112,6 +126,58 @@ export async function createResonanciaObservation(params: {
       anchors: params.anchors,
       tags: params.tags,
       statement: params.statement,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(await getReadableApiError(response));
+  }
+
+  return response.json();
+}
+
+export async function listResonanciaRelations(params: {
+  subjectId: number | string | null | undefined;
+  context?: ResonanciaObservationContext;
+}): Promise<ResonanciaRelation[]> {
+  if (params.subjectId == null || params.subjectId === '') return [];
+
+  const search = new URLSearchParams({ subject: String(params.subjectId) });
+  if (params.context) search.set('context', params.context);
+
+  const response = await fetch(`${API_BASE_URL}/resonancia/relations/?${search.toString()}`, {
+    method: 'GET',
+    headers: buildHeaders(),
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    if (response.status === 400) return [];
+    throw new Error(await getReadableApiError(response));
+  }
+
+  return response.json();
+}
+
+export async function createResonanciaRelation(params: {
+  subjectId: number | string;
+  context: ResonanciaObservationContext;
+  toLabel: string;
+  position: number;
+  note?: string;
+  tags: string[];
+}): Promise<ResonanciaRelation> {
+  const search = new URLSearchParams({ subject: String(params.subjectId) });
+  const response = await fetch(`${API_BASE_URL}/resonancia/relations/?${search.toString()}`, {
+    method: 'POST',
+    headers: buildHeaders(),
+    credentials: 'include',
+    body: JSON.stringify({
+      context: params.context,
+      to_label: params.toLabel,
+      position: params.position,
+      note: params.note ?? '',
+      tags: params.tags,
     }),
   });
 

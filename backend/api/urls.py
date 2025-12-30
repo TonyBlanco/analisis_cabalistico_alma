@@ -121,6 +121,7 @@ from .utils.symbolic_interpreter_ai import (
 from .resonancia_views import (
     ResonanciaObservationListCreateView,
     ResonanciaObservationDetailView,
+    ResonanciaRelationListCreateView,
 )
 
 urlpatterns = [
@@ -262,6 +263,7 @@ urlpatterns = [
     # Resonancia Ancestral (observaciones simbólicas manuales, sin inferencias)
     path('resonancia/observations/', ResonanciaObservationListCreateView.as_view(), name='resonancia_observations'),
     path('resonancia/observations/<uuid:pk>/', ResonanciaObservationDetailView.as_view(), name='resonancia_observation_detail'),
+    path('resonancia/relations/', ResonanciaRelationListCreateView.as_view(), name='resonancia_relations'),
 
     # Estado simbolico estructural (TreeStructuralState v0.1)
     path('symbolic/tree-structural-state/', TreeStructuralStateView.as_view(), name='tree_structural_state'),

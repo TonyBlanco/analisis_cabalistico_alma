@@ -21,12 +21,36 @@ function parseCommaSeparatedList(raw: string, maxItems: number): string[] {
   return parts.slice(0, maxItems);
 }
 
+function shouldShowObservationalReminder(statement: string): boolean {
+  const text = statement.trim().toLowerCase();
+  if (!text) return false;
+  const triggers = [
+    'porque',
+    'por que',
+    'causa',
+    'causal',
+    'provoca',
+    'origina',
+    'explica',
+    'significa',
+    'diagn',
+    'patolog',
+    'trastorno',
+    'síntoma',
+    'sintoma',
+    'enfermedad',
+    'predic',
+  ];
+  return triggers.some((t) => text.includes(t));
+}
+
 export default function ResonanciaAncestralWorkspace() {
   const consultante = useActiveConsultante();
   const [observations, setObservations] = useState<ResonanciaObservation[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const nowLabel = useMemo(() => new Date().toLocaleString('es-ES'), []);
 
   const [filters, setFilters] = useState<{
     type?: ResonanciaObservationType;
@@ -123,6 +147,8 @@ export default function ResonanciaAncestralWorkspace() {
     };
   }, [observations]);
 
+  const showObservationalReminder = useMemo(() => shouldShowObservationalReminder(form.statement), [form.statement]);
+
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="flex items-center justify-between border-b border-gray-200 bg-white px-6 py-4">
@@ -144,6 +170,9 @@ export default function ResonanciaAncestralWorkspace() {
               <div className="text-xs text-gray-500">{identityLabel}</div>
             </div>
           ) : null}
+          <div className="hidden md:block text-right">
+            <div className="text-xs text-gray-500">Fecha/hora: {nowLabel}</div>
+          </div>
           <button
             type="button"
             onClick={() => window.print()}
@@ -415,6 +444,11 @@ export default function ResonanciaAncestralWorkspace() {
                     }
                   }}
                 >
+                  {showObservationalReminder ? (
+                    <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+                      Recuerda formular observaciones descriptivas, no causales ni explicativas.
+                    </div>
+                  ) : null}
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <label className="block">
                       <span className="text-xs font-medium text-gray-700">Tipo</span>

@@ -997,6 +997,7 @@ class TherapistHolisticConfigSerializer(serializers.ModelSerializer):
 class ResonanciaObservationSerializer(serializers.ModelSerializer):
     """Serializer para ResonanciaObservation (registro simbólico manual)."""
 
+    subject = serializers.PrimaryKeyRelatedField(read_only=True)
     author = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:

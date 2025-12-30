@@ -25,7 +25,7 @@ export default function ResonanciaAncestralWorkspace() {
           </span>
           <div>
             <p className="text-xs uppercase tracking-wide text-gray-500">Workspace simbólico</p>
-            <h1 className="text-2xl font-semibold text-gray-900">Resonancia Ancestral</h1>
+            <h1 className="text-3xl font-semibold tracking-tight text-gray-900">Resonancia Ancestral</h1>
             <p className="text-sm text-gray-600">Cartografía simbólica — no clínica.</p>
           </div>
         </div>
@@ -46,7 +46,7 @@ export default function ResonanciaAncestralWorkspace() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl px-6 py-8">
+      <main className="mx-auto max-w-6xl px-6 py-10">
         {!consultante ? (
           <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
             <h2 className="text-lg font-semibold text-gray-900">Sin consultante activo</h2>
@@ -58,17 +58,17 @@ export default function ResonanciaAncestralWorkspace() {
             </p>
           </div>
         ) : (
-          <div className="space-y-4">
-            <div className="rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700">
+          <div className="space-y-6">
+            <div className="rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm leading-relaxed text-gray-700">
               Este espacio permite observar patrones simbólicos y relacionales del sistema. No realiza inferencias
               automáticas ni sustituye la lectura profesional del terapeuta.
             </div>
 
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
               <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
                 <div className="text-xs uppercase tracking-wide text-gray-500">T1</div>
-                <h3 className="mt-1 text-base font-semibold text-gray-900">Mapa de resonancia</h3>
-                <p className="mt-2 text-sm text-gray-600">
+                <h3 className="mt-1 text-lg font-semibold text-gray-900">Mapa de resonancia</h3>
+                <p className="mt-2 text-sm leading-relaxed text-gray-600">
                   Representación visual de las resonancias relacionales observadas en el sistema. Funciona como marco
                   simbólico de referencia para orientar la lectura, sin cálculos ni interpretaciones automáticas.
                 </p>
@@ -76,8 +76,8 @@ export default function ResonanciaAncestralWorkspace() {
 
               <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
                 <div className="text-xs uppercase tracking-wide text-gray-500">T2</div>
-                <h3 className="mt-1 text-base font-semibold text-gray-900">Ejes ancestrales</h3>
-                <p className="mt-2 text-sm text-gray-600">
+                <h3 className="mt-1 text-lg font-semibold text-gray-900">Ejes ancestrales</h3>
+                <p className="mt-2 text-sm leading-relaxed text-gray-600">
                   Visualización de ejes simbólicos recurrentes dentro del sistema relacional. Permite observar
                   direcciones de repetición o continuidad sin establecer conclusiones.
                 </p>
@@ -85,8 +85,8 @@ export default function ResonanciaAncestralWorkspace() {
 
               <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
                 <div className="text-xs uppercase tracking-wide text-gray-500">T3</div>
-                <h3 className="mt-1 text-base font-semibold text-gray-900">Resonancias</h3>
-                <p className="mt-2 text-sm text-gray-600">
+                <h3 className="mt-1 text-lg font-semibold text-gray-900">Resonancias</h3>
+                <p className="mt-2 text-sm leading-relaxed text-gray-600">
                   Listado de resonancias identificadas por observación directa del terapeuta. Opera como registro
                   simbólico, sin jerarquizar ni automatizar significados.
                 </p>
@@ -94,15 +94,15 @@ export default function ResonanciaAncestralWorkspace() {
 
               <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
                 <div className="text-xs uppercase tracking-wide text-gray-500">T4</div>
-                <h3 className="mt-1 text-base font-semibold text-gray-900">Registro</h3>
-                <p className="mt-2 text-sm text-gray-600">
+                <h3 className="mt-1 text-lg font-semibold text-gray-900">Registro</h3>
+                <p className="mt-2 text-sm leading-relaxed text-gray-600">
                   Espacio de registro manual para notas simbólicas del proceso. No genera conclusiones automáticas ni
                   recomendaciones.
                 </p>
               </section>
             </div>
 
-            <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-relaxed text-amber-900">
               Cuando algunos datos del consultante no están disponibles, el workspace permanece accesible, aunque
               ciertas visualizaciones pueden mostrarse de forma limitada.
             </div>

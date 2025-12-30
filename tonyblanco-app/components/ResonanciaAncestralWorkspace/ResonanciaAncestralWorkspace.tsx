@@ -188,6 +188,40 @@ export default function ResonanciaAncestralWorkspace() {
     };
   }, [observations]);
 
+  const descriptiveVisualizations = useMemo(() => {
+    const byType: Record<ResonanciaObservationType, number> = {
+      resonancia: 0,
+      eje: 0,
+      repeticion: 0,
+      nota: 0,
+    };
+
+    const byContext: Record<ResonanciaObservationContext, number> = {
+      familiar: 0,
+      relacional: 0,
+      sistemico: 0,
+    };
+
+    const byTypeAndContext: Record<ResonanciaObservationType, Record<ResonanciaObservationContext, number>> = {
+      resonancia: { familiar: 0, relacional: 0, sistemico: 0 },
+      eje: { familiar: 0, relacional: 0, sistemico: 0 },
+      repeticion: { familiar: 0, relacional: 0, sistemico: 0 },
+      nota: { familiar: 0, relacional: 0, sistemico: 0 },
+    };
+
+    const timeline = observations
+      .slice()
+      .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+
+    for (const obs of observations) {
+      byType[obs.type] += 1;
+      byContext[obs.context] += 1;
+      byTypeAndContext[obs.type][obs.context] += 1;
+    }
+
+    return { byType, byContext, byTypeAndContext, timeline };
+  }, [observations]);
+
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="flex items-center justify-between border-b border-gray-200 bg-white px-6 py-4">
@@ -578,6 +612,215 @@ export default function ResonanciaAncestralWorkspace() {
                       ))}
                     </ul>
                   ) : null}
+
+                  <div className="mt-6 border-t border-gray-200 pt-4">
+                    <div className="flex items-center gap-2">
+                      <h4 className="text-base font-semibold text-gray-900">Visualización descriptiva (observacional)</h4>
+                      <InfoTooltip
+                        id="viz_intro"
+                        label="¿Qué estoy viendo?"
+                        openId={openTooltipId}
+                        setOpenId={setOpenTooltipId}
+                      >
+                        Esta sección muestra visualizaciones descriptivas basadas exclusivamente en los registros existentes
+                        (filtros aplicados).
+                        <br />
+                        <br />
+                        El sistema <strong>no interpreta</strong>, <strong>no valida</strong> ni <strong>extrae conclusiones</strong>{' '}
+                        a partir de ellos.
+                      </InfoTooltip>
+                    </div>
+                    <p className="mt-1 text-sm text-gray-600">
+                      Conteos y distribuciones simples de lo ya registrado, sin inferencias ni recomendaciones.
+                    </p>
+
+                    {!observations.length ? (
+                      <div className="mt-4 rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700">
+                        Sin observaciones registradas: las visualizaciones aparecen cuando existe al menos un registro.
+                      </div>
+                    ) : (
+                      <div className="mt-4 space-y-4">
+                        <div className="rounded-lg border border-gray-200 bg-white p-4">
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-2">
+                              <div className="text-xs uppercase tracking-wide text-gray-500">V1</div>
+                              <div className="text-sm font-semibold text-gray-900">Densidad simbólica por tipo</div>
+                              <InfoTooltip
+                                id="viz_v1"
+                                label="¿Qué estoy viendo?"
+                                openId={openTooltipId}
+                                setOpenId={setOpenTooltipId}
+                              >
+                                Conteo de observaciones por tipo en la vista actual (filtros aplicados).
+                                <br />
+                                <br />
+                                El sistema <strong>no interpreta</strong>, <strong>no valida</strong> ni{' '}
+                                <strong>extrae conclusiones</strong> a partir de ellos.
+                              </InfoTooltip>
+                            </div>
+                          </div>
+
+                          <div className="mt-3 space-y-2">
+                            {(
+                              [
+                                { key: 'resonancia', label: 'Resonancia' },
+                                { key: 'eje', label: 'Eje' },
+                                { key: 'repeticion', label: 'Repetición' },
+                                { key: 'nota', label: 'Nota' },
+                              ] as const
+                            ).map(({ key, label }) => {
+                              const value = descriptiveVisualizations.byType[key];
+                              const max = Math.max(
+                                1,
+                                ...Object.values(descriptiveVisualizations.byType).map((count) => Number(count) || 0),
+                              );
+                              const width = Math.max(4, Math.round((value / max) * 100));
+                              return (
+                                <div key={key} className="grid grid-cols-[110px_1fr_42px] items-center gap-3">
+                                  <div className="text-sm text-gray-700">{label}</div>
+                                  <div className="h-3 rounded-full bg-gray-100">
+                                    <div
+                                      className="h-3 rounded-full bg-gray-400"
+                                      style={{ width: `${width}%` }}
+                                      aria-label={`${label}: ${value}`}
+                                    />
+                                  </div>
+                                  <div className="text-right text-sm tabular-nums text-gray-700">{value}</div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        <div className="rounded-lg border border-gray-200 bg-white p-4">
+                          <div className="flex items-center gap-2">
+                            <div className="text-xs uppercase tracking-wide text-gray-500">V2</div>
+                            <div className="text-sm font-semibold text-gray-900">Distribución por contexto</div>
+                            <InfoTooltip
+                              id="viz_v2"
+                              label="¿Qué estoy viendo?"
+                              openId={openTooltipId}
+                              setOpenId={setOpenTooltipId}
+                            >
+                              Conteo de observaciones por contexto en la vista actual (filtros aplicados).
+                              <br />
+                              <br />
+                              El sistema <strong>no interpreta</strong>, <strong>no valida</strong> ni{' '}
+                              <strong>extrae conclusiones</strong> a partir de ellos.
+                            </InfoTooltip>
+                          </div>
+
+                          <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
+                            {(
+                              [
+                                { key: 'familiar', label: 'Familiar' },
+                                { key: 'relacional', label: 'Relacional' },
+                                { key: 'sistemico', label: 'Sistémico' },
+                              ] as const
+                            ).map(({ key, label }) => (
+                              <div key={key} className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2">
+                                <div className="text-xs font-medium text-gray-700">{label}</div>
+                                <div className="mt-1 text-2xl font-semibold tabular-nums text-gray-900">
+                                  {descriptiveVisualizations.byContext[key]}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="rounded-lg border border-gray-200 bg-white p-4">
+                          <div className="flex items-center gap-2">
+                            <div className="text-xs uppercase tracking-wide text-gray-500">V3</div>
+                            <div className="text-sm font-semibold text-gray-900">Línea temporal observacional</div>
+                            <InfoTooltip
+                              id="viz_v3"
+                              label="¿Qué estoy viendo?"
+                              openId={openTooltipId}
+                              setOpenId={setOpenTooltipId}
+                            >
+                              Secuencia cronológica de registros observacionales en la vista actual (filtros aplicados).
+                              <br />
+                              <br />
+                              El sistema <strong>no interpreta</strong>, <strong>no valida</strong> ni{' '}
+                              <strong>extrae conclusiones</strong> a partir de ellos.
+                            </InfoTooltip>
+                          </div>
+
+                          <div className="mt-3 space-y-2">
+                            {descriptiveVisualizations.timeline.map((obs) => (
+                              <div key={`timeline-${obs.id}`} className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2">
+                                <div className="flex flex-wrap items-center gap-2 text-xs text-gray-600">
+                                  <span className="rounded-full bg-white px-2 py-1">
+                                    {new Date(obs.created_at).toLocaleString('es-ES')}
+                                  </span>
+                                  <span className="rounded-full bg-white px-2 py-1">{obs.type}</span>
+                                  <span className="rounded-full bg-white px-2 py-1">{obs.context}</span>
+                                  <span className="rounded-full bg-white px-2 py-1">{obs.state}</span>
+                                </div>
+                                <div className="mt-2 text-sm text-gray-900">{obs.statement}</div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="rounded-lg border border-gray-200 bg-white p-4">
+                          <div className="flex items-center gap-2">
+                            <div className="text-xs uppercase tracking-wide text-gray-500">V4</div>
+                            <div className="text-sm font-semibold text-gray-900">Matriz simbólica simple (tipo × contexto)</div>
+                            <InfoTooltip
+                              id="viz_v4"
+                              label="¿Qué estoy viendo?"
+                              openId={openTooltipId}
+                              setOpenId={setOpenTooltipId}
+                            >
+                              Cruce simple de tipo y contexto, mostrando el número de observaciones por celda en la vista actual
+                              (filtros aplicados).
+                              <br />
+                              <br />
+                              El sistema <strong>no interpreta</strong>, <strong>no valida</strong> ni{' '}
+                              <strong>extrae conclusiones</strong> a partir de ellos.
+                            </InfoTooltip>
+                          </div>
+
+                          <div className="mt-3 overflow-x-auto">
+                            <table className="w-full border-collapse text-sm">
+                              <thead>
+                                <tr className="text-left text-xs text-gray-600">
+                                  <th className="border-b border-gray-200 px-2 py-2 font-medium">Tipo</th>
+                                  <th className="border-b border-gray-200 px-2 py-2 font-medium">Familiar</th>
+                                  <th className="border-b border-gray-200 px-2 py-2 font-medium">Relacional</th>
+                                  <th className="border-b border-gray-200 px-2 py-2 font-medium">Sistémico</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {(
+                                  [
+                                    { key: 'resonancia', label: 'Resonancia' },
+                                    { key: 'eje', label: 'Eje' },
+                                    { key: 'repeticion', label: 'Repetición' },
+                                    { key: 'nota', label: 'Nota' },
+                                  ] as const
+                                ).map(({ key, label }) => (
+                                  <tr key={`matrix-${key}`} className="text-gray-800">
+                                    <td className="border-b border-gray-100 px-2 py-2 font-medium text-gray-700">{label}</td>
+                                    <td className="border-b border-gray-100 px-2 py-2 tabular-nums">
+                                      {descriptiveVisualizations.byTypeAndContext[key].familiar}
+                                    </td>
+                                    <td className="border-b border-gray-100 px-2 py-2 tabular-nums">
+                                      {descriptiveVisualizations.byTypeAndContext[key].relacional}
+                                    </td>
+                                    <td className="border-b border-gray-100 px-2 py-2 tabular-nums">
+                                      {descriptiveVisualizations.byTypeAndContext[key].sistemico}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </section>
 

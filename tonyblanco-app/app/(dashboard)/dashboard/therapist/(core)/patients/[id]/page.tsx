@@ -74,7 +74,7 @@ export default function TherapistPatientDetailPage() {
     const nextErrors: string[] = [];
 
     const patientPromise = fetchJson(`${API_URL}/therapist/patients/${patientId}/`).catch((err) => {
-      nextErrors.push(`Patient fetch failed: ${err.message}`);
+      nextErrors.push(`Error al cargar consultante: ${err.message}`);
       return null;
     });
     const profilePromise = fetchJson(`${API_URL}/therapist/patients/${patientId}/profile/`).catch((err) => {
@@ -118,8 +118,8 @@ export default function TherapistPatientDetailPage() {
   return (
     <div className="max-w-5xl mx-auto p-6 space-y-6">
       <div className="bg-white border border-gray-200 rounded-lg p-6">
-        <h1 className="text-xl font-semibold text-gray-900">Patient clinical view</h1>
-        <p className="text-sm text-gray-600">Patient ID: {patientId}</p>
+        <h1 className="text-xl font-semibold text-gray-900">Vista clínica del consultante</h1>
+        <p className="text-sm text-gray-600">ID consultante: {patientId}</p>
       </div>
 
       {errors.length > 0 && (
@@ -134,12 +134,12 @@ export default function TherapistPatientDetailPage() {
       )}
 
       <section className="bg-white border border-gray-200 rounded-lg p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-3">Patient info</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-3">Información del consultante</h2>
         {patient ? (
           <div className="text-sm text-gray-700 space-y-2">
-            <div>Name: {valueOrFallback(patient.full_name || patient.legal_full_name || patient.name)}</div>
+            <div>Nombre: {valueOrFallback(patient.full_name || patient.legal_full_name || patient.name)}</div>
             <div>Email: {valueOrFallback(patient.email)}</div>
-            <div>Status: {valueOrFallback(patient.therapy_status || patient.status)}</div>
+            <div>Estado: {valueOrFallback(patient.therapy_status || patient.status)}</div>
           </div>
         ) : (
           <p className="text-sm text-gray-600">No patient data.</p>

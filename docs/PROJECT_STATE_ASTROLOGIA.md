@@ -3,6 +3,15 @@
 ### Estado general
 
 - Estado: estable (FASE 3)
+
+### Incidente de contaminacion cruzada y resolucion
+
+- Sintomas: mezcla accidental de copy/plantillas clinicas (p. ej. "Patient clinical view"), textos en ingles en el Espacio Clinico y opciones fuera de dominio dentro de Astrologia Profesional.
+- Criterio: Astrologia Profesional no puede renderizar vistas clinicas ni depender de legacy; el Espacio Clinico debe estar en espanol y sin acoplamientos a workspaces simbolicos.
+- Resolucion aplicada (quirurgica, sin redisenos):
+  - Restauracion de copy en espanol en el Espacio Clinico (labels/paneles/vista de consultante).
+  - Bloqueo de modulos y opciones de fase posterior en Astrologia Profesional (incluye Compuesta/Davison y overlays simbolicos no permitidos en modo real).
+  - Verificacion de aislamiento: sin imports cruzados entre dominios (clinico ↔ astrologia) y sin `_legacy_*` dentro del workspace de Astrologia.
 - Alcance actual: frontend + capas reales controladas (sin PDFs, sin IA interpretativa, sin lenguaje clínico)
 
 ### Capas reales activas (FASE 3)

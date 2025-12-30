@@ -32,14 +32,14 @@ export default function PanelDock() {
     <aside className={`hidden lg:flex flex-col ${sizeClasses[panelSize]} border-l border-gray-200 bg-white`}>
       <div className="flex items-center justify-between px-3 py-2 border-b border-gray-200">
         <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">
-          Tool panels
+          Paneles
         </span>
         <div className="flex items-center gap-1 text-gray-500">
           <button
             type="button"
             onClick={() => setPanelSize('compact')}
             className="p-1 hover:text-gray-700"
-            aria-label="Compact panels"
+            aria-label="Paneles compactos"
           >
             <Minus className="h-3 w-3" />
           </button>
@@ -47,7 +47,7 @@ export default function PanelDock() {
             type="button"
             onClick={() => setPanelSize('comfortable')}
             className="p-1 hover:text-gray-700"
-            aria-label="Comfortable panels"
+            aria-label="Paneles cómodos"
           >
             <Square className="h-3 w-3" />
           </button>
@@ -55,7 +55,7 @@ export default function PanelDock() {
             type="button"
             onClick={() => setPanelSize('wide')}
             className="p-1 hover:text-gray-700"
-            aria-label="Wide panels"
+            aria-label="Paneles anchos"
           >
             <RectangleVertical className="h-3 w-3" />
           </button>
@@ -77,7 +77,7 @@ export default function PanelDock() {
                     type="button"
                     onClick={() => toggleCollapse(panel.id)}
                     className="p-1 hover:text-gray-700"
-                    aria-label="Collapse panel"
+                    aria-label="Colapsar panel"
                   >
                     <Minus className="h-3 w-3" />
                   </button>
@@ -85,7 +85,7 @@ export default function PanelDock() {
                     type="button"
                     onClick={() => closePanel(panel.id)}
                     className="p-1 hover:text-gray-700"
-                    aria-label="Close panel"
+                    aria-label="Cerrar panel"
                   >
                     <X className="h-3 w-3" />
                   </button>
@@ -99,7 +99,7 @@ export default function PanelDock() {
                     <>
                       <p className="text-xs text-gray-600">{tool.summary}</p>
                       <p className="text-[11px] text-gray-500">
-                        Keep the workspace visible while reviewing this panel.
+                        Mantén el workspace visible mientras revisas este panel.
                       </p>
                     </>
                   )}
@@ -110,7 +110,7 @@ export default function PanelDock() {
         })}
       </div>
       <div className="border-t border-gray-200 px-3 py-2 text-[11px] text-gray-500">
-        Panels stay open while you observe the workspace.
+        Los paneles permanecen abiertos durante la observación.
       </div>
     </aside>
   );

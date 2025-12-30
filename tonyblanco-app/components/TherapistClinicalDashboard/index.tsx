@@ -19,33 +19,33 @@ interface TherapistClinicalDashboardProps {
 const contextSections: ContextSection[] = [
   {
     id: 'overview',
-    label: 'Overview',
-    description: 'Situational awareness',
+    label: 'Resumen',
+    description: 'Contexto situacional',
   },
   {
     id: 'clinical-history',
-    label: 'Clinical history',
-    description: 'Longitudinal context',
+    label: 'Historia clínica',
+    description: 'Contexto longitudinal',
   },
   {
     id: 'bioemotional',
-    label: 'Bio-Emotional',
-    description: 'Symbolic observations',
+    label: 'Bio-Emocional',
+    description: 'Observación simbólica',
   },
   {
     id: 'visualization',
-    label: 'Body-Soul',
-    description: 'Layered visualization',
+    label: 'Cuerpo-Alma',
+    description: 'Visualización por capas',
   },
   {
     id: 'evaluations',
-    label: 'Evaluations',
-    description: 'Assigned tests',
+    label: 'Evaluaciones',
+    description: 'Tests asignados',
   },
   {
     id: 'integrative-notes',
-    label: 'Integrative notes',
-    description: 'Human notes',
+    label: 'Notas integrativas',
+    description: 'Notas humanas',
   },
 ];
 

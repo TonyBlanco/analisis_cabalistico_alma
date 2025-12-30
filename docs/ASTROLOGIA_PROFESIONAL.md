@@ -7,6 +7,13 @@
 - Visualización profesional (SVG) para lectura holística.
 - El sistema evita lenguaje clínico/diagnóstico y no incluye PDFs en las fases actuales.
 
+### Aislamiento por dominios
+
+- Astrologia Profesional vive en su workspace: `tonyblanco-app/app/(dashboard)/dashboard/therapist/(swm)/astrologia/page.tsx` y `tonyblanco-app/components/AstrologyWorkspace/*`.
+- Astrologia Profesional NO debe importar vistas clinicas (`tonyblanco-app/components/clinical/*`) ni usar `_legacy_*`.
+- El Espacio Clinico vive en `tonyblanco-app/app/(dashboard)/dashboard/therapist/(core)/*` y `tonyblanco-app/components/TherapistClinicalDashboard/*`.
+- El Espacio Clinico NO debe importar componentes de Astrologia (`tonyblanco-app/components/AstrologyWorkspace/*`).
+
 ### Motor astronómico (backend existente)
 
 - Swiss Ephemeris (cálculo real).

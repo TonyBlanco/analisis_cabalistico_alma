@@ -111,7 +111,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
 
   // Advanced Transits (A16.3)
   const [showAdvancedTransits, setShowAdvancedTransits] = useState<boolean>(false);
-  const [transitBaseType, setTransitBaseType] = useState<'natal' | 'composite_chart' | 'davison_chart'>('natal');
+  const [transitBaseType] = useState<'natal' | 'composite_chart' | 'davison_chart'>('natal');
   const [advancedTransitDate, setAdvancedTransitDate] = useState<string>(new Date().toISOString().slice(0, 10));
   const [transitsSnapshot, setTransitsSnapshot] = useState<any | null>(null);
   const [transitLoading, setTransitLoading] = useState<boolean>(false);
@@ -1186,6 +1186,8 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                         ))}
                       </select>
                     </div>
+                    {false && (
+                      <>
                       <div className="mt-2 flex items-center gap-2">
                       <button className="px-2 py-1 rounded border bg-white text-sm" onClick={() => {
                         // compute composite from loaded partnerChart
@@ -1320,6 +1322,8 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                         })()}
                       </div>
                     ) : null}
+                      </>
+                    )}
 
                   {/* Secondary Progressions Panel (A17.1) */}
                   {showSecondaryProgressions ? (
@@ -1421,7 +1425,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                     {/* Base selector */}
                     <div className="mb-2 text-sm">
                       <label className="block text-xs text-gray-600">Carta base</label>
-                      <select value={transitBaseType} onChange={(e) => setTransitBaseType(e.target.value as any)} className="mt-1 rounded border px-2 py-1 text-sm">
+                      <select value={transitBaseType} disabled className="mt-1 rounded border px-2 py-1 text-sm">
                         <option value="natal">Natal</option>
                         <option value="composite_chart" disabled={!compositeChart}>Compuesta</option>
                         <option value="davison_chart" disabled={!davisonChart}>Davison</option>

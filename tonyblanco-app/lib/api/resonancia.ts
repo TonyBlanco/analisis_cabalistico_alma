@@ -63,11 +63,13 @@ async function getReadableApiError(response: Response): Promise<string> {
 }
 
 export async function listResonanciaObservations(params: {
-  subjectId: number | string;
+  subjectId: number | string | null | undefined;
   type?: ResonanciaObservationType;
   context?: ResonanciaObservationContext;
   state?: ResonanciaObservationState;
 }): Promise<ResonanciaObservation[]> {
+  if (params.subjectId == null || params.subjectId === '') return [];
+
   const search = new URLSearchParams({ subject: String(params.subjectId) });
   if (params.type) search.set('type', params.type);
   if (params.context) search.set('context', params.context);
@@ -80,6 +82,7 @@ export async function listResonanciaObservations(params: {
   });
 
   if (!response.ok) {
+    if (response.status === 400) return [];
     throw new Error(await getReadableApiError(response));
   }
 

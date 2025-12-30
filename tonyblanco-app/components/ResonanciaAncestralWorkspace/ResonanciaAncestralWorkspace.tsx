@@ -65,7 +65,7 @@ export default function ResonanciaAncestralWorkspace() {
     let isMounted = true;
 
     async function run() {
-      if (!consultante) return;
+      if (!consultante?.id) return;
       setLoading(true);
       setError(null);
       try {
@@ -92,6 +92,13 @@ export default function ResonanciaAncestralWorkspace() {
       isMounted = false;
     };
   }, [consultante, filters.context, filters.state, filters.type]);
+
+  useEffect(() => {
+    if (consultante?.id) return;
+    setObservations([]);
+    setError(null);
+    setLoading(false);
+  }, [consultante]);
 
   const neutralAnchorGraph = useMemo(() => {
     const nodes = new Set<string>();

@@ -35,6 +35,9 @@ class ResonanciaObservationListCreateView(generics.ListCreateAPIView):
     def get_queryset(self):
         user = self.request.user
         subject_id = self.request.query_params.get('subject')
+        if not subject_id:
+            return ResonanciaObservation.objects.none()
+
         patient = _get_owned_patient_or_404(therapist=user, patient_id=subject_id)
 
         qs = ResonanciaObservation.objects.filter(author=user, subject=patient).order_by('-created_at')
@@ -52,7 +55,7 @@ class ResonanciaObservationListCreateView(generics.ListCreateAPIView):
     def list(self, request, *args, **kwargs):
         subject_id = request.query_params.get('subject')
         if not subject_id:
-            return Response({'error': 'subject es requerido.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response([], status=status.HTTP_200_OK)
 
         try:
             return super().list(request, *args, **kwargs)

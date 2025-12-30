@@ -9,12 +9,12 @@ Este documento describe el estado del SWM **Resonancia Ancestral** en fase de re
 En este repositorio no existe un contrato técnico canónico ni una implementación previa verificable del SWM “Resonancia Ancestral”.
 Las referencias externas a “A1–A4, B3, T1–T4” no están documentadas aquí, por lo que no se reconstruyen ni se asumen.
 
-## Reintegración realizada (este commit)
+## Reintegración realizada (base)
 
 - Launcher en sidebar del terapeuta (solo navegación): `tonyblanco-app/app/(dashboard)/dashboard/therapist/components/TherapistSidebar.tsx`
 - Ruta SWM propia: `tonyblanco-app/app/(dashboard)/dashboard/therapist/(swm)/resonancia-ancestral/page.tsx`
 - Workspace aislado (sin clínica, sin legacy): `tonyblanco-app/components/ResonanciaAncestralWorkspace/ResonanciaAncestralWorkspace.tsx`
-- Scaffolding visual T1–T4 **placeholder** (solo lectura, sin inferencias, sin cálculo, sin backend).
+- Scaffolding visual T1–T4 (solo lectura, sin inferencias, sin cálculo, sin backend).
 
 ## Qué NO se toca (innegociable)
 
@@ -22,6 +22,29 @@ Las referencias externas a “A1–A4, B3, T1–T4” no están documentadas aqu
 - Imports desde `_legacy_*`.
 - Guards globales o cambios de requisitos de identidad.
 - APIs backend.
+
+## Release interno — Estado estable
+
+Fecha: 2025-12-30
+
+Commits incluidos (Resonancia Ancestral):
+
+- `a14ae559` — SWM por ruta + launcher en sidebar (sin core, sin legacy).
+- `77096e80` — microcopy simbólico profesional (sin lógica, sin layout).
+- `1d02e02b` — afinación de jerarquía visual y espaciado (sin lógica).
+
+Alcance exacto del release:
+
+- SWM accesible por ruta propia: `/dashboard/therapist/resonancia-ancestral`.
+- UI simbólica read-only (observacional, no clínica).
+- Microcopy actualizado y jerarquía visual afinada.
+
+Qué NO incluye (explícito):
+
+- Cálculo, inferencias, automatización, recomendaciones.
+- Tooltips simbólicos educativos.
+- Leyenda visual simbólica.
+- Integraciones clínicas o cambios en el core del terapeuta.
 
 ## Validación manual
 
@@ -31,4 +54,3 @@ Las referencias externas a “A1–A4, B3, T1–T4” no están documentadas aqu
 4. Click → abre `/dashboard/therapist/resonancia-ancestral`.
 5. Sin consultante activo → muestra mensaje informativo (no bloquea, no crashea).
 6. Con consultante activo → se renderiza UI simbólica (T1–T4) en modo read-only.
-

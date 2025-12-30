@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Activity, HelpCircle } from 'lucide-react';
 import useActiveConsultante from '@/hooks/useActiveConsultante';
 import {
@@ -21,18 +21,49 @@ function parseCommaSeparatedList(raw: string, maxItems: number): string[] {
   return parts.slice(0, maxItems);
 }
 
-function HelpTooltip({ label, children }: { label: string; children: ReactNode }) {
+function InfoTooltip({
+  id,
+  label,
+  openId,
+  setOpenId,
+  children,
+}: {
+  id: string;
+  label: string;
+  openId: string | null;
+  setOpenId: (id: string | null) => void;
+  children: React.ReactNode;
+}) {
+  const isOpen = openId === id;
+
   return (
-    <span className="group relative inline-flex items-center">
+    <span className="relative inline-flex items-center" data-tooltip-root={id}>
       <button
         type="button"
         className="inline-flex items-center text-gray-400 hover:text-gray-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-300 rounded"
         aria-label={label}
+        aria-haspopup="true"
+        aria-expanded={isOpen}
+        aria-controls={`tooltip-${id}`}
+        onClick={() => setOpenId(isOpen ? null : id)}
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') {
+            setOpenId(null);
+          }
+        }}
       >
         <HelpCircle className="h-4 w-4" aria-hidden="true" />
         <span className="sr-only">{label}</span>
       </button>
-      <span className="pointer-events-none absolute left-0 top-full z-20 mt-2 hidden w-80 max-w-[85vw] rounded-lg border border-gray-200 bg-white p-3 text-xs leading-relaxed text-gray-800 shadow-lg group-hover:block group-focus-within:block">
+
+      <span
+        id={`tooltip-${id}`}
+        role="tooltip"
+        className={[
+          'absolute left-0 top-full z-20 mt-2 w-80 max-w-[85vw] rounded-lg border border-gray-200 bg-white p-3 text-xs leading-relaxed text-gray-800 shadow-lg',
+          isOpen ? 'block' : 'hidden',
+        ].join(' ')}
+      >
         {children}
       </span>
     </span>
@@ -46,6 +77,7 @@ export default function ResonanciaAncestralWorkspace() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const nowLabel = useMemo(() => new Date().toLocaleString('es-ES'), []);
+  const [openTooltipId, setOpenTooltipId] = useState<string | null>(null);
 
   const [filters, setFilters] = useState<{
     type?: ResonanciaObservationType;
@@ -117,6 +149,20 @@ export default function ResonanciaAncestralWorkspace() {
     setError(null);
     setLoading(false);
   }, [consultante]);
+
+  useEffect(() => {
+    if (!openTooltipId) return;
+
+    function onPointerDown(event: MouseEvent | TouchEvent) {
+      const target = event.target as Element | null;
+      if (!target) return;
+      const root = target.closest(`[data-tooltip-root="${openTooltipId}"]`);
+      if (!root) setOpenTooltipId(null);
+    }
+
+    document.addEventListener('pointerdown', onPointerDown);
+    return () => document.removeEventListener('pointerdown', onPointerDown);
+  }, [openTooltipId]);
 
   const neutralAnchorGraph = useMemo(() => {
     const nodes = new Set<string>();
@@ -209,11 +255,18 @@ export default function ResonanciaAncestralWorkspace() {
                 <div className="text-xs uppercase tracking-wide text-gray-500">T1</div>
                 <div className="mt-1 flex items-center gap-2">
                   <h3 className="text-lg font-semibold text-gray-900">Mapa de resonancia</h3>
-                  <HelpTooltip label="Mapa de resonancia: ayuda">
+                  <InfoTooltip
+                    id="t1_map"
+                    label="Mapa de resonancia: ayuda"
+                    openId={openTooltipId}
+                    setOpenId={setOpenTooltipId}
+                  >
                     <strong>Mapa de resonancia</strong>
+                    <br />
                     <br />
                     Esta visualización muestra <strong>relaciones simbólicas registradas</strong> entre elementos
                     observados.
+                    <br />
                     <br />
                     • Cada nodo representa un <em>anchor</em> (elemento mencionado en una observación).
                     <br />
@@ -225,7 +278,7 @@ export default function ResonanciaAncestralWorkspace() {
                     <br />
                     <br />
                     Su función es <strong>hacer visible lo que ha sido observado</strong>, no explicar por qué ocurre.
-                  </HelpTooltip>
+                  </InfoTooltip>
                 </div>
                 <p className="mt-2 text-sm leading-relaxed text-gray-600">
                   Visualización neutral basada en anchors registrados. No infiere significados ni jerarquías.
@@ -235,11 +288,20 @@ export default function ResonanciaAncestralWorkspace() {
                   <div>
                     <div className="flex items-center gap-2">
                       <div className="text-xs font-medium text-gray-700">Anchors</div>
-                      <HelpTooltip label="Anchor: ayuda">
+                      <InfoTooltip
+                        id="t1_anchors"
+                        label="Anchor (elemento simbólico): ayuda"
+                        openId={openTooltipId}
+                        setOpenId={setOpenTooltipId}
+                      >
                         <strong>Anchor (elemento simbólico)</strong>
                         <br />
-                        Un anchor es una palabra o referencia que el terapeuta utiliza para nombrar <strong>algo observado</strong>{' '}
+                        <br />
+                        Un anchor es una palabra o referencia que el terapeuta utiliza para nombrar{' '}
+                        <strong>algo observado</strong>
+                        <br />
                         (por ejemplo: una emoción mencionada, una figura familiar, un tema recurrente).
+                        <br />
                         <br />
                         • No es un diagnóstico
                         <br />
@@ -249,7 +311,7 @@ export default function ResonanciaAncestralWorkspace() {
                         <br />
                         <br />
                         Su sentido depende <strong>exclusivamente del contexto profesional del terapeuta</strong>.
-                      </HelpTooltip>
+                      </InfoTooltip>
                     </div>
                     {neutralAnchorGraph.nodes.length ? (
                       <div className="mt-2 flex flex-wrap gap-2">
@@ -270,14 +332,21 @@ export default function ResonanciaAncestralWorkspace() {
                   <div>
                     <div className="flex items-center gap-2">
                       <div className="text-xs font-medium text-gray-700">Enlaces</div>
-                      <HelpTooltip label="Enlace simbólico: ayuda">
+                      <InfoTooltip
+                        id="t1_links"
+                        label="Enlace simbólico: ayuda"
+                        openId={openTooltipId}
+                        setOpenId={setOpenTooltipId}
+                      >
                         <strong>Enlace simbólico</strong>
                         <br />
-                        Un enlace aparece cuando <strong>dos o más anchors</strong> han sido registrados juntos en una observación.
+                        <br />
+                        Un enlace aparece cuando <strong>dos o más anchors</strong> han sido registrados juntos en una
+                        observación.
                         <br />
                         <br />
                         El enlace <strong>solo indica coexistencia</strong>, no relación causal ni explicativa.
-                      </HelpTooltip>
+                      </InfoTooltip>
                     </div>
                     {neutralAnchorGraph.edges.length ? (
                       <ul className="mt-2 space-y-1 text-sm text-gray-700">
@@ -303,8 +372,14 @@ export default function ResonanciaAncestralWorkspace() {
                 <div className="text-xs uppercase tracking-wide text-gray-500">T2</div>
                 <div className="mt-1 flex items-center gap-2">
                   <h3 className="text-lg font-semibold text-gray-900">Ejes ancestrales</h3>
-                  <HelpTooltip label="Eje simbólico: ayuda">
+                  <InfoTooltip
+                    id="t2_axis"
+                    label="Eje simbólico: ayuda"
+                    openId={openTooltipId}
+                    setOpenId={setOpenTooltipId}
+                  >
                     <strong>Eje simbólico</strong>
+                    <br />
                     <br />
                     Un eje representa una <strong>dirección de repetición observada</strong> dentro del registro.
                     <br />
@@ -313,7 +388,7 @@ export default function ResonanciaAncestralWorkspace() {
                     <br />
                     <br />
                     Sirve para <strong>organizar observaciones similares</strong> y facilitar su revisión profesional.
-                  </HelpTooltip>
+                  </InfoTooltip>
                 </div>
                 <p className="mt-2 text-sm leading-relaxed text-gray-600">
                   Visualización de ejes simbólicos recurrentes dentro del sistema relacional. Permite observar
@@ -324,15 +399,22 @@ export default function ResonanciaAncestralWorkspace() {
                   <label className="block">
                     <span className="flex items-center gap-2 text-xs font-medium text-gray-700">
                       Tipo
-                      <HelpTooltip label="Tipo de observación: ayuda">
+                      <InfoTooltip
+                        id="t2_filter_type"
+                        label="Tipo de observación: ayuda"
+                        openId={openTooltipId}
+                        setOpenId={setOpenTooltipId}
+                      >
                         <strong>Tipo de observación</strong>
                         <br />
-                        Filtra el registro según la forma en que fue clasificada la observación (resonancia, eje,
-                        repetición o nota).
+                        <br />
+                        Filtra el registro según la forma en que fue clasificada la observación
+                        <br />
+                        (resonancia, eje, repetición o nota).
                         <br />
                         <br />
                         ⚠️ El filtro <strong>no crea datos nuevos</strong> ni modifica el contenido.
-                      </HelpTooltip>
+                      </InfoTooltip>
                     </span>
                     <select
                       className="mt-1 w-full rounded-md border border-gray-200 bg-white px-2 py-2 text-sm text-gray-900"
@@ -353,15 +435,22 @@ export default function ResonanciaAncestralWorkspace() {
                   <label className="block">
                     <span className="flex items-center gap-2 text-xs font-medium text-gray-700">
                       Contexto
-                      <HelpTooltip label="Contexto simbólico: ayuda">
+                      <InfoTooltip
+                        id="t2_filter_context"
+                        label="Contexto simbólico: ayuda"
+                        openId={openTooltipId}
+                        setOpenId={setOpenTooltipId}
+                      >
                         <strong>Contexto simbólico</strong>
                         <br />
-                        Describe el ámbito desde el cual se realizó la observación (familiar, relacional, sistémico,
-                        etc.).
+                        <br />
+                        Describe el ámbito desde el cual se realizó la observación
+                        <br />
+                        (familiar, relacional, sistémico, etc.).
                         <br />
                         <br />
                         El contexto <strong>no define significado</strong>, solo <strong>sitúa la observación</strong>.
-                      </HelpTooltip>
+                      </InfoTooltip>
                     </span>
                     <select
                       className="mt-1 w-full rounded-md border border-gray-200 bg-white px-2 py-2 text-sm text-gray-900"
@@ -381,14 +470,20 @@ export default function ResonanciaAncestralWorkspace() {
                   <label className="block">
                     <span className="flex items-center gap-2 text-xs font-medium text-gray-700">
                       Estado
-                      <HelpTooltip label="Estado de la observación: ayuda">
+                      <InfoTooltip
+                        id="t2_filter_state"
+                        label="Estado de la observación: ayuda"
+                        openId={openTooltipId}
+                        setOpenId={setOpenTooltipId}
+                      >
                         <strong>Estado de la observación</strong>
+                        <br />
                         <br />
                         Indica si la observación está activa o latente dentro del proceso.
                         <br />
                         <br />
                         No implica gravedad, relevancia ni prioridad.
-                      </HelpTooltip>
+                      </InfoTooltip>
                     </span>
                     <select
                       className="mt-1 w-full rounded-md border border-gray-200 bg-white px-2 py-2 text-sm text-gray-900"
@@ -441,6 +536,14 @@ export default function ResonanciaAncestralWorkspace() {
                             <span className="rounded-full bg-white px-2 py-1">{obs.type}</span>
                             <span className="rounded-full bg-white px-2 py-1">{obs.context}</span>
                             <span className="rounded-full bg-white px-2 py-1">{obs.state}</span>
+                            <InfoTooltip
+                              id={`t3_item_${obs.id}`}
+                              label="Entrada: ayuda"
+                              openId={openTooltipId}
+                              setOpenId={setOpenTooltipId}
+                            >
+                              Esta entrada refleja <strong>exactamente lo que fue registrado</strong>, sin análisis automático.
+                            </InfoTooltip>
                           </div>
                           <div className="mt-2 text-sm text-gray-900">{obs.statement}</div>
                           {(obs.tags?.length || obs.anchors?.length) ? (
@@ -482,7 +585,12 @@ export default function ResonanciaAncestralWorkspace() {
                 <div className="text-xs uppercase tracking-wide text-gray-500">T4</div>
                 <div className="mt-1 flex items-center gap-2">
                   <h3 className="text-lg font-semibold text-gray-900">Registro</h3>
-                  <HelpTooltip label="Registro observacional: ayuda">
+                  <InfoTooltip
+                    id="t4_title"
+                    label="Registro observacional: ayuda"
+                    openId={openTooltipId}
+                    setOpenId={setOpenTooltipId}
+                  >
                     <strong>Registro observacional</strong>
                     <br />
                     <br />
@@ -490,7 +598,7 @@ export default function ResonanciaAncestralWorkspace() {
                     <br />
                     <br />
                     El lenguaje utilizado es responsabilidad profesional del terapeuta.
-                  </HelpTooltip>
+                  </InfoTooltip>
                 </div>
                 <p className="mt-2 text-sm leading-relaxed text-gray-600">
                   Espacio de registro manual para notas simbólicas del proceso. No genera conclusiones automáticas ni recomendaciones.
@@ -633,7 +741,12 @@ export default function ResonanciaAncestralWorkspace() {
                   <label className="block">
                     <span className="flex items-center gap-2 text-xs font-medium text-gray-700">
                       Observación
-                      <HelpTooltip label="Cómo redactar una observación: ayuda">
+                      <InfoTooltip
+                        id="t4_statement"
+                        label="Cómo redactar una observación: ayuda"
+                        openId={openTooltipId}
+                        setOpenId={setOpenTooltipId}
+                      >
                         <strong>Cómo redactar una observación</strong>
                         <br />
                         <br />
@@ -649,7 +762,7 @@ export default function ResonanciaAncestralWorkspace() {
                         ❌ Evite diagnósticos
                         <br />
                         ❌ Evite conclusiones cerradas
-                      </HelpTooltip>
+                      </InfoTooltip>
                     </span>
                     <textarea
                       className="mt-1 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900"

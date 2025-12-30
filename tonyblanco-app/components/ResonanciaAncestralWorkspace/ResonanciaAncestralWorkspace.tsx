@@ -27,7 +27,6 @@ export default function ResonanciaAncestralWorkspace() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const printTimestamp = useMemo(() => new Date().toLocaleString('es-ES'), []);
 
   const [filters, setFilters] = useState<{
     type?: ResonanciaObservationType;
@@ -174,20 +173,13 @@ export default function ResonanciaAncestralWorkspace() {
           </div>
         ) : (
           <div className="space-y-6">
-            <div className="hidden print:block rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900">
-              <div className="font-semibold">Resonancia Ancestral — Vista actual</div>
-              <div className="mt-1 text-xs text-gray-600">
-                Consultante: {consultante.nombre_completo} ({identityLabel}) · Fecha/Hora: {printTimestamp}
-              </div>
-              <div className="mt-2 text-xs text-gray-600">
-                Filtros: tipo={filters.type ?? 'todos'} · contexto={filters.context ?? 'todos'} · estado=
-                {filters.state ?? 'todos'}
-              </div>
-            </div>
-
             <div className="rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm leading-relaxed text-gray-700">
               Este espacio permite observar patrones simbólicos y relacionales del sistema. No realiza inferencias
               automáticas ni sustituye la lectura profesional del terapeuta.
+            </div>
+            <div className="rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700">
+              Aviso: mantenga el lenguaje en modo observacional (descriptivo), evitando conclusiones automáticas o
+              diagnósticos.
             </div>
 
             <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">

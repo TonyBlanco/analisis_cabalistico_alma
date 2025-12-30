@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import PatientProfileView from '@/components/patient/PatientProfileView';
 import PatientProfileEditor from '@/components/patient/PatientProfileEditor';
 import dynamic from 'next/dynamic'
+import { getActivePatient, setActivePatientId } from '@/lib/active-patient';
 
 import { getApiBaseUrl } from '@/lib/api-base';
 import { getAuthToken } from '@/lib/api';
@@ -103,6 +104,30 @@ export default function TherapistPatientDetailPage() {
     setAnalysisRecords(Array.isArray(analysisData) ? analysisData : (analysisData?.results || []));
     setErrors(nextErrors);
     setLoading(false);
+
+    // Sync: if this route successfully loads a consultante but global context is empty/incomplete,
+    // inject it so the header and Astrology guard unlock automatically.
+    const numericPatientId = Number(patientId);
+    if (!Number.isNaN(numericPatientId)) {
+      const active = getActivePatient();
+      const patientName =
+        profileData?.legal_full_name ||
+        profileData?.full_name ||
+        patientData?.legal_full_name ||
+        patientData?.full_name ||
+        patientData?.name ||
+        null;
+
+      const shouldInject =
+        !active ||
+        active.id !== numericPatientId ||
+        (patientName && !active.name);
+
+      if (shouldInject) {
+        setActivePatientId(numericPatientId, patientName);
+        window.dispatchEvent(new Event('activePatientChanged'));
+      }
+    }
   };
 
   if (loading) {

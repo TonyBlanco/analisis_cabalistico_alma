@@ -18,6 +18,7 @@ from .models import (
     Resource,
     UserResourceAccess,
     TherapistHolisticConfig,
+    ResonanciaObservation,
 )
 from .birth_data_model import UserBirthData
 from django.contrib.auth.models import User
@@ -991,3 +992,61 @@ class TherapistHolisticConfigSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(f'Invalid weight for {key}: {weight}')
         
         return value
+
+
+class ResonanciaObservationSerializer(serializers.ModelSerializer):
+    """Serializer para ResonanciaObservation (registro simbólico manual)."""
+
+    author = serializers.PrimaryKeyRelatedField(read_only=True)
+
+    class Meta:
+        model = ResonanciaObservation
+        fields = [
+            'id',
+            'subject',
+            'author',
+            'type',
+            'source',
+            'context',
+            'state',
+            'anchors',
+            'tags',
+            'statement',
+            'created_at',
+            'updated_at',
+        ]
+        read_only_fields = ['id', 'author', 'created_at', 'updated_at']
+
+    def validate_statement(self, value):
+        cleaned = (value or '').strip()
+        if not cleaned:
+            raise serializers.ValidationError('statement es obligatorio.')
+        return cleaned
+
+    def _clean_list(self, items, *, field_name: str, max_items: int):
+        if items is None:
+            return []
+        if not isinstance(items, list):
+            raise serializers.ValidationError({field_name: 'Debe ser una lista.'})
+
+        cleaned: list[str] = []
+        for raw in items:
+            if raw is None:
+                continue
+            if not isinstance(raw, str):
+                raise serializers.ValidationError({field_name: 'Todos los elementos deben ser strings.'})
+            candidate = raw.strip()
+            if not candidate:
+                continue
+            cleaned.append(candidate)
+
+        if len(cleaned) > max_items:
+            raise serializers.ValidationError({field_name: f'Máximo {max_items} elementos.'})
+
+        return cleaned
+
+    def validate_anchors(self, value):
+        return self._clean_list(value, field_name='anchors', max_items=50)
+
+    def validate_tags(self, value):
+        return self._clean_list(value, field_name='tags', max_items=30)

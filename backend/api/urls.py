@@ -118,6 +118,10 @@ from .utils.symbolic_interpreter_ai import (
     generate_symbolic_interpretation_view,
     symbolic_interpreter_status_view,
 )
+from .resonancia_views import (
+    ResonanciaObservationListCreateView,
+    ResonanciaObservationDetailView,
+)
 
 urlpatterns = [
     # ⚠️ ENDPOINTS TEMPORALES - ELIMINAR DESPUÉS DE USAR ⚠️
@@ -254,6 +258,11 @@ urlpatterns = [
 
     # Dominio bio-emocional & árbol transgeneracional (aislado)
     path('bioemotional/', include('api.bioemotional.urls', namespace='bioemotional')),
+
+    # Resonancia Ancestral (observaciones simbólicas manuales, sin inferencias)
+    path('resonancia/observations/', ResonanciaObservationListCreateView.as_view(), name='resonancia_observations'),
+    path('resonancia/observations/<uuid:pk>/', ResonanciaObservationDetailView.as_view(), name='resonancia_observation_detail'),
+
     # Estado simbolico estructural (TreeStructuralState v0.1)
     path('symbolic/tree-structural-state/', TreeStructuralStateView.as_view(), name='tree_structural_state'),
     

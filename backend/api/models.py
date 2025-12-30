@@ -1220,3 +1220,70 @@ class TherapistHolisticConfig(models.Model):
     def __str__(self):
         return f'Configuración MSHE de {self.therapist.username}'
 
+
+class ResonanciaObservation(models.Model):
+    """Observación simbólica manual (Resonancia Ancestral).
+
+    Modelo aislado: persiste registro observacional sin inferencias, sin scoring y sin automatización.
+    """
+
+    TYPE_CHOICES = [
+        ('resonancia', 'Resonancia'),
+        ('eje', 'Eje'),
+        ('repeticion', 'Repetición'),
+        ('nota', 'Nota'),
+    ]
+
+    SOURCE_CHOICES = [
+        ('observacion_directa', 'Observación directa'),
+        ('registro_manual', 'Registro manual'),
+    ]
+
+    CONTEXT_CHOICES = [
+        ('familiar', 'Familiar'),
+        ('relacional', 'Relacional'),
+        ('sistemico', 'Sistémico'),
+    ]
+
+    STATE_CHOICES = [
+        ('activo', 'Activo'),
+        ('latente', 'Latente'),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    subject = models.ForeignKey(
+        Patient,
+        on_delete=models.CASCADE,
+        related_name='resonancia_observations',
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='resonancia_observations',
+        limit_choices_to={'profile__user_type': 'therapist'},
+    )
+
+    type = models.CharField(max_length=16, choices=TYPE_CHOICES)
+    source = models.CharField(max_length=32, choices=SOURCE_CHOICES, default='registro_manual')
+    context = models.CharField(max_length=16, choices=CONTEXT_CHOICES)
+    state = models.CharField(max_length=16, choices=STATE_CHOICES)
+
+    anchors = models.JSONField(default=list, blank=True)
+    tags = models.JSONField(default=list, blank=True)
+    statement = models.TextField()
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Observación (Resonancia)'
+        verbose_name_plural = 'Observaciones (Resonancia)'
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['subject', '-created_at'], name='res_subj_created_idx'),
+            models.Index(fields=['author', '-created_at'], name='res_auth_created_idx'),
+        ]
+
+    def __str__(self) -> str:  # pragma: no cover
+        return f'ResonanciaObservation {self.type} ({self.subject_id})'
+

@@ -40,6 +40,12 @@ interface AstrologySidebarProps {
   setDevelopmentStage?: (v: 'off' | 'early_childhood' | 'childhood_early' | 'childhood_middle' | 'adolescence' | 'young_adult') => void;
   visualStyle?: 'classic' | 'huber';
   setVisualStyle?: (v: 'classic' | 'huber') => void;
+  mode?: 'symbolic' | 'real';
+  layerAvailability?: {
+    transits?: boolean;
+    progressions?: boolean;
+    solarReturn?: boolean;
+  };
 }
 
 const HOUSE_OPTIONS: Array<{ code: string; name: string; desc?: string }> = [
@@ -94,8 +100,12 @@ export default function AstrologySidebar({
   setDevelopmentStage,
   visualStyle = 'classic',
   setVisualStyle,
+  mode = 'symbolic',
+  layerAvailability,
 }: AstrologySidebarProps) {
+  const isRealMode = mode === 'real';
   const canUseForecast = Boolean(hasIdentity);
+  const available = layerAvailability ?? {};
   const isLayerActive = (layer: string) => Boolean(activeLayers && activeLayers.has(layer));
   const hasAnySymbolicTemporalLayer = Boolean(
     activeLayers && (activeLayers.has('transits') || activeLayers.has('progressions') || activeLayers.has('solarArc'))
@@ -127,22 +137,41 @@ export default function AstrologySidebar({
     layer: 'transits' | 'progressions' | 'solarArc';
     label: string;
     tooltip: string;
-  }) => (
-    <div className={`flex items-center justify-between px-2 py-1 border rounded ${canUseForecast ? 'bg-white border-gray-200' : 'bg-gray-50 border-gray-200 opacity-60'}`}>
-      <div className="text-[13px]" title={tooltip}>
-        {label} · <span className="text-gray-500">lectura simbólica</span>
+  }) => {
+    const isSupportedInReal = layer === 'transits' || layer === 'progressions';
+    const layerAvailable = isRealMode ? (isSupportedInReal && Boolean((available as any)[layer])) : true;
+    const disabled =
+      !canUseForecast ||
+      !onToggleLayer ||
+      (isRealMode && !layerAvailable) ||
+      (isRealMode && layer === 'solarArc');
+
+    const stateLabel = isRealMode ? 'cálculo real' : 'lectura simbólica';
+    const title = !canUseForecast
+      ? 'Requiere identidad válida (fecha de nacimiento)'
+      : isRealMode && layer === 'solarArc'
+        ? 'Disponible en fase posterior (requiere soporte de cálculo backend).'
+        : isRealMode && !layerAvailable
+          ? 'Disponible tras recalcular la carta natal (si el backend devuelve esta capa).'
+          : tooltip;
+
+    return (
+      <div className={`flex items-center justify-between px-2 py-1 border rounded ${disabled ? 'bg-gray-50 border-gray-200 opacity-70' : 'bg-white border-gray-200'}`}>
+        <div className="text-[13px]" title={title}>
+          {label} · <span className="text-gray-500">{stateLabel}</span>
+        </div>
+        <label className="inline-flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={isLayerActive(layer)}
+            onChange={() => onToggleLayer?.(layer)}
+            disabled={disabled}
+            title={title}
+          />
+        </label>
       </div>
-      <label className="inline-flex items-center gap-2 text-sm">
-        <input
-          type="checkbox"
-          checked={isLayerActive(layer)}
-          onChange={() => onToggleLayer && onToggleLayer(layer)}
-          disabled={!canUseForecast}
-          title={!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : tooltip}
-        />
-      </label>
-    </div>
-  );
+    );
+  };
   return (
     <aside className="w-72 border-r border-gray-200 bg-white flex flex-col">
       <div className="px-4 py-4 border-b border-gray-200">
@@ -159,16 +188,16 @@ export default function AstrologySidebar({
             {ASTRO_METHODS.filter(m => m.category === 'natal').map((m) => (
               m.id === 'huber' ? (
                 <div key={m.id} className={`flex items-center justify-between px-2 py-1 border rounded ${canUseForecast ? 'bg-white border-gray-200' : 'bg-gray-50 border-gray-200 opacity-60'}`}>
-                  <div className="text-sm" title="Disponible en modo simbólico. Cambia la representación visual sin recalcular ni modificar datos.">
-                    {m.name} · <span className="text-gray-500">disponible en modo simbólico</span>
+                  <div className="text-sm" title={isRealMode ? 'Disponible en fase posterior.' : 'Disponible en modo simbólico. Cambia la representación visual sin recalcular ni modificar datos.'}>
+                    {m.name} · <span className="text-gray-500">{isRealMode ? 'fase posterior' : 'disponible en modo simbólico'}</span>
                   </div>
                   <label className="inline-flex items-center gap-2 text-sm">
                     <input
                       type="checkbox"
                       checked={visualStyle === 'huber'}
                       onChange={(e) => setVisualStyle && setVisualStyle(e.target.checked ? 'huber' : 'classic')}
-                      disabled={!canUseForecast}
-                      title={!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : 'Estilo HUBER: lectura psicológica simbólica (no astronómica). No recalcula ni modifica datos.'}
+                      disabled={!canUseForecast || isRealMode}
+                      title={isRealMode ? 'Disponible en fase posterior.' : (!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : 'Estilo HUBER: lectura psicológica simbólica (no astronómica). No recalcula ni modifica datos.')}
                     />
                   </label>
                 </div>
@@ -215,8 +244,8 @@ export default function AstrologySidebar({
                   type="checkbox"
                   checked={Boolean(symbolicDoubleWheel)}
                   onChange={(e) => setSymbolicDoubleWheel && setSymbolicDoubleWheel(e.target.checked)}
-                  disabled={!canUseSymbolicDoubleWheel}
-                  title={!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : (!hasAnySymbolicTemporalLayer ? 'Activa al menos una capa temporal simbólica' : 'Doble rueda simbólica (solo visual)')}
+                  disabled={!canUseSymbolicDoubleWheel || isRealMode}
+                  title={isRealMode ? 'Disponible en fase posterior.' : (!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : (!hasAnySymbolicTemporalLayer ? 'Activa al menos una capa temporal simbólica' : 'Doble rueda simbólica (solo visual)'))}
                 />
               </label>
             </div>
@@ -263,9 +292,9 @@ export default function AstrologySidebar({
               <div className="flex items-center justify-between">
                 <div
                   className="text-[13px]"
-                  title="Retorno Solar · capa anual simbólica. No corresponde a un cálculo astronómico real."
+                  title={isRealMode ? 'Retorno Solar (cálculo real): calculado por el motor Swiss Ephemeris al recalcular la carta base.' : 'Retorno Solar · capa anual simbólica. No corresponde a un cálculo astronómico real.'}
                 >
-                  Solar · <span className="text-gray-500">capa anual simbólica</span>
+                  Solar · <span className="text-gray-500">{isRealMode ? 'cálculo real' : 'capa anual simbólica'}</span>
                 </div>
                 <label className="inline-flex items-center gap-2 text-sm">
                   <input
@@ -274,10 +303,12 @@ export default function AstrologySidebar({
                     onChange={(e) => {
                       const next = e.target.checked;
                       if (onToggleLayer) onToggleLayer('return_solar');
-                      if (setSymbolicSolarReturnYear) setSymbolicSolarReturnYear(next ? (symbolicSolarReturnYear ?? new Date().getFullYear()) : null);
+                      if (!isRealMode && setSymbolicSolarReturnYear) setSymbolicSolarReturnYear(next ? (symbolicSolarReturnYear ?? new Date().getFullYear()) : null);
                     }}
-                    disabled={!canUseReturns}
-                    title={!canUseReturns ? 'Requiere identidad válida (fecha de nacimiento)' : 'Activar capa anual simbólica (solo visual)'}
+                    disabled={!canUseReturns || (isRealMode && !available.solarReturn) || !onToggleLayer}
+                    title={isRealMode
+                      ? (!available.solarReturn ? 'Disponible tras recalcular la carta natal (si el backend devuelve solarReturn).' : 'Activar/desactivar capa anual (cálculo real).')
+                      : (!canUseReturns ? 'Requiere identidad válida (fecha de nacimiento)' : 'Activar capa anual simbólica (solo visual)')}
                   />
                 </label>
               </div>
@@ -292,7 +323,7 @@ export default function AstrologySidebar({
                     const value = Number(e.target.value);
                     setSymbolicSolarReturnYear(Number.isFinite(value) ? value : null);
                   }}
-                  disabled={!canUseReturns}
+                  disabled={!canUseReturns || isRealMode}
                   min={1900}
                   max={2100}
                 />
@@ -303,9 +334,9 @@ export default function AstrologySidebar({
               <div className="flex items-center justify-between">
                 <div
                   className="text-[13px]"
-                  title="Retorno Lunar · capa mensual simbólica. No corresponde a un cálculo astronómico real."
+                  title={isRealMode ? 'Disponible en fase posterior (requiere soporte de cálculo backend).' : 'Retorno Lunar · capa mensual simbólica. No corresponde a un cálculo astronómico real.'}
                 >
-                  Lunar · <span className="text-gray-500">capa mensual simbólica</span>
+                  Lunar · <span className="text-gray-500">{isRealMode ? 'fase posterior' : 'capa mensual simbólica'}</span>
                 </div>
                 <label className="inline-flex items-center gap-2 text-sm">
                   <input
@@ -314,10 +345,10 @@ export default function AstrologySidebar({
                     onChange={(e) => {
                       const next = e.target.checked;
                       if (onToggleLayer) onToggleLayer('return_lunar');
-                      if (setSymbolicLunarReturnDate) setSymbolicLunarReturnDate(next ? (symbolicLunarReturnDate ?? new Date().toISOString().slice(0, 10)) : null);
+                      if (!isRealMode && setSymbolicLunarReturnDate) setSymbolicLunarReturnDate(next ? (symbolicLunarReturnDate ?? new Date().toISOString().slice(0, 10)) : null);
                     }}
-                    disabled={!canUseReturns}
-                    title={!canUseReturns ? 'Requiere identidad válida (fecha de nacimiento)' : 'Activar capa mensual simbólica (solo visual)'}
+                    disabled={!canUseReturns || isRealMode || !onToggleLayer}
+                    title={isRealMode ? 'Disponible en fase posterior (requiere soporte de cálculo backend).' : (!canUseReturns ? 'Requiere identidad válida (fecha de nacimiento)' : 'Activar capa mensual simbólica (solo visual)')}
                   />
                 </label>
               </div>
@@ -328,22 +359,22 @@ export default function AstrologySidebar({
                   className="rounded border border-gray-200 px-2 py-1 text-[12px]"
                   value={symbolicLunarReturnDate ?? new Date().toISOString().slice(0, 10)}
                   onChange={(e) => setSymbolicLunarReturnDate && setSymbolicLunarReturnDate(e.target.value || null)}
-                  disabled={!canUseReturns}
+                  disabled={!canUseReturns || isRealMode}
                 />
               </div>
             </div>
 
             <div className={`flex items-center justify-between px-2 py-1 border rounded ${canUseReturns ? 'bg-white border-gray-200' : 'bg-gray-50 border-gray-200 opacity-60'}`}>
               <div className="text-[13px]" title="Capa planetaria simbólica. No predictiva. Usa los planetas ya visibles, sin efemérides ni fechas.">
-                Planetarios · <span className="text-gray-500">capa simbólica</span>
+                Planetarios · <span className="text-gray-500">{isRealMode ? 'fase posterior' : 'capa simbólica'}</span>
               </div>
               <label className="inline-flex items-center gap-2 text-sm">
                 <input
                   type="checkbox"
                   checked={Boolean(isPlanetaryLayerActive)}
                   onChange={() => onToggleLayer && onToggleLayer('planetary')}
-                  disabled={!canUseReturns}
-                  title={!canUseReturns ? 'Requiere identidad válida (fecha de nacimiento)' : 'Capa planetaria simbólica. No predictiva.'}
+                  disabled={!canUseReturns || isRealMode || !onToggleLayer}
+                  title={isRealMode ? 'Disponible en fase posterior.' : (!canUseReturns ? 'Requiere identidad válida (fecha de nacimiento)' : 'Capa planetaria simbólica. No predictiva.')}
                 />
               </label>
             </div>
@@ -358,9 +389,9 @@ export default function AstrologySidebar({
               <div className="flex items-center justify-between">
                 <div
                   className="text-[13px]"
-                  title="Armónicos (modo simbólico): representan patrones de resonancia psicológica. No son cálculos astronómicos."
+                  title={isRealMode ? 'Disponible en fase posterior.' : 'Armónicos (modo simbólico): representan patrones de resonancia psicológica. No son cálculos astronómicos.'}
                 >
-                  Armónicos · <span className="text-gray-500">disponible (simbólico)</span>
+                  Armónicos · <span className="text-gray-500">{isRealMode ? 'fase posterior' : 'disponible (simbólico)'}</span>
                 </div>
               </div>
               <div className="mt-1 flex items-center justify-between gap-2">
@@ -372,8 +403,8 @@ export default function AstrologySidebar({
                     const v = e.target.value as 'off' | 'h5' | 'h7' | 'h9' | 'h11' | 'h13' | 'h16';
                     setHarmonicMode && setHarmonicMode(v);
                   }}
-                  disabled={!canUseForecast}
-                  title={!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : 'Armónicos (modo simbólico): patrones de resonancia psicológica. No matemático ni predictivo.'}
+                  disabled={!canUseForecast || isRealMode}
+                  title={isRealMode ? 'Disponible en fase posterior.' : (!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : 'Armónicos (modo simbólico): patrones de resonancia psicológica. No matemático ni predictivo.')}
                 >
                   <option value="off">Off</option>
                   <option value="h5">h5 · creatividad / voluntad / diseño</option>
@@ -388,15 +419,15 @@ export default function AstrologySidebar({
 
             <div className={`flex items-center justify-between px-2 py-1 border rounded ${canUseForecast ? 'bg-white border-gray-200' : 'bg-gray-50 border-gray-200 opacity-60'}`}>
               <div className="text-[13px]" title="Persona Chart — lectura simbólica. No crea una carta nueva; solo cambia el énfasis visual.">
-                Persona Chart · <span className="text-gray-500">lectura simbólica</span>
+                Persona Chart · <span className="text-gray-500">{isRealMode ? 'fase posterior' : 'lectura simbólica'}</span>
               </div>
               <label className="inline-flex items-center gap-2 text-sm">
                 <input
                   type="checkbox"
                   checked={Boolean(isPersonaActive)}
                   onChange={() => setPersonaMode && setPersonaMode(isPersonaActive ? 'off' : 'social')}
-                  disabled={!canUseForecast}
-                  title={!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : 'Persona Chart (simbólico): representa la identidad que el individuo muestra o utiliza en un contexto específico. No es una carta astronómica.'}
+                  disabled={!canUseForecast || isRealMode}
+                  title={isRealMode ? 'Disponible en fase posterior.' : (!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : 'Persona Chart (simbólico): representa la identidad que el individuo muestra o utiliza en un contexto específico. No es una carta astronómica.')}
                 />
               </label>
             </div>
@@ -409,8 +440,8 @@ export default function AstrologySidebar({
                   const v = e.target.value as 'off' | 'social' | 'professional' | 'intimate';
                   setPersonaMode && setPersonaMode(v);
                 }}
-                disabled={!canUseForecast}
-                title={!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : 'Persona Chart (simbólico): representa la identidad visible/adaptativa según contexto. No es una carta astronómica.'}
+                disabled={!canUseForecast || isRealMode}
+                title={isRealMode ? 'Disponible en fase posterior.' : (!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : 'Persona Chart (simbólico): representa la identidad visible/adaptativa según contexto. No es una carta astronómica.')}
               >
                 <option value="off">Off</option>
                 <option value="social">Social · “Cómo me ven”</option>
@@ -422,15 +453,15 @@ export default function AstrologySidebar({
             <div className={`px-2 py-2 border rounded ${canUseForecast ? 'bg-white border-gray-200' : 'bg-gray-50 border-gray-200 opacity-60'}`}>
               <div className="flex items-center justify-between">
                 <div className="text-[13px]" title="Relocación simbólica (no astronómica). No cambia coordenadas reales ni recalcula.">
-                  Relocación · <span className="text-gray-500">simbólica</span>
+                  Relocación · <span className="text-gray-500">{isRealMode ? 'fase posterior' : 'simbólica'}</span>
                 </div>
                 <label className="inline-flex items-center gap-2 text-sm">
                   <input
                     type="checkbox"
                     checked={Boolean(isRelocationActive)}
                     onChange={() => setRelocationMode && setRelocationMode(isRelocationActive ? 'off' : 'home')}
-                    disabled={!canUseForecast}
-                    title={!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : 'Relocación simbólica: describe cómo el entorno influye en la experiencia vital. No es una carta astronómica relocada.'}
+                    disabled={!canUseForecast || isRealMode}
+                    title={isRealMode ? 'Disponible en fase posterior.' : (!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : 'Relocación simbólica: describe cómo el entorno influye en la experiencia vital. No es una carta astronómica relocada.')}
                   />
                 </label>
               </div>
@@ -443,8 +474,8 @@ export default function AstrologySidebar({
                     const v = e.target.value as 'off' | 'home' | 'work' | 'travel' | 'abroad';
                     setRelocationMode && setRelocationMode(v);
                   }}
-                  disabled={!canUseForecast}
-                  title={!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : 'Relocación simbólica: describe cómo el entorno influye en la experiencia vital. No es una carta astronómica relocada.'}
+                  disabled={!canUseForecast || isRealMode}
+                  title={isRealMode ? 'Disponible en fase posterior.' : (!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : 'Relocación simbólica: describe cómo el entorno influye en la experiencia vital. No es una carta astronómica relocada.')}
                 >
                   <option value="off">Off</option>
                   <option value="home">Hogar · “Dónde me siento contenido”</option>
@@ -546,8 +577,8 @@ export default function AstrologySidebar({
             </div>
             <div className={`px-2 py-2 border rounded ${canUseForecast ? 'bg-white border-gray-200' : 'bg-gray-50 border-gray-200 opacity-60'}`}>
               <div className="flex items-center justify-between">
-                <div className="text-[13px]" title="Estrellas fijas (modo simbólico): arquetipos culturales utilizados como referencias psicológicas. No son predicciones.">
-                  Estrellas fijas · <span className="text-gray-500">modo simbólico (arquetipos)</span>
+                <div className="text-[13px]" title={isRealMode ? 'Disponible en fase posterior.' : 'Estrellas fijas (modo simbólico): arquetipos culturales utilizados como referencias psicológicas. No son predicciones.'}>
+                  Estrellas fijas · <span className="text-gray-500">{isRealMode ? 'fase posterior' : 'modo simbólico (arquetipos)'}</span>
                 </div>
                 <span className="text-[11px] text-gray-500">{fixedStars.primary ? 'activo' : 'off'}</span>
               </div>
@@ -558,8 +589,8 @@ export default function AstrologySidebar({
                     type="checkbox"
                     checked={Boolean(fixedStars.primary)}
                     onChange={(e) => setFixedStars && setFixedStars({ ...fixedStars, primary: e.target.checked })}
-                    disabled={!canUseForecast}
-                    title={!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : 'Estrellas fijas (modo simbólico): arquetipos culturales. No predictivo.'}
+                    disabled={!canUseForecast || isRealMode}
+                    title={isRealMode ? 'Disponible en fase posterior.' : (!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : 'Estrellas fijas (modo simbólico): arquetipos culturales. No predictivo.')}
                   />
                 </label>
                 <label className="flex items-center justify-between text-[13px] opacity-60">

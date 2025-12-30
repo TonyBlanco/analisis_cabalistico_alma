@@ -1,94 +1,68 @@
 ---
 
-### 1. Propósito del Módulo
+## Astrología Profesional — Frontend (estado operativo)
 
-* Astrología profesional holística
-* Lectura simbólica
-* Uso terapéutico no clínico
-* Integración futura con análisis psicológicos (Jung / Liz Greene)
+### Propósito
 
----
+- Visualización profesional (SVG) para lectura holística.
+- El sistema evita lenguaje clínico/diagnóstico y no incluye PDFs en las fases actuales.
 
-### 2. Motor Astronómico
+### Motor astronómico (backend existente)
 
-* Swiss Ephemeris
-* Tropical
-* Sistema de casas: Placidus
-* Precisión astronómica real
-* Cálculo bajo demanda (no automático)
+- Swiss Ephemeris (cálculo real).
+- Cálculo **bajo demanda** (no automático) desde el frontend mediante el botón **“Recalcular carta”**.
 
----
+### Identidad canónica (requerida para cálculo real)
 
-### 3. Identidad Canónica del Consultante
+Para **calcular** y persistir una carta natal real se requiere identidad completa:
 
-Requisitos mínimos para renderizar carta:
+- Fecha, hora y zona horaria
+- Ciudad/país + coordenadas (lat/lon)
 
-* fecha_nacimiento
-* coordenadas
-* identidad válida activa
+Si falta información: la UI puede renderizar placeholder, pero **no dispara cálculo**.
 
-Si no existe → **bloqueo visual explícito**
+### Flujo de cálculo (FASE 3)
 
----
+1. El terapeuta abre `/dashboard/therapist/astrologia`.
+2. Al pulsar **“Recalcular carta”**:
+   - Se ejecuta el cálculo real de la carta natal (backend).
+   - El backend puede devolver un `analysis_result` con técnicas adicionales (si están habilitadas en servidor).
+3. La rueda se refresca automáticamente con los datos calculados; no existe recálculo automático por cambios de UI.
 
-### 4. Modos Implementados (A1–A14)
+### Capas reales activadas (FASE 3)
 
-#### Activos
+Estas capas se consideran **reales** porque provienen del `analysis_result` del backend (Swiss Ephemeris) y se pueden activar/desactivar **solo a nivel visual** (no disparan cálculo por sí mismas):
 
-* Carta Natal
-* Natal + Asteroides
-* Doble Rueda (base sinastría)
+- Carta natal (base)
+- Tránsitos (si el backend los devuelve)
+- Progresiones (si el backend las devuelve)
+- Retorno Solar (si el backend lo devuelve)
+- Doble rueda (sinastría) con carta secundaria real al seleccionar pareja (se usa su payload natal existente; no compuesta/Davison)
 
-#### En integración (bloqueados)
+### Capas y módulos bloqueados explícitamente (FASE 3)
 
-* Compuesta
-* Davison
-* Tránsitos
-* Progresiones
-* Arco Solar
-* Retornos
-* Armónicos
-* Persona Charts
-* Relocación
+Se mantienen visibles con tooltip de “fase posterior”, sin permitir cálculo accidental:
 
----
+- Arco Solar (no disponible en backend actual para este flujo)
+- Retorno Lunar (no disponible en backend actual para este flujo)
+- Armónicos
+- Persona Charts
+- Relocación
+- Estilo HUBER
+- Estrellas fijas
+- Compuesta / Davison
 
-### 5. Visualización
+### Terminología canónica
 
-* SVG avanzado
-* Rotación por ASC
-* Anillos clásicos
-* Casas numeradas
-* Glifos planetarios
-* Jerarquía de aspectos por orbe
-* Modo single / doble rueda
+| Prohibido   | Correcto          |
+|-----------:|-------------------|
+| paciente    | consultante       |
+| diagnóstico | lectura simbólica |
+| clínico     | holístico         |
 
----
+### Estado tras FASE 3
 
-### 6. Filosofía de Arquitectura
-
-* Modular
-* Progresiva
-* Sin refactors destructivos
-* Sin “marketplace”
-* Métodos como **capacidades del sistema**
-
----
-
-### 7. Terminología Canónica
-
-| Prohibido   | Correcto              |
-| ----------- | --------------------- |
-| paciente    | consultante           |
-| diagnóstico | lectura simbólica     |
-| clínico     | holístico             |
-| tratamiento | proceso de conciencia |
-
----
-
-> Ningún método nuevo (A16+) podrá implementarse sin respetar:
->
-> * Identidad canónica
-> * Contratos de AstroMethod
-> * Render SVG central
-> * Filosofía holística
+- Cálculo real controlado: **solo** por acción explícita del usuario (botón).
+- Capas reales disponibles: natal + (tránsitos/progresiones/retorno solar) si el backend las entrega.
+- Doble rueda real disponible vía selección de pareja (sin compuesta/Davison).
+- Módulos no implementados: bloqueados y documentados.

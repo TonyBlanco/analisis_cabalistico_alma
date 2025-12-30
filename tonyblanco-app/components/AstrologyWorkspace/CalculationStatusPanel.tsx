@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 type Props = {
   overlays: { natal: boolean; transits: boolean; solarReturn: boolean; progressions: boolean };
   activeLayers: Set<string>;
+  mode?: 'symbolic' | 'real';
   symbolicLayers?: {
     natal: boolean;
     transits: boolean;
@@ -41,11 +42,113 @@ const Dot: React.FC<{ type: DotType }> = ({ type }) => {
   return <span className="inline-block w-3 h-3 rounded-full bg-rose-400 mr-2 opacity-70" />;
 };
 
-export default function CalculationStatusPanel({ overlays, activeLayers, symbolicLayers, harmonicMode = 'off', personaMode = 'off', relocationMode = 'off', advancedObjects = { nodes: false, fortune: false, symbolicPoints: false }, fixedStars = { primary: false, secondary: false }, relationshipMode = 'off', relationshipRole = 'active', developmentStage = 'off', houseSystem, zodiacType, canRecalculate, secondaryLayerKey = null, comparisonEnabled = false, comparisonAspectsEnabled = false }: Props) {
+export default function CalculationStatusPanel({ overlays, activeLayers, mode, symbolicLayers, harmonicMode = 'off', personaMode = 'off', relocationMode = 'off', advancedObjects = { nodes: false, fortune: false, symbolicPoints: false }, fixedStars = { primary: false, secondary: false }, relationshipMode = 'off', relationshipRole = 'active', developmentStage = 'off', houseSystem, zodiacType, canRecalculate, secondaryLayerKey = null, comparisonEnabled = false, comparisonAspectsEnabled = false }: Props) {
   const [helper, setHelper] = useState<string | null>(null);
+  const effectiveMode: 'symbolic' | 'real' = mode ?? (symbolicLayers ? 'symbolic' : 'real');
   const symbolicTooltip = 'Capa simbólica activa. No corresponde a un cálculo astronómico real.';
   const annualSymbolicTooltip = 'Capa anual/mensual activa (lectura simbólica) — sin recalcular carta base.';
   const isSecondary = (key: string) => Boolean(secondaryLayerKey && secondaryLayerKey === key);
+
+  if (effectiveMode === 'real') {
+    const calcTooltip = 'Capa activa (cálculo real). No se recalcula automáticamente desde el toggle; use “Recalcular carta” para regenerar.';
+    const lockedTooltip = 'Disponible en fase posterior (requiere soporte de cálculo backend).';
+
+    const isActive = (key: 'natal' | 'transits' | 'progressions' | 'return_solar') => activeLayers.has(key);
+    const layerAvailable = (key: 'natal' | 'transits' | 'progressions' | 'return_solar') => {
+      if (key === 'natal') return overlays.natal;
+      if (key === 'transits') return overlays.transits;
+      if (key === 'progressions') return overlays.progressions;
+      return overlays.solarReturn;
+    };
+
+    const dotFor = (key: 'natal' | 'transits' | 'progressions' | 'return_solar') => {
+      if (isActive(key) && layerAvailable(key)) return 'active' as const;
+      if (layerAvailable(key)) return 'available' as const;
+      return 'locked' as const;
+    };
+
+    return (
+      <div className="mb-4 bg-white border border-gray-200 rounded-lg p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <div className="text-sm font-semibold text-gray-900">Estado de cálculos</div>
+            <div className="mt-1 text-xs text-gray-600">Capas reales calculadas por Swiss Ephemeris (solo lectura).</div>
+          </div>
+          <div className="text-xs text-gray-500">{houseSystem} · {zodiacType}</div>
+        </div>
+
+        <ul className="mt-3 space-y-2 text-sm">
+          <li className="flex items-center">
+            <span className="flex items-center w-full">
+              <Dot type={dotFor('natal')} />
+              <span className="flex-1">Carta natal</span>
+              <span className="text-xs text-gray-400">{overlays.natal ? 'disponible' : 'pendiente'}</span>
+            </span>
+          </li>
+
+          <li className="flex items-center">
+            <button onClick={() => setHelper(calcTooltip)} className="flex items-center w-full text-left" title={calcTooltip}>
+              <Dot type={dotFor('transits')} />
+              <span className="flex-1">Tránsitos</span>
+              <span className="text-xs text-gray-400">{isSecondary('transits') ? 'secundaria' : (isActive('transits') ? 'activo (real)' : (overlays.transits ? 'disponible' : 'pendiente'))}</span>
+            </button>
+          </li>
+
+          <li className="flex items-center">
+            <button onClick={() => setHelper(calcTooltip)} className="flex items-center w-full text-left" title={calcTooltip}>
+              <Dot type={dotFor('progressions')} />
+              <span className="flex-1">Progresiones</span>
+              <span className="text-xs text-gray-400">{isSecondary('progressions') ? 'secundaria' : (isActive('progressions') ? 'activo (real)' : (overlays.progressions ? 'disponible' : 'pendiente'))}</span>
+            </button>
+          </li>
+
+          <li className="flex items-center">
+            <button onClick={() => setHelper(calcTooltip)} className="flex items-center w-full text-left" title={calcTooltip}>
+              <Dot type={dotFor('return_solar')} />
+              <span className="flex-1">Retorno Solar</span>
+              <span className="text-xs text-gray-400">{isSecondary('return_solar') ? 'secundaria' : (isActive('return_solar') ? 'activo (real)' : (overlays.solarReturn ? 'disponible' : 'pendiente'))}</span>
+            </button>
+          </li>
+
+          <li className="flex items-center">
+            <button onClick={() => setHelper(lockedTooltip)} className="flex items-center w-full text-left" title={lockedTooltip}>
+              <Dot type="locked" />
+              <span className="flex-1">Retorno Lunar</span>
+              <span className="text-xs text-gray-400">bloqueado</span>
+            </button>
+          </li>
+
+          <li className="flex items-center">
+            <button onClick={() => setHelper(lockedTooltip)} className="flex items-center w-full text-left" title={lockedTooltip}>
+              <Dot type="locked" />
+              <span className="flex-1">Arco Solar</span>
+              <span className="text-xs text-gray-400">bloqueado</span>
+            </button>
+          </li>
+
+          <li className="flex items-center">
+            <span className="flex items-center w-full">
+              <Dot type={comparisonEnabled ? 'active' : 'available'} />
+              <span className="flex-1">Doble rueda (sinastría)</span>
+              <span className="text-xs text-gray-400">{comparisonEnabled ? 'activo' : 'disponible'}</span>
+            </span>
+          </li>
+
+          <li className="flex items-center">
+            <button onClick={() => setHelper(lockedTooltip)} className="flex items-center w-full text-left" title={lockedTooltip}>
+              <Dot type="locked" />
+              <span className="flex-1">Armónicos / Persona / Relocación / HUBER / Estrellas fijas</span>
+              <span className="text-xs text-gray-400">fase posterior</span>
+            </button>
+          </li>
+        </ul>
+
+        {helper ? (
+          <div className="mt-3 rounded border border-gray-200 bg-gray-50 p-2 text-xs text-gray-700">{helper}</div>
+        ) : null}
+      </div>
+    );
+  }
 
   const handleClickWouldRecalc = (label: string, isLocked: boolean) => {
     if (isLocked) {

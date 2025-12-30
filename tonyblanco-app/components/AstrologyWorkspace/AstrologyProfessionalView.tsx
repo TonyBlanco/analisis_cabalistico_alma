@@ -17,8 +17,6 @@ import type { ActiveConsultante } from '@/hooks/useActiveConsultante';
 import AstroWheelAdvanced from '@/components/astrology/AstroWheelAdvanced';
 import { normalizeNatalForWheel } from '@/components/astrology/normalizer';
 import CalculationStatusPanel from './CalculationStatusPanel';
-import html2canvas from 'html2canvas';
-import { jsPDF } from 'jspdf';
 
 interface Props {
   consultante: ActiveConsultante;
@@ -77,17 +75,6 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
   // Local UI state for sidebar selectors (visual only)
   const [houseSystem, setHouseSystem] = useState<string>(natal?.metadatos?.sistema_casas || 'P');
   const [zodiacType, setZodiacType] = useState<string>(natal?.metadatos?.zodiac_type || 'tropical');
-
-  // When the user changes house system or zodiac type, trigger real recalculation via provided hook
-  React.useEffect(() => {
-    const fn = calculateChart;
-    if (!hasChart || !consultante?.id || !fn) return;
-    // Debounce-like behavior: call recalculation immediately on change
-    Promise.resolve(fn(houseSystem, zodiacType)).catch((e) => {
-      // eslint-disable-next-line no-console
-      console.error('Error recalculating chart:', e);
-    });
-  }, [hasChart, houseSystem, zodiacType, consultante?.id, calculateChart]);
 
   // Auto-load therapist patients when synastry UI is enabled to avoid a 'blocked' select
   React.useEffect(() => {
@@ -154,9 +141,6 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
   const [activeLayers, setActiveLayers] = useState<Set<string>>(() => {
     const s = new Set<string>();
     if (overlays.natal) s.add('natal');
-    if (overlays.transits) s.add('transits');
-    if (overlays.solarReturn) s.add('solarReturn');
-    if (overlays.progressions) s.add('progressions');
     return s;
   });
   const [symbolicDoubleWheel, setSymbolicDoubleWheel] = useState<boolean>(false);
@@ -188,22 +172,10 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
     });
   };
 
-  const isSymbolicReadingMode = useMemo(() => {
-    if (!hasIdentity) return false;
-    const keys = [
-      'transits',
-      'progressions',
-      'solarArc',
-      'return_solar',
-      'return_lunar',
-      'planetary',
-      'harmonics',
-      'persona',
-      'relocation',
-      'mathPoints',
-    ];
+  const hasActiveComputedLayers = useMemo(() => {
+    const keys = ['transits', 'progressions', 'return_solar'] as const;
     return keys.some((k) => activeLayers.has(k));
-  }, [hasIdentity, activeLayers]);
+  }, [activeLayers]);
 
   const harmonicOrder = useMemo(() => {
     if (harmonicMode === 'h5') return 5 as const;
@@ -385,27 +357,8 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
     });
   }, [developmentStage, hasIdentity]);
 
-  // Layer inputs
-  const [transitDate, setTransitDate] = useState<string>(new Date().toISOString().slice(0, 10));
-  const [progressionDate, setProgressionDate] = useState<string>(new Date().toISOString().slice(0, 10));
-  const [solarYear, setSolarYear] = useState<number>(new Date().getFullYear());
-  const [solarArcDate, setSolarArcDate] = useState<string>(new Date().toISOString().slice(0, 10));
-
   const apiURL = getApiBaseUrl();
 
-  // Calculation sessions (frontend-only) for preview/comparison
-  type CalculationSession = {
-    id: string;
-    base_snapshot_id: string | null;
-    method: { houses: string; zodiac: string; ayanamsha?: string | null };
-    mode: 'preview' | 'applied';
-    created_at: string;
-    chartPayload?: any; // returned payload from POST (not applied to base)
-  };
-
-  const [sessions, setSessions] = useState<CalculationSession[]>([]);
-  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
-  const [compareMode, setCompareMode] = useState(false);
   const [showRecalcModal, setShowRecalcModal] = useState(false);
   const [recalcMethod, setRecalcMethod] = useState<{ houses: string; zodiac: string }>({ houses: houseSystem, zodiac: zodiacType });
 
@@ -417,30 +370,8 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
     console.info('ASTRO_LOG', entry);
   };
 
-  // Export helper for comparative views (A18)
-  const exportComparativeAsPDF = async (elementId: string, filename = 'comparativa.pdf') => {
-    try {
-      const el = document.getElementById(elementId);
-      if (!el) throw new Error('Elemento no encontrado para exportar');
-      const canvas = await html2canvas(el, { useCORS: true, backgroundColor: '#ffffff', scale: 2 });
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF({ orientation: 'landscape' });
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const imgProps = pdf.getImageProperties(imgData);
-      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-      // Small permitted holistic notice at top
-      pdf.setFontSize(10);
-      pdf.text('Observación holística — Propósito profesional', 10, 10);
-      pdf.addImage(imgData, 'PNG', 0, 14, pdfWidth, pdfHeight);
-      pdf.save(filename);
-    } catch (err: any) {
-      // eslint-disable-next-line no-console
-      console.error('Export failed', err);
-      // Minimal user feedback
-      // eslint-disable-next-line no-alert
-      alert('Error exportando comparativa: ' + (err?.message || err));
-    }
-  };
+  // PDF export intentionally disabled in this phase.
+  const exportComparativeAsPDF = async (_elementId: string, _filename = 'comparativa.pdf') => {};
 
   // open modal via global event from sidebar button
   React.useEffect(() => {
@@ -452,119 +383,6 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
     return () => window.removeEventListener('open-recalc-modal', handler as EventListener);
   }, [hasChart]);
 
-  // Listen for sidebar event to open Advanced Transits panel
-  React.useEffect(() => {
-    const h = () => {
-      if (!hasChart) return;
-      setShowAdvancedTransits(true);
-    };
-    window.addEventListener('open-advanced-transits', h as EventListener);
-    return () => window.removeEventListener('open-advanced-transits', h as EventListener);
-  }, [hasChart]);
-
-  // Listen for events to open A17 panels
-  React.useEffect(() => {
-    const p = () => {
-      if (!hasChart) return;
-      setShowSecondaryProgressions(true);
-    };
-    const s = () => {
-      if (!hasChart) return;
-      setShowSolarReturn(true);
-    };
-    window.addEventListener('open-secondary-progressions', p as EventListener);
-    window.addEventListener('open-solar-return', s as EventListener);
-    // A18 events
-    const cs = () => {
-      if (!hasChart) return;
-      setShowCompareSolarReturn(true);
-    };
-    const cp = () => {
-      if (!hasChart) return;
-      setShowCompareProgressions(true);
-    };
-    window.addEventListener('open-compare-natal-solar-return', cs as EventListener);
-    window.addEventListener('open-compare-natal-progressions', cp as EventListener);
-    return () => {
-      window.removeEventListener('open-secondary-progressions', p as EventListener);
-      window.removeEventListener('open-solar-return', s as EventListener);
-      window.removeEventListener('open-compare-natal-solar-return', cs as EventListener);
-      window.removeEventListener('open-compare-natal-progressions', cp as EventListener);
-    };
-  }, [hasChart]);
-
-  const performRecalculation = async (housesCode: string, zodiacCode: string) => {
-    if (!hasChart || !consultante?.id) return null;
-    try {
-      const token = getAuthToken();
-      if (!token) throw new Error('No auth');
-
-      const body: any = { house_system: housesCode, zodiac_type: zodiacCode };
-      const resp = await fetch(`${apiURL}/therapist/patients/${consultante.id}/astrology-kerykeion/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Token ${token}` },
-        body: JSON.stringify(body),
-      });
-      if (!resp.ok) {
-        const txt = await resp.text().catch(() => 'error');
-        throw new Error(txt);
-      }
-      const data = await resp.json();
-
-      const session: CalculationSession = {
-        id: `sess-${Date.now()}`,
-        base_snapshot_id: (natal?.metadatos && natal?.metadatos.input_snapshot && natal?.metadatos.input_snapshot.id) ? String(natal?.metadatos?.input_snapshot?.id) : null,
-        method: { houses: housesCode, zodiac: zodiacCode },
-        mode: 'preview',
-        created_at: new Date().toISOString(),
-        chartPayload: data.chart || data.chart_payload || data,
-      };
-
-      setSessions((s) => [session, ...s]);
-      setActiveSessionId(session.id);
-      setCompareMode(true);
-
-      pushLog({ type: 'astrology_recalculation', consultante_id: consultante.id, method: session.method, timestamp: session.created_at, mode: session.mode });
-
-      return session;
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.error('Recalc failed', e);
-      return null;
-    }
-  };
-
-  const calculateLayer = async (layer: 'transits' | 'progressions' | 'solarReturn') => {
-    if (!hasChart || !consultante?.id) return;
-    try {
-      const body: any = { layer };
-      if (layer === 'transits') body.reference_date = transitDate;
-      if (layer === 'progressions') { body.reference_date = progressionDate; body.method = 'secondary'; }
-      if (layer === 'solarReturn') { body.year = solarYear; body.method = 'solar_return'; }
-
-      const token = getAuthToken();
-      if (!token) {
-        console.error('calculateLayer: no auth token available');
-        throw new Error('Authentication credentials were not provided.');
-      }
-
-      const resp = await fetch(`${apiURL}/therapist/patients/${consultante.id}/astrology-kerykeion/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Token ${token}` },
-        body: JSON.stringify(body),
-      });
-      if (!resp.ok) {
-        const err = await resp.text().catch(() => 'error');
-        throw new Error(String(err));
-      }
-      if (refetch) await refetch();
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.error('Error calculating layer:', e);
-      // fallback: attempt a generic calculateChart refresh
-      if (calculateChart) await calculateChart();
-    }
-  };
 
   const meta = (natal?.metadatos as any) || {};
 
@@ -590,37 +408,37 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
 
   const temporalLayers = useMemo(() => {
     const layers: Array<{ key: 'transits' | 'progressions' | 'solarArc'; label?: string }> = [];
-    if (activeLayers.has('transits')) layers.push({ key: 'transits', label: `Tránsitos · ${transitDate}` });
-    if (activeLayers.has('progressions')) layers.push({ key: 'progressions', label: `Progresiones · ${progressionDate}` });
-    if (activeLayers.has('solarArc')) layers.push({ key: 'solarArc', label: `Arco Solar · ${solarArcDate}` });
+    if (activeLayers.has('transits')) {
+      const stamp = analysis_result?.transits?.metadatos?.calculated_at;
+      layers.push({ key: 'transits', label: stamp ? `Tránsitos · ${String(stamp).slice(0, 10)}` : 'Tránsitos' });
+    }
+    if (activeLayers.has('progressions')) {
+      const ref = analysis_result?.progressions?.reference_date;
+      layers.push({ key: 'progressions', label: ref ? `Progresiones · ${String(ref).slice(0, 10)}` : 'Progresiones' });
+    }
     return layers;
-  }, [activeLayers, transitDate, progressionDate, solarArcDate]);
+  }, [activeLayers, analysis_result]);
 
   const annualLayers = useMemo(() => {
-    const layers: Array<{ key: 'solarReturn' | 'solarReturnA' | 'solarReturnB' | 'lunarReturn'; label?: string }> = [];
-    if (symbolicSolarReturnYear !== null) {
-      if (solarReturnCompareEnabled && solarReturnCompareYearB !== null) {
-        layers.push({ key: 'solarReturnA', label: `Retorno Solar (A) · ${symbolicSolarReturnYear}` });
-        layers.push({ key: 'solarReturnB', label: `Retorno Solar (B) · ${solarReturnCompareYearB}` });
-      } else {
-        layers.push({ key: 'solarReturn', label: `Retorno Solar · ${symbolicSolarReturnYear}` });
-      }
+    const layers: Array<{ key: 'solarReturn'; label?: string }> = [];
+    if (activeLayers.has('return_solar')) {
+      const ref = analysis_result?.solarReturn?.reference_date;
+      layers.push({ key: 'solarReturn', label: ref ? `Retorno Solar · ${String(ref).slice(0, 10)}` : 'Retorno Solar' });
     }
-    if (symbolicLunarReturnDate) layers.push({ key: 'lunarReturn', label: `Retorno Lunar · ${symbolicLunarReturnDate}` });
     return layers;
-  }, [symbolicSolarReturnYear, solarReturnCompareEnabled, solarReturnCompareYearB, symbolicLunarReturnDate]);
+  }, [activeLayers, analysis_result]);
 
   useEffect(() => {
     if (!solarReturnCompareEnabled) {
       setSolarReturnCompareYearB(null);
       return;
     }
-    if (symbolicSolarReturnYear === null) return;
-    setSolarReturnCompareYearB((prev) => (prev === null ? symbolicSolarReturnYear - 1 : prev));
-  }, [solarReturnCompareEnabled, symbolicSolarReturnYear]);
+    // Comparison by year requires backend support for targeting a specific return year (not enabled in this phase).
+    setSolarReturnCompareYearB(null);
+  }, [solarReturnCompareEnabled]);
 
   const secondaryLayer = useMemo(() => {
-    const order = ['transits', 'progressions', 'solarArc', 'return_solar', 'return_lunar'] as const;
+    const order = ['transits', 'progressions', 'return_solar'] as const;
     for (const key of order) {
       if (activeLayers.has(key)) return key;
     }
@@ -629,28 +447,28 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
 
   const secondaryLayerLabel = useMemo(() => {
     if (!secondaryLayer) return null;
-    if (secondaryLayer === 'transits') return 'Tránsitos (lectura simbólica)';
-    if (secondaryLayer === 'progressions') return 'Progresiones (lectura simbólica)';
-    if (secondaryLayer === 'solarArc') return 'Arco Solar (lectura simbólica)';
-    if (secondaryLayer === 'return_solar') return `Retorno Solar · ${symbolicSolarReturnYear ?? new Date().getFullYear()} (lectura simbólica)`;
-    return `Retorno Lunar · ${(symbolicLunarReturnDate ?? new Date().toISOString().slice(0, 10)).slice(0, 7)} (lectura simbólica)`;
-  }, [secondaryLayer, symbolicSolarReturnYear, symbolicLunarReturnDate]);
+    if (secondaryLayer === 'transits') return 'Tránsitos (cálculo real)';
+    if (secondaryLayer === 'progressions') return 'Progresiones (cálculo real)';
+    return 'Retorno Solar (cálculo real)';
+  }, [secondaryLayer]);
 
   const focusLabel = useMemo(() => {
     const parts: string[] = [];
-    if (symbolicSolarReturnYear !== null) {
-      if (solarReturnCompareEnabled && solarReturnCompareYearB !== null) parts.push(`Año A ${symbolicSolarReturnYear} · Año B ${solarReturnCompareYearB}`);
-      else parts.push(`Año ${symbolicSolarReturnYear}`);
+    if (activeLayers.has('return_solar')) {
+      const ref = analysis_result?.solarReturn?.reference_date;
+      parts.push(ref ? `Retorno Solar ${String(ref).slice(0, 10)}` : 'Retorno Solar');
     }
-    if (symbolicLunarReturnDate) {
-      const [y, m] = symbolicLunarReturnDate.split('-');
-      const monthIndex = Math.max(0, Math.min(11, (Number(m) || 1) - 1));
-      const monthNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-      parts.push(`Mes ${monthNames[monthIndex]} ${y || ''}`.trim());
+    if (activeLayers.has('transits')) {
+      const stamp = analysis_result?.transits?.metadatos?.calculated_at;
+      parts.push(stamp ? `Tránsitos ${String(stamp).slice(0, 10)}` : 'Tránsitos');
+    }
+    if (activeLayers.has('progressions')) {
+      const ref = analysis_result?.progressions?.reference_date;
+      parts.push(ref ? `Progresiones ${String(ref).slice(0, 10)}` : 'Progresiones');
     }
     if (parts.length === 0) return null;
-    return `Enfoque temporal simbólico: ${parts.join(' · ')}`;
-  }, [symbolicSolarReturnYear, solarReturnCompareEnabled, solarReturnCompareYearB, symbolicLunarReturnDate]);
+    return `Enfoque temporal (cálculo real): ${parts.join(' · ')}`;
+  }, [activeLayers, analysis_result]);
 
   const lunarMonthIndex = useMemo(() => {
     if (!symbolicLunarReturnDate) return new Date().getMonth();
@@ -896,8 +714,6 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
     const enabled = Boolean(synastryEnabled);
     if (!enabled || !natal) return { enabled: false as const, planets: [], label: '' };
 
-    const baseWheel = normalizeNatalForWheel(natal as any);
-
     const fromPartnerChart = () => {
       if (!partnerChart) return null;
       const wheel = normalizeNatalForWheel(partnerChart);
@@ -906,55 +722,15 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
       return { planets: wheel.planets, label: `Carta comparada — ${labelName} (lectura simbólica)` };
     };
 
-    const fromActiveSession = () => {
-      if (!activeSessionId) return null;
-      const sess = sessions.find((x) => x.id === activeSessionId);
-      const wheel = sess?.chartPayload ? normalizeNatalForWheel(sess.chartPayload) : null;
-      if (!wheel) return null;
-      return { planets: wheel.planets, label: `Carta comparada — lectura simbólica (sesión ${activeSessionId})` };
-    };
-
-    const fromLastSession = () => {
-      const sess = sessions.slice().reverse().find((x) => Boolean(x.chartPayload));
-      if (!sess) return null;
-      const wheel = sess.chartPayload ? normalizeNatalForWheel(sess.chartPayload) : null;
-      if (!wheel) return null;
-      return { planets: wheel.planets, label: `Carta comparada — lectura simbólica (última sesión ${sess.id})` };
-    };
-
-    const best = fromPartnerChart() || fromActiveSession() || fromLastSession();
+    const best = fromPartnerChart();
     if (best) return { enabled: true as const, planets: best.planets, label: best.label };
 
     // No secondary source selected: keep UI informative but avoid changing wheel geometry.
-    return { enabled: false as const, planets: [], label: 'Sin carta secundaria: selecciona una pareja o una sesión para comparar (solo visual).' };
-  }, [synastryEnabled, partnerChart, natal, activeSessionId, sessions, partnerList, selectedPartnerId]);
+    return { enabled: false as const, planets: [], label: 'Sin carta secundaria: selecciona una pareja para comparar (solo visual).' };
+  }, [synastryEnabled, partnerChart, natal, partnerList, selectedPartnerId]);
 
-  // Bridge: year/date presence -> activeLayers (UI + engine)
-  useEffect(() => {
-    setActiveLayers((prev) => {
-      const want = symbolicSolarReturnYear !== null;
-      const has = prev.has('return_solar');
-      if (want === has) return prev;
-      const next = new Set(prev);
-      if (want) next.add('return_solar');
-      else next.delete('return_solar');
-      pushLog({ event: 'LayerActivationEvent', layer: 'return_solar', mode: want ? 'symbolic' : 'off' });
-      return next;
-    });
-  }, [symbolicSolarReturnYear]);
-
-  useEffect(() => {
-    setActiveLayers((prev) => {
-      const want = Boolean(symbolicLunarReturnDate);
-      const has = prev.has('return_lunar');
-      if (want === has) return prev;
-      const next = new Set(prev);
-      if (want) next.add('return_lunar');
-      else next.delete('return_lunar');
-      pushLog({ event: 'LayerActivationEvent', layer: 'return_lunar', mode: want ? 'symbolic' : 'off' });
-      return next;
-    });
-  }, [symbolicLunarReturnDate]);
+  // Note: In Phase 3, layer activation is driven ONLY by explicit user toggles (checkboxes),
+  // never by inferred year/date inputs.
 
   return (
     <div className="flex h-full bg-gray-50">
@@ -965,6 +741,8 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
           setHouseSystem={setHouseSystem}
           zodiacType={zodiacType}
           setZodiacType={setZodiacType}
+          mode="real"
+          layerAvailability={{ transits: overlays.transits, progressions: overlays.progressions, solarReturn: overlays.solarReturn }}
           showAsteroids={showAsteroids}
           setShowAsteroids={setShowAsteroids}
           synastryEnabled={hasChart ? synastryEnabled : false}
@@ -1011,9 +789,9 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
           <header className="mb-6">
             <h1 className="text-xl font-semibold text-gray-900">Carta Natal — Astrología Profesional</h1>
             <p className="text-sm text-gray-600 mt-1">Swiss Ephemeris · Solo lectura</p>
-            {isSymbolicReadingMode ? (
-              <div className="mt-2 inline-flex items-center rounded border border-indigo-100 bg-indigo-50 px-3 py-2 text-xs text-indigo-900">
-                Modo lectura simbolica activa. No se estan realizando calculos astronomicos.
+            {hasActiveComputedLayers ? (
+              <div className="mt-2 inline-flex items-center rounded border border-emerald-100 bg-emerald-50 px-3 py-2 text-xs text-emerald-900">
+                Capas calculadas activas (Swiss Ephemeris). No se recalcula automáticamente.
               </div>
             ) : null}
             {visualStyle === 'huber' ? (
@@ -1108,24 +886,17 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                         type="checkbox"
                         checked={activeLayers.has('transits')}
                         onChange={() => handleLayerToggle('transits')}
-                        disabled={!hasIdentity}
-                        title={!hasIdentity ? 'Requiere identidad válida (fecha de nacimiento)' : 'Capa temporal simbólica que muestra activaciones externas en relación a la carta base. No predice eventos.'}
+                        disabled={!hasChart || !overlays.transits}
+                        title={!hasChart ? 'Carta pendiente: completa datos de nacimiento para habilitar acciones' : (!overlays.transits ? 'No disponible: el backend no devolvió transits en analysis_result' : 'Tránsitos (cálculo real): superposición de posiciones planetarias (no predictivo).')}
                       />
                     </div>
                   </div>
                   <div className="mt-2 text-xs">
-                    <label className="block">Fecha de referencia</label>
-                    <input type="date" value={transitDate} onChange={(e) => setTransitDate(e.target.value)} className="mt-1 w-full" disabled={!hasIdentity} />
-                    {!overlays.transits && (
-                      <button
-                        onClick={() => calculateLayer('transits')}
-                        disabled={!hasChart}
-                        title={!hasChart ? 'Carta pendiente: completa datos de nacimiento para habilitar acciones' : undefined}
-                        className={`mt-2 px-3 py-1 text-xs rounded ${hasChart ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 cursor-not-allowed'}`}
-                      >
-                        Calcular capa
-                      </button>
-                    )}
+                    <div className="text-[11px] text-gray-600">
+                      {overlays.transits && analysis_result?.transits?.metadatos?.calculated_at
+                        ? `Referencia (motor): ${String(analysis_result.transits.metadatos.calculated_at).slice(0, 16)}`
+                        : 'Disponible cuando el backend provee transits en analysis_result.'}
+                    </div>
                   </div>
                 </div>
 
@@ -1144,24 +915,17 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                         type="checkbox"
                         checked={activeLayers.has('progressions')}
                         onChange={() => handleLayerToggle('progressions')}
-                        disabled={!hasIdentity}
-                        title={!hasIdentity ? 'Requiere identidad válida (fecha de nacimiento)' : 'Representación simbólica del desarrollo interno a lo largo del tiempo. No predice eventos.'}
+                        disabled={!hasChart || !overlays.progressions}
+                        title={!hasChart ? 'Carta pendiente: completa datos de nacimiento para habilitar acciones' : (!overlays.progressions ? 'No disponible: el backend no devolvió progressions en analysis_result' : 'Progresiones secundarias (cálculo real): day-for-year (no predictivo).')}
                       />
                     </div>
                   </div>
                   <div className="mt-2 text-xs">
-                    <label className="block">Fecha objetivo</label>
-                    <input type="date" value={progressionDate} onChange={(e) => setProgressionDate(e.target.value)} className="mt-1 w-full" disabled={!hasIdentity} />
-                    {!overlays.progressions && (
-                      <button
-                        onClick={() => calculateLayer('progressions')}
-                        disabled={!hasChart}
-                        title={!hasChart ? 'Carta pendiente: completa datos de nacimiento para habilitar acciones' : undefined}
-                        className={`mt-2 px-3 py-1 text-xs rounded ${hasChart ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 cursor-not-allowed'}`}
-                      >
-                        Calcular capa
-                      </button>
-                    )}
+                    <div className="text-[11px] text-gray-600">
+                      {overlays.progressions && analysis_result?.progressions?.reference_date
+                        ? `Referencia (motor): ${String(analysis_result.progressions.reference_date).slice(0, 16)}`
+                        : 'Disponible cuando el backend provee progressions en analysis_result.'}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1178,22 +942,22 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                       </div>
                     </div>
                     <div>
-                      <input type="checkbox" checked={activeLayers.has('solarReturn')} onChange={() => handleLayerToggle('solarReturn')} disabled={!hasChart} title={!hasChart ? 'Carta pendiente: completa datos de nacimiento para habilitar acciones' : undefined} />
+                      <input
+                        type="checkbox"
+                        checked={activeLayers.has('return_solar')}
+                        onChange={() => handleLayerToggle('return_solar')}
+                        disabled={!hasChart || !overlays.solarReturn}
+                        title={!hasChart ? 'Carta pendiente: completa datos de nacimiento para habilitar acciones' : (!overlays.solarReturn ? 'No disponible: el backend no devolvió solarReturn en analysis_result' : 'Retorno Solar (cálculo real): calculado por el motor a partir de la carta base (no predictivo).')}
+                      />
                     </div>
                   </div>
                   <div className="mt-2 text-xs">
                     <label className="block">Año</label>
-                    <input type="number" value={solarYear} onChange={(e) => setSolarYear(Number(e.target.value))} className="mt-1 w-full" />
-                    {!overlays.solarReturn && (
-                      <button
-                        onClick={() => calculateLayer('solarReturn')}
-                        disabled={!hasChart}
-                        title={!hasChart ? 'Carta pendiente: completa datos de nacimiento para habilitar acciones' : undefined}
-                        className={`mt-2 px-3 py-1 text-xs rounded ${hasChart ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 cursor-not-allowed'}`}
-                      >
-                        Calcular capa
-                      </button>
-                    )}
+                    <div className="text-[11px] text-gray-600">
+                      {analysis_result?.solarReturn?.reference_date
+                        ? `Instante (motor): ${String(analysis_result.solarReturn.reference_date).slice(0, 16)}`
+                        : 'Disponible cuando el backend provee solarReturn en analysis_result.'}
+                    </div>
                   </div>
                 </div>
 
@@ -1204,7 +968,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                       <div className="text-sm font-medium">Arco Solar</div>
                       <div className="text-xs text-gray-500 flex items-center gap-2">
                         <span>Estado:</span>
-                        {!hasIdentity ? renderLayerStateBadge('pendiente') : renderLayerStateBadge('solo_lectura')}
+                        renderLayerStateBadge('no_calculado')
                       </div>
                     </div>
                     <div>
@@ -1212,14 +976,13 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                         type="checkbox"
                         checked={activeLayers.has('solarArc')}
                         onChange={() => handleLayerToggle('solarArc')}
-                        disabled={!hasIdentity}
-                        title={!hasIdentity ? 'Requiere identidad válida (fecha de nacimiento)' : 'Desplazamiento simbólico uniforme usado como referencia estructural. No predice eventos.'}
+                        disabled={true}
+                        title="Disponible en fase posterior (requiere soporte de cálculo backend)."
                       />
                     </div>
                   </div>
                   <div className="mt-2 text-xs">
-                    <label className="block">Fecha de referencia</label>
-                    <input type="date" value={solarArcDate} onChange={(e) => setSolarArcDate(e.target.value)} className="mt-1 w-full" disabled={!hasIdentity} />
+                    <div className="text-[11px] text-gray-600">Disponible en fase posterior (cálculo real no habilitado).</div>
                   </div>
                 </div>
               </div>
@@ -1251,7 +1014,8 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
               </div>
             ) : null}
 
-            {(symbolicSolarReturnYear !== null || symbolicLunarReturnDate) ? (
+            {/* Phase 3: timeline UI remains disabled until backend supports targeting specific years/months for returns. */}
+            {false ? (
               <div className="mb-4 bg-white border border-gray-200 rounded-lg p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div>
@@ -1287,15 +1051,15 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                     <input
                       type="range"
                       className="mt-2 w-full"
-                      min={symbolicSolarReturnYear - 5}
-                      max={symbolicSolarReturnYear + 5}
-                      value={symbolicSolarReturnYear}
+                      min={symbolicSolarReturnYear! - 5}
+                      max={symbolicSolarReturnYear! + 5}
+                      value={symbolicSolarReturnYear!}
                       onChange={(e) => setSymbolicSolarReturnYear(Number(e.target.value))}
                     />
                     <div className="mt-1 flex justify-between text-[11px] text-gray-500">
-                      <span>{symbolicSolarReturnYear - 5}</span>
-                      <span>{symbolicSolarReturnYear}</span>
-                      <span>{symbolicSolarReturnYear + 5}</span>
+                      <span>{symbolicSolarReturnYear! - 5}</span>
+                      <span>{symbolicSolarReturnYear!}</span>
+                      <span>{symbolicSolarReturnYear! + 5}</span>
                     </div>
 
                     {solarReturnCompareEnabled && solarReturnCompareYearB !== null ? (
@@ -1307,15 +1071,15 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                         <input
                           type="range"
                           className="mt-2 w-full"
-                          min={solarReturnCompareYearB - 5}
-                          max={solarReturnCompareYearB + 5}
-                          value={solarReturnCompareYearB}
+                          min={solarReturnCompareYearB! - 5}
+                          max={solarReturnCompareYearB! + 5}
+                          value={solarReturnCompareYearB!}
                           onChange={(e) => setSolarReturnCompareYearB(Number(e.target.value))}
                         />
                         <div className="mt-1 flex justify-between text-[11px] text-gray-500">
-                          <span>{solarReturnCompareYearB - 5}</span>
-                          <span>{solarReturnCompareYearB}</span>
-                          <span>{solarReturnCompareYearB + 5}</span>
+                          <span>{solarReturnCompareYearB! - 5}</span>
+                          <span>{solarReturnCompareYearB!}</span>
+                          <span>{solarReturnCompareYearB! + 5}</span>
                         </div>
                         <div className="mt-3 rounded border border-gray-200 bg-white p-3">
                           <div className="text-[13px] font-semibold text-gray-900">Comparación anual simbólica</div>
@@ -1334,7 +1098,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                   <div className="mt-3 p-3 rounded border border-gray-200 bg-gray-50">
                     <div className="flex items-center justify-between">
                       <div className="text-[13px] font-medium text-gray-900">Timeline mensual — Retorno Lunar</div>
-                      <div className="text-xs text-gray-600">{symbolicLunarReturnDate.slice(0, 7)}</div>
+                      <div className="text-xs text-gray-600">{symbolicLunarReturnDate!.slice(0, 7)}</div>
                     </div>
                     <input
                       type="range"
@@ -1818,21 +1582,9 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                 <>
                  {/* Calculation status panel - UI only, read-only */}
                  <CalculationStatusPanel
+                   mode="real"
                    overlays={overlays}
                    activeLayers={activeLayers}
-                   symbolicLayers={{
-                     natal: hasIdentity,
-                     transits: activeLayers.has('transits'),
-                     progressions: activeLayers.has('progressions'),
-                     solarArc: activeLayers.has('solarArc'),
-                     solarReturn: activeLayers.has('return_solar'),
-                     lunarReturn: activeLayers.has('return_lunar'),
-                     planetary: activeLayers.has('planetary'),
-                     harmonics: activeLayers.has('harmonics'),
-                     persona: activeLayers.has('persona'),
-                     relocation: activeLayers.has('relocation'),
-                     mathPoints: activeLayers.has('mathPoints'),
-                   }}
                    harmonicMode={harmonicMode}
                    personaMode={personaMode}
                    relocationMode={relocationMode}
@@ -1882,11 +1634,15 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                            <div className="mt-6 flex justify-end gap-3">
                              <button className="px-3 py-2 rounded border" onClick={() => setShowRecalcModal(false)}>❌ Cancelar</button>
                              <button className="px-3 py-2 rounded bg-blue-600 text-white" onClick={async () => {
-                               // Confirm and perform recalculation (preview session)
-                               const sess = await performRecalculation(recalcMethod.houses, recalcMethod.zodiac);
-                               setShowRecalcModal(false);
-                               if (sess) {
-                                 // show indicator handled by compareMode / sessions state
+                               // Confirm and perform recalculation (real, persisted in backend)
+                               try {
+                                 if (calculateChart) {
+                                   await calculateChart(recalcMethod.houses, recalcMethod.zodiac);
+                                 } else if (refetch) {
+                                   await refetch();
+                                 }
+                               } finally {
+                                 setShowRecalcModal(false);
                                }
                              }}>✅ Recalcular</button>
                            </div>
@@ -1894,36 +1650,11 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                        </div>
                      ) : null}
 
-                    
-
-                     {/* Comparison controls */}
-                     <div className="mb-3 flex items-center justify-between">
-                       <div className="flex items-center gap-3">
-                         <label className="inline-flex items-center gap-2 text-sm">
-                           <input type="checkbox" checked={compareMode} onChange={(e) => setCompareMode(e.target.checked)} />
-                           <span className="text-sm">🔍 Comparar métodos</span>
-                         </label>
-                         {compareMode ? (
-                           <div className="text-sm text-gray-600">{activeSessionId ? `Comparando con sesión ${activeSessionId}` : 'Seleccione una sesión para comparar'}</div>
-                         ) : null}
-                       </div>
-                       {compareMode && sessions.length > 0 ? (
-                         <div className="flex items-center gap-2">
-                           <select value={activeSessionId ?? ''} onChange={(e) => setActiveSessionId(e.target.value || null)} className="rounded border px-2 py-1 text-sm">
-                             <option value="">-- seleccionar sesión --</option>
-                             {sessions.map(s => (
-                               <option key={s.id} value={s.id}>{`${s.id} · ${s.method.houses} · ${s.method.zodiac}`}</option>
-                             ))}
-                           </select>
-                           <button className="px-2 py-1 text-sm rounded border" onClick={() => { setCompareMode(false); setActiveSessionId(null); }}>❌ Cerrar comparación</button>
-                         </div>
-                       ) : null}
-                     </div>
                   {!synastryEnabled && hasChart && activeLayers.has('transits') && analysis_result?.transits ? (
                     <AstrologyDoubleWheelSVG natal={natal!} overlay={analysis_result.transits} overlayLabel="Tránsitos" orbDegrees={orb} consultante={consultante} />
                   ) : !synastryEnabled && hasChart && activeLayers.has('progressions') && analysis_result?.progressions?.chart ? (
                     <AstrologyDoubleWheelSVG natal={natal!} overlay={analysis_result.progressions.chart} overlayLabel="Progresiones (Secundarias)" orbDegrees={orb} consultante={consultante} />
-                  ) : !synastryEnabled && hasChart && activeLayers.has('solarReturn') && analysis_result?.solarReturn?.chart ? (
+                  ) : !synastryEnabled && hasChart && activeLayers.has('return_solar') && analysis_result?.solarReturn?.chart ? (
                     <AstrologyDoubleWheelSVG natal={natal!} overlay={analysis_result.solarReturn.chart} overlayLabel="Retorno Solar" orbDegrees={orb} consultante={consultante} />
                   ) : hasChart && synastryEnabled && partnerChart ? (
                     <div>
@@ -2004,51 +1735,6 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                         if (!housesOk || !planetsOk || wheel.ascendantDeg === null) {
                           // If normalization failed, keep legacy simple renderer as a fallback to avoid breaking visuals
                           return <NatalChartSVGPro chart={natal} maxHeight={560} />;
-                        }
-
-                        // If comparison mode with active session, render stacked wheels
-                        if (compareMode && activeSessionId) {
-                          const sess = sessions.find(x => x.id === activeSessionId);
-                          const sessWheel = sess?.chartPayload ? normalizeNatalForWheel(sess.chartPayload) : null;
-                          const baseWheel = wheel;
-                          return (
-                            <div className="relative w-full" style={{ height: 920 }}>
-                              {/* compared (behind) */}
-                              {sessWheel ? (
-                                <div style={{ position: 'absolute', inset: 0, opacity: 0.55 }}>
-                                  <AstroWheelAdvanced size={920} ascendantDeg={sessWheel.ascendantDeg ?? baseWheel.ascendantDeg ?? 0} houses={sessWheel.houses} planets={sessWheel.planets} asteroids={sessWheel.asteroids ?? []} showAspects={false} orbDeg={orb} titleRight={`Comparada: ${sess?.method?.houses ?? ''} · ${sess?.method?.zodiac ?? ''}`} />
-                                </div>
-                              ) : null}
-                              {/* base (front) */}
-                              <div style={{ position: 'absolute', inset: 0 }}>
-                                  <AstroWheelAdvanced
-                                    size={920}
-                                    ascendantDeg={baseWheel.ascendantDeg ?? 0}
-                                    houses={baseWheel.houses}
-                                    planets={baseWheel.planets}
-                                    asteroids={baseWheel.asteroids ?? []}
-                                    showAspects={true}
-                                     orbDeg={orb}
-                                     temporalLayers={temporalLayers}
-                                    annualLayers={annualLayers}
-                                    symbolicDoubleWheel={symbolicDoubleWheel}
-                                    secondaryLayer={secondaryLayer && secondaryLayerLabel ? { key: secondaryLayer, label: secondaryLayerLabel, mode: 'symbolic' } : null}
-                                    secondaryPlanets={secondaryPlanets ?? undefined}
-                                    comparisonWheel={comparisonWheel}
-                                    showComparisonAspects={false}
-                                    symbolicPlanetaryLayer={activeLayers.has('planetary')}
-                                    harmonicOrder={harmonicOrder}
-                                    personaMode={personaMode}
-                                    relocation={relocationParams ? { city: relocationParams.label, offsetDeg: relocationParams.offsetDeg, mode: relocationParams.mode, rotationDeg: relocationParams.rotationDeg } : undefined}
-                                    showMathPoints={activeLayers.has('mathPoints')}
-                                    titleRight={`${meta.sistema_casas || 'placidus'} · ${meta.zodiac_type || 'tropical'}`}
-                                    transitPlanets={
-                                      progressionsSnapshot ? progressionsSnapshot.planets : (transitsSnapshot && transitBaseType === 'natal' ? transitsSnapshot.planets : undefined)
-                                    }
-                                  />
-                              </div>
-                            </div>
-                          );
                         }
 
                         return (

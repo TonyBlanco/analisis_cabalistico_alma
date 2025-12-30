@@ -60,7 +60,8 @@ export default function ResonanciaAncestralWorkspace() {
         ) : (
           <div className="space-y-4">
             <div className="rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700">
-              Observacional. Sin inferencias, sin automatización decisoria, sin lenguaje clínico.
+              Este espacio permite observar patrones simbólicos y relacionales del sistema. No realiza inferencias
+              automáticas ni sustituye la lectura profesional del terapeuta.
             </div>
 
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -68,7 +69,8 @@ export default function ResonanciaAncestralWorkspace() {
                 <div className="text-xs uppercase tracking-wide text-gray-500">T1</div>
                 <h3 className="mt-1 text-base font-semibold text-gray-900">Mapa de resonancia</h3>
                 <p className="mt-2 text-sm text-gray-600">
-                  Scaffold visual de referencia. Se completa con contenido simbólico sin inferencias.
+                  Representación visual de las resonancias relacionales observadas en el sistema. Funciona como marco
+                  simbólico de referencia para orientar la lectura, sin cálculos ni interpretaciones automáticas.
                 </p>
               </section>
 
@@ -76,7 +78,8 @@ export default function ResonanciaAncestralWorkspace() {
                 <div className="text-xs uppercase tracking-wide text-gray-500">T2</div>
                 <h3 className="mt-1 text-base font-semibold text-gray-900">Ejes ancestrales</h3>
                 <p className="mt-2 text-sm text-gray-600">
-                  Panel de observación de ejes simbólicos. Solo lectura, sin cálculo.
+                  Visualización de ejes simbólicos recurrentes dentro del sistema relacional. Permite observar
+                  direcciones de repetición o continuidad sin establecer conclusiones.
                 </p>
               </section>
 
@@ -84,7 +87,8 @@ export default function ResonanciaAncestralWorkspace() {
                 <div className="text-xs uppercase tracking-wide text-gray-500">T3</div>
                 <h3 className="mt-1 text-base font-semibold text-gray-900">Resonancias</h3>
                 <p className="mt-2 text-sm text-gray-600">
-                  Espacio para listar resonancias observadas y referencias, sin automatización.
+                  Listado de resonancias identificadas por observación directa del terapeuta. Opera como registro
+                  simbólico, sin jerarquizar ni automatizar significados.
                 </p>
               </section>
 
@@ -92,14 +96,15 @@ export default function ResonanciaAncestralWorkspace() {
                 <div className="text-xs uppercase tracking-wide text-gray-500">T4</div>
                 <h3 className="mt-1 text-base font-semibold text-gray-900">Registro</h3>
                 <p className="mt-2 text-sm text-gray-600">
-                  Registro manual (placeholder). No genera conclusiones ni recomendaciones.
+                  Espacio de registro manual para notas simbólicas del proceso. No genera conclusiones automáticas ni
+                  recomendaciones.
                 </p>
               </section>
             </div>
 
             <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-              Si la identidad del consultante está incompleta (fecha/hora/lugar), este workspace se mantiene accesible
-              pero algunas visualizaciones pueden quedar limitadas.
+              Cuando algunos datos del consultante no están disponibles, el workspace permanece accesible, aunque
+              ciertas visualizaciones pueden mostrarse de forma limitada.
             </div>
           </div>
         )}
@@ -107,4 +112,3 @@ export default function ResonanciaAncestralWorkspace() {
     </div>
   );
 }
-

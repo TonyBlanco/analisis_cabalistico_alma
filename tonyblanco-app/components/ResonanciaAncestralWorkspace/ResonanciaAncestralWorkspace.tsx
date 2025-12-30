@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
-import { Activity } from 'lucide-react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { Activity, HelpCircle } from 'lucide-react';
 import useActiveConsultante from '@/hooks/useActiveConsultante';
 import {
   createResonanciaObservation,
@@ -21,27 +21,22 @@ function parseCommaSeparatedList(raw: string, maxItems: number): string[] {
   return parts.slice(0, maxItems);
 }
 
-function shouldShowObservationalReminder(statement: string): boolean {
-  const text = statement.trim().toLowerCase();
-  if (!text) return false;
-  const triggers = [
-    'porque',
-    'por que',
-    'causa',
-    'causal',
-    'provoca',
-    'origina',
-    'explica',
-    'significa',
-    'diagn',
-    'patolog',
-    'trastorno',
-    'síntoma',
-    'sintoma',
-    'enfermedad',
-    'predic',
-  ];
-  return triggers.some((t) => text.includes(t));
+function HelpTooltip({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <span className="group relative inline-flex items-center">
+      <button
+        type="button"
+        className="inline-flex items-center text-gray-400 hover:text-gray-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-300 rounded"
+        aria-label={label}
+      >
+        <HelpCircle className="h-4 w-4" aria-hidden="true" />
+        <span className="sr-only">{label}</span>
+      </button>
+      <span className="pointer-events-none absolute left-0 top-full z-20 mt-2 hidden w-80 max-w-[85vw] rounded-lg border border-gray-200 bg-white p-3 text-xs leading-relaxed text-gray-800 shadow-lg group-hover:block group-focus-within:block">
+        {children}
+      </span>
+    </span>
+  );
 }
 
 export default function ResonanciaAncestralWorkspace() {
@@ -147,8 +142,6 @@ export default function ResonanciaAncestralWorkspace() {
     };
   }, [observations]);
 
-  const showObservationalReminder = useMemo(() => shouldShowObservationalReminder(form.statement), [form.statement]);
-
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="flex items-center justify-between border-b border-gray-200 bg-white px-6 py-4">
@@ -214,14 +207,50 @@ export default function ResonanciaAncestralWorkspace() {
             <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
               <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
                 <div className="text-xs uppercase tracking-wide text-gray-500">T1</div>
-                <h3 className="mt-1 text-lg font-semibold text-gray-900">Mapa de resonancia</h3>
+                <div className="mt-1 flex items-center gap-2">
+                  <h3 className="text-lg font-semibold text-gray-900">Mapa de resonancia</h3>
+                  <HelpTooltip label="Mapa de resonancia: ayuda">
+                    <strong>Mapa de resonancia</strong>
+                    <br />
+                    Esta visualización muestra <strong>relaciones simbólicas registradas</strong> entre elementos
+                    observados.
+                    <br />
+                    • Cada nodo representa un <em>anchor</em> (elemento mencionado en una observación).
+                    <br />
+                    • Cada enlace indica que dos o más anchors fueron registrados juntos.
+                    <br />
+                    <br />
+                    ⚠️ El mapa <strong>no indica causas</strong>, <strong>no establece jerarquías</strong> y{' '}
+                    <strong>no interpreta significados</strong>.
+                    <br />
+                    <br />
+                    Su función es <strong>hacer visible lo que ha sido observado</strong>, no explicar por qué ocurre.
+                  </HelpTooltip>
+                </div>
                 <p className="mt-2 text-sm leading-relaxed text-gray-600">
                   Visualización neutral basada en anchors registrados. No infiere significados ni jerarquías.
                 </p>
 
                 <div className="mt-4 space-y-3">
                   <div>
-                    <div className="text-xs font-medium text-gray-700">Anchors</div>
+                    <div className="flex items-center gap-2">
+                      <div className="text-xs font-medium text-gray-700">Anchors</div>
+                      <HelpTooltip label="Anchor: ayuda">
+                        <strong>Anchor (elemento simbólico)</strong>
+                        <br />
+                        Un anchor es una palabra o referencia que el terapeuta utiliza para nombrar <strong>algo observado</strong>{' '}
+                        (por ejemplo: una emoción mencionada, una figura familiar, un tema recurrente).
+                        <br />
+                        • No es un diagnóstico
+                        <br />
+                        • No es una categoría clínica
+                        <br />
+                        • No tiene valor por sí mismo
+                        <br />
+                        <br />
+                        Su sentido depende <strong>exclusivamente del contexto profesional del terapeuta</strong>.
+                      </HelpTooltip>
+                    </div>
                     {neutralAnchorGraph.nodes.length ? (
                       <div className="mt-2 flex flex-wrap gap-2">
                         {neutralAnchorGraph.nodes.map((node) => (
@@ -239,7 +268,17 @@ export default function ResonanciaAncestralWorkspace() {
                   </div>
 
                   <div>
-                    <div className="text-xs font-medium text-gray-700">Enlaces</div>
+                    <div className="flex items-center gap-2">
+                      <div className="text-xs font-medium text-gray-700">Enlaces</div>
+                      <HelpTooltip label="Enlace simbólico: ayuda">
+                        <strong>Enlace simbólico</strong>
+                        <br />
+                        Un enlace aparece cuando <strong>dos o más anchors</strong> han sido registrados juntos en una observación.
+                        <br />
+                        <br />
+                        El enlace <strong>solo indica coexistencia</strong>, no relación causal ni explicativa.
+                      </HelpTooltip>
+                    </div>
                     {neutralAnchorGraph.edges.length ? (
                       <ul className="mt-2 space-y-1 text-sm text-gray-700">
                         {neutralAnchorGraph.edges.map((edge) => {
@@ -262,7 +301,20 @@ export default function ResonanciaAncestralWorkspace() {
 
               <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
                 <div className="text-xs uppercase tracking-wide text-gray-500">T2</div>
-                <h3 className="mt-1 text-lg font-semibold text-gray-900">Ejes ancestrales</h3>
+                <div className="mt-1 flex items-center gap-2">
+                  <h3 className="text-lg font-semibold text-gray-900">Ejes ancestrales</h3>
+                  <HelpTooltip label="Eje simbólico: ayuda">
+                    <strong>Eje simbólico</strong>
+                    <br />
+                    Un eje representa una <strong>dirección de repetición observada</strong> dentro del registro.
+                    <br />
+                    <br />
+                    No es una causa, no es una ley, no es una conclusión.
+                    <br />
+                    <br />
+                    Sirve para <strong>organizar observaciones similares</strong> y facilitar su revisión profesional.
+                  </HelpTooltip>
+                </div>
                 <p className="mt-2 text-sm leading-relaxed text-gray-600">
                   Visualización de ejes simbólicos recurrentes dentro del sistema relacional. Permite observar
                   direcciones de repetición o continuidad sin establecer conclusiones.
@@ -270,7 +322,18 @@ export default function ResonanciaAncestralWorkspace() {
 
                 <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
                   <label className="block">
-                    <span className="text-xs font-medium text-gray-700">Tipo</span>
+                    <span className="flex items-center gap-2 text-xs font-medium text-gray-700">
+                      Tipo
+                      <HelpTooltip label="Tipo de observación: ayuda">
+                        <strong>Tipo de observación</strong>
+                        <br />
+                        Filtra el registro según la forma en que fue clasificada la observación (resonancia, eje,
+                        repetición o nota).
+                        <br />
+                        <br />
+                        ⚠️ El filtro <strong>no crea datos nuevos</strong> ni modifica el contenido.
+                      </HelpTooltip>
+                    </span>
                     <select
                       className="mt-1 w-full rounded-md border border-gray-200 bg-white px-2 py-2 text-sm text-gray-900"
                       value={filters.type ?? ''}
@@ -288,7 +351,18 @@ export default function ResonanciaAncestralWorkspace() {
                   </label>
 
                   <label className="block">
-                    <span className="text-xs font-medium text-gray-700">Contexto</span>
+                    <span className="flex items-center gap-2 text-xs font-medium text-gray-700">
+                      Contexto
+                      <HelpTooltip label="Contexto simbólico: ayuda">
+                        <strong>Contexto simbólico</strong>
+                        <br />
+                        Describe el ámbito desde el cual se realizó la observación (familiar, relacional, sistémico,
+                        etc.).
+                        <br />
+                        <br />
+                        El contexto <strong>no define significado</strong>, solo <strong>sitúa la observación</strong>.
+                      </HelpTooltip>
+                    </span>
                     <select
                       className="mt-1 w-full rounded-md border border-gray-200 bg-white px-2 py-2 text-sm text-gray-900"
                       value={filters.context ?? ''}
@@ -305,7 +379,17 @@ export default function ResonanciaAncestralWorkspace() {
                   </label>
 
                   <label className="block">
-                    <span className="text-xs font-medium text-gray-700">Estado</span>
+                    <span className="flex items-center gap-2 text-xs font-medium text-gray-700">
+                      Estado
+                      <HelpTooltip label="Estado de la observación: ayuda">
+                        <strong>Estado de la observación</strong>
+                        <br />
+                        Indica si la observación está activa o latente dentro del proceso.
+                        <br />
+                        <br />
+                        No implica gravedad, relevancia ni prioridad.
+                      </HelpTooltip>
+                    </span>
                     <select
                       className="mt-1 w-full rounded-md border border-gray-200 bg-white px-2 py-2 text-sm text-gray-900"
                       value={filters.state ?? ''}
@@ -330,6 +414,14 @@ export default function ResonanciaAncestralWorkspace() {
                 </p>
 
                 <div className="mt-4 space-y-3">
+                  <div className="rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800">
+                    📌 <strong>Aviso importante</strong>
+                    <br />
+                    Este listado muestra <strong>registros observacionales</strong> realizados por el terapeuta.
+                    <br />
+                    El sistema <strong>no interpreta</strong>, <strong>no valida</strong> ni{' '}
+                    <strong>extrae conclusiones</strong> a partir de ellos.
+                  </div>
                   {error ? (
                     <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-800">{error}</div>
                   ) : null}
@@ -388,7 +480,18 @@ export default function ResonanciaAncestralWorkspace() {
 
               <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
                 <div className="text-xs uppercase tracking-wide text-gray-500">T4</div>
-                <h3 className="mt-1 text-lg font-semibold text-gray-900">Registro</h3>
+                <div className="mt-1 flex items-center gap-2">
+                  <h3 className="text-lg font-semibold text-gray-900">Registro</h3>
+                  <HelpTooltip label="Registro observacional: ayuda">
+                    <strong>Registro observacional</strong>
+                    <br />
+                    <br />
+                    Este espacio está destinado a <strong>describir lo observado</strong>, no a explicar causas ni generar conclusiones.
+                    <br />
+                    <br />
+                    El lenguaje utilizado es responsabilidad profesional del terapeuta.
+                  </HelpTooltip>
+                </div>
                 <p className="mt-2 text-sm leading-relaxed text-gray-600">
                   Espacio de registro manual para notas simbólicas del proceso. No genera conclusiones automáticas ni recomendaciones.
                 </p>
@@ -444,11 +547,37 @@ export default function ResonanciaAncestralWorkspace() {
                     }
                   }}
                 >
-                  {showObservationalReminder ? (
-                    <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
-                      Recuerda formular observaciones descriptivas, no causales ni explicativas.
+                  <details className="rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800">
+                    <summary className="cursor-pointer select-none text-sm font-medium text-gray-900">
+                      Ayuda de redacción (observacional)
+                    </summary>
+                    <div className="mt-2 text-sm text-gray-800">
+                      <strong>Cómo redactar una observación</strong>
+                      <br />
+                      ✔️ Describa lo que aparece o se repite
+                      <br />
+                      ✔️ Use lenguaje descriptivo
+                      <br />
+                      ✔️ Mantenga la formulación abierta
+                      <br />
+                      <br />
+                      ❌ Evite explicaciones causales
+                      <br />
+                      ❌ Evite diagnósticos
+                      <br />
+                      ❌ Evite conclusiones cerradas
+                      <br />
+                      <br />
+                      <strong>❌ Ejemplo NO recomendado</strong>
+                      <br />
+                      “Hay una causa familiar que hace que todos fracasen económicamente.”
+                      <br />
+                      <br />
+                      <strong>✅ Ejemplo recomendado</strong>
+                      <br />
+                      “Se repite la mención de dificultades económicas en varios miembros del sistema familiar.”
                     </div>
-                  ) : null}
+                  </details>
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <label className="block">
                       <span className="text-xs font-medium text-gray-700">Tipo</span>
@@ -502,7 +631,26 @@ export default function ResonanciaAncestralWorkspace() {
                   </div>
 
                   <label className="block">
-                    <span className="text-xs font-medium text-gray-700">Observación</span>
+                    <span className="flex items-center gap-2 text-xs font-medium text-gray-700">
+                      Observación
+                      <HelpTooltip label="Cómo redactar una observación: ayuda">
+                        <strong>Cómo redactar una observación</strong>
+                        <br />
+                        <br />
+                        ✔️ Describa lo que aparece o se repite
+                        <br />
+                        ✔️ Use lenguaje descriptivo
+                        <br />
+                        ✔️ Mantenga la formulación abierta
+                        <br />
+                        <br />
+                        ❌ Evite explicaciones causales
+                        <br />
+                        ❌ Evite diagnósticos
+                        <br />
+                        ❌ Evite conclusiones cerradas
+                      </HelpTooltip>
+                    </span>
                     <textarea
                       className="mt-1 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900"
                       rows={4}

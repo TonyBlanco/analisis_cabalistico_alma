@@ -39,3 +39,19 @@ class TherapistPatientProfileDemographicsTests(TestCase):
         self.assertEqual(self.patient.biological_sex, "male")
         self.assertEqual(self.patient.gender_identity, "man")
 
+    def test_get_profile_does_not_override_with_not_recorded_defaults(self):
+        User = get_user_model()
+        patient_user = User.objects.create_user("patient_demo", "patient_demo@test.com", "pass12345")
+        # Ensure profile exists with defaults (not_recorded) to reproduce the regression.
+        UserProfile.objects.get(user=patient_user)
+
+        self.patient.user = patient_user
+        self.patient.biological_sex = "male"
+        self.patient.gender_identity = "man"
+        self.patient.save(update_fields=["user", "biological_sex", "gender_identity"])
+
+        resp = self.client.get(f"/api/therapist/patients/{self.patient.id}/profile/")
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertEqual(data.get("biologicalSex"), "male")
+        self.assertEqual(data.get("genderIdentity"), "man")

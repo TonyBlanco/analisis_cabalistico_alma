@@ -1503,11 +1503,14 @@ class TherapistPatientProfileView(APIView):
             )
             profile_data["consent_accepted_at"] = getattr(up, "consent_accepted_at", None)
 
-            # Enriquecer demografía desde UserProfile si existe (fuente de verdad para pacientes con cuenta)
-            if getattr(up, "biological_sex", None):
-                profile_data["biologicalSex"] = getattr(up, "biological_sex", None)
-            if getattr(up, "gender_identity", None):
-                profile_data["genderIdentity"] = getattr(up, "gender_identity", None)
+            # Enriquecer demografía desde UserProfile si existe (fuente de verdad para pacientes con cuenta).
+            # Evitar pisar valores reales con defaults ("not_recorded").
+            up_bio = getattr(up, "biological_sex", None)
+            if up_bio and up_bio != "not_recorded":
+                profile_data["biologicalSex"] = up_bio
+            up_gender = getattr(up, "gender_identity", None)
+            if up_gender and up_gender != "not_recorded":
+                profile_data["genderIdentity"] = up_gender
 
         return Response(profile_data, status=status.HTTP_200_OK)
 

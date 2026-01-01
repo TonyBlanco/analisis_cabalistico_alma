@@ -1,7 +1,9 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import type { AdminSystemStatus } from '@/lib/contracts/adminWorkspace.v2_1';
 import ProfileMenu from '@/components/ProfileMenu';
+import { clearAuthState } from '@/lib/auth-state';
 
 function statusBadge(status: AdminSystemStatus) {
   if (status === 'ok') return { label: 'Sistema OK', className: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
@@ -17,8 +19,14 @@ export function AdminProHeader(props: {
   refreshing: boolean;
   chips?: Array<{ label: string; status: AdminSystemStatus }>;
 }) {
+  const router = useRouter();
   const { title = 'Administración', status, lastUpdated, onRefresh, refreshing, chips } = props;
   const badge = statusBadge(status);
+
+  const handleLogout = () => {
+    clearAuthState();
+    router.replace('/login');
+  };
 
   return (
     <header className="sticky top-0 z-30 bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between">
@@ -56,6 +64,13 @@ export function AdminProHeader(props: {
             className="inline-flex items-center rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-900 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {refreshing ? 'Refrescando…' : 'Refrescar'}
+          </button>
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="inline-flex items-center rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-900 hover:bg-slate-50"
+          >
+            Cerrar sesión
           </button>
           <ProfileMenu />
         </div>

@@ -1,3 +1,5 @@
+# This system is prepared for future activation. Currently inactive.
+
 SYSTEM_METADATA = {
     "id": "rider_waite_symbolic",
     "label": "Rider–Waite (simbólico)",
@@ -7,4 +9,3 @@ SYSTEM_METADATA = {
     "persistence": False,
     "notes": "Prepared as passive symbolic structure. Not executable.",
 }
-

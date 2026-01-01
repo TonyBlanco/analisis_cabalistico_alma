@@ -1,3 +1,5 @@
+# This system is prepared for future activation. Currently inactive.
+
 SYSTEM_METADATA = {
     "id": "tarot_de_marsella_symbolic",
     "label": "Tarot de Marsella (simbólico)",
@@ -7,4 +9,3 @@ SYSTEM_METADATA = {
     "persistence": False,
     "notes": "Prepared as passive symbolic structure. Not executable.",
 }
-

@@ -1,3 +1,5 @@
+# This system is prepared for future activation. Currently inactive.
+
 SYSTEM_METADATA = {
     "id": "golden_dawn_tarot",
     "label": "Golden Dawn Tarot",

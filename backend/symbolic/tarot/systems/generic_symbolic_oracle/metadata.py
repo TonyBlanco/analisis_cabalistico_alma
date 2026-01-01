@@ -1,3 +1,5 @@
+# This system is prepared for future activation. Currently inactive.
+
 SYSTEM_METADATA = {
     "id": "generic_symbolic_oracle",
     "label": "Oráculo simbólico genérico",
@@ -7,4 +9,3 @@ SYSTEM_METADATA = {
     "persistence": False,
     "notes": "Prepared as passive symbolic structure. Not executable.",
 }
-

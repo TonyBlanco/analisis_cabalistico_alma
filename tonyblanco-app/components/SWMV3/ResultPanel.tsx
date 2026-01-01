@@ -31,8 +31,10 @@ export default function ResultPanel({ reading, saveStatus, onClose }: Props) {
     }
   })();
 
-  const sr = reading.symbolic_reading?.symbolic_reading ?? null;
-  const systemFrame = reading.symbolic_reading?.symbolic_reading?.system_frame ?? null;
+  const srContainer = reading.symbolic_reading ?? null;
+  const sr = srContainer?.symbolic_reading ?? null;
+  const systemFrame = sr?.system_frame ?? null;
+  const keywords = srContainer?.card?.keywords ?? [];
 
   return (
     <div className="fixed right-6 bottom-6 z-40 w-96 max-w-full rounded bg-white p-4 shadow-lg">
@@ -59,6 +61,18 @@ export default function ResultPanel({ reading, saveStatus, onClose }: Props) {
             Lectura simbólica estructurada
           </div>
           {systemFrame && <div className="mt-1 text-xs text-gray-600">{systemFrame}</div>}
+          {Array.isArray(keywords) && keywords.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-1">
+              {keywords.slice(0, 10).map((kw) => (
+                <span
+                  key={kw}
+                  className="rounded-full border border-gray-200 bg-white px-2 py-0.5 text-[11px] text-gray-700"
+                >
+                  {kw}
+                </span>
+              ))}
+            </div>
+          )}
           {sr?.core_meaning && (
             <div className="mt-2">
               <div className="text-xs font-medium text-gray-700">Significado central</div>

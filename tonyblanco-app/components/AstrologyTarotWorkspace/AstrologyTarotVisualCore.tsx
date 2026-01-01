@@ -159,6 +159,7 @@ export default function AstrologyTarotVisualCore({
   const activeSwmCard = swmPayload?.cards?.[0] ?? null;
   const activeSymbols = activeSwmCard?.symbols ?? null;
   const structured = swmPayload?.symbolic_reading?.symbolic_reading ?? null;
+  const structuredKeywords = swmPayload?.symbolic_reading?.card?.keywords ?? null;
 
   const handleCardSelect = (card: TarotCardData | null) => {
     setSelectedCard(card);
@@ -722,6 +723,18 @@ export default function AstrologyTarotVisualCore({
                   <div className="mt-1 text-xs text-gray-600">
                     {structured?.system_frame ?? 'Marco simbólico no disponible.'}
                   </div>
+                  {Array.isArray(structuredKeywords) && structuredKeywords.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-1">
+                      {structuredKeywords.slice(0, 10).map((kw) => (
+                        <span
+                          key={kw}
+                          className="rounded-full border border-gray-200 bg-white px-2 py-0.5 text-[11px] text-gray-700"
+                        >
+                          {kw}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                   <div className="mt-2">
                     <div className="text-xs font-medium text-gray-700">Significado central</div>
                     <div className="text-sm text-gray-700">

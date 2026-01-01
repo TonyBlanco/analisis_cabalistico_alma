@@ -92,6 +92,16 @@ export default function AstrologyTarotVisualCore({
   };
 
   const activeConfig = sectionConfig[activeSection];
+  const systemKey = selectedSystem ?? 'thoth';
+  const isSystemImplemented = systemKey === 'thoth';
+  const systemLabelMap: Record<TarotSystemId, string> = {
+    thoth: 'Thoth Tarot (Crowley)',
+    'golden-dawn': 'Golden Dawn Tarot',
+    bota: 'B.O.T.A. Tarot',
+    hermetic: 'Hermetic Tarot',
+    sephiroth: 'Tarot of the Sephiroth',
+  };
+  const systemLabel = systemLabelMap[systemKey];
   const [selectedCard, setSelectedCard] = useState<TarotCardData | null>(null);
   const [analysisSources, setAnalysisSources] = useState({
     tarot: true,
@@ -115,16 +125,16 @@ export default function AstrologyTarotVisualCore({
   const pathLabel = cabalaData?.sendero ?? null;
 
   const thothMapping = useMemo(() => {
-    if (selectedSystem !== 'thoth' || !selectedCard) {
+    if (systemKey !== 'thoth' || !selectedCard) {
       return null;
     }
     return THOTH_MAJOR_ARCANA.find(
       (entry) => entry.arcanaId === selectedCard.id
     );
-  }, [selectedCard, selectedSystem]);
+  }, [selectedCard, systemKey]);
 
   const goldenDawnMapping = useMemo(() => {
-    if (selectedSystem !== 'golden-dawn' || !selectedCard) {
+    if (systemKey !== 'golden-dawn' || !selectedCard) {
       return null;
     }
     if (typeof selectedCard.number !== 'number') {
@@ -133,10 +143,10 @@ export default function AstrologyTarotVisualCore({
     return GOLDEN_DAWN_MAJOR_ARCANA.find(
       (entry) => entry.number === selectedCard.number
     );
-  }, [selectedCard, selectedSystem]);
+  }, [selectedCard, systemKey]);
 
   const botaMapping = useMemo(() => {
-    if (selectedSystem !== 'bota' || !selectedCard) {
+    if (systemKey !== 'bota' || !selectedCard) {
       return null;
     }
     if (typeof selectedCard.number !== 'number') {
@@ -145,10 +155,10 @@ export default function AstrologyTarotVisualCore({
     return BOTA_MAJOR_ARCANA.find(
       (entry) => entry.number === selectedCard.number
     );
-  }, [selectedCard, selectedSystem]);
+  }, [selectedCard, systemKey]);
 
   const hermeticMapping = useMemo(() => {
-    if (selectedSystem !== 'hermetic' || !selectedCard) {
+    if (systemKey !== 'hermetic' || !selectedCard) {
       return null;
     }
     if (typeof selectedCard.number !== 'number') {
@@ -157,10 +167,10 @@ export default function AstrologyTarotVisualCore({
     return HERMETIC_MAJOR_ARCANA.find(
       (entry) => entry.number === selectedCard.number
     );
-  }, [selectedCard, selectedSystem]);
+  }, [selectedCard, systemKey]);
 
   const sephirothMapping = useMemo(() => {
-    if (selectedSystem !== 'sephiroth' || !selectedCard) {
+    if (systemKey !== 'sephiroth' || !selectedCard) {
       return null;
     }
     if (typeof selectedCard.number !== 'number') {
@@ -169,13 +179,16 @@ export default function AstrologyTarotVisualCore({
     return SEPHIROTH_MAJOR_ARCANA.find(
       (entry) => entry.number === selectedCard.number
     );
-  }, [selectedCard, selectedSystem]);
+  }, [selectedCard, systemKey]);
 
   const handleDraftSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (!isSystemImplemented) {
+      return;
+    }
     const draftPayload = {
       patientId: patientId ?? null,
-      system: selectedSystem ?? null,
+      system: systemKey,
       selectedCards: selectedCard
         ? [{ id: selectedCard.id, name: selectedCard.name }]
         : [],
@@ -201,7 +214,7 @@ export default function AstrologyTarotVisualCore({
       patientId,
       date: new Date().toISOString(),
       workspace: 'tarot',
-      system: selectedSystem ?? 'thoth',
+      system: systemKey,
       symbols: {
         cards: [selectedCard.id],
       },
@@ -213,7 +226,7 @@ export default function AstrologyTarotVisualCore({
   const displayDate = new Date().toLocaleDateString('es-ES');
 
   const resolveSystemMapping = () => {
-    switch (selectedSystem) {
+    switch (systemKey) {
       case 'thoth':
         return thothMapping
           ? {
@@ -260,7 +273,7 @@ export default function AstrologyTarotVisualCore({
   };
 
   useEffect(() => {
-    if (!selectedCard?.name) {
+    if (!isSystemImplemented || !selectedCard?.name) {
       setCabalisticCorrespondence(null);
       return;
     }
@@ -293,10 +306,14 @@ export default function AstrologyTarotVisualCore({
 
     fetchCorrespondence();
     return () => controller.abort();
-  }, [selectedCard?.name]);
+  }, [isSystemImplemented, selectedCard?.name]);
 
   useEffect(() => {
     if (!patientId || !selectedCard) {
+      return;
+    }
+
+    if (!isSystemImplemented) {
       return;
     }
 
@@ -304,7 +321,6 @@ export default function AstrologyTarotVisualCore({
       return;
     }
 
-    const systemKey = selectedSystem ?? 'thoth';
     const sessionKey = `${patientId}:${systemKey}:${selectedCard.id}:${activeSection}`;
     if (lastSessionKey.current === sessionKey) {
       return;
@@ -330,7 +346,8 @@ export default function AstrologyTarotVisualCore({
     activeSection,
     patientId,
     selectedCard,
-    selectedSystem,
+    systemKey,
+    isSystemImplemented,
     thothMapping,
     goldenDawnMapping,
     botaMapping,
@@ -352,6 +369,25 @@ export default function AstrologyTarotVisualCore({
         </div>
       </div>
       <div className="grid gap-4">
+        {!isSystemImplemented && (
+          <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+            <div className="flex items-center justify-between gap-2">
+              <div>
+                <div className="text-[11px] uppercase tracking-wide text-amber-800">
+                  SISTEMA SIMBÓLICO · EN PREPARACIÓN
+                </div>
+                <div className="mt-1 font-medium">{systemLabel}</div>
+              </div>
+              <div className="text-[11px] text-amber-800">Motor no disponible</div>
+            </div>
+            <p className="mt-2">
+              Este sistema simbólico está declarado, pero su motor aún no está disponible.
+            </p>
+            <p className="mt-1 text-xs text-amber-800">
+              No se ejecutará análisis en esta fase.
+            </p>
+          </div>
+        )}
         {activeSection === 'tarot-deck-view' && (
           <TarotDeck
             cards={deckCards}
@@ -387,12 +423,17 @@ export default function AstrologyTarotVisualCore({
             onCardSelect={setSelectedCard}
           />
         )}
-        {activeSection === 'tarot-correspondences' && (
+        {activeSection === 'tarot-correspondences' && isSystemImplemented && (
           <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700">
             Correspondencias simbolicas disponibles para consulta visual.
           </div>
         )}
-        {activeSection === 'tarot-ai-draft' && (
+        {activeSection === 'tarot-correspondences' && !isSystemImplemented && (
+          <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700">
+            Correspondencias no disponibles: motor simbólico aún no implementado.
+          </div>
+        )}
+        {activeSection === 'tarot-ai-draft' && isSystemImplemented && (
           <form
             className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-700 space-y-4"
             onSubmit={handleDraftSubmit}
@@ -416,7 +457,7 @@ export default function AstrologyTarotVisualCore({
                 </div>
                 <div>
                   <span className="font-medium">Sistema activo:</span>{' '}
-                  <span>{selectedSystem ?? '—'}</span>
+                  <span>{systemLabel}</span>
                 </div>
               </div>
             </div>
@@ -539,7 +580,21 @@ export default function AstrologyTarotVisualCore({
           </form>
         )}
 
-        {selectedCard && (
+        {activeSection === 'tarot-ai-draft' && !isSystemImplemented && (
+          <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700">
+            <div className="text-xs uppercase tracking-wide text-gray-500">
+              Panel informativo (solo lectura)
+            </div>
+            <p className="mt-2">
+              Este sistema simbólico está declarado, pero su motor aún no está disponible.
+            </p>
+            <p className="mt-1 text-xs text-gray-600">
+              No se ejecutará análisis en esta fase.
+            </p>
+          </div>
+        )}
+
+        {isSystemImplemented && selectedCard && (
           <div className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-700">
             <div className="text-xs uppercase tracking-wide text-gray-500">
               Correspondencia Cabalistica
@@ -570,199 +625,53 @@ export default function AstrologyTarotVisualCore({
           </div>
         )}
 
-        {selectedSystem === 'thoth' && (
+        {isSystemImplemented && (
           <div className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-700">
-            <div className="text-xs uppercase tracking-wide text-gray-500">
-              Sistema Thoth Tarot
+            <div className="flex items-center justify-between gap-2">
+              <div className="text-xs uppercase tracking-wide text-gray-500">
+                Sistema Thoth Tarot
+              </div>
+              <span className="text-[10px] uppercase tracking-wide text-emerald-700">
+                IMPLEMENTADO (LECTURA EDUCATIVA)
+              </span>
             </div>
             <div className="mt-2 grid gap-2">
               <div>
                 <span className="font-medium">Arcano:</span>{' '}
-                <span>{selectedCard?.name || 'Dato simbolico no disponible'}</span>
+                <span>
+                  {selectedCard?.name ?? 'Selecciona una carta para ver correspondencias.'}
+                </span>
               </div>
               <div>
                 <span className="font-medium">Letra hebrea:</span>{' '}
-                <span>{thothMapping?.hebrewLetter || 'Dato simbolico no disponible'}</span>
+                <span>{thothMapping?.hebrewLetter ?? '—'}</span>
               </div>
               <div>
                 <span className="font-medium">Gematria:</span>{' '}
                 <span>
                   {typeof thothMapping?.gematria === 'number'
                     ? thothMapping.gematria
-                    : 'Dato simbolico no disponible'}
+                    : '—'}
                 </span>
               </div>
               <div>
                 <span className="font-medium">Sendero:</span>{' '}
-                <span>{thothMapping?.path || 'Dato simbolico no disponible'}</span>
+                <span>{thothMapping?.path ?? '—'}</span>
               </div>
               <div>
                 <span className="font-medium">Sefirot relacionadas:</span>{' '}
                 <span>
                   {thothMapping?.sefirot?.length
                     ? thothMapping.sefirot.join(' - ')
-                    : 'Dato simbolico no disponible'}
+                    : '—'}
                 </span>
               </div>
             </div>
-          </div>
-        )}
-
-        {selectedSystem === 'golden-dawn' && (
-          <div className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-700">
-            <div className="text-xs uppercase tracking-wide text-gray-500">
-              Sistema Golden Dawn Tarot
-            </div>
-            <div className="mt-2 grid gap-2">
-              <div>
-                <span className="font-medium">Arcano:</span>{' '}
-                <span>{selectedCard?.name || 'Dato simbolico no disponible'}</span>
+            {!selectedCard && (
+              <div className="mt-2 text-xs text-gray-500">
+                Selecciona una carta en el mazo para visualizar correspondencias.
               </div>
-              <div>
-                <span className="font-medium">Letra hebrea:</span>{' '}
-                <span>
-                  {goldenDawnMapping?.hebrewLetter || 'Dato simbolico no disponible'}
-                </span>
-              </div>
-              <div>
-                <span className="font-medium">Gematria:</span>{' '}
-                <span>
-                  {typeof goldenDawnMapping?.gematria === 'number'
-                    ? goldenDawnMapping.gematria
-                    : 'Dato simbolico no disponible'}
-                </span>
-              </div>
-              <div>
-                <span className="font-medium">Sendero:</span>{' '}
-                <span>{goldenDawnMapping?.path || 'Dato simbolico no disponible'}</span>
-              </div>
-              <div>
-                <span className="font-medium">Sefirot relacionadas:</span>{' '}
-                <span>
-                  {goldenDawnMapping?.sefirot?.length
-                    ? goldenDawnMapping.sefirot.join(' - ')
-                    : 'Dato simbolico no disponible'}
-                </span>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {selectedSystem === 'bota' && (
-          <div className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-700">
-            <div className="text-xs uppercase tracking-wide text-gray-500">
-              Sistema B.O.T.A. Tarot
-            </div>
-            <div className="mt-2 grid gap-2">
-              <div>
-                <span className="font-medium">Arcano:</span>{' '}
-                <span>{selectedCard?.name || 'Dato simbolico no disponible'}</span>
-              </div>
-              <div>
-                <span className="font-medium">Letra hebrea:</span>{' '}
-                <span>{botaMapping?.hebrewLetter || 'Dato simbolico no disponible'}</span>
-              </div>
-              <div>
-                <span className="font-medium">Gematria:</span>{' '}
-                <span>
-                  {typeof botaMapping?.gematria === 'number'
-                    ? botaMapping.gematria
-                    : 'Dato simbolico no disponible'}
-                </span>
-              </div>
-              <div>
-                <span className="font-medium">Sendero:</span>{' '}
-                <span>{botaMapping?.path || 'Dato simbolico no disponible'}</span>
-              </div>
-              <div>
-                <span className="font-medium">Sefirot relacionadas:</span>{' '}
-                <span>
-                  {botaMapping?.sefirot?.length
-                    ? botaMapping.sefirot.join(' - ')
-                    : 'Dato simbolico no disponible'}
-                </span>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {selectedSystem === 'hermetic' && (
-          <div className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-700">
-            <div className="text-xs uppercase tracking-wide text-gray-500">
-              Sistema Hermetic Tarot
-            </div>
-            <div className="mt-2 grid gap-2">
-              <div>
-                <span className="font-medium">Arcano:</span>{' '}
-                <span>{selectedCard?.name || 'Dato simbolico no disponible'}</span>
-              </div>
-              <div>
-                <span className="font-medium">Letra hebrea:</span>{' '}
-                <span>
-                  {hermeticMapping?.hebrewLetter || 'Dato simbolico no disponible'}
-                </span>
-              </div>
-              <div>
-                <span className="font-medium">Gematria:</span>{' '}
-                <span>
-                  {typeof hermeticMapping?.gematria === 'number'
-                    ? hermeticMapping.gematria
-                    : 'Dato simbolico no disponible'}
-                </span>
-              </div>
-              <div>
-                <span className="font-medium">Sendero:</span>{' '}
-                <span>{hermeticMapping?.path || 'Dato simbolico no disponible'}</span>
-              </div>
-              <div>
-                <span className="font-medium">Sefirot relacionadas:</span>{' '}
-                <span>
-                  {hermeticMapping?.sefirot?.length
-                    ? hermeticMapping.sefirot.join(' - ')
-                    : 'Dato simbolico no disponible'}
-                </span>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {selectedSystem === 'sephiroth' && (
-          <div className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-700">
-            <div className="text-xs uppercase tracking-wide text-gray-500">
-              Sistema Tarot of the Sephiroth
-            </div>
-            <div className="mt-2 grid gap-2">
-              <div>
-                <span className="font-medium">Arcano:</span>{' '}
-                <span>{selectedCard?.name || 'Dato simbolico no disponible'}</span>
-              </div>
-              <div>
-                <span className="font-medium">Letra hebrea:</span>{' '}
-                <span>
-                  {sephirothMapping?.hebrewLetter || 'Dato simbolico no disponible'}
-                </span>
-              </div>
-              <div>
-                <span className="font-medium">Gematria:</span>{' '}
-                <span>
-                  {typeof sephirothMapping?.gematria === 'number'
-                    ? sephirothMapping.gematria
-                    : 'Dato simbolico no disponible'}
-                </span>
-              </div>
-              <div>
-                <span className="font-medium">Sendero:</span>{' '}
-                <span>{sephirothMapping?.path || 'Dato simbolico no disponible'}</span>
-              </div>
-              <div>
-                <span className="font-medium">Sefirot relacionadas:</span>{' '}
-                <span>
-                  {sephirothMapping?.sefirot?.length
-                    ? sephirothMapping.sefirot.join(' - ')
-                    : 'Dato simbolico no disponible'}
-                </span>
-              </div>
-            </div>
+            )}
           </div>
         )}
       </div>

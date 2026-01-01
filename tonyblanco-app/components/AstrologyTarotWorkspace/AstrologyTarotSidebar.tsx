@@ -13,7 +13,10 @@ import {
   DocumentTextIcon,
   SparklesIcon,
   SquaresPlusIcon,
+  CheckCircleIcon,
+  ClockIcon,
 } from '@heroicons/react/24/solid';
+import { SwmV3Button } from '../SWMV3';
 
 interface AstrologyTarotSidebarProps {
   activeSection: AstrologyTarotSectionId;
@@ -66,47 +69,49 @@ const sections: Array<{
   },
 ];
 
+type SymbolicSystemImplementationStatus = 'implemented' | 'preparing';
+
 const cabalisticSystems: Array<{
   id: TarotSystemId;
   label: string;
   description: string;
   Icon: typeof CalendarDaysIcon;
-  status?: string;
+  implementationStatus: SymbolicSystemImplementationStatus;
 }> = [
   {
     id: 'thoth',
     label: 'Thoth Tarot (Crowley)',
     description: 'Letras hebreas · Astrologia · Arbol de la Vida',
     Icon: AcademicCapIcon,
-    status: 'Activo (Sistema simbolico)',
+    implementationStatus: 'implemented',
   },
   {
     id: 'golden-dawn',
     label: 'Golden Dawn Tarot',
     description: 'Sistema cabalistico hermetico completo',
     Icon: CubeTransparentIcon,
-    status: 'Sistema simbolico',
+    implementationStatus: 'preparing',
   },
   {
     id: 'bota',
     label: 'B.O.T.A. Tarot',
     description: 'Estudio cabalistico estructurado',
     Icon: DocumentTextIcon,
-    status: 'Sistema simbolico (estudio cabalistico)',
+    implementationStatus: 'preparing',
   },
   {
     id: 'sephiroth',
     label: 'Tarot of the Sephiroth',
     description: 'Enfoque en el Arbol de la Vida',
     Icon: SquaresPlusIcon,
-    status: 'Sistema simbolico - Arbol de la Vida',
+    implementationStatus: 'preparing',
   },
   {
     id: 'hermetic',
     label: 'Hermetic Tarot',
     description: 'Simbolismo esoterico profundo',
     Icon: SparklesIcon,
-    status: 'Sistema simbolico hermetico',
+    implementationStatus: 'preparing',
   },
 ];
 
@@ -148,59 +153,62 @@ export default function AstrologyTarotSidebar({
         </div>
         <div className="pt-2">
           <p className="text-[11px] uppercase tracking-wide text-gray-400">
-            Sistemas Cabalisticos
+            Sistemas simbólicos
           </p>
           <div className="mt-2 space-y-2">
             {cabalisticSystems.map((system) => {
-              const isActive = system.id && system.id === selectedSystem;
-              if (system.id) {
-                return (
-                  <button
-                    key={system.label}
-                    type="button"
-                    onClick={() => onSelectSystem?.(system.id)}
-                    className={`w-full rounded-md border px-3 py-2 text-left text-sm transition-colors ${
-                      isActive
-                        ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
-                        : 'border-gray-200 text-gray-600 hover:bg-gray-50'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2">
-                        <system.Icon className="h-4 w-4 text-gray-400" />
-                        <p className="text-sm font-medium text-gray-700">
-                          {system.label}
-                        </p>
-                      </div>
-                      {system.status && (
-                        <span className="text-[10px] uppercase tracking-wide text-emerald-600">
-                          {system.status}
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-[11px] text-gray-400">{system.description}</p>
-                  </button>
-                );
-              }
+              const isSelected = system.id === selectedSystem;
+              const isImplemented = system.implementationStatus === 'implemented';
+
+              const statusLabel = isImplemented
+                ? 'IMPLEMENTADO (LECTURA EDUCATIVA)'
+                : 'SISTEMA SIMBÓLICO · EN PREPARACIÓN';
+              const StatusIcon = isImplemented ? CheckCircleIcon : ClockIcon;
+
+              const selectedClasses = isImplemented
+                ? 'border-emerald-200 bg-emerald-50'
+                : 'border-amber-200 bg-amber-50';
+              const idleClasses = 'border-gray-200 text-gray-600 hover:bg-gray-50';
 
               return (
-                <div
+                <button
                   key={system.label}
-                  className="w-full rounded-md border border-dashed border-gray-200 px-3 py-2 text-left text-sm text-gray-500"
-                  aria-disabled="true"
+                  type="button"
+                  onClick={() => onSelectSystem?.(system.id)}
+                  className={`w-full rounded-md border px-3 py-2 text-left text-sm transition-colors ${
+                    isSelected ? selectedClasses : idleClasses
+                  }`}
                 >
-                  <div className="flex items-center gap-2">
-                    <system.Icon className="h-4 w-4 text-gray-400" />
-                    <p className="text-sm font-medium text-gray-600">
-                      {system.label}
-                    </p>
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <system.Icon className="h-4 w-4 text-gray-400" />
+                      <p className="text-sm font-medium text-gray-700">
+                        {system.label}
+                      </p>
+                    </div>
+                    <span
+                      className={`flex items-center gap-1 text-[10px] uppercase tracking-wide ${
+                        isImplemented ? 'text-emerald-700' : 'text-amber-700'
+                      }`}
+                    >
+                      <StatusIcon className="h-3.5 w-3.5" />
+                      {statusLabel}
+                    </span>
                   </div>
                   <p className="text-[11px] text-gray-400">{system.description}</p>
-                </div>
+                  {!isImplemented && (
+                    <p className="mt-1 text-[11px] text-gray-500">
+                      Motor simbólico aún no implementado.
+                    </p>
+                  )}
+                </button>
               );
             })}
           </div>
         </div>
+      </div>
+      <div className="px-3 py-2 border-t border-gray-100">
+        <SwmV3Button />
       </div>
       <div className="px-4 py-3 border-t border-gray-200 text-[11px] text-gray-500">
         Observacional. Sin lectura automatica.

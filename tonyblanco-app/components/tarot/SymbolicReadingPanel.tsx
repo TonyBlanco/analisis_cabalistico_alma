@@ -2,28 +2,48 @@
 
 import type { TarotCardDraw } from './TarotSpreadView';
 
-type SymbolicReadingText = {
-  core_meaning?: string | null;
-  contextual_meaning?: string | null;
-  position_meaning?: string | null;
-  system_frame?: string | null;
-};
-
 type Props = {
   systemLabel?: string | null;
   selectedCard?: TarotCardDraw | null;
-  reading?: SymbolicReadingText | null;
 };
 
-const FALLBACK = 'Este sistema aún no define este campo simbólico.';
+const FIELD_FALLBACK = 'Este sistema aún no define este campo simbólico.';
+const CARD_FALLBACK = 'Este sistema aún no define lectura detallada para esta carta.';
 
 function line(value: string | null | undefined): string {
   const v = (value ?? '').trim();
-  return v || FALLBACK;
+  return v || FIELD_FALLBACK;
 }
 
-export default function SymbolicReadingPanel({ systemLabel, selectedCard, reading }: Props) {
+function extractSelectedReading(selectedCard: TarotCardDraw | null | undefined): {
+  positionLabel: string;
+  core: string | null;
+  contextual: string | null;
+  positionMeaning: string | null;
+  systemFrame: string | null;
+} {
+  const pos = selectedCard?.position;
+  const positionLabel = (pos?.nameSpanish || pos?.label || pos?.id || '').trim();
+
+  const srContainer = selectedCard?.symbolic_reading;
+  const sr = srContainer && typeof srContainer === 'object' ? (srContainer as any).symbolic_reading : null;
+  return {
+    positionLabel,
+    core: sr && typeof sr.core_meaning === 'string' ? sr.core_meaning : null,
+    contextual: sr && typeof sr.contextual_meaning === 'string' ? sr.contextual_meaning : null,
+    positionMeaning: sr && typeof sr.position_meaning === 'string' ? sr.position_meaning : null,
+    systemFrame: sr && typeof sr.system_frame === 'string' ? sr.system_frame : null,
+  };
+}
+
+export default function SymbolicReadingPanel({ systemLabel, selectedCard }: Props) {
   const cardName = (selectedCard?.card?.nameSpanish || selectedCard?.card?.name || '').trim();
+  const extracted = extractSelectedReading(selectedCard);
+  const hasAnyReading =
+    Boolean(extracted.core?.trim()) ||
+    Boolean(extracted.contextual?.trim()) ||
+    Boolean(extracted.positionMeaning?.trim()) ||
+    Boolean(extracted.systemFrame?.trim());
 
   return (
     <section className="rounded-lg border border-slate-200 bg-white p-4">
@@ -42,30 +62,44 @@ export default function SymbolicReadingPanel({ systemLabel, selectedCard, readin
       <div className="mt-4 grid gap-3">
         <div className="rounded-md border border-slate-200 bg-slate-50 p-3">
           <div className="text-xs font-medium text-slate-700">Carta seleccionada</div>
-          <div className="mt-1 text-sm text-slate-900">{cardName || FALLBACK}</div>
+          <div className="mt-1 text-sm text-slate-900">{cardName || FIELD_FALLBACK}</div>
+          {extracted.positionLabel ? (
+            <div className="mt-1 text-xs text-slate-600">Posición: {extracted.positionLabel}</div>
+          ) : null}
         </div>
+
+        {!selectedCard ? (
+          <div className="rounded-md border border-slate-200 bg-white p-3 text-sm text-slate-700">{CARD_FALLBACK}</div>
+        ) : null}
+
+        {selectedCard && !hasAnyReading ? (
+          <div className="rounded-md border border-slate-200 bg-white p-3 text-sm text-slate-700">{CARD_FALLBACK}</div>
+        ) : null}
 
         <div className="rounded-md border border-slate-200 bg-white p-3">
           <div className="text-xs font-medium text-slate-700">Marco simbólico del sistema</div>
-          <div className="mt-1 text-sm text-slate-700">{line(reading?.system_frame)}</div>
+          <div className="mt-1 text-sm text-slate-700">{line(extracted.systemFrame)}</div>
         </div>
 
         <div className="rounded-md border border-slate-200 bg-white p-3">
           <div className="text-xs font-medium text-slate-700">Significado central</div>
-          <div className="mt-1 text-sm text-slate-700">{line(reading?.core_meaning)}</div>
+          <div className="mt-1 text-sm text-slate-700">
+            {extracted.core?.includes('Este sistema no define')
+              ? CARD_FALLBACK
+              : line(extracted.core)}
+          </div>
         </div>
 
         <div className="rounded-md border border-slate-200 bg-white p-3">
           <div className="text-xs font-medium text-slate-700">Contexto</div>
-          <div className="mt-1 text-sm text-slate-700">{line(reading?.contextual_meaning)}</div>
+          <div className="mt-1 text-sm text-slate-700">{line(extracted.contextual)}</div>
         </div>
 
         <div className="rounded-md border border-slate-200 bg-white p-3">
           <div className="text-xs font-medium text-slate-700">Significado de la posición</div>
-          <div className="mt-1 text-sm text-slate-700">{line(reading?.position_meaning)}</div>
+          <div className="mt-1 text-sm text-slate-700">{line(extracted.positionMeaning)}</div>
         </div>
       </div>
     </section>
   );
 }
-

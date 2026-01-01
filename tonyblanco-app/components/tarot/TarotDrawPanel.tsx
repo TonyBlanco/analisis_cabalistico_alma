@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import ConsentModal, { type SwmV3ConsentMode } from '@/components/SWMV3/ConsentModal';
 import { API_BASE_URL, getAuthToken } from '@/lib/api';
-import TarotSpreadView, { type TarotCardDraw, type TarotSpread } from './TarotSpreadView';
+import TarotSpreadView, { type TarotCardDraw, type TarotSpread, type TarotSpreadPosition } from './TarotSpreadView';
 import SymbolicReadingPanel from './SymbolicReadingPanel';
 
 type ConsentState = {
@@ -19,6 +19,12 @@ type SwmV3ApiResponse = {
   reading_id: string | null;
   payload?: any;
   error?: string;
+};
+
+type SymbolicReading = {
+  system: { id: string; label: string };
+  spread: TarotSpread;
+  cards: TarotCardDraw[];
 };
 
 const SYSTEMS: Array<{ id: string; label: string }> = [
@@ -44,6 +50,30 @@ function safeString(value: unknown): string {
   return typeof value === 'string' ? value : '';
 }
 
+function safeStringArray(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((v) => typeof v === 'string' && v.trim()).map((v) => v.trim());
+}
+
+function buildSpread(spreadId: string, cards: TarotCardDraw[]): TarotSpread {
+  const nameSpanish = SPREADS.find((s) => s.id === spreadId)?.nameSpanish ?? spreadId;
+  const positionsFromCards: TarotSpreadPosition[] = [];
+  for (const draw of cards) {
+    if (draw.position && typeof draw.position.id === 'string' && draw.position.id.trim()) {
+      positionsFromCards.push(draw.position);
+    }
+  }
+  const dedup = new Map<string, TarotSpreadPosition>();
+  for (const p of positionsFromCards) {
+    if (!dedup.has(p.id)) dedup.set(p.id, p);
+  }
+  return {
+    id: spreadId,
+    nameSpanish,
+    positions: Array.from(dedup.values()),
+  };
+}
+
 export default function TarotDrawPanel(props: { consultantId?: string | null }) {
   const [systemId, setSystemId] = useState<string>('thoth');
   const [spreadId, setSpreadId] = useState<string>('simple');
@@ -55,63 +85,10 @@ export default function TarotDrawPanel(props: { consultantId?: string | null }) 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [payload, setPayload] = useState<any | null>(null);
-  const [selectedDrawId, setSelectedDrawId] = useState<string | null>(null);
+  const [reading, setReading] = useState<SymbolicReading | null>(null);
+  const [selectedCard, setSelectedCard] = useState<TarotCardDraw | null>(null);
 
   const systemLabel = useMemo(() => SYSTEMS.find((s) => s.id === systemId)?.label ?? systemId, [systemId]);
-
-  const canonical = useMemo(() => {
-    const content = payload && typeof payload === "object" ? payload : null;
-
-    const spread: TarotSpread | null =
-      content?.spread && typeof content.spread === 'object'
-        ? {
-            id: safeString((content.spread as any).id) || spreadId,
-            nameSpanish: safeString((content.spread as any).nameSpanish) || safeString((content.spread as any).label) || undefined,
-            positions: Array.isArray((content.spread as any).positions) ? (content.spread as any).positions : [],
-          }
-        : {
-            id: spreadId,
-            nameSpanish: SPREADS.find((s) => s.id === spreadId)?.nameSpanish ?? spreadId,
-            positions: [],
-          };
-
-    const cardsRaw = Array.isArray(content?.cards) ? content.cards : [];
-    const draws: TarotCardDraw[] = cardsRaw
-      .filter((c: any) => c && typeof c === 'object')
-      .map((c: any, index: number) => ({
-        id: safeString(c.draw_id) || safeString(c.id) || `draw-${index + 1}`,
-        position: c.position && typeof c.position === 'object' ? (c.position as any) : null,
-        reversed: Boolean(c.reversed),
-        card: {
-          id: safeString(c.id) || `card-${index + 1}`,
-          nameSpanish: safeString(c.nameSpanish) || safeString(c.nameSpanish ?? c.name_es) || undefined,
-          name: safeString(c.name) || undefined,
-          imageUrl: safeString(c.imageUrl) || safeString(c.image_url) || undefined,
-          keywords: Array.isArray(c.keywords) ? c.keywords : Array.isArray(c.tags) ? c.tags : [],
-        },
-      }));
-
-    return { spread, draws, content };
-  }, [payload, spreadId]);
-
-  const selectedDraw = useMemo(() => {
-    if (!canonical.draws.length) return null;
-    if (selectedDrawId) return canonical.draws.find((d) => d.id === selectedDrawId) ?? canonical.draws[0];
-    return canonical.draws[0];
-  }, [canonical.draws, selectedDrawId]);
-
-  const reading = useMemo(() => {
-    // Current SWM v3 payload shape: payload.symbolic_reading.symbolic_reading.*
-    const sr = payload?.symbolic_reading?.symbolic_reading;
-    if (!sr || typeof sr !== 'object') return null;
-    return {
-      core_meaning: safeString((sr as any).core_meaning),
-      contextual_meaning: safeString((sr as any).contextual_meaning),
-      position_meaning: safeString((sr as any).position_meaning),
-      system_frame: safeString((sr as any).system_frame),
-    };
-  }, [payload]);
 
   const handleRun = async () => {
     setError(null);
@@ -162,8 +139,32 @@ export default function TarotDrawPanel(props: { consultantId?: string | null }) 
         return;
       }
 
-      setPayload(json.payload ?? null);
-      setSelectedDrawId(null);
+      const payload = json.payload && typeof json.payload === 'object' ? json.payload : null;
+      const cardsRaw = Array.isArray(payload?.cards) ? payload.cards : [];
+      const draws: TarotCardDraw[] = cardsRaw
+        .filter((c: any) => c && typeof c === 'object')
+        .map((c: any, index: number) => ({
+          id: safeString(c.draw_id) || safeString(c.id) || `draw-${index + 1}`,
+          position: c.position && typeof c.position === 'object' ? (c.position as any) : null,
+          reversed: Boolean(c.reversed),
+          card: {
+            id: safeString(c.id) || `card-${index + 1}`,
+            nameSpanish: safeString(c.nameSpanish) || safeString(c.name) || undefined,
+            name: safeString(c.name) || undefined,
+            imageUrl: safeString(c.imageUrl) || safeString(c.image_url) || undefined,
+            keywords: safeStringArray(c.keywords).length ? safeStringArray(c.keywords) : safeStringArray(c.tags),
+          },
+          symbolic_reading: c.symbolic_reading && typeof c.symbolic_reading === 'object' ? c.symbolic_reading : null,
+        }));
+
+      const nextReading: SymbolicReading = {
+        system: { id: systemId, label: systemLabel },
+        spread: buildSpread(spreadId, draws),
+        cards: draws,
+      };
+
+      setReading(nextReading);
+      setSelectedCard(draws[0] ?? null);
     } catch (e: any) {
       setError(e?.message || 'Error inesperado al ejecutar la lectura.');
     } finally {
@@ -253,13 +254,16 @@ export default function TarotDrawPanel(props: { consultantId?: string | null }) 
 
         <div className="space-y-3 lg:col-span-2">
           <TarotSpreadView
-            spread={canonical.spread}
-            cards={canonical.draws}
-            selectedCardDrawId={selectedDraw?.id ?? null}
-            onSelectCard={(draw) => setSelectedDrawId(draw.id)}
+            spread={reading?.spread ?? null}
+            cards={reading?.cards ?? []}
+            selectedCardDrawId={selectedCard?.id ?? null}
+            onSelectCard={(draw) => setSelectedCard(draw)}
           />
 
-          <SymbolicReadingPanel systemLabel={systemLabel} selectedCard={selectedDraw} reading={reading} />
+          <SymbolicReadingPanel
+            systemLabel={systemLabel}
+            selectedCard={selectedCard}
+          />
         </div>
       </div>
 
@@ -274,4 +278,3 @@ export default function TarotDrawPanel(props: { consultantId?: string | null }) 
     </section>
   );
 }
-

@@ -20,6 +20,7 @@ export type TarotCardDraw = {
   position?: TarotSpreadPosition | null;
   reversed?: boolean;
   card: TarotCardViewCard;
+  symbolic_reading?: any;
 };
 
 type Props = {
@@ -106,4 +107,3 @@ export default function TarotSpreadView({ spread, cards, selectedCardDrawId, onS
     </section>
   );
 }
-

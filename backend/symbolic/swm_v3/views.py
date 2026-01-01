@@ -27,6 +27,28 @@ CONSENT_MODES = {
     SymbolicReading.ConsentMode.STORE_WITH_CONSENT,
 }
 
+_SPREAD_POSITIONS: dict[str, list[dict[str, str]]] = {
+    "simple": [
+        {"id": "present", "nameSpanish": "Estado actual", "meaning": "Estado actual observable"},
+    ],
+    "three_cards": [
+        {"id": "origin", "nameSpanish": "Origen", "meaning": "Punto de partida simbólico"},
+        {"id": "present", "nameSpanish": "Presente", "meaning": "Estado actual observable"},
+        {"id": "direction", "nameSpanish": "Dirección", "meaning": "Tendencia simbólica"},
+    ],
+    "observation": [
+        {"id": "visible", "nameSpanish": "Lo visible", "meaning": "Lo observable en primer plano"},
+        {"id": "underlying", "nameSpanish": "Lo subyacente", "meaning": "Estructura de fondo que sostiene"},
+    ],
+}
+
+
+def _spread_positions(spread_type: str, card_count: int) -> list[dict[str, str]]:
+    positions = _SPREAD_POSITIONS.get(spread_type) or _SPREAD_POSITIONS["simple"]
+    if not isinstance(positions, list):
+        return []
+    return positions[: max(0, min(card_count, len(positions)))]
+
 
 def _json(payload: dict[str, Any], status_code: int) -> JsonResponse:
     required_defaults = {
@@ -75,20 +97,43 @@ class SwmV3SymbolicReadingCreateView(APIView):
                 if not isinstance(payload_content, dict):
                     return _error("Unsupported system_id.", mode=consent_mode)
             else:
-                payload_content = adapter.build_payload(selected_cards, context={}).to_content_dict()
+                spread_type_raw = request.data.get("spread_type")
+                spread_type = spread_type_raw if isinstance(spread_type_raw, str) and spread_type_raw else "simple"
+                payload_content = adapter.build_payload(selected_cards, context={"spread_type": spread_type}).to_content_dict()
 
             cards = payload_content.get("cards") if isinstance(payload_content, dict) else None
             if isinstance(cards, list) and cards:
                 system_label = getattr(adapter, "label", system_id) if adapter is not None else system_id
-                symbolic_reading = build_symbolic_reading_for_payload(
-                    system_id=system_id,
-                    system_label=str(system_label),
-                    card=cards[0] if isinstance(cards[0], dict) else {"id": str(cards[0])},
-                    spread_type=str(request.data.get("spread_type") or "simple"),
-                    position=str(request.data.get("position") or "central"),
-                    intention=str(request.data.get("intention") or ""),
-                )
-                payload_content = {**payload_content, "symbolic_reading": symbolic_reading}
+                spread_type_raw = request.data.get("spread_type")
+                spread_type = spread_type_raw if isinstance(spread_type_raw, str) and spread_type_raw else "simple"
+                positions = _spread_positions(spread_type, len(cards))
+                intention = str(request.data.get("intention") or "")
+
+                positioned_cards: list[dict[str, Any]] = []
+                per_card_readings: list[dict[str, Any]] = []
+                for idx, raw_card in enumerate(cards):
+                    card_obj = raw_card if isinstance(raw_card, dict) else {"id": str(raw_card)}
+                    position_obj = positions[idx] if idx < len(positions) else None
+                    if isinstance(position_obj, dict):
+                        card_obj = {**card_obj, "position": position_obj}
+
+                    sr = build_symbolic_reading_for_payload(
+                        system_id=system_id,
+                        system_label=str(system_label),
+                        card=card_obj,
+                        spread_type=spread_type,
+                        position=str((position_obj or {}).get("id") or "central"),
+                        intention=intention,
+                    )
+                    card_obj = {**card_obj, "symbolic_reading": sr}
+                    positioned_cards.append(card_obj)
+                    per_card_readings.append(sr)
+
+                cards = positioned_cards
+                payload_content = {**payload_content, "cards": positioned_cards}
+
+                # Backward-compatible: keep top-level symbolic_reading for the first card.
+                payload_content = {**payload_content, "symbolic_reading": per_card_readings[0] if per_card_readings else None}
 
             if consent_mode == SymbolicReading.ConsentMode.NO_STORE:
                 return _json(

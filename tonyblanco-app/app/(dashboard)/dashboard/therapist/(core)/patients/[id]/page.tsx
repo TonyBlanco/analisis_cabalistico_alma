@@ -6,6 +6,7 @@ import PatientProfileView from '@/components/patient/PatientProfileView';
 import PatientProfileEditor from '@/components/patient/PatientProfileEditor';
 import dynamic from 'next/dynamic'
 import { getActivePatient, setActivePatientId } from '@/lib/active-patient';
+import { TarotDrawPanel } from '@/components/tarot';
 
 import { getApiBaseUrl } from '@/lib/api-base';
 import { getAuthToken } from '@/lib/api';
@@ -231,6 +232,10 @@ export default function TherapistPatientDetailPage() {
       <section className="bg-white border border-gray-200 rounded-lg p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-3">Kabbalah Interpretation (PoC)</h2>
         <KabbalahPanel patientId={patientId} />
+      </section>
+
+      <section className="bg-white border border-gray-200 rounded-lg p-6">
+        <TarotDrawPanel consultantId={patient?.user ?? null} />
       </section>
 
       {showEditor && (

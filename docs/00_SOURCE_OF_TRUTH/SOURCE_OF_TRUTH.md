@@ -68,3 +68,13 @@ Para cualquier módulo simbólico que use referencias externas (p. ej. Sefaria) 
 - El modelo AI recibe SOLO metadatos (título/URL) y/o mapeos internos (planeta/signo/casa/letra), nunca pasajes.
 - La salida debe ser texto original (sin citas, sin comillas, sin formato tipo markdown) y breve (3 líneas).
 - Los enlaces externos se muestran como “Fuente: Sefaria (enlace externo)” y sirven solo como navegación a la fuente.
+
+### Evolución del Sistema Simbólico — SWM v3
+
+Se reconoce formalmente la introducción de SWM v3: una capa interpretativa simbólica asistida por IA con carácter educativo y no clínico.
+
+- SWM v1 (visual / observacional) permanece como la implementación canónica y operativa.
+- SWM v3 agrega capacidades interpretativas bajo gobernanza, consentimiento y trazabilidad, tal como define `docs/SWM_V3_INTERPRETACION_SIMBOLICA_GOBERNADA.md`.
+- Cualquier implementación de SWM v3 deberá respetar las reglas de seguridad y auditoría descritas en la fuente de la verdad y en la auditoría vigente.
+
+Este añadido amplía la documentación sin reescribir la fuente de la verdad existente.

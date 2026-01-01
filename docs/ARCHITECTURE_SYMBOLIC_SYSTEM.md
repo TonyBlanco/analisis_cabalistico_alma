@@ -108,6 +108,20 @@ Future enhancements may include:
 - Keep symbolic analysis separate from diagnostic workflows
 - Remain auditable and governed
 
+## Evolution: Interpretative Symbolic Layer (SWM v3)
+
+SWM v3 formaliza la capa interpretativa simbólica asistida por IA como una extensión documentada e integrada en el ecosistema simbólico con las siguientes garantías:
+
+- La ejecución de análisis simbólicos por IA ocurre fuera del motor visual y siempre bajo acción explícita del usuario (ej. botón `Interpretar tirada`).
+- Las salidas son no-clínicas, educativas y sujetas a la misma validación de 5 capas y filtrado de seguridad que el intérprete simbólico existente.
+- La persistencia de lecturas está gobernada por opciones (`no_store`, `store_anonymized`, `store_with_consent`) y por ownership claro (terapeuta).
+- SWM v3 es optativo y controlado por feature flags; SWM v1 (visual/observacional) no se elimina ni se reescribe.
+- Cualquier implementación práctica debe adherir a `docs/SWM_V3_INTERPRETACION_SIMBOLICA_GOBERNADA.md` y a la auditoría vigente.
+
+Notas técnicas para implementadores documentales:
+- Mantener separación clara entre visualización (plugins/adapters) y la capa interpretativa; evitar acoplamientos que puedan llevar a ejecuciones automáticas.
+- Documentar en `01_PROJECT_STATE` cualquier creación de recursos o flags nuevos antes de implementarlos en codebase.
+
 ## 7. Design Principles
 - Separation of concerns
 - Source of truth for symbolic data

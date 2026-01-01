@@ -797,3 +797,16 @@ Se implementó un sistema unificado de geocodificación para resolver inconsiste
 - **Impacto**: No afecta flujos clínicos ni arquitectura simbólica; mejora estabilidad del sistema
 
 Documentos actualizados: `docs/README.md`, `backend/API_DOCUMENTATION.md`
+
+## Addendum Aprobado — Sistema Simbólico Interpretativo (SWM v3)
+
+Se aprueba la introducción documentada de una fase interpretativa simbólica bajo el nombre SWM v3 con las siguientes condiciones obligatorias:
+
+- SWM v3 está **autorizado** como capa interpretativa educativa asistida por IA.
+- SWM v3 es **no clínica** y **no** altera los flujos clínicos existentes ni el `execution_mode`.
+- SWM v3 se desplegará de forma gradual y gobernada por feature flags (ej. `AI_TAROT_ENABLED`) y políticas de consentimiento.
+- La implementación debe respetar la auditoría vigente y no sustituye el juicio profesional del terapeuta.
+- Cualquier persistencia de lecturas deberá seguir los modos `no_store`, `store_anonymized`, `store_with_consent` y la propiedad de los datos será clara (ownership terapeutas).
+- El documento rector para SWM v3 es `docs/SWM_V3_INTERPRETACION_SIMBOLICA_GOBERNADA.md`.
+
+Este addendum no modifica ni reescribe decisiones previas; sólo habilita la extensión documental para futuras implementaciones bajo gobernanza estricta.

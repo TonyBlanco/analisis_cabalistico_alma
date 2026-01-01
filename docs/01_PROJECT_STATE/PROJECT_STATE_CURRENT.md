@@ -73,6 +73,23 @@ Documento vinculante:
 - Zero regression
 - Fase siguiente: consumidores de AnalysisRecord
 
+## SWM v3 — Registro documental (2026-01-01)
+
+- **Estado**: DOCUMENTATION-ENABLED (v3) — solamente documentación creada y aprobada para implementación futura por fases.
+- **Propósito**: Registrar formalmente la habilitación documental de SWM v3 (Interpretación simbólica educativa asistida por IA) sin introducir cambios de código, endpoints ni rutas.
+- **Documentos creados / añadidos**:
+  - `docs/SWM_V3_INTERPRETACION_SIMBOLICA_GOBERNADA.md` (documento rector SWM v3)
+  - `docs/SWM_V3_PHASE_CHECKLIST.md` (checklist técnico por fases, Phase 1→Phase 3)
+  - `docs/SWM_V3_PR_TEMPLATE.md` (plantilla PR obligatoria para SWM v3)
+  - `docs/SWM_V3_GOVERNANCE_ARTIFACTS.md` (artefactos de gobernanza: criterios, validaciones, stop conditions)
+  - Actualizaciones: `docs/tarot-ai-plan.md`, `docs/00_SOURCE_OF_TRUTH/SOURCE_OF_TRUTH.md`, `docs/00_SOURCE_OF_TRUTH/AUDITORIA CABALA APP 12182025.md`, `docs/ARCHITECTURE_SYMBOLIC_SYSTEM.md`
+- **Decisión operativa**: SWM v3 queda **autorizado** documentalmente para implementación futura por fases; cualquier trabajo de código deberá:
+  - registrarse previamente en este archivo `01_PROJECT_STATE/PROJECT_STATE_CURRENT.md` con ticket/branch y alcance,
+  - obtener sign-off de Auditoría (docs/00_SOURCE_OF_TRUTH/AUDITORIA CABALA APP 12182025.md),
+  - respetar feature flags (`AI_TAROT_ENABLED` por defecto `false`) y modos de persistencia (`no_store` | `store_anonymized` | `store_with_consent`).
+- **Restricciones inmediatas**: No modificar `src/`, no crear endpoints, no cambiar rutas, no refactorizar ni preparar código sin aprobación explícita de Auditoría.
+- **Registro**: entrada creada por agente documental el 2026-01-01. Referencias incluidas arriba.
+
 ---
 
 ## TreeStructuralState System — Unified Symbolic Visualization

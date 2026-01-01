@@ -25,7 +25,7 @@ SYSTEMS_REGISTRY = [
     {
         "id": "rider_waite_symbolic",
         "module": "symbolic.tarot.systems.rider_waite_symbolic",
-        "status": "planned",
+        "status": "active",
     },
     {
         "id": "tarot_cabalistico_tree_of_life",

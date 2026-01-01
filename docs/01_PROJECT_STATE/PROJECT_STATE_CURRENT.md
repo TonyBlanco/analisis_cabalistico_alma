@@ -90,6 +90,11 @@ Documento vinculante:
 - **Restricciones inmediatas**: No modificar `src/`, no crear endpoints, no cambiar rutas, no refactorizar ni preparar código sin aprobación explícita de Auditoría.
 - **Registro**: entrada creada por agente documental el 2026-01-01. Referencias incluidas arriba.
 
+- **Phase 2 Implementation (2026-01-01)**: CODE-LIMITED feature added to `tonyblanco-app` UI under feature-flag `NEXT_PUBLIC_SWM_V3_ENABLED`.
+  - **Estado**: COMPLETED (UI gated + consent modal + deterministic mock engine; no persistence).
+  - **Scope**: single secondary CTA button in Tarot sidebar, consent modal (opt-in), deterministic mock interpretation using Phase 1 example deck, read-only result panel. NO endpoints, NO storage, NO IA real.
+  - **Commit**: feat(swm-v3): phase 2 ui gated consent and mock interpretation
+
 ---
 
 ## TreeStructuralState System — Unified Symbolic Visualization

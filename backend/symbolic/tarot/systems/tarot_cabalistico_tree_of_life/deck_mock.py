@@ -1,0 +1,21 @@
+CARDS_MOCK = [
+    {
+        "id": "kab_keter_crown",
+        "name": "Crown (Keter)",
+        "arcana": "symbolic",
+        "tags": ["origin", "unity", "potential", "crown"],
+    },
+    {
+        "id": "kab_tiferet_heart",
+        "name": "Heart (Tiferet)",
+        "arcana": "symbolic",
+        "tags": ["balance", "beauty", "center", "integration"],
+    },
+    {
+        "id": "kab_yesod_foundation",
+        "name": "Foundation (Yesod)",
+        "arcana": "symbolic",
+        "tags": ["structure", "pattern", "channel", "foundation"],
+    },
+]
+

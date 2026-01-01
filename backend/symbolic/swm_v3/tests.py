@@ -136,3 +136,24 @@ class SymbolicReadingApiExecutionTests(TestCase):
         saved = SymbolicReading.objects.get(id=body["reading_id"])
         self.assertEqual(saved.system_id, "golden_dawn")
         self.assertIsNone(saved.consultant_id)
+
+    def test_no_store_returns_payload_for_rota(self):
+        response = self.client.post(
+            "/api/swm-v3/symbolic-readings/",
+            data={
+                "system_id": "rota",
+                "consent_mode": "no_store",
+                "reading_type": "educational",
+                "selected_cards": ["rota_10_wheel"],
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, 200)
+        body = response.json()
+        self.assertTrue(body.get("success"))
+        self.assertFalse(body.get("stored"))
+        self.assertEqual(body.get("mode"), "no_store")
+        self.assertIsNone(body.get("reading_id"))
+        self.assertIsInstance(body.get("payload"), dict)
+        self.assertNotEqual(body, {})
+        self.assertEqual(body["payload"].get("id", "").startswith("swm-v3-mock-rota-"), True)

@@ -15,7 +15,7 @@ SYSTEMS_REGISTRY = [
     {
         "id": "rota_tarot",
         "module": "symbolic.tarot.systems.rota_tarot",
-        "status": "planned",
+        "status": "active",
     },
     {
         "id": "tarot_de_marsella_symbolic",

@@ -834,7 +834,7 @@ class EmailOrUsernameAuthToken(APIView):
                 'error': 'user_not_found',
                 'message': 'No existe una cuenta con ese usuario o email',
                 'detail': 'No existe una cuenta con ese usuario o email'
-            }, status=status.HTTP_404_NOT_FOUND)
+            }, status=status.HTTP_401_UNAUTHORIZED)
 
         # Verificar si la cuenta está activa
         if not user.is_active:

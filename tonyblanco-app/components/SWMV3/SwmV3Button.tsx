@@ -1,9 +1,27 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import ConsentModal from './ConsentModal';
+import ConsentModal, { type SwmV3ConsentMode } from './ConsentModal';
 import ResultPanel from './ResultPanel';
-import runMockInterpretation from './MockEngine';
+import runMockInterpretation, { type SwmV3Reading } from './MockEngine';
+import { API_BASE_URL, getAuthToken } from '@/lib/api';
+
+type ConsentState = {
+  mode: SwmV3ConsentMode;
+  acceptedAt: string;
+  version: string;
+};
+
+export type SwmV3SaveStatus =
+  | { state: 'idle' }
+  | { state: 'not_saved'; mode: SwmV3ConsentMode }
+  | { state: 'saving'; mode: SwmV3ConsentMode }
+  | { state: 'saved'; mode: SwmV3ConsentMode; id: string }
+  | { state: 'failed'; mode: SwmV3ConsentMode };
+
+type Props = {
+  consultantId?: string;
+};
 
 function isFlagEnabled(): boolean {
   try {
@@ -11,60 +29,119 @@ function isFlagEnabled(): boolean {
       return Boolean((window as any).__SWM_V3_ENABLED);
     }
     return process.env.NEXT_PUBLIC_SWM_V3_ENABLED === 'true';
-  } catch (e) {
+  } catch {
     return false;
   }
 }
 
-export default function SwmV3Button() {
+export default function SwmV3Button({ consultantId }: Props) {
   const [enabled, setEnabled] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [consented, setConsented] = useState(false);
-  const [reading, setReading] = useState<any | null>(null);
+  const [consent, setConsent] = useState<ConsentState | null>(null);
+  const [reading, setReading] = useState<SwmV3Reading | null>(null);
+  const [saveStatus, setSaveStatus] = useState<SwmV3SaveStatus>({ state: 'idle' });
 
   useEffect(() => setEnabled(isFlagEnabled()), []);
 
-  if (!enabled) return null; // feature-flag gated: do not render when disabled
+  if (!enabled) return null;
 
-  const handleConfirm = (mode: any) => {
-    // Phase 2 only allows no_store
-    setConsented(true);
+  const handleConfirm = (payload: ConsentState) => {
+    setConsent(payload);
     setShowModal(false);
   };
 
-  const handleInterpret = () => {
-    // Deterministic mock interpretation; always local state only
+  const persistReading = async (payload: {
+    consent: ConsentState;
+    reading: SwmV3Reading;
+    consultantId?: string;
+  }) => {
+    const { consent, reading } = payload;
+
+    if (consent.mode === 'no_store') {
+      setSaveStatus({ state: 'not_saved', mode: consent.mode });
+      return;
+    }
+
+    setSaveStatus({ state: 'saving', mode: consent.mode });
+
+    try {
+      const token = getAuthToken();
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Token ${token}` } : {}),
+      };
+
+      const response = await fetch(`${API_BASE_URL}/swm-v3/symbolic-readings/`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          system_id: 'thoth',
+          reading_type: 'educational',
+          content: reading,
+          consent_mode: consent.mode,
+          consultant_id:
+            consent.mode === 'store_with_consent' ? payload.consultantId ?? null : null,
+          consent: {
+            explicit_opt_in: true,
+            version: consent.version,
+            accepted_at: consent.acceptedAt,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        setSaveStatus({ state: 'failed', mode: consent.mode });
+        return;
+      }
+
+      const data = (await response.json()) as { id?: string; saved?: boolean };
+      if (data?.saved === false) {
+        setSaveStatus({ state: 'not_saved', mode: consent.mode });
+        return;
+      }
+
+      setSaveStatus({ state: 'saved', mode: consent.mode, id: data?.id ?? 'unknown' });
+    } catch {
+      setSaveStatus({ state: 'failed', mode: consent.mode });
+    }
+  };
+
+  const handleInterpret = async () => {
+    if (!consent) {
+      setShowModal(true);
+      return;
+    }
+
     const r = runMockInterpretation();
     setReading(r);
+    await persistReading({ consent, reading: r, consultantId });
   };
 
   return (
     <div className="mt-4 px-3">
       <button
         type="button"
-        onClick={() => setShowModal(true)}
-        disabled={!consented}
+        onClick={handleInterpret}
         className={`w-full rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-          consented ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-600'
+          consent ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
         }`}
       >
-        Interpretar tirada (educativo)
+        {consent ? 'Interpretar tirada (educativo)' : 'Configurar consentimiento'}
       </button>
-
-      <div className="mt-2">
-        <button
-          type="button"
-          onClick={handleInterpret}
-          disabled={!consented}
-          className="text-xs text-gray-500"
-        >
-          Ejecutar simulación (mock)
-        </button>
-      </div>
 
       <ConsentModal open={showModal} onClose={() => setShowModal(false)} onConfirm={handleConfirm} />
 
-      {reading && <ResultPanel reading={reading} onClose={() => setReading(null)} />}
+      {reading && (
+        <ResultPanel
+          reading={reading}
+          saveStatus={saveStatus}
+          onClose={() => {
+            setReading(null);
+            setSaveStatus({ state: 'idle' });
+          }}
+        />
+      )}
     </div>
   );
 }
+

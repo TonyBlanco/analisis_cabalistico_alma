@@ -23,6 +23,7 @@ interface AstrologyTarotSidebarProps {
   onChange: (section: AstrologyTarotSectionId) => void;
   selectedSystem?: TarotSystemId | null;
   onSelectSystem?: (system: TarotSystemId) => void;
+  patientId?: string;
 }
 
 const sections: Array<{
@@ -120,6 +121,7 @@ export default function AstrologyTarotSidebar({
   onChange,
   selectedSystem,
   onSelectSystem,
+  patientId,
 }: AstrologyTarotSidebarProps) {
   return (
     <aside className="w-64 border-r border-gray-200 bg-white flex flex-col">
@@ -208,7 +210,7 @@ export default function AstrologyTarotSidebar({
         </div>
       </div>
       <div className="px-3 py-2 border-t border-gray-100">
-        <SwmV3Button />
+        <SwmV3Button consultantId={patientId} />
       </div>
       <div className="px-4 py-3 border-t border-gray-200 text-[11px] text-gray-500">
         Observacional. Sin lectura automatica.

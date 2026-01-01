@@ -95,6 +95,8 @@ Documento vinculante:
   - **Scope**: single secondary CTA button in Tarot sidebar, consent modal (opt-in), deterministic mock interpretation using Phase 1 example deck, read-only result panel. NO endpoints, NO storage, NO IA real.
   - **Commit**: feat(swm-v3): phase 2 ui gated consent and mock interpretation
 
+- SWM v3 Phase 3 — COMPLETED (governed persistence + consent, no AI)
+
 ---
 
 ## TreeStructuralState System — Unified Symbolic Visualization

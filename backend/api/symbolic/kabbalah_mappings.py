@@ -12,7 +12,9 @@ try:
 except Exception:
     yaml = None
 
-BASE_DIR = os.path.join(os.path.dirname(__file__), '..', '..', 'docs', '04_SYMBOLIC_SYSTEM')
+BASE_DIR = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "..", "..", "..", "docs", "04_SYMBOLIC_SYSTEM")
+)
 MAPPINGS_DIR = os.path.join(BASE_DIR, 'mappings')
 
 # Simple file cache: path -> (mtime, data)
@@ -248,8 +250,16 @@ def load_72_names() -> Dict[str, Any]:
         # legacy: markdown that may include YAML frontmatter; try to parse whole file
         data = _load_yaml_file(path)
 
-    names = _list_to_dict(data.get('names') or data.get('names_72') or [])
-    return names
+    # Preferred schema: top-level "names:" list
+    names_list = (data.get('names') or data.get('names_72')) if isinstance(data, dict) else None
+    if names_list is not None:
+        return _list_to_dict(names_list)
+
+    # Fallback parser (when PyYAML is unavailable) returns an already-keyed dict
+    if isinstance(data, dict) and data:
+        return {k: v for k, v in data.items() if k != "__meta__"}
+
+    return {}
 
 
 def load_sefer_yetzirah() -> Dict[str, Any]:

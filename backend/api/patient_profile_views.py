@@ -80,6 +80,8 @@ class TherapistUpdatePatientProfileView(APIView):
         birth_city = request.data.get('birth_city')
         birth_country = request.data.get('birth_country')
         birth_time = request.data.get('birth_time')
+        biological_sex = request.data.get('biologicalSex')
+        gender_identity = request.data.get('genderIdentity')
         
         if full_name is not None:
             # Validate: must have at least 2 words
@@ -106,6 +108,25 @@ class TherapistUpdatePatientProfileView(APIView):
             patient.birth_time = birth_time
             if birth_data:
                 birth_data.birth_time = birth_time
+
+        # Demographics (profile metadata)
+        if biological_sex is not None:
+            allowed = {c[0] for c in Patient._meta.get_field('biological_sex').choices}
+            if biological_sex not in allowed:
+                return Response(
+                    {'biologicalSex': f'Valor inválido: {biological_sex}'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            patient.biological_sex = biological_sex
+
+        if gender_identity is not None:
+            allowed = {c[0] for c in Patient._meta.get_field('gender_identity').choices}
+            if gender_identity not in allowed:
+                return Response(
+                    {'genderIdentity': f'Valor inválido: {gender_identity}'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            patient.gender_identity = gender_identity
         
         # === GEO-RESOLUTION CORE LOGIC ===
         new_city = birth_city
@@ -190,19 +211,31 @@ class TherapistUpdatePatientProfileView(APIView):
         # También sincronizar a UserProfile del paciente si existe
         if patient.user and hasattr(patient.user, 'profile'):
             user_profile = patient.user.profile
+            update_fields = []
+
             user_profile.birth_city = patient.birth_city
             user_profile.birth_country = patient.birth_country
             user_profile.birth_latitude = patient.birth_latitude
             user_profile.birth_longitude = patient.birth_longitude
             user_profile.birth_timezone = patient.birth_timezone or ''
+            update_fields.extend(['birth_city', 'birth_country', 'birth_latitude', 'birth_longitude', 'birth_timezone'])
+
             if patient.birth_date:
                 user_profile.birth_date = patient.birth_date
+                update_fields.append('birth_date')
             if patient.birth_time:
                 user_profile.birth_time = patient.birth_time
-            user_profile.save(update_fields=[
-                'birth_city', 'birth_country', 'birth_latitude', 
-                'birth_longitude', 'birth_timezone', 'birth_date', 'birth_time'
-            ])
+                update_fields.append('birth_time')
+
+            if biological_sex is not None:
+                user_profile.biological_sex = patient.biological_sex
+                update_fields.append('biological_sex')
+
+            if gender_identity is not None:
+                user_profile.gender_identity = patient.gender_identity
+                update_fields.append('gender_identity')
+
+            user_profile.save(update_fields=sorted(set(update_fields)))
         
         # Check if profile is now complete
         validation = {'is_complete': True, 'missing_fields': [], 'warnings': []}
@@ -231,6 +264,8 @@ class TherapistUpdatePatientProfileView(APIView):
             'missing_fields': validation['missing_fields'],
             'profile_updated_by_therapist': True,
             'last_therapist_update': birth_data.last_therapist_update.isoformat() if birth_data and birth_data.last_therapist_update else timezone.now().isoformat(),
+            'biologicalSex': getattr(patient, 'biological_sex', None),
+            'genderIdentity': getattr(patient, 'gender_identity', None),
             'coordinates': {
                 'latitude': float(patient.birth_latitude) if patient.birth_latitude else None,
                 'longitude': float(patient.birth_longitude) if patient.birth_longitude else None,

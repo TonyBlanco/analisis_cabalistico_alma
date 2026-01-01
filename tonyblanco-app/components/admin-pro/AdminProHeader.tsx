@@ -1,6 +1,7 @@
 'use client';
 
 import type { AdminSystemStatus } from '@/lib/contracts/adminWorkspace.v2_1';
+import ProfileMenu from '@/components/ProfileMenu';
 
 function statusBadge(status: AdminSystemStatus) {
   if (status === 'ok') return { label: 'Sistema OK', className: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
@@ -56,6 +57,7 @@ export function AdminProHeader(props: {
           >
             {refreshing ? 'Refrescando…' : 'Refrescar'}
           </button>
+          <ProfileMenu />
         </div>
       </div>
     </header>

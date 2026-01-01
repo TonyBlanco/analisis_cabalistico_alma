@@ -1,6 +1,7 @@
 'use client';
 
 import type { AdminSystemStatus } from '../../lib/contracts/adminWorkspace.v1';
+import ProfileMenu from '../ProfileMenu';
 
 export function AdminHeader(props: { status: AdminSystemStatus; lastUpdated: string | null }) {
   const { status, lastUpdated } = props;
@@ -19,9 +20,12 @@ export function AdminHeader(props: { status: AdminSystemStatus; lastUpdated: str
           <h1 className="text-xl font-semibold">Administración</h1>
           <span className={`rounded-full px-2 py-1 text-xs font-medium ${badge.className}`}>{badge.label}</span>
         </div>
-        <div className="text-xs text-gray-600">
-          Última actualización:{' '}
-          <span className="font-medium text-gray-900">{lastUpdated ? lastUpdated : '—'}</span>
+        <div className="flex items-center gap-3">
+          <div className="text-xs text-gray-600">
+            Última actualización:{' '}
+            <span className="font-medium text-gray-900">{lastUpdated ? lastUpdated : '—'}</span>
+          </div>
+          <ProfileMenu />
         </div>
       </div>
     </div>

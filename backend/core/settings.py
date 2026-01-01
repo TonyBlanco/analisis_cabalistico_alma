@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'astrology',        # Módulo de astrología (cálculos astronómicos)
     'courses',          # Sistema LMS de cursos
     'symbolic.72_angels',  # SWM 72 Ángeles Engine
+    'symbolic.swm_v3',  # SWM v3 governed symbolic readings (Phase 3)
 ]
 
 MIDDLEWARE = [

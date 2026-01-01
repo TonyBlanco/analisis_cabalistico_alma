@@ -35,6 +35,6 @@ SYSTEMS_REGISTRY = [
     {
         "id": "generic_symbolic_oracle",
         "module": "symbolic.tarot.systems.generic_symbolic_oracle",
-        "status": "planned",
+        "status": "active",
     },
 ]

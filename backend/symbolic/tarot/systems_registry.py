@@ -20,7 +20,7 @@ SYSTEMS_REGISTRY = [
     {
         "id": "tarot_de_marsella_symbolic",
         "module": "symbolic.tarot.systems.tarot_de_marsella_symbolic",
-        "status": "planned",
+        "status": "active",
     },
     {
         "id": "rider_waite_symbolic",

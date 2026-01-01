@@ -15,6 +15,17 @@ export type SwmV3Reading = {
   correspondences: string[];
   caution: string;
   cards: SwmV3ReadingCard[];
+  symbolic_reading?: {
+    system?: { id: string; label: string };
+    card?: { name: string; arcana: string; keywords: string[] };
+    symbolic_reading?: {
+      core_meaning: string;
+      contextual_meaning: string;
+      position_meaning: string;
+      system_frame: string;
+    };
+    notes?: string;
+  };
 };
 
 export function runMockInterpretation(): SwmV3Reading {
@@ -30,4 +41,3 @@ export function runMockInterpretation(): SwmV3Reading {
 }
 
 export default runMockInterpretation;
-

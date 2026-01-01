@@ -31,6 +31,9 @@ export default function ResultPanel({ reading, saveStatus, onClose }: Props) {
     }
   })();
 
+  const sr = reading.symbolic_reading?.symbolic_reading ?? null;
+  const systemFrame = reading.symbolic_reading?.symbolic_reading?.system_frame ?? null;
+
   return (
     <div className="fixed right-6 bottom-6 z-40 w-96 max-w-full rounded bg-white p-4 shadow-lg">
       <div className="flex items-start justify-between">
@@ -50,6 +53,27 @@ export default function ResultPanel({ reading, saveStatus, onClose }: Props) {
 
       <p className="mt-3 text-sm text-gray-700">{reading.summary}</p>
 
+      {(sr?.core_meaning || sr?.contextual_meaning || systemFrame) && (
+        <div className="mt-3 rounded-md border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700">
+          <div className="text-xs font-semibold text-gray-700">
+            Lectura simbólica estructurada
+          </div>
+          {systemFrame && <div className="mt-1 text-xs text-gray-600">{systemFrame}</div>}
+          {sr?.core_meaning && (
+            <div className="mt-2">
+              <div className="text-xs font-medium text-gray-700">Significado central</div>
+              <div className="text-sm text-gray-700">{sr.core_meaning}</div>
+            </div>
+          )}
+          {sr?.contextual_meaning && (
+            <div className="mt-2">
+              <div className="text-xs font-medium text-gray-700">Contexto</div>
+              <div className="text-sm text-gray-700">{sr.contextual_meaning}</div>
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="mt-3 text-sm">
         <div className="font-medium text-gray-800">Temas</div>
         <ul className="list-disc ml-5 mt-1 text-gray-700">
@@ -68,4 +92,3 @@ export default function ResultPanel({ reading, saveStatus, onClose }: Props) {
     </div>
   );
 }
-

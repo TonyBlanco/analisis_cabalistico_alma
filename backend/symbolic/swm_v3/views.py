@@ -15,6 +15,7 @@ from symbolic.tarot.systems.tarot_de_marsella_symbolic import adapter as marsell
 from symbolic.tarot.systems.rider_waite_symbolic import adapter as rider_waite_adapter  # noqa: F401
 from symbolic.tarot.systems.tarot_cabalistico_tree_of_life import adapter as cabalistic_adapter  # noqa: F401
 from symbolic.tarot.systems.generic_symbolic_oracle import adapter as oracle_adapter  # noqa: F401
+from symbolic.tarot.symbolic_engine import build_symbolic_reading_for_payload
 
 from .models import SymbolicReading
 from .service import SymbolicReadingSaveContext, saveSymbolicReading
@@ -75,6 +76,19 @@ class SwmV3SymbolicReadingCreateView(APIView):
                     return _error("Unsupported system_id.", mode=consent_mode)
             else:
                 payload_content = adapter.build_payload(selected_cards, context={}).to_content_dict()
+
+            cards = payload_content.get("cards") if isinstance(payload_content, dict) else None
+            if isinstance(cards, list) and cards:
+                system_label = getattr(adapter, "label", system_id) if adapter is not None else system_id
+                symbolic_reading = build_symbolic_reading_for_payload(
+                    system_id=system_id,
+                    system_label=str(system_label),
+                    card=cards[0] if isinstance(cards[0], dict) else {"id": str(cards[0])},
+                    spread_type=str(request.data.get("spread_type") or "simple"),
+                    position=str(request.data.get("position") or "central"),
+                    intention=str(request.data.get("intention") or ""),
+                )
+                payload_content = {**payload_content, "symbolic_reading": symbolic_reading}
 
             if consent_mode == SymbolicReading.ConsentMode.NO_STORE:
                 return _json(

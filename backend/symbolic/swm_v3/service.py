@@ -24,7 +24,7 @@ def _validate_reading_content(content: Any) -> None:
     if not isinstance(content, dict):
         raise ValueError("Invalid content payload.")
 
-    allowed_top_keys = {"id", "summary", "themes", "correspondences", "caution", "cards"}
+    allowed_top_keys = {"id", "summary", "themes", "correspondences", "caution", "cards", "symbolic_reading"}
     extra_keys = set(content.keys()) - allowed_top_keys
     if extra_keys:
         raise ValueError("Content contains unsupported fields.")
@@ -102,4 +102,3 @@ def saveSymbolicReading(
         consent_accepted_at=accepted_at,
         audit_trace=audit_trace,
     )
-

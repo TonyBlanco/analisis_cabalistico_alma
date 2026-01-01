@@ -49,6 +49,17 @@ type SwmV3Payload = {
   correspondences: string[];
   caution: string;
   cards: SwmV3PayloadCard[];
+  symbolic_reading?: {
+    system?: { id: string; label: string };
+    card?: { name: string; arcana: string; keywords: string[] };
+    symbolic_reading?: {
+      core_meaning: string;
+      contextual_meaning: string;
+      position_meaning: string;
+      system_frame: string;
+    };
+    notes?: string;
+  };
 };
 
 type SwmV3ApiResponse = {
@@ -147,6 +158,7 @@ export default function AstrologyTarotVisualCore({
 
   const activeSwmCard = swmPayload?.cards?.[0] ?? null;
   const activeSymbols = activeSwmCard?.symbols ?? null;
+  const structured = swmPayload?.symbolic_reading?.symbolic_reading ?? null;
 
   const handleCardSelect = (card: TarotCardData | null) => {
     setSelectedCard(card);
@@ -702,6 +714,26 @@ export default function AstrologyTarotVisualCore({
                       ? activeSwmCard.tags.join(', ')
                       : '-'}
                   </span>
+                </div>
+                <div className="pt-2 border-t border-gray-200">
+                  <div className="text-xs uppercase tracking-wide text-gray-500">
+                    Lectura simbólica (mínima)
+                  </div>
+                  <div className="mt-1 text-xs text-gray-600">
+                    {structured?.system_frame ?? 'Marco simbólico no disponible.'}
+                  </div>
+                  <div className="mt-2">
+                    <div className="text-xs font-medium text-gray-700">Significado central</div>
+                    <div className="text-sm text-gray-700">
+                      {structured?.core_meaning ?? 'Significado no disponible.'}
+                    </div>
+                  </div>
+                  <div className="mt-2">
+                    <div className="text-xs font-medium text-gray-700">Contexto</div>
+                    <div className="text-sm text-gray-700">
+                      {structured?.contextual_meaning ?? 'Contexto no disponible.'}
+                    </div>
+                  </div>
                 </div>
               </div>
             )}

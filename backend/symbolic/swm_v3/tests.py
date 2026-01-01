@@ -109,6 +109,26 @@ class SymbolicReadingApiExecutionTests(TestCase):
         self.assertNotEqual(body, {})
         self.assertEqual(body["payload"].get("id", "").startswith("swm-v3-mock-golden-dawn-"), True)
 
+    def test_no_store_returns_payload_for_thoth(self):
+        response = self.client.post(
+            "/api/swm-v3/symbolic-readings/",
+            data={
+                "system_id": "thoth",
+                "consent_mode": "no_store",
+                "reading_type": "educational",
+                "selected_cards": ["the_fool"],
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, 200)
+        body = response.json()
+        self.assertTrue(body.get("success"))
+        self.assertFalse(body.get("stored"))
+        self.assertEqual(body.get("mode"), "no_store")
+        self.assertIsNone(body.get("reading_id"))
+        self.assertIsInstance(body.get("payload"), dict)
+        self.assertNotEqual(body, {})
+
     def test_store_anonymized_persists_golden_dawn(self):
         response = self.client.post(
             "/api/swm-v3/symbolic-readings/",

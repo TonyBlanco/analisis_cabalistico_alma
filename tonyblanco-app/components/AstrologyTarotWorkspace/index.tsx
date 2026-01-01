@@ -19,6 +19,7 @@ export default function AstrologyTarotWorkspace({
   const [activeSection, setActiveSection] =
     useState<AstrologyTarotSectionId>('tarot-natal');
   const [selectedSystem, setSelectedSystem] = useState<TarotSystemId>('thoth');
+  const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
 
   const sectionLabelMap: Record<AstrologyTarotSectionId, string> = {
     'tarot-natal': 'Carta Natal',
@@ -56,6 +57,7 @@ export default function AstrologyTarotWorkspace({
           selectedSystem={selectedSystem}
           onSelectSystem={setSelectedSystem}
           patientId={patientId}
+          selectedCardId={selectedCardId}
         />
         <main className="flex-1 px-6 py-6">
           <div className="mb-4 rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700">
@@ -67,6 +69,7 @@ export default function AstrologyTarotWorkspace({
               patientId={patientId}
               patientBirthDate={patientBirthDate}
               selectedSystem={selectedSystem}
+              onCardSelect={(card) => setSelectedCardId((card as { id?: string } | null)?.id ?? null)}
             />
             <aside className="w-72 space-y-4">
               <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">

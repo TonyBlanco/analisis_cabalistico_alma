@@ -8,6 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
 from symbolic.tarot.execution import resolve_adapter
+from symbolic.tarot import builtin_adapters  # noqa: F401
 from symbolic.tarot.systems.golden_dawn_tarot import adapter as golden_dawn_adapter  # noqa: F401
 from symbolic.tarot.systems.rota_tarot import adapter as rota_adapter  # noqa: F401
 from symbolic.tarot.systems.tarot_de_marsella_symbolic import adapter as marsella_adapter  # noqa: F401
@@ -68,20 +69,10 @@ class SwmV3SymbolicReadingCreateView(APIView):
             )
 
             adapter = resolve_adapter(system_id)
-            if adapter is None and system_id != "thoth":
-                return _error("Unsupported system_id.", mode=consent_mode)
-
             if adapter is None:
                 payload_content = request.data.get("content")
                 if not isinstance(payload_content, dict):
-                    payload_content = {
-                        "id": "swm-v3-mock-thoth",
-                        "summary": "Lectura educativa (mock) — Thoth Tarot. Observacional, no clínica.",
-                        "themes": [],
-                        "correspondences": [],
-                        "caution": "Lectura educativa (mock) — no es diagnóstico, recomendación ni consejo clínico.",
-                        "cards": [],
-                    }
+                    return _error("Unsupported system_id.", mode=consent_mode)
             else:
                 payload_content = adapter.build_payload(selected_cards, context={}).to_content_dict()
 

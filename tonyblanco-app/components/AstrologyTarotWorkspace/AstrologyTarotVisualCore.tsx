@@ -25,16 +25,40 @@ interface AstrologyTarotVisualCoreProps {
   selectedSystem?: TarotSystemId | null;
 }
 
-type CabalaCorrespondence = {
-  card: string;
-  cabala: {
-    letra_hebrea: string;
-    nombre_letra: string;
-    valor_gematrico: number;
-    sendero: string | null;
-    sistema: string;
+type SwmV3PayloadCard = {
+  id: string;
+  name: string;
+  arcana?: string;
+  tags?: string[];
+  symbols?: {
+    hebrew_letter?: string | null;
+    letter_name?: string | null;
+    gematria?: number | null;
+    path?: string | null;
+    sefirot?: string[];
+    system?: string;
+    source?: string;
+    [key: string]: unknown;
   };
-} | null;
+};
+
+type SwmV3Payload = {
+  id: string;
+  summary: string;
+  themes: string[];
+  correspondences: string[];
+  caution: string;
+  cards: SwmV3PayloadCard[];
+};
+
+type SwmV3ApiResponse = {
+  success: boolean;
+  stored: boolean;
+  mode: string | null;
+  reading_id: string | null;
+  payload?: SwmV3Payload;
+  error?: string;
+};
 
 export default function AstrologyTarotVisualCore({
   activeSection,
@@ -93,7 +117,7 @@ export default function AstrologyTarotVisualCore({
 
   const activeConfig = sectionConfig[activeSection];
   const systemKey = selectedSystem ?? 'thoth';
-  const isSystemImplemented = systemKey === 'thoth';
+  const isSystemImplemented = true;
   const systemLabelMap: Partial<Record<TarotSystemId, string>> = {
     thoth: 'Thoth Tarot (Crowley)',
     'golden-dawn': 'Golden Dawn Tarot',
@@ -118,16 +142,16 @@ export default function AstrologyTarotVisualCore({
   >('exploratorio');
   const [intention, setIntention] = useState('');
   const [draft, setDraft] = useState<Record<string, unknown> | null>(null);
-  const [cabalisticCorrespondence, setCabalisticCorrespondence] =
-    useState<CabalaCorrespondence>(null);
+  const [swmPayload, setSwmPayload] = useState<SwmV3Payload | null>(null);
   const lastSessionKey = useRef<string | null>(null);
 
-  const fallbackText = 'Correspondencia simbolica no disponible';
-  const cabalaData = cabalisticCorrespondence?.cabala ?? null;
-  const hebrewGlyph = cabalaData?.letra_hebrea ?? null;
-  const letterName = cabalaData?.nombre_letra ?? null;
-  const gematriaValue = cabalaData?.valor_gematrico ?? null;
-  const pathLabel = cabalaData?.sendero ?? null;
+  const activeSwmCard = swmPayload?.cards?.[0] ?? null;
+  const activeSymbols = activeSwmCard?.symbols ?? null;
+
+  const handleCardSelect = (card: TarotCardData | null) => {
+    setSelectedCard(card);
+    onCardSelect?.(card);
+  };
 
   const thothMapping = useMemo(() => {
     if (systemKey !== 'thoth' || !selectedCard) {
@@ -278,40 +302,54 @@ export default function AstrologyTarotVisualCore({
   };
 
   useEffect(() => {
-    if (!isSystemImplemented || !selectedCard?.name) {
-      setCabalisticCorrespondence(null);
+    if (!isSystemImplemented || !selectedCard) {
+      setSwmPayload(null);
       return;
     }
 
     const controller = new AbortController();
-    const fetchCorrespondence = async () => {
+    const fetchPayload = async () => {
       try {
         const token = getAuthToken();
-        const headers: HeadersInit = token
-          ? { Authorization: `Token ${token}` }
-          : {};
-        const response = await fetch(
-          `${API_BASE_URL}/tarot/cabalistic-correspondence/?card_name=${encodeURIComponent(
-            selectedCard.name
-          )}`,
-          { headers, signal: controller.signal }
-        );
+        const headers: HeadersInit = {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Token ${token}` } : {}),
+        };
+
+        const response = await fetch(`${API_BASE_URL}/swm-v3/symbolic-readings/`, {
+          method: 'POST',
+          headers,
+          signal: controller.signal,
+          body: JSON.stringify({
+            system_id: systemKey,
+            consent_mode: 'no_store',
+            reading_type: 'educational',
+            selected_cards: [selectedCard.id],
+          }),
+        });
+
         if (!response.ok) {
-          setCabalisticCorrespondence(null);
+          setSwmPayload(null);
           return;
         }
-        const data = (await response.json()) as CabalaCorrespondence;
-        setCabalisticCorrespondence(data);
+
+        const data = (await response.json()) as SwmV3ApiResponse;
+        if (!data?.success || !data?.payload) {
+          setSwmPayload(null);
+          return;
+        }
+
+        setSwmPayload(data.payload);
       } catch (error) {
         if ((error as { name?: string }).name !== 'AbortError') {
-          setCabalisticCorrespondence(null);
+          setSwmPayload(null);
         }
       }
     };
 
-    fetchCorrespondence();
+    fetchPayload();
     return () => controller.abort();
-  }, [isSystemImplemented, selectedCard?.name]);
+  }, [isSystemImplemented, systemKey, selectedCard?.id]);
 
   useEffect(() => {
     if (!patientId || !selectedCard) {
@@ -398,7 +436,7 @@ export default function AstrologyTarotVisualCore({
             cards={deckCards}
             layout="grid"
             interactive={true}
-            onCardSelect={setSelectedCard}
+            onCardSelect={handleCardSelect}
           />
         )}
         {activeSection === 'tarot-tree-spread' && (
@@ -407,7 +445,7 @@ export default function AstrologyTarotVisualCore({
             layout="spread"
             spreadType="celtic-cross"
             interactive={true}
-            onCardSelect={setSelectedCard}
+            onCardSelect={handleCardSelect}
             showContent={false}
           />
         )}
@@ -416,7 +454,7 @@ export default function AstrologyTarotVisualCore({
             cards={deckCards.slice(0, 7)}
             layout="fan"
             interactive={true}
-            onCardSelect={setSelectedCard}
+            onCardSelect={handleCardSelect}
             showContent={false}
           />
         )}
@@ -425,7 +463,7 @@ export default function AstrologyTarotVisualCore({
             cards={deckCards.slice(0, 3)}
             layout="grid"
             interactive={true}
-            onCardSelect={setSelectedCard}
+            onCardSelect={handleCardSelect}
           />
         )}
         {activeSection === 'tarot-correspondences' && isSystemImplemented && (
@@ -599,82 +637,72 @@ export default function AstrologyTarotVisualCore({
           </div>
         )}
 
-        {isSystemImplemented && selectedCard && (
-          <div className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-700">
-            <div className="text-xs uppercase tracking-wide text-gray-500">
-              Correspondencia Cabalistica
-            </div>
-            <div className="mt-2 grid gap-2">
-              <div>
-                <span className="font-medium">Letra hebrea:</span>{' '}
-                <span>{hebrewGlyph ?? fallbackText}</span>
-              </div>
-              <div>
-                <span className="font-medium">Nombre:</span>{' '}
-                <span>{letterName ?? fallbackText}</span>
-              </div>
-              <div>
-                <span className="font-medium">Valor gematrico:</span>{' '}
-                <span>{gematriaValue ?? fallbackText}</span>
-              </div>
-              <div>
-                <span className="font-medium">Sendero:</span>{' '}
-                <span>{pathLabel ?? fallbackText}</span>
-              </div>
-              {!cabalaData && (
-                <div className="text-xs text-gray-500">
-                  Correspondencia simbolica no disponible para esta carta.
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
         {isSystemImplemented && (
           <div className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-700">
             <div className="flex items-center justify-between gap-2">
               <div className="text-xs uppercase tracking-wide text-gray-500">
-                Sistema Thoth Tarot
+                Sistema simbólico activo
               </div>
               <span className="text-[10px] uppercase tracking-wide text-emerald-700">
-                IMPLEMENTADO (LECTURA EDUCATIVA)
+                IMPLEMENTADO (MOCK EDUCATIVO)
               </span>
             </div>
-            <div className="mt-2 grid gap-2">
-              <div>
-                <span className="font-medium">Arcano:</span>{' '}
-                <span>
-                  {selectedCard?.name ?? 'Selecciona una carta para ver correspondencias.'}
-                </span>
-              </div>
-              <div>
-                <span className="font-medium">Letra hebrea:</span>{' '}
-                <span>{thothMapping?.hebrewLetter ?? '—'}</span>
-              </div>
-              <div>
-                <span className="font-medium">Gematria:</span>{' '}
-                <span>
-                  {typeof thothMapping?.gematria === 'number'
-                    ? thothMapping.gematria
-                    : '—'}
-                </span>
-              </div>
-              <div>
-                <span className="font-medium">Sendero:</span>{' '}
-                <span>{thothMapping?.path ?? '—'}</span>
-              </div>
-              <div>
-                <span className="font-medium">Sefirot relacionadas:</span>{' '}
-                <span>
-                  {thothMapping?.sefirot?.length
-                    ? thothMapping.sefirot.join(' - ')
-                    : '—'}
-                </span>
-              </div>
-            </div>
+            <div className="mt-1 font-medium">{systemLabel}</div>
+
             {!selectedCard && (
               <div className="mt-2 text-xs text-gray-500">
-                Selecciona una carta en el mazo para visualizar correspondencias.
+                Selecciona una carta en el mazo para visualizar datos simbólicos.
+              </div>
+            )}
+
+            {selectedCard && !swmPayload && (
+              <div className="mt-2 text-xs text-gray-500">
+                Cargando datos simbólicos...
+              </div>
+            )}
+
+            {selectedCard && swmPayload && (
+              <div className="mt-2 grid gap-2">
+                <div>
+                  <span className="font-medium">Carta:</span>{' '}
+                  <span>{selectedCard.name}</span>
+                </div>
+                <div>
+                  <span className="font-medium">Letra hebrea:</span>{' '}
+                  <span>{activeSymbols?.hebrew_letter ?? '-'}</span>
+                </div>
+                <div>
+                  <span className="font-medium">Nombre:</span>{' '}
+                  <span>{activeSymbols?.letter_name ?? '-'}</span>
+                </div>
+                <div>
+                  <span className="font-medium">Valor gemátrico:</span>{' '}
+                  <span>
+                    {typeof activeSymbols?.gematria === 'number'
+                      ? String(activeSymbols.gematria)
+                      : '-'}
+                  </span>
+                </div>
+                <div>
+                  <span className="font-medium">Sendero:</span>{' '}
+                  <span>{activeSymbols?.path ?? '-'}</span>
+                </div>
+                <div>
+                  <span className="font-medium">Sefirot relacionadas:</span>{' '}
+                  <span>
+                    {Array.isArray(activeSymbols?.sefirot) && activeSymbols.sefirot.length
+                      ? activeSymbols.sefirot.join(' - ')
+                      : '-'}
+                  </span>
+                </div>
+                <div>
+                  <span className="font-medium">Tags:</span>{' '}
+                  <span>
+                    {Array.isArray(activeSwmCard?.tags) && activeSwmCard.tags.length
+                      ? activeSwmCard.tags.join(', ')
+                      : '-'}
+                  </span>
+                </div>
               </div>
             )}
           </div>

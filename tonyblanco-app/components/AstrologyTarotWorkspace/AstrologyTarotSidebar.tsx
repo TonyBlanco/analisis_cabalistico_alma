@@ -24,6 +24,7 @@ interface AstrologyTarotSidebarProps {
   selectedSystem?: TarotSystemId | null;
   onSelectSystem?: (system: TarotSystemId) => void;
   patientId?: string;
+  selectedCardId?: string | null;
 }
 
 const sections: Array<{
@@ -89,65 +90,65 @@ const cabalisticSystems: Array<{
   {
     id: 'golden-dawn',
     label: 'Golden Dawn Tarot',
-    description: 'Sistema simbólico (en preparación)',
+    description: 'Sistema simbólico (mock educativo)',
     Icon: CubeTransparentIcon,
-    implementationStatus: 'preparing',
+    implementationStatus: 'implemented',
   },
   {
     id: 'rota',
     label: 'R.O.T.A. (tarot hermético)',
-    description: 'Sistema simbólico (en preparación)',
+    description: 'Sistema simbólico (mock educativo)',
     Icon: CubeTransparentIcon,
-    implementationStatus: 'preparing',
+    implementationStatus: 'implemented',
   },
   {
     id: 'marsella',
     label: 'Tarot de Marsella (simbólico)',
-    description: 'Sistema simbólico (en preparación)',
+    description: 'Sistema simbólico (mock educativo)',
     Icon: DocumentTextIcon,
-    implementationStatus: 'preparing',
+    implementationStatus: 'implemented',
   },
   {
     id: 'rider-waite',
     label: 'Rider–Waite (simbólico)',
-    description: 'Sistema simbólico (en preparación)',
+    description: 'Sistema simbólico (mock educativo)',
     Icon: DocumentTextIcon,
-    implementationStatus: 'preparing',
+    implementationStatus: 'implemented',
   },
   {
     id: 'tarot-cabalistico',
     label: 'Tarot cabalístico (Árbol de la Vida)',
-    description: 'Sistema simbólico (en preparación)',
+    description: 'Sistema simbólico (mock educativo)',
     Icon: SquaresPlusIcon,
-    implementationStatus: 'preparing',
+    implementationStatus: 'implemented',
   },
   {
     id: 'oracle-symbolic',
     label: 'Oráculo simbólico genérico',
-    description: 'Sistema simbólico (en preparación)',
+    description: 'Sistema simbólico (mock educativo)',
     Icon: SparklesIcon,
-    implementationStatus: 'preparing',
+    implementationStatus: 'implemented',
   },
   {
     id: 'bota',
     label: 'B.O.T.A. Tarot',
-    description: 'Sistema simbólico (en preparación)',
+    description: 'Sistema simbólico (mock educativo)',
     Icon: DocumentTextIcon,
-    implementationStatus: 'preparing',
+    implementationStatus: 'implemented',
   },
   {
     id: 'sephiroth',
     label: 'Tarot of the Sephiroth',
-    description: 'Sistema simbólico (en preparación)',
+    description: 'Sistema simbólico (mock educativo)',
     Icon: SquaresPlusIcon,
-    implementationStatus: 'preparing',
+    implementationStatus: 'implemented',
   },
   {
     id: 'hermetic',
     label: 'Hermetic Tarot',
-    description: 'Sistema simbólico (en preparación)',
+    description: 'Sistema simbólico (mock educativo)',
     Icon: SparklesIcon,
-    implementationStatus: 'preparing',
+    implementationStatus: 'implemented',
   },
 ];
 
@@ -157,6 +158,7 @@ export default function AstrologyTarotSidebar({
   selectedSystem,
   onSelectSystem,
   patientId,
+  selectedCardId,
 }: AstrologyTarotSidebarProps) {
   return (
     <aside className="w-64 border-r border-gray-200 bg-white flex flex-col">
@@ -197,8 +199,7 @@ export default function AstrologyTarotSidebar({
           <div className="mt-2 space-y-2">
             {cabalisticSystems.map((system) => {
               const isImplemented = system.implementationStatus === 'implemented';
-              const isDisabled = !isImplemented;
-              const isSelected = isImplemented && system.id === selectedSystem;
+              const isSelected = system.id === selectedSystem;
 
               const badgeLabel = isImplemented ? 'Implementado' : 'Próximamente';
               const stateLabel = isImplemented ? 'Activo' : 'Inactivo';
@@ -208,30 +209,14 @@ export default function AstrologyTarotSidebar({
                 'border-emerald-200 bg-emerald-50 text-gray-900';
               const enabledIdleClasses =
                 'border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900';
-              const disabledClasses =
-                'border-gray-200 bg-gray-50 text-gray-500 opacity-80 cursor-not-allowed';
 
               return (
                 <button
                   key={system.id}
                   type="button"
-                  disabled={isDisabled}
-                  aria-disabled={isDisabled}
-                  title={
-                    isDisabled ? 'Sistema en preparación (no ejecutable)' : undefined
-                  }
-                  onClick={() => {
-                    if (isDisabled) {
-                      return;
-                    }
-                    onSelectSystem?.(system.id);
-                  }}
+                  onClick={() => onSelectSystem?.(system.id)}
                   className={`w-full rounded-md border px-3 py-2 text-left text-sm transition-colors ${
-                    isDisabled
-                      ? disabledClasses
-                      : isSelected
-                        ? selectedClasses
-                        : enabledIdleClasses
+                    isSelected ? selectedClasses : enabledIdleClasses
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2">
@@ -258,12 +243,6 @@ export default function AstrologyTarotSidebar({
                     </div>
                   </div>
                   <p className="text-[11px] text-gray-400">{system.description}</p>
-                  {isDisabled && (
-                    <p className="mt-1 text-[11px] text-gray-500">
-                      Este sistema está preparado pero aún no está activo. Sistema en
-                      preparación.
-                    </p>
-                  )}
                 </button>
               );
             })}
@@ -271,7 +250,11 @@ export default function AstrologyTarotSidebar({
         </div>
       </div>
       <div className="px-3 py-2 border-t border-gray-100">
-        <SwmV3Button consultantId={patientId} />
+        <SwmV3Button
+          consultantId={patientId}
+          systemId={selectedSystem ?? 'thoth'}
+          selectedCardId={selectedCardId ?? null}
+        />
       </div>
       <div className="px-4 py-3 border-t border-gray-200 text-[11px] text-gray-500">
         Observacional. Sin lectura automática.
@@ -279,4 +262,3 @@ export default function AstrologyTarotSidebar({
     </aside>
   );
 }
-

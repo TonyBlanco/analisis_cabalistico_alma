@@ -7,6 +7,9 @@ from django.http import JsonResponse
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
+from symbolic.tarot.execution import resolve_adapter
+from symbolic.tarot.systems.golden_dawn_tarot import adapter as golden_dawn_adapter  # noqa: F401
+
 from .models import SymbolicReading
 from .service import SymbolicReadingSaveContext, saveSymbolicReading
 
@@ -48,13 +51,43 @@ class SwmV3SymbolicReadingCreateView(APIView):
             if consent_mode not in CONSENT_MODES:
                 return _error("Invalid consent_mode.", mode=mode)
 
+            system_id = request.data.get("system_id")
+            if not isinstance(system_id, str) or not system_id:
+                return _error("Invalid system_id.", mode=consent_mode)
+
+            selected_cards_raw = request.data.get("selected_cards") or []
+            selected_cards: list[str] = (
+                [str(card_id) for card_id in selected_cards_raw if isinstance(card_id, (str, int))]
+                if isinstance(selected_cards_raw, list)
+                else []
+            )
+
+            adapter = resolve_adapter(system_id)
+            if adapter is None and system_id != "thoth":
+                return _error("Unsupported system_id.", mode=consent_mode)
+
+            if adapter is None:
+                payload_content = request.data.get("content")
+                if not isinstance(payload_content, dict):
+                    payload_content = {
+                        "id": "swm-v3-mock-thoth",
+                        "summary": "Lectura educativa (mock) — Thoth Tarot. Observacional, no clínica.",
+                        "themes": [],
+                        "correspondences": [],
+                        "caution": "Lectura educativa (mock) — no es diagnóstico, recomendación ni consejo clínico.",
+                        "cards": [],
+                    }
+            else:
+                payload_content = adapter.build_payload(selected_cards, context={}).to_content_dict()
+
             if consent_mode == SymbolicReading.ConsentMode.NO_STORE:
                 return _json(
                     {
                         "success": True,
                         "stored": False,
                         "mode": consent_mode,
-                        "message": "Reading not stored (no_store).",
+                        "reading_id": None,
+                        "payload": payload_content,
                     },
                     status_code=200,
                 )
@@ -72,22 +105,17 @@ class SwmV3SymbolicReadingCreateView(APIView):
                     mode=consent_mode,
                 )
 
-            system_id = request.data.get("system_id")
-            if not isinstance(system_id, str) or not system_id:
-                return _error("Invalid system_id.", mode=consent_mode)
-
             reading_type = request.data.get("reading_type") or SymbolicReading.ReadingType.EDUCATIONAL
             if reading_type != SymbolicReading.ReadingType.EDUCATIONAL:
                 return _error("Only educational readings are allowed in Phase 3.", mode=consent_mode)
 
-            content = request.data.get("content")
             consultant = request.data.get("consultant_id")
             consultant_user = None
             if consent_mode == SymbolicReading.ConsentMode.STORE_WITH_CONSENT and consultant:
                 consultant_user = User.objects.filter(id=consultant).first()
 
             saved = saveSymbolicReading(
-                reading=content,
+                reading=payload_content,
                 consentMode=consent_mode,
                 context=SymbolicReadingSaveContext(
                     therapist=user,
@@ -105,7 +133,8 @@ class SwmV3SymbolicReadingCreateView(APIView):
                         "success": True,
                         "stored": False,
                         "mode": consent_mode,
-                        "message": "Reading not stored (no_store).",
+                        "reading_id": None,
+                        "payload": payload_content,
                     },
                     status_code=200,
                 )
@@ -116,6 +145,7 @@ class SwmV3SymbolicReadingCreateView(APIView):
                     "stored": True,
                     "mode": consent_mode,
                     "reading_id": str(saved.id),
+                    "payload": payload_content,
                 },
                 status_code=201,
             )

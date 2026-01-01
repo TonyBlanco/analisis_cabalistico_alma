@@ -1,16 +1,16 @@
 """
-Passive registry for planned tarot symbolic systems.
+Registry for Tarot symbolic systems (SWM v3).
 
 Safety:
-- Not imported in runtime flows.
-- No side effects, no deck logic, no IO.
+- Data-only, no IO.
+- Activation is explicit via `status="active"`.
 """
 
 SYSTEMS_REGISTRY = [
     {
         "id": "golden_dawn_tarot",
         "module": "symbolic.tarot.systems.golden_dawn_tarot",
-        "status": "planned",
+        "status": "active",
     },
     {
         "id": "rota_tarot",
@@ -38,4 +38,3 @@ SYSTEMS_REGISTRY = [
         "status": "planned",
     },
 ]
-

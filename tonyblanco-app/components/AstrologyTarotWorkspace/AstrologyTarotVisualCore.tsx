@@ -94,14 +94,19 @@ export default function AstrologyTarotVisualCore({
   const activeConfig = sectionConfig[activeSection];
   const systemKey = selectedSystem ?? 'thoth';
   const isSystemImplemented = systemKey === 'thoth';
-  const systemLabelMap: Record<TarotSystemId, string> = {
+  const systemLabelMap: Partial<Record<TarotSystemId, string>> = {
     thoth: 'Thoth Tarot (Crowley)',
     'golden-dawn': 'Golden Dawn Tarot',
+    rota: 'R.O.T.A. (tarot hermético)',
+    marsella: 'Tarot de Marsella (simbólico)',
+    'rider-waite': 'Rider–Waite (simbólico)',
+    'tarot-cabalistico': 'Tarot cabalístico (Árbol de la Vida)',
+    'oracle-symbolic': 'Oráculo simbólico genérico',
     bota: 'B.O.T.A. Tarot',
     hermetic: 'Hermetic Tarot',
     sephiroth: 'Tarot of the Sephiroth',
   };
-  const systemLabel = systemLabelMap[systemKey];
+  const systemLabel = systemLabelMap[systemKey] ?? systemKey;
   const [selectedCard, setSelectedCard] = useState<TarotCardData | null>(null);
   const [analysisSources, setAnalysisSources] = useState({
     tarot: true,
@@ -365,7 +370,7 @@ export default function AstrologyTarotVisualCore({
           </p>
         </div>
         <div className="text-right text-xs text-gray-500">
-          Seccion activa: <span className="font-medium text-gray-700">{activeSection}</span>
+          Sección activa: <span className="font-medium text-gray-700">{activeSection}</span>
         </div>
       </div>
       <div className="grid gap-4">
@@ -374,14 +379,14 @@ export default function AstrologyTarotVisualCore({
             <div className="flex items-center justify-between gap-2">
               <div>
                 <div className="text-[11px] uppercase tracking-wide text-amber-800">
-                  SISTEMA SIMBÓLICO · EN PREPARACIÓN
+                  SISTEMA SIMBÓLICO · PRÓXIMAMENTE
                 </div>
                 <div className="mt-1 font-medium">{systemLabel}</div>
               </div>
-              <div className="text-[11px] text-amber-800">Motor no disponible</div>
+              <div className="text-[11px] text-amber-800">Inactivo</div>
             </div>
             <p className="mt-2">
-              Este sistema simbólico está declarado, pero su motor aún no está disponible.
+              Este sistema está preparado pero aún no está activo.
             </p>
             <p className="mt-1 text-xs text-amber-800">
               No se ejecutará análisis en esta fase.
@@ -430,7 +435,7 @@ export default function AstrologyTarotVisualCore({
         )}
         {activeSection === 'tarot-correspondences' && !isSystemImplemented && (
           <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700">
-            Correspondencias no disponibles: motor simbólico aún no implementado.
+            Correspondencias no disponibles: sistema en preparación.
           </div>
         )}
         {activeSection === 'tarot-ai-draft' && isSystemImplemented && (
@@ -586,7 +591,7 @@ export default function AstrologyTarotVisualCore({
               Panel informativo (solo lectura)
             </div>
             <p className="mt-2">
-              Este sistema simbólico está declarado, pero su motor aún no está disponible.
+              Este sistema está preparado pero aún no está activo.
             </p>
             <p className="mt-1 text-xs text-gray-600">
               No se ejecutará análisis en esta fase.

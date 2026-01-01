@@ -6,4 +6,14 @@ export type AstrologyTarotSectionId =
   | 'tarot-deck-view'
   | 'tarot-ai-draft';
 
-export type TarotSystemId = 'thoth' | 'golden-dawn' | 'bota' | 'hermetic' | 'sephiroth';
+export type TarotSystemId =
+  | 'thoth'
+  | 'golden-dawn'
+  | 'rota'
+  | 'marsella'
+  | 'rider-waite'
+  | 'tarot-cabalistico'
+  | 'oracle-symbolic'
+  | 'bota'
+  | 'hermetic'
+  | 'sephiroth';

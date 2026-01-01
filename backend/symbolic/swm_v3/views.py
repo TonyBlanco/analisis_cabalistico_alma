@@ -12,6 +12,7 @@ from symbolic.tarot.systems.golden_dawn_tarot import adapter as golden_dawn_adap
 from symbolic.tarot.systems.rota_tarot import adapter as rota_adapter  # noqa: F401
 from symbolic.tarot.systems.tarot_de_marsella_symbolic import adapter as marsella_adapter  # noqa: F401
 from symbolic.tarot.systems.rider_waite_symbolic import adapter as rider_waite_adapter  # noqa: F401
+from symbolic.tarot.systems.tarot_cabalistico_tree_of_life import adapter as cabalistic_adapter  # noqa: F401
 
 from .models import SymbolicReading
 from .service import SymbolicReadingSaveContext, saveSymbolicReading

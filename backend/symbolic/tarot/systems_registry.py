@@ -30,7 +30,7 @@ SYSTEMS_REGISTRY = [
     {
         "id": "tarot_cabalistico_tree_of_life",
         "module": "symbolic.tarot.systems.tarot_cabalistico_tree_of_life",
-        "status": "planned",
+        "status": "active",
     },
     {
         "id": "generic_symbolic_oracle",

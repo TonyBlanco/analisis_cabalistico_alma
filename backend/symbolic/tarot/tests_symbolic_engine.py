@@ -1,6 +1,7 @@
 from django.test import SimpleTestCase
 
 from symbolic.tarot.symbolic_engine import build_minimal_symbolic_reading, SymbolicEngineInput
+from symbolic.tarot.symbolic_engine import _MAJOR_ARCANA_CANONICAL_ES
 
 
 class SymbolicEngineTests(SimpleTestCase):
@@ -54,3 +55,18 @@ class SymbolicEngineTests(SimpleTestCase):
         forbidden = ["openai", "generativeai", "gemini", "llm", "anthropic"]
         self.assertFalse(any(marker in source.lower() for marker in forbidden))
 
+    def test_all_major_arcana_have_core_meaning(self):
+        systems = [
+            ("golden-dawn", "symbolic.tarot.meanings.golden_dawn"),
+            ("rota", "symbolic.tarot.meanings.rota"),
+            ("marsella", "symbolic.tarot.meanings.marsella"),
+            ("rider-waite", "symbolic.tarot.meanings.rider_waite"),
+            ("tarot-cabalistico", "symbolic.tarot.meanings.tarot_cabalistico"),
+            ("oracle-symbolic", "symbolic.tarot.meanings.oracle_symbolic"),
+        ]
+
+        for system_id, module_path in systems:
+            module = __import__(module_path, fromlist=["SYMBOLIC_MEANINGS"])
+            meanings = getattr(module, "SYMBOLIC_MEANINGS", {})
+            missing = [name for name in _MAJOR_ARCANA_CANONICAL_ES if name not in meanings]
+            self.assertEqual(missing, [], msg=f"{system_id} missing: {missing}")

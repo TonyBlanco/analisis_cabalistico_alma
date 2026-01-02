@@ -17,6 +17,7 @@ from symbolic.tarot.systems.tarot_cabalistico_tree_of_life import adapter as cab
 from symbolic.tarot.systems.generic_symbolic_oracle import adapter as oracle_adapter  # noqa: F401
 from symbolic.tarot.meaning_resolver import ResolveInput, resolveSymbolicMeaning
 from symbolic.tarot.loaders.thoth_loader import get_thoth_card
+from symbolic.tarot.loaders.bota_loader import get_bota_card
 
 from .models import SymbolicReading
 from .service import SymbolicReadingSaveContext, saveSymbolicReading
@@ -176,6 +177,61 @@ class SwmV3SymbolicReadingCreateView(APIView):
                             card_obj = {
                                 **card_obj,
                                 "nameSpanish": thoth_card.get("nameSpanish") or card_obj.get("nameSpanish"),
+                                "symbols": {**existing_symbols, **extra_symbols},
+                            }
+
+                    if system_id == "bota":
+                        bota_card = get_bota_card(card_obj.get("id") or card_obj.get("code"))
+                        if isinstance(bota_card, dict):
+                            meanings = bota_card.get("meanings") if isinstance(bota_card.get("meanings"), dict) else {}
+                            kabbalistic = (
+                                bota_card.get("kabbalistic")
+                                if isinstance(bota_card.get("kabbalistic"), dict)
+                                else {}
+                            )
+                            colors = (
+                                kabbalistic.get("colors")
+                                if isinstance(kabbalistic.get("colors"), dict)
+                                else {}
+                            )
+                            extra_symbols = {
+                                "nameSpanish": bota_card.get("nameSpanish"),
+                                "keywords": meanings.get("keywords"),
+                                "keywordsReversed": None,
+                                "upright": {
+                                    "general": meanings.get("central"),
+                                    "love": None,
+                                    "career": meanings.get("practical"),
+                                    "spiritual": meanings.get("spiritual"),
+                                },
+                                "reversed": {
+                                    "general": None,
+                                    "love": None,
+                                    "career": None,
+                                    "spiritual": None,
+                                },
+                                "kabbalistic": {
+                                    "hebrewLetter": kabbalistic.get("hebrewLetter"),
+                                    "letterValue": kabbalistic.get("letterValue"),
+                                    "path": kabbalistic.get("path"),
+                                    "sefirot": kabbalistic.get("sefirot"),
+                                    "element": kabbalistic.get("element"),
+                                    "planet": kabbalistic.get("planet"),
+                                    "sign": kabbalistic.get("sign"),
+                                    "decan": kabbalistic.get("decan"),
+                                    "colors": colors if colors else None,
+                                },
+                                # Backward-compatible: populate existing UI fields as additional enrichment.
+                                "hebrew_letter": kabbalistic.get("hebrewLetter"),
+                                "letter_name": kabbalistic.get("hebrewLetter"),
+                                "gematria": kabbalistic.get("letterValue"),
+                                "path": kabbalistic.get("path"),
+                                "sefirot": kabbalistic.get("sefirot"),
+                            }
+                            existing_symbols = card_obj.get("symbols") if isinstance(card_obj.get("symbols"), dict) else {}
+                            card_obj = {
+                                **card_obj,
+                                "nameSpanish": bota_card.get("nameSpanish") or card_obj.get("nameSpanish"),
                                 "symbols": {**existing_symbols, **extra_symbols},
                             }
 

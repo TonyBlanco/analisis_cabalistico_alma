@@ -1,0 +1,3668 @@
+{
+  "deck": {
+    "name": "B.O.T.A. Tarot",
+    "system": "Builders of the Adytum",
+    "author": "Paul Foster Case",
+    "totalCards": 78,
+    "version": "1.0",
+    "description": "Sistema de Tarot cabalístico educativo para desarrollo espiritual"
+  },
+  "majorArcana": [
+    {
+      "id": "the-fool",
+      "code": "0",
+      "number": 0,
+      "name": "The Fool",
+      "nameSpanish": "El Loco",
+      "kabbalistic": {
+        "hebrewLetter": "Aleph",
+        "letterValue": 1,
+        "path": 11,
+        "sefirot": [
+          "Kether",
+          "Chokmah"
+        ],
+        "element": "air",
+        "planet": null,
+        "sign": null
+      },
+      "meanings": {
+        "central": "Espíritu Supremo antes de manifestación. Potencial infinito y libertad divina.",
+        "keywords": [
+          "potencial",
+          "libertad",
+          "espíritu",
+          "comienzo",
+          "inocencia"
+        ],
+        "spiritual": "Representa el alma antes de su descenso a la materia, la chispa divina.",
+        "psychological": "La mente super-consciente, libre de condicionamiento.",
+        "practical": "Estar abierto a nuevas experiencias sin prejuicio."
+      },
+      "symbolism": {
+        "colors": [],
+        "symbols": [
+          "rosa",
+          "perro",
+          "precipicio",
+          "sol",
+          "montañas"
+        ],
+        "numerology": "0 - El No-Ser, Ain, potencial infinito",
+        "colorScales": {
+          "king": "Bright pale yellow",
+          "queen": "Sky blue",
+          "emperor": "Blue emerald",
+          "empress": "Emerald flecked gold"
+        }
+      },
+      "botaSpecific": {
+        "lessonFocus": "Desarrollar confianza en la guía interior divina",
+        "meditation": "Contemplar el estado de inocencia y apertura sin miedo",
+        "affirmation": "Confío en el espíritu divino que me guía"
+      },
+      "aiPromptHints": [
+        "Educational meditation on The Fool: focus on Desarrollar confianza en la guía interior divina"
+      ],
+      "psychologicalThemes": [
+        "La mente super-consciente, libre de condicionamiento."
+      ]
+    },
+    {
+      "id": "the-magician",
+      "code": "I",
+      "number": 1,
+      "name": "The Magician",
+      "nameSpanish": "El Mago",
+      "kabbalistic": {
+        "hebrewLetter": "Beth",
+        "letterValue": 2,
+        "path": 12,
+        "sefirot": [
+          "Kether",
+          "Binah"
+        ],
+        "element": null,
+        "planet": "Mercury",
+        "sign": null
+      },
+      "meanings": {
+        "central": "Voluntad concentrada y poder de manifestación a través de la palabra.",
+        "keywords": [
+          "voluntad",
+          "manifestación",
+          "palabra",
+          "concentración",
+          "poder"
+        ],
+        "spiritual": "La palabra divina que crea el universo.",
+        "psychological": "Control mental y capacidad de enfocar la intención.",
+        "practical": "Usar la comunicación efectiva para lograr objetivos."
+      },
+      "symbolism": {
+        "colors": [],
+        "symbols": [
+          "varita",
+          "copa",
+          "espada",
+          "pentáculo",
+          "lazo infinito"
+        ],
+        "numerology": "1 - Unidad, principio creador",
+        "colorScales": {
+          "king": "Yellow",
+          "queen": "Purple",
+          "emperor": "Grey",
+          "empress": "Indigo, flecked violet"
+        }
+      },
+      "botaSpecific": {
+        "lessonFocus": "Maestría en el uso de la voluntad y la palabra",
+        "meditation": "Visualizar la energía fluyendo desde la corona a través de los centros",
+        "affirmation": "Mi palabra crea mi realidad"
+      },
+      "aiPromptHints": [
+        "Educational meditation on The Magician: focus on Maestría en el uso de la voluntad y la palabra"
+      ],
+      "psychologicalThemes": [
+        "Control mental y capacidad de enfocar la intención."
+      ]
+    },
+    {
+      "id": "the-high-priestess",
+      "code": "II",
+      "number": 2,
+      "name": "The High Priestess",
+      "nameSpanish": "La Sacerdotisa",
+      "kabbalistic": {
+        "hebrewLetter": "Gimel",
+        "letterValue": 3,
+        "path": 13,
+        "sefirot": [
+          "Kether",
+          "Tiphareth"
+        ],
+        "element": "water",
+        "planet": null,
+        "sign": null
+      },
+      "meanings": {
+        "central": "Sabiduría intuitiva y conocimiento oculto.",
+        "keywords": [
+          "intuición",
+          "sabiduría",
+          "oculto",
+          "subconsciente",
+          "receptividad"
+        ],
+        "spiritual": "La presencia divina en el alma humana.",
+        "psychological": "Acceso al subconsciente y memoria universal.",
+        "practical": "Confiar en la intuición para tomar decisiones."
+      },
+      "symbolism": {
+        "colors": [],
+        "symbols": [
+          "velo",
+          "libro",
+          "luna creciente",
+          "pilares"
+        ],
+        "numerology": "2 - Polaridad, receptividad",
+        "colorScales": {
+          "king": "Blue",
+          "queen": "Silver",
+          "emperor": "Cold pale blue",
+          "empress": "Silver, rayed sky blue"
+        }
+      },
+      "botaSpecific": {
+        "lessonFocus": "Desarrollar la intuición espiritual",
+        "meditation": "Escuchar la voz interior en silencio",
+        "affirmation": "Estoy conectado con la sabiduría divina"
+      },
+      "aiPromptHints": [
+        "Educational meditation on The High Priestess: focus on Desarrollar la intuición espiritual"
+      ],
+      "psychologicalThemes": [
+        "Acceso al subconsciente y memoria universal."
+      ]
+    },
+    {
+      "id": "the-empress",
+      "code": "III",
+      "number": 3,
+      "name": "The Empress",
+      "nameSpanish": "La Emperatriz",
+      "kabbalistic": {
+        "hebrewLetter": "Daleth",
+        "letterValue": 4,
+        "path": 14,
+        "sefirot": [
+          "Chokmah",
+          "Binah"
+        ],
+        "element": null,
+        "planet": "Venus",
+        "sign": null
+      },
+      "meanings": {
+        "central": "Fertilidad, abundancia y manifestación material.",
+        "keywords": [
+          "fertilidad",
+          "abundancia",
+          "naturaleza",
+          "creatividad",
+          "nutrición"
+        ],
+        "spiritual": "La madre divina que sustenta la vida.",
+        "psychological": "Capacidad de nutrir y crear.",
+        "practical": "Cultivar la abundancia en todas las áreas de la vida."
+      },
+      "symbolism": {
+        "colors": [],
+        "symbols": [
+          "trono",
+          "corona",
+          "escudo",
+          "águila"
+        ],
+        "numerology": "3 - Expansión, crecimiento",
+        "colorScales": {
+          "king": "Emerald green",
+          "queen": "Sky blue",
+          "emperor": "Early spring green",
+          "empress": "Bright rose or cerise, rayed pale green"
+        }
+      },
+      "botaSpecific": {
+        "lessonFocus": "Equilibrar acción y receptividad",
+        "meditation": "Visualizar la energía vital fluyendo",
+        "affirmation": "Abrazo la abundancia divina"
+      },
+      "aiPromptHints": [
+        "Educational meditation on The Empress: focus on Equilibrar acción y receptividad"
+      ],
+      "psychologicalThemes": [
+        "Capacidad de nutrir y crear."
+      ]
+    },
+    {
+      "id": "the-emperor",
+      "code": "IV",
+      "number": 4,
+      "name": "The Emperor",
+      "nameSpanish": "El Emperador",
+      "kabbalistic": {
+        "hebrewLetter": "Tzaddi",
+        "letterValue": 90,
+        "path": 15,
+        "sefirot": [
+          "Chokmah",
+          "Tiphareth"
+        ],
+        "element": null,
+        "planet": null,
+        "sign": "Aries"
+      },
+      "meanings": {
+        "central": "Autoridad, estructura y orden divino.",
+        "keywords": [
+          "autoridad",
+          "estructura",
+          "orden",
+          "estabilidad",
+          "liderazgo"
+        ],
+        "spiritual": "El principio masculino de organización.",
+        "psychological": "Control racional y establecimiento de límites.",
+        "practical": "Crear sistemas ordenados para el progreso."
+      },
+      "symbolism": {
+        "colors": [],
+        "symbols": [
+          "trono",
+          "cetros",
+          "águila",
+          "globo"
+        ],
+        "numerology": "4 - Estabilidad, manifestación",
+        "colorScales": {
+          "king": "Scarlet",
+          "queen": "Red",
+          "emperor": "Brilliant flame",
+          "empress": "Glowing red"
+        }
+      },
+      "botaSpecific": {
+        "lessonFocus": "Desarrollar autoridad espiritual",
+        "meditation": "Afirmar el orden divino en la vida",
+        "affirmation": "Soy un canal de orden divino"
+      },
+      "aiPromptHints": [
+        "Educational meditation on The Emperor: focus on Desarrollar autoridad espiritual"
+      ],
+      "psychologicalThemes": [
+        "Control racional y establecimiento de límites."
+      ]
+    },
+    {
+      "id": "the-hierophant",
+      "code": "V",
+      "number": 5,
+      "name": "The Hierophant",
+      "nameSpanish": "El Hierofante",
+      "kabbalistic": {
+        "hebrewLetter": "Vau",
+        "letterValue": 6,
+        "path": 16,
+        "sefirot": [
+          "Chokmah",
+          "Chesed"
+        ],
+        "element": null,
+        "planet": null,
+        "sign": "Taurus"
+      },
+      "meanings": {
+        "central": "Enseñanza espiritual y transmisión de conocimiento sagrado.",
+        "keywords": [
+          "enseñanza",
+          "tradición",
+          "guía",
+          "iniciación",
+          "sabiduría"
+        ],
+        "spiritual": "El maestro espiritual que revela verdades.",
+        "psychological": "Integración de conocimiento y experiencia.",
+        "practical": "Buscar y compartir sabiduría espiritual."
+      },
+      "symbolism": {
+        "colors": [],
+        "symbols": [
+          "llaves",
+          "libro",
+          "báculo",
+          "discípulos"
+        ],
+        "numerology": "5 - Equilibrio, armonía",
+        "colorScales": {
+          "king": "Red orange",
+          "queen": "Deep indigo",
+          "emperor": "Deep warm olive",
+          "empress": "Rich brown"
+        }
+      },
+      "botaSpecific": {
+        "lessonFocus": "Transmitir conocimiento espiritual",
+        "meditation": "Visualizar la luz del conocimiento fluyendo",
+        "affirmation": "Soy un canal de sabiduría divina"
+      },
+      "aiPromptHints": [
+        "Educational meditation on The Hierophant: focus on Transmitir conocimiento espiritual"
+      ],
+      "psychologicalThemes": [
+        "Integración de conocimiento y experiencia."
+      ]
+    },
+    {
+      "id": "the-lovers",
+      "code": "VI",
+      "number": 6,
+      "name": "The Lovers",
+      "nameSpanish": "Los Enamorados",
+      "kabbalistic": {
+        "hebrewLetter": "Zain",
+        "letterValue": 7,
+        "path": 17,
+        "sefirot": [
+          "Binah",
+          "Tiphareth"
+        ],
+        "element": null,
+        "planet": null,
+        "sign": "Gemini"
+      },
+      "meanings": {
+        "central": "Unión, armonía y elección consciente.",
+        "keywords": [
+          "unión",
+          "armonía",
+          "elección",
+          "equilibrio",
+          "relación"
+        ],
+        "spiritual": "La unión del alma con lo divino.",
+        "psychological": "Integración de opuestos internos.",
+        "practical": "Hacer elecciones que promuevan la armonía."
+      },
+      "symbolism": {
+        "colors": [],
+        "symbols": [
+          "ángel",
+          "serpiente",
+          "árboles",
+          "montaña"
+        ],
+        "numerology": "6 - Armonía, belleza",
+        "colorScales": {
+          "king": "Orange",
+          "queen": "Pale mauve",
+          "emperor": "New yellow leather",
+          "empress": "Reddish grey inclined to mauve"
+        }
+      },
+      "botaSpecific": {
+        "lessonFocus": "Integrar polaridades en unidad",
+        "meditation": "Contemplar la unión de opuestos",
+        "affirmation": "Elijo la armonía divina"
+      },
+      "aiPromptHints": [
+        "Educational meditation on The Lovers: focus on Integrar polaridades en unidad"
+      ],
+      "psychologicalThemes": [
+        "Integración de opuestos internos."
+      ]
+    },
+    {
+      "id": "the-chariot",
+      "code": "VII",
+      "number": 7,
+      "name": "The Chariot",
+      "nameSpanish": "El Carro",
+      "kabbalistic": {
+        "hebrewLetter": "Cheth",
+        "letterValue": 8,
+        "path": 18,
+        "sefirot": [
+          "Binah",
+          "Geburah"
+        ],
+        "element": null,
+        "planet": null,
+        "sign": "Cancer"
+      },
+      "meanings": {
+        "central": "Victoria a través del control equilibrado de fuerzas opuestas.",
+        "keywords": [
+          "victoria",
+          "control",
+          "equilibrio",
+          "voluntad",
+          "triunfo"
+        ],
+        "spiritual": "El triunfo del espíritu sobre la materia.",
+        "psychological": "Dominio de emociones y deseos.",
+        "practical": "Dirigir la vida con propósito consciente."
+      },
+      "symbolism": {
+        "colors": [],
+        "symbols": [
+          "carro",
+          "esfinges",
+          "estrella",
+          "corona"
+        ],
+        "numerology": "7 - Victoria, triunfo",
+        "colorScales": {
+          "king": "Amber",
+          "queen": "Maroon",
+          "emperor": "Rich bright russet",
+          "empress": "Dark greenish brown"
+        }
+      },
+      "botaSpecific": {
+        "lessonFocus": "Controlar las fuerzas internas",
+        "meditation": "Visualizar el carro del alma avanzando",
+        "affirmation": "Triunfo sobre las limitaciones"
+      },
+      "aiPromptHints": [
+        "Educational meditation on The Chariot: focus on Controlar las fuerzas internas"
+      ],
+      "psychologicalThemes": [
+        "Dominio de emociones y deseos."
+      ]
+    },
+    {
+      "id": "strength",
+      "code": "VIII",
+      "number": 8,
+      "name": "Strength",
+      "nameSpanish": "La Fuerza",
+      "kabbalistic": {
+        "hebrewLetter": "Teth",
+        "letterValue": 9,
+        "path": 19,
+        "sefirot": [
+          "Chesed",
+          "Geburah"
+        ],
+        "element": null,
+        "planet": null,
+        "sign": "Leo"
+      },
+      "meanings": {
+        "central": "Fuerza interior y compasión amorosa.",
+        "keywords": [
+          "fuerza",
+          "compasión",
+          "coraje",
+          "paciencia",
+          "amor"
+        ],
+        "spiritual": "La fuerza del amor divino.",
+        "psychological": "Control suave sobre las emociones.",
+        "practical": "Actuar con fuerza y gentileza."
+      },
+      "symbolism": {
+        "colors": [],
+        "symbols": [
+          "león",
+          "flor",
+          "infinito"
+        ],
+        "numerology": "8 - Justicia, equilibrio",
+        "colorScales": {
+          "king": "Greenish yellow",
+          "queen": "Deep purple",
+          "emperor": "Grey",
+          "empress": "Reddish yellow"
+        }
+      },
+      "botaSpecific": {
+        "lessonFocus": "Desarrollar fuerza compasiva",
+        "meditation": "Sentir la fuerza del amor interior",
+        "affirmation": "Mi fuerza viene del amor divino"
+      },
+      "aiPromptHints": [
+        "Educational meditation on Strength: focus on Desarrollar fuerza compasiva"
+      ],
+      "psychologicalThemes": [
+        "Control suave sobre las emociones."
+      ]
+    },
+    {
+      "id": "the-hermit",
+      "code": "IX",
+      "number": 9,
+      "name": "The Hermit",
+      "nameSpanish": "El Ermitaño",
+      "kabbalistic": {
+        "hebrewLetter": "Yod",
+        "letterValue": 10,
+        "path": 20,
+        "sefirot": [
+          "Chesed",
+          "Tiphareth"
+        ],
+        "element": null,
+        "planet": null,
+        "sign": "Virgo"
+      },
+      "meanings": {
+        "central": "Iluminación interior y búsqueda solitaria de verdad.",
+        "keywords": [
+          "iluminación",
+          "búsqueda",
+          "sabiduría",
+          "introspección",
+          "guía"
+        ],
+        "spiritual": "La luz interior que guía el alma.",
+        "psychological": "Reflexión profunda y autoconocimiento.",
+        "practical": "Buscar claridad a través de la contemplación."
+      },
+      "symbolism": {
+        "colors": [],
+        "symbols": [
+          "linterna",
+          "báculo",
+          "montaña",
+          "estrella"
+        ],
+        "numerology": "9 - Iniciación, culminación",
+        "colorScales": {
+          "king": "Yellowish Green",
+          "queen": "Indigo",
+          "emperor": "Greenish Grey",
+          "empress": "Plum"
+        }
+      },
+      "botaSpecific": {
+        "lessonFocus": "Encontrar la luz interior",
+        "meditation": "Contemplar la llama de la sabiduría",
+        "affirmation": "Mi luz interior me guía"
+      },
+      "aiPromptHints": [
+        "Educational meditation on The Hermit: focus on Encontrar la luz interior"
+      ],
+      "psychologicalThemes": [
+        "Reflexión profunda y autoconocimiento."
+      ]
+    },
+    {
+      "id": "wheel-of-fortune",
+      "code": "X",
+      "number": 10,
+      "name": "Wheel of Fortune",
+      "nameSpanish": "La Rueda de la Fortuna",
+      "kabbalistic": {
+        "hebrewLetter": "Kaph",
+        "letterValue": 20,
+        "path": 21,
+        "sefirot": [
+          "Chesed",
+          "Netzach"
+        ],
+        "element": null,
+        "planet": null,
+        "sign": "Jupiter"
+      },
+      "meanings": {
+        "central": "Ciclos de cambio y oportunidad divina.",
+        "keywords": [
+          "cambio",
+          "ciclos",
+          "oportunidad",
+          "destino",
+          "evolución"
+        ],
+        "spiritual": "La rueda del karma y la evolución espiritual.",
+        "psychological": "Aceptación del cambio inevitable.",
+        "practical": "Aprovechar los ciclos de oportunidad."
+      },
+      "symbolism": {
+        "colors": [],
+        "symbols": [
+          "rueda",
+          "esfinge",
+          "serpiente",
+          "ánubis"
+        ],
+        "numerology": "10 - Culminación, retorno",
+        "colorScales": {
+          "king": "Violet",
+          "queen": "Purple tinged blue",
+          "emperor": "Bright purple",
+          "empress": "Blue rayed yellow"
+        }
+      },
+      "botaSpecific": {
+        "lessonFocus": "Entender los ciclos divinos",
+        "meditation": "Observar el flujo de los ciclos",
+        "affirmation": "Acepto el cambio como evolución"
+      },
+      "aiPromptHints": [
+        "Educational meditation on Wheel of Fortune: focus on Entender los ciclos divinos"
+      ],
+      "psychologicalThemes": [
+        "Aceptación del cambio inevitable."
+      ]
+    },
+    {
+      "id": "justice",
+      "code": "XI",
+      "number": 11,
+      "name": "Justice",
+      "nameSpanish": "La Justicia",
+      "kabbalistic": {
+        "hebrewLetter": "Lamed",
+        "letterValue": 30,
+        "path": 22,
+        "sefirot": [
+          "Geburah",
+          "Tiphareth"
+        ],
+        "element": null,
+        "planet": null,
+        "sign": "Libra"
+      },
+      "meanings": {
+        "central": "Equilibrio, verdad y justicia divina.",
+        "keywords": [
+          "equilibrio",
+          "verdad",
+          "justicia",
+          "armonía",
+          "decisión"
+        ],
+        "spiritual": "La ley divina que mantiene el orden.",
+        "psychological": "Integración de razón y emoción.",
+        "practical": "Actuar con integridad y equilibrio."
+      },
+      "symbolism": {
+        "colors": [],
+        "symbols": [
+          "balanza",
+          "espada",
+          "velo",
+          "corona"
+        ],
+        "numerology": "11 - Iluminación, revelación",
+        "colorScales": {
+          "king": "Emerald",
+          "queen": "Blue",
+          "emperor": "Deep Blue-green",
+          "empress": "Pale Green"
+        }
+      },
+      "botaSpecific": {
+        "lessonFocus": "Mantener el equilibrio divino",
+        "meditation": "Pesando acciones con verdad",
+        "affirmation": "Vivo en armonía con la ley divina"
+      },
+      "aiPromptHints": [
+        "Educational meditation on Justice: focus on Mantener el equilibrio divino"
+      ],
+      "psychologicalThemes": [
+        "Integración de razón y emoción."
+      ]
+    },
+    {
+      "id": "the-hanged-man",
+      "code": "XII",
+      "number": 12,
+      "name": "The Hanged Man",
+      "nameSpanish": "El Colgado",
+      "kabbalistic": {
+        "hebrewLetter": "Mem",
+        "letterValue": 40,
+        "path": 23,
+        "sefirot": [
+          "Geburah",
+          "Hod"
+        ],
+        "element": "water",
+        "planet": null,
+        "sign": null
+      },
+      "meanings": {
+        "central": "Sacrificio voluntario y perspectiva invertida.",
+        "keywords": [
+          "sacrificio",
+          "perspectiva",
+          "entrega",
+          "espera",
+          "transformación"
+        ],
+        "spiritual": "La entrega del ego al espíritu.",
+        "psychological": "Cambiar la perspectiva para ver la verdad.",
+        "practical": "Aceptar lo que no se puede cambiar."
+      },
+      "symbolism": {
+        "colors": [],
+        "symbols": [
+          "árbol",
+          "aura",
+          "manos atadas"
+        ],
+        "numerology": "12 - Sacrificio, entrega",
+        "colorScales": {
+          "king": "Deep Blue",
+          "queen": "Sea Green",
+          "emperor": "Deep Olive Green",
+          "empress": "White flecked purple"
+        }
+      },
+      "botaSpecific": {
+        "lessonFocus": "Liberarse del ego",
+        "meditation": "Invertir la perspectiva mundana",
+        "affirmation": "Me entrego a la voluntad divina"
+      },
+      "aiPromptHints": [
+        "Educational meditation on The Hanged Man: focus on Liberarse del ego"
+      ],
+      "psychologicalThemes": [
+        "Cambiar la perspectiva para ver la verdad."
+      ]
+    },
+    {
+      "id": "death",
+      "code": "XIII",
+      "number": 13,
+      "name": "Death",
+      "nameSpanish": "La Muerte",
+      "kabbalistic": {
+        "hebrewLetter": "Nun",
+        "letterValue": 50,
+        "path": 24,
+        "sefirot": [
+          "Tiphareth",
+          "Netzach"
+        ],
+        "element": null,
+        "planet": null,
+        "sign": "Scorpio"
+      },
+      "meanings": {
+        "central": "Transformación y renovación espiritual.",
+        "keywords": [
+          "transformación",
+          "renovación",
+          "cambio",
+          "liberación",
+          "nuevo comienzo"
+        ],
+        "spiritual": "La muerte del ego y renacimiento espiritual.",
+        "psychological": "Liberarse de patrones obsoletos.",
+        "practical": "Aceptar el cambio como oportunidad de crecimiento."
+      },
+      "symbolism": {
+        "colors": [],
+        "symbols": [
+          "esqueleto",
+          "guadaña",
+          "rosa",
+          "sol naciente"
+        ],
+        "numerology": "13 - Regeneración, transformación",
+        "colorScales": {
+          "king": "Green Blue",
+          "queen": "Dull Brown",
+          "emperor": "Very Dark Brown",
+          "empress": "Livid Indigo Brown"
+        }
+      },
+      "botaSpecific": {
+        "lessonFocus": "Aceptar la transformación espiritual",
+        "meditation": "Visualizar el renacimiento del alma",
+        "affirmation": "Emerjo renovado del cambio"
+      },
+      "aiPromptHints": [
+        "Educational meditation on Death: focus on Aceptar la transformación espiritual"
+      ],
+      "psychologicalThemes": [
+        "Liberarse de patrones obsoletos."
+      ]
+    },
+    {
+      "id": "temperance",
+      "code": "XIV",
+      "number": 14,
+      "name": "Temperance",
+      "nameSpanish": "La Templanza",
+      "kabbalistic": {
+        "hebrewLetter": "Samekh",
+        "letterValue": 60,
+        "path": 25,
+        "sefirot": [
+          "Chesed",
+          "Geburah"
+        ],
+        "element": null,
+        "planet": null,
+        "sign": "Sagittarius"
+      },
+      "meanings": {
+        "central": "Moderación, equilibrio y armonía espiritual.",
+        "keywords": [
+          "moderación",
+          "equilibrio",
+          "armonía",
+          "paciencia",
+          "integración"
+        ],
+        "spiritual": "La unión de opuestos en armonía divina.",
+        "psychological": "Equilibrar impulsos y razón.",
+        "practical": "Encontrar el camino medio en todas las cosas."
+      },
+      "symbolism": {
+        "colors": [],
+        "symbols": [
+          "ángel",
+          "copas",
+          "sendero",
+          "montaña"
+        ],
+        "numerology": "14 - Movimiento, adaptación",
+        "colorScales": {
+          "king": "Blue",
+          "queen": "Yellow",
+          "emperor": "Green",
+          "empress": "Dark vivid blue"
+        }
+      },
+      "botaSpecific": {
+        "lessonFocus": "Integrar opuestos en unidad",
+        "meditation": "Equilibrando energías opuestas",
+        "affirmation": "Vivo en perfecta armonía"
+      },
+      "aiPromptHints": [
+        "Educational meditation on Temperance: focus on Integrar opuestos en unidad"
+      ],
+      "psychologicalThemes": [
+        "Equilibrar impulsos y razón."
+      ]
+    },
+    {
+      "id": "the-devil",
+      "code": "XV",
+      "number": 15,
+      "name": "The Devil",
+      "nameSpanish": "El Diablo",
+      "kabbalistic": {
+        "hebrewLetter": "Ayin",
+        "letterValue": 70,
+        "path": 26,
+        "sefirot": [
+          "Tiphareth",
+          "Hod"
+        ],
+        "element": null,
+        "planet": null,
+        "sign": "Capricorn"
+      },
+      "meanings": {
+        "central": "Ilusión material y liberación de ataduras.",
+        "keywords": [
+          "ilusión",
+          "liberación",
+          "materialismo",
+          "ataduras",
+          "transformación"
+        ],
+        "spiritual": "Las cadenas del ego y la materia.",
+        "psychological": "Reconocer y trascender limitaciones autoimpuestas.",
+        "practical": "Liberarse de patrones restrictivos."
+      },
+      "symbolism": {
+        "colors": [],
+        "symbols": [
+          "cadenas",
+          "antorcha invertida",
+          "cuernos",
+          "alas"
+        ],
+        "numerology": "15 - Materialismo, ilusión",
+        "colorScales": {
+          "king": "Indigo",
+          "queen": "Black",
+          "emperor": "Blue Black",
+          "empress": "Cold very dark grey"
+        }
+      },
+      "botaSpecific": {
+        "lessonFocus": "Liberarse de ilusiones materiales",
+        "meditation": "Rompiendo cadenas invisibles",
+        "affirmation": "Soy libre de todas las ataduras"
+      },
+      "aiPromptHints": [
+        "Educational meditation on The Devil: focus on Liberarse de ilusiones materiales"
+      ],
+      "psychologicalThemes": [
+        "Reconocer y trascender limitaciones autoimpuestas."
+      ]
+    },
+    {
+      "id": "the-tower",
+      "code": "XVI",
+      "number": 16,
+      "name": "The Tower",
+      "nameSpanish": "La Torre",
+      "kabbalistic": {
+        "hebrewLetter": "Peh",
+        "letterValue": 80,
+        "path": 27,
+        "sefirot": [
+          "Hod",
+          "Netzach"
+        ],
+        "element": null,
+        "planet": "Mars",
+        "sign": null
+      },
+      "meanings": {
+        "central": "Destrucción de estructuras falsas y revelación de verdad.",
+        "keywords": [
+          "destrucción",
+          "revelación",
+          "liberación",
+          "cambio",
+          "verdad"
+        ],
+        "spiritual": "La destrucción de ilusiones para revelar la verdad.",
+        "psychological": "Romper con creencias limitantes.",
+        "practical": "Aceptar el colapso de estructuras obsoletas."
+      },
+      "symbolism": {
+        "colors": [],
+        "symbols": [
+          "torre",
+          "rayo",
+          "coronas cayendo",
+          "figuras"
+        ],
+        "numerology": "16 - Destrucción, revelación",
+        "colorScales": {
+          "king": "Scarlet",
+          "queen": "Red",
+          "emperor": "Venetian Red",
+          "empress": "Bright Red, rayed Azure and Emerald"
+        }
+      },
+      "botaSpecific": {
+        "lessonFocus": "Aceptar la destrucción de ilusiones",
+        "meditation": "Observando la caída de estructuras falsas",
+        "affirmation": "Emerjo de la destrucción renovado"
+      },
+      "aiPromptHints": [
+        "Educational meditation on The Tower: focus on Aceptar la destrucción de ilusiones"
+      ],
+      "psychologicalThemes": [
+        "Romper con creencias limitantes."
+      ]
+    },
+    {
+      "id": "the-star",
+      "code": "XVII",
+      "number": 17,
+      "name": "The Star",
+      "nameSpanish": "La Estrella",
+      "kabbalistic": {
+        "hebrewLetter": "Heh",
+        "letterValue": 5,
+        "path": 28,
+        "sefirot": [
+          "Netzach",
+          "Yesod"
+        ],
+        "element": null,
+        "planet": null,
+        "sign": "Aquarius"
+      },
+      "meanings": {
+        "central": "Esperanza, inspiración y guía espiritual.",
+        "keywords": [
+          "esperanza",
+          "inspiración",
+          "guía",
+          "renovación",
+          "fe"
+        ],
+        "spiritual": "La estrella de la esperanza divina.",
+        "psychological": "Renovación de la fe y optimismo.",
+        "practical": "Seguir la inspiración interior."
+      },
+      "symbolism": {
+        "colors": [],
+        "symbols": [
+          "estrella",
+          "copas",
+          "pájaro",
+          "montaña"
+        ],
+        "numerology": "17 - Esperanza, fe",
+        "colorScales": {
+          "king": "Violet",
+          "queen": "Sky blue",
+          "emperor": "Bluish-mauve",
+          "empress": "White, faintly tinted purple"
+        }
+      },
+      "botaSpecific": {
+        "lessonFocus": "Cultivar esperanza espiritual",
+        "meditation": "Siguiendo la luz de la estrella",
+        "affirmation": "Mi esperanza viene de lo divino"
+      },
+      "aiPromptHints": [
+        "Educational meditation on The Star: focus on Cultivar esperanza espiritual"
+      ],
+      "psychologicalThemes": [
+        "Renovación de la fe y optimismo."
+      ]
+    },
+    {
+      "id": "the-moon",
+      "code": "XVIII",
+      "number": 18,
+      "name": "The Moon",
+      "nameSpanish": "La Luna",
+      "kabbalistic": {
+        "hebrewLetter": "Qoph",
+        "letterValue": 100,
+        "path": 29,
+        "sefirot": [
+          "Netzach",
+          "Malkuth"
+        ],
+        "element": null,
+        "planet": null,
+        "sign": "Pisces"
+      },
+      "meanings": {
+        "central": "Ilusión, intuición y el subconsciente.",
+        "keywords": [
+          "ilusión",
+          "intuición",
+          "subconsciente",
+          "imaginación",
+          "misterio"
+        ],
+        "spiritual": "El velo entre lo visible y lo invisible.",
+        "psychological": "Explorar el mundo de los sueños y la intuición.",
+        "practical": "Confiar en la guía intuitiva."
+      },
+      "symbolism": {
+        "colors": [],
+        "symbols": [
+          "luna",
+          "perros",
+          "cangrejo",
+          "torres"
+        ],
+        "numerology": "18 - Ilusión, intuición",
+        "colorScales": {
+          "king": "Crimson",
+          "queen": "Buff flecked silver-white",
+          "emperor": "Light translucent pinkish brown",
+          "empress": "Stone"
+        }
+      },
+      "botaSpecific": {
+        "lessonFocus": "Navegar por el mundo de los sueños",
+        "meditation": "Explorando el subconsciente",
+        "affirmation": "Confío en mi intuición divina"
+      },
+      "aiPromptHints": [
+        "Educational meditation on The Moon: focus on Navegar por el mundo de los sueños"
+      ],
+      "psychologicalThemes": [
+        "Explorar el mundo de los sueños y la intuición."
+      ]
+    },
+    {
+      "id": "the-sun",
+      "code": "XIX",
+      "number": 19,
+      "name": "The Sun",
+      "nameSpanish": "El Sol",
+      "kabbalistic": {
+        "hebrewLetter": "Resh",
+        "letterValue": 200,
+        "path": 30,
+        "sefirot": [
+          "Hod",
+          "Yesod"
+        ],
+        "element": null,
+        "planet": "Sun",
+        "sign": null
+      },
+      "meanings": {
+        "central": "Iluminación, vitalidad y realización.",
+        "keywords": [
+          "iluminación",
+          "vitalidad",
+          "realización",
+          "alegría",
+          "claridad"
+        ],
+        "spiritual": "La luz divina que ilumina el alma.",
+        "psychological": "Claridad mental y alegría interior.",
+        "practical": "Vivir con vitalidad y propósito."
+      },
+      "symbolism": {
+        "colors": [],
+        "symbols": [
+          "sol",
+          "niño",
+          "caballo",
+          "muro"
+        ],
+        "numerology": "19 - Iluminación, realización",
+        "colorScales": {
+          "king": "Orange",
+          "queen": "Gold yellow",
+          "emperor": "Rich amber",
+          "empress": "Amber rayed red"
+        }
+      },
+      "botaSpecific": {
+        "lessonFocus": "Alcanzar iluminación espiritual",
+        "meditation": "Bañándose en la luz del sol divino",
+        "affirmation": "Soy uno con la luz divina"
+      },
+      "aiPromptHints": [
+        "Educational meditation on The Sun: focus on Alcanzar iluminación espiritual"
+      ],
+      "psychologicalThemes": [
+        "Claridad mental y alegría interior."
+      ]
+    },
+    {
+      "id": "judgement",
+      "code": "XX",
+      "number": 20,
+      "name": "Judgement",
+      "nameSpanish": "El Juicio",
+      "kabbalistic": {
+        "hebrewLetter": "Shin",
+        "letterValue": 300,
+        "path": 31,
+        "sefirot": [
+          "Malkuth",
+          "Hod"
+        ],
+        "element": "fire",
+        "planet": null,
+        "sign": null
+      },
+      "meanings": {
+        "central": "Renacimiento espiritual y evaluación divina.",
+        "keywords": [
+          "renacimiento",
+          "evaluación",
+          "despertar",
+          "llamada",
+          "transformación"
+        ],
+        "spiritual": "La llamada del alma al despertar espiritual.",
+        "psychological": "Revisar y transformar el pasado.",
+        "practical": "Responder a la llamada del alma."
+      },
+      "symbolism": {
+        "colors": [],
+        "symbols": [
+          "ángel",
+          "trompeta",
+          "ataúdes",
+          "figuras"
+        ],
+        "numerology": "20 - Renacimiento, juicio",
+        "colorScales": {
+          "king": "Glowing orange scarlet",
+          "queen": "Vermilion",
+          "emperor": "Scarlet flecked gold",
+          "empress": "Vermilion flecked crimson"
+        }
+      },
+      "botaSpecific": {
+        "lessonFocus": "Responder al llamado espiritual",
+        "meditation": "Escuchando la trompeta del despertar",
+        "affirmation": "Despierto a mi verdadero ser"
+      },
+      "aiPromptHints": [
+        "Educational meditation on Judgement: focus on Responder al llamado espiritual"
+      ],
+      "psychologicalThemes": [
+        "Revisar y transformar el pasado."
+      ]
+    },
+    {
+      "id": "the-world",
+      "code": "XXI",
+      "number": 21,
+      "name": "The World",
+      "nameSpanish": "El Mundo",
+      "kabbalistic": {
+        "hebrewLetter": "Tau",
+        "letterValue": 400,
+        "path": 32,
+        "sefirot": [
+          "Malkuth",
+          "Yesod"
+        ],
+        "element": "earth",
+        "planet": "Saturn",
+        "sign": null
+      },
+      "meanings": {
+        "central": "Completitud, integración y realización cósmica.",
+        "keywords": [
+          "completitud",
+          "integración",
+          "realización",
+          "éxito",
+          "unidad"
+        ],
+        "spiritual": "La unidad del alma con el cosmos.",
+        "psychological": "Integración de todas las experiencias.",
+        "practical": "Celebrar la completitud del viaje."
+      },
+      "symbolism": {
+        "colors": [],
+        "symbols": [
+          "círculo",
+          "figura danzante",
+          "animales",
+          "guirnalda"
+        ],
+        "numerology": "21 - Culminación, unidad",
+        "colorScales": {
+          "king": "Indigo",
+          "queen": "Black",
+          "emperor": "Blue-black",
+          "empress": "Black rayed Blue"
+        }
+      },
+      "botaSpecific": {
+        "lessonFocus": "Alcanzar unidad cósmica",
+        "meditation": "Danzando en la unidad universal",
+        "affirmation": "Soy uno con el universo"
+      },
+      "aiPromptHints": [
+        "Educational meditation on The World: focus on Alcanzar unidad cósmica"
+      ],
+      "psychologicalThemes": [
+        "Integración de todas las experiencias."
+      ]
+    }
+  ],
+  "minorArcana": {
+    "wands": [
+      {
+        "id": "ace-of-wands",
+        "code": "W01",
+        "number": 1,
+        "name": "Ace of Wands",
+        "nameSpanish": "As de Bastos",
+        "element": "fire",
+        "meanings": {
+          "central": "Energía creativa primordial y potencial de acción.",
+          "keywords": [
+            "creatividad",
+            "acción",
+            "energía",
+            "potencial",
+            "iniciativa"
+          ],
+          "spiritual": "La chispa divina de creación.",
+          "psychological": "Impulso creativo y motivación.",
+          "practical": "Iniciar proyectos con entusiasmo."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "bastón",
+            "hojas",
+            "montaña"
+          ],
+          "numerology": "1 - Principio, acción"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Despertar la energía creativa",
+          "meditation": "Sintiendo la chispa divina",
+          "affirmation": "Mi creatividad fluye libremente"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Ace of Wands: focus on Despertar la energía creativa"
+        ],
+        "psychologicalThemes": [
+          "Impulso creativo y motivación."
+        ]
+      },
+      {
+        "id": "two-of-wands",
+        "code": "W02",
+        "number": 2,
+        "name": "Two of Wands",
+        "nameSpanish": "Dos de Bastos",
+        "element": "fire",
+        "decan": "Mars in Aries",
+        "meanings": {
+          "central": "Elección y planificación de dirección.",
+          "keywords": [
+            "elección",
+            "planificación",
+            "dirección",
+            "decisión",
+            "visión"
+          ],
+          "spiritual": "Elegir el camino espiritual correcto.",
+          "psychological": "Claridad en metas y dirección.",
+          "practical": "Planificar el próximo paso con visión."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "bastones",
+            "globo",
+            "barco"
+          ],
+          "numerology": "2 - Polaridad, decisión"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Elegir dirección espiritual",
+          "meditation": "Visualizando el camino adelante",
+          "affirmation": "Elijo mi camino con claridad"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Two of Wands: focus on Elegir dirección espiritual"
+        ],
+        "psychologicalThemes": [
+          "Claridad en metas y dirección."
+        ]
+      },
+      {
+        "id": "three-of-wands",
+        "code": "W03",
+        "number": 3,
+        "name": "Three of Wands",
+        "nameSpanish": "Tres de Bastos",
+        "element": "fire",
+        "decan": "Sun in Aries",
+        "meanings": {
+          "central": "Expansión y cooperación en acción.",
+          "keywords": [
+            "expansión",
+            "cooperación",
+            "crecimiento",
+            "oportunidad",
+            "visión"
+          ],
+          "spiritual": "Expansión de la conciencia espiritual.",
+          "psychological": "Confianza en el proceso de crecimiento.",
+          "practical": "Colaborar para expandir horizontes."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "bastones",
+            "barcos",
+            "montaña"
+          ],
+          "numerology": "3 - Expansión, crecimiento"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Expandir la visión espiritual",
+          "meditation": "Viendo oportunidades de crecimiento",
+          "affirmation": "Mi visión se expande continuamente"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Three of Wands: focus on Expandir la visión espiritual"
+        ],
+        "psychologicalThemes": [
+          "Confianza en el proceso de crecimiento."
+        ]
+      },
+      {
+        "id": "four-of-wands",
+        "code": "W04",
+        "number": 4,
+        "name": "Four of Wands",
+        "nameSpanish": "Cuatro de Bastos",
+        "element": "fire",
+        "decan": "Venus in Aries",
+        "meanings": {
+          "central": "Celebración y estabilidad en la acción.",
+          "keywords": [
+            "celebración",
+            "estabilidad",
+            "armonía",
+            "hogar",
+            "comunidad"
+          ],
+          "spiritual": "Celebración de logros espirituales.",
+          "psychological": "Sentimiento de seguridad y pertenencia.",
+          "practical": "Celebrar hitos y construir comunidad."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "bastones",
+            "guirnalda",
+            "castillo"
+          ],
+          "numerology": "4 - Estabilidad, celebración"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Celebrar el progreso espiritual",
+          "meditation": "Honrando logros internos",
+          "affirmation": "Celebro mi camino espiritual"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Four of Wands: focus on Celebrar el progreso espiritual"
+        ],
+        "psychologicalThemes": [
+          "Sentimiento de seguridad y pertenencia."
+        ]
+      },
+      {
+        "id": "five-of-wands",
+        "code": "W05",
+        "number": 5,
+        "name": "Five of Wands",
+        "nameSpanish": "Cinco de Bastos",
+        "element": "fire",
+        "decan": "Saturn in Leo",
+        "meanings": {
+          "central": "Conflicto constructivo y superación de obstáculos.",
+          "keywords": [
+            "conflicto",
+            "desafío",
+            "competencia",
+            "crecimiento",
+            "resolución"
+          ],
+          "spiritual": "Superar obstáculos en el camino espiritual.",
+          "psychological": "Enfrentar y resolver conflictos internos.",
+          "practical": "Usar desafíos como oportunidades de crecimiento."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "bastones",
+            "figuras",
+            "conflicto"
+          ],
+          "numerology": "5 - Conflicto, cambio"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Transformar conflicto en crecimiento",
+          "meditation": "Viendo desafíos como maestros",
+          "affirmation": "Crecimiento a través del conflicto"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Five of Wands: focus on Transformar conflicto en crecimiento"
+        ],
+        "psychologicalThemes": [
+          "Enfrentar y resolver conflictos internos."
+        ]
+      },
+      {
+        "id": "six-of-wands",
+        "code": "W06",
+        "number": 6,
+        "name": "Six of Wands",
+        "nameSpanish": "Seis de Bastos",
+        "element": "fire",
+        "decan": "Jupiter in Leo",
+        "meanings": {
+          "central": "Victoria y reconocimiento público.",
+          "keywords": [
+            "victoria",
+            "reconocimiento",
+            "éxito",
+            "liderazgo",
+            "confianza"
+          ],
+          "spiritual": "Triunfo espiritual y reconocimiento divino.",
+          "psychological": "Confianza en logros personales.",
+          "practical": "Celebrar victorias y liderar con humildad."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "bastón",
+            "corona",
+            "caballo"
+          ],
+          "numerology": "6 - Victoria, armonía"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Aceptar el triunfo espiritual",
+          "meditation": "Reconociendo logros internos",
+          "affirmation": "Mi éxito viene de lo divino"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Six of Wands: focus on Aceptar el triunfo espiritual"
+        ],
+        "psychologicalThemes": [
+          "Confianza en logros personales."
+        ]
+      },
+      {
+        "id": "seven-of-wands",
+        "code": "W07",
+        "number": 7,
+        "name": "Seven of Wands",
+        "nameSpanish": "Siete de Bastos",
+        "element": "fire",
+        "decan": "Mars in Leo",
+        "meanings": {
+          "central": "Defensa valiente y perseverancia.",
+          "keywords": [
+            "defensa",
+            "perseverancia",
+            "coraje",
+            "determinación",
+            "resistencia"
+          ],
+          "spiritual": "Defender la verdad espiritual.",
+          "psychological": "Mantener convicciones frente a oposición.",
+          "practical": "Permanecer firme en principios."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "bastón",
+            "altura",
+            "figuras"
+          ],
+          "numerology": "7 - Valor, defensa"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Defender la verdad interior",
+          "meditation": "Manteniendo la posición espiritual",
+          "affirmation": "Defiendo mi verdad con coraje"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Seven of Wands: focus on Defender la verdad interior"
+        ],
+        "psychologicalThemes": [
+          "Mantener convicciones frente a oposición."
+        ]
+      },
+      {
+        "id": "eight-of-wands",
+        "code": "W08",
+        "number": 8,
+        "name": "Eight of Wands",
+        "nameSpanish": "Ocho de Bastos",
+        "element": "fire",
+        "decan": "Mercury in Sagittarius",
+        "meanings": {
+          "central": "Movimiento rápido y comunicación efectiva.",
+          "keywords": [
+            "movimiento",
+            "comunicación",
+            "velocidad",
+            "progreso",
+            "acción"
+          ],
+          "spiritual": "La rapidez del pensamiento divino.",
+          "psychological": "Claridad mental y acción decidida.",
+          "practical": "Actuar con rapidez y precisión."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "bastones",
+            "vuelo",
+            "río"
+          ],
+          "numerology": "8 - Movimiento, justicia"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Actuar con divina rapidez",
+          "meditation": "Sintiendo el flujo de energía",
+          "affirmation": "Mi acción es precisa y oportuna"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Eight of Wands: focus on Actuar con divina rapidez"
+        ],
+        "psychologicalThemes": [
+          "Claridad mental y acción decidida."
+        ]
+      },
+      {
+        "id": "nine-of-wands",
+        "code": "W09",
+        "number": 9,
+        "name": "Nine of Wands",
+        "nameSpanish": "Nueve de Bastos",
+        "element": "fire",
+        "decan": "Moon in Sagittarius",
+        "meanings": {
+          "central": "Resistencia y preparación para desafíos.",
+          "keywords": [
+            "resistencia",
+            "preparación",
+            "defensa",
+            "perseverancia",
+            "fuerza"
+          ],
+          "spiritual": "Fortaleza espiritual probada.",
+          "psychological": "Preparación mental para dificultades.",
+          "practical": "Mantener la guardia y perseverar."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "bastones",
+            "vendas",
+            "defensa"
+          ],
+          "numerology": "9 - Resistencia, culminación"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Desarrollar fortaleza espiritual",
+          "meditation": "Preparándose para desafíos",
+          "affirmation": "Mi fuerza espiritual es inquebrantable"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Nine of Wands: focus on Desarrollar fortaleza espiritual"
+        ],
+        "psychologicalThemes": [
+          "Preparación mental para dificultades."
+        ]
+      },
+      {
+        "id": "ten-of-wands",
+        "code": "W10",
+        "number": 10,
+        "name": "Ten of Wands",
+        "nameSpanish": "Diez de Bastos",
+        "element": "fire",
+        "decan": "Saturn in Sagittarius",
+        "meanings": {
+          "central": "Carga pesada y necesidad de delegación.",
+          "keywords": [
+            "carga",
+            "responsabilidad",
+            "delegación",
+            "agotamiento",
+            "liberación"
+          ],
+          "spiritual": "Liberarse de cargas innecesarias.",
+          "psychological": "Reconocer límites y pedir ayuda.",
+          "practical": "Delegar tareas para mantener el equilibrio."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "bastones",
+            "carga",
+            "caminante"
+          ],
+          "numerology": "10 - Culminación, carga"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Liberarse de cargas espirituales",
+          "meditation": "Soltando lo que no sirve",
+          "affirmation": "Libero cargas innecesarias"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Ten of Wands: focus on Liberarse de cargas espirituales"
+        ],
+        "psychologicalThemes": [
+          "Reconocer límites y pedir ayuda."
+        ]
+      },
+      {
+        "id": "page-of-wands",
+        "code": "WP",
+        "number": 11,
+        "name": "Page of Wands",
+        "nameSpanish": "Paje de Bastos",
+        "element": "earth",
+        "court": "princess",
+        "meanings": {
+          "central": "Entusiasmo juvenil y exploración creativa.",
+          "keywords": [
+            "entusiasmo",
+            "exploración",
+            "creatividad",
+            "aprendizaje",
+            "curiosidad"
+          ],
+          "spiritual": "La chispa de curiosidad espiritual.",
+          "psychological": "Mente abierta y disposición para aprender.",
+          "practical": "Explorar nuevas ideas con entusiasmo."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "bastón",
+            "salamandra",
+            "sombrero"
+          ],
+          "numerology": "Exploración, aprendizaje"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Cultivar curiosidad espiritual",
+          "meditation": "Explorando el mundo interior",
+          "affirmation": "Mi curiosidad me guía al conocimiento"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Page of Wands: focus on Cultivar curiosidad espiritual"
+        ],
+        "psychologicalThemes": [
+          "Mente abierta y disposición para aprender."
+        ]
+      },
+      {
+        "id": "knight-of-wands",
+        "code": "WK",
+        "number": 12,
+        "name": "Knight of Wands",
+        "nameSpanish": "Caballero de Bastos",
+        "element": "air",
+        "court": "prince",
+        "meanings": {
+          "central": "Acción audaz y aventura espiritual.",
+          "keywords": [
+            "acción",
+            "aventura",
+            "audacia",
+            "pasión",
+            "viaje"
+          ],
+          "spiritual": "El guerrero espiritual en acción.",
+          "psychological": "Impulso para actuar con pasión.",
+          "practical": "Emprender aventuras con confianza."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "caballo",
+            "bastón",
+            "armadura"
+          ],
+          "numerology": "Acción, movimiento"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Actuar con pasión espiritual",
+          "meditation": "Cabalgar hacia la aventura divina",
+          "affirmation": "Actúo con divina pasión"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Knight of Wands: focus on Actuar con pasión espiritual"
+        ],
+        "psychologicalThemes": [
+          "Impulso para actuar con pasión."
+        ]
+      },
+      {
+        "id": "queen-of-wands",
+        "code": "WQ",
+        "number": 13,
+        "name": "Queen of Wands",
+        "nameSpanish": "Reina de Bastos",
+        "element": "water",
+        "court": "queen",
+        "meanings": {
+          "central": "Calidez, magnetismo y liderazgo inspirador.",
+          "keywords": [
+            "calidez",
+            "magnetismo",
+            "liderazgo",
+            "inspiración",
+            "confianza"
+          ],
+          "spiritual": "La presencia cálida del espíritu divino.",
+          "psychological": "Confianza en la capacidad de inspirar.",
+          "practical": "Liderar con calidez y magnetismo."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "trono",
+            "gato",
+            "bastón"
+          ],
+          "numerology": "Receptividad, liderazgo"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Inspirar con presencia espiritual",
+          "meditation": "Radiando calidez divina",
+          "affirmation": "Inspiro con mi presencia espiritual"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Queen of Wands: focus on Inspirar con presencia espiritual"
+        ],
+        "psychologicalThemes": [
+          "Confianza en la capacidad de inspirar."
+        ]
+      },
+      {
+        "id": "king-of-wands",
+        "code": "WKg",
+        "number": 14,
+        "name": "King of Wands",
+        "nameSpanish": "Rey de Bastos",
+        "element": "fire",
+        "court": "king",
+        "meanings": {
+          "central": "Liderazgo visionario y autoridad espiritual.",
+          "keywords": [
+            "liderazgo",
+            "visión",
+            "autoridad",
+            "creatividad",
+            "inspiración"
+          ],
+          "spiritual": "El rey espiritual que guía con visión.",
+          "psychological": "Confianza en la capacidad de liderar.",
+          "practical": "Guiar con visión y autoridad."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "trono",
+            "león",
+            "bastón"
+          ],
+          "numerology": "Autoridad, visión"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Liderar con visión espiritual",
+          "meditation": "Guiando con autoridad divina",
+          "affirmation": "Lidero con visión espiritual"
+        },
+        "aiPromptHints": [
+          "Educational meditation on King of Wands: focus on Liderar con visión espiritual"
+        ],
+        "psychologicalThemes": [
+          "Confianza en la capacidad de liderar."
+        ]
+      }
+    ],
+    "cups": [
+      {
+        "id": "ace-of-cups",
+        "code": "C01",
+        "number": 1,
+        "name": "Ace of Cups",
+        "nameSpanish": "As de Copas",
+        "element": "water",
+        "meanings": {
+          "central": "Amor espiritual y potencial emocional.",
+          "keywords": [
+            "amor",
+            "emoción",
+            "espiritualidad",
+            "potencial",
+            "intuición"
+          ],
+          "spiritual": "La copa del amor divino.",
+          "psychological": "Apertura emocional y receptividad.",
+          "practical": "Abrirse al amor y la intuición."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "copa",
+            "paloma",
+            "agua"
+          ],
+          "numerology": "1 - Principio, amor"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Abrirse al amor divino",
+          "meditation": "Recibiendo el amor espiritual",
+          "affirmation": "Mi corazón está abierto al amor divino"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Ace of Cups: focus on Abrirse al amor divino"
+        ],
+        "psychologicalThemes": [
+          "Apertura emocional y receptividad."
+        ]
+      },
+      {
+        "id": "two-of-cups",
+        "code": "C02",
+        "number": 2,
+        "name": "Two of Cups",
+        "nameSpanish": "Dos de Copas",
+        "element": "water",
+        "decan": "Venus in Cancer",
+        "meanings": {
+          "central": "Unión emocional y armonía relacional.",
+          "keywords": [
+            "unión",
+            "armonía",
+            "relación",
+            "equilibrio",
+            "amor"
+          ],
+          "spiritual": "La unión del alma con lo divino.",
+          "psychological": "Conexión emocional profunda.",
+          "practical": "Cultivar relaciones armoniosas."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "copas",
+            "serpiente",
+            "león"
+          ],
+          "numerology": "2 - Unión, armonía"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Unir corazón y espíritu",
+          "meditation": "Sintiendo la unión divina",
+          "affirmation": "Mi corazón se une con el divino"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Two of Cups: focus on Unir corazón y espíritu"
+        ],
+        "psychologicalThemes": [
+          "Conexión emocional profunda."
+        ]
+      },
+      {
+        "id": "three-of-cups",
+        "code": "C03",
+        "number": 3,
+        "name": "Three of Cups",
+        "nameSpanish": "Tres de Copas",
+        "element": "water",
+        "decan": "Mercury in Cancer",
+        "meanings": {
+          "central": "Celebración comunitaria y alegría compartida.",
+          "keywords": [
+            "celebración",
+            "comunidad",
+            "alegría",
+            "amistad",
+            "abundancia"
+          ],
+          "spiritual": "La alegría de la comunidad espiritual.",
+          "psychological": "Sentimiento de pertenencia y celebración.",
+          "practical": "Celebrar conexiones y compartir alegría."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "copas",
+            "figuras",
+            "frutas"
+          ],
+          "numerology": "3 - Celebración, abundancia"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Celebrar la comunidad espiritual",
+          "meditation": "Compartiendo alegría divina",
+          "affirmation": "Celebro la abundancia espiritual"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Three of Cups: focus on Celebrar la comunidad espiritual"
+        ],
+        "psychologicalThemes": [
+          "Sentimiento de pertenencia y celebración."
+        ]
+      },
+      {
+        "id": "four-of-cups",
+        "code": "C04",
+        "number": 4,
+        "name": "Four of Cups",
+        "nameSpanish": "Cuatro de Copas",
+        "element": "water",
+        "decan": "Moon in Cancer",
+        "meanings": {
+          "central": "Contemplación y reevaluación emocional.",
+          "keywords": [
+            "contemplación",
+            "reevaluación",
+            "introspección",
+            "discontento",
+            "oportunidad"
+          ],
+          "spiritual": "Buscar significado más profundo.",
+          "psychological": "Reflexión sobre necesidades emocionales.",
+          "practical": "Reevaluar prioridades y oportunidades."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "copas",
+            "mano",
+            "nube"
+          ],
+          "numerology": "4 - Contemplación, estabilidad"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Buscar profundidad espiritual",
+          "meditation": "Contemplando el alma",
+          "affirmation": "Busco significado más profundo"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Four of Cups: focus on Buscar profundidad espiritual"
+        ],
+        "psychologicalThemes": [
+          "Reflexión sobre necesidades emocionales."
+        ]
+      },
+      {
+        "id": "five-of-cups",
+        "code": "C05",
+        "number": 5,
+        "name": "Five of Cups",
+        "nameSpanish": "Cinco de Copas",
+        "element": "water",
+        "decan": "Mars in Scorpio",
+        "meanings": {
+          "central": "Pérdida y enfoque en lo que permanece.",
+          "keywords": [
+            "pérdida",
+            "duelo",
+            "perspectiva",
+            "esperanza",
+            "transformación"
+          ],
+          "spiritual": "Liberarse del apego para encontrar paz.",
+          "psychological": "Procesar emociones de pérdida.",
+          "practical": "Enfocarse en lo positivo que queda."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "copas",
+            "figura",
+            "puente"
+          ],
+          "numerology": "5 - Pérdida, transformación"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Liberarse del apego emocional",
+          "meditation": "Viendo lo que permanece",
+          "affirmation": "Encuentro paz en la aceptación"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Five of Cups: focus on Liberarse del apego emocional"
+        ],
+        "psychologicalThemes": [
+          "Procesar emociones de pérdida."
+        ]
+      },
+      {
+        "id": "six-of-cups",
+        "code": "C06",
+        "number": 6,
+        "name": "Six of Cups",
+        "nameSpanish": "Seis de Copas",
+        "element": "water",
+        "decan": "Sun in Scorpio",
+        "meanings": {
+          "central": "Inocencia, nostalgia y recuerdos puros.",
+          "keywords": [
+            "inocencia",
+            "nostalgia",
+            "recuerdos",
+            "pureza",
+            "regalo"
+          ],
+          "spiritual": "La pureza del alma infantil.",
+          "psychological": "Conexión con la inocencia interior.",
+          "practical": "Honrar recuerdos y dar con generosidad."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "copas",
+            "niños",
+            "flores"
+          ],
+          "numerology": "6 - Inocencia, armonía"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Redescubrir la inocencia espiritual",
+          "meditation": "Recordando la pureza del alma",
+          "affirmation": "Mi corazón permanece puro"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Six of Cups: focus on Redescubrir la inocencia espiritual"
+        ],
+        "psychologicalThemes": [
+          "Conexión con la inocencia interior."
+        ]
+      },
+      {
+        "id": "seven-of-cups",
+        "code": "C07",
+        "number": 7,
+        "name": "Seven of Cups",
+        "nameSpanish": "Siete de Copas",
+        "element": "water",
+        "decan": "Venus in Scorpio",
+        "meanings": {
+          "central": "Ilusiones y necesidad de discernimiento.",
+          "keywords": [
+            "ilusiones",
+            "discernimiento",
+            "elección",
+            "fantasía",
+            "claridad"
+          ],
+          "spiritual": "Ver más allá de las ilusiones materiales.",
+          "psychological": "Distinguir realidad de fantasía.",
+          "practical": "Elegir con claridad y discernimiento."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "copas",
+            "nubes",
+            "figuras"
+          ],
+          "numerology": "7 - Ilusión, discernimiento"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Ver más allá de las ilusiones",
+          "meditation": "Discerniendo verdad de ilusión",
+          "affirmation": "Veo con claridad espiritual"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Seven of Cups: focus on Ver más allá de las ilusiones"
+        ],
+        "psychologicalThemes": [
+          "Distinguir realidad de fantasía."
+        ]
+      },
+      {
+        "id": "eight-of-cups",
+        "code": "C08",
+        "number": 8,
+        "name": "Eight of Cups",
+        "nameSpanish": "Ocho de Copas",
+        "element": "water",
+        "decan": "Saturn in Pisces",
+        "meanings": {
+          "central": "Abandono de lo insatisfactorio y búsqueda de significado.",
+          "keywords": [
+            "abandono",
+            "búsqueda",
+            "significado",
+            "viaje",
+            "liberación"
+          ],
+          "spiritual": "Dejar lo material por lo espiritual.",
+          "psychological": "Buscar satisfacción más profunda.",
+          "practical": "Abandonar situaciones insatisfactorias."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "copas",
+            "luna",
+            "montañas"
+          ],
+          "numerology": "8 - Abandono, búsqueda"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Buscar significado espiritual",
+          "meditation": "Caminando hacia lo desconocido",
+          "affirmation": "Busco satisfacción espiritual"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Eight of Cups: focus on Buscar significado espiritual"
+        ],
+        "psychologicalThemes": [
+          "Buscar satisfacción más profunda."
+        ]
+      },
+      {
+        "id": "nine-of-cups",
+        "code": "C09",
+        "number": 9,
+        "name": "Nine of Cups",
+        "nameSpanish": "Nueve de Copas",
+        "element": "water",
+        "decan": "Jupiter in Pisces",
+        "meanings": {
+          "central": "Satisfacción emocional y realización de deseos.",
+          "keywords": [
+            "satisfacción",
+            "realización",
+            "deseos",
+            "abundancia",
+            "contento"
+          ],
+          "spiritual": "La copa de la satisfacción divina.",
+          "psychological": "Sentimiento de plenitud emocional.",
+          "practical": "Disfrutar de logros y abundancia."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "copas",
+            "figura",
+            "arco"
+          ],
+          "numerology": "9 - Satisfacción, culminación"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Encontrar satisfacción espiritual",
+          "meditation": "Bañándose en abundancia divina",
+          "affirmation": "Mi corazón está lleno de satisfacción"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Nine of Cups: focus on Encontrar satisfacción espiritual"
+        ],
+        "psychologicalThemes": [
+          "Sentimiento de plenitud emocional."
+        ]
+      },
+      {
+        "id": "ten-of-cups",
+        "code": "C10",
+        "number": 10,
+        "name": "Ten of Cups",
+        "nameSpanish": "Diez de Copas",
+        "element": "water",
+        "decan": "Mars in Pisces",
+        "meanings": {
+          "central": "Felicidad familiar y armonía emocional completa.",
+          "keywords": [
+            "felicidad",
+            "familia",
+            "armonía",
+            "amor",
+            "completitud"
+          ],
+          "spiritual": "La familia espiritual unida en amor.",
+          "psychological": "Sentimiento de paz y completitud.",
+          "practical": "Cultivar relaciones amorosas y armoniosas."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "copas",
+            "familia",
+            "arco iris"
+          ],
+          "numerology": "10 - Completitud, felicidad"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Alcanzar armonía espiritual",
+          "meditation": "Sintiendo la unidad familiar",
+          "affirmation": "Vivo en armonía divina"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Ten of Cups: focus on Alcanzar armonía espiritual"
+        ],
+        "psychologicalThemes": [
+          "Sentimiento de paz y completitud."
+        ]
+      },
+      {
+        "id": "page-of-cups",
+        "code": "CP",
+        "number": 11,
+        "name": "Page of Cups",
+        "nameSpanish": "Paje de Copas",
+        "element": "earth",
+        "court": "princess",
+        "meanings": {
+          "central": "Mensajes intuitivos y creatividad emocional.",
+          "keywords": [
+            "intuición",
+            "mensajes",
+            "creatividad",
+            "emoción",
+            "aprendizaje"
+          ],
+          "spiritual": "Mensajes del corazón espiritual.",
+          "psychological": "Desarrollo de la intuición emocional.",
+          "practical": "Escuchar mensajes intuitivos."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "copa",
+            "pez",
+            "sombrero"
+          ],
+          "numerology": "Intuición, aprendizaje"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Desarrollar intuición espiritual",
+          "meditation": "Escuchando mensajes del corazón",
+          "affirmation": "Mi intuición me guía"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Page of Cups: focus on Desarrollar intuición espiritual"
+        ],
+        "psychologicalThemes": [
+          "Desarrollo de la intuición emocional."
+        ]
+      },
+      {
+        "id": "knight-of-cups",
+        "code": "CK",
+        "number": 12,
+        "name": "Knight of Cups",
+        "nameSpanish": "Caballero de Copas",
+        "element": "air",
+        "court": "prince",
+        "meanings": {
+          "central": "Oferta romántica y creatividad emocional.",
+          "keywords": [
+            "oferta",
+            "romance",
+            "creatividad",
+            "emoción",
+            "invitación"
+          ],
+          "spiritual": "La copa del amor espiritual ofrecida.",
+          "psychological": "Impulso creativo y emocional.",
+          "practical": "Ofrecer amor y creatividad."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "caballo",
+            "copa",
+            "alas"
+          ],
+          "numerology": "Oferta, movimiento"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Ofrecer amor espiritual",
+          "meditation": "Extendiendo la copa del amor",
+          "affirmation": "Ofrezco amor divino"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Knight of Cups: focus on Ofrecer amor espiritual"
+        ],
+        "psychologicalThemes": [
+          "Impulso creativo y emocional."
+        ]
+      },
+      {
+        "id": "queen-of-cups",
+        "code": "CQ",
+        "number": 13,
+        "name": "Queen of Cups",
+        "nameSpanish": "Reina de Copas",
+        "element": "water",
+        "court": "queen",
+        "meanings": {
+          "central": "Empatía profunda y sabiduría emocional.",
+          "keywords": [
+            "empatía",
+            "sabiduría",
+            "emoción",
+            "intuición",
+            "nutrición"
+          ],
+          "spiritual": "La reina del amor divino.",
+          "psychological": "Profunda comprensión emocional.",
+          "practical": "Nutrir con empatía y amor."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "trono",
+            "copa",
+            "loto"
+          ],
+          "numerology": "Receptividad, sabiduría"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Cultivar empatía espiritual",
+          "meditation": "Sintiendo con el corazón divino",
+          "affirmation": "Mi empatía fluye libremente"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Queen of Cups: focus on Cultivar empatía espiritual"
+        ],
+        "psychologicalThemes": [
+          "Profunda comprensión emocional."
+        ]
+      },
+      {
+        "id": "king-of-cups",
+        "code": "CKg",
+        "number": 14,
+        "name": "King of Cups",
+        "nameSpanish": "Rey de Copas",
+        "element": "fire",
+        "court": "king",
+        "meanings": {
+          "central": "Maestría emocional y liderazgo compasivo.",
+          "keywords": [
+            "maestría",
+            "liderazgo",
+            "compasión",
+            "equilibrio",
+            "sabiduría"
+          ],
+          "spiritual": "El rey del amor espiritual.",
+          "psychological": "Control emocional y compasión.",
+          "practical": "Liderar con corazón y sabiduría."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "trono",
+            "copa",
+            "pez"
+          ],
+          "numerology": "Autoridad, compasión"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Liderar con compasión espiritual",
+          "meditation": "Gobernando con corazón divino",
+          "affirmation": "Lidero con amor y sabiduría"
+        },
+        "aiPromptHints": [
+          "Educational meditation on King of Cups: focus on Liderar con compasión espiritual"
+        ],
+        "psychologicalThemes": [
+          "Control emocional y compasión."
+        ]
+      }
+    ],
+    "swords": [
+      {
+        "id": "ace-of-swords",
+        "code": "S01",
+        "number": 1,
+        "name": "Ace of Swords",
+        "nameSpanish": "As de Espadas",
+        "element": "air",
+        "meanings": {
+          "central": "Claridad mental y verdad intelectual.",
+          "keywords": [
+            "claridad",
+            "verdad",
+            "intelecto",
+            "justicia",
+            "decisión"
+          ],
+          "spiritual": "La espada de la verdad divina.",
+          "psychological": "Claridad mental y discernimiento.",
+          "practical": "Buscar verdad y justicia."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "espada",
+            "corona",
+            "olivo"
+          ],
+          "numerology": "1 - Claridad, verdad"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Buscar verdad espiritual",
+          "meditation": "Cortando ilusiones con verdad",
+          "affirmation": "Mi mente está clara y enfocada"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Ace of Swords: focus on Buscar verdad espiritual"
+        ],
+        "psychologicalThemes": [
+          "Claridad mental y discernimiento."
+        ]
+      },
+      {
+        "id": "two-of-swords",
+        "code": "S02",
+        "number": 2,
+        "name": "Two of Swords",
+        "nameSpanish": "Dos de Espadas",
+        "element": "air",
+        "decan": "Moon in Libra",
+        "meanings": {
+          "central": "Equilibrio mental y decisiones difíciles.",
+          "keywords": [
+            "equilibrio",
+            "decisión",
+            "dilema",
+            "paz",
+            "justicia"
+          ],
+          "spiritual": "Equilibrar mente y corazón espiritual.",
+          "psychological": "Resolver conflictos mentales.",
+          "practical": "Tomar decisiones equilibradas."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "espadas",
+            "luna",
+            "balanza"
+          ],
+          "numerology": "2 - Equilibrio, decisión"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Equilibrar mente espiritual",
+          "meditation": "Resolviendo dilemas internos",
+          "affirmation": "Encuentro equilibrio en la verdad"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Two of Swords: focus on Equilibrar mente espiritual"
+        ],
+        "psychologicalThemes": [
+          "Resolver conflictos mentales."
+        ]
+      },
+      {
+        "id": "three-of-swords",
+        "code": "S03",
+        "number": 3,
+        "name": "Three of Swords",
+        "nameSpanish": "Tres de Espadas",
+        "element": "air",
+        "decan": "Saturn in Libra",
+        "meanings": {
+          "central": "Dolor emocional y necesidad de expresión.",
+          "keywords": [
+            "dolor",
+            "expresión",
+            "sanación",
+            "comprensión",
+            "liberación"
+          ],
+          "spiritual": "El dolor que lleva a la comprensión espiritual.",
+          "psychological": "Procesar y expresar dolor emocional.",
+          "practical": "Expresar sentimientos para sanar."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "espadas",
+            "corazón",
+            "nubes"
+          ],
+          "numerology": "3 - Dolor, expresión"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Sanar dolor espiritual",
+          "meditation": "Expresando dolor para liberar",
+          "affirmation": "Mi dolor me lleva a la sanación"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Three of Swords: focus on Sanar dolor espiritual"
+        ],
+        "psychologicalThemes": [
+          "Procesar y expresar dolor emocional."
+        ]
+      },
+      {
+        "id": "four-of-swords",
+        "code": "S04",
+        "number": 4,
+        "name": "Four of Swords",
+        "nameSpanish": "Cuatro de Espadas",
+        "element": "air",
+        "decan": "Jupiter in Libra",
+        "meanings": {
+          "central": "Descanso mental y contemplación.",
+          "keywords": [
+            "descanso",
+            "contemplación",
+            "recuperación",
+            "paz",
+            "reflexión"
+          ],
+          "spiritual": "El descanso del guerrero espiritual.",
+          "psychological": "Necesidad de descanso mental.",
+          "practical": "Tomar tiempo para reflexionar."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "espadas",
+            "tumba",
+            "ventana"
+          ],
+          "numerology": "4 - Descanso, contemplación"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Descansar en la paz espiritual",
+          "meditation": "Contemplando en silencio",
+          "affirmation": "Encuentro paz en la contemplación"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Four of Swords: focus on Descansar en la paz espiritual"
+        ],
+        "psychologicalThemes": [
+          "Necesidad de descanso mental."
+        ]
+      },
+      {
+        "id": "five-of-swords",
+        "code": "S05",
+        "number": 5,
+        "name": "Five of Swords",
+        "nameSpanish": "Cinco de Espadas",
+        "element": "air",
+        "decan": "Venus in Aquarius",
+        "meanings": {
+          "central": "Conflicto mental y necesidad de resolución.",
+          "keywords": [
+            "conflicto",
+            "resolución",
+            "estrategia",
+            "victoria",
+            "ética"
+          ],
+          "spiritual": "Resolver conflictos con integridad espiritual.",
+          "psychological": "Enfrentar conflictos mentales.",
+          "practical": "Buscar resolución pacífica."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "espadas",
+            "figuras",
+            "agua"
+          ],
+          "numerology": "5 - Conflicto, resolución"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Resolver conflictos con integridad",
+          "meditation": "Buscando paz mental",
+          "affirmation": "Resuelvo conflictos con amor"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Five of Swords: focus on Resolver conflictos con integridad"
+        ],
+        "psychologicalThemes": [
+          "Enfrentar conflictos mentales."
+        ]
+      },
+      {
+        "id": "six-of-swords",
+        "code": "S06",
+        "number": 6,
+        "name": "Six of Swords",
+        "nameSpanish": "Seis de Espadas",
+        "element": "air",
+        "decan": "Mercury in Aquarius",
+        "meanings": {
+          "central": "Transición mental y movimiento hacia la paz.",
+          "keywords": [
+            "transición",
+            "paz",
+            "movimiento",
+            "sanación",
+            "progreso"
+          ],
+          "spiritual": "Viaje hacia la iluminación mental.",
+          "psychological": "Moverse hacia pensamientos más pacíficos.",
+          "practical": "Transitar hacia situaciones más positivas."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "espadas",
+            "barco",
+            "agua"
+          ],
+          "numerology": "6 - Transición, paz"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Transitar hacia paz espiritual",
+          "meditation": "Navegando hacia la calma",
+          "affirmation": "Mi mente encuentra paz"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Six of Swords: focus on Transitar hacia paz espiritual"
+        ],
+        "psychologicalThemes": [
+          "Moverse hacia pensamientos más pacíficos."
+        ]
+      },
+      {
+        "id": "seven-of-swords",
+        "code": "S07",
+        "number": 7,
+        "name": "Seven of Swords",
+        "nameSpanish": "Siete de Espadas",
+        "element": "air",
+        "decan": "Moon in Aquarius",
+        "meanings": {
+          "central": "Estrategia mental y planificación cuidadosa.",
+          "keywords": [
+            "estrategia",
+            "planificación",
+            "independencia",
+            "ingenio",
+            "precaución"
+          ],
+          "spiritual": "Usar la mente para el bien espiritual.",
+          "psychological": "Pensamiento estratégico y precaución.",
+          "practical": "Planificar con cuidado e ingenio."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "espadas",
+            "tienda",
+            "figura"
+          ],
+          "numerology": "7 - Estrategia, precaución"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Planificar con sabiduría espiritual",
+          "meditation": "Pensando estratégicamente",
+          "affirmation": "Uso mi mente con propósito divino"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Seven of Swords: focus on Planificar con sabiduría espiritual"
+        ],
+        "psychologicalThemes": [
+          "Pensamiento estratégico y precaución."
+        ]
+      },
+      {
+        "id": "eight-of-swords",
+        "code": "S08",
+        "number": 8,
+        "name": "Eight of Swords",
+        "nameSpanish": "Ocho de Espadas",
+        "element": "air",
+        "decan": "Jupiter in Gemini",
+        "meanings": {
+          "central": "Restricción mental y liberación de limitaciones.",
+          "keywords": [
+            "restricción",
+            "liberación",
+            "miedo",
+            "limitaciones",
+            "empoderamiento"
+          ],
+          "spiritual": "Liberarse de ataduras mentales espirituales.",
+          "psychological": "Reconocer y superar miedos.",
+          "practical": "Romper patrones limitantes."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "espadas",
+            "vendas",
+            "círculo"
+          ],
+          "numerology": "8 - Restricción, liberación"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Liberarse de miedos espirituales",
+          "meditation": "Rompiendo ataduras mentales",
+          "affirmation": "Soy libre de limitaciones"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Eight of Swords: focus on Liberarse de miedos espirituales"
+        ],
+        "psychologicalThemes": [
+          "Reconocer y superar miedos."
+        ]
+      },
+      {
+        "id": "nine-of-swords",
+        "code": "S09",
+        "number": 9,
+        "name": "Nine of Swords",
+        "nameSpanish": "Nueve de Espadas",
+        "element": "air",
+        "decan": "Mars in Gemini",
+        "meanings": {
+          "central": "Ansiedad mental y necesidad de paz interior.",
+          "keywords": [
+            "ansiedad",
+            "preocupación",
+            "pesadillas",
+            "paz",
+            "sanación"
+          ],
+          "spiritual": "Encontrar paz en la mente espiritual.",
+          "psychological": "Liberarse de pensamientos ansiosos.",
+          "practical": "Buscar paz mental y consuelo."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "espadas",
+            "cama",
+            "figura"
+          ],
+          "numerology": "9 - Ansiedad, sanación"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Encontrar paz mental espiritual",
+          "meditation": "Liberando preocupaciones",
+          "affirmation": "Mi mente encuentra paz divina"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Nine of Swords: focus on Encontrar paz mental espiritual"
+        ],
+        "psychologicalThemes": [
+          "Liberarse de pensamientos ansiosos."
+        ]
+      },
+      {
+        "id": "ten-of-swords",
+        "code": "S10",
+        "number": 10,
+        "name": "Ten of Swords",
+        "nameSpanish": "Diez de Espadas",
+        "element": "air",
+        "decan": "Sun in Gemini",
+        "meanings": {
+          "central": "Culminación dolorosa y nuevo comienzo mental.",
+          "keywords": [
+            "culminación",
+            "dolor",
+            "fin",
+            "renovación",
+            "liberación"
+          ],
+          "spiritual": "El fin de un ciclo mental para renacer.",
+          "psychological": "Aceptar el fin de patrones mentales.",
+          "practical": "Liberarse de pensamientos destructivos."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "espadas",
+            "cuerpo",
+            "amanecer"
+          ],
+          "numerology": "10 - Culminación, renovación"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Renovar la mente espiritual",
+          "meditation": "Aceptando el fin para renacer",
+          "affirmation": "Renuevo mi mente con luz divina"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Ten of Swords: focus on Renovar la mente espiritual"
+        ],
+        "psychologicalThemes": [
+          "Aceptar el fin de patrones mentales."
+        ]
+      },
+      {
+        "id": "page-of-swords",
+        "code": "SP",
+        "number": 11,
+        "name": "Page of Swords",
+        "nameSpanish": "Paje de Espadas",
+        "element": "earth",
+        "court": "princess",
+        "meanings": {
+          "central": "Curiosidad intelectual y aprendizaje mental.",
+          "keywords": [
+            "curiosidad",
+            "aprendizaje",
+            "comunicación",
+            "vigilancia",
+            "novedad"
+          ],
+          "spiritual": "La mente inquisitiva espiritual.",
+          "psychological": "Desarrollo de pensamiento crítico.",
+          "practical": "Buscar conocimiento y comunicar ideas."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "espada",
+            "pájaro",
+            "sombrero"
+          ],
+          "numerology": "Curiosidad, aprendizaje"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Desarrollar mente espiritual inquisitiva",
+          "meditation": "Explorando ideas nuevas",
+          "affirmation": "Mi mente busca verdad divina"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Page of Swords: focus on Desarrollar mente espiritual inquisitiva"
+        ],
+        "psychologicalThemes": [
+          "Desarrollo de pensamiento crítico."
+        ]
+      },
+      {
+        "id": "knight-of-swords",
+        "code": "SK",
+        "number": 12,
+        "name": "Knight of Swords",
+        "nameSpanish": "Caballero de Espadas",
+        "element": "air",
+        "court": "prince",
+        "meanings": {
+          "central": "Acción mental rápida y determinación intelectual.",
+          "keywords": [
+            "acción",
+            "determinación",
+            "rapidez",
+            "justicia",
+            "decisión"
+          ],
+          "spiritual": "El guerrero de la verdad espiritual.",
+          "psychological": "Impulso para actuar con claridad mental.",
+          "practical": "Actuar con decisión y justicia."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "caballo",
+            "espada",
+            "viento"
+          ],
+          "numerology": "Acción, determinación"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Actuar con claridad espiritual",
+          "meditation": "Cargando hacia la verdad",
+          "affirmation": "Actúo con divina claridad"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Knight of Swords: focus on Actuar con claridad espiritual"
+        ],
+        "psychologicalThemes": [
+          "Impulso para actuar con claridad mental."
+        ]
+      },
+      {
+        "id": "queen-of-swords",
+        "code": "SQ",
+        "number": 13,
+        "name": "Queen of Swords",
+        "nameSpanish": "Reina de Espadas",
+        "element": "water",
+        "court": "queen",
+        "meanings": {
+          "central": "Claridad mental y sabiduría intelectual.",
+          "keywords": [
+            "claridad",
+            "sabiduría",
+            "independencia",
+            "honestidad",
+            "percepción"
+          ],
+          "spiritual": "La reina de la verdad espiritual.",
+          "psychological": "Percepción clara y honestidad.",
+          "practical": "Comunicar con claridad y honestidad."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "trono",
+            "espada",
+            "mariposa"
+          ],
+          "numerology": "Receptividad, sabiduría"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Cultivar claridad espiritual",
+          "meditation": "Viendo con percepción divina",
+          "affirmation": "Mi percepción es clara y verdadera"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Queen of Swords: focus on Cultivar claridad espiritual"
+        ],
+        "psychologicalThemes": [
+          "Percepción clara y honestidad."
+        ]
+      },
+      {
+        "id": "king-of-swords",
+        "code": "SKg",
+        "number": 14,
+        "name": "King of Swords",
+        "nameSpanish": "Rey de Espadas",
+        "element": "fire",
+        "court": "king",
+        "meanings": {
+          "central": "Autoridad intelectual y liderazgo justo.",
+          "keywords": [
+            "autoridad",
+            "liderazgo",
+            "justicia",
+            "análisis",
+            "disciplina"
+          ],
+          "spiritual": "El rey de la verdad espiritual.",
+          "psychological": "Pensamiento disciplinado y justo.",
+          "practical": "Liderar con justicia y claridad mental."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "trono",
+            "espada",
+            "libros"
+          ],
+          "numerology": "Autoridad, justicia"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Liderar con justicia espiritual",
+          "meditation": "Gobernando con verdad divina",
+          "affirmation": "Lidero con justicia y claridad"
+        },
+        "aiPromptHints": [
+          "Educational meditation on King of Swords: focus on Liderar con justicia espiritual"
+        ],
+        "psychologicalThemes": [
+          "Pensamiento disciplinado y justo."
+        ]
+      }
+    ],
+    "pentacles": [
+      {
+        "id": "ace-of-pentacles",
+        "code": "P01",
+        "number": 1,
+        "name": "Ace of Pentacles",
+        "nameSpanish": "As de Pentáculos",
+        "element": "earth",
+        "meanings": {
+          "central": "Abundancia material y oportunidad práctica.",
+          "keywords": [
+            "abundancia",
+            "oportunidad",
+            "práctica",
+            "prosperidad",
+            "manifiesto"
+          ],
+          "spiritual": "La abundancia del reino material divino.",
+          "psychological": "Confianza en la prosperidad.",
+          "practical": "Tomar oportunidades prácticas."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "pentáculo",
+            "jardín",
+            "arco"
+          ],
+          "numerology": "1 - Abundancia, manifestación"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Manifestar abundancia espiritual",
+          "meditation": "Recibiendo prosperidad divina",
+          "affirmation": "La abundancia divina fluye hacia mí"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Ace of Pentacles: focus on Manifestar abundancia espiritual"
+        ],
+        "psychologicalThemes": [
+          "Confianza en la prosperidad."
+        ]
+      },
+      {
+        "id": "two-of-pentacles",
+        "code": "P02",
+        "number": 2,
+        "name": "Two of Pentacles",
+        "nameSpanish": "Dos de Pentáculos",
+        "element": "earth",
+        "decan": "Jupiter in Capricorn",
+        "meanings": {
+          "central": "Equilibrio entre responsabilidades y cambio.",
+          "keywords": [
+            "equilibrio",
+            "cambio",
+            "responsabilidades",
+            "adaptación",
+            "flexibilidad"
+          ],
+          "spiritual": "Equilibrar lo material y lo espiritual.",
+          "psychological": "Manejar múltiples prioridades.",
+          "practical": "Adaptarse a cambios con flexibilidad."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "pentáculos",
+            "barco",
+            "olas"
+          ],
+          "numerology": "2 - Equilibrio, cambio"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Equilibrar vida material y espiritual",
+          "meditation": "Manejando cambios con gracia",
+          "affirmation": "Encuentro equilibrio en el cambio"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Two of Pentacles: focus on Equilibrar vida material y espiritual"
+        ],
+        "psychologicalThemes": [
+          "Manejar múltiples prioridades."
+        ]
+      },
+      {
+        "id": "three-of-pentacles",
+        "code": "P03",
+        "number": 3,
+        "name": "Three of Pentacles",
+        "nameSpanish": "Tres de Pentáculos",
+        "element": "earth",
+        "decan": "Mars in Capricorn",
+        "meanings": {
+          "central": "Colaboración y construcción de cimientos sólidos.",
+          "keywords": [
+            "colaboración",
+            "construcción",
+            "habilidades",
+            "aprendizaje",
+            "artesanía"
+          ],
+          "spiritual": "Construir el templo espiritual.",
+          "psychological": "Valorar el trabajo en equipo.",
+          "practical": "Desarrollar habilidades y colaborar."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "pentáculos",
+            "catedral",
+            "figuras"
+          ],
+          "numerology": "3 - Colaboración, construcción"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Construir con propósito espiritual",
+          "meditation": "Colaborando en la obra divina",
+          "affirmation": "Construyo con amor y habilidad"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Three of Pentacles: focus on Construir con propósito espiritual"
+        ],
+        "psychologicalThemes": [
+          "Valorar el trabajo en equipo."
+        ]
+      },
+      {
+        "id": "four-of-pentacles",
+        "code": "P04",
+        "number": 4,
+        "name": "Four of Pentacles",
+        "nameSpanish": "Cuatro de Pentáculos",
+        "element": "earth",
+        "decan": "Sun in Capricorn",
+        "meanings": {
+          "central": "Seguridad material y posesividad.",
+          "keywords": [
+            "seguridad",
+            "posesividad",
+            "conservación",
+            "estabilidad",
+            "control"
+          ],
+          "spiritual": "Liberarse del apego material.",
+          "psychological": "Necesidad de seguridad vs. generosidad.",
+          "practical": "Encontrar equilibrio entre guardar y compartir."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "pentáculos",
+            "figura",
+            "ciudad"
+          ],
+          "numerology": "4 - Seguridad, posesividad"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Liberarse del apego material",
+          "meditation": "Compartiendo con generosidad",
+          "affirmation": "Comparto abundancia divina"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Four of Pentacles: focus on Liberarse del apego material"
+        ],
+        "psychologicalThemes": [
+          "Necesidad de seguridad vs. generosidad."
+        ]
+      },
+      {
+        "id": "five-of-pentacles",
+        "code": "P05",
+        "number": 5,
+        "name": "Five of Pentacles",
+        "nameSpanish": "Cinco de Pentáculos",
+        "element": "earth",
+        "decan": "Mercury in Taurus",
+        "meanings": {
+          "central": "Dificultades materiales y búsqueda de ayuda espiritual.",
+          "keywords": [
+            "dificultades",
+            "ayuda",
+            "fe",
+            "recuperación",
+            "apoyo"
+          ],
+          "spiritual": "Encontrar ayuda en lo divino durante la necesidad.",
+          "psychological": "Pedir ayuda cuando se necesita.",
+          "practical": "Buscar apoyo durante tiempos difíciles."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "pentáculos",
+            "ventana",
+            "figuras"
+          ],
+          "numerology": "5 - Dificultades, recuperación"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Buscar ayuda espiritual",
+          "meditation": "Encontrando luz en la oscuridad",
+          "affirmation": "La ayuda divina está disponible"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Five of Pentacles: focus on Buscar ayuda espiritual"
+        ],
+        "psychologicalThemes": [
+          "Pedir ayuda cuando se necesita."
+        ]
+      },
+      {
+        "id": "six-of-pentacles",
+        "code": "P06",
+        "number": 6,
+        "name": "Six of Pentacles",
+        "nameSpanish": "Seis de Pentáculos",
+        "element": "earth",
+        "decan": "Moon in Taurus",
+        "meanings": {
+          "central": "Generosidad y equilibrio en dar y recibir.",
+          "keywords": [
+            "generosidad",
+            "equilibrio",
+            "dar",
+            "recibir",
+            "justicia"
+          ],
+          "spiritual": "La ley divina de dar y recibir.",
+          "psychological": "Equilibrar generosidad y receptividad.",
+          "practical": "Dar y recibir con equilibrio."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "pentáculos",
+            "balanza",
+            "figuras"
+          ],
+          "numerology": "6 - Generosidad, equilibrio"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Practicar generosidad espiritual",
+          "meditation": "Dando y recibiendo con amor",
+          "affirmation": "Doy y recibo con abundancia"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Six of Pentacles: focus on Practicar generosidad espiritual"
+        ],
+        "psychologicalThemes": [
+          "Equilibrar generosidad y receptividad."
+        ]
+      },
+      {
+        "id": "seven-of-pentacles",
+        "code": "P07",
+        "number": 7,
+        "name": "Seven of Pentacles",
+        "nameSpanish": "Siete de Pentáculos",
+        "element": "earth",
+        "decan": "Saturn in Taurus",
+        "meanings": {
+          "central": "Paciencia en el crecimiento y evaluación de progreso.",
+          "keywords": [
+            "paciencia",
+            "crecimiento",
+            "evaluación",
+            "perseverancia",
+            "reflexión"
+          ],
+          "spiritual": "El crecimiento espiritual toma tiempo.",
+          "psychological": "Paciencia con el proceso de desarrollo.",
+          "practical": "Evaluar progreso y perseverar."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "pentáculos",
+            "bastón",
+            "jardín"
+          ],
+          "numerology": "7 - Paciencia, evaluación"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Cultivar paciencia espiritual",
+          "meditation": "Observando el crecimiento divino",
+          "affirmation": "Confío en el proceso espiritual"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Seven of Pentacles: focus on Cultivar paciencia espiritual"
+        ],
+        "psychologicalThemes": [
+          "Paciencia con el proceso de desarrollo."
+        ]
+      },
+      {
+        "id": "eight-of-pentacles",
+        "code": "P08",
+        "number": 8,
+        "name": "Eight of Pentacles",
+        "nameSpanish": "Ocho de Pentáculos",
+        "element": "earth",
+        "decan": "Sun in Virgo",
+        "meanings": {
+          "central": "Dedicación al oficio y mejora continua.",
+          "keywords": [
+            "dedicación",
+            "oficio",
+            "mejora",
+            "aprendizaje",
+            "artesanía"
+          ],
+          "spiritual": "Perfeccionar el arte espiritual.",
+          "psychological": "Compromiso con el desarrollo personal.",
+          "practical": "Mejorar habilidades con dedicación."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "pentáculos",
+            "banco",
+            "herramientas"
+          ],
+          "numerology": "8 - Dedicación, mejora"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Perfeccionar el oficio espiritual",
+          "meditation": "Trabajando con dedicación divina",
+          "affirmation": "Mejoro continuamente mi ser"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Eight of Pentacles: focus on Perfeccionar el oficio espiritual"
+        ],
+        "psychologicalThemes": [
+          "Compromiso con el desarrollo personal."
+        ]
+      },
+      {
+        "id": "nine-of-pentacles",
+        "code": "P09",
+        "number": 9,
+        "name": "Nine of Pentacles",
+        "nameSpanish": "Nueve de Pentáculos",
+        "element": "earth",
+        "decan": "Venus in Virgo",
+        "meanings": {
+          "central": "Independencia material y disfrute de logros.",
+          "keywords": [
+            "independencia",
+            "logros",
+            "disfrute",
+            "abundancia",
+            "refinamiento"
+          ],
+          "spiritual": "La abundancia espiritual cultivada.",
+          "psychological": "Disfrutar de la independencia lograda.",
+          "practical": "Celebrar logros y mantener independencia."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "pentáculos",
+            "jardín",
+            "halcón"
+          ],
+          "numerology": "9 - Independencia, logros"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Disfrutar abundancia espiritual",
+          "meditation": "Bañándose en logros divinos",
+          "affirmation": "Disfruto la abundancia divina"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Nine of Pentacles: focus on Disfrutar abundancia espiritual"
+        ],
+        "psychologicalThemes": [
+          "Disfrutar de la independencia lograda."
+        ]
+      },
+      {
+        "id": "ten-of-pentacles",
+        "code": "P10",
+        "number": 10,
+        "name": "Ten of Pentacles",
+        "nameSpanish": "Diez de Pentáculos",
+        "element": "earth",
+        "decan": "Mercury in Virgo",
+        "meanings": {
+          "central": "Legado familiar y seguridad hereditaria.",
+          "keywords": [
+            "legado",
+            "familia",
+            "seguridad",
+            "tradición",
+            "abundancia"
+          ],
+          "spiritual": "La herencia espiritual transmitida.",
+          "psychological": "Sentimiento de pertenencia familiar.",
+          "practical": "Construir legado y seguridad."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "pentáculos",
+            "familia",
+            "escudo"
+          ],
+          "numerology": "10 - Legado, completitud"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Construir legado espiritual",
+          "meditation": "Honrando la herencia divina",
+          "affirmation": "Construyo un legado de amor"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Ten of Pentacles: focus on Construir legado espiritual"
+        ],
+        "psychologicalThemes": [
+          "Sentimiento de pertenencia familiar."
+        ]
+      },
+      {
+        "id": "page-of-pentacles",
+        "code": "PP",
+        "number": 11,
+        "name": "Page of Pentacles",
+        "nameSpanish": "Paje de Pentáculos",
+        "element": "earth",
+        "court": "princess",
+        "meanings": {
+          "central": "Aprendizaje práctico y exploración material.",
+          "keywords": [
+            "aprendizaje",
+            "práctico",
+            "exploración",
+            "oportunidad",
+            "dedicación"
+          ],
+          "spiritual": "El estudiante del reino material divino.",
+          "psychological": "Curiosidad por el mundo práctico.",
+          "practical": "Aprender habilidades prácticas."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "pentáculo",
+            "toro",
+            "campo"
+          ],
+          "numerology": "Aprendizaje, exploración"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Aprender lecciones materiales espirituales",
+          "meditation": "Explorando el mundo práctico",
+          "affirmation": "Aprendo con dedicación divina"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Page of Pentacles: focus on Aprender lecciones materiales espirituales"
+        ],
+        "psychologicalThemes": [
+          "Curiosidad por el mundo práctico."
+        ]
+      },
+      {
+        "id": "knight-of-pentacles",
+        "code": "PK",
+        "number": 12,
+        "name": "Knight of Pentacles",
+        "nameSpanish": "Caballero de Pentáculos",
+        "element": "air",
+        "court": "prince",
+        "meanings": {
+          "central": "Trabajo diligente y progreso metódico.",
+          "keywords": [
+            "trabajo",
+            "diligencia",
+            "progreso",
+            "metódico",
+            "responsabilidad"
+          ],
+          "spiritual": "El trabajador espiritual dedicado.",
+          "psychological": "Compromiso con el deber.",
+          "practical": "Trabajar con consistencia y responsabilidad."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "caballo",
+            "pentáculo",
+            "campo"
+          ],
+          "numerology": "Trabajo, progreso"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Trabajar con dedicación espiritual",
+          "meditation": "Avanzando con paciencia divina",
+          "affirmation": "Trabajo con amor y dedicación"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Knight of Pentacles: focus on Trabajar con dedicación espiritual"
+        ],
+        "psychologicalThemes": [
+          "Compromiso con el deber."
+        ]
+      },
+      {
+        "id": "queen-of-pentacles",
+        "code": "PQ",
+        "number": 13,
+        "name": "Queen of Pentacles",
+        "nameSpanish": "Reina de Pentáculos",
+        "element": "water",
+        "court": "queen",
+        "meanings": {
+          "central": "Nutrición práctica y abundancia terrenal.",
+          "keywords": [
+            "nutrición",
+            "práctica",
+            "abundancia",
+            "cuidado",
+            "fertilidad"
+          ],
+          "spiritual": "La madre tierra espiritual nutriendo.",
+          "psychological": "Capacidad de nutrir y cuidar.",
+          "practical": "Crear abundancia a través del cuidado."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "trono",
+            "pentáculo",
+            "conejo"
+          ],
+          "numerology": "Receptividad, nutrición"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Nutrir con amor espiritual",
+          "meditation": "Cuidando con generosidad divina",
+          "affirmation": "Nutro con abundancia divina"
+        },
+        "aiPromptHints": [
+          "Educational meditation on Queen of Pentacles: focus on Nutrir con amor espiritual"
+        ],
+        "psychologicalThemes": [
+          "Capacidad de nutrir y cuidar."
+        ]
+      },
+      {
+        "id": "king-of-pentacles",
+        "code": "PKg",
+        "number": 14,
+        "name": "King of Pentacles",
+        "nameSpanish": "Rey de Pentáculos",
+        "element": "fire",
+        "court": "king",
+        "meanings": {
+          "central": "Maestría material y liderazgo próspero.",
+          "keywords": [
+            "maestría",
+            "liderazgo",
+            "prosperidad",
+            "seguridad",
+            "disciplina"
+          ],
+          "spiritual": "El rey de la abundancia espiritual.",
+          "psychological": "Confianza en la capacidad de prosperar.",
+          "practical": "Liderar con estabilidad y prosperidad."
+        },
+        "symbolism": {
+          "colors": [],
+          "symbols": [
+            "trono",
+            "pentáculo",
+            "toros"
+          ],
+          "numerology": "Autoridad, prosperidad"
+        },
+        "botaSpecific": {
+          "lessonFocus": "Liderar con prosperidad espiritual",
+          "meditation": "Gobernando con abundancia divina",
+          "affirmation": "Lidero con prosperidad y amor"
+        },
+        "aiPromptHints": [
+          "Educational meditation on King of Pentacles: focus on Liderar con prosperidad espiritual"
+        ],
+        "psychologicalThemes": [
+          "Confianza en la capacidad de prosperar."
+        ]
+      }
+    ]
+  }
+}

@@ -2,9 +2,31 @@
 
 import clsx from 'clsx';
 
-export type BotaTarotCardData = {
+export interface BotaTarotCardSVGProps {
+  title: string;
+  reversed: boolean;
+  cardCode?: string | null;
+  symbols: {
+    hebrew_letter?: string | null;
+    letter_value?: number | null;
+    path?: number | null;
+    sefirot?: string | string[] | null;
+    element?: string | null;
+    planet?: string | null;
+    sign?: string | null;
+    scales?: {
+      king?: string | null;
+      queen?: string | null;
+      emperor?: string | null;
+      empress?: string | null;
+    } | null;
+    kabbalistic?: any;
+  };
+}
+
+// Backward-compat for existing callers (to be removed once all callsites use BotaTarotCardSVGProps).
+export type LegacyBotaTarotCardData = {
   id: string;
-  number?: number | null;
   name?: string | null;
   hebrewLetter?: string | null;
   letterValue?: number | null;
@@ -22,6 +44,9 @@ export type BotaTarotCardData = {
   } | null;
 };
 
+// Backward-compatible export name used by existing callsites.
+export type BotaTarotCardData = LegacyBotaTarotCardData;
+
 function cleanText(value: unknown): string {
   return typeof value === 'string' ? value.trim() : '';
 }
@@ -31,32 +56,100 @@ function line(label: string, value: unknown): string | null {
   return v ? label + ': ' + v : null;
 }
 
-export default function BotaTarotCardSVG({
-  card,
-  reversed = false,
-}: {
-  card: BotaTarotCardData;
-  reversed?: boolean;
-}) {
-  const title = cleanText(card.name) || cleanText(card.id) || 'Carta';
+function normalizeSymbols(raw: any): BotaTarotCardSVGProps['symbols'] {
+  const base = raw && typeof raw === 'object' ? raw : {};
+  const k = base.kabbalistic && typeof base.kabbalistic === 'object' ? base.kabbalistic : base;
+  const scales = base.scales && typeof base.scales === 'object' ? base.scales : null;
+  const colors =
+    k.colors && typeof k.colors === 'object'
+      ? k.colors
+      : k.kabbalistic?.colors && typeof k.kabbalistic.colors === 'object'
+        ? k.kabbalistic.colors
+        : null;
+
+  return {
+    hebrew_letter: base.hebrew_letter ?? k.hebrew_letter ?? k.hebrewLetter ?? null,
+    letter_value: base.letter_value ?? k.letter_value ?? k.letterValue ?? null,
+    path: base.path ?? k.path ?? null,
+    sefirot: base.sefirot ?? k.sefirot ?? k.sefirot ?? null,
+    element: base.element ?? k.element ?? null,
+    planet: base.planet ?? k.planet ?? null,
+    sign: base.sign ?? k.sign ?? null,
+    scales:
+      scales ||
+      (colors
+        ? {
+            king: colors.king ?? null,
+            queen: colors.queen ?? null,
+            emperor: colors.emperor ?? null,
+            empress: colors.empress ?? null,
+          }
+        : null),
+    kabbalistic: base.kabbalistic,
+  };
+}
+
+function normalizeProps(
+  props: BotaTarotCardSVGProps | { card: LegacyBotaTarotCardData; reversed?: boolean },
+): BotaTarotCardSVGProps {
+  if ('symbols' in props) {
+    return {
+      ...props,
+      title: cleanText(props.title),
+      reversed: Boolean(props.reversed),
+      symbols: normalizeSymbols(props.symbols),
+    };
+  }
+
+  const card = props.card;
+  return {
+    title: cleanText(card.name) || cleanText(card.id),
+    reversed: Boolean(props.reversed),
+    cardCode: null,
+    symbols: normalizeSymbols({
+      hebrew_letter: card.hebrewLetter ?? null,
+      letter_value: card.letterValue ?? null,
+      path: typeof card.path === 'number' ? card.path : null,
+      sefirot: card.sefirot ?? null,
+      element: card.element ?? null,
+      planet: card.planet ?? null,
+      sign: card.sign ?? null,
+      scales: card.colors
+        ? {
+            king: card.colors.king ?? null,
+            queen: card.colors.queen ?? null,
+            emperor: card.colors.emperor ?? null,
+            empress: card.colors.empress ?? null,
+          }
+        : null,
+    }),
+  };
+}
+
+export default function BotaTarotCardSVG(
+  props: BotaTarotCardSVGProps | { card: LegacyBotaTarotCardData; reversed?: boolean },
+) {
+  const normalized = normalizeProps(props);
+  const title = normalized.title;
+  const reversed = normalized.reversed;
+  const symbols = normalized.symbols;
 
   const metaLines = [
-    line('Letra', card.hebrewLetter),
-    typeof card.letterValue === 'number' ? 'Valor: ' + String(card.letterValue) : null,
-    card.path != null ? 'Sendero: ' + String(card.path) : null,
-    line('Sefirot', card.sefirot),
-    line('Elemento', card.element),
-    line('Planeta', card.planet),
-    line('Signo', card.sign),
-    line('Decano', card.decan),
+    line('Letra', symbols.hebrew_letter),
+    typeof symbols.letter_value === 'number' ? 'Valor: ' + String(symbols.letter_value) : null,
+    symbols.path != null ? 'Sendero: ' + String(symbols.path) : null,
+    Array.isArray(symbols.sefirot) ? line('Sefirot', symbols.sefirot.join(', ')) : line('Sefirot', symbols.sefirot),
+    line('Elemento', symbols.element),
+    line('Planeta', symbols.planet),
+    line('Signo', symbols.sign),
   ].filter((v): v is string => Boolean(v));
 
-  const swatches = card.colors
+  const swatches = symbols.scales
     ? [
-        { key: 'king', label: 'Rey', color: cleanText(card.colors.king) },
-        { key: 'queen', label: 'Reina', color: cleanText(card.colors.queen) },
-        { key: 'emperor', label: 'Emper.', color: cleanText(card.colors.emperor) },
-        { key: 'empress', label: 'Empr.', color: cleanText(card.colors.empress) },
+        { key: 'king', label: 'Rey', color: cleanText(symbols.scales.king) },
+        { key: 'queen', label: 'Reina', color: cleanText(symbols.scales.queen) },
+        { key: 'emperor', label: 'Emper.', color: cleanText(symbols.scales.emperor) },
+        { key: 'empress', label: 'Empr.', color: cleanText(symbols.scales.empress) },
       ].filter((s) => s.color)
     : [];
 
@@ -77,7 +170,7 @@ export default function BotaTarotCardSVG({
         {title}
       </text>
       <text x="36" y="74" fontSize="11" fill="#475569">
-        {card.number != null ? '#' + String(card.number) : ''}
+        {cleanText(normalized.cardCode) || ''}
       </text>
 
       <rect x="24" y="100" width="252" height="290" rx="10" fill="#ffffff" stroke="#e2e8f0" />
@@ -107,12 +200,7 @@ export default function BotaTarotCardSVG({
             </g>
           ))}
         </g>
-      ) : (
-        <text x="36" y="448" fontSize="11" fill="#64748b">
-          No disponible
-        </text>
-      )}
+      ) : null}
     </svg>
   );
 }
-

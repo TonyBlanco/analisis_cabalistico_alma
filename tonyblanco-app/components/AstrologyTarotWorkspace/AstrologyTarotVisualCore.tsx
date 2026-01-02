@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { TarotDeck } from '@/components/TarotCard';
 import { API_BASE_URL, getAuthToken } from '@/lib/api';
 import type { TarotCardData } from '@/components/TarotCard/TarotCard.types';
+import TarotDrawPanel from '@/components/tarot/TarotDrawPanel';
 import { ARCANOS_MAYORES } from '@/components/BodySoulVisualization/plugins/tarot/tarot.logic';
 import type { PatientContext } from '@/components/BodySoulVisualization/types';
 import { THOTH_MAJOR_ARCANA } from '../../../src/symbolic/tarot/decks/thoth';
@@ -100,6 +101,10 @@ export default function AstrologyTarotVisualCore({
     AstrologyTarotSectionId,
     { title: string; description: string }
   > = {
+    'tarot-systems': {
+      title: 'Sistemas de Tarot',
+      description: 'Ejecución de lecturas SWM v3 dentro del workspace.',
+    },
     'tarot-natal': {
       title: 'Carta Natal',
       description: 'Vista simbolica de origen. Observacional.',
@@ -425,6 +430,9 @@ export default function AstrologyTarotVisualCore({
         </div>
       </div>
       <div className="grid gap-4">
+        {activeSection === 'tarot-systems' && (
+          <TarotDrawPanel consultantId={patientId ? String(patientId) : null} />
+        )}
         {!isSystemImplemented && (
           <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
             <div className="flex items-center justify-between gap-2">

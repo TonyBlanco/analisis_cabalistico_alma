@@ -22,6 +22,7 @@ export default function AstrologyTarotWorkspace({
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
 
   const sectionLabelMap: Record<AstrologyTarotSectionId, string> = {
+    'tarot-systems': 'Sistemas de Tarot',
     'tarot-natal': 'Carta Natal',
     'tarot-tree-spread': 'Tirada del Arbol',
     'tarot-free-spread': 'Tirada Libre',

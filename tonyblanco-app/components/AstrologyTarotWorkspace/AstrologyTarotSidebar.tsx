@@ -34,6 +34,12 @@ const sections: Array<{
   Icon: typeof CalendarDaysIcon;
 }> = [
   {
+    id: 'tarot-systems',
+    label: 'Sistemas de Tarot',
+    description: 'Ejecución de lecturas SWM v3.',
+    Icon: SquaresPlusIcon,
+  },
+  {
     id: 'tarot-natal',
     label: 'Carta Natal',
     description: 'Configuración simbólica de origen.',

@@ -22,13 +22,12 @@ export default function AstrologyTarotWorkspace({
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
 
   const sectionLabelMap: Record<AstrologyTarotSectionId, string> = {
-    'tarot-systems': 'Sistemas de Tarot',
     'tarot-natal': 'Carta Natal',
-    'tarot-tree-spread': 'Tirada del Arbol',
+    'tarot-tree-spread': 'Tirada del Árbol',
     'tarot-free-spread': 'Tirada Libre',
     'tarot-correspondences': 'Correspondencias',
     'tarot-deck-view': 'Visualizar Mazo',
-    'tarot-ai-draft': 'Preparar Analisis IA',
+    'tarot-ai-draft': 'Preparar Análisis IA',
   };
 
   return (
@@ -55,8 +54,8 @@ export default function AstrologyTarotWorkspace({
         <AstrologyTarotSidebar
           activeSection={activeSection}
           onChange={setActiveSection}
-          patientId={patientId}
-          selectedCardId={selectedCardId}
+          selectedSystem={selectedSystem}
+          onSelectSystem={setSelectedSystem}
         />
         <main className="flex-1 px-6 py-6">
           <div className="mb-4 rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700">

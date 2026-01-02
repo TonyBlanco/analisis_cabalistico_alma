@@ -1,5 +1,4 @@
 export type AstrologyTarotSectionId =
-  | 'tarot-systems'
   | 'tarot-natal'
   | 'tarot-tree-spread'
   | 'tarot-free-spread'

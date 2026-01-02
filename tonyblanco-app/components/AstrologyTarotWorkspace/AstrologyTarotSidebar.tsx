@@ -8,14 +8,20 @@ import {
   LinkIcon,
   RectangleGroupIcon,
   ClipboardDocumentCheckIcon,
+  AcademicCapIcon,
+  CubeTransparentIcon,
+  DocumentTextIcon,
+  SparklesIcon,
   SquaresPlusIcon,
+  CheckCircleIcon,
+  ClockIcon,
 } from '@heroicons/react/24/solid';
 
 interface AstrologyTarotSidebarProps {
   activeSection: AstrologyTarotSectionId;
   onChange: (section: AstrologyTarotSectionId) => void;
-  patientId?: string;
-  selectedCardId?: string | null;
+  selectedSystem?: TarotSystemId | null;
+  onSelectSystem?: (system: TarotSystemId) => void;
 }
 
 const sections: Array<{
@@ -24,12 +30,6 @@ const sections: Array<{
   description: string;
   Icon: typeof CalendarDaysIcon;
 }> = [
-  {
-    id: 'tarot-systems',
-    label: 'Sistemas de Tarot',
-    description: 'Ejecución de lecturas SWM v3.',
-    Icon: SquaresPlusIcon,
-  },
   {
     id: 'tarot-natal',
     label: 'Carta Natal',
@@ -68,18 +68,62 @@ const sections: Array<{
   },
 ];
 
+type SymbolicSystemImplementationStatus = 'implemented' | 'preparing';
+
+const cabalisticSystems: Array<{
+  id: TarotSystemId;
+  label: string;
+  description: string;
+  Icon: typeof CalendarDaysIcon;
+  implementationStatus: SymbolicSystemImplementationStatus;
+}> = [
+  {
+    id: 'thoth',
+    label: 'Thoth Tarot (Crowley)',
+    description: 'Letras hebreas · Astrología · Árbol de la Vida',
+    Icon: AcademicCapIcon,
+    implementationStatus: 'implemented',
+  },
+  {
+    id: 'golden-dawn',
+    label: 'Golden Dawn Tarot',
+    description: 'Sistema cabalístico hermético completo',
+    Icon: CubeTransparentIcon,
+    implementationStatus: 'preparing',
+  },
+  {
+    id: 'bota',
+    label: 'B.O.T.A. Tarot',
+    description: 'Estudio cabalístico estructurado',
+    Icon: DocumentTextIcon,
+    implementationStatus: 'preparing',
+  },
+  {
+    id: 'sephiroth',
+    label: 'Tarot of the Sephiroth',
+    description: 'Enfoque en el Árbol de la Vida',
+    Icon: SquaresPlusIcon,
+    implementationStatus: 'preparing',
+  },
+  {
+    id: 'hermetic',
+    label: 'Hermetic Tarot',
+    description: 'Simbolismo esotérico profundo',
+    Icon: SparklesIcon,
+    implementationStatus: 'preparing',
+  },
+];
+
 export default function AstrologyTarotSidebar({
   activeSection,
   onChange,
-  patientId,
-  selectedCardId,
+  selectedSystem,
+  onSelectSystem,
 }: AstrologyTarotSidebarProps) {
   return (
     <aside className="w-64 border-r border-gray-200 bg-white flex flex-col">
       <div className="px-4 py-4 border-b border-gray-200">
-        <p className="text-xs uppercase tracking-wide text-gray-500">
-          Workspace simbólico
-        </p>
+        <p className="text-xs uppercase tracking-wide text-gray-500">Workspace simbólico</p>
         <h2 className="text-lg font-semibold text-gray-900">Tarot</h2>
       </div>
       <div className="flex-1 px-3 py-4 space-y-4">
@@ -105,6 +149,61 @@ export default function AstrologyTarotSidebar({
               </button>
             );
           })}
+        </div>
+        <div className="pt-2">
+          <p className="text-[11px] uppercase tracking-wide text-gray-400">
+            Sistemas simbólicos
+          </p>
+          <div className="mt-2 space-y-2">
+            {cabalisticSystems.map((system) => {
+              const isSelected = system.id === selectedSystem;
+              const isImplemented = system.implementationStatus === 'implemented';
+
+              const statusLabel = isImplemented
+                ? 'IMPLEMENTADO (LECTURA EDUCATIVA)'
+                : 'SISTEMA SIMBÓLICO · EN PREPARACIÓN';
+              const StatusIcon = isImplemented ? CheckCircleIcon : ClockIcon;
+
+              const selectedClasses = isImplemented
+                ? 'border-emerald-200 bg-emerald-50'
+                : 'border-amber-200 bg-amber-50';
+              const idleClasses = 'border-gray-200 text-gray-600 hover:bg-gray-50';
+
+              return (
+                <button
+                  key={system.label}
+                  type="button"
+                  onClick={() => onSelectSystem?.(system.id)}
+                  className={`w-full rounded-md border px-3 py-2 text-left text-sm transition-colors ${
+                    isSelected ? selectedClasses : idleClasses
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <system.Icon className="h-4 w-4 text-gray-400" />
+                      <p className="text-sm font-medium text-gray-700">
+                        {system.label}
+                      </p>
+                    </div>
+                    <span
+                      className={`flex items-center gap-1 text-[10px] uppercase tracking-wide ${
+                        isImplemented ? 'text-emerald-700' : 'text-amber-700'
+                      }`}
+                    >
+                      <StatusIcon className="h-3.5 w-3.5" />
+                      {statusLabel}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-gray-400">{system.description}</p>
+                  {!isImplemented && (
+                    <p className="mt-1 text-[11px] text-gray-500">
+                      Motor simbólico aún no implementado.
+                    </p>
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
       <div className="px-4 py-3 border-t border-gray-200 text-[11px] text-gray-500">

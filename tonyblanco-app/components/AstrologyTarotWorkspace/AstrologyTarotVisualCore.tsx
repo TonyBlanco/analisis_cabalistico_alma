@@ -103,10 +103,6 @@ export default function AstrologyTarotVisualCore({
     AstrologyTarotSectionId,
     { title: string; description: string }
   > = {
-    'tarot-systems': {
-      title: 'Sistemas de Tarot',
-      description: 'Ejecución de lecturas SWM v3 dentro del workspace.',
-    },
     'tarot-natal': {
       title: 'Carta Natal',
       description: 'Vista simbolica de origen. Observacional.',
@@ -432,14 +428,6 @@ export default function AstrologyTarotVisualCore({
         </div>
       </div>
       <div className="grid gap-4">
-        {activeSection === 'tarot-systems' && (
-          <TarotDrawPanel
-            consultantId={patientId ? String(patientId) : null}
-            systemId={systemKey}
-            onSystemChange={(next) => onSystemChange?.(next as TarotSystemId)}
-            useBotaSvg={systemKey === 'bota'}
-          />
-        )}
         {!isSystemImplemented && (
           <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
             <div className="flex items-center justify-between gap-2">
@@ -468,22 +456,19 @@ export default function AstrologyTarotVisualCore({
           />
         )}
         {activeSection === 'tarot-tree-spread' && (
-          <TarotDeck
-            cards={deckCards.slice(0, 10)}
-            layout="spread"
-            spreadType="celtic-cross"
-            interactive={true}
-            onCardSelect={handleCardSelect}
-            showContent={false}
+          <TarotDrawPanel
+            consultantId={patientId ? String(patientId) : null}
+            systemId={systemKey}
+            onSystemChange={(next) => onSystemChange?.(next as TarotSystemId)}
+            useBotaSvg={systemKey === 'bota'}
           />
         )}
         {activeSection === 'tarot-free-spread' && (
-          <TarotDeck
-            cards={deckCards.slice(0, 7)}
-            layout="fan"
-            interactive={true}
-            onCardSelect={handleCardSelect}
-            showContent={false}
+          <TarotDrawPanel
+            consultantId={patientId ? String(patientId) : null}
+            systemId={systemKey}
+            onSystemChange={(next) => onSystemChange?.(next as TarotSystemId)}
+            useBotaSvg={systemKey === 'bota'}
           />
         )}
         {activeSection === 'tarot-natal' && (

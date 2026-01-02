@@ -46,6 +46,13 @@ const SPREADS: Array<{ id: string; nameSpanish: string }> = [
   { id: 'observation', nameSpanish: 'Tirada de observación' },
 ];
 
+const CONTEXTS: Array<{ id: string; label: string }> = [
+  { id: 'general', label: 'General' },
+  { id: 'love', label: 'Vínculo' },
+  { id: 'career', label: 'Trabajo' },
+  { id: 'spiritual', label: 'Espiritual' },
+];
+
 function safeString(value: unknown): string {
   return typeof value === 'string' ? value : '';
 }
@@ -78,6 +85,7 @@ export default function TarotDrawPanel(props: { consultantId?: string | null }) 
   const [systemId, setSystemId] = useState<string>('thoth');
   const [spreadId, setSpreadId] = useState<string>('simple');
   const [intention, setIntention] = useState<string>('');
+  const [contextFocus, setContextFocus] = useState<string>('general');
 
   const [consent, setConsent] = useState<ConsentState | null>(null);
   const [showConsent, setShowConsent] = useState(false);
@@ -115,6 +123,7 @@ export default function TarotDrawPanel(props: { consultantId?: string | null }) 
           selected_cards: [],
           consent_mode: consent.mode,
           spread_type: spreadId,
+          context_focus: contextFocus,
           intention,
           consultant_id: consent.mode === 'store_with_consent' ? props.consultantId ?? null : null,
           ...(consent.mode === 'no_store'
@@ -211,6 +220,21 @@ export default function TarotDrawPanel(props: { consultantId?: string | null }) 
               {SPREADS.map((s) => (
                 <option key={s.id} value={s.id}>
                   {s.nameSpanish}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-slate-700">Contexto</label>
+            <select
+              value={contextFocus}
+              onChange={(e) => setContextFocus(e.target.value)}
+              className="mt-1 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900"
+            >
+              {CONTEXTS.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.label}
                 </option>
               ))}
             </select>

@@ -15,7 +15,7 @@ from symbolic.tarot.systems.tarot_de_marsella_symbolic import adapter as marsell
 from symbolic.tarot.systems.rider_waite_symbolic import adapter as rider_waite_adapter  # noqa: F401
 from symbolic.tarot.systems.tarot_cabalistico_tree_of_life import adapter as cabalistic_adapter  # noqa: F401
 from symbolic.tarot.systems.generic_symbolic_oracle import adapter as oracle_adapter  # noqa: F401
-from symbolic.tarot.symbolic_engine import build_symbolic_reading_for_payload
+from symbolic.tarot.meaning_resolver import ResolveInput, resolveSymbolicMeaning
 
 from .models import SymbolicReading
 from .service import SymbolicReadingSaveContext, saveSymbolicReading
@@ -107,7 +107,12 @@ class SwmV3SymbolicReadingCreateView(APIView):
                 spread_type_raw = request.data.get("spread_type")
                 spread_type = spread_type_raw if isinstance(spread_type_raw, str) and spread_type_raw else "simple"
                 positions = _spread_positions(spread_type, len(cards))
-                intention = str(request.data.get("intention") or "")
+                context_focus_raw = request.data.get("context_focus")
+                context_focus = (
+                    context_focus_raw.strip()
+                    if isinstance(context_focus_raw, str) and context_focus_raw.strip()
+                    else "general"
+                )
 
                 positioned_cards: list[dict[str, Any]] = []
                 per_card_readings: list[dict[str, Any]] = []
@@ -117,15 +122,49 @@ class SwmV3SymbolicReadingCreateView(APIView):
                     if isinstance(position_obj, dict):
                         card_obj = {**card_obj, "position": position_obj}
 
-                    sr = build_symbolic_reading_for_payload(
-                        system_id=system_id,
-                        system_label=str(system_label),
-                        card=card_obj,
-                        spread_type=spread_type,
-                        position=str((position_obj or {}).get("id") or "central"),
-                        intention=intention,
+                    # Deterministic inversion flag (backend is the authority).
+                    reversed_flag = ((sum(ord(c) for c in str(card_obj.get("id") or "")) + idx) % 2) == 1
+                    card_label = str(card_obj.get("name") or card_obj.get("id") or "Carta")
+                    name_es = card_obj.get("nameSpanish")
+                    if not isinstance(name_es, str) or not name_es.strip():
+                        card_obj = {**card_obj, "nameSpanish": card_label}
+
+                    meaning = resolveSymbolicMeaning(
+                        ResolveInput(
+                            system_id=system_id,
+                            system_label=str(system_label),
+                            card=card_obj,
+                            position=position_obj if isinstance(position_obj, dict) else None,
+                            reversed=reversed_flag,
+                            context_focus=context_focus,
+                        )
                     )
-                    card_obj = {**card_obj, "symbolic_reading": sr}
+                    # Keep backward-compatible container shape used by UI.
+                    sr = {
+                        "system": {"id": system_id, "label": str(system_label)},
+                        "card": {
+                            "name": meaning.get("title") or card_label,
+                            "arcana": str(card_obj.get("arcana") or "unknown"),
+                            "keywords": meaning.get("keywords") or (card_obj.get("tags") or []),
+                        },
+                        "symbolic_reading": {
+                            "core_meaning": meaning.get("core_meaning") or "",
+                            "contextual_meaning": meaning.get("contextual_meaning") or "",
+                            "context_meaning": meaning.get("context_meaning") or "",
+                            "position_meaning": meaning.get("position_meaning") or "",
+                            "system_frame": meaning.get("system_frame") or "",
+                        },
+                        "notes": "Lectura simbólica estructurada. No diagnóstica.",
+                    }
+
+                    card_obj = {
+                        **card_obj,
+                        "reversed": reversed_flag,
+                        "keywords": meaning.get("keywords") or (card_obj.get("tags") or []),
+                        "upright": meaning.get("upright") or {},
+                        "reversed_context": meaning.get("reversed") or {},
+                        "symbolic_reading": sr,
+                    }
                     positioned_cards.append(card_obj)
                     per_card_readings.append(sr)
 

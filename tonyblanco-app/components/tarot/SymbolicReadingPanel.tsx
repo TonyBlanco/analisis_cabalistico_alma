@@ -19,6 +19,7 @@ function extractSelectedReading(selectedCard: TarotCardDraw | null | undefined):
   positionLabel: string;
   core: string | null;
   contextual: string | null;
+  context: string | null;
   positionMeaning: string | null;
   systemFrame: string | null;
 } {
@@ -31,6 +32,7 @@ function extractSelectedReading(selectedCard: TarotCardDraw | null | undefined):
     positionLabel,
     core: sr && typeof sr.core_meaning === 'string' ? sr.core_meaning : null,
     contextual: sr && typeof sr.contextual_meaning === 'string' ? sr.contextual_meaning : null,
+    context: sr && typeof sr.context_meaning === 'string' ? sr.context_meaning : null,
     positionMeaning: sr && typeof sr.position_meaning === 'string' ? sr.position_meaning : null,
     systemFrame: sr && typeof sr.system_frame === 'string' ? sr.system_frame : null,
   };
@@ -38,9 +40,11 @@ function extractSelectedReading(selectedCard: TarotCardDraw | null | undefined):
 
 export default function SymbolicReadingPanel({ systemLabel, selectedCard }: Props) {
   const cardName = (selectedCard?.card?.nameSpanish || selectedCard?.card?.name || '').trim();
+  const keywords = Array.isArray(selectedCard?.card?.keywords) ? selectedCard!.card!.keywords!.filter(Boolean) : [];
   const extracted = extractSelectedReading(selectedCard);
   const hasAnyReading =
     Boolean(extracted.core?.trim()) ||
+    Boolean(extracted.context?.trim()) ||
     Boolean(extracted.contextual?.trim()) ||
     Boolean(extracted.positionMeaning?.trim()) ||
     Boolean(extracted.systemFrame?.trim());
@@ -91,13 +95,31 @@ export default function SymbolicReadingPanel({ systemLabel, selectedCard }: Prop
         </div>
 
         <div className="rounded-md border border-slate-200 bg-white p-3">
-          <div className="text-xs font-medium text-slate-700">Contexto</div>
-          <div className="mt-1 text-sm text-slate-700">{line(extracted.contextual)}</div>
+          <div className="text-xs font-medium text-slate-700">Contexto aplicado</div>
+          <div className="mt-1 text-sm text-slate-700">{line(extracted.context || extracted.contextual)}</div>
         </div>
 
         <div className="rounded-md border border-slate-200 bg-white p-3">
           <div className="text-xs font-medium text-slate-700">Significado de la posición</div>
           <div className="mt-1 text-sm text-slate-700">{line(extracted.positionMeaning)}</div>
+        </div>
+
+        <div className="rounded-md border border-slate-200 bg-white p-3">
+          <div className="text-xs font-medium text-slate-700">Keywords</div>
+          {keywords.length > 0 ? (
+            <div className="mt-2 flex flex-wrap gap-1">
+              {keywords.slice(0, 12).map((kw) => (
+                <span
+                  key={kw}
+                  className="rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[11px] text-slate-700"
+                >
+                  {kw}
+                </span>
+              ))}
+            </div>
+          ) : (
+            <div className="mt-1 text-sm text-slate-700">{FIELD_FALLBACK}</div>
+          )}
         </div>
       </div>
     </section>

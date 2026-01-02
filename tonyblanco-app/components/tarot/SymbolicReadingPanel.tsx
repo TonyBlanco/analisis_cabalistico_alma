@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useMemo, useState } from 'react';
 import type { TarotCardDraw } from './TarotSpreadView';
 
 type Props = {
@@ -11,9 +12,45 @@ type Props = {
 const FIELD_FALLBACK = 'Campo simbólico no disponible para esta carta.';
 const CARD_FALLBACK = 'Selecciona una carta para ver su lectura simbólica.';
 
+type BotaPositionDefinition = {
+  label: string;
+  definition: string;
+  scope: string;
+};
+
+type BotaPositionsOntology = Record<string, BotaPositionDefinition>;
+
 function line(value: string | null | undefined): string {
   const v = (value ?? '').trim();
   return v || FIELD_FALLBACK;
+}
+
+function normalizeKey(value: string): string {
+  return value
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[_-]+/g, '_')
+    .replace(/\s+/g, '_')
+    .replace(/[^a-z0-9_]/g, '')
+    .replace(/^(\d{1,2}_)+/, '')
+    .replace(/_+/g, '_')
+    .replace(/^_+|_+$/g, '');
+}
+
+function botaPositionKey(selectedCard: TarotCardDraw | null | undefined): string | null {
+  const id = (selectedCard?.position?.id || '').toString().trim().toLowerCase();
+  if (id === 'origin') return 'origen';
+  if (id === 'present') return 'presente';
+  if (id === 'direction') return 'direccion';
+
+  const label = (selectedCard?.position?.nameSpanish || selectedCard?.position?.label || '').toString();
+  const normalized = normalizeKey(label);
+  if (!normalized) return null;
+  if (normalized.includes('origen')) return 'origen';
+  if (normalized.includes('presente') || normalized.includes('estado_actual')) return 'presente';
+  if (normalized.includes('direccion') || normalized.includes('direccion')) return 'direccion';
+  return null;
 }
 
 function extractSelectedReading(selectedCard: TarotCardDraw | null | undefined): {
@@ -43,6 +80,8 @@ export default function SymbolicReadingPanel({ systemLabel, selectedCard, contex
   const cardName = (selectedCard?.card?.nameSpanish || selectedCard?.card?.name || '').trim();
   const extracted = extractSelectedReading(selectedCard);
   const symbols = selectedCard?.symbols && typeof selectedCard.symbols === 'object' ? (selectedCard.symbols as any) : null;
+  const systemId = (symbols?.system || '').toString().toLowerCase();
+  const isBota = systemId === 'bota' || (systemLabel || '').toLowerCase().includes('b.o.t.a');
   const orientationKey = selectedCard?.reversed ? 'reversed' : 'upright';
   const focusKey = (typeof contextFocus === 'string' && contextFocus.trim()) ? contextFocus.trim() : 'general';
   const symbolTexts = symbols && typeof symbols[orientationKey] === 'object' ? (symbols[orientationKey] as any) : null;
@@ -69,6 +108,96 @@ export default function SymbolicReadingPanel({ systemLabel, selectedCard, contex
     Boolean(extracted.positionMeaning?.trim()) ||
     Boolean(extracted.systemFrame?.trim());
 
+  const [botaMode, setBotaMode] = useState<'structural' | 'educational'>('structural');
+  const [positionsOntology, setPositionsOntology] = useState<BotaPositionsOntology | null>(null);
+  const [editorialText, setEditorialText] = useState<string | null>(null);
+
+  const kabbalistic = isBota && symbols && typeof symbols.kabbalistic === 'object' ? symbols.kabbalistic : null;
+  const structuralRows = useMemo(() => {
+    if (!isBota || !kabbalistic) return [];
+    const hebrewLetter = typeof kabbalistic.hebrewLetter === 'string' ? kabbalistic.hebrewLetter : null;
+    const letterValue = typeof kabbalistic.letterValue === 'number' ? kabbalistic.letterValue : null;
+    const path = kabbalistic.path ?? null;
+    const sefirot = Array.isArray(kabbalistic.sefirot) ? kabbalistic.sefirot.filter(Boolean) : null;
+    const element = typeof kabbalistic.element === 'string' ? kabbalistic.element : null;
+    const planet = typeof kabbalistic.planet === 'string' ? kabbalistic.planet : null;
+    const sign = typeof kabbalistic.sign === 'string' ? kabbalistic.sign : null;
+
+    return [
+      { label: 'Letra', value: hebrewLetter && letterValue !== null ? `${hebrewLetter} (${letterValue})` : hebrewLetter },
+      { label: 'Sendero', value: typeof path === 'number' || typeof path === 'string' ? String(path) : null },
+      { label: 'Sefirot', value: sefirot?.length ? (sefirot.length >= 2 ? `${sefirot[0]}–${sefirot[1]}` : String(sefirot[0])) : null },
+      { label: 'Elemento', value: element },
+      { label: 'Planeta', value: planet },
+      { label: 'Signo', value: sign },
+    ].filter((row) => row.value);
+  }, [isBota, kabbalistic]);
+
+  const positionKey = useMemo(() => (isBota ? botaPositionKey(selectedCard) : null), [isBota, selectedCard]);
+  const positionDefinition = useMemo(() => {
+    if (!isBota || !positionKey || !positionsOntology) return null;
+    return positionsOntology[positionKey] ?? null;
+  }, [isBota, positionKey, positionsOntology]);
+
+  const editorialKey = useMemo(() => {
+    if (!isBota) return null;
+    const name = (typeof symbols?.nameSpanish === 'string' && symbols.nameSpanish.trim())
+      ? symbols.nameSpanish.trim()
+      : cardName;
+    const normalized = normalizeKey(name);
+    return normalized ? normalized : null;
+  }, [isBota, symbols, cardName]);
+
+  useEffect(() => {
+    if (!isBota) return;
+    if (botaMode !== 'educational') return;
+
+    let cancelled = false;
+
+    const loadPositions = async () => {
+      if (positionsOntology) return;
+      const res = await fetch('/docs/bota/positions/bota_positions.json', { cache: 'force-cache' }).catch(() => null);
+      if (!res || !res.ok) return;
+      const json = (await res.json().catch(() => null)) as unknown;
+      if (!json || typeof json !== 'object') return;
+      if (!cancelled) setPositionsOntology(json as BotaPositionsOntology);
+    };
+
+    loadPositions();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isBota, botaMode, positionsOntology]);
+
+  useEffect(() => {
+    if (!isBota) return;
+    if (botaMode !== 'educational') {
+      setEditorialText(null);
+      return;
+    }
+    if (!editorialKey) return;
+
+    let cancelled = false;
+
+    const loadEditorial = async () => {
+      const res = await fetch(`/docs/bota/editorial/${editorialKey}.md`, { cache: 'force-cache' }).catch(() => null);
+      if (!res || !res.ok) {
+        if (!cancelled) setEditorialText(null);
+        return;
+      }
+      const txt = await res.text().catch(() => '');
+      const cleaned = (txt || '').trim();
+      if (!cancelled) setEditorialText(cleaned || null);
+    };
+
+    loadEditorial();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isBota, botaMode, editorialKey]);
+
   return (
     <section className="rounded-lg border border-slate-200 bg-white p-4">
       <div className="flex items-start justify-between gap-3">
@@ -81,6 +210,26 @@ export default function SymbolicReadingPanel({ systemLabel, selectedCard, contex
             Lectura simbólica descriptiva. No diagnóstica.
           </div>
         </div>
+        {isBota ? (
+          <div className="flex items-center gap-2">
+            <div className="inline-flex rounded-md border border-slate-200 bg-white p-1 text-[11px]">
+              <button
+                type="button"
+                onClick={() => setBotaMode('structural')}
+                className={`rounded px-2 py-1 font-medium ${botaMode === 'structural' ? 'bg-slate-100 text-slate-900' : 'text-slate-600'}`}
+              >
+                Vista estructural
+              </button>
+              <button
+                type="button"
+                onClick={() => setBotaMode('educational')}
+                className={`rounded px-2 py-1 font-medium ${botaMode === 'educational' ? 'bg-slate-100 text-slate-900' : 'text-slate-600'}`}
+              >
+                Vista educativa
+              </button>
+            </div>
+          </div>
+        ) : null}
       </div>
 
       <div className="mt-4 grid gap-3">
@@ -103,6 +252,46 @@ export default function SymbolicReadingPanel({ systemLabel, selectedCard, contex
 
         {selectedCard && !hasAnyReading ? (
           <div className="rounded-md border border-slate-200 bg-white p-3 text-sm text-slate-700">{CARD_FALLBACK}</div>
+        ) : null}
+
+        {isBota && selectedCard && botaMode === 'structural' ? (
+          <div className="rounded-md border border-slate-200 bg-white p-3">
+            <div className="text-xs font-medium text-slate-700">Estructura B.O.T.A.</div>
+            {structuralRows.length ? (
+              <dl className="mt-2 grid gap-2 text-sm text-slate-700">
+                {structuralRows.map((row) => (
+                  <div key={row.label} className="flex items-baseline justify-between gap-3">
+                    <dt className="text-xs font-medium text-slate-600">{row.label}</dt>
+                    <dd className="text-sm text-slate-900">{row.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            ) : (
+              <div className="mt-1 text-sm text-slate-700">{FIELD_FALLBACK}</div>
+            )}
+          </div>
+        ) : null}
+
+        {isBota && selectedCard && botaMode === 'educational' ? (
+          <div className="rounded-md border border-slate-200 bg-white p-3">
+            <div className="text-xs font-medium text-slate-700">Definición de la posición</div>
+            {positionDefinition ? (
+              <div className="mt-2 space-y-1 text-sm text-slate-700">
+                <div className="text-sm font-semibold text-slate-900">{positionDefinition.label}</div>
+                <div>{positionDefinition.definition}</div>
+                <div className="text-xs text-slate-500">Alcance: {positionDefinition.scope}</div>
+              </div>
+            ) : (
+              <div className="mt-1 text-sm text-slate-700">—</div>
+            )}
+          </div>
+        ) : null}
+
+        {isBota && selectedCard && botaMode === 'educational' && editorialText ? (
+          <div className="rounded-md border border-slate-200 bg-white p-3">
+            <div className="text-xs font-medium text-slate-700">Texto educativo (B.O.T.A.)</div>
+            <div className="mt-2 whitespace-pre-wrap text-sm text-slate-700">{editorialText}</div>
+          </div>
         ) : null}
 
         <div className="rounded-md border border-slate-200 bg-white p-3">
@@ -141,7 +330,7 @@ export default function SymbolicReadingPanel({ systemLabel, selectedCard, contex
               ))}
             </div>
           ) : (
-            <div className="mt-1 text-sm text-slate-700">{FIELD_FALLBACK}</div>
+            <div className="mt-1 text-sm text-slate-700">{isBota ? '—' : FIELD_FALLBACK}</div>
           )}
         </div>
       </div>

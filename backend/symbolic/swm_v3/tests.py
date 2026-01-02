@@ -302,6 +302,6 @@ class SymbolicReadingApiExecutionTests(TestCase):
             self.assertIsInstance(sr, dict)
             core = ((sr.get("symbolic_reading") or {}).get("core_meaning")) or ""
             self.assertIsInstance(core, str)
-            self.assertIn("Letra hebraica", core)
+            self.assertIn("Letra:", core)
             self.assertNotIn("mock", core.lower())
             self.assertNotIn("The ", core)

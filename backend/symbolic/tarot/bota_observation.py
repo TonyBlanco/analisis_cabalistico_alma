@@ -70,19 +70,27 @@ def build_bota_observation_from_symbols(symbols: dict[str, Any], *, reversed_fla
     parts: list[str] = []
     if isinstance(hebrew_letter, str) and hebrew_letter.strip():
         if isinstance(letter_value, int):
-            parts.append(f"Letra hebraica: {hebrew_letter.strip()} (valor {letter_value}).")
+            parts.append(f"Letra: {hebrew_letter.strip()} ({letter_value}).")
         else:
-            parts.append(f"Letra hebraica: {hebrew_letter.strip()}.")
+            parts.append(f"Letra: {hebrew_letter.strip()}.")
+    else:
+        parts.append("Letra: N/A.")
 
-    if isinstance(path, (int, str)) and str(path).strip():
-        parts.append(f"Sendero: {str(path).strip()}.")
+    if isinstance(path, int):
+        parts.append(f"Sendero: {path}.")
+    elif isinstance(path, str) and path.strip():
+        parts.append(f"Sendero: {path.strip()}.")
+    else:
+        parts.append("Sendero: N/A.")
 
     sef = [str(s).strip() for s in sefirot if str(s).strip()]
     if sef:
-        parts.append(f"Sefirot: {', '.join(sef)}.")
+        joined = f"{sef[0]}–{sef[1]}" if len(sef) >= 2 else sef[0]
+        parts.append(f"Sefirot: {joined}.")
+    else:
+        parts.append("Sefirot: N/A.")
 
-    if element:
-        parts.append(f"Elemento: {element}.")
+    parts.append(f"Elemento: {element or 'N/A'}.")
 
     if planet:
         parts.append(f"Planeta: {planet}.")
@@ -90,8 +98,8 @@ def build_bota_observation_from_symbols(symbols: dict[str, Any], *, reversed_fla
     if sign:
         parts.append(f"Signo: {sign}.")
 
-    orientation = "invertida" if reversed_flag else "derecha"
-    parts.append(f"Orientación: {orientation}.")
+    # Orientation is carried separately by the SWM v3 payload; observation stays structural.
+    _ = reversed_flag
 
     return " ".join(parts).strip()
 
@@ -100,4 +108,3 @@ def build_bota_observation(card_id_or_code: Any, *, reversed_flag: bool) -> str:
     card = get_bota_card(card_id_or_code) or {}
     symbols = {"kabbalistic": _safe_dict(card.get("kabbalistic"))}
     return build_bota_observation_from_symbols(symbols, reversed_flag=reversed_flag)
-

@@ -1,6 +1,6 @@
 'use client';
 
-import type { AstrologyTarotSectionId, TarotSystemId } from './types';
+import type { AstrologyTarotSectionId } from './types';
 import {
   CalendarDaysIcon,
   Squares2X2Icon,
@@ -8,20 +8,11 @@ import {
   LinkIcon,
   RectangleGroupIcon,
   ClipboardDocumentCheckIcon,
-  AcademicCapIcon,
-  CubeTransparentIcon,
-  DocumentTextIcon,
-  SparklesIcon,
-  SquaresPlusIcon,
-  CheckCircleIcon,
-  ClockIcon,
 } from '@heroicons/react/24/solid';
 
 interface AstrologyTarotSidebarProps {
   activeSection: AstrologyTarotSectionId;
   onChange: (section: AstrologyTarotSectionId) => void;
-  selectedSystem?: TarotSystemId | null;
-  onSelectSystem?: (system: TarotSystemId) => void;
 }
 
 const sections: Array<{
@@ -68,92 +59,9 @@ const sections: Array<{
   },
 ];
 
-type SymbolicSystemImplementationStatus = 'implemented' | 'preparing';
-
-const cabalisticSystems: Array<{
-  id: TarotSystemId;
-  label: string;
-  description: string;
-  Icon: typeof CalendarDaysIcon;
-  implementationStatus: SymbolicSystemImplementationStatus;
-}> = [
-  {
-    id: 'thoth',
-    label: 'Thoth Tarot (Crowley)',
-    description: 'Letras hebreas · Astrología · Árbol de la Vida',
-    Icon: AcademicCapIcon,
-    implementationStatus: 'implemented',
-  },
-  {
-    id: 'golden-dawn',
-    label: 'Golden Dawn Tarot',
-    description: 'Sistema cabalístico hermético completo',
-    Icon: CubeTransparentIcon,
-    implementationStatus: 'implemented',
-  },
-  {
-    id: 'rota',
-    label: 'R.O.T.A. (tarot hermético)',
-    description: 'Marco hermético estructural',
-    Icon: CubeTransparentIcon,
-    implementationStatus: 'implemented',
-  },
-  {
-    id: 'marsella',
-    label: 'Tarot de Marsella',
-    description: 'Lectura arquetípica simbólica',
-    Icon: RectangleGroupIcon,
-    implementationStatus: 'implemented',
-  },
-  {
-    id: 'rider-waite',
-    label: 'Rider–Waite',
-    description: 'Narrativa simbólica moderna',
-    Icon: Squares2X2Icon,
-    implementationStatus: 'implemented',
-  },
-  {
-    id: 'tarot-cabalistico',
-    label: 'Tarot cabalístico (Árbol de la Vida)',
-    description: 'Enfoque en sefirot y senderos',
-    Icon: LinkIcon,
-    implementationStatus: 'implemented',
-  },
-  {
-    id: 'oracle-symbolic',
-    label: 'Oráculo simbólico genérico',
-    description: 'Símbolo abierto no jerárquico',
-    Icon: SparklesIcon,
-    implementationStatus: 'implemented',
-  },
-  {
-    id: 'bota',
-    label: 'B.O.T.A. Tarot',
-    description: 'Estudio cabalístico estructurado',
-    Icon: DocumentTextIcon,
-    implementationStatus: 'implemented',
-  },
-  {
-    id: 'sephiroth',
-    label: 'Tarot of the Sephiroth',
-    description: 'Enfoque en el Árbol de la Vida',
-    Icon: SquaresPlusIcon,
-    implementationStatus: 'implemented',
-  },
-  {
-    id: 'hermetic',
-    label: 'Hermetic Tarot',
-    description: 'Simbolismo esotérico profundo',
-    Icon: SparklesIcon,
-    implementationStatus: 'implemented',
-  },
-];
-
 export default function AstrologyTarotSidebar({
   activeSection,
   onChange,
-  selectedSystem,
-  onSelectSystem,
 }: AstrologyTarotSidebarProps) {
   return (
     <aside className="w-64 border-r border-gray-200 bg-white flex flex-col">
@@ -184,54 +92,6 @@ export default function AstrologyTarotSidebar({
               </button>
             );
           })}
-        </div>
-        <div className="pt-2">
-          <p className="text-[11px] uppercase tracking-wide text-gray-400">
-            Sistemas simbólicos
-          </p>
-          <div className="mt-2 space-y-2">
-            {cabalisticSystems.map((system) => {
-              const isSelected = system.id === selectedSystem;
-              const isImplemented = system.implementationStatus === 'implemented';
-
-              const StatusIcon = isImplemented ? CheckCircleIcon : ClockIcon;
-
-              const selectedClasses = isImplemented
-                ? 'border-emerald-200 bg-emerald-50'
-                : 'border-amber-200 bg-amber-50';
-              const idleClasses = 'border-gray-200 text-gray-600 hover:bg-gray-50';
-
-              return (
-                <button
-                  key={system.label}
-                  type="button"
-                  onClick={() => onSelectSystem?.(system.id)}
-                  className={`w-full rounded-md border px-3 py-2 text-left text-sm transition-colors ${
-                    isSelected ? selectedClasses : idleClasses
-                  }`}
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <system.Icon className="h-4 w-4 text-gray-400" />
-                      <p className="text-sm font-medium text-gray-700">
-                        {system.label}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-emerald-800">
-                        <StatusIcon className="h-3.5 w-3.5" />
-                        IMPLEMENTADO
-                      </span>
-                      <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-gray-700">
-                        ACTIVO
-                      </span>
-                    </div>
-                  </div>
-                  <p className="text-[11px] text-gray-400">{system.description}</p>
-                </button>
-              );
-            })}
-          </div>
         </div>
       </div>
       <div className="px-4 py-3 border-t border-gray-200 text-[11px] text-gray-500">

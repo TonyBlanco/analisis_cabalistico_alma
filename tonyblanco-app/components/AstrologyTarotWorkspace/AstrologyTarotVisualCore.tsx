@@ -8,6 +8,7 @@ import type { TarotCardData } from '@/components/TarotCard/TarotCard.types';
 import TarotDrawPanel from '@/components/tarot/TarotDrawPanel';
 import { ARCANOS_MAYORES } from '@/components/BodySoulVisualization/plugins/tarot/tarot.logic';
 import type { PatientContext } from '@/components/BodySoulVisualization/types';
+import BotaImageReferencePanel from '@/components/tarot/bota/BotaImageReferencePanel';
 import { THOTH_MAJOR_ARCANA } from '../../../src/symbolic/tarot/decks/thoth';
 import { GOLDEN_DAWN_MAJOR_ARCANA } from '../../../src/symbolic/tarot/decks/golden-dawn';
 import { BOTA_MAJOR_ARCANA } from '../../../src/symbolic/tarot/decks/bota';
@@ -448,12 +449,15 @@ export default function AstrologyTarotVisualCore({
           </div>
         )}
         {activeSection === 'tarot-deck-view' && (
-          <TarotDeck
-            cards={deckCards}
-            layout="grid"
-            interactive={true}
-            onCardSelect={handleCardSelect}
-          />
+          <>
+            <TarotDeck
+              cards={deckCards}
+              layout="grid"
+              interactive={true}
+              onCardSelect={handleCardSelect}
+            />
+            {systemKey === 'bota' && <BotaImageReferencePanel />}
+          </>
         )}
         {activeSection === 'tarot-tree-spread' && (
           <TarotDrawPanel

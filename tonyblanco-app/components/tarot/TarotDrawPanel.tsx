@@ -351,6 +351,7 @@ export default function TarotDrawPanel(props: {
         <div className="space-y-3 lg:col-span-2">
           <TarotSpreadView
             spread={reading?.spread ?? null}
+            systemId={systemId}
             cards={reading?.cards ?? []}
             selectedCardDrawId={selectedCard?.id ?? null}
             onSelectCard={(draw) => setSelectedCard(draw)}

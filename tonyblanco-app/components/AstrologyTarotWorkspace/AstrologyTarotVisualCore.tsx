@@ -437,6 +437,7 @@ export default function AstrologyTarotVisualCore({
             consultantId={patientId ? String(patientId) : null}
             systemId={systemKey}
             onSystemChange={(next) => onSystemChange?.(next as TarotSystemId)}
+            useBotaSvg={systemKey === 'bota'}
           />
         )}
         {!isSystemImplemented && (

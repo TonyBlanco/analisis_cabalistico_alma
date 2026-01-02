@@ -28,6 +28,7 @@ export type TarotCardDraw = {
 type Props = {
   spread?: TarotSpread | null;
   systemId?: string | null;
+  useBotaSvg?: boolean;
   cards: TarotCardDraw[];
   selectedCardDrawId?: string | null;
   onSelectCard?: (draw: TarotCardDraw) => void;
@@ -42,7 +43,14 @@ function gridCols(count: number): string {
   return 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4';
 }
 
-export default function TarotSpreadView({ spread, systemId, cards, selectedCardDrawId, onSelectCard }: Props) {
+export default function TarotSpreadView({
+  spread,
+  systemId,
+  useBotaSvg,
+  cards,
+  selectedCardDrawId,
+  onSelectCard,
+}: Props) {
   const positions = Array.isArray(spread?.positions) ? spread!.positions : [];
   const title = (spread?.nameSpanish || spread?.id || '').trim() || 'Tirada';
   const count = Math.max(cards.length, positions.length);
@@ -83,7 +91,7 @@ export default function TarotSpreadView({ spread, systemId, cards, selectedCardD
             (item.position?.nameSpanish || item.position?.label || item.position?.id || '').trim() ||
             'Posición (no definida)';
           const draw = item.draw;
-          const isBota = (systemId || '').toLowerCase() === 'bota';
+          const isBota = Boolean(useBotaSvg) || (systemId || '').toLowerCase() === 'bota';
 
           return (
             <div key={item.key} className="space-y-2">

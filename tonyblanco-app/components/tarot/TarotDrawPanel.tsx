@@ -140,6 +140,7 @@ export default function TarotDrawPanel(props: {
   consultantId?: string | null;
   systemId?: string;
   onSystemChange?: (systemId: string) => void;
+  useBotaSvg?: boolean;
 }) {
   const [systemIdState, setSystemIdState] = useState<string>('thoth');
   const systemId = props.systemId ?? systemIdState;
@@ -352,6 +353,7 @@ export default function TarotDrawPanel(props: {
           <TarotSpreadView
             spread={reading?.spread ?? null}
             systemId={systemId}
+            useBotaSvg={props.useBotaSvg}
             cards={reading?.cards ?? []}
             selectedCardDrawId={selectedCard?.id ?? null}
             onSelectCard={(draw) => setSelectedCard(draw)}

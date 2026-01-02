@@ -89,28 +89,63 @@ const cabalisticSystems: Array<{
     label: 'Golden Dawn Tarot',
     description: 'Sistema cabalístico hermético completo',
     Icon: CubeTransparentIcon,
-    implementationStatus: 'preparing',
+    implementationStatus: 'implemented',
+  },
+  {
+    id: 'rota',
+    label: 'R.O.T.A. (tarot hermético)',
+    description: 'Marco hermético estructural',
+    Icon: CubeTransparentIcon,
+    implementationStatus: 'implemented',
+  },
+  {
+    id: 'marsella',
+    label: 'Tarot de Marsella',
+    description: 'Lectura arquetípica simbólica',
+    Icon: RectangleGroupIcon,
+    implementationStatus: 'implemented',
+  },
+  {
+    id: 'rider-waite',
+    label: 'Rider–Waite',
+    description: 'Narrativa simbólica moderna',
+    Icon: Squares2X2Icon,
+    implementationStatus: 'implemented',
+  },
+  {
+    id: 'tarot-cabalistico',
+    label: 'Tarot cabalístico (Árbol de la Vida)',
+    description: 'Enfoque en sefirot y senderos',
+    Icon: LinkIcon,
+    implementationStatus: 'implemented',
+  },
+  {
+    id: 'oracle-symbolic',
+    label: 'Oráculo simbólico genérico',
+    description: 'Símbolo abierto no jerárquico',
+    Icon: SparklesIcon,
+    implementationStatus: 'implemented',
   },
   {
     id: 'bota',
     label: 'B.O.T.A. Tarot',
     description: 'Estudio cabalístico estructurado',
     Icon: DocumentTextIcon,
-    implementationStatus: 'preparing',
+    implementationStatus: 'implemented',
   },
   {
     id: 'sephiroth',
     label: 'Tarot of the Sephiroth',
     description: 'Enfoque en el Árbol de la Vida',
     Icon: SquaresPlusIcon,
-    implementationStatus: 'preparing',
+    implementationStatus: 'implemented',
   },
   {
     id: 'hermetic',
     label: 'Hermetic Tarot',
     description: 'Simbolismo esotérico profundo',
     Icon: SparklesIcon,
-    implementationStatus: 'preparing',
+    implementationStatus: 'implemented',
   },
 ];
 
@@ -159,9 +194,6 @@ export default function AstrologyTarotSidebar({
               const isSelected = system.id === selectedSystem;
               const isImplemented = system.implementationStatus === 'implemented';
 
-              const statusLabel = isImplemented
-                ? 'IMPLEMENTADO (LECTURA EDUCATIVA)'
-                : 'SISTEMA SIMBÓLICO · EN PREPARACIÓN';
               const StatusIcon = isImplemented ? CheckCircleIcon : ClockIcon;
 
               const selectedClasses = isImplemented
@@ -185,21 +217,17 @@ export default function AstrologyTarotSidebar({
                         {system.label}
                       </p>
                     </div>
-                    <span
-                      className={`flex items-center gap-1 text-[10px] uppercase tracking-wide ${
-                        isImplemented ? 'text-emerald-700' : 'text-amber-700'
-                      }`}
-                    >
-                      <StatusIcon className="h-3.5 w-3.5" />
-                      {statusLabel}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-emerald-800">
+                        <StatusIcon className="h-3.5 w-3.5" />
+                        IMPLEMENTADO
+                      </span>
+                      <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-gray-700">
+                        ACTIVO
+                      </span>
+                    </div>
                   </div>
                   <p className="text-[11px] text-gray-400">{system.description}</p>
-                  {!isImplemented && (
-                    <p className="mt-1 text-[11px] text-gray-500">
-                      Motor simbólico aún no implementado.
-                    </p>
-                  )}
                 </button>
               );
             })}

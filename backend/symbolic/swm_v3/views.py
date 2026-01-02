@@ -16,6 +16,7 @@ from symbolic.tarot.systems.rider_waite_symbolic import adapter as rider_waite_a
 from symbolic.tarot.systems.tarot_cabalistico_tree_of_life import adapter as cabalistic_adapter  # noqa: F401
 from symbolic.tarot.systems.generic_symbolic_oracle import adapter as oracle_adapter  # noqa: F401
 from symbolic.tarot.meaning_resolver import ResolveInput, resolveSymbolicMeaning
+from symbolic.tarot.loaders.thoth_loader import get_thoth_card
 
 from .models import SymbolicReading
 from .service import SymbolicReadingSaveContext, saveSymbolicReading
@@ -128,6 +129,55 @@ class SwmV3SymbolicReadingCreateView(APIView):
                     name_es = card_obj.get("nameSpanish")
                     if not isinstance(name_es, str) or not name_es.strip():
                         card_obj = {**card_obj, "nameSpanish": card_label}
+
+                    if system_id == "thoth":
+                        thoth_card = get_thoth_card(card_obj.get("id") or card_obj.get("code"))
+                        if isinstance(thoth_card, dict):
+                            thoth_upright = thoth_card.get("upright") if isinstance(thoth_card.get("upright"), dict) else {}
+                            thoth_reversed = thoth_card.get("reversed") if isinstance(thoth_card.get("reversed"), dict) else {}
+                            thoth_kabbalistic = (
+                                thoth_card.get("kabbalistic")
+                                if isinstance(thoth_card.get("kabbalistic"), dict)
+                                else {}
+                            )
+                            extra_symbols = {
+                                "nameSpanish": thoth_card.get("nameSpanish"),
+                                "keywords": thoth_card.get("keywords"),
+                                "keywordsReversed": thoth_card.get("keywordsReversed"),
+                                "upright": {
+                                    "general": thoth_upright.get("general"),
+                                    "love": thoth_upright.get("love"),
+                                    "career": thoth_upright.get("career"),
+                                    "spiritual": thoth_upright.get("spiritual"),
+                                },
+                                "reversed": {
+                                    "general": thoth_reversed.get("general"),
+                                    "love": thoth_reversed.get("love"),
+                                    "career": thoth_reversed.get("career"),
+                                    "spiritual": thoth_reversed.get("spiritual"),
+                                },
+                                "kabbalistic": {
+                                    "hebrewLetter": thoth_kabbalistic.get("hebrewLetter"),
+                                    "path": thoth_kabbalistic.get("path"),
+                                    "sefirot": thoth_kabbalistic.get("sefirot"),
+                                    "element": thoth_kabbalistic.get("element"),
+                                    "planet": thoth_kabbalistic.get("planet"),
+                                    "sign": thoth_kabbalistic.get("sign"),
+                                    "decan": thoth_kabbalistic.get("decan"),
+                                },
+                                # Backward-compatible: populate existing UI fields as additional enrichment.
+                                "hebrew_letter": thoth_kabbalistic.get("hebrewLetter"),
+                                "letter_name": thoth_kabbalistic.get("hebrewLetter"),
+                                "gematria": thoth_kabbalistic.get("letterValue"),
+                                "path": thoth_kabbalistic.get("path"),
+                                "sefirot": thoth_kabbalistic.get("sefirot"),
+                            }
+                            existing_symbols = card_obj.get("symbols") if isinstance(card_obj.get("symbols"), dict) else {}
+                            card_obj = {
+                                **card_obj,
+                                "nameSpanish": thoth_card.get("nameSpanish") or card_obj.get("nameSpanish"),
+                                "symbols": {**existing_symbols, **extra_symbols},
+                            }
 
                     meaning = resolveSymbolicMeaning(
                         ResolveInput(

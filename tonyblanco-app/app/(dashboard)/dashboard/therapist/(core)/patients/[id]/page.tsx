@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import PatientProfileView from '@/components/patient/PatientProfileView';
 import PatientProfileEditor from '@/components/patient/PatientProfileEditor';
 import dynamic from 'next/dynamic'
 import { getActivePatient, setActivePatientId } from '@/lib/active-patient';
-import { TarotDrawPanel } from '@/components/tarot';
 
 import { getApiBaseUrl } from '@/lib/api-base';
 import { getAuthToken } from '@/lib/api';
@@ -146,6 +146,14 @@ export default function TherapistPatientDetailPage() {
       <div className="bg-white border border-gray-200 rounded-lg p-6">
         <h1 className="text-xl font-semibold text-gray-900">Vista clínica del consultante</h1>
         <p className="text-sm text-gray-600">ID consultante: {patientId}</p>
+        <div className="mt-4">
+          <Link
+            href={`/dashboard/therapist/tarot?patient=${encodeURIComponent(patientId)}`}
+            className="inline-flex items-center rounded-md border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-900 hover:bg-gray-50"
+          >
+            Abrir Tarot en workspace simbólico
+          </Link>
+        </div>
       </div>
 
       {errors.length > 0 && (
@@ -232,10 +240,6 @@ export default function TherapistPatientDetailPage() {
       <section className="bg-white border border-gray-200 rounded-lg p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-3">Kabbalah Interpretation (PoC)</h2>
         <KabbalahPanel patientId={patientId} />
-      </section>
-
-      <section className="bg-white border border-gray-200 rounded-lg p-6">
-        <TarotDrawPanel consultantId={patient?.user ?? null} />
       </section>
 
       {showEditor && (

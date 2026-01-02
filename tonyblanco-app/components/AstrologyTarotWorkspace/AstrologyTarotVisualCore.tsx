@@ -24,6 +24,7 @@ interface AstrologyTarotVisualCoreProps {
   onReadingComplete?: (reading: unknown) => void;
   onCardSelect?: (card: unknown) => void;
   selectedSystem?: TarotSystemId | null;
+  onSystemChange?: (systemId: TarotSystemId) => void;
 }
 
 type SwmV3PayloadCard = {
@@ -81,6 +82,7 @@ export default function AstrologyTarotVisualCore({
   onReadingComplete,
   onCardSelect,
   selectedSystem,
+  onSystemChange,
 }: AstrologyTarotVisualCoreProps) {
   const deckCards = useMemo<TarotCardData[]>(
     () =>
@@ -431,7 +433,11 @@ export default function AstrologyTarotVisualCore({
       </div>
       <div className="grid gap-4">
         {activeSection === 'tarot-systems' && (
-          <TarotDrawPanel consultantId={patientId ? String(patientId) : null} />
+          <TarotDrawPanel
+            consultantId={patientId ? String(patientId) : null}
+            systemId={systemKey}
+            onSystemChange={(next) => onSystemChange?.(next as TarotSystemId)}
+          />
         )}
         {!isSystemImplemented && (
           <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">

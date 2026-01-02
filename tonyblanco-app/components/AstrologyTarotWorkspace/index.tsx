@@ -55,8 +55,6 @@ export default function AstrologyTarotWorkspace({
         <AstrologyTarotSidebar
           activeSection={activeSection}
           onChange={setActiveSection}
-          selectedSystem={selectedSystem}
-          onSelectSystem={setSelectedSystem}
           patientId={patientId}
           selectedCardId={selectedCardId}
         />
@@ -70,6 +68,7 @@ export default function AstrologyTarotWorkspace({
               patientId={patientId}
               patientBirthDate={patientBirthDate}
               selectedSystem={selectedSystem}
+              onSystemChange={setSelectedSystem}
               onCardSelect={(card) => setSelectedCardId((card as { id?: string } | null)?.id ?? null)}
             />
             <aside className="w-72 space-y-4">

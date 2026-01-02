@@ -81,8 +81,17 @@ function buildSpread(spreadId: string, cards: TarotCardDraw[]): TarotSpread {
   };
 }
 
-export default function TarotDrawPanel(props: { consultantId?: string | null }) {
-  const [systemId, setSystemId] = useState<string>('thoth');
+export default function TarotDrawPanel(props: {
+  consultantId?: string | null;
+  systemId?: string;
+  onSystemChange?: (systemId: string) => void;
+}) {
+  const [systemIdState, setSystemIdState] = useState<string>('thoth');
+  const systemId = props.systemId ?? systemIdState;
+  const setSystemId = (next: string) => {
+    setSystemIdState(next);
+    props.onSystemChange?.(next);
+  };
   const [spreadId, setSpreadId] = useState<string>('simple');
   const [intention, setIntention] = useState<string>('');
   const [contextFocus, setContextFocus] = useState<string>('general');

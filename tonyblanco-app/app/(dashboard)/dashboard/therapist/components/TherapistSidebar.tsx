@@ -95,7 +95,7 @@ const swmLaunchers = [
     title: 'Astrologia | Tarot',
     description: 'Workspace combinado — Proximamente. Usa Astrología o Tarot por separado.',
     href: '/dashboard/therapist/astrologia-tarot',
-    icon: LayoutGrid,
+    icon: Compass,
     enabled: false, // Proximamente: mantener combinado deshabilitado, usar workspaces separados
   },
   {
@@ -257,23 +257,14 @@ export default function TherapistSidebar() {
 
               if (!launcher.enabled) {
                 return (
-                  <div
-                    key={launcher.id}
-                    aria-disabled="true"
-                    title={!expanded ? launcher.title : undefined}
-                  >
+                  <div key={launcher.id} aria-disabled="true">
                     {content}
                   </div>
                 );
               }
 
               return (
-                <Link
-                  key={launcher.id}
-                  href={launcher.href}
-                  className="block"
-                  title={!expanded ? launcher.title : undefined}
-                >
+                <Link key={launcher.id} href={launcher.href} className="block">
                   {content}
                 </Link>
               );

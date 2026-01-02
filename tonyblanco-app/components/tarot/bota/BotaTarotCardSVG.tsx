@@ -22,13 +22,13 @@ export type BotaTarotCardData = {
   } | null;
 };
 
-function text(value: unknown): string {
-  return typeof value === 'string' ? value : '';
+function cleanText(value: unknown): string {
+  return typeof value === 'string' ? value.trim() : '';
 }
 
-function valueLine(label: string, value: unknown): string {
-  const v = text(value).trim();
-  return v ? `${label}: ${v}` : '';
+function line(label: string, value: unknown): string | null {
+  const v = cleanText(value);
+  return v ? label + ': ' + v : null;
 }
 
 export default function BotaTarotCardSVG({
@@ -38,27 +38,26 @@ export default function BotaTarotCardSVG({
   card: BotaTarotCardData;
   reversed?: boolean;
 }) {
-  const title = (card.name || card.id || '').trim() || 'Carta';
+  const title = cleanText(card.name) || cleanText(card.id) || 'Carta';
 
   const metaLines = [
-    valueLine('Letra', card.hebrewLetter),
-    card.letterValue != null ? `Valor: ${String(card.letterValue)}` : '',
-    card.path != null ? `Sendero: ${String(card.path)}` : '',
-    valueLine('Sefirot', card.sefirot),
-    valueLine('Elemento', card.element),
-    valueLine('Planeta', card.planet),
-    valueLine('Signo', card.sign),
-    valueLine('Decano', card.decan),
-  ].filter(Boolean);
+    line('Letra', card.hebrewLetter),
+    typeof card.letterValue === 'number' ? 'Valor: ' + String(card.letterValue) : null,
+    card.path != null ? 'Sendero: ' + String(card.path) : null,
+    line('Sefirot', card.sefirot),
+    line('Elemento', card.element),
+    line('Planeta', card.planet),
+    line('Signo', card.sign),
+    line('Decano', card.decan),
+  ].filter((v): v is string => Boolean(v));
 
-  const scales = card.colors ?? null;
-  const swatches = scales
-    ? ([
-        { key: 'king', label: 'Rey', color: scales.king },
-        { key: 'queen', label: 'Reina', color: scales.queen },
-        { key: 'emperor', label: 'Emper.', color: scales.emperor },
-        { key: 'empress', label: 'Empr.', color: scales.empress },
-      ] as const).filter((s) => typeof s.color === 'string' && s.color.trim())
+  const swatches = card.colors
+    ? [
+        { key: 'king', label: 'Rey', color: cleanText(card.colors.king) },
+        { key: 'queen', label: 'Reina', color: cleanText(card.colors.queen) },
+        { key: 'emperor', label: 'Emper.', color: cleanText(card.colors.emperor) },
+        { key: 'empress', label: 'Empr.', color: cleanText(card.colors.empress) },
+      ].filter((s) => s.color)
     : [];
 
   return (
@@ -78,7 +77,7 @@ export default function BotaTarotCardSVG({
         {title}
       </text>
       <text x="36" y="74" fontSize="11" fill="#475569">
-        {card.number != null ? `#${String(card.number)}` : ''}
+        {card.number != null ? '#' + String(card.number) : ''}
       </text>
 
       <rect x="24" y="100" width="252" height="290" rx="10" fill="#ffffff" stroke="#e2e8f0" />
@@ -86,9 +85,9 @@ export default function BotaTarotCardSVG({
         KABBALISTIC / SYMBOLIC
       </text>
 
-      {metaLines.slice(0, 10).map((line, idx) => (
+      {metaLines.slice(0, 10).map((value, idx) => (
         <text key={idx} x="36" y={148 + idx * 18} fontSize="11" fill="#334155">
-          {line}
+          {value}
         </text>
       ))}
 
@@ -100,8 +99,8 @@ export default function BotaTarotCardSVG({
       {swatches.length ? (
         <g transform="translate(36, 436)">
           {swatches.slice(0, 4).map((s, idx) => (
-            <g key={s.key} transform={`translate(${idx * 60},0)`}>
-              <rect x="0" y="0" width="16" height="16" rx="4" fill={String(s.color)} stroke="#cbd5e1" />
+            <g key={s.key} transform={'translate(' + String(idx * 60) + ',0)'}>
+              <rect x="0" y="0" width="16" height="16" rx="4" fill={s.color} stroke="#cbd5e1" />
               <text x="22" y="12" fontSize="10" fill="#334155">
                 {s.label}
               </text>

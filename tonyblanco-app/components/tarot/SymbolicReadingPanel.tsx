@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type { TarotCardDraw } from './TarotSpreadView';
 import { resolveBotaIdentity } from '../../../src/symbolic/tarot/bota/botaIdentityResolver';
 import { buildBotaPositionMeaning } from '../../../src/symbolic/tarot/bota/positionInterpreter';
+import { getBotaVisualStructure } from '../../../src/symbolic/tarot/bota/botaVisualMapper';
 
 type Props = {
   systemLabel?: string | null;
@@ -152,6 +153,11 @@ export default function SymbolicReadingPanel({ systemLabel, selectedCard, contex
     });
   }, [isBota, selectedCard]);
 
+  const botaVisual = useMemo(() => {
+    if (!isBota || !botaIdentity?.id) return null;
+    return getBotaVisualStructure(botaIdentity.id);
+  }, [isBota, botaIdentity?.id]);
+
   const botaPositionMeaning = useMemo(() => {
     if (!isBota || !selectedCard || botaMode !== 'educational' || !botaIdentity) return null;
     return buildBotaPositionMeaning({
@@ -279,6 +285,21 @@ export default function SymbolicReadingPanel({ systemLabel, selectedCard, contex
         {isBota && selectedCard && botaMode === 'structural' ? (
           <div className="rounded-md border border-slate-200 bg-white p-3">
             <div className="text-xs font-medium text-slate-700">Estructura B.O.T.A.</div>
+            {botaVisual ? (
+              <div className="mt-2 space-y-2">
+                <img
+                  src={botaVisual.imagePath}
+                  alt={`Estructura B.O.T.A. — ${cardName || 'carta'}`}
+                  className="w-full max-w-xl rounded-md border border-slate-200 bg-white"
+                />
+                {botaVisual.sefirot.length ? (
+                  <div className="text-xs text-slate-600">
+                    Sefirot activas:{' '}
+                    <span className="font-medium text-slate-900">{botaVisual.sefirot.join(' · ')}</span>
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
             {structuralRows.length ? (
               <dl className="mt-2 grid gap-2 text-sm text-slate-700">
                 {structuralRows.map((row) => (

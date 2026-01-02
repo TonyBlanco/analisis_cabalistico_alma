@@ -103,38 +103,10 @@ export default function SymbolicReadingPanel({ systemLabel, selectedCard, contex
       : Array.isArray(selectedCard?.card?.keywords)
         ? selectedCard!.card!.keywords!.filter(Boolean)
         : [];
-  const hasAnyReading =
-    Boolean(textByContext) ||
-    Boolean(extracted.core?.trim()) ||
-    Boolean(extracted.context?.trim()) ||
-    Boolean(extracted.contextual?.trim()) ||
-    Boolean(extracted.positionMeaning?.trim()) ||
-    Boolean(extracted.systemFrame?.trim());
 
   const [botaMode, setBotaMode] = useState<'structural' | 'educational'>('structural');
   const [positionsOntology, setPositionsOntology] = useState<BotaPositionsOntology | null>(null);
   const [editorialText, setEditorialText] = useState<string | null>(null);
-
-  const kabbalistic = isBota && symbols && typeof symbols.kabbalistic === 'object' ? symbols.kabbalistic : null;
-  const structuralRows = useMemo(() => {
-    if (!isBota || !kabbalistic) return [];
-    const hebrewLetter = typeof kabbalistic.hebrewLetter === 'string' ? kabbalistic.hebrewLetter : null;
-    const letterValue = typeof kabbalistic.letterValue === 'number' ? kabbalistic.letterValue : null;
-    const path = kabbalistic.path ?? null;
-    const sefirot = Array.isArray(kabbalistic.sefirot) ? kabbalistic.sefirot.filter(Boolean) : null;
-    const element = typeof kabbalistic.element === 'string' ? kabbalistic.element : null;
-    const planet = typeof kabbalistic.planet === 'string' ? kabbalistic.planet : null;
-    const sign = typeof kabbalistic.sign === 'string' ? kabbalistic.sign : null;
-
-    return [
-      { label: 'Letra', value: hebrewLetter && letterValue !== null ? `${hebrewLetter} (${letterValue})` : hebrewLetter },
-      { label: 'Sendero', value: typeof path === 'number' || typeof path === 'string' ? String(path) : null },
-      { label: 'Sefirot', value: sefirot?.length ? (sefirot.length >= 2 ? `${sefirot[0]}–${sefirot[1]}` : String(sefirot[0])) : null },
-      { label: 'Elemento', value: element },
-      { label: 'Planeta', value: planet },
-      { label: 'Signo', value: sign },
-    ].filter((row) => row.value);
-  }, [isBota, kabbalistic]);
 
   const positionKey = useMemo(() => (isBota ? botaPositionKey(selectedCard) : null), [isBota, selectedCard]);
   const positionDefinition = useMemo(() => {
@@ -158,14 +130,60 @@ export default function SymbolicReadingPanel({ systemLabel, selectedCard, contex
     return getBotaVisualStructure(botaIdentity.id);
   }, [isBota, botaIdentity?.id]);
 
+  const botaConsciousnessLine = useMemo(() => {
+    if (!isBota || !botaIdentity?.consciousness) return null;
+    const { power, aspect, humanFaculty } = botaIdentity.consciousness;
+    const parts: string[] = [];
+    if (power) parts.push(`Poder: ${power}`);
+    if (aspect) parts.push(`Aspecto: ${aspect}`);
+    if (humanFaculty) parts.push(`Facultad humana: ${humanFaculty}`);
+    return parts.length ? parts.join(' · ') : null;
+  }, [isBota, botaIdentity?.consciousness]);
+
+  const botaMainText = useMemo(() => {
+    if (!isBota || !botaIdentity) return null;
+    const parts: string[] = [];
+    if (botaIdentity.hebrewLetter) parts.push(`Letra: ${botaIdentity.hebrewLetter}`);
+    if (typeof botaIdentity.path === 'number') parts.push(`Sendero: ${botaIdentity.path}`);
+    if (botaIdentity.sefirot?.length) {
+      const s = botaIdentity.sefirot;
+      parts.push(`Sefirot: ${s.length >= 2 ? `${s[0]}–${s[1]}` : s[0]}`);
+    }
+    if (botaIdentity.cabalisticIntelligence) parts.push(`Inteligencia: ${botaIdentity.cabalisticIntelligence}`);
+    return parts.length ? parts.join(' · ') : null;
+  }, [isBota, botaIdentity]);
+
   const botaPositionMeaning = useMemo(() => {
-    if (!isBota || !selectedCard || botaMode !== 'educational' || !botaIdentity) return null;
+    if (!isBota || !selectedCard || !botaIdentity) return null;
     return buildBotaPositionMeaning({
       identity: botaIdentity,
       positionId: selectedCard.position?.id ?? null,
       positionLabel: (selectedCard.position?.nameSpanish || selectedCard.position?.label || null) as string | null,
     });
-  }, [isBota, selectedCard, botaMode, botaIdentity]);
+  }, [isBota, selectedCard, botaIdentity]);
+
+  const hasAnyReading = useMemo(() => {
+    return (
+      Boolean(textByContext) ||
+      Boolean(extracted.core?.trim()) ||
+      Boolean(extracted.context?.trim()) ||
+      Boolean(extracted.contextual?.trim()) ||
+      Boolean(extracted.positionMeaning?.trim()) ||
+      Boolean(extracted.systemFrame?.trim()) ||
+      (isBota && Boolean(botaConsciousnessLine || botaMainText || botaPositionMeaning))
+    );
+  }, [
+    textByContext,
+    extracted.core,
+    extracted.context,
+    extracted.contextual,
+    extracted.positionMeaning,
+    extracted.systemFrame,
+    isBota,
+    botaConsciousnessLine,
+    botaMainText,
+    botaPositionMeaning,
+  ]);
 
   const editorialKey = useMemo(() => {
     if (!isBota) return null;
@@ -178,7 +196,6 @@ export default function SymbolicReadingPanel({ systemLabel, selectedCard, contex
 
   useEffect(() => {
     if (!isBota) return;
-    if (botaMode !== 'educational') return;
 
     let cancelled = false;
 
@@ -196,7 +213,7 @@ export default function SymbolicReadingPanel({ systemLabel, selectedCard, contex
     return () => {
       cancelled = true;
     };
-  }, [isBota, botaMode, positionsOntology]);
+  }, [isBota, positionsOntology]);
 
   useEffect(() => {
     if (!isBota) return;
@@ -300,18 +317,7 @@ export default function SymbolicReadingPanel({ systemLabel, selectedCard, contex
                 ) : null}
               </div>
             ) : null}
-            {structuralRows.length ? (
-              <dl className="mt-2 grid gap-2 text-sm text-slate-700">
-                {structuralRows.map((row) => (
-                  <div key={row.label} className="flex items-baseline justify-between gap-3">
-                    <dt className="text-xs font-medium text-slate-600">{row.label}</dt>
-                    <dd className="text-sm text-slate-900">{row.value}</dd>
-                  </div>
-                ))}
-              </dl>
-            ) : (
-              <div className="mt-1 text-sm text-slate-700">{FIELD_FALLBACK}</div>
-            )}
+            <div className="mt-2 text-sm text-slate-700">{botaConsciousnessLine ?? '—'}</div>
           </div>
         ) : null}
 
@@ -352,18 +358,26 @@ export default function SymbolicReadingPanel({ systemLabel, selectedCard, contex
         <div className="rounded-md border border-slate-200 bg-white p-3">
           <div className="text-xs font-medium text-slate-700">Texto principal</div>
           <div className="mt-1 text-sm text-slate-700">
-            {textByContext ? textByContext : line(extracted.core)}
+            {isBota ? (botaMainText ?? '—') : (textByContext ? textByContext : line(extracted.core))}
           </div>
         </div>
 
         <div className="rounded-md border border-slate-200 bg-white p-3">
           <div className="text-xs font-medium text-slate-700">Contexto aplicado</div>
-          <div className="mt-1 text-sm text-slate-700">{line(extracted.context || extracted.contextual)}</div>
+          <div className="mt-1 text-sm text-slate-700">
+            {isBota ? (botaPositionMeaning ?? '—') : line(extracted.context || extracted.contextual)}
+          </div>
         </div>
 
         <div className="rounded-md border border-slate-200 bg-white p-3">
           <div className="text-xs font-medium text-slate-700">Significado de la posición</div>
-          <div className="mt-1 text-sm text-slate-700">{line(extracted.positionMeaning)}</div>
+          <div className="mt-1 whitespace-pre-wrap text-sm text-slate-700">
+            {isBota && positionDefinition
+              ? `${positionDefinition.label}: ${positionDefinition.definition}\nEnfoque: ${positionDefinition.scope}.`
+              : isBota
+                ? '—'
+                : line(extracted.positionMeaning)}
+          </div>
         </div>
 
         <div className="rounded-md border border-slate-200 bg-white p-3">

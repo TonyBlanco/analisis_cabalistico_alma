@@ -4,6 +4,8 @@ import json
 from functools import lru_cache
 from pathlib import Path
 from typing import Any, Optional
+import re
+import unicodedata
 
 _DATASET_PATH = (
     Path(__file__).resolve().parent.parent / "data" / "bota" / "bota-tarot-complete.json"
@@ -22,6 +24,29 @@ def _normalize_key(raw: Any) -> str:
     if raw is None:
         return ""
     return str(raw).strip().lower()
+
+
+_NON_ALNUM_UNDERSCORE = re.compile(r"[^a-z0-9_]+")
+
+
+def normalizeBotaKey(raw: Any) -> str:
+    if raw is None:
+        return ""
+    value = str(raw).strip().lower()
+    if not value:
+        return ""
+
+    if value.endswith(".png"):
+        value = value.rsplit("/", 1)[-1]
+        value = value[:-4]
+
+    value = unicodedata.normalize("NFKD", value)
+    value = "".join(ch for ch in value if not unicodedata.combining(ch))
+    value = value.replace("-", "_").replace(" ", "_")
+    value = _NON_ALNUM_UNDERSCORE.sub("_", value)
+    value = re.sub(r"_+", "_", value).strip("_")
+    value = re.sub(r"^\d{1,2}_", "", value)
+    return value
 
 
 def _extract_code(card_id: str) -> Optional[str]:
@@ -51,7 +76,11 @@ def _load_bota_dataset() -> dict[str, Any]:
 
 
 @lru_cache(maxsize=1)
-def _bota_indexes() -> tuple[dict[str, dict[str, Any]], dict[str, dict[str, Any]]]:
+def _bota_indexes() -> tuple[
+    dict[str, dict[str, Any]],
+    dict[str, dict[str, Any]],
+    dict[str, dict[str, Any]],
+]:
     data = _load_bota_dataset()
     major = _safe_list(data.get("majorArcana"))
     minor = _safe_dict(data.get("minorArcana"))
@@ -64,18 +93,39 @@ def _bota_indexes() -> tuple[dict[str, dict[str, Any]], dict[str, dict[str, Any]
 
     by_id: dict[str, dict[str, Any]] = {}
     by_code: dict[str, dict[str, Any]] = {}
+    by_norm: dict[str, dict[str, Any]] = {}
     for card in all_cards:
         card_id = _normalize_key(card.get("id"))
         if card_id:
             by_id[card_id] = card
+            normalized = normalizeBotaKey(card_id)
+            if normalized:
+                by_norm.setdefault(normalized, card)
 
         code_raw = card.get("code")
         if code_raw is not None:
             code_key = _normalize_key(code_raw)
             if code_key:
                 by_code[code_key] = card
+                normalized = normalizeBotaKey(code_key)
+                if normalized:
+                    by_norm.setdefault(normalized, card)
 
-    return by_id, by_code
+        name = card.get("name")
+        if isinstance(name, str) and name.strip():
+            by_norm.setdefault(normalizeBotaKey(name), card)
+
+        name_es = card.get("nameSpanish")
+        if isinstance(name_es, str) and name_es.strip():
+            by_norm.setdefault(normalizeBotaKey(name_es), card)
+
+        number = card.get("number")
+        if isinstance(number, int) and isinstance(name_es, str) and name_es.strip():
+            base = normalizeBotaKey(name_es)
+            if base:
+                by_norm.setdefault(f"{number:02d}_{base}", card)
+
+    return by_id, by_code, by_norm
 
 
 def get_bota_card(card_id: Any) -> Optional[dict[str, Any]]:
@@ -85,13 +135,19 @@ def get_bota_card(card_id: Any) -> Optional[dict[str, Any]]:
     if not key:
         return None
 
-    by_id, by_code = _bota_indexes()
+    by_id, by_code, by_norm = _bota_indexes()
     if key in by_id:
         return by_id[key]
 
     code = _extract_code(key)
     if code:
-        return by_code.get(_normalize_key(code))
+        resolved = by_code.get(_normalize_key(code))
+        if resolved is not None:
+            return resolved
+
+    normalized = normalizeBotaKey(key)
+    if normalized:
+        return by_norm.get(normalized)
     return None
 
 
@@ -108,4 +164,3 @@ def bota_card_count() -> int:
         return total
     by_id, _ = _bota_indexes()
     return len(by_id)
-

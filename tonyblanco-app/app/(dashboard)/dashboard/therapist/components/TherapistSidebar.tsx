@@ -84,8 +84,8 @@ const swmLaunchers = [
   },
   {
     id: 'tarot',
-    title: 'Tarot Terapéutico',
-    description: 'Workspace de Tarot terapéutico (separado de Astrología).',
+    title: 'Tarot (SWM v3)',
+    description: 'Workspace simbólico.',
     href: '/dashboard/therapist/tarot',
     icon: Compass,
     enabled: true,
@@ -243,7 +243,7 @@ export default function TherapistSidebar() {
                     </div>
                   )}
                   {!expanded && <span className="sr-only">{launcher.title}</span>}
-                  {expanded && (
+                  {expanded && launcher.id !== 'tarot' && (
                     <span
                       className={`ml-auto text-[10px] ${
                         launcher.enabled ? 'text-emerald-600' : 'text-gray-400'

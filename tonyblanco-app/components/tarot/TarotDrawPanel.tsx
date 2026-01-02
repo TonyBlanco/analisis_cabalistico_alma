@@ -5,6 +5,9 @@ import ConsentModal, { type SwmV3ConsentMode } from '@/components/SWMV3/ConsentM
 import { API_BASE_URL, getAuthToken } from '@/lib/api';
 import TarotSpreadView, { type TarotCardDraw, type TarotSpread, type TarotSpreadPosition } from './TarotSpreadView';
 import SymbolicReadingPanel from './SymbolicReadingPanel';
+import { resolveBotaIdentity } from '../../../src/symbolic/tarot/bota/botaIdentityResolver';
+import { buildBotaPositionMeaning } from '../../../src/symbolic/tarot/bota/positionInterpreter';
+import { buildBotaSynthesis } from '../../../src/symbolic/tarot/bota/synthesisBuilder';
 
 type ConsentState = {
   mode: SwmV3ConsentMode;
@@ -99,6 +102,7 @@ function positionDisplayName(draw: TarotCardDraw | null | undefined): string {
 }
 
 function drawKeywords(draw: TarotCardDraw): string[] {
+  if ((draw?.symbols?.system || '').toString().toLowerCase() === 'bota') return [];
   const symbols = safeDict(draw.symbols);
   const candidate = draw.reversed ? symbols?.keywordsReversed : symbols?.keywords;
   if (Array.isArray(candidate)) return candidate.filter((v) => typeof v === 'string' && v.trim()).map((v) => v.trim());
@@ -108,6 +112,23 @@ function drawKeywords(draw: TarotCardDraw): string[] {
 }
 
 function drawText(draw: TarotCardDraw, contextFocus: string): string {
+  if ((draw?.symbols?.system || '').toString().toLowerCase() === 'bota') {
+    const identity = resolveBotaIdentity({
+      id: draw.card?.id,
+      name: draw.card?.name || null,
+      nameSpanish: draw.card?.nameSpanish || null,
+      symbols: draw.symbols,
+      imageUrl: draw.card?.imageUrl || null,
+    });
+    if (!identity) return '';
+    return (
+      buildBotaPositionMeaning({
+        identity,
+        positionId: draw.position?.id ?? null,
+        positionLabel: (draw.position?.nameSpanish || draw.position?.label || null) as string | null,
+      }) || ''
+    );
+  }
   const symbols = safeDict(draw.symbols);
   const orientationKey = draw.reversed ? 'reversed' : 'upright';
   const focus = contextFocus || 'general';
@@ -123,6 +144,26 @@ function drawText(draw: TarotCardDraw, contextFocus: string): string {
 }
 
 function synthesize(cards: TarotCardDraw[], contextFocus: string): string {
+  if (cards.some((c) => (c?.symbols?.system || '').toString().toLowerCase() === 'bota')) {
+    const items = cards
+      .map((draw) => {
+        const identity = resolveBotaIdentity({
+          id: draw.card?.id,
+          name: draw.card?.name || null,
+          nameSpanish: draw.card?.nameSpanish || null,
+          symbols: draw.symbols,
+          imageUrl: draw.card?.imageUrl || null,
+        });
+        if (!identity) return null;
+        return {
+          identity,
+          positionLabel: (draw.position?.nameSpanish || draw.position?.label || draw.position?.id || '').toString(),
+        };
+      })
+      .filter(Boolean) as Array<{ identity: any; positionLabel: string }>;
+
+    return buildBotaSynthesis(items) || '';
+  }
   const focus = contextFocus || 'general';
   const parts = cards.slice(0, 3).map((draw) => {
     const pos = positionDisplayName(draw) || 'Posición';

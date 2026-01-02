@@ -74,23 +74,22 @@ def build_bota_observation_from_symbols(symbols: dict[str, Any], *, reversed_fla
         else:
             parts.append(f"Letra: {hebrew_letter.strip()}.")
     else:
-        parts.append("Letra: N/A.")
+        return ""
 
     if isinstance(path, int):
         parts.append(f"Sendero: {path}.")
     elif isinstance(path, str) and path.strip():
         parts.append(f"Sendero: {path.strip()}.")
-    else:
-        parts.append("Sendero: N/A.")
+    # If missing, omit.
 
     sef = [str(s).strip() for s in sefirot if str(s).strip()]
     if sef:
         joined = f"{sef[0]}–{sef[1]}" if len(sef) >= 2 else sef[0]
         parts.append(f"Sefirot: {joined}.")
-    else:
-        parts.append("Sefirot: N/A.")
+    # If missing, omit.
 
-    parts.append(f"Elemento: {element or 'N/A'}.")
+    if element:
+        parts.append(f"Elemento: {element}.")
 
     if planet:
         parts.append(f"Planeta: {planet}.")
@@ -98,7 +97,6 @@ def build_bota_observation_from_symbols(symbols: dict[str, Any], *, reversed_fla
     if sign:
         parts.append(f"Signo: {sign}.")
 
-    # Orientation is carried separately by the SWM v3 payload; observation stays structural.
     _ = reversed_flag
 
     return " ".join(parts).strip()

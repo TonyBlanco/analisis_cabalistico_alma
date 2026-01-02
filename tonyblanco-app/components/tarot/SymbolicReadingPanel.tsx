@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import type { TarotCardDraw } from './TarotSpreadView';
+import { resolveBotaIdentity } from '../../../src/symbolic/tarot/bota/botaIdentityResolver';
+import { buildBotaPositionMeaning } from '../../../src/symbolic/tarot/bota/positionInterpreter';
 
 type Props = {
   systemLabel?: string | null;
@@ -138,6 +140,26 @@ export default function SymbolicReadingPanel({ systemLabel, selectedCard, contex
     if (!isBota || !positionKey || !positionsOntology) return null;
     return positionsOntology[positionKey] ?? null;
   }, [isBota, positionKey, positionsOntology]);
+
+  const botaIdentity = useMemo(() => {
+    if (!isBota || !selectedCard) return null;
+    return resolveBotaIdentity({
+      id: selectedCard.card?.id,
+      name: selectedCard.card?.name || null,
+      nameSpanish: selectedCard.card?.nameSpanish || null,
+      symbols: selectedCard.symbols,
+      imageUrl: selectedCard.card?.imageUrl || null,
+    });
+  }, [isBota, selectedCard]);
+
+  const botaPositionMeaning = useMemo(() => {
+    if (!isBota || !selectedCard || botaMode !== 'educational' || !botaIdentity) return null;
+    return buildBotaPositionMeaning({
+      identity: botaIdentity,
+      positionId: selectedCard.position?.id ?? null,
+      positionLabel: (selectedCard.position?.nameSpanish || selectedCard.position?.label || null) as string | null,
+    });
+  }, [isBota, selectedCard, botaMode, botaIdentity]);
 
   const editorialKey = useMemo(() => {
     if (!isBota) return null;
@@ -284,6 +306,13 @@ export default function SymbolicReadingPanel({ systemLabel, selectedCard, contex
             ) : (
               <div className="mt-1 text-sm text-slate-700">—</div>
             )}
+          </div>
+        ) : null}
+
+        {isBota && selectedCard && botaMode === 'educational' && botaPositionMeaning ? (
+          <div className="rounded-md border border-slate-200 bg-white p-3">
+            <div className="text-xs font-medium text-slate-700">Significado por posición (B.O.T.A.)</div>
+            <div className="mt-1 whitespace-pre-wrap text-sm text-slate-700">{botaPositionMeaning}</div>
           </div>
         ) : null}
 

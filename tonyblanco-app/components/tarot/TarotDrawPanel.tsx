@@ -81,6 +81,61 @@ function buildSpread(spreadId: string, cards: TarotCardDraw[]): TarotSpread {
   };
 }
 
+const READING_FALLBACK_TEXT = 'Lectura no disponible para esta carta.';
+
+function safeDict(value: unknown): Record<string, any> | null {
+  return value && typeof value === 'object' ? (value as Record<string, any>) : null;
+}
+
+function cardDisplayName(draw: TarotCardDraw | null | undefined): string {
+  const symbols = safeDict(draw?.symbols);
+  const nameSpanish = symbols && typeof symbols.nameSpanish === 'string' ? symbols.nameSpanish : null;
+  return (nameSpanish || draw?.card?.nameSpanish || draw?.card?.name || draw?.card?.id || '').trim();
+}
+
+function positionDisplayName(draw: TarotCardDraw | null | undefined): string {
+  const pos = draw?.position;
+  return (pos?.nameSpanish || pos?.label || pos?.id || '').trim();
+}
+
+function drawKeywords(draw: TarotCardDraw): string[] {
+  const symbols = safeDict(draw.symbols);
+  const candidate = draw.reversed ? symbols?.keywordsReversed : symbols?.keywords;
+  if (Array.isArray(candidate)) return candidate.filter((v) => typeof v === 'string' && v.trim()).map((v) => v.trim());
+  const fallback = draw.card?.keywords;
+  if (Array.isArray(fallback)) return fallback.filter((v) => typeof v === 'string' && v.trim()).map((v) => v.trim());
+  return [];
+}
+
+function drawText(draw: TarotCardDraw, contextFocus: string): string {
+  const symbols = safeDict(draw.symbols);
+  const orientationKey = draw.reversed ? 'reversed' : 'upright';
+  const focus = contextFocus || 'general';
+  const texts = safeDict(symbols?.[orientationKey]);
+  const byFocus = texts && typeof texts[focus] === 'string' ? String(texts[focus]).trim() : '';
+  const byGeneral = texts && typeof texts.general === 'string' ? String(texts.general).trim() : '';
+  if (byFocus) return byFocus;
+  if (byGeneral) return byGeneral;
+  const srContainer = draw.symbolic_reading && typeof draw.symbolic_reading === 'object' ? (draw.symbolic_reading as any).symbolic_reading : null;
+  const srCore = srContainer && typeof srContainer.core_meaning === 'string' ? srContainer.core_meaning.trim() : '';
+  const srCtx = srContainer && typeof srContainer.context_meaning === 'string' ? srContainer.context_meaning.trim() : '';
+  return srCore || srCtx || '';
+}
+
+function synthesize(cards: TarotCardDraw[], contextFocus: string): string {
+  const focus = contextFocus || 'general';
+  const parts = cards.slice(0, 3).map((draw) => {
+    const pos = positionDisplayName(draw) || 'Posición';
+    const name = cardDisplayName(draw) || 'Carta';
+    const kws = drawKeywords(draw).slice(0, 2);
+    const kwText = kws.length ? ` (${kws.join(' · ')})` : '';
+    const orientation = draw.reversed ? 'invertida' : 'derecha';
+    return `${pos}: ${name} (${orientation})${kwText}`;
+  });
+  if (!parts.length) return '';
+  return `El conjunto de cartas organiza un relato simbólico por posiciones (${focus}), destacando tensiones y continuidades observables. ${parts.join(' / ')}.`;
+}
+
 export default function TarotDrawPanel(props: {
   consultantId?: string | null;
   systemId?: string;
@@ -167,11 +222,19 @@ export default function TarotDrawPanel(props: {
           reversed: Boolean(c.reversed),
           card: {
             id: safeString(c.id) || `card-${index + 1}`,
-            nameSpanish: safeString(c.nameSpanish) || safeString(c.name) || undefined,
+            nameSpanish: safeString(c.symbols?.nameSpanish) || safeString(c.nameSpanish) || safeString(c.name) || undefined,
             name: safeString(c.name) || undefined,
             imageUrl: safeString(c.imageUrl) || safeString(c.image_url) || undefined,
-            keywords: safeStringArray(c.keywords).length ? safeStringArray(c.keywords) : safeStringArray(c.tags),
+            keywords: safeStringArray(c.symbols?.keywords).length
+              ? safeStringArray(c.symbols?.keywords)
+              : safeStringArray(c.keywords).length
+                ? safeStringArray(c.keywords)
+                : safeStringArray(c.tags),
+            keywordsReversed: safeStringArray(c.symbols?.keywordsReversed).length
+              ? safeStringArray(c.symbols?.keywordsReversed)
+              : safeStringArray(c.keywordsReversed),
           },
+          symbols: c.symbols && typeof c.symbols === 'object' ? c.symbols : null,
           symbolic_reading: c.symbolic_reading && typeof c.symbolic_reading === 'object' ? c.symbolic_reading : null,
         }));
 
@@ -296,7 +359,54 @@ export default function TarotDrawPanel(props: {
           <SymbolicReadingPanel
             systemLabel={systemLabel}
             selectedCard={selectedCard}
+            contextFocus={contextFocus}
           />
+
+          {reading?.cards?.length ? (
+            <section className="rounded-lg border border-slate-200 bg-white p-4">
+              <div className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                Interpretación por posición
+              </div>
+              <div className="mt-3 space-y-3">
+                {reading.cards.map((draw) => {
+                  const pos = positionDisplayName(draw) || 'Posición';
+                  const name = cardDisplayName(draw) || draw.card.id;
+                  const text = drawText(draw, contextFocus) || READING_FALLBACK_TEXT;
+                  const kws = drawKeywords(draw);
+                  return (
+                    <div key={draw.id} className="rounded-md border border-slate-200 bg-slate-50 p-3">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="text-sm font-semibold text-slate-900">
+                          {pos}: {name}
+                        </div>
+                        <div className="text-xs text-slate-600">{draw.reversed ? 'Invertida' : 'Derecha'}</div>
+                      </div>
+                      <div className="mt-2 text-sm text-slate-700">{text}</div>
+                      {kws.length ? (
+                        <div className="mt-2 flex flex-wrap gap-1">
+                          {kws.slice(0, 12).map((kw) => (
+                            <span
+                              key={kw}
+                              className="rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[11px] text-slate-700"
+                            >
+                              {kw}
+                            </span>
+                          ))}
+                        </div>
+                      ) : null}
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="mt-4 rounded-md border border-slate-200 bg-white p-3">
+                <div className="text-xs font-medium text-slate-700">Síntesis simbólica</div>
+                <div className="mt-1 text-sm text-slate-700">{synthesize(reading.cards, contextFocus)}</div>
+                <div className="mt-2 text-xs text-slate-600">
+                  Lectura simbólica descriptiva. No contiene conclusiones ni recomendaciones.
+                </div>
+              </div>
+            </section>
+          ) : null}
         </div>
       </div>
 

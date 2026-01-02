@@ -8,6 +8,7 @@ export type TarotCardViewCard = {
   name?: string | null;
   imageUrl?: string | null;
   keywords?: string[] | null;
+  keywordsReversed?: string[] | null;
 };
 
 type Props = {
@@ -19,7 +20,8 @@ type Props = {
 
 export default function TarotCardView({ card, reversed = false, selected = false, onSelect }: Props) {
   const label = (card.nameSpanish || card.name || card.id || '').trim() || 'Carta';
-  const keywords = Array.isArray(card.keywords) ? card.keywords.filter(Boolean) : [];
+  const keywordsSource = reversed ? card.keywordsReversed : card.keywords;
+  const keywords = Array.isArray(keywordsSource) ? keywordsSource.filter(Boolean) : [];
 
   return (
     <button
@@ -80,4 +82,3 @@ export default function TarotCardView({ card, reversed = false, selected = false
     </button>
   );
 }
-

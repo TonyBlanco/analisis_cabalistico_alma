@@ -5,10 +5,11 @@ import type { TarotCardDraw } from './TarotSpreadView';
 type Props = {
   systemLabel?: string | null;
   selectedCard?: TarotCardDraw | null;
+  contextFocus?: string | null;
 };
 
-const FIELD_FALLBACK = 'Este sistema aún no define este campo simbólico.';
-const CARD_FALLBACK = 'Este sistema aún no define lectura detallada para esta carta.';
+const FIELD_FALLBACK = 'Campo simbólico no disponible para esta carta.';
+const CARD_FALLBACK = 'Selecciona una carta para ver su lectura simbólica.';
 
 function line(value: string | null | undefined): string {
   const v = (value ?? '').trim();
@@ -38,11 +39,30 @@ function extractSelectedReading(selectedCard: TarotCardDraw | null | undefined):
   };
 }
 
-export default function SymbolicReadingPanel({ systemLabel, selectedCard }: Props) {
+export default function SymbolicReadingPanel({ systemLabel, selectedCard, contextFocus }: Props) {
   const cardName = (selectedCard?.card?.nameSpanish || selectedCard?.card?.name || '').trim();
-  const keywords = Array.isArray(selectedCard?.card?.keywords) ? selectedCard!.card!.keywords!.filter(Boolean) : [];
   const extracted = extractSelectedReading(selectedCard);
+  const symbols = selectedCard?.symbols && typeof selectedCard.symbols === 'object' ? (selectedCard.symbols as any) : null;
+  const orientationKey = selectedCard?.reversed ? 'reversed' : 'upright';
+  const focusKey = (typeof contextFocus === 'string' && contextFocus.trim()) ? contextFocus.trim() : 'general';
+  const symbolTexts = symbols && typeof symbols[orientationKey] === 'object' ? (symbols[orientationKey] as any) : null;
+  const textByContext =
+    symbolTexts && typeof symbolTexts[focusKey] === 'string' && symbolTexts[focusKey].trim()
+      ? symbolTexts[focusKey].trim()
+      : symbolTexts && typeof symbolTexts.general === 'string' && symbolTexts.general.trim()
+        ? symbolTexts.general.trim()
+        : null;
+
+  const symbolKeywordsRaw =
+    symbols && (selectedCard?.reversed ? symbols.keywordsReversed : symbols.keywords);
+  const keywords =
+    Array.isArray(symbolKeywordsRaw)
+      ? symbolKeywordsRaw.filter(Boolean)
+      : Array.isArray(selectedCard?.card?.keywords)
+        ? selectedCard!.card!.keywords!.filter(Boolean)
+        : [];
   const hasAnyReading =
+    Boolean(textByContext) ||
     Boolean(extracted.core?.trim()) ||
     Boolean(extracted.context?.trim()) ||
     Boolean(extracted.contextual?.trim()) ||
@@ -70,6 +90,11 @@ export default function SymbolicReadingPanel({ systemLabel, selectedCard }: Prop
           {extracted.positionLabel ? (
             <div className="mt-1 text-xs text-slate-600">Posición: {extracted.positionLabel}</div>
           ) : null}
+          {selectedCard ? (
+            <div className="mt-1 text-xs text-slate-600">
+              Orientación: {selectedCard.reversed ? 'Invertida' : 'Derecha'}
+            </div>
+          ) : null}
         </div>
 
         {!selectedCard ? (
@@ -86,11 +111,9 @@ export default function SymbolicReadingPanel({ systemLabel, selectedCard }: Prop
         </div>
 
         <div className="rounded-md border border-slate-200 bg-white p-3">
-          <div className="text-xs font-medium text-slate-700">Significado central</div>
+          <div className="text-xs font-medium text-slate-700">Texto principal</div>
           <div className="mt-1 text-sm text-slate-700">
-            {extracted.core?.includes('Este sistema no define')
-              ? CARD_FALLBACK
-              : line(extracted.core)}
+            {textByContext ? textByContext : line(extracted.core)}
           </div>
         </div>
 

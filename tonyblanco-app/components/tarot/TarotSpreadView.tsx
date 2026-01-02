@@ -20,6 +20,7 @@ export type TarotCardDraw = {
   position?: TarotSpreadPosition | null;
   reversed?: boolean;
   card: TarotCardViewCard;
+  symbols?: any;
   symbolic_reading?: any;
 };
 

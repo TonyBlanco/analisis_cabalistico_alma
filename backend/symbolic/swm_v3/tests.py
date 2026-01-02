@@ -261,3 +261,47 @@ class SymbolicReadingApiExecutionTests(TestCase):
         self.assertIsInstance(body.get("payload"), dict)
         self.assertNotEqual(body, {})
         self.assertEqual(body["payload"].get("id", "").startswith("swm-v3-mock-oracle-"), True)
+
+    def test_no_store_returns_payload_for_bota_without_english_meanings(self):
+        response = self.client.post(
+            "/api/swm-v3/symbolic-readings/",
+            data={
+                "system_id": "bota",
+                "consent_mode": "no_store",
+                "reading_type": "educational",
+                "selected_cards": ["the-fool"],
+                "spread_type": "three_cards",
+                "context_focus": "general",
+                "intention": "",
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, 200)
+        body = response.json()
+        self.assertTrue(body.get("success"))
+        self.assertFalse(body.get("stored"))
+        self.assertEqual(body.get("mode"), "no_store")
+        self.assertIsNone(body.get("reading_id"))
+        self.assertIsInstance(body.get("payload"), dict)
+        self.assertNotEqual(body, {})
+
+        payload = body.get("payload") or {}
+        self.assertIn("cards", payload)
+        self.assertIsInstance(payload.get("cards"), list)
+        self.assertGreaterEqual(len(payload.get("cards")), 1)
+
+        for card in payload["cards"]:
+            symbols = card.get("symbols") or {}
+            self.assertIsInstance(symbols, dict)
+            # No English meanings/keywords injected for B.O.T.A.
+            self.assertTrue(symbols.get("keywords") in (None, [], {}))
+            self.assertTrue(symbols.get("upright") in (None, {},))
+            self.assertTrue(symbols.get("reversed") in (None, {},))
+
+            sr = card.get("symbolic_reading") or {}
+            self.assertIsInstance(sr, dict)
+            core = ((sr.get("symbolic_reading") or {}).get("core_meaning")) or ""
+            self.assertIsInstance(core, str)
+            self.assertIn("Letra hebraica", core)
+            self.assertNotIn("mock", core.lower())
+            self.assertNotIn("The ", core)

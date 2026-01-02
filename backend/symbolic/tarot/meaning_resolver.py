@@ -36,8 +36,7 @@ _SYSTEM_MEANINGS_MODULE: dict[str, str] = {
     "oracle_symbolic": "oracle_symbolic",
     "oracle_generic": "oracle_symbolic",
     "generic_symbolic_oracle": "oracle_symbolic",
-    # Minimal (fallback-only) systems
-    "bota": "thoth",
+    # Minimal systems
     "hermetic": "thoth",
     "sephiroth": "thoth",
 }
@@ -51,7 +50,7 @@ _SYSTEM_FRAME: dict[str, str] = {
     "rider-waite": "Rider–Waite: lectura simbólica narrativa (mock educativo).",
     "rota": "R.O.T.A.: lectura hermética sintética (mock educativo).",
     "thoth": "Thoth: lectura hermética/astrológica con correspondencias (mock educativo).",
-    "bota": "B.O.T.A.: lectura cabalística estructurada (mock educativo).",
+    "bota": "B.O.T.A.: correspondencias cabalísticas (observacional).",
     "hermetic": "Hermetic: lectura esotérica estructural (mock educativo).",
     "sephiroth": "Sephiroth: lectura del Árbol de la Vida por correspondencias (mock educativo).",
 }
@@ -246,6 +245,24 @@ def _context_meaning(
 
 
 def resolveSymbolicMeaning(payload: ResolveInput) -> dict[str, Any]:
+    if payload.system_id == "bota":
+        from symbolic.tarot.bota_observation import build_bota_observation_from_symbols
+
+        card_label = _card_label(payload.card)
+        symbols = payload.card.get("symbols") if isinstance(payload.card.get("symbols"), dict) else {}
+        observation = build_bota_observation_from_symbols(symbols, reversed_flag=payload.reversed)
+        return {
+            "title": card_label,
+            "core_meaning": observation,
+            "position_meaning": "",
+            "context_meaning": "",
+            "contextual_meaning": "",
+            "system_frame": _SYSTEM_FRAME.get("bota", "B.O.T.A.: correspondencias cabalísticas (observacional)."),
+            "keywords": [],
+            "upright": {},
+            "reversed": {},
+        }
+
     card_label = _card_label(payload.card)
     entry = _meaning_entry(payload.system_id, payload.card.get("name") or payload.card.get("id") or "")
     keywords = _keywords(payload.card, entry)
@@ -288,4 +305,3 @@ def resolveSymbolicMeaning(payload: ResolveInput) -> dict[str, Any]:
         "upright": upright,
         "reversed": reversed_ctx,
     }
-

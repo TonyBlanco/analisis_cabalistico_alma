@@ -71,6 +71,16 @@ def _build_minimal_payload(
         payload_cards = _rotate(deck, count=count, seed=seed)
         payload_id = "swm-v3-mock-" + system_id + "-" + "-".join([c["id"] for c in payload_cards])
 
+    if system_id == "bota":
+        return SymbolicReadingPayload(
+            id=payload_id,
+            summary=f"Lectura simbólica B.O.T.A. — {label}. Observacional, no clínica.",
+            themes=[],
+            correspondences=[],
+            caution="Lectura simbólica observacional — no es diagnóstico, recomendación ni consejo clínico.",
+            cards=payload_cards,
+        )
+
     return SymbolicReadingPayload(
         id=payload_id,
         summary=f"Lectura educativa (mock) — {label}. Observacional, no clínica.",

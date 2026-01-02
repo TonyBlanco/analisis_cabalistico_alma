@@ -183,7 +183,6 @@ class SwmV3SymbolicReadingCreateView(APIView):
                     if system_id == "bota":
                         bota_card = get_bota_card(card_obj.get("id") or card_obj.get("code"))
                         if isinstance(bota_card, dict):
-                            meanings = bota_card.get("meanings") if isinstance(bota_card.get("meanings"), dict) else {}
                             kabbalistic = (
                                 bota_card.get("kabbalistic")
                                 if isinstance(bota_card.get("kabbalistic"), dict)
@@ -196,20 +195,10 @@ class SwmV3SymbolicReadingCreateView(APIView):
                             )
                             extra_symbols = {
                                 "nameSpanish": bota_card.get("nameSpanish"),
-                                "keywords": meanings.get("keywords"),
+                                "keywords": None,
                                 "keywordsReversed": None,
-                                "upright": {
-                                    "general": meanings.get("central"),
-                                    "love": None,
-                                    "career": meanings.get("practical"),
-                                    "spiritual": meanings.get("spiritual"),
-                                },
-                                "reversed": {
-                                    "general": None,
-                                    "love": None,
-                                    "career": None,
-                                    "spiritual": None,
-                                },
+                                "upright": {},
+                                "reversed": {},
                                 "kabbalistic": {
                                     "hebrewLetter": kabbalistic.get("hebrewLetter"),
                                     "letterValue": kabbalistic.get("letterValue"),
@@ -231,6 +220,7 @@ class SwmV3SymbolicReadingCreateView(APIView):
                             existing_symbols = card_obj.get("symbols") if isinstance(card_obj.get("symbols"), dict) else {}
                             card_obj = {
                                 **card_obj,
+                                "name": bota_card.get("nameSpanish") or card_obj.get("name"),
                                 "nameSpanish": bota_card.get("nameSpanish") or card_obj.get("nameSpanish"),
                                 "symbols": {**existing_symbols, **extra_symbols},
                             }
@@ -246,12 +236,17 @@ class SwmV3SymbolicReadingCreateView(APIView):
                         )
                     )
                     # Keep backward-compatible container shape used by UI.
+                    keywords_out = meaning.get("keywords")
+                    if system_id == "bota":
+                        keywords_out = []
+                    elif not keywords_out:
+                        keywords_out = card_obj.get("tags") or []
                     sr = {
                         "system": {"id": system_id, "label": str(system_label)},
                         "card": {
                             "name": meaning.get("title") or card_label,
                             "arcana": str(card_obj.get("arcana") or "unknown"),
-                            "keywords": meaning.get("keywords") or (card_obj.get("tags") or []),
+                            "keywords": keywords_out,
                         },
                         "symbolic_reading": {
                             "core_meaning": meaning.get("core_meaning") or "",
@@ -266,7 +261,7 @@ class SwmV3SymbolicReadingCreateView(APIView):
                     card_obj = {
                         **card_obj,
                         "reversed": reversed_flag,
-                        "keywords": meaning.get("keywords") or (card_obj.get("tags") or []),
+                        "keywords": keywords_out,
                         "upright": meaning.get("upright") or {},
                         "reversed_context": meaning.get("reversed") or {},
                         "symbolic_reading": sr,

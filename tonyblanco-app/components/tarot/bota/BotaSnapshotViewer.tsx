@@ -8,6 +8,7 @@ type CardSnapshot = {
   id: string;
   position: { id: string; nameSpanish: string };
   symbolic_reading?: any;
+  symbols?: any;
 };
 
 type Snapshot = {

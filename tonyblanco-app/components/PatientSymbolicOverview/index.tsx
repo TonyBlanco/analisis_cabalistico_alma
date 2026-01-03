@@ -10,6 +10,7 @@ import {
   Download,
   Loader2
 } from 'lucide-react';
+import SymbolicReadingPanel from '@/components/tarot/SymbolicReadingPanel';
 import { setActivePatientId } from '@/lib/active-patient';
 import { openPrintableReport } from '@/lib/report-printing';
 import { getApiBaseUrl } from '@/lib/api-base';
@@ -62,6 +63,8 @@ export default function PatientSymbolicOverview({ patientId }: PatientSymbolicOv
   const [exporting, setExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
   const [exportLevel, setExportLevel] = useState<'summary' | 'audit'>('summary');
+  const [swmItems, setSwmItems] = useState<any[]>([]);
+  const [selectedSwm, setSelectedSwm] = useState<any | null>(null);
 
   const activatePatient = () => {
     const parsedId = typeof patientId === 'string' ? parseInt(patientId, 10) : patientId;
@@ -119,6 +122,29 @@ export default function PatientSymbolicOverview({ patientId }: PatientSymbolicOv
     };
 
     fetchOverview();
+    // also fetch persisted symbolic readings (SWM v3)
+    const fetchSwm = async () => {
+      try {
+        const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
+        if (!token) return;
+        const res = await fetch(`${API_URL.replace(/\/$/, '')}/swm-v3/symbolic-readings/?patient_id=${encodeURIComponent(String(patientId))}`, {
+          headers: { 'Content-Type': 'application/json', Authorization: `Token ${token}` },
+        });
+        if (!res.ok) return;
+        const j = await res.json().catch(() => null);
+        const list = Array.isArray(j) ? j : (j && Array.isArray(j.items) ? j.items : []);
+        const filtered = list.filter((it: any) => {
+          const typ = (it.type || it.reading_type || (it.content && it.content.reading_type) || '').toString().toLowerCase();
+          const system = (it.system || it.system_id || (it.content && it.content.system) || (it.content && it.content.symbolic_reading && it.content.symbolic_reading.system && it.content.symbolic_reading.system.id) || '').toString().toLowerCase();
+          return typ === 'symbolic' || typ === 'educational' || it.snapshot === true || it.is_snapshot === true || (it.content && it.content.cards) ? (system === 'tarot_bota' || system === 'bota' || system === 'tarot-bota') : false;
+        });
+        setSwmItems(filtered);
+      } catch (e) {
+        // ignore
+      }
+    };
+
+    fetchSwm();
   }, [patientId]);
 
   const downloadFile = (filename: string, content: string, mimeType: string) => {
@@ -334,35 +360,52 @@ export default function PatientSymbolicOverview({ patientId }: PatientSymbolicOv
         <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
           <h3 className="text-base font-semibold text-gray-900">Análisis simbólicos guardados</h3>
           <p className="text-xs text-gray-500 mt-1">
-            {overview.cabalistic_analyses.length} análisis registrados
+            {overview.cabalistic_analyses.length + swmItems.length} análisis registrados
           </p>
         </div>
+        <div className="divide-y divide-gray-100">
+          {overview.cabalistic_analyses.slice(0, 5).map((analysis) => (
+            <div key={`cab-${analysis.id}`} className="px-6 py-4 hover:bg-gray-50 transition-colors">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <div className="font-medium text-gray-900">{analysis.analysis_type_display}</div>
+                  <div className="text-sm text-gray-600 mt-1">{analysis.brief_summary}</div>
+                  <div className="text-xs text-gray-500 mt-2 flex items-center gap-2">
+                    <Calendar className="h-3 w-3" />
+                    {analysis.created_at 
+                      ? new Date(analysis.created_at).toLocaleString('es-ES')
+                      : '—'}
+                  </div>
+                </div>
+                <ChevronRight className="h-5 w-5 text-gray-400 flex-shrink-0" />
+              </div>
+            </div>
+          ))}
 
-        {overview.cabalistic_analyses.length === 0 ? (
-          <div className="px-6 py-4 text-sm text-gray-600">
-            No hay análisis simbólicos guardados aún.
-          </div>
-        ) : (
-          <div className="divide-y divide-gray-100">
-            {overview.cabalistic_analyses.slice(0, 5).map((analysis) => (
-              <div key={analysis.id} className="px-6 py-4 hover:bg-gray-50 transition-colors">
+          {swmItems.slice(0, 5).map((it) => {
+            const created = it.created_at || it.created || (it.content && it.content.created_at) || it.timestamp || null;
+            const spread = (it.content && it.content.spread && (it.content.spread.nameSpanish || it.content.spread.name)) || (it.payload && it.payload.spread && it.payload.spread.nameSpanish) || null;
+            const summary = (it.summary || (it.content && it.content.summary) || it.brief_summary) || '';
+            return (
+              <div key={`swm-${it.id || it.reading_id || Math.random()}`} className="px-6 py-4 hover:bg-gray-50 transition-colors">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <div className="font-medium text-gray-900">{analysis.analysis_type_display}</div>
-                    <div className="text-sm text-gray-600 mt-1">{analysis.brief_summary}</div>
+                    <div className="font-medium text-gray-900">Tarot B.O.T.A.</div>
+                    <div className="text-sm text-gray-600 mt-1">{summary}</div>
                     <div className="text-xs text-gray-500 mt-2 flex items-center gap-2">
                       <Calendar className="h-3 w-3" />
-                      {analysis.created_at 
-                        ? new Date(analysis.created_at).toLocaleString('es-ES')
-                        : '—'}
+                      {created ? new Date(created).toLocaleString('es-ES') : '—'}
+                      {spread ? <span className="ml-2">· {spread}</span> : null}
                     </div>
                   </div>
-                  <ChevronRight className="h-5 w-5 text-gray-400 flex-shrink-0" />
+                  <div className="flex items-center gap-3">
+                    <button onClick={() => setSelectedSwm(it)} className="text-xs text-sky-600">Ver lectura</button>
+                  </div>
                 </div>
               </div>
-            ))}
-          </div>
-        )}
+            );
+          })}
+        </div>
       </section>
 
       {/* Tests Psicométricos */}
@@ -475,6 +518,27 @@ export default function PatientSymbolicOverview({ patientId }: PatientSymbolicOv
         </div>
         {exportError && <p className="text-xs text-red-600 mt-2">{exportError}</p>}
       </div>
+      {selectedSwm ? (
+        <div className="fixed inset-0 z-50 flex items-start justify-center p-8">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setSelectedSwm(null)} />
+          <div className="relative max-w-4xl w-full rounded-lg bg-white shadow-lg overflow-auto" style={{maxHeight: '90vh'}}>
+            <div className="p-4 border-b">
+              <div className="text-sm font-semibold">Lectura simbólica observacional. No diagnóstica. No clínica.</div>
+            </div>
+            <div className="p-4">
+              <SymbolicReadingPanel
+                systemLabel={(selectedSwm.system_label || selectedSwm.system || selectedSwm.system_id || (selectedSwm.content && selectedSwm.content.symbolic_reading && selectedSwm.content.symbolic_reading.system && selectedSwm.content.symbolic_reading.system.label) || 'B.O.T.A. Tarot')}
+                selectedCard={Array.isArray((selectedSwm.content || selectedSwm.payload || {}).cards) ? (selectedSwm.content || selectedSwm.payload).cards[0] : null}
+                contextFocus={(selectedSwm.content && selectedSwm.content.context_focus) || null}
+              />
+            </div>
+            <div className="p-3 border-t text-right">
+              <button type="button" onClick={() => setSelectedSwm(null)} className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800">Cerrar</button>
+            </div>
+            <style jsx>{` :global(.therapist-readonly) button, :global(.therapist-readonly) a { display: none !important; } `}</style>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

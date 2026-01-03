@@ -7,6 +7,7 @@ import PatientProfileView from '@/components/patient/PatientProfileView';
 import PatientProfileEditor from '@/components/patient/PatientProfileEditor';
 import dynamic from 'next/dynamic'
 import { getActivePatient, setActivePatientId } from '@/lib/active-patient';
+import TherapistSymbolicHistoryPanel from '@/components/therapist/TherapistSymbolicHistoryPanel';
 
 import { getApiBaseUrl } from '@/lib/api-base';
 import { getAuthToken } from '@/lib/api';
@@ -213,6 +214,11 @@ export default function TherapistPatientDetailPage() {
           </div>
         )}
       </section>
+
+      <section className="bg-white border border-gray-200 rounded-lg p-6">
+        <TherapistSymbolicHistoryPanel patientId={patientId} />
+      </section>
+
 
       <section className="bg-white border border-gray-200 rounded-lg p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-3">Analysis records</h2>

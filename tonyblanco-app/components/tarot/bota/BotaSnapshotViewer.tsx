@@ -47,7 +47,7 @@ export default function BotaSnapshotViewer({ snapshot }: { snapshot: Snapshot })
                 )}
 
                 <div className="flex-1">
-                  <div className="text-sm font-semibold">{identity?.displayName || c.id}</div>
+                  <div className="text-sm font-semibold">{identity?.nameSpanish || c.id}</div>
                   <div className="text-xs text-slate-600">Posición: {c.position?.nameSpanish || c.position?.id || '—'}</div>
 
                   <div className="mt-3 grid grid-cols-2 gap-3 text-sm text-slate-700">

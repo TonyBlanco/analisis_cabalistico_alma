@@ -162,11 +162,8 @@ function synthesize(cards: TarotCardDraw[], contextFocus: string): string {
         };
       })
       .filter(Boolean) as Array<{ identity: any; positionLabel: string }>;
-                <div className="mt-4">
-                  <SymbolicReadingPanel systemLabel={systemLabel} selectedCard={selectedCard} contextFocus={contextFocus} />
-                </div>
 
-    return buildBotaSynthesis(items) || '';
+      return buildBotaSynthesis(items) || '';
   }
   const focus = contextFocus || 'general';
   const parts = cards.slice(0, 3).map((draw) => {

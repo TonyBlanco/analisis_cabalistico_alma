@@ -69,6 +69,43 @@ def _error(detail: str, status_code: int = 400, mode: str | None = None) -> Json
 class SwmV3SymbolicReadingCreateView(APIView):
     permission_classes = [IsAuthenticated]
 
+    def get(self, request):
+        """List symbolic readings for the authenticated therapist or return a single reading by id."""
+        try:
+            user = request.user
+            if not hasattr(user, "profile") or getattr(user.profile, "user_type", None) != "therapist":
+                return _error("Only therapist users can list symbolic readings.", status_code=403)
+
+            reading_id = request.query_params.get("id")
+            if reading_id:
+                reading = SymbolicReading.objects.filter(id=reading_id, therapist=user).first()
+                if not reading:
+                    return _error("Reading not found.", status_code=404)
+                return _json({"success": True, "item": {
+                    "id": str(reading.id),
+                    "system_id": reading.system_id,
+                    "consent_mode": reading.consent_mode,
+                    "reading_type": reading.reading_type,
+                    "created_at": reading.created_at.isoformat(),
+                    "content": reading.content,
+                }}, status_code=200)
+
+            qs = SymbolicReading.objects.filter(therapist=user).order_by("-created_at")[:100]
+            items = [
+                {
+                    "id": str(r.id),
+                    "system_id": r.system_id,
+                    "consent_mode": r.consent_mode,
+                    "reading_type": r.reading_type,
+                    "created_at": r.created_at.isoformat(),
+                    "summary": (r.content.get("summary") if isinstance(r.content, dict) else None),
+                }
+                for r in qs
+            ]
+            return _json({"success": True, "items": items}, status_code=200)
+        except Exception:
+            return _error("Unexpected server error.", status_code=500)
+
     def post(self, request):
         consent_mode_raw = request.data.get("consent_mode")
         mode = consent_mode_raw if isinstance(consent_mode_raw, str) else None

@@ -5,6 +5,7 @@ import ConsentModal, { type SwmV3ConsentMode } from '@/components/SWMV3/ConsentM
 import { API_BASE_URL, getAuthToken } from '@/lib/api';
 import TarotSpreadView, { type TarotCardDraw, type TarotSpread, type TarotSpreadPosition } from './TarotSpreadView';
 import SymbolicReadingPanel from './SymbolicReadingPanel';
+import TherapistSymbolicHistory from '@/components/therapist/TherapistSymbolicHistory';
 import { resolveBotaIdentity } from '../../../src/symbolic/tarot/bota/botaIdentityResolver';
 import { buildBotaPositionMeaning } from '../../../src/symbolic/tarot/bota/positionInterpreter';
 import { buildBotaSynthesis } from '../../../src/symbolic/tarot/bota/synthesisBuilder';
@@ -161,6 +162,9 @@ function synthesize(cards: TarotCardDraw[], contextFocus: string): string {
         };
       })
       .filter(Boolean) as Array<{ identity: any; positionLabel: string }>;
+                <div className="mt-4">
+                  <SymbolicReadingPanel systemLabel={systemLabel} selectedCard={selectedCard} contextFocus={contextFocus} />
+                </div>
 
     return buildBotaSynthesis(items) || '';
   }
@@ -295,6 +299,66 @@ export default function TarotDrawPanel(props: {
     }
   };
 
+  const handleSave = async () => {
+    if (!reading) return;
+    if (!consent) {
+      setShowConsent(true);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    try {
+      const token = getAuthToken();
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Token ${token}` } : {}),
+      };
+
+      const selected_cards = (reading.cards || []).map((c) => (c.card && c.card.id) || c.id).filter(Boolean);
+
+      const response = await fetch(`${API_BASE_URL}/swm-v3/symbolic-readings/?`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          system_id: systemId,
+          reading_type: 'educational',
+          selected_cards,
+          consent_mode: consent.mode,
+          spread_type: spreadId,
+          context_focus: contextFocus,
+          intention,
+          consultant_id: consent.mode === 'store_with_consent' ? props.consultantId ?? null : null,
+          consent: {
+            explicit_opt_in: true,
+            version: consent.version,
+            accepted_at: consent.acceptedAt,
+          },
+        }),
+      });
+
+      const json = (await response.json().catch(() => null)) as SwmV3ApiResponse | null;
+      if (!response.ok || !json) {
+        setError('No se pudo guardar la lectura.');
+        return;
+      }
+      if (!json.success) {
+        setError(json.error || 'No se pudo guardar la lectura.');
+        return;
+      }
+
+      if (json.stored) {
+        // Show stored id in console / feedback
+        // eslint-disable-next-line no-console
+        console.info('Saved symbolic reading id=', json.reading_id);
+      }
+    } catch (e: any) {
+      setError(e?.message || 'Error inesperado al guardar la lectura.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <section className="rounded-lg border border-slate-200 bg-white p-4">
       <div className="flex items-start justify-between gap-3">
@@ -374,6 +438,16 @@ export default function TarotDrawPanel(props: {
             >
               {loading ? 'Ejecutando…' : consent ? 'Ejecutar lectura' : 'Configurar consentimiento'}
             </button>
+            {reading ? (
+              <button
+                type="button"
+                onClick={handleSave}
+                disabled={loading}
+                className="inline-flex items-center rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 hover:bg-slate-50"
+              >
+                Guardar lectura
+              </button>
+            ) : null}
             {consent ? (
               <button
                 type="button"

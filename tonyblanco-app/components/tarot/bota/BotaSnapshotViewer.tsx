@@ -1,7 +1,7 @@
 "use client";
 
-import { getBotaVisualStructure } from '@/src/symbolic/tarot/bota/botaVisualMapper';
-import { resolveBotaIdentity } from '@/src/symbolic/tarot/bota/botaIdentityResolver';
+import { getBotaVisualStructure } from '../../../src/symbolic/tarot/bota/botaVisualMapper';
+import { resolveBotaIdentity } from '../../../src/symbolic/tarot/bota/botaIdentityResolver';
 import React from 'react';
 
 type CardSnapshot = {

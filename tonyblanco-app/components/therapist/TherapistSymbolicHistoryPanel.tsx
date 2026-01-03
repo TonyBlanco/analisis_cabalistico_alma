@@ -4,6 +4,10 @@ import { useEffect, useState } from "react";
 import { getAuthToken } from "@/lib/api";
 import { getApiBaseUrl } from "@/lib/api-base";
 import SymbolicReadingPanel from "@/components/tarot/SymbolicReadingPanel";
+import dynamic from 'next/dynamic';
+import React from 'react';
+
+const BotaViewer = dynamic(() => import('@/components/tarot/bota/BotaSnapshotViewer'), { ssr: false });
 
 type SnapshotItem = any;
 
@@ -97,11 +101,15 @@ export default function TherapistSymbolicHistoryPanel({ patientId }: { patientId
               <div className="text-sm font-semibold">Lectura simbólica observacional. No diagnóstica. No predictiva. No clínica.</div>
             </div>
             <div className="p-4 therapist-readonly">
-              <SymbolicReadingPanel
-                systemLabel={(selected.system_label || selected.system || selected.system_id || (selected.payload && selected.payload.system) || 'B.O.T.A. Tarot')}
-                selectedCard={Array.isArray(selected.payload?.cards) ? selected.payload.cards[0] : null}
-                contextFocus={selected.payload?.context_focus || null}
-              />
+              {((selected.system || selected.system_id || (selected.payload && selected.payload.symbolic_reading && selected.payload.symbolic_reading.system && selected.payload.symbolic_reading.system.id)) || '').toString().toLowerCase().includes('bota') ? (
+                <BotaViewer snapshot={selected.payload || selected} />
+              ) : (
+                <SymbolicReadingPanel
+                  systemLabel={(selected.system_label || selected.system || selected.system_id || (selected.payload && selected.payload.system) || 'Sistema simbólico')}
+                  selectedCard={Array.isArray(selected.payload?.cards) ? selected.payload.cards[0] : null}
+                  contextFocus={selected.payload?.context_focus || null}
+                />
+              )}
             </div>
             <div className="p-3 border-t text-right">
               <button type="button" onClick={close} className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800">Cerrar</button>

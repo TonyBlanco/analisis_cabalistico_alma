@@ -11,6 +11,10 @@ import {
   Loader2
 } from 'lucide-react';
 import SymbolicReadingPanel from '@/components/tarot/SymbolicReadingPanel';
+import React from 'react';
+import dynamic from 'next/dynamic';
+
+const BotaViewerWrapper = dynamic(() => import('@/components/tarot/bota/BotaSnapshotViewer').then((m) => (props: any) => m.default(props)), { ssr: false });
 import { setActivePatientId } from '@/lib/active-patient';
 import { openPrintableReport } from '@/lib/report-printing';
 import { getApiBaseUrl } from '@/lib/api-base';
@@ -526,11 +530,20 @@ export default function PatientSymbolicOverview({ patientId }: PatientSymbolicOv
               <div className="text-sm font-semibold">Lectura simbólica observacional. No diagnóstica. No clínica.</div>
             </div>
             <div className="p-4">
-              <SymbolicReadingPanel
-                systemLabel={(selectedSwm.system_label || selectedSwm.system || selectedSwm.system_id || (selectedSwm.content && selectedSwm.content.symbolic_reading && selectedSwm.content.symbolic_reading.system && selectedSwm.content.symbolic_reading.system.label) || 'B.O.T.A. Tarot')}
-                selectedCard={Array.isArray((selectedSwm.content || selectedSwm.payload || {}).cards) ? (selectedSwm.content || selectedSwm.payload).cards[0] : null}
-                contextFocus={(selectedSwm.content && selectedSwm.content.context_focus) || null}
-              />
+              {((selectedSwm.system || selectedSwm.system_id || (selectedSwm.content && selectedSwm.content.symbolic_reading && selectedSwm.content.symbolic_reading.system && selectedSwm.content.symbolic_reading.system.id)) || '').toString().toLowerCase().includes('bota') ? (
+                // Use dedicated B.O.T.A. snapshot viewer
+                // Import dynamically to avoid SSR issues
+                <React.Suspense fallback={<div>Cargando...</div>}>
+                  {/* @ts-ignore */}
+                  <BotaViewerWrapper snapshot={(selectedSwm.content || selectedSwm.payload || selectedSwm)} />
+                </React.Suspense>
+              ) : (
+                <SymbolicReadingPanel
+                  systemLabel={(selectedSwm.system_label || selectedSwm.system || selectedSwm.system_id || (selectedSwm.content && selectedSwm.content.symbolic_reading && selectedSwm.content.symbolic_reading.system && selectedSwm.content.symbolic_reading.system.label) || 'B.O.T.A. Tarot')}
+                  selectedCard={Array.isArray((selectedSwm.content || selectedSwm.payload || {}).cards) ? (selectedSwm.content || selectedSwm.payload).cards[0] : null}
+                  contextFocus={(selectedSwm.content && selectedSwm.content.context_focus) || null}
+                />
+              )}
             </div>
             <div className="p-3 border-t text-right">
               <button type="button" onClick={() => setSelectedSwm(null)} className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800">Cerrar</button>

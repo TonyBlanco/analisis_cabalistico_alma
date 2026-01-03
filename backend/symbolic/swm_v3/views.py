@@ -90,7 +90,24 @@ class SwmV3SymbolicReadingCreateView(APIView):
                     "content": reading.content,
                 }}, status_code=200)
 
-            qs = SymbolicReading.objects.filter(therapist=user).order_by("-created_at")[:100]
+            patient_id = request.query_params.get("patient_id")
+            qs = SymbolicReading.objects.filter(therapist=user)
+            if patient_id:
+                try:
+                    pid = int(patient_id)
+                except (TypeError, ValueError):
+                    return _error("Invalid patient_id.", status_code=400)
+                # Lazy import to avoid tight coupling on module import.
+                from api.models import Patient  # type: ignore
+
+                patient = Patient.objects.filter(pk=pid, therapist=user, is_active=True).first()
+                consultant_id = getattr(patient, "user_id", None) if patient else None
+                if consultant_id:
+                    qs = qs.filter(consultant_id=consultant_id)
+                else:
+                    qs = qs.none()
+
+            qs = qs.order_by("-created_at")[:100]
             items = [
                 {
                     "id": str(r.id),
@@ -386,3 +403,78 @@ class SwmV3SymbolicReadingCreateView(APIView):
         except Exception:
             return _error("Unexpected server error.", status_code=500, mode=mode)
 
+
+class SwmV3SymbolicReadingDetailView(APIView):
+    """Detail view for a single symbolic reading. Supports GET (therapist owner) and DELETE with strict checks.
+
+    DELETE enforces:
+    - authenticated user is a therapist
+    - therapist is owner of the reading
+    - reading.system_id corresponds to B.O.T.A. (allows several common variants)
+    - reading.reading_type is the allowed phase type
+    - reading.consent_mode represents a stored reading (not `no_store`)
+    Returns hard-delete (permanent) on success.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        try:
+            user = request.user
+            if not hasattr(user, "profile") or getattr(user.profile, "user_type", None) != "therapist":
+                return _error("Only therapist users can access symbolic readings.", status_code=403)
+
+            reading = SymbolicReading.objects.filter(id=pk, therapist=user).first()
+            if not reading:
+                return _error("Reading not found.", status_code=404)
+
+            return _json(
+                {
+                    "success": True,
+                    "item": {
+                        "id": str(reading.id),
+                        "system_id": reading.system_id,
+                        "consent_mode": reading.consent_mode,
+                        "reading_type": reading.reading_type,
+                        "created_at": reading.created_at.isoformat(),
+                        "content": reading.content,
+                    },
+                },
+                status_code=200,
+            )
+        except Exception:
+            return _error("Unexpected server error.", status_code=500)
+
+    def delete(self, request, pk):
+        try:
+            user = request.user
+            if not hasattr(user, "profile") or getattr(user.profile, "user_type", None) != "therapist":
+                return _error("Only therapist users can delete symbolic readings.", status_code=403)
+
+            reading = SymbolicReading.objects.filter(id=pk).first()
+            if not reading:
+                return _error("Reading not found.", status_code=404)
+
+            # Ownership check
+            if reading.therapist_id != user.id:
+                return _error("You are not the owner of this reading.", status_code=403)
+
+            # System check: accept common variants that indicate B.O.T.A.
+            sysid = (reading.system_id or "").lower()
+            allowed_sys_keywords = ["bota", "tarot_bota", "tarot-bota", "tarotbota"]
+            if not any(k in sysid for k in allowed_sys_keywords):
+                return _error("Deletion allowed only for B.O.T.A. symbolic readings.", status_code=403)
+
+            # Reading type check (phase 3 stored readings are 'educational')
+            if reading.reading_type != SymbolicReading.ReadingType.EDUCATIONAL:
+                return _error("Deletion allowed only for phase-3 educational symbolic readings.", status_code=403)
+
+            # Only allow deleting stored readings (cannot delete non-stored/no_store)
+            if reading.consent_mode == SymbolicReading.ConsentMode.NO_STORE:
+                return _error("Cannot delete non-stored observational readings.", status_code=403)
+
+            # Hard delete
+            reading.delete()
+            return _json({"success": True, "deleted": True}, status_code=200)
+        except Exception:
+            return _error("Unexpected server error.", status_code=500)

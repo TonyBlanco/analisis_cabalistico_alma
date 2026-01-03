@@ -6,8 +6,9 @@ import { getApiBaseUrl } from "@/lib/api-base";
 import SymbolicReadingPanel from "@/components/tarot/SymbolicReadingPanel";
 import dynamic from 'next/dynamic';
 import React from 'react';
+import { useToast } from '@/components/ui/toast';
 
-const BotaViewer = dynamic(() => import('@/components/tarot/bota/BotaSnapshotViewer'), { ssr: false });
+const BotaViewer = dynamic(() => import('@/components/tarot/bota/BotaSnapshotViewer').then((m) => (props: any) => m.default(props)), { ssr: false });
 
 type SnapshotItem = any;
 
@@ -15,6 +16,10 @@ export default function TherapistSymbolicHistoryPanel({ patientId }: { patientId
   const [items, setItems] = useState<SnapshotItem[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<SnapshotItem | null>(null);
+  const [selectedLoading, setSelectedLoading] = useState(false);
+  const [selectedError, setSelectedError] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<SnapshotItem | null>(null);
+  const toast = useToast();
 
   useEffect(() => {
     let cancelled = false;
@@ -36,7 +41,7 @@ export default function TherapistSymbolicHistoryPanel({ patientId }: { patientId
 
         // Filter strictly for persisted symbolic snapshots from B.O.T.A.
         const filtered = list.filter((it: any) => {
-          const system = (it.system || it.system_id || (it.payload && it.payload.system) || '').toString().toLowerCase();
+          const system = (it.system_id || it.system || (it.payload && it.payload.system) || '').toString().toLowerCase();
           const typ = (it.type || it.reading_type || (it.payload && it.payload.type) || '').toString().toLowerCase();
           return (system === 'tarot_bota' || system === 'bota' || system === 'tarot-bota') && (typ === 'symbolic' || typ === 'symbol' || typ === 'educational' || it.snapshot === true || it.is_snapshot === true);
         });
@@ -50,21 +55,42 @@ export default function TherapistSymbolicHistoryPanel({ patientId }: { patientId
     return () => { cancelled = true; };
   }, [patientId]);
 
-  const open = (it: SnapshotItem) => {
-    // Ensure no keywords / interactive fields are passed to child
-    const clone = JSON.parse(JSON.stringify(it));
-    if (clone.payload && Array.isArray(clone.payload.cards)) {
-      clone.payload.cards = clone.payload.cards.map((c: any) => {
-        if (c.symbols && typeof c.symbols === 'object') {
-          c.symbols = { ...c.symbols, keywords: [], keywordsReversed: [] };
+  const open = async (it: SnapshotItem) => {
+    const id = it?.id || it?.reading_id;
+    setSelected(it);
+    setSelectedLoading(true);
+    setSelectedError(null);
+
+    try {
+      if (!id) throw new Error('Invalid id');
+
+      const token = getAuthToken();
+      const headers: HeadersInit = { "Content-Type": "application/json", ...(token ? { Authorization: `Token ${token}` } : {}) };
+      const base = getApiBaseUrl();
+
+      const res = await fetch(`${base}/swm-v3/symbolic-readings/?id=${encodeURIComponent(String(id))}`, { headers });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body?.error || 'No se pudo cargar la lectura.');
+      }
+      const json = await res.json().catch(() => null);
+      const full = json?.item || null;
+      if (full) {
+        if (full.content && Array.isArray(full.content.cards)) {
+          full.content.cards = full.content.cards.map((c: any) => {
+            if (c.symbols && typeof c.symbols === 'object') {
+              c.symbols = { ...c.symbols, keywords: [], keywordsReversed: [] };
+            }
+            return c;
+          });
         }
-        if (c.card && typeof c.card === 'object') {
-          c.card = { ...c.card, keywords: [] };
-        }
-        return c;
-      });
+        setSelected(full);
+      }
+    } catch (e: any) {
+      setSelectedError(e?.message || 'Error inesperado al cargar');
+    } finally {
+      setSelectedLoading(false);
     }
-    setSelected(clone);
   };
 
   const close = () => setSelected(null);
@@ -86,7 +112,8 @@ export default function TherapistSymbolicHistoryPanel({ patientId }: { patientId
                 <div className="text-xs text-slate-600">{it.summary || (it.payload && it.payload.summary) || ''}</div>
               </div>
               <div>
-                <button type="button" onClick={() => open(it)} className="text-xs text-sky-600">Abrir lectura</button>
+                  <button type="button" onClick={() => open(it)} className="text-xs text-sky-600 mr-3">Abrir lectura</button>
+                  <button type="button" onClick={() => setDeleting(it)} className="text-xs text-red-600">Eliminar</button>
               </div>
             </li>
           );
@@ -101,8 +128,13 @@ export default function TherapistSymbolicHistoryPanel({ patientId }: { patientId
               <div className="text-sm font-semibold">Lectura simbólica observacional. No diagnóstica. No predictiva. No clínica.</div>
             </div>
             <div className="p-4 therapist-readonly">
-              {((selected.system || selected.system_id || (selected.payload && selected.payload.symbolic_reading && selected.payload.symbolic_reading.system && selected.payload.symbolic_reading.system.id)) || '').toString().toLowerCase().includes('bota') ? (
-                <BotaViewer snapshot={selected.payload || selected} />
+              {selectedLoading ? (
+                <div className="text-sm text-slate-600">Cargando lectura...</div>
+              ) : selectedError ? (
+                <div className="text-sm text-red-600">{selectedError}</div>
+              ) : null}
+              {(((selected.payload && selected.payload.system && selected.payload.system.id) || selected.system || selected.system_id) || '').toString().toLowerCase() === 'bota' ? (
+                <BotaViewer snapshot={selected.content || selected.payload || selected} />
               ) : (
                 <SymbolicReadingPanel
                   systemLabel={(selected.system_label || selected.system || selected.system_id || (selected.payload && selected.payload.system) || 'Sistema simbólico')}
@@ -121,6 +153,50 @@ export default function TherapistSymbolicHistoryPanel({ patientId }: { patientId
             :global(.therapist-readonly) .rounded-full { display: none !important; }
             :global(.therapist-readonly) .inline-flex { display: none !important; }
           `}</style>
+        </div>
+      ) : null}
+      {deleting ? (
+        <div className="fixed inset-0 z-60 flex items-center justify-center p-6">
+          <div className="absolute inset-0 bg-black/40" />
+          <div className="relative max-w-lg w-full bg-white rounded shadow-lg p-6">
+            <h3 className="text-lg font-semibold mb-2">Eliminar lectura simbólica</h3>
+            <p className="text-sm text-slate-700 mb-4">Confirmación explícita: esta acción elimina definitivamente el registro.</p>
+            <div className="text-right">
+              <button onClick={() => setDeleting(null)} className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm mr-2">Cancelar</button>
+              <button
+                onClick={async () => {
+                  const it = deleting;
+                  if (!it) return;
+                  try {
+                    const token = getAuthToken();
+                    const headers: HeadersInit = { 'Content-Type': 'application/json', ...(token ? { Authorization: `Token ${token}` } : {}) };
+                    const base = getApiBaseUrl();
+                    const id = it.id || it.reading_id;
+                    if (!id) throw new Error('Invalid id');
+                    const res = await fetch(`${base}/swm-v3/symbolic-readings/${id}/`, { method: 'DELETE', headers });
+                    if (!res.ok) {
+                      let err = await res.json().catch(() => null);
+                      toast.error('Error', err?.error || 'No se pudo eliminar la lectura.');
+                      setDeleting(null);
+                      return;
+                    }
+                    // remove from list
+                    setItems((prev) => prev.filter((x) => (x.id || x.reading_id) !== id));
+                    setDeleting(null);
+                    // close viewer if deleting selected
+                    if (selected && ((selected.id || selected.reading_id) === id)) setSelected(null);
+                    toast.showToast({ type: 'success', message: 'Lectura simbólica eliminada' });
+                  } catch (e: any) {
+                    toast.error('Error', e?.message || 'Error inesperado al eliminar');
+                    setDeleting(null);
+                  }
+                }}
+                className="rounded-md bg-red-600 text-white px-3 py-2 text-sm"
+              >
+                Eliminar definitivamente
+              </button>
+            </div>
+          </div>
         </div>
       ) : null}
     </section>

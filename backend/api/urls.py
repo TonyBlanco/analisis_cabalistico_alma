@@ -124,6 +124,7 @@ from .resonancia_views import (
     ResonanciaRelationListCreateView,
 )
 from symbolic.swm_v3.views import SwmV3SymbolicReadingCreateView
+from symbolic.swm_v3.views import SwmV3SymbolicReadingDetailView
 
 urlpatterns = [
     # ⚠️ ENDPOINTS TEMPORALES - ELIMINAR DESPUÉS DE USAR ⚠️
@@ -175,6 +176,7 @@ urlpatterns = [
 
     # SWM v3 (Phase 3): governed persistence for symbolic readings (mock only)
     path('swm-v3/symbolic-readings/', SwmV3SymbolicReadingCreateView.as_view(), name='swm_v3_symbolic_readings_create'),
+    path('swm-v3/symbolic-readings/<uuid:pk>/', SwmV3SymbolicReadingDetailView.as_view(), name='swm_v3_symbolic_readings_detail'),
 
     path('therapist/patients/<int:id>/tarot-analysis/generate-and-save/', GenerateAndSaveTarotAnalysisView.as_view(), name='tarot_analysis_generate_and_save'),
     path('therapist/patients/<int:id>/cabalistic-analysis/', SaveCabalisticAnalysisView.as_view(), name='save_cabalistic_analysis'),

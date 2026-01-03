@@ -18,6 +18,7 @@ const BotaViewerWrapper = dynamic(() => import('@/components/tarot/bota/BotaSnap
 import { setActivePatientId } from '@/lib/active-patient';
 import { openPrintableReport } from '@/lib/report-printing';
 import { getApiBaseUrl } from '@/lib/api-base';
+import { isTherapist } from '@/lib/auth';
 
 const API_URL = getApiBaseUrl();
 
@@ -69,6 +70,9 @@ export default function PatientSymbolicOverview({ patientId }: PatientSymbolicOv
   const [exportLevel, setExportLevel] = useState<'summary' | 'audit'>('summary');
   const [swmItems, setSwmItems] = useState<any[]>([]);
   const [selectedSwm, setSelectedSwm] = useState<any | null>(null);
+  const [selectedSwmLoading, setSelectedSwmLoading] = useState(false);
+  const [selectedSwmError, setSelectedSwmError] = useState<string | null>(null);
+  const [swmDeleteCandidate, setSwmDeleteCandidate] = useState<any | null>(null);
 
   const activatePatient = () => {
     const parsedId = typeof patientId === 'string' ? parseInt(patientId, 10) : patientId;
@@ -138,9 +142,11 @@ export default function PatientSymbolicOverview({ patientId }: PatientSymbolicOv
         const j = await res.json().catch(() => null);
         const list = Array.isArray(j) ? j : (j && Array.isArray(j.items) ? j.items : []);
         const filtered = list.filter((it: any) => {
-          const typ = (it.type || it.reading_type || (it.content && it.content.reading_type) || '').toString().toLowerCase();
-          const system = (it.system || it.system_id || (it.content && it.content.system) || (it.content && it.content.symbolic_reading && it.content.symbolic_reading.system && it.content.symbolic_reading.system.id) || '').toString().toLowerCase();
-          return typ === 'symbolic' || typ === 'educational' || it.snapshot === true || it.is_snapshot === true || (it.content && it.content.cards) ? (system === 'tarot_bota' || system === 'bota' || system === 'tarot-bota') : false;
+          const system = (it.system_id || it.system || it.systemId || '').toString().toLowerCase();
+          const typ = (it.reading_type || it.type || '').toString().toLowerCase();
+          const isBota = system === 'tarot_bota' || system === 'bota' || system === 'tarot-bota';
+          const isSnapshot = typ === 'educational' || typ === 'symbolic' || it.snapshot === true || it.is_snapshot === true;
+          return Boolean(isBota && isSnapshot);
         });
         setSwmItems(filtered);
       } catch (e) {
@@ -150,6 +156,57 @@ export default function PatientSymbolicOverview({ patientId }: PatientSymbolicOv
 
     fetchSwm();
   }, [patientId]);
+
+  const openSwmReading = async (it: any) => {
+    const id = it?.id || it?.reading_id;
+    if (!id) {
+      setSelectedSwm(it);
+      return;
+    }
+
+    setSelectedSwm(it);
+    setSelectedSwmLoading(true);
+    setSelectedSwmError(null);
+
+    try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
+      if (!token) throw new Error('No auth token found');
+
+      const res = await fetch(
+        `${API_URL.replace(/\/$/, '')}/swm-v3/symbolic-readings/?id=${encodeURIComponent(String(id))}`,
+        { headers: { 'Content-Type': 'application/json', Authorization: `Token ${token}` } }
+      );
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body?.error || 'No se pudo cargar la lectura.');
+      }
+      const json = await res.json().catch(() => null);
+      const full = json?.item || null;
+      if (full) setSelectedSwm(full);
+    } catch (err: any) {
+      setSelectedSwmError(err?.message || 'No se pudo cargar la lectura.');
+    } finally {
+      setSelectedSwmLoading(false);
+    }
+  };
+
+  const deleteSwmReading = async (it: any) => {
+    const id = it?.id || it?.reading_id;
+    if (!id) return;
+
+    const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
+    if (!token) return;
+
+    const res = await fetch(`${API_URL.replace(/\/$/, '')}/swm-v3/symbolic-readings/${encodeURIComponent(String(id))}/`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json', Authorization: `Token ${token}` },
+    });
+    if (!res.ok) return;
+
+    setSwmItems((prev) => prev.filter((x) => (x?.id || x?.reading_id) !== id));
+    setSwmDeleteCandidate(null);
+    if (selectedSwm && (selectedSwm?.id || selectedSwm?.reading_id) === id) setSelectedSwm(null);
+  };
 
   const downloadFile = (filename: string, content: string, mimeType: string) => {
     if (typeof window === 'undefined') return;
@@ -309,6 +366,27 @@ export default function PatientSymbolicOverview({ patientId }: PatientSymbolicOv
         )}
       </div>
 
+      {/* Módulos simbólicos observacionales (NO clínicos, NO tests) */}
+      <section className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+        <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
+          <h3 className="text-base font-semibold text-gray-900">Módulos simbólicos observacionales</h3>
+          <p className="text-xs text-gray-500 mt-1">No se mezclan con tests clínicos</p>
+        </div>
+        <div className="px-6 py-4 flex items-center justify-between gap-4">
+          <div>
+            <div className="font-medium text-gray-900">Tarot B.O.T.A.</div>
+            <div className="text-xs text-gray-600 mt-1">{swmItems.length} lecturas guardadas</div>
+          </div>
+          <span
+            className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
+              swmItems.length > 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600'
+            }`}
+          >
+            {swmItems.length > 0 ? 'Completado' : 'Sin registros'}
+          </span>
+        </div>
+      </section>
+
       {/* Astrología (Carta Natal) */}
       <section className="bg-white border border-gray-200 rounded-lg overflow-hidden">
         <div className="px-6 py-4 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
@@ -403,7 +481,10 @@ export default function PatientSymbolicOverview({ patientId }: PatientSymbolicOv
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <button onClick={() => setSelectedSwm(it)} className="text-xs text-sky-600">Ver lectura</button>
+                    <button onClick={() => openSwmReading(it)} className="text-xs text-sky-600">Ver lectura</button>
+                    {isTherapist() ? (
+                      <button onClick={() => setSwmDeleteCandidate(it)} className="text-xs text-red-600">Eliminar</button>
+                    ) : null}
                   </div>
                 </div>
               </div>
@@ -530,7 +611,12 @@ export default function PatientSymbolicOverview({ patientId }: PatientSymbolicOv
               <div className="text-sm font-semibold">Lectura simbólica observacional. No diagnóstica. No clínica.</div>
             </div>
             <div className="p-4">
-              {((selectedSwm.system || selectedSwm.system_id || (selectedSwm.content && selectedSwm.content.symbolic_reading && selectedSwm.content.symbolic_reading.system && selectedSwm.content.symbolic_reading.system.id)) || '').toString().toLowerCase().includes('bota') ? (
+              {selectedSwmLoading ? (
+                <div className="text-sm text-slate-600">Cargando lectura...</div>
+              ) : selectedSwmError ? (
+                <div className="text-sm text-red-600">{selectedSwmError}</div>
+              ) : null}
+              {(((selectedSwm.content && selectedSwm.content.system && selectedSwm.content.system.id) || selectedSwm.system || selectedSwm.system_id) || '').toString().toLowerCase() === 'bota' ? (
                 // Use dedicated B.O.T.A. snapshot viewer
                 // Import dynamically to avoid SSR issues
                 <React.Suspense fallback={<div>Cargando...</div>}>
@@ -546,9 +632,37 @@ export default function PatientSymbolicOverview({ patientId }: PatientSymbolicOv
               )}
             </div>
             <div className="p-3 border-t text-right">
+              {isTherapist() ? (
+                <button
+                  type="button"
+                  onClick={() => setSwmDeleteCandidate(selectedSwm)}
+                  className="mr-2 rounded-md border border-red-200 bg-white px-3 py-2 text-sm text-red-700"
+                >
+                  Eliminar
+                </button>
+              ) : null}
               <button type="button" onClick={() => setSelectedSwm(null)} className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800">Cerrar</button>
             </div>
             <style jsx>{` :global(.therapist-readonly) button, :global(.therapist-readonly) a { display: none !important; } `}</style>
+          </div>
+        </div>
+      ) : null}
+
+      {swmDeleteCandidate && isTherapist() ? (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-6">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setSwmDeleteCandidate(null)} />
+          <div className="relative max-w-lg w-full bg-white rounded shadow-lg p-6">
+            <h3 className="text-lg font-semibold mb-2">Eliminar lectura B.O.T.A.</h3>
+            <p className="text-sm text-slate-700 mb-4">Confirmación explícita: esta acción elimina definitivamente el registro.</p>
+            <div className="text-right">
+              <button onClick={() => setSwmDeleteCandidate(null)} className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm mr-2">Cancelar</button>
+              <button
+                onClick={() => deleteSwmReading(swmDeleteCandidate)}
+                className="rounded-md bg-red-600 text-white px-3 py-2 text-sm"
+              >
+                Eliminar definitivamente
+              </button>
+            </div>
           </div>
         </div>
       ) : null}

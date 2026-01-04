@@ -43,3 +43,9 @@ Lista de Workspaces listos para aislamiento inmediato: Resonancia Ancestral, SCI
 Riesgos residuales: Contaminación cruzada si exportaciones manuales no se controlan; riesgo de modificación accidental en data legacy compleja.
 
 Recomendaciones solo de encapsulación: Implementar UI de export manual en cada Workspace; remover cualquier listener automático de integración; validar aislamiento en auditorías futuras.
+
+## Referencias y contrato de export
+Todas las exportaciones manuales desde los Workspaces deben cumplir con el contrato documental:
+- `docs/WORKSPACE_EXPORT_CONTRACT.md`
+
+Referencias canónicas adicionales: ver `docs/DOCUMENT_AUTHORITY_INDEX.md` para el orden de lectura recomendado.

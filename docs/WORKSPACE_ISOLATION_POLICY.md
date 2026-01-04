@@ -188,6 +188,7 @@ Este documento es complementario y obligatorio junto a:
 * `DOCUMENTATION_GOVERNANCE.md`
 * `ARCHITECTURE_SYMBOLIC_SYSTEM.md`
 * `SWM_V3_GOVERNANCE_ARTIFACTS.md`
+* `WORKSPACE_EXPORT_CONTRACT.md`
 
 En caso de conflicto, prevalece la gobernanza y el lock.
 

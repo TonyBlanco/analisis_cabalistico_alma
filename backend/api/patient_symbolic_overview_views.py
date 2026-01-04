@@ -20,6 +20,11 @@ from .models import CabalisticAnalysis
 from .test_models import TestResult
 from .permissions import IsTherapist
 
+# Optional: include SWM v3 symbolic readings (B.O.T.A. snapshots) in overview completeness
+try:
+    from symbolic.swm_v3.models import SymbolicReading  # type: ignore
+except Exception:
+    SymbolicReading = None
 
 class PatientSymbolicOverviewView(APIView):
     """
@@ -148,6 +153,15 @@ class PatientSymbolicOverviewView(APIView):
             modules_completed.append('natal_chart')
         if any(a['analysis_type'] == 'tarot' for a in cabalistic_analyses):
             modules_completed.append('tarot')
+        # Also consider SWM v3 symbolic readings (e.g. B.O.T.A. snapshots) as Tarot
+        try:
+            if SymbolicReading is not None and getattr(patient, 'user_id', None):
+                swm_qs = SymbolicReading.objects.filter(therapist=request.user, consultant_id=patient.user_id)
+                if swm_qs.exists() and 'tarot' not in modules_completed:
+                    modules_completed.append('tarot')
+        except Exception:
+            # keep overview tolerant to failures here
+            pass
         # Cábala se considera completada si existe cualquier análisis cabalístico guardado
         # distinto de tarot (incluye tipos extendidos legacy como 'shekinah').
         if any(a.get('analysis_type') and a.get('analysis_type') != 'tarot' for a in cabalistic_analyses):

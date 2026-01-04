@@ -7,6 +7,7 @@ import SymbolicReadingPanel from "@/components/tarot/SymbolicReadingPanel";
 import dynamic from 'next/dynamic';
 import React from 'react';
 import { useToast } from '@/components/ui/toast';
+import { isTherapist } from '@/lib/auth';
 
 const BotaViewer = dynamic(() => import('@/components/tarot/bota/BotaSnapshotViewer').then((m) => (props: any) => m.default(props)), { ssr: false });
 
@@ -144,6 +145,15 @@ export default function TherapistSymbolicHistoryPanel({ patientId }: { patientId
               )}
             </div>
             <div className="p-3 border-t text-right">
+              {isTherapist() ? (
+                <button
+                  type="button"
+                  onClick={() => setDeleting(selected)}
+                  className="mr-2 rounded-md border border-red-200 bg-white px-3 py-2 text-sm text-red-700"
+                >
+                  Eliminar lectura
+                </button>
+              ) : null}
               <button type="button" onClick={close} className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800">Cerrar</button>
             </div>
           </div>

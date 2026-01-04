@@ -84,86 +84,30 @@ export default function BotaSnapshotViewer({ snapshot }: { snapshot: Snapshot })
 
       <div className="space-y-4">
         {cards.map((card, idx) => {
-          const identity = resolveBotaIdentity({
-            id: card.id,
-            name: card.name || card.id,
-            nameSpanish: card.nameSpanish || card.id,
-            symbols: card.symbols && typeof card.symbols === "object" ? card.symbols : {},
-            imageUrl: null,
-          });
-          const visual = identity?.id ? getBotaVisualStructure(identity.id) : null;
-
           const sr: any = (card as any).symbolic_reading;
           const normalized = normalizeReading(sr);
 
-          const system = sr?.system?.label || systemLabel;
           const positionLabel = card.position?.nameSpanish || card.position?.id || "";
+          const orientation = (card.orientation || card.oriented || (card.symbolic_reading && card.symbolic_reading.orientation) || (card.symbolic_reading && card.symbolic_reading.reversed) || '').toString();
+          const imageSlug = (card.slug || card.symbols?.slug || card.id || '').toString();
 
-          const consciousnessText =
-            extractText(sr?.consciousness) || extractText(normalized?.consciousness);
-          const correspondencesText =
-            extractText(sr?.correspondences) || extractText(normalized?.correspondences);
-          const synthesisText = extractText(sr?.synthesis) || extractText(normalized?.synthesis);
-
-          const coreMeaning = extractText(normalized?.core_meaning);
-          const positionMeaning = extractText(normalized?.position_meaning);
-          const contextualMeaning = extractText(normalized?.contextual_meaning);
-          const systemFrame = extractText(normalized?.system_frame);
-
-          const kabbalistic =
-            card.symbols?.kabbalistic && typeof card.symbols.kabbalistic === "object"
-              ? card.symbols.kabbalistic
-              : null;
-          const rawPairs: Array<[string, string]> = [
-            ["Letra hebrea", extractText(kabbalistic?.hebrewLetter)],
-            ["Sendero", extractText(kabbalistic?.path)],
-            [
-              "Sefirot",
-              Array.isArray(kabbalistic?.sefirot)
-                ? kabbalistic.sefirot.join(" · ")
-                : extractText(kabbalistic?.sefirot),
-            ],
-            ["Elemento", extractText(kabbalistic?.element)],
-            ["Planeta", extractText(kabbalistic?.planet)],
-            ["Signo", extractText(kabbalistic?.sign)],
-            ["Decanato", extractText(kabbalistic?.decan)],
-          ];
-          const kabbalisticPairs = rawPairs.filter((pair) => Boolean(pair[1]));
+          const consciousnessText = extractText(sr?.consciousness) || extractText(normalized?.consciousness);
+          const correspondencesText = extractText(sr?.correspondences) || extractText(normalized?.correspondences);
+          const coreMeaning = extractText(normalized?.core_meaning) || extractText(normalized?.system_frame);
 
           return (
             <div key={`${card.id}-${idx}`} className="rounded-md border border-slate-200 bg-white p-4">
               <div className="flex items-start gap-4">
-                {visual?.imagePath ? (
-                  <img
-                    src={visual.imagePath}
-                    alt={identity?.nameSpanish || card.id}
-                    className="h-20 w-20 rounded-md bg-gray-50 object-contain"
-                  />
-                ) : (
-                  <div className="flex h-20 w-20 items-center justify-center rounded-md bg-gray-50 text-xs text-slate-400">
-                    {card.id}
-                  </div>
-                )}
+                <img
+                  src={`/tarot/${imageSlug}.png`}
+                  alt={card.nameSpanish || card.name || card.id}
+                  className="h-20 w-20 rounded-md bg-gray-50 object-contain"
+                />
 
                 <div className="flex-1">
-                  <div className="text-sm font-semibold">
-                    {identity?.nameSpanish || card.nameSpanish || card.name || card.id}
-                  </div>
-                  {positionLabel ? (
-                    <div className="text-xs text-slate-600">Posición: {positionLabel}</div>
-                  ) : null}
-                  {system ? <div className="mt-1 text-[11px] text-slate-500">Sistema: {system}</div> : null}
-
-                  {kabbalisticPairs.length ? (
-                    <div className="mt-3 grid grid-cols-2 gap-3 text-sm text-slate-700">
-                      {kabbalisticPairs.map(([label, value]) => (
-                        <div key={label}>
-                          <div className="text-xs text-slate-500">{label}</div>
-                          <div className="font-medium">{value}</div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : null}
+                  <div className="text-sm font-semibold">{card.nameSpanish || card.name || card.id}</div>
+                  {positionLabel ? <div className="text-xs text-slate-600">Posición: {positionLabel}</div> : null}
+                  {orientation ? <div className="text-xs text-slate-600">Orientación: {orientation}</div> : null}
 
                   {consciousnessText ? (
                     <div className="mt-3 whitespace-pre-wrap text-sm text-slate-700">
@@ -184,31 +128,6 @@ export default function BotaSnapshotViewer({ snapshot }: { snapshot: Snapshot })
                       <div className="text-xs font-semibold text-slate-600">Lectura simbólica</div>
                       <div className="mt-1">{coreMeaning}</div>
                     </div>
-                  ) : null}
-
-                  {positionMeaning ? (
-                    <div className="mt-3 whitespace-pre-wrap text-sm text-slate-700">
-                      <div className="text-xs font-semibold text-slate-600">Sentido por posición</div>
-                      <div className="mt-1">{positionMeaning}</div>
-                    </div>
-                  ) : null}
-
-                  {contextualMeaning ? (
-                    <div className="mt-3 whitespace-pre-wrap text-sm text-slate-700">
-                      <div className="text-xs font-semibold text-slate-600">Contexto</div>
-                      <div className="mt-1">{contextualMeaning}</div>
-                    </div>
-                  ) : null}
-
-                  {synthesisText ? (
-                    <div className="mt-3 whitespace-pre-wrap text-sm text-slate-700">
-                      <div className="text-xs font-semibold text-slate-600">Síntesis</div>
-                      <div className="mt-1">{synthesisText}</div>
-                    </div>
-                  ) : null}
-
-                  {systemFrame ? (
-                    <div className="mt-3 whitespace-pre-wrap text-xs text-slate-500">{systemFrame}</div>
                   ) : null}
                 </div>
               </div>

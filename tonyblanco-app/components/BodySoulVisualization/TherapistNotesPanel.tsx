@@ -43,17 +43,7 @@ export default function TherapistNotesPanel({
   }, [hasManualToggle]);
 
   useEffect(() => {
-    const handleCopy = (event: Event) => {
-      const detail = (event as CustomEvent<{ text?: string }>).detail;
-      const incoming = detail?.text?.trim();
-      if (!incoming) return;
-      setHasManualToggle(true);
-      setIsCollapsed(false);
-      setDraftStatus('observed');
-      setDraftText((prev) => (prev ? `${prev}\n\n${incoming}` : incoming));
-    };
-    window.addEventListener('visualization-copy-notes', handleCopy as EventListener);
-    return () => window.removeEventListener('visualization-copy-notes', handleCopy as EventListener);
+    // Removed automatic copy handler: notes must remain manual-only.
   }, []);
 
   const target = useMemo(() => {

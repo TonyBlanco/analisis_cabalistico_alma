@@ -1163,26 +1163,37 @@ class AssignTestToPatientView(APIView):
         # Do NOT create records here; prefer existing DB entries. Do not filter by is_active
         # to allow assigning historical/legacy entries when execution_mode indicates holistic.
         from django.db.models import Q
+        import re
 
         try:
-            # Build a safe Q that only references `slug` if the field exists on the model.
-            model_fields = {f.name for f in TestModule._meta.get_fields()}
-            q = Q(code__iexact=test_code)
-            if 'slug' in model_fields:
-                q |= Q(slug__iexact=test_code)
+            # Tolerant lookup: normalize codes by removing hyphens/underscores and lowercasing
+            def _normalize(s: str) -> str:
+                return re.sub(r"[-_]", "", (s or "")).lower()
 
-            test_module = (
-                TestModule.objects
-                .filter(q)
-                .order_by('-is_active', '-updated_at')
-                .first()
-            )
+            raw_code = test_code
+            norm = _normalize(raw_code)
+
+            candidates = []
+            for t in TestModule.objects.all():
+                if _normalize(getattr(t, 'code', '')) == norm:
+                    candidates.append(t)
+                    continue
+                if getattr(t, 'slug', None) and _normalize(getattr(t, 'slug')) == norm:
+                    candidates.append(t)
+
+            # Prefer active and recently updated modules
+            if candidates:
+                candidates.sort(key=lambda x: (getattr(x, 'is_active', False), getattr(x, 'updated_at', None) or 0), reverse=True)
+                test_module = candidates[0]
+            else:
+                test_module = None
+
             logger.error("ASSIGN_TEST: step 6 - test module resolved")
         except Exception as e:
             logger.exception("ASSIGN_TEST: FAIL loading test module")
             return Response(
                 {"detail": f"Error loading test: {str(e)}"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
         if not test_module:

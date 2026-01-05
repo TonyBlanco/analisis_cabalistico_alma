@@ -1197,12 +1197,65 @@ class AssignTestToPatientView(APIView):
             )
 
         if not test_module:
+            # Fallback: allow assignment-only for legacy tests (no TestModule in DB)
+            # Build a minimal legacy map (normalized keys)
+            raw_legacy_map = {
+                "phq-9": "phq-9",
+                "phq9": "phq-9",
+                "gad-7": "gad-7",
+                "gad7": "gad-7",
+                "bai": "bai",
+                "bdi-ii": "bdi-ii",
+                "isi": "insomnia",
+                "stai": "stai",
+                "scl-90": "scl-90",
+                "scl90": "scl-90",
+                "mcmi-iv": "mcmi-iv",
+                "pai": "pai",
+            }
+
+            def _normalize_key(s: str) -> str:
+                return re.sub(r"[-_]", "", (s or "")).lower()
+
+            legacy_map = { _normalize_key(k): v for k, v in raw_legacy_map.items() }
+            legacy_key = _normalize_key(test_code)
+
+            if legacy_key in legacy_map:
+                legacy_code = legacy_map[legacy_key]
+                try:
+                    # Create a TestResult entry as an assignment-only legacy marker
+                    tr = TestResult.objects.create(
+                        user=request.user,
+                        patient=patient,
+                        test_module=None,
+                        test_id=legacy_code,
+                        input_data={},
+                        result_data={'assignment_only': True},
+                        details={
+                            'assigned_by': request.user.id,
+                            'legacy_assignment': True,
+                            'status': 'assigned_pending_legacy'
+                        },
+                    )
+                    return Response(
+                        {
+                            'detail': 'Test legacy asignado correctamente',
+                            'legacy': True,
+                            'code': legacy_code,
+                            'result_id': tr.id,
+                        },
+                        status=status.HTTP_201_CREATED,
+                    )
+                except Exception as e:
+                    logger.exception('ASSIGN_TEST: FAIL creating legacy assignment')
+                    return Response({'detail': f'Error creando asignación legacy: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
             return Response(
                 {
                     'error': 'Test no encontrado',
                     'message': f'El test con código {test_code} no existe'
                 },
-                status=status.HTTP_404_NOT_FOUND
+                status=status.HTTP_404_NOT_FOUND,
             )
 
         # Functional validation: only allow assignment if the module is authorized for holistic execution

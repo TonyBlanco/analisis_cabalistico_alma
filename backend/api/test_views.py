@@ -977,9 +977,30 @@ class PatientPreviousTestsView(APIView):
                 pass
         
         serializer = TestResultSerializer(results, many=True)
+        serialized = serializer.data
+
+        # Augment serialized results with legacy assignment info so frontend can display them
+        augmented = []
+        for obj, ser in zip(results, serialized):
+            # If this is a legacy assignment (no test_module and flagged in details), normalize fields
+            try:
+                is_legacy = obj.test_module is None and isinstance(obj.details, dict) and obj.details.get('legacy_assignment') is True
+            except Exception:
+                is_legacy = False
+
+            if is_legacy:
+                # Ensure frontend-friendly fields exist: test_module_name, test_module_code
+                ser['test_module_name'] = ser.get('test_module_name') or (obj.test_id or None)
+                ser['test_module_code'] = ser.get('test_module_code') or (obj.test_id or None)
+                # Expose a legacy flag and status for UI consumption
+                ser['legacy'] = True
+                ser['legacy_status'] = (obj.details or {}).get('status', 'assigned_pending_legacy')
+
+            augmented.append(ser)
+
         return Response({
-            'count': len(results),
-            'results': serializer.data
+            'count': len(augmented),
+            'results': augmented
         })
 
 

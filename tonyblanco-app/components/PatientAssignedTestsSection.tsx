@@ -44,11 +44,11 @@ export default function PatientAssignedTestsSection() {
       const response = await getAvailableTests();
       const allTests = response.tests || [];
 
-      // Filter: Only patient_self tests that are assigned (has_special_access)
+      // Filter: Only holistically-governed tests that are assigned (has_special_access)
       const assigned = allTests.filter((test: TestModule) => {
         const isAssigned = test.user_access?.has_special_access === true;
-        const isPatientSelf = test.available_for_personal === true;
-        return isAssigned && isPatientSelf;
+        const isHolistic = (test as any).execution_mode === 'holistic';
+        return isAssigned && isHolistic;
       });
 
       setAssignedTests(assigned);

@@ -160,7 +160,7 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
     setShowConfirmModal(false);
     try {
       const { assignTestToPatient } = await import('@/lib/assignment-api');
-      await assignTestToPatient(activePatientId, testToAssign.code, 'patient_self');
+      await assignTestToPatient(activePatientId, testToAssign.code);
       // Registrar asignación local para reflejar en el workspace mientras el backend responde.
       const key = 'assigned_tests_by_patient';
       const existing = typeof window !== 'undefined' ? localStorage.getItem(key) : null;

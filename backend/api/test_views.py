@@ -1112,14 +1112,28 @@ class AssignTestToPatientView(APIView):
             )
         
         # Ensure test is available for personal/patient execution
-        if not test_module.available_for_personal:
-            return Response(
-                {
-                    'error': 'Test no disponible',
-                    'message': 'Este test no está disponible para ejecución por pacientes'
-                },
-                status=status.HTTP_403_FORBIDDEN
-            )
+        # Prefer explicit `execution_mode` on the TestModule when present (non-invasive).
+        # If the module declares an execution_mode, allow assignment only for the
+        # holistically-governed mode. Otherwise, fall back to legacy `available_for_personal` flag.
+        exec_mode = getattr(test_module, 'execution_mode', None)
+        if exec_mode is not None:
+            if exec_mode != 'holistic':
+                return Response(
+                    {
+                        'error': 'Modo de ejecución no permitido',
+                        'message': 'El test no está habilitado para asignación en modo holístico'
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        else:
+            if not test_module.available_for_personal:
+                return Response(
+                    {
+                        'error': 'Test no disponible',
+                        'message': 'Este test no está disponible para ejecución por pacientes'
+                    },
+                    status=status.HTTP_403_FORBIDDEN
+                )
         
         # Create or update UserTestAccess for the patient's user account
         access, created = UserTestAccess.objects.get_or_create(

@@ -100,7 +100,6 @@ export default function AssignedTestsSection({
 
     try {
       const remoteResults = await getTestResultsForPatient({ patient_id: activePatientId });
-      // Use backend as the single source of truth — remove localStorage merge (T6.10).
       setAssignedTests(remoteResults);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error al cargar tests asignados';

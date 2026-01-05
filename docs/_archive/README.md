@@ -252,8 +252,8 @@ See:
 - `04_SYMBOLIC_SYSTEM/SYMBOLIC_INTERPRETER_AI_IMPLEMENTATION.md`: Phase 3+4 implementation
 - `04_SYMBOLIC_SYSTEM/SYMBOLIC_INTERPRETER_PROFESSIONAL_PROMPT.md`: Phase 4 technical spec
 
-### Clinical Workflows
-- `00_SOURCE_OF_TRUTH/AUDITORIA CABALA APP 12182025.md`: Clinical audit
+### Holistic Workflows
+- `00_SOURCE_OF_TRUTH/AUDITORIA CABALA APP 12182025.md`: Auditoría holística
 - `../backend/API_DOCUMENTATION.md`: Backend API reference
 
 ### BioEmotional
@@ -264,7 +264,7 @@ See:
 
 ## Key Principles
 
-### Clinical Governance
+### Holistic Governance
 1. **No autoevaluation**: Patients cannot analyze themselves
 2. **Therapist ownership**: Only therapists can create clinical analyses
 3. **Execution mode**: Always determined by backend, never from request

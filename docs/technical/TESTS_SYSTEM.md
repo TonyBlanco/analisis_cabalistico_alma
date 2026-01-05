@@ -1,6 +1,6 @@
 > ⚠️ DOCUMENTO HISTÓRICO / LEGACY  
 > Este documento describe un sistema anterior de tests con membresías.  
-> NO es aplicable al sistema clínico actual (ver AUDITORIA CABALA APP 12182025.md).
+> NO es aplicable al sistema clínico legacy actual (ver AUDITORIA CABALA APP 12182025.md).
 
 # Sistema de Tests Modulares
 

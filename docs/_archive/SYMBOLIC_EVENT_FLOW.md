@@ -97,5 +97,7 @@ es revisada por humanos y vive fuera del UI. Esta seccion es descriptiva
 y no implica implementacion ni ejecucion.
 
 ## Fuente de verdad
-- AUDITORIA CABALA APP 12182025.md (normativo clinico).
+-- AUDITORIA CABALA APP 12182025.md (normativo holístico).
+
+Este documento es normativo dentro del marco de Diagnóstico Holístico Gobernado definido en la Auditoría vigente.
 - SOURCE_OF_TRUTH.md (jerarquia).

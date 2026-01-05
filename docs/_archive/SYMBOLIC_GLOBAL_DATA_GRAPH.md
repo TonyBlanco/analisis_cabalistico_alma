@@ -63,5 +63,7 @@ Los hubs no interpretan. Solo permiten cruce masivo de datos.
 - No reglas clinicas.
 
 ## Fuente de verdad
-- AUDITORIA CABALA APP 12182025.md (normativo clinico).
+-- AUDITORIA CABALA APP 12182025.md (normativo holístico).
+
+Este documento es normativo dentro del marco de Diagnóstico Holístico Gobernado definido en la Auditoría vigente.
 - SOURCE_OF_TRUTH.md mantiene la jerarquia documental.

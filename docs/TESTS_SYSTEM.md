@@ -1,6 +1,10 @@
-> ΓÜá∩╕Å DOCUMENTO HIST├ôRICO / LEGACY  
-> Este documento describe un sistema anterior de tests con membres├¡as.  
-> NO es aplicable al sistema cl├¡nico actual (ver AUDITORIA CABALA APP 12182025.md).
+> 📌 DOCUMENTO LEGACY / HISTÓRICO — LEER ANTES DE USAR
+>
+> Este documento conserva la descripción histórica de tests y flujos clínicos legacy. No gobierna el Diagnóstico Holístico vigente y NO es fuente normativa para prácticas holísticas actuales.
+>
+> Uso permitido: trazabilidad histórica, referencia de versiones legacy y documentación de migraciones. Cualquier acción operativa o técnica debe remitirse a `AUDITORIA CABALA APP 12182025.md` y `SOURCE_OF_TRUTH.md`.
+
+> NOTA: El Diagnóstico Holístico actual es una evaluación simbólica y no clínica sujeta a supervisión humana y validación en el tiempo.
 
 # Sistema de Tests Modulares
 

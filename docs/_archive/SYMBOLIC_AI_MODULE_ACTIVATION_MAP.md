@@ -155,5 +155,7 @@ Mientras una fase no este explicitamente activada por documento normativo nuevo,
 la IA no avanza.
 
 ## Fuente de verdad
-- AUDITORIA CABALA APP 12182025.md (normativo clinico).
+-- AUDITORIA CABALA APP 12182025.md (normativo holístico).
+
+Este documento es normativo dentro del marco de Diagnóstico Holístico Gobernado definido en la Auditoría vigente.
 - SOURCE_OF_TRUTH.md mantiene la jerarquia documental.

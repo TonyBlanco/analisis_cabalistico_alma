@@ -78,3 +78,16 @@ Se reconoce formalmente la introducción de SWM v3: una capa interpretativa simb
 - Cualquier implementación de SWM v3 deberá respetar las reglas de seguridad y auditoría descritas en la fuente de la verdad y en la auditoría vigente.
 
 Este añadido amplía la documentación sin reescribir la fuente de la verdad existente.
+
+### Reconocimiento: Diagnóstico Holístico Modular
+
+Se reconoce formalmente en la jerarquía normativa que el proyecto admite, bajo gobernanza y conforme a la `AUDITORIA CABALA APP 12182025.md`, la realización de Diagnóstico Holístico Modular. Este Diagnóstico:
+
+- Es una evaluación simbólica y una lectura holística, no clínica.
+- No sustituye la práctica médica ni la evaluación psicológica profesional.
+- Se rige por la Auditoría vigente y requiere validación en el tiempo (validación longitudinal).
+- El componente SCDF queda expresamente definido como consumidor de resultados (viewer/consumer) y no como motor diagnóstico.
+
+Toda implementación técnica necesaria para soportar diagnósticos debe seguir el proceso y las aprobaciones descritas en la Auditoría vigente.
+
+La habilitación normativa no implica disponibilidad técnica inmediata.

@@ -90,5 +90,7 @@ Nota: la matriz es conceptual y declarativa. No implica activacion.
 Si una dependencia no esta satisfecha, el diagnostico no puede ocurrir.
 
 ## Fuente de verdad
-- AUDITORIA CABALA APP 12182025.md (normativo clinico).
+- AUDITORIA CABALA APP 12182025.md (normativo holístico).
 - SOURCE_OF_TRUTH.md mantiene la jerarquia documental.
+
+Este documento es normativo dentro del marco de Diagnóstico Holístico Gobernado definido en la Auditoría vigente.

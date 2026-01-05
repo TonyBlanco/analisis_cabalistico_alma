@@ -40,28 +40,27 @@ Alcance: frontend (tonyblanco-app), backend (Django + DRF), docs y rutas legacy 
 
 ## Resumen ejecutivo
 - Frontend activo: Next.js App Router en `tonyblanco-app/app` con dashboards por rol y paginas publicas minimas.
-- Backend: Django/DRF con hardening de tests y control de roles/ownership; endpoints clinicos y de analisis cabalistico activos.
+- Backend: Django/DRF con hardening de tests y control de roles/ownership; endpoints clínicos legacy y de análisis cabalístico activos. El dominio clínico se mantiene Aislado como legado operativo y no será modificado durante la Fase A de corrección normativa.
 - Legacy: rutas antiguas preservadas en `_legacy_app_backup` y `_legacy_components_backup` (no activas en App Router actual).
 - Tests/analisis: dos flujos inmutables (`patient_self`, `therapist_clinical`), con hardening aplicado en backend.
 - Ultimas 12 horas: no hay cambios MD ni commits recientes detectados.
 
 
-## Decisión UX Estratégica – Dashboard Terapéutico
+## Decisión UX Estratégica – Dashboard Holístico
 
-Se ha adoptado un modelo de workspace clínico persistente
-inspirado en Orion Health, con las siguientes implicaciones:
+Se mantiene el modelo de workspace persistente con enfoque holístico, preservando la experiencia de observación y continuidad contextual. La interfaz seguirá soportando los flujos legacy clínicos sin modificaciones en esta fase.
 
-- Eliminación de navegación destructiva en contexto terapéutico
+- Eliminación de navegación destructiva en contextos de análisis holístico
 - Separación entre:
-  - Workspace (persistente)
-  - Utilidades (paneles)
+   - Workspace (persistente)
+   - Utilidades (paneles)
 - El sidebar deja de ser un menú clásico
-- El terapeuta nunca pierde el contexto visual del paciente
+- El profesional mantiene el contexto visual del cliente/paciente
 
 Esta decisión es intencional y responde a:
 - reducción de carga cognitiva
 - aumento de calidad observacional
-- alineación ética (no diagnóstico automático)
+- alineación ética (no diagnóstico automático sin control)
 
 Cualquier cambio que rompa esta lógica se considera regresión UX.
 
@@ -92,6 +91,46 @@ Cualquier cambio que rompa esta lógica se considera regresión UX.
 ## Cambios recientes (2025-12-19)
 - Guards de hydration en `TherapistTestsPage` y `TestCatalogSection` para contenido dependiente de paciente activo.
 - Nuevo documento: `docs/SCDF v2 — Diseño Clínico.md`.
+ - Nuevo documento: `docs/SCDF v2 — Diseño Clínico.md`.
+
+## Alcance rector — Cambio a "Holístico"
+
+A partir de la fecha de esta auditoría, el alcance rector pasa de un enfoque "clínico" a un enfoque "holístico". Esto significa que la gobernanza, las reglas de seguridad y la jerarquía documental enfocarán la operación del sistema como un ecosistema simbólico-holístico.
+
+Importante: el dominio clínico se mantiene como un subsistema legacy aislado (rutas, endpoints y flujos etiquetados `therapist`/`patient`), sujeto a las mismas reglas de no-modificación durante la Fase A. Cualquier adaptación técnica que implique tocar código, crear endpoints o renombrar rutas requerirá aprobación formal y quedará fuera del alcance de esta fase.
+
+### Excepción Normativa — Diagnóstico Modular Holístico (Gobernado)
+
+Esta auditoría establece, con carácter normativo y gobernado, una excepción que permite la realización de Diagnóstico Modular Holístico conforme a las reglas que siguen. En este documento "diagnóstico" se entiende exclusivamente como "evaluación / informe / lectura holística gobernada" —no clínica— y su uso queda estrictamente regulado.
+
+Reglas obligatorias de la Excepción Normativa:
+
+- Definición operativa: el "Diagnóstico Modular Holístico" comprende diagnósticos parciales por módulo (p. ej. Tarot, Gematría, Numerología, Astrología, Bio-emoción, Transgeneracional) y una posible síntesis holística integrada; todos son lecturas simbólicas y no sustituyen ni constituyen un diagnóstico médico o psicológico.
+- Supervisión humana: toda ejecución que derive en una lectura o informe deberá contar con supervisión humana explícita por parte de un profesional autorizado; los resultados son herramientas de apoyo, no decisiones clínicas.
+- Consentimiento: siempre que aplique, debe registrarse consentimiento informado y versionado antes de cualquier ejecución; el consentimiento debe ser recuperable junto con el registro de auditoría.
+- Logging y trazabilidad inmutables: cada ejecución debe generar un registro inmutable que incluya: usuario ejecutor, rol, versión del módulo, parámetros de ejecución, identificador de sujeto (si aplica), timestamp y sumario del resultado.
+- Ownership y permisos: acceso y visualización de resultados se controlan por ownership comprobable y por roles; no está permitida la auto-evaluación sin la supervisión requerida.
+- Hardening y `execution_mode`: las reglas de seguridad y validaciones actuales (ownership, rol, `execution_mode`, filtrado de listados) se mantienen y se aplican sin excepción al modo diagnóstico.
+- Validación longitudinal: las lecturas o informes que formen parte de un diagnóstico integrado deberán estar sujetos a validación en el tiempo y trazabilidad longitudinal (versiones, puntos de control, métricas de coherencia).
+- Aprobación técnica previa: cualquier modificación técnica necesaria para soportar funcionalidades adicionales (endpoints, UI, pruebas) requiere aprobación formal de Auditoría y pruebas de integración/hardening antes de su despliegue.
+
+Prohibiciones expresas:
+
+- Queda terminantemente prohibido presentar, almacenar o usar las salidas de estas lecturas como diagnóstico médico o psicológico.
+- No se autoriza la automatización de decisiones clínicas; las lecturas son evaluaciones simbólicas sujetas a supervisión humana.
+
+- Cualquier uso del término 'diagnóstico' fuera de la definición establecida en esta Excepción Normativa constituye incumplimiento y debe bloquearse.
+
+Documentos simbólicos normativos vinculados (lista vinculante):
+
+- `docs/_archive/SYMBOLIC_MODULE_DEPENDENCY_MATRIX.md`
+- `docs/_archive/SYMBOLIC_GLOBAL_DATA_GRAPH.md`
+- `docs/_archive/SYMBOLIC_EVENT_FLOW.md`
+- `docs/_archive/SYMBOLIC_DIAGNOSIS_LONGITUDINAL_VALIDATION.md`
+- `docs/_archive/SYMBOLIC_AI_MODULE_ACTIVATION_MAP.md`
+- `docs/SYMBOLIC_AI_PHASE_0_CONTRACT.md`
+
+Nota operacional: esta Excepción Normativa permite planificar y documentar el camino para lecturas holísticas gobernadas, pero NO autoriza por sí misma cambios de código; toda implementación técnica debe tramitarse y obtener aprobación conforme a `SOURCE_OF_TRUTH.md`.
 
 
 ## Fuentes revisadas (clave)

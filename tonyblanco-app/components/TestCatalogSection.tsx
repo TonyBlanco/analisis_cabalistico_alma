@@ -381,16 +381,19 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
                           const isAssigning = assigningTestCode === test.code;
                           const isImplemented = (test as any).implemented !== false;
                           const requiresLicense = (test as any).requires_license === true;
-                          // Only allow assignment for patient_self tests that are implemented and not licensed-only.
+                          // Only show Assign button for holistically-enabled tests.
+                          const isHolistic = (test as any).execution_mode === 'holistic';
+                          if (!isHolistic) return null;
+                          // Only allow assignment for holistically-governed tests that are implemented and not licensed-only.
                           const disabled = isAssigning || !isImplemented || requiresLicense;
                           return (
-                        <AssignTestButton
-                          onAssign={() => handleAssignTest(test)}
+                            <AssignTestButton
+                              onAssign={() => handleAssignTest(test)}
                               disabled={disabled}
                               isAssigning={isAssigning}
                               isImplemented={isImplemented}
                               requiresLicense={requiresLicense}
-                        />
+                            />
                           );
                         })()
                       )}

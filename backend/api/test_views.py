@@ -1089,16 +1089,37 @@ class AssignTestToPatientView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Validate test module exists
-        try:
-            test_module = TestModule.objects.get(code=test_code, is_active=True)
-        except TestModule.DoesNotExist:
+        # Resolve test module tolerant to code/slug differences (case-insensitive).
+        # Do NOT create records here; prefer existing DB entries. Do not filter by is_active
+        # to allow assigning historical/legacy entries when execution_mode indicates holistic.
+        from django.db.models import Q
+
+        test_module = (
+            TestModule.objects
+            .filter(
+                Q(code__iexact=test_code) | Q(slug__iexact=test_code)
+            )
+            .order_by('-is_active', '-updated_at')
+            .first()
+        )
+
+        if not test_module:
             return Response(
                 {
                     'error': 'Test no encontrado',
-                    'message': f'El test con código {test_code} no existe o no está activo'
+                    'message': f'El test con código {test_code} no existe'
                 },
                 status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Functional validation: only allow assignment if the module is authorized for holistic execution
+        if getattr(test_module, 'execution_mode', None) != 'holistic':
+            return Response(
+                {
+                    'error': 'Modo de ejecución no permitido',
+                    'message': 'El test no está habilitado para asignación en modo holístico'
+                },
+                status=status.HTTP_400_BAD_REQUEST
             )
         
         # SECURITY: Only allow patient_self tests (not therapist_clinical)

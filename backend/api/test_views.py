@@ -249,6 +249,16 @@ class ExecuteTestView(APIView):
         }
         execution_mode = self._infer_execution_mode(test_module, request_context)
 
+        # Pilot guard: legacy-migrated psychological tests must not execute via the generic endpoint.
+        if test_code in {"phq-9", "gad-7", "bai"}:
+            return Response(
+                {
+                    'error': 'Ejecuci¢n no disponible',
+                    'message': 'Este test est  en piloto y no se ejecuta por /tests/execute/.',
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
 
         # Safety rails (defense-in-depth): therapists never run patient_self; and
         # therapist_clinical requires patient_id.
@@ -1440,6 +1450,40 @@ class PHQ9SubmitView(APIView):
                     status=status.HTTP_400_BAD_REQUEST
                 )
             answers[key] = value
+
+        # Pilot mode: persist raw answers without clinical scoring or interpretation.
+        try:
+            test_module = TestModule.objects.get(code='phq-9')
+        except TestModule.DoesNotExist:
+            return Response(
+                {'error': 'Test no encontrado', 'message': 'PHQ-9 no est  registrado.'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        TestResult.objects.create(
+            user=user,
+            test_module=test_module,
+            test_id='phq-9',
+            input_data={'answers': answers},
+            result_data={
+                'status': 'pending',
+                'message': 'Respuestas guardadas. Pendiente de implementaci¢n.',
+            },
+            score=None,
+            clinical_diagnosis='',
+            details={
+                'raw_answers': answers,
+                'legacy_migrated': True,
+            },
+        )
+
+        return Response(
+            {
+                'status': 'pending',
+                'message': 'Respuestas guardadas. Pendiente de implementaci¢n.',
+            },
+            status=status.HTTP_200_OK,
+        )
 
         total_score = sum(answers.values())
         if total_score <= 4:

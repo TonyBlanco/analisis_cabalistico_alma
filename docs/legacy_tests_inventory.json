@@ -1,0 +1,210 @@
+[
+  {
+    "legacy_code": "adhd",
+    "source_path": "_legacy_app_backup/tests/adhd",
+    "files": [
+      "page.tsx"
+    ],
+    "has_questions": false,
+    "notes": ""
+  },
+  {
+    "legacy_code": "bai",
+    "source_path": "_legacy_app_backup/tests/bai",
+    "files": [
+      "page.tsx"
+    ],
+    "has_questions": false,
+    "notes": ""
+  },
+  {
+    "legacy_code": "bdi-ii",
+    "source_path": "_legacy_app_backup/tests/bdi-ii",
+    "files": [
+      "page.tsx"
+    ],
+    "has_questions": false,
+    "notes": ""
+  },
+  {
+    "legacy_code": "cabalistic-astrology",
+    "source_path": "_legacy_app_backup/tests/cabalistic-astrology",
+    "files": [
+      "page.tsx"
+    ],
+    "has_questions": false,
+    "notes": ""
+  },
+  {
+    "legacy_code": "complete-numerology",
+    "source_path": "_legacy_app_backup/tests/complete-numerology",
+    "files": [
+      "page.tsx"
+    ],
+    "has_questions": false,
+    "notes": ""
+  },
+  {
+    "legacy_code": "eating",
+    "source_path": "_legacy_app_backup/tests/eating",
+    "files": [
+      "page.tsx"
+    ],
+    "has_questions": false,
+    "notes": ""
+  },
+  {
+    "legacy_code": "financial-abundance",
+    "source_path": "_legacy_app_backup/tests/financial-abundance",
+    "files": [
+      "page.tsx"
+    ],
+    "has_questions": false,
+    "notes": ""
+  },
+  {
+    "legacy_code": "gad-7",
+    "source_path": "_legacy_app_backup/tests/gad-7",
+    "files": [
+      "page.tsx"
+    ],
+    "has_questions": false,
+    "notes": ""
+  },
+  {
+    "legacy_code": "insomnia",
+    "source_path": "_legacy_app_backup/tests/insomnia",
+    "files": [
+      "page.tsx"
+    ],
+    "has_questions": false,
+    "notes": ""
+  },
+  {
+    "legacy_code": "mcmi-iv",
+    "source_path": "_legacy_app_backup/tests/mcmi-iv",
+    "files": [
+      "page.tsx"
+    ],
+    "has_questions": false,
+    "notes": ""
+  },
+  {
+    "legacy_code": "ocd",
+    "source_path": "_legacy_app_backup/tests/ocd",
+    "files": [
+      "page.tsx"
+    ],
+    "has_questions": false,
+    "notes": ""
+  },
+  {
+    "legacy_code": "pai",
+    "source_path": "_legacy_app_backup/tests/pai",
+    "files": [
+      "page.tsx"
+    ],
+    "has_questions": false,
+    "notes": ""
+  },
+  {
+    "legacy_code": "phq-9",
+    "source_path": "_legacy_app_backup/tests/phq-9",
+    "files": [
+      "page.tsx"
+    ],
+    "has_questions": false,
+    "notes": ""
+  },
+  {
+    "legacy_code": "professional-pai",
+    "source_path": "_legacy_app_backup/tests/professional-pai",
+    "files": [
+      "page.tsx"
+    ],
+    "has_questions": false,
+    "notes": ""
+  },
+  {
+    "legacy_code": "psicologia",
+    "source_path": "_legacy_app_backup/tests/psicologia",
+    "files": [
+      "scid5/lib/schema.ts"
+    ],
+    "has_questions": false,
+    "notes": ""
+  },
+  {
+    "legacy_code": "ptsd",
+    "source_path": "_legacy_app_backup/tests/ptsd",
+    "files": [
+      "page.tsx"
+    ],
+    "has_questions": false,
+    "notes": ""
+  },
+  {
+    "legacy_code": "results",
+    "source_path": "_legacy_app_backup/tests/results",
+    "files": [
+      "[id]/page.tsx",
+      "page.tsx"
+    ],
+    "has_questions": false,
+    "notes": ""
+  },
+  {
+    "legacy_code": "scid-5-rv",
+    "source_path": "_legacy_app_backup/tests/scid-5-rv",
+    "files": [
+      "page.tsx"
+    ],
+    "has_questions": false,
+    "notes": ""
+  },
+  {
+    "legacy_code": "scid5",
+    "source_path": "_legacy_app_backup/tests/scid5",
+    "files": [
+      "page.tsx"
+    ],
+    "has_questions": false,
+    "notes": ""
+  },
+  {
+    "legacy_code": "scl-90",
+    "source_path": "_legacy_app_backup/tests/scl-90",
+    "files": [
+      "page.tsx"
+    ],
+    "has_questions": false,
+    "notes": ""
+  },
+  {
+    "legacy_code": "scl-90-r",
+    "source_path": "_legacy_app_backup/tests/scl-90-r",
+    "files": [
+      "page.tsx"
+    ],
+    "has_questions": false,
+    "notes": ""
+  },
+  {
+    "legacy_code": "stai",
+    "source_path": "_legacy_app_backup/tests/stai",
+    "files": [
+      "page.tsx"
+    ],
+    "has_questions": false,
+    "notes": ""
+  },
+  {
+    "legacy_code": "substance",
+    "source_path": "_legacy_app_backup/tests/substance",
+    "files": [
+      "page.tsx"
+    ],
+    "has_questions": false,
+    "notes": ""
+  }
+]

@@ -1,0 +1,9 @@
+{
+  "code": "mcmi-iv",
+  "name": "MCMI-IV",
+  "origin": "legacy_migration",
+  "legacy": true,
+  "active": false,
+  "execution_mode": "legacy_migrated",
+  "notes": "Migrado desde _legacy_app_backup/tests. No ejecutable."
+}

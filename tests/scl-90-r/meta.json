@@ -1,0 +1,9 @@
+{
+  "code": "scl-90-r",
+  "name": "SCL-90-R",
+  "origin": "legacy_migration",
+  "legacy": true,
+  "active": false,
+  "execution_mode": "legacy_migrated",
+  "notes": "Migrado desde _legacy_app_backup/tests. No ejecutable."
+}

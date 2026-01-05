@@ -1165,11 +1165,15 @@ class AssignTestToPatientView(APIView):
         from django.db.models import Q
 
         try:
+            # Build a safe Q that only references `slug` if the field exists on the model.
+            model_fields = {f.name for f in TestModule._meta.get_fields()}
+            q = Q(code__iexact=test_code)
+            if 'slug' in model_fields:
+                q |= Q(slug__iexact=test_code)
+
             test_module = (
                 TestModule.objects
-                .filter(
-                    Q(code__iexact=test_code) | Q(slug__iexact=test_code)
-                )
+                .filter(q)
                 .order_by('-is_active', '-updated_at')
                 .first()
             )
@@ -1191,13 +1195,16 @@ class AssignTestToPatientView(APIView):
             )
 
         # Functional validation: only allow assignment if the module is authorized for holistic execution
-        if getattr(test_module, 'execution_mode', None) != 'holistic':
+        if (
+            getattr(test_module, "execution_mode", None) != "holistic"
+            and not getattr(test_module, "available_for_personal", False)
+        ):
             return Response(
                 {
-                    'error': 'Modo de ejecución no permitido',
-                    'message': 'El test no está habilitado para asignación en modo holístico'
+                    "error": "Modo de ejecución no permitido",
+                    "message": "El test no está habilitado para asignación",
                 },
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_400_BAD_REQUEST,
             )
         
         # SECURITY: Only allow patient_self tests (not therapist_clinical)

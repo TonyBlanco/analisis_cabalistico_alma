@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { ClipboardList, Loader2, Mail, CheckCircle, Info } from 'lucide-react';
 import { TEST_TYPES, type TestModule } from '@/lib/test-types';
 import { clinicalTestsRegistry } from '@/lib/clinicalTests.registry';
@@ -45,61 +45,48 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
   const router = useRouter();
   const activePatientId = getActivePatientId();
 
-  // Assigned tests tracking (localStorage-based fallback)
-  const [assignedCodes, setAssignedCodes] = useState<Set<string>>(new Set());
+  // Assigned tests fetched from canonical endpoint (used by AssignedTestsSection)
+  const [assignedTests, setAssignedTests] = useState<any[]>([]);
 
-  const loadAssignedForPatient = () => {
+  const fetchAssignedTests = useCallback(async () => {
+    if (!activePatientId) return;
     try {
-      if (typeof window === 'undefined') return setAssignedCodes(new Set());
-      const raw = localStorage.getItem('assigned_tests_by_patient');
-      const parsed = raw ? JSON.parse(raw) : {};
-      const list = parsed[String(activePatientId)] || [];
-      const codes = new Set(list.map((t: any) => String(t.code)));
-      setAssignedCodes(codes);
+      const { getTestResultsForPatient } = await import('@/lib/test-api');
+      const remoteResults = await getTestResultsForPatient({ patient_id: Number(activePatientId) });
+
+      // Include any local pending assignments stored after assignment actions
+      let localAssignments: Array<any> = [];
+      if (typeof window !== 'undefined') {
+        const raw = localStorage.getItem('assigned_tests_by_patient');
+        if (raw) {
+          const parsed = JSON.parse(raw) || {};
+          const list = parsed[String(activePatientId)] || [];
+          localAssignments = list.map((item: any) => ({
+            id: undefined,
+            test_module: { id: item.test_id ?? item.id ?? 0, code: item.code },
+            test_module_code: item.code,
+            created_at: item.assigned_at || new Date().toISOString(),
+          }));
+        }
+      }
+
+      const remoteCodes = new Set(remoteResults.map((r: any) => r.test_module?.code || r.test_module_code).filter(Boolean));
+      const merged = [...remoteResults, ...localAssignments.filter((p) => !remoteCodes.has(p.test_module?.code || p.test_module_code))];
+      setAssignedTests(merged);
     } catch (err) {
-      setAssignedCodes(new Set());
+      setAssignedTests([]);
+      console.error('Error fetching assigned tests in catalog:', err);
     }
-  };
+  }, [activePatientId]);
 
   useEffect(() => {
-    loadAssignedForPatient();
-    const handler = () => loadAssignedForPatient();
+    fetchAssignedTests();
+    const handler = () => fetchAssignedTests();
     if (typeof window !== 'undefined') window.addEventListener('assignedTestsChanged', handler);
     return () => {
       if (typeof window !== 'undefined') window.removeEventListener('assignedTestsChanged', handler);
     };
-  }, [activePatientId]);
-
-  // Assign without modal/alerts: minimal visual-only flow.
-  const assignNow = async (test: TestModule) => {
-    if (!activePatientId) return;
-    if (assignedCodes.has(String(test.code))) return; // prevent double-assign
-    setAssigningTestCode(test.code);
-    try {
-      const { assignTestToPatient } = await import('@/lib/assignment-api');
-      await assignTestToPatient(activePatientId, test.code);
-
-      // update local cache
-      const key = 'assigned_tests_by_patient';
-      const existing = typeof window !== 'undefined' ? localStorage.getItem(key) : null;
-      const parsed = existing ? JSON.parse(existing) : {};
-      const patientKey = String(activePatientId);
-      const current: Array<any> = parsed[patientKey] || [];
-      const now = new Date().toISOString();
-      const deduped = current.filter((t) => String(t.code) !== String(test.code));
-      deduped.push({ code: test.code, name: test.name, description: test.description, assigned_at: now });
-      parsed[patientKey] = deduped;
-      if (typeof window !== 'undefined') {
-        localStorage.setItem(key, JSON.stringify(parsed));
-        window.dispatchEvent(new Event('assignedTestsChanged'));
-      }
-    } catch (err) {
-      // Silent failure per instructions (no new alerts)
-      console.error('assignNow error', err);
-    } finally {
-      setAssigningTestCode(null);
-    }
-  };
+  }, [activePatientId, fetchAssignedTests]);
 
   useEffect(() => {
     setMounted(true);
@@ -434,15 +421,15 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
                         </span>
                       ) : (
                         (() => {
+                          // Build set of assigned test ids using canonical assignedTests
+                          const assignedTestIds = new Set(
+                            assignedTests.map((t: any) => (t.test_id ?? (t.test?.id ?? t.test_module?.id ?? t.test_module_code)))
+                          );
+                          const isAssigned = assignedTestIds.has(test.id ?? test.code);
                           const isAssigning = assigningTestCode === test.code;
                           const isImplemented = (test as any).implemented !== false;
                           const requiresLicense = (test as any).requires_license === true;
-                          // Only show Assign button for holistically-enabled tests.
-                          const isHolistic = (test as any).execution_mode === 'holistic';
-                          if (!isHolistic) return null;
-                          // Only allow assignment for holistically-governed tests that are implemented and not licensed-only.
-                          const disabled = isAssigning || !isImplemented || requiresLicense;
-                          const isAssigned = assignedCodes.has(String(test.code));
+
                           if (isAssigned) {
                             return (
                               <div className="flex items-center text-sm text-green-600">
@@ -450,25 +437,16 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
                               </div>
                             );
                           }
+
+                          // The only criterion for showing the Assign action is whether it's already assigned.
                           return (
-                            <button
-                              onClick={() => {
-                                if (assignedCodes.has(String(test.code))) return; // double-safety
-                                assignNow(test);
-                              }}
-                              disabled={disabled}
-                              className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-white rounded-md hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-                              style={{ backgroundColor: '#1f6c8f' }}
-                              title={
-                                requiresLicense
-                                  ? 'Este instrumento requiere licencia. Carga contenido licenciado y habilita el acceso correspondiente.'
-                                  : !isImplemented
-                                    ? 'Este test está marcado como “En desarrollo”.'
-                                    : undefined
-                              }
-                            >
-                              {isAssigning ? 'Asignando...' : requiresLicense ? 'Requiere licencia' : !isImplemented ? 'En desarrollo' : 'Asignar'}
-                            </button>
+                            <AssignTestButton
+                              onAssign={() => handleAssignTest(test)}
+                              disabled={isAssigning}
+                              isAssigning={isAssigning}
+                              isImplemented={isImplemented}
+                              requiresLicense={requiresLicense}
+                            />
                           );
                         })()
                       )}

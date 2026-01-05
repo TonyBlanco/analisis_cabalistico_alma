@@ -28,6 +28,37 @@ from .validators.test_execution import (
 
 logger = logging.getLogger(__name__)
 
+class PlaceholderPsychologicalTestExecutor:
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def execute(self):
+        return {
+            "status": "pending",
+            "message": "Test asignado. Pendiente de implementación."
+        }
+
+
+# Placeholder executors for psychological tests marked "En desarrollo".
+# Codes must match DB (see backend/initialize_tests.py).
+EXECUTORS = {
+    "phq-9": PlaceholderPsychologicalTestExecutor,
+    "gad-7": PlaceholderPsychologicalTestExecutor,
+    "bai": PlaceholderPsychologicalTestExecutor,
+    "bdi-ii": PlaceholderPsychologicalTestExecutor,
+    "insomnia-index": PlaceholderPsychologicalTestExecutor,
+    "stai": PlaceholderPsychologicalTestExecutor,
+    "scl-90": PlaceholderPsychologicalTestExecutor,
+    "mcmi-iv": PlaceholderPsychologicalTestExecutor,
+    "scid5": PlaceholderPsychologicalTestExecutor,
+    "professional-pai": PlaceholderPsychologicalTestExecutor,
+    "ptsd-check": PlaceholderPsychologicalTestExecutor,
+    "ocd-screen": PlaceholderPsychologicalTestExecutor,
+    "adhd-adult": PlaceholderPsychologicalTestExecutor,
+    "substance-use": PlaceholderPsychologicalTestExecutor,
+    "eating-disorder": PlaceholderPsychologicalTestExecutor,
+}
+
 
 class AvailableTestsView(APIView):
     """Lista todos los tests disponibles para el usuario actual"""
@@ -1254,12 +1285,29 @@ class AssignTestToPatientView(APIView):
         
         logger.error("ASSIGN_TEST: step 9 - success")
 
+        placeholder_cls = EXECUTORS.get(getattr(test_module, 'code', None))
+        placeholder_payload = None
+        if placeholder_cls is not None:
+            try:
+                placeholder_payload = placeholder_cls().execute()
+            except Exception:
+                placeholder_payload = None
+
         return Response({
             'success': True,
-            'message': f'Test "{test_display_name}" asignado exitosamente al paciente {patient_display_name}',
+            'message': (
+                placeholder_payload.get("message")
+                if isinstance(placeholder_payload, dict) and placeholder_payload.get("message")
+                else f'Test "{test_display_name}" asignado exitosamente al paciente {patient_display_name}'
+            ),
             'patient_id': patient.id,
             'test_code': test_code,
-            'created': created
+            'created': created,
+            'status': (
+                placeholder_payload.get("status")
+                if isinstance(placeholder_payload, dict) and placeholder_payload.get("status")
+                else None
+            )
         }, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
 
 

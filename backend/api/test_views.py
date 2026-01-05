@@ -1031,6 +1031,7 @@ class AssignTestToPatientView(APIView):
     permission_classes = [IsAuthenticated]
     
     def post(self, request):
+        logger.error("ASSIGN_TEST: step 1 - request received")
         user = request.user
         try:
             profile = user.profile
@@ -1042,6 +1043,8 @@ class AssignTestToPatientView(APIView):
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
+        
+        logger.error("ASSIGN_TEST: step 2 - user profile loaded")
         
         # SECURITY: Only therapists can assign tests (not admins)
         user_type = getattr(profile, 'user_type', None)
@@ -1072,6 +1075,8 @@ class AssignTestToPatientView(APIView):
         patient_id_raw = request.data.get('patient_id')
         test_code = request.data.get('test_code')
         
+        logger.error(f"ASSIGN_TEST: step 3 - payload received patient_id={patient_id_raw}, test_code={test_code}")
+        
         if not patient_id_raw or not test_code:
             return Response(
                 {
@@ -1092,9 +1097,12 @@ class AssignTestToPatientView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
+        logger.error("ASSIGN_TEST: step 4 - patient_id parsed")
+        
         # Validate patient exists and belongs to therapist
         try:
             patient = Patient.objects.get(id=patient_id, therapist=user)
+            logger.error("ASSIGN_TEST: step 5 - patient loaded")
         except Patient.DoesNotExist:
             return Response(
                 {
@@ -1102,6 +1110,12 @@ class AssignTestToPatientView(APIView):
                     'message': f'El paciente con ID {patient_id} no existe o no pertenece a este terapeuta'
                 },
                 status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            logger.exception("ASSIGN_TEST: FAIL loading patient")
+            return Response(
+                {"detail": f"Error loading patient: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
         
         # Validate patient has linked User account
@@ -1119,14 +1133,22 @@ class AssignTestToPatientView(APIView):
         # to allow assigning historical/legacy entries when execution_mode indicates holistic.
         from django.db.models import Q
 
-        test_module = (
-            TestModule.objects
-            .filter(
-                Q(code__iexact=test_code) | Q(slug__iexact=test_code)
+        try:
+            test_module = (
+                TestModule.objects
+                .filter(
+                    Q(code__iexact=test_code) | Q(slug__iexact=test_code)
+                )
+                .order_by('-is_active', '-updated_at')
+                .first()
             )
-            .order_by('-is_active', '-updated_at')
-            .first()
-        )
+            logger.error("ASSIGN_TEST: step 6 - test module resolved")
+        except Exception as e:
+            logger.exception("ASSIGN_TEST: FAIL loading test module")
+            return Response(
+                {"detail": f"Error loading test: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
         if not test_module:
             return Response(
@@ -1181,50 +1203,45 @@ class AssignTestToPatientView(APIView):
                     status=status.HTTP_403_FORBIDDEN
                 )
         
+        # Create or update UserTestAccess for the patient's user account
         try:
-            # Create or update UserTestAccess for the patient's user account
-            try:
-                access, created = UserTestAccess.objects.get_or_create(
-                    user=patient.user,
-                    test_module=test_module
-                )
-            except UserTestAccess.MultipleObjectsReturned:
-                # Legacy duplicates: pick one deterministically and continue (avoid 500)
-                access = (
-                    UserTestAccess.objects
-                    .filter(user=patient.user, test_module=test_module)
-                    .order_by('-id')
-                    .first()
-                )
-                created = False
+            access, created = UserTestAccess.objects.get_or_create(
+                user=patient.user,
+                test_module=test_module
+            )
+            logger.error("ASSIGN_TEST: step 7 - assignment resolved (get_or_create)")
+        except UserTestAccess.MultipleObjectsReturned:
+            logger.error("ASSIGN_TEST: step 7b - multiple assignment rows detected")
+            access = (
+                UserTestAccess.objects
+                .filter(user=patient.user, test_module=test_module)
+                .order_by('-id')
+                .first()
+            )
+            created = False
+        except Exception as e:
+            logger.exception("ASSIGN_TEST: FAIL creating assignment (get_or_create)")
+            return Response(
+                {"detail": f"Error creating assignment: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
-            if not access:
-                return Response(
-                    {
-                        'error': 'Relación inválida',
-                        'message': 'No se pudo resolver el acceso del test para el usuario del paciente'
-                    },
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            
+        if not access:
+            logger.error("ASSIGN_TEST: FAIL creating assignment - access unresolved")
+            return Response(
+                {"detail": "Error creating assignment: access unresolved"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        try:
             # Mark as special access (assigned by therapist)
             access.has_special_access = True
             access.save()
-        except IntegrityError:
+            logger.error("ASSIGN_TEST: step 8 - assignment saved")
+        except Exception as e:
+            logger.exception("ASSIGN_TEST: FAIL creating assignment (save)")
             return Response(
-                {
-                    'error': 'Error de integridad',
-                    'message': 'Error de integridad al asignar el test'
-                },
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        except Exception:
-            logger.exception("Error interno al asignar test")
-            return Response(
-                {
-                    'error': 'Error interno',
-                    'message': 'Error interno al asignar test'
-                },
+                {"detail": f"Error creating assignment: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
@@ -1234,6 +1251,8 @@ class AssignTestToPatientView(APIView):
             or f'ID {patient.id}'
         )
         test_display_name = getattr(test_module, 'name', None) or test_code
+        
+        logger.error("ASSIGN_TEST: step 9 - success")
 
         return Response({
             'success': True,

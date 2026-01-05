@@ -191,9 +191,12 @@ export default function AssignedTestsSection({
       ) : (
         <div className="space-y-3">
           {assignedTests.map((result) => {
-            // Determine status: completed (has result)
-            const status = result.id ? 'completed' : 'pending';
-            const canViewResult = status === 'completed' && Boolean(result.id);
+            const isAssignmentOnly =
+              (result as any)?.result_data?.assignment_only === true ||
+              (result as any)?.details?.legacy_assignment === true;
+
+            const status = isAssignmentOnly ? 'pending' : 'completed';
+            const canViewResult = !isAssignmentOnly && Boolean(result.id);
             const statusLabels = {
               completed: { label: 'Completado', className: 'bg-green-100 text-green-800' },
               pending: { label: 'Pendiente', className: 'bg-yellow-100 text-yellow-800' },

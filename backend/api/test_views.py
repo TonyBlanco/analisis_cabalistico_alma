@@ -1,3 +1,4 @@
+import logging
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -5,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.exceptions import ValidationError, PermissionDenied
 from rest_framework.decorators import permission_classes
 from django.shortcuts import get_object_or_404
+from django.db import IntegrityError
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from .test_models import TestModule, UserTestAccess, TestResult
@@ -23,6 +25,8 @@ from .validators.test_execution import (
     validate_patient_ownership,
     validate_patient_self_context
 )
+
+logger = logging.getLogger(__name__)
 
 
 class AvailableTestsView(APIView):
@@ -1028,10 +1032,20 @@ class AssignTestToPatientView(APIView):
     
     def post(self, request):
         user = request.user
-        profile = user.profile
+        try:
+            profile = user.profile
+        except (AttributeError, UserProfile.DoesNotExist):
+            return Response(
+                {
+                    'error': 'Perfil de usuario no encontrado',
+                    'message': 'El usuario autenticado no tiene un perfil válido'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
         
         # SECURITY: Only therapists can assign tests (not admins)
-        if profile.user_type != 'therapist':
+        user_type = getattr(profile, 'user_type', None)
+        if user_type != 'therapist':
             return Response(
                 {
                     'error': 'No autorizado',
@@ -1042,8 +1056,8 @@ class AssignTestToPatientView(APIView):
         
         # SECURITY: Explicitly block admins even if user_type is 'therapist'
         is_admin = (
-            profile.is_admin or 
-            user.is_staff or 
+            getattr(profile, 'is_admin', False) or
+            user.is_staff or
             user.is_superuser
         )
         if is_admin:
@@ -1055,14 +1069,25 @@ class AssignTestToPatientView(APIView):
                 status=status.HTTP_403_FORBIDDEN
             )
         
-        patient_id = request.data.get('patient_id')
+        patient_id_raw = request.data.get('patient_id')
         test_code = request.data.get('test_code')
         
-        if not patient_id or not test_code:
+        if not patient_id_raw or not test_code:
             return Response(
                 {
                     'error': 'Datos incompletos',
                     'message': 'patient_id y test_code son requeridos'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            patient_id = int(patient_id_raw)
+        except (TypeError, ValueError):
+            return Response(
+                {
+                    'error': 'ID inválido',
+                    'message': 'patient_id debe ser un número entero válido'
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
@@ -1080,7 +1105,7 @@ class AssignTestToPatientView(APIView):
             )
         
         # Validate patient has linked User account
-        if not patient.user:
+        if not getattr(patient, 'user', None):
             return Response(
                 {
                     'error': 'Paciente sin cuenta de usuario',
@@ -1156,23 +1181,67 @@ class AssignTestToPatientView(APIView):
                     status=status.HTTP_403_FORBIDDEN
                 )
         
-        # Create or update UserTestAccess for the patient's user account
-        access, created = UserTestAccess.objects.get_or_create(
-            user=patient.user,
-            test_module=test_module
+        try:
+            # Create or update UserTestAccess for the patient's user account
+            try:
+                access, created = UserTestAccess.objects.get_or_create(
+                    user=patient.user,
+                    test_module=test_module
+                )
+            except UserTestAccess.MultipleObjectsReturned:
+                # Legacy duplicates: pick one deterministically and continue (avoid 500)
+                access = (
+                    UserTestAccess.objects
+                    .filter(user=patient.user, test_module=test_module)
+                    .order_by('-id')
+                    .first()
+                )
+                created = False
+
+            if not access:
+                return Response(
+                    {
+                        'error': 'Relación inválida',
+                        'message': 'No se pudo resolver el acceso del test para el usuario del paciente'
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Mark as special access (assigned by therapist)
+            access.has_special_access = True
+            access.save()
+        except IntegrityError:
+            return Response(
+                {
+                    'error': 'Error de integridad',
+                    'message': 'Error de integridad al asignar el test'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception:
+            logger.exception("Error interno al asignar test")
+            return Response(
+                {
+                    'error': 'Error interno',
+                    'message': 'Error interno al asignar test'
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        patient_display_name = (
+            getattr(patient, 'full_name', None)
+            or getattr(patient, 'name', None)
+            or f'ID {patient.id}'
         )
-        
-        # Mark as special access (assigned by therapist)
-        access.has_special_access = True
-        access.save()
-        
+        test_display_name = getattr(test_module, 'name', None) or test_code
+
         return Response({
             'success': True,
-            'message': f'Test "{test_module.name}" asignado exitosamente al paciente {patient.full_name}',
+            'message': f'Test "{test_display_name}" asignado exitosamente al paciente {patient_display_name}',
             'patient_id': patient.id,
             'test_code': test_code,
             'created': created
-        })
+        }, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
 
 
 class PHQ9SubmitView(APIView):

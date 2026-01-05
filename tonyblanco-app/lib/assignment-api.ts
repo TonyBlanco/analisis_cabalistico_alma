@@ -69,33 +69,41 @@ export async function assignTestToPatient(
   });
 
   if (!response.ok) {
+    // Try to parse JSON error body, fallback to text
+    let errorData: any = {};
+    let rawText = '';
+    try {
+      errorData = await response.json().catch(() => ({}));
+    } catch (e) {
+      // ignore
+    }
+    try {
+      rawText = await response.text();
+    } catch (e) {
+      rawText = '';
+    }
+
+    const baseMsg = errorData.message || errorData.error || (rawText && rawText.length ? rawText : null) || 'Error al asignar test';
+
     if (response.status === 403) {
-      const errorData = await response.json().catch(() => ({}));
-      const errorMessage = errorData.message || errorData.error || 'No tienes permisos para asignar tests.';
-      
       // Check for specific error messages
-      if (errorMessage.includes('administradores no pueden')) {
+      if (String(baseMsg).includes('administradores no pueden')) {
         throw new Error('Los administradores no pueden asignar tests a pacientes. Solo los terapeutas pueden gestionar sus propios pacientes.');
       }
-      if (errorMessage.includes('tests clínicos') || errorMessage.includes('therapist_clinical')) {
+      if (String(baseMsg).includes('tests clínicos') || String(baseMsg).includes('therapist_clinical')) {
         throw new Error('No se pueden asignar tests clínicos a pacientes. Solo tests patient_self pueden ser asignados.');
       }
-      if (errorMessage.includes('no disponible')) {
-        throw new Error(errorMessage);
-      }
-      
-      throw new Error(errorMessage);
+      throw new Error(baseMsg + ` (status ${response.status})`);
     }
+
     if (response.status === 401) {
       throw new Error('No autenticado. Por favor, inicia sesión nuevamente.');
     }
     if (response.status === 404) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || errorData.error || 'Paciente o test no encontrado.');
+      throw new Error((errorData.message || errorData.error || 'Paciente o test no encontrado.') + ` (status ${response.status})`);
     }
 
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.error || errorData.message || 'Error al asignar test');
+    throw new Error(baseMsg + ` (status ${response.status})`);
   }
 
   return response.json();

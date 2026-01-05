@@ -45,6 +45,62 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
   const router = useRouter();
   const activePatientId = getActivePatientId();
 
+  // Assigned tests tracking (localStorage-based fallback)
+  const [assignedCodes, setAssignedCodes] = useState<Set<string>>(new Set());
+
+  const loadAssignedForPatient = () => {
+    try {
+      if (typeof window === 'undefined') return setAssignedCodes(new Set());
+      const raw = localStorage.getItem('assigned_tests_by_patient');
+      const parsed = raw ? JSON.parse(raw) : {};
+      const list = parsed[String(activePatientId)] || [];
+      const codes = new Set(list.map((t: any) => String(t.code)));
+      setAssignedCodes(codes);
+    } catch (err) {
+      setAssignedCodes(new Set());
+    }
+  };
+
+  useEffect(() => {
+    loadAssignedForPatient();
+    const handler = () => loadAssignedForPatient();
+    if (typeof window !== 'undefined') window.addEventListener('assignedTestsChanged', handler);
+    return () => {
+      if (typeof window !== 'undefined') window.removeEventListener('assignedTestsChanged', handler);
+    };
+  }, [activePatientId]);
+
+  // Assign without modal/alerts: minimal visual-only flow.
+  const assignNow = async (test: TestModule) => {
+    if (!activePatientId) return;
+    if (assignedCodes.has(String(test.code))) return; // prevent double-assign
+    setAssigningTestCode(test.code);
+    try {
+      const { assignTestToPatient } = await import('@/lib/assignment-api');
+      await assignTestToPatient(activePatientId, test.code);
+
+      // update local cache
+      const key = 'assigned_tests_by_patient';
+      const existing = typeof window !== 'undefined' ? localStorage.getItem(key) : null;
+      const parsed = existing ? JSON.parse(existing) : {};
+      const patientKey = String(activePatientId);
+      const current: Array<any> = parsed[patientKey] || [];
+      const now = new Date().toISOString();
+      const deduped = current.filter((t) => String(t.code) !== String(test.code));
+      deduped.push({ code: test.code, name: test.name, description: test.description, assigned_at: now });
+      parsed[patientKey] = deduped;
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(key, JSON.stringify(parsed));
+        window.dispatchEvent(new Event('assignedTestsChanged'));
+      }
+    } catch (err) {
+      // Silent failure per instructions (no new alerts)
+      console.error('assignNow error', err);
+    } finally {
+      setAssigningTestCode(null);
+    }
+  };
+
   useEffect(() => {
     setMounted(true);
     fetchTests();
@@ -386,14 +442,33 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
                           if (!isHolistic) return null;
                           // Only allow assignment for holistically-governed tests that are implemented and not licensed-only.
                           const disabled = isAssigning || !isImplemented || requiresLicense;
+                          const isAssigned = assignedCodes.has(String(test.code));
+                          if (isAssigned) {
+                            return (
+                              <div className="flex items-center text-sm text-green-600">
+                                ✔ Asignado · esperando respuesta
+                              </div>
+                            );
+                          }
                           return (
-                            <AssignTestButton
-                              onAssign={() => handleAssignTest(test)}
+                            <button
+                              onClick={() => {
+                                if (assignedCodes.has(String(test.code))) return; // double-safety
+                                assignNow(test);
+                              }}
                               disabled={disabled}
-                              isAssigning={isAssigning}
-                              isImplemented={isImplemented}
-                              requiresLicense={requiresLicense}
-                            />
+                              className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-white rounded-md hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                              style={{ backgroundColor: '#1f6c8f' }}
+                              title={
+                                requiresLicense
+                                  ? 'Este instrumento requiere licencia. Carga contenido licenciado y habilita el acceso correspondiente.'
+                                  : !isImplemented
+                                    ? 'Este test está marcado como “En desarrollo”.'
+                                    : undefined
+                              }
+                            >
+                              {isAssigning ? 'Asignando...' : requiresLicense ? 'Requiere licencia' : !isImplemented ? 'En desarrollo' : 'Asignar'}
+                            </button>
                           );
                         })()
                       )}

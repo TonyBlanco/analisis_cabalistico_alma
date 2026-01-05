@@ -1,3 +1,46 @@
 {
-  "questions": []
+  "questions": [
+    {
+      "id": "q1",
+      "type": "likert",
+      "label": "Feeling nervous, anxious, or on edge",
+      "options": [0, 1, 2, 3]
+    },
+    {
+      "id": "q2",
+      "type": "likert",
+      "label": "Not being able to stop or control worrying",
+      "options": [0, 1, 2, 3]
+    },
+    {
+      "id": "q3",
+      "type": "likert",
+      "label": "Worrying too much about different things",
+      "options": [0, 1, 2, 3]
+    },
+    {
+      "id": "q4",
+      "type": "likert",
+      "label": "Trouble relaxing",
+      "options": [0, 1, 2, 3]
+    },
+    {
+      "id": "q5",
+      "type": "likert",
+      "label": "Being so restless that it is hard to sit still",
+      "options": [0, 1, 2, 3]
+    },
+    {
+      "id": "q6",
+      "type": "likert",
+      "label": "Becoming easily annoyed or irritable",
+      "options": [0, 1, 2, 3]
+    },
+    {
+      "id": "q7",
+      "type": "likert",
+      "label": "Feeling afraid as if something awful might happen",
+      "options": [0, 1, 2, 3]
+    }
+  ]
 }

@@ -1580,6 +1580,40 @@ class GAD7SubmitView(APIView):
                 )
             answers[key] = value
 
+        # Pilot mode: persist raw answers without clinical scoring or interpretation.
+        try:
+            test_module = TestModule.objects.get(code='gad-7')
+        except TestModule.DoesNotExist:
+            return Response(
+                {'error': 'Test no encontrado', 'message': 'GAD-7 no est  registrado.'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        TestResult.objects.create(
+            user=user,
+            test_module=test_module,
+            test_id='gad-7',
+            input_data={'answers': answers},
+            result_data={
+                'status': 'pending',
+                'message': 'Respuestas guardadas. Pendiente de implementaci¢n.',
+            },
+            score=None,
+            clinical_diagnosis='',
+            details={
+                'raw_answers': answers,
+                'legacy_migrated': True,
+            },
+        )
+
+        return Response(
+            {
+                'status': 'pending',
+                'message': 'Respuestas guardadas. Pendiente de implementaci¢n.',
+            },
+            status=status.HTTP_200_OK,
+        )
+
         total_score = sum(answers.values())
         if total_score <= 4:
             severity_label = 'Mínima'

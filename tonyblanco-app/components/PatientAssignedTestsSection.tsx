@@ -44,7 +44,14 @@ export default function PatientAssignedTestsSection() {
       const response = await getAvailableTests();
       const allTests = response.tests || [];
 
-      const assigned = allTests.filter(
+      const tests = allTests.map((t) => ({
+        ...t,
+        status: t.is_active ? "active" : "inactive",
+      }));
+
+      const visibleTests = tests.filter((t) => t.status === "active");
+
+      const assigned = visibleTests.filter(
         (test: TestModule) => test.user_access?.has_special_access === true
       );
 
@@ -170,12 +177,7 @@ export default function PatientAssignedTestsSection() {
 
       {assignedTests.length === 0 ? (
         <div className="border border-gray-200 border-dashed rounded-lg p-12 text-center">
-          <p className="text-gray-500 text-sm">
-            No tienes tests asignados por el momento.
-          </p>
-          <p className="text-gray-400 text-xs mt-2">
-            Tu terapeuta te notificará cuando te asigne nuevos tests.
-          </p>
+          <p className="text-gray-500 text-sm">No tests available at this time.</p>
         </div>
       ) : (
         <div className="space-y-3">

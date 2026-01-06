@@ -725,21 +725,59 @@ class TestResultDetailView(APIView):
     def get(self, request, pk):
         """Obtiene un resultado específico"""
         result = get_object_or_404(TestResult, pk=pk)
-        
-        # Minimal, explicit access check: allow owner or therapists/staff
         user = request.user
 
-        if result.user == user:
-            # Owner (patient) — allowed
-            pass
-        elif getattr(user, 'is_staff', False) or hasattr(user, 'is_therapist'):
-            # Staff or therapist attribute present — allowed (therapist access to patient results)
-            pass
-        else:
-            return Response(
-                {"detail": "No tienes permiso para ver este resultado"},
-                status=status.HTTP_403_FORBIDDEN,
-            )
+        # Resolve profile and admin flag
+        try:
+            profile = user.profile
+        except (AttributeError, UserProfile.DoesNotExist):
+            profile = None
+
+        is_admin = bool(profile and (profile.is_admin or user.is_staff or user.is_superuser))
+
+        # Permission rules: allow if requester is
+        # - admin
+        # - the owning user who ran the test (result.user)
+        # - the patient linked to the result (patient.user)
+        # - the therapist assigned to the patient (patient.therapist)
+        allowed = False
+        if is_admin:
+            allowed = True
+        elif result.user and result.user == user:
+            allowed = True
+        elif result.patient is not None:
+            try:
+                if result.patient.user and result.patient.user == user:
+                    allowed = True
+                elif result.patient.therapist and result.patient.therapist == user:
+                    allowed = True
+            except Exception:
+                # fallthrough
+                allowed = allowed
+
+        if not allowed:
+            return Response({"detail": "No tienes permiso para ver este resultado"}, status=status.HTTP_403_FORBIDDEN)
+
+        # Tolerant serialization: if the result doesn't contain clinical fields (score/clinical_diagnosis)
+        # return the payload as-is so symbolic tests don't cause errors in the therapist workspace.
+        try:
+            has_clinical = (getattr(result, 'score', None) is not None) or bool(getattr(result, 'clinical_diagnosis', None))
+        except Exception:
+            has_clinical = False
+
+        if not has_clinical:
+            tm = getattr(result, 'test_module', None)
+            return Response({
+                'id': result.id,
+                'test_module': {
+                    'id': getattr(tm, 'id', None) if tm else None,
+                    'code': getattr(tm, 'code', None) if tm else getattr(result, 'test_id', None),
+                    'name': getattr(tm, 'name', None) if tm else None,
+                },
+                'created_at': getattr(result, 'created_at', None),
+                'result_data': result.result_data or {},
+                'details': result.details or {},
+            })
 
         serializer = TestResultSerializer(result)
         return Response(serializer.data)

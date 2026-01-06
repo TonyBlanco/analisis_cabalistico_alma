@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import { getActivePatientId, getActivePatientName } from '@/lib/active-patient';
-import { getTestResultsForPatient } from '@/lib/test-api';
+import { getTestResultsForPatient, getPatientPreviousTests } from '@/lib/test-api';
 import { TestResult } from '@/lib/test-types';
 
 /**
@@ -99,8 +99,10 @@ export default function AssignedTestsSection({
     setError(null);
 
     try {
-      const remoteResults = await getTestResultsForPatient({ patient_id: activePatientId });
-      setAssignedTests(remoteResults);
+      // Use patient-previous endpoint to include pending assignments
+      const data = await getPatientPreviousTests({ patient_id: activePatientId });
+      const remoteResults = Array.isArray(data) ? data : (data.results || []);
+      setAssignedTests(remoteResults as any);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error al cargar tests asignados';
       setError(errorMessage);

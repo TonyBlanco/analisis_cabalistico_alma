@@ -726,16 +726,21 @@ class TestResultDetailView(APIView):
         """Obtiene un resultado específico"""
         result = get_object_or_404(TestResult, pk=pk)
         
-        # PHASE 4: Validate access based on role and ownership
-        if not self._can_access_result(request.user, result):
+        # Minimal, explicit access check: allow owner or therapists/staff
+        user = request.user
+
+        if result.user == user:
+            # Owner (patient) — allowed
+            pass
+        elif getattr(user, 'is_staff', False) or hasattr(user, 'is_therapist'):
+            # Staff or therapist attribute present — allowed (therapist access to patient results)
+            pass
+        else:
             return Response(
-                {
-                    'error': 'No tienes acceso a este resultado',
-                    'message': 'Este resultado no pertenece a tu cuenta o a tus pacientes'
-                },
-                status=status.HTTP_403_FORBIDDEN
+                {"detail": "No tienes permiso para ver este resultado"},
+                status=status.HTTP_403_FORBIDDEN,
             )
-        
+
         serializer = TestResultSerializer(result)
         return Response(serializer.data)
     
@@ -889,18 +894,20 @@ class PatientPreviousTestsView(APIView):
         user = request.user
         profile = user.profile
         
-        # PHASE 5: Only therapist can search patient tests
+        # PHASE 5: Determine requester role: admin / therapist / patient
         is_admin = (
             profile.is_admin or 
             user.is_staff or 
             user.is_superuser
         )
-        
-        if not is_admin and profile.user_type != 'therapist':
+
+        # Allow access to admins, therapists, and the patient themself.
+        # Other roles are forbidden.
+        if not is_admin and profile.user_type not in ('therapist', 'patient'):
             return Response(
                 {
                     'error': 'No autorizado',
-                    'message': 'Solo los terapeutas pueden buscar tests de pacientes'
+                    'message': 'Solo terapeutas o el propio paciente pueden buscar tests de pacientes'
                 },
                 status=status.HTTP_403_FORBIDDEN
             )
@@ -917,24 +924,53 @@ class PatientPreviousTestsView(APIView):
             except Exception:
                 patient_id_int = None
         
-        # PHASE 5: patient_id is required for therapist searches (ensures ownership validation)
+        # PHASE 5: Resolve patient context according to requester role
         if not is_admin:
-            if not patient_id_int:
-                return Response(
-                    {
-                        'error': 'patient_id requerido',
-                        'message': 'Se requiere patient_id para buscar tests de pacientes'
-                    },
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            
-            # PHASE 5: Validate patient ownership using hardened validator
-            try:
-                patient = validate_patient_ownership(user, patient_id_int)
-                patient_name = patient.full_name
-                patient_birth_date = str(patient.birth_date)
-            except PermissionDenied as e:
-                return Response(e.detail, status=status.HTTP_403_FORBIDDEN)
+            if profile.user_type == 'therapist':
+                # Therapist must provide patient_id and must own the patient
+                if not patient_id_int:
+                    return Response(
+                        {
+                            'error': 'patient_id requerido',
+                            'message': 'Se requiere patient_id para buscar tests de pacientes'
+                        },
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+
+                try:
+                    patient = validate_patient_ownership(user, patient_id_int)
+                    patient_name = patient.full_name
+                    patient_birth_date = str(patient.birth_date)
+                except PermissionDenied as e:
+                    return Response(e.detail, status=status.HTTP_403_FORBIDDEN)
+
+            elif profile.user_type == 'patient':
+                # Allow patients to query their own previous tests. Prefer direct Patient linkage.
+                try:
+                    own_patient = Patient.objects.get(user=user)
+                    # If patient_id provided, ensure it matches the patient's record
+                    if patient_id_int and own_patient.id != patient_id_int:
+                        return Response(
+                            {
+                                'error': 'No autorizado',
+                                'message': 'No tienes permiso para ver tests de otro paciente'
+                            },
+                            status=status.HTTP_403_FORBIDDEN
+                        )
+
+                    patient = own_patient
+                    patient_name = patient.full_name
+                    patient_birth_date = str(patient.birth_date)
+                except Patient.DoesNotExist:
+                    # If no linked Patient record, fall back to query params (must be provided)
+                    if not patient_id_int and not (patient_name and patient_birth_date):
+                        return Response(
+                            {
+                                'error': 'Datos insuficientes',
+                                'message': 'No se encontró un perfil de paciente vinculado; proporciona patient_id o patient_name y patient_birth_date'
+                            },
+                            status=status.HTTP_400_BAD_REQUEST
+                        )
         else:
             # Admin can search without patient_id (for administrative purposes)
             if not patient_id and not (patient_name and patient_birth_date):
@@ -985,6 +1021,22 @@ class PatientPreviousTestsView(APIView):
                 results = unique_results
             except Patient.DoesNotExist:
                 pass
+
+        # If the requester is the patient themself, also include TestResult objects created by that user
+        # (these may not have client_name/client_birth_date populated)
+        if profile.user_type == 'patient' and getattr(user, 'id', None) and patient and patient.user and patient.user.id == user.id:
+            try:
+                user_results = TestResult.objects.filter(user=user).select_related('test_module', 'user').order_by('-created_at')
+                all_results = list(results) + list(user_results)
+                seen_ids = set()
+                unique_results = []
+                for result in all_results:
+                    if result.id not in seen_ids:
+                        seen_ids.add(result.id)
+                        unique_results.append(result)
+                results = unique_results
+            except Exception:
+                pass
         
         serializer = TestResultSerializer(results, many=True)
         serialized = serializer.data
@@ -1007,6 +1059,47 @@ class PatientPreviousTestsView(APIView):
                 ser['legacy_status'] = (obj.details or {}).get('status', 'assigned_pending_legacy')
 
             augmented.append(ser)
+
+        # Additionally, include active UserTestAccess assignments (as pending) so
+        # patients see canonical assignments created via UserTestAccess
+        try:
+            seen_codes = set()
+            for s in augmented:
+                code = None
+                try:
+                    code = (s.get('test_module') or {}).get('code') or s.get('test_module_code') or s.get('test_id')
+                except Exception:
+                    code = None
+                if code:
+                    seen_codes.add(str(code).lower())
+
+            if patient and getattr(patient, 'user', None):
+                accesses = UserTestAccess.objects.filter(user=patient.user, has_special_access=True).select_related('test_module')
+                for access in accesses:
+                    tm = getattr(access, 'test_module', None)
+                    if not tm:
+                        continue
+                    code = (getattr(tm, 'code', None) or '').lower()
+                    if code in seen_codes:
+                        continue
+
+                    pseudo = {
+                        'id': f'useraccess-{access.id}',
+                        'test_module_name': getattr(tm, 'name', None),
+                        'test_module_code': getattr(tm, 'code', None),
+                        'test_module': {
+                            'id': getattr(tm, 'id', None),
+                            'code': getattr(tm, 'code', None),
+                            'name': getattr(tm, 'name', None),
+                        },
+                        'result_data': {'assignment_only': True},
+                        'details': {'assigned_via_user_access': True},
+                        'created_at': access.created_at.isoformat() if getattr(access, 'created_at', None) else None
+                    }
+                    augmented.append(pseudo)
+                    seen_codes.add(code)
+        except Exception:
+            pass
 
         return Response({
             'count': len(augmented),

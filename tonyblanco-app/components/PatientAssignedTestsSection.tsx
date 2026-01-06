@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getAvailableTests, getTestResults, executeTest } from '@/lib/test-api';
+import { getAvailableTests, getTestResults, executeTest, getPatientPreviousTests } from '@/lib/test-api';
 import { TestModule, ExecuteTestRequest } from '@/lib/test-types';
 import { clinicalTestsRegistry } from '@/lib/clinicalTests.registry';
 
@@ -38,18 +38,51 @@ export default function PatientAssignedTestsSection() {
   const fetchAssignedTests = async () => {
     setLoading(true);
     setError(null);
-
     try {
-      // Fetch available tests (includes user_access info)
+      // Prefer PatientPrevious endpoint when available (therapist context).
+      // If it fails (403 for patient or other), fall back to existing behavior.
+      try {
+        const resp = await getPatientPreviousTests({});
+        const results = Array.isArray(resp) ? resp : (resp.results || []);
+
+        // Map TestResult objects to a minimal TestModule-like shape
+        const mapped = results.map((r: any) => ({
+          id: r.test_module?.id || null,
+          code: r.test_module?.code || r.test_module_code || r.test_id || null,
+          name: r.test_module?.name || r.test_module_name || (r.test_module && r.test_module.name) || 'Test sin nombre',
+          description: r.test_module?.description || r.details?.description || '',
+          test_type: r.test_module?.test_type || null,
+          // Mark assignment-only entries so UI can show pending state
+          user_access: { has_special_access: !!(r.result_data?.assignment_only || r.details?.legacy_assignment) },
+          __raw_result: r,
+        }));
+
+        setAssignedTests(mapped as any);
+
+        const completedIds = new Set<number>();
+        for (const r of results) {
+          if (!(r.result_data && (r.result_data.assignment_only === true || (r.details || {}).legacy_assignment === true))) {
+            if (r.test_module && r.test_module.id) completedIds.add(r.test_module.id);
+          }
+        }
+        setCompletedTestIds(completedIds);
+        setLoading(false);
+        return;
+      } catch (innerErr) {
+        // If patient-previous is not accessible (e.g., patient user), continue to fallback
+        console.debug('getPatientPreviousTests not available, falling back to available-tests flow', innerErr);
+      }
+
+      // Fallback: original flow for patients (uses UserTestAccess info)
       const response = await getAvailableTests();
       const allTests = response.tests || [];
 
       const tests = allTests.map((t) => ({
         ...t,
-        status: t.is_active ? "active" : "inactive",
+        status: t.is_active ? 'active' : 'inactive',
       }));
 
-      const visibleTests = tests.filter((t) => t.status === "active");
+      const visibleTests = tests.filter((t) => t.status === 'active');
 
       const assigned = visibleTests.filter(
         (test: TestModule) => test.user_access?.has_special_access === true

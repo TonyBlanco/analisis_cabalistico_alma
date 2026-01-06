@@ -69,7 +69,7 @@ class SimpleTestModuleSerializer(serializers.ModelSerializer):
 class TestResultSerializer(serializers.ModelSerializer):
     """Serializer para resultados de tests"""
     test_module = SimpleTestModuleSerializer(read_only=True)
-    test_module_name = serializers.CharField(source='test_module.name', read_only=True)
+    test_module_name = serializers.SerializerMethodField()
     test_module_code = serializers.CharField(source='test_module.code', read_only=True)
     patient_id = serializers.IntegerField(source='patient.id', read_only=True, allow_null=True)
     patient_name = serializers.CharField(source='patient.full_name', read_only=True, allow_null=True)
@@ -84,6 +84,17 @@ class TestResultSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at'
         ]
         read_only_fields = ['created_at', 'updated_at']
+
+    def get_test_module_name(self, obj):
+        if obj.test_module:
+            return obj.test_module.name
+        # Fallback: try details/test_code
+        try:
+            if obj.details and isinstance(obj.details, dict):
+                return obj.details.get('test_code') or obj.details.get('test_id')
+        except Exception:
+            pass
+        return None
 
 
 class TestExecutionSerializer(serializers.Serializer):

@@ -33,6 +33,7 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
   const [tests, setTests] = useState<CatalogTest[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [userType, setUserType] = useState<string>('');
   const [assigningTestCode, setAssigningTestCode] = useState<string | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [testToAssign, setTestToAssign] = useState<TestModule | null>(null);
@@ -114,6 +115,8 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
       }));
 
       const remote = await getAvailableTests().catch(() => null);
+      const userTypeFromApi = (remote && remote.user_type) || '';
+      setUserType(userTypeFromApi);
       const remoteTests: TestModule[] = Array.isArray(remote?.tests) ? remote!.tests : [];
       const remoteByCode = new Map(remoteTests.map((t) => [t.code, t]));
 
@@ -181,6 +184,14 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
       toast.warning(
         'Selecciona un consultante',
         'Debes seleccionar un consultante activo antes de asignar un test.'
+      );
+      return;
+    }
+
+    if (userType === 'admin') {
+      toast.error(
+        'Solo terapeutas pueden asignar tests',
+        'Los administradores no pueden asignar tests a pacientes.'
       );
       return;
     }

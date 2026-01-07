@@ -1,7 +1,7 @@
 export const scdf_es = {
   page: {
-    title: 'SCDF — Entrevista Clínica Integrativa',
-    subtitle: 'Marco clínico estructurado para registro consultivo (no automatiza diagnóstico).',
+    title: 'SCDF — Formulación estructurada',
+    subtitle: 'Marco estructurado para formulación y registro consultivo (no diagnóstico).',
   },
   helpModal: {
     button: {

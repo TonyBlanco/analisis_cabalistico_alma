@@ -13,7 +13,7 @@ import {
   AlertTriangle, ClipboardList, User, Calendar, Stethoscope, HelpCircle
 } from 'lucide-react';
 import TherapistRoute from '@/components/TherapistRoute';
-import { executeTest, getPatientPreviousTests, type ExecuteTestRequest } from '@/lib/test-api';
+import { getPatientPreviousTests } from '@/lib/test-api';
 import { useToast, ToastContainer } from '@/components/ui/toast';
 import SCDFHelpModal from '@/components/SCDFHelpModal';
 import { scdf_es as t } from '@/lib/i18n/es/scdf';
@@ -38,10 +38,10 @@ function computeAgeFromBirthDate(value: unknown): number {
 const INITIAL_TEMPLATE = {
   metadata: {
     framework_version: "1.0",
-    framework_name: "Structured Clinical Diagnostic Framework (SCDF)",
-    jurisdiction: "International - Clinical Practice",
-    based_on: "DSM-5 diagnostic logic and ICD-11 compatibility principles",
-    note: "This is NOT the SCID-5. This is a proprietary structured clinical framework inspired by DSM-5 logic, developed specifically for this platform.",
+    framework_name: "Structured Consultative Framework (SCDF)",
+    jurisdiction: "Internal - Consultative Practice",
+    based_on: "Estructura propia para formulación y registro consultivo (no diagnóstico).",
+    note: "Herramienta orientativa de formulación y registro. No automatiza diagnóstico ni sustituye el juicio profesional.",
     created_at: new Date().toISOString().split('T')[0]
   },
   client_data: {
@@ -52,7 +52,7 @@ const INITIAL_TEMPLATE = {
   modules: [
     {
       module_id: "MOOD_001",
-      module_name: "Mood Disorders Module",
+      module_name: "Estado de ánimo y energía",
       status: "evaluated",
       core_gate: {
         present: false,
@@ -77,7 +77,7 @@ const INITIAL_TEMPLATE = {
     },
     {
       module_id: "ANXIETY_001",
-      module_name: "Anxiety Disorders Module",
+      module_name: "Ansiedad y activación",
       status: "evaluated",
       core_gate: {
         present: false,
@@ -101,7 +101,7 @@ const INITIAL_TEMPLATE = {
     },
     {
       module_id: "PSYCHOSIS_001",
-      module_name: "Psychotic Disorders Module",
+      module_name: "Percepción y realidad",
       status: "evaluated",
       core_gate: {
         present: false,
@@ -125,7 +125,7 @@ const INITIAL_TEMPLATE = {
     },
     {
       module_id: "TRAUMA_001",
-      module_name: "Trauma and Stressor-Related Disorders Module",
+      module_name: "Estrés y experiencias difíciles",
       status: "evaluated",
       core_gate: {
         present: false,
@@ -148,7 +148,7 @@ const INITIAL_TEMPLATE = {
     },
     {
       module_id: "SUBSTANCE_001",
-      module_name: "Substance-Related Disorders Module",
+      module_name: "Consumo y hábitos",
       status: "evaluated",
       core_gate: {
         present: false,
@@ -171,7 +171,7 @@ const INITIAL_TEMPLATE = {
     },
     {
       module_id: "PERSONALITY_001",
-      module_name: "Personality Disorders Module",
+      module_name: "Patrones relacionales y de personalidad",
       status: "evaluated",
       core_gate: {
         present: false,
@@ -195,7 +195,7 @@ const INITIAL_TEMPLATE = {
     },
     {
       module_id: "EATING_001",
-      module_name: "Eating Disorders Module",
+      module_name: "Alimentación y autocuidado",
       status: "evaluated",
       core_gate: {
         present: false,
@@ -218,7 +218,7 @@ const INITIAL_TEMPLATE = {
     },
     {
       module_id: "SLEEP_001",
-      module_name: "Sleep-Wake Disorders Module",
+      module_name: "Sueño y descanso",
       status: "evaluated",
       core_gate: {
         present: false,
@@ -338,6 +338,34 @@ export default function SCDFPage() {
     }
   }, [patientId]);
 
+  const loadLatestSCDFRecord = async (parsedPatientId: number, token: string) => {
+    const response = await fetch(
+      `${API_URL}/analysis-records/?patient_id=${encodeURIComponent(String(parsedPatientId))}`,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Token ${token}`,
+        },
+      }
+    );
+
+    if (!response.ok) return;
+
+    const body = await response.json().catch(() => ({}));
+    const items = Array.isArray(body) ? body : (body?.results || []);
+    const latest = items.find((r: any) => String(r?.module_code || '').toLowerCase() === 'scdf');
+    const raw = latest?.raw_input;
+    if (!raw || typeof raw !== 'object') return;
+
+    const { clinician_notes, ...rest } = raw as any;
+    if (rest?.modules && rest?.client_data) {
+      setScdfData(rest as SCDFData);
+    }
+    if (typeof clinician_notes === 'string') {
+      setClinicianNotes(clinician_notes);
+    }
+  };
+
   const loadPatientData = async () => {
     try {
       setLoading(true);
@@ -382,6 +410,7 @@ export default function SCDFPage() {
       try {
         const parsedPatientId = patientId ? parseInt(patientId, 10) : NaN;
         if (!Number.isNaN(parsedPatientId)) {
+          await loadLatestSCDFRecord(parsedPatientId, token);
           const prev = await getPatientPreviousTests({ patient_id: parsedPatientId });
           const results = Array.isArray(prev?.results) ? prev.results : [];
 
@@ -551,11 +580,11 @@ export default function SCDFPage() {
       return;
     }
 
-    // VALIDACIÓN CRÍTICA: Evaluaciones clínicas DEBEN tener paciente seleccionado
+    // VALIDACIÓN CRÍTICA: Evaluación SCDF requiere paciente seleccionado
     if (!patientId) {
       showToast({
         type: 'error',
-        message: 'Debes seleccionar un paciente antes de guardar la evaluación clínica SCDF'
+        message: 'Debes seleccionar un paciente antes de guardar la evaluación SCDF'
       });
       return;
     }
@@ -563,19 +592,64 @@ export default function SCDFPage() {
     try {
       setSubmitting(true);
 
-      const payload: ExecuteTestRequest = {
-        test_module_code: 'scdf',
-        input_data: {
-          ...scdfData,
-          clinician_notes: clinicianNotes || undefined
-        },
-        client_name: scdfData.client_data.nombre,
-        client_birth_date: scdfData.client_data.fecha,
-        patient_id: patientId ? parseInt(patientId) : undefined,
-        save_result: true
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        router.push('/login');
+        return;
+      }
+
+      const birthSnapshot = {
+        legal_name: (patient?.full_name || patient?.legal_full_name || scdfData?.client_data?.nombre || '').toString(),
+        birth_date: (patient?.birth_date || scdfData?.client_data?.fecha || '').toString(),
+        birth_time: (patient?.birth_time || patient?.birth_hour || '').toString(),
+        city: (patient?.birth_city || patient?.city || '').toString(),
+        country: (patient?.birth_country || patient?.country || '').toString(),
+        lat: patient?.birth_lat ?? patient?.lat ?? null,
+        lng: patient?.birth_lng ?? patient?.lng ?? null,
+        timezone: (patient?.birth_timezone || patient?.timezone || '').toString(),
+        geocode_source: (patient?.geocode_source || '').toString(),
       };
 
-      const result = await executeTest(payload);
+      const payload = {
+        kind: 'legacy',
+        module_code: 'SCDF',
+        role_context: 'therapist',
+        execution_mode: 'therapist_clinical',
+        visibility: 'therapist',
+        patient: patientId ? parseInt(patientId, 10) : undefined,
+        birth_data_snapshot: birthSnapshot,
+        algorithm_snapshot: {
+          engine: 'SCDF_WORKSPACE',
+          version: '1.0',
+          build_hash: null,
+          params: { schema: 'scdf_v1' },
+        },
+        raw_input: {
+          ...scdfData,
+          clinician_notes: (clinicianNotes || '').trim() || undefined,
+        },
+        therapist_annotations: {
+          notes: (clinicianNotes || '').trim() || '',
+          visible_to_patient: false,
+        },
+      };
+
+      const response = await fetch(`${API_URL}/analysis-records/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Token ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}));
+        const message = body?.detail || body?.error || body?.message || 'Error al guardar la evaluación SCDF';
+        throw new Error(message);
+      }
+
+      await response.json().catch(() => null);
 
       const noteText = (clinicianNotes || '').trim();
       if (noteText && patientId) {
@@ -600,15 +674,7 @@ export default function SCDFPage() {
         message: t.messages.saveSuccess
       });
 
-      // Redirigir a resultados o página del paciente
-      try {
-        const resultId = (result as any)?.result_id;
-        if (resultId) {
-          router.push(`/dashboard/therapist/tests/results/${encodeURIComponent(String(resultId))}`);
-          return;
-        }
-      } catch {}
-
+      // Redirigir a la ficha del paciente
       if (patientId) {
         router.push(`/dashboard/therapist/patients/${encodeURIComponent(String(patientId))}`);
       } else {

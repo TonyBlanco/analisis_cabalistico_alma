@@ -158,7 +158,10 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
 
   // Agrupa por familia para mejorar legibilidad sin ocultar tests
   const groupedByFamily = normalizedTests.reduce<Record<string, CatalogTest[]>>((acc, test) => {
-    const family = (test as any).family ?? clinicalTestsRegistry.find((e) => e.test_code === test.code)?.family ?? 'psicologicos';
+    const rawFamily = (test as any).family ?? clinicalTestsRegistry.find((e) => e.test_code === test.code)?.family;
+    // Normaliza wellness/diagnostic como 'psicologicos' para asegurar visibilidad en UI
+    const family = rawFamily === 'cabalisticos' ? 'cabalisticos' : 'psicologicos';
+
     if (!acc[family]) acc[family] = [];
     acc[family].push(test);
     return acc;

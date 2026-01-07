@@ -830,6 +830,84 @@ def compute_stress_regulation_wellness(input_data: dict) -> dict:
     }
 
 
+
+def compute_anxiety_state_trait(input_data: dict) -> dict:
+    """Compute a wellness-oriented anxiety assessment inspired by STAI."""
+
+    responses = (input_data.get('responses', {}) or {})
+    domains = {
+        'estado': [f'anst-state-{i}' for i in range(1, 11)],
+        'rasgo': [f'anst-trait-{i}' for i in range(1, 11)],
+    }
+
+    def _as_int(val) -> int:
+        try:
+            return int(val)
+        except Exception:
+            return 0
+
+    def _normalize_value(qid: str) -> int:
+        v = _as_int(responses.get(qid, 0))
+        return max(0, min(4, v))
+
+    domain_scores = {}
+    all_vals = []
+    for domain, qids in domains.items():
+        vals = [_normalize_value(qid) for qid in qids]
+        all_vals.extend(vals)
+        avg = sum(vals) / (len(vals) or 1)
+        domain_scores[domain] = {
+            'avg_0_4': round(avg, 2),
+            'percent_0_100': int(round((avg / 4) * 100)),
+            'items': len(qids),
+        }
+
+    overall_avg = (sum(all_vals) / (len(all_vals) or 1))
+    index_0_100 = int(round((overall_avg / 4) * 100))
+
+    if index_0_100 >= 70:
+        tier = 'Alto'
+        summary = 'Estado y rasgo muestran gestión sólida de la ansiedad; tus recursos mantienen equilibrio a pesar de señales puntuales.'
+    elif index_0_100 >= 40:
+        tier = 'Medio'
+        summary = 'Hay señales de inquietud moderada, pero continúas contando con recursos para regular y reconectar con la calma.'
+    else:
+        tier = 'Bajo'
+        summary = 'Estado y rasgo reflejan una ansiedad más marcada; prioriza pausas, apoyo y prácticas suaves de regulación.'
+
+    ranked = sorted(domain_scores.items(), key=lambda kv: kv[1]['percent_0_100'], reverse=True)
+    strengths = [name for name, v in ranked if v['percent_0_100'] >= 70][:3]
+    focus_areas = [name for name, v in ranked if v['percent_0_100'] < 50][:3]
+
+    recommendations = [
+        'Respirar conscientemente 2-3 minutos cuando notes que el cuerpo se activa.',
+        'Identificar un pensamiento recurrente que dispara inquietud y reenfocarlo con calma.',
+        'Planificar al menos un espacio diario sin dispositivos para bajar el ritmo.',
+        'Compartir una preocupación con alguien de confianza y acordar un siguiente paso.',
+        'Registrar una acción concreta que te ancle (tocar tierra, beber agua, pausar) cuando sientas alerta.',
+    ]
+
+    return {
+        'codigo_evaluacion': _generate_code('ANST'),
+        'fecha_evaluacion': input_data.get('fecha') or datetime.utcnow().strftime('%Y-%m-%d'),
+        'respuestas': responses,
+        'puntuaciones': {
+            'indice_0_100': index_0_100,
+            'nivel': tier,
+            'dominios': domain_scores,
+        },
+        'interpretacion': {
+            'resumen': summary,
+            'fortalezas': strengths,
+            'areas_enfoque': focus_areas,
+        },
+        'recomendaciones': recommendations,
+        'alertas': {
+            'nota': 'Resultado orientativo, no diagnóstico.',
+        },
+    }
+
+
 def compute_stress_wellness(input_data: dict) -> dict:
     """Compute an in-house Wellness Stress assessment (non-diagnostic).
 

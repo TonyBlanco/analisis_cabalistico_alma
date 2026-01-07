@@ -445,6 +445,7 @@ class ExecuteTestView(APIView):
         compute_nutrition_wellness = None
         compute_stress_wellness = None
         compute_stress_regulation_wellness = None
+        compute_anxiety_state_trait = None
         compute_screening_general = None
         compute_stress_screening = None
         compute_past_lives = None
@@ -456,21 +457,22 @@ class ExecuteTestView(APIView):
             compute_pai = None
         try:
             from .diagnostics import (
-                compute_bdi,
-                compute_bai,
-                compute_scl90,
-                compute_stai,
-                compute_mcmi4,
-                compute_scid5,
-                compute_wellness_assessment,
-                compute_insomnia_wellness,
-                compute_nutrition_wellness,
-                compute_stress_wellness,
-                compute_stress_regulation_wellness,
-                compute_screening_general,
-                compute_stress_screening,
-                compute_past_lives,
-                compute_scdf,
+            compute_bdi,
+            compute_bai,
+            compute_scl90,
+            compute_stai,
+            compute_mcmi4,
+            compute_scid5,
+            compute_wellness_assessment,
+            compute_insomnia_wellness,
+            compute_nutrition_wellness,
+            compute_stress_wellness,
+            compute_stress_regulation_wellness,
+            compute_anxiety_state_trait,
+            compute_screening_general,
+            compute_stress_screening,
+            compute_past_lives,
+            compute_scdf,
             )
         except Exception:
             compute_bdi = compute_bai = compute_scl90 = compute_stai = compute_mcmi4 = compute_scid5 = None
@@ -518,6 +520,13 @@ class ExecuteTestView(APIView):
                     return compute_stress_regulation_wellness({'fecha': input_data.get('fecha'), 'responses': responses})
                 logger.error('compute_stress_regulation_wellness not available; refusing symbolic fallback for stress-regulation')
                 raise ValueError('Stress-regulation wellness engine not available')
+
+            if test_module.code == 'anxiety-state-trait':
+                responses = input_data.get('responses', {})
+                if compute_anxiety_state_trait:
+                    return compute_anxiety_state_trait({'fecha': input_data.get('fecha'), 'responses': responses})
+                logger.error('compute_anxiety_state_trait not available; refusing symbolic fallback for anxiety-state-trait')
+                raise ValueError('Anxiety-state-trait wellness engine not available')
 
             if test_type == 'bdi' or test_module.code == 'bdi-ii':
                 responses = input_data.get('responses', {})

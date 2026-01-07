@@ -1,4 +1,6 @@
 from datetime import datetime
+from typing import Dict
+from ..tests.wellness.anxiety_state_trait.stai_bank import select_items_for_execution
 
 
 def _generate_code(prefix='DIAG'):
@@ -834,11 +836,9 @@ def compute_stress_regulation_wellness(input_data: dict) -> dict:
 def compute_anxiety_state_trait(input_data: dict) -> dict:
     """Compute a wellness-oriented anxiety assessment inspired by STAI."""
 
+    seed = input_data.get('seed')
+    selected_items = select_items_for_execution(seed=seed)
     responses = (input_data.get('responses', {}) or {})
-    domains = {
-        'estado': [f'anst-state-{i}' for i in range(1, 11)],
-        'rasgo': [f'anst-trait-{i}' for i in range(1, 11)],
-    }
 
     def _as_int(val) -> int:
         try:
@@ -846,20 +846,27 @@ def compute_anxiety_state_trait(input_data: dict) -> dict:
         except Exception:
             return 0
 
-    def _normalize_value(qid: str) -> int:
-        v = _as_int(responses.get(qid, 0))
-        return max(0, min(4, v))
+    def _normalize_value(item: Dict) -> int:
+        raw_value = responses.get(item['id'], None)
+        if raw_value is None:
+            raw_value = responses.get(item.get('legacy_id', ''), 0)
+        return max(0, min(4, _as_int(raw_value)))
 
     domain_scores = {}
     all_vals = []
-    for domain, qids in domains.items():
-        vals = [_normalize_value(qid) for qid in qids]
+    for domain in ('estado', 'rasgo'):
+        domain_items = [item for item in selected_items if item.get('domain') == domain]
+        if len(domain_items) != 10:
+            raise ValueError(
+                f'Canonical selection returned {len(domain_items)} items for domain {domain}; expected 10'
+            )
+        vals = [_normalize_value(item) for item in domain_items]
         all_vals.extend(vals)
         avg = sum(vals) / (len(vals) or 1)
         domain_scores[domain] = {
             'avg_0_4': round(avg, 2),
             'percent_0_100': int(round((avg / 4) * 100)),
-            'items': len(qids),
+            'items': len(domain_items),
         }
 
     overall_avg = (sum(all_vals) / (len(all_vals) or 1))
@@ -904,6 +911,9 @@ def compute_anxiety_state_trait(input_data: dict) -> dict:
         'recomendaciones': recommendations,
         'alertas': {
             'nota': 'Resultado orientativo, no diagnóstico.',
+        },
+        'raw_inputs': {
+            'selected_items': selected_items,
         },
     }
 

@@ -8,6 +8,7 @@ Este módulo genera el banco de 120 ítems (4 clústeres x 15 ítems por dominio
 y provee funciones de selección estratificada y exportación.
 """
 
+from pathlib import Path
 from typing import List, Dict, Optional
 import random
 from datetime import datetime
@@ -442,6 +443,30 @@ def select_items_scdf(n: int = 20, seed: Optional[int] = None, domain: Optional[
         selected = sorted(selected, key=lambda x: (x['domain'], x['cluster'], x['id']))
 
     return selected[:n]
+
+
+def load_canonical_bank() -> List[Dict]:
+    path = Path(__file__).parent / 'banco_items.json'
+    if not path.exists():
+        raise FileNotFoundError(f'Canonical STAI banco_items.json not found at {path}')
+    with path.open(encoding='utf-8') as f:
+        return json.load(f)
+
+
+def select_items_for_execution(n: int = 20, seed: Optional[int] = None) -> List[Dict]:
+    bank = load_canonical_bank()
+    domain_items = {
+        'estado': [item for item in bank if item.get('domain') == 'estado'],
+        'rasgo': [item for item in bank if item.get('domain') == 'rasgo'],
+    }
+    rand = random.Random(seed)
+    selected: List[Dict] = []
+    for domain, items in domain_items.items():
+        if len(items) < 10:
+            raise ValueError(f'Insufficient items for domain {domain} ({len(items)} found)')
+        selected.extend(rand.sample(items, 10))
+    rand.shuffle(selected)
+    return selected
 
 
 def export_banco_json(path: str = "banco_items.json") -> None:

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { fetchSession } from '@/lib/session';
 import { getUserRole } from '@/lib/getUserRole';
 import PatientPicker from '@/components/PatientPicker';
+import ActivePatientIndicator from '@/components/ActivePatientIndicator';
 import TherapistClinicalDashboard from '@/components/TherapistClinicalDashboard';
 import type { Patient } from '@/lib/patient-api';
 
@@ -37,6 +38,8 @@ export default function TherapistDashboard() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <ActivePatientIndicator onSelectPatient={() => setPickerOpen(true)} />
+
       <TherapistClinicalDashboard 
         onChangePatient={() => setPickerOpen(true)}
         patientId={selectedPatient?.id}

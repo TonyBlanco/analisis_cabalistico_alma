@@ -51,28 +51,19 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
   const fetchAssignedTests = useCallback(async () => {
     if (!activePatientId) return;
     try {
-      const { getTestResultsForPatient } = await import('@/lib/test-api');
-      const remoteResults = await getTestResultsForPatient({ patient_id: Number(activePatientId) });
+      // Use patient-previous because it includes canonical UserTestAccess assignments (pending)
+      const { getPatientPreviousTests } = await import('@/lib/test-api');
+      const data = await getPatientPreviousTests({ patient_id: Number(activePatientId) });
+      const items = Array.isArray(data) ? data : (data?.results || []);
 
-      // Include any local pending assignments stored after assignment actions
-      let localAssignments: Array<any> = [];
-      if (typeof window !== 'undefined') {
-        const raw = localStorage.getItem('assigned_tests_by_patient');
-        if (raw) {
-          const parsed = JSON.parse(raw) || {};
-          const list = parsed[String(activePatientId)] || [];
-          localAssignments = list.map((item: any) => ({
-            id: undefined,
-            test_module: { id: item.test_id ?? item.id ?? 0, code: item.code },
-            test_module_code: item.code,
-            created_at: item.assigned_at || new Date().toISOString(),
-          }));
-        }
-      }
+      // Guardrail: only treat canonical UserTestAccess-based assignments as "assigned"
+      // (legacy TestResult history must NOT mark a test as assigned).
+      const canonicalAssignments = (items || []).filter((r: any) => {
+        const details = r?.details || {};
+        return details?.assigned_via_user_access === true || String(r?.id || '').startsWith('useraccess-');
+      });
 
-      const remoteCodes = new Set(remoteResults.map((r: any) => r.test_module?.code || r.test_module_code).filter(Boolean));
-      const merged = [...remoteResults, ...localAssignments.filter((p) => !remoteCodes.has(p.test_module?.code || p.test_module_code))];
-      setAssignedTests(merged);
+      setAssignedTests(canonicalAssignments);
     } catch (err) {
       setAssignedTests([]);
       console.error('Error fetching assigned tests in catalog:', err);
@@ -421,11 +412,16 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
                         </span>
                       ) : (
                         (() => {
-                          // Build set of assigned test ids using canonical assignedTests
-                          const assignedTestIds = new Set(
-                            assignedTests.map((t: any) => (t.test_id ?? (t.test?.id ?? t.test_module?.id ?? t.test_module_code)))
+                          // Canonical "assigned" = UserTestAccess assignment + test is assignable and executable (has patient_route)
+                          const assignedCodes = new Set(
+                            assignedTests
+                              .map((t: any) => (t.test_module?.code || t.test_module_code || t.test_id))
+                              .filter(Boolean)
+                              .map((c: any) => String(c).toLowerCase()),
                           );
-                          const isAssigned = assignedTestIds.has(test.id ?? test.code);
+                          const hasPatientRoute = Boolean((test as any).patient_route);
+                          const isAssignable = Boolean((test as any).available_for_personal);
+                          const isAssigned = hasPatientRoute && isAssignable && assignedCodes.has(String(test.code).toLowerCase());
                           const isAssigning = assigningTestCode === test.code;
                           const isImplemented = (test as any).implemented !== false;
                           const requiresLicense = (test as any).requires_license === true;

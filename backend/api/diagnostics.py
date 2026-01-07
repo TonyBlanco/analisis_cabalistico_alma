@@ -499,6 +499,432 @@ def compute_wellness_assessment(input_data: dict) -> dict:
     return result
 
 
+def compute_insomnia_wellness(input_data: dict) -> dict:
+    """Compute an in-house Insomnia Wellness check (non-medical).
+
+    Expects:
+      - responses: dict(questionId -> 0..4) using ids i1..i16
+        (0=Nunca, 1=Rara vez, 2=A veces, 3=A menudo, 4=Casi siempre)
+
+    Returns a structure compatible with the insomnia patient UI.
+    """
+    responses = (input_data.get('responses', {}) or {})
+
+    domains = {
+        'inicio_continuidad': ['i1', 'i2', 'i3', 'i4'],
+        'regularidad_ritmo': ['i5', 'i6', 'i7', 'i8'],
+        'habitos_entorno': ['i9', 'i10', 'i11', 'i12'],
+        'recuperacion_diurna': ['i13', 'i14', 'i15', 'i16'],
+    }
+
+    reverse_items = {'i2', 'i4', 'i8', 'i11', 'i15'}
+
+    def _as_int(val) -> int:
+        try:
+            return int(val)
+        except Exception:
+            return 0
+
+    def _normalize_value(qid: str) -> int:
+        v = _as_int(responses.get(qid, 0))
+        v = max(0, min(4, v))
+        if qid in reverse_items:
+            return 4 - v
+        return v
+
+    domain_scores = {}
+    all_vals = []
+    for domain, qids in domains.items():
+        vals = [_normalize_value(qid) for qid in qids]
+        all_vals.extend(vals)
+        avg = sum(vals) / (len(vals) or 1)
+        domain_scores[domain] = {
+            'avg_0_4': round(avg, 2),
+            'percent_0_100': int(round((avg / 4) * 100)),
+            'items': len(qids),
+        }
+
+    overall_avg = (sum(all_vals) / (len(all_vals) or 1))
+    index_0_100 = int(round((overall_avg / 4) * 100))
+
+    ranked = sorted(domain_scores.items(), key=lambda kv: kv[1]['avg_0_4'], reverse=True)
+    strengths = [name for name, _ in ranked[:2]]
+    focus_areas = [name for name, _ in ranked[-2:]][::-1]
+
+    if index_0_100 >= 75:
+        tier = 'Alto'
+        tier_note = 'Tu descanso se percibe estable. Enfócate en sostener hábitos y proteger tu rutina de sueño.'
+    elif index_0_100 >= 50:
+        tier = 'Medio'
+        tier_note = 'Hay bases de descanso, pero con áreas claras para mejorar con ajustes simples y consistentes.'
+    else:
+        tier = 'Bajo'
+        tier_note = 'Tu descanso se percibe comprometido. Prioriza regularidad, relajación y pide apoyo si lo necesitas.'
+
+    suggestions = {
+        'inicio_continuidad': [
+            'Rutina de desconexión 30–60 min antes de dormir',
+            'Reducir cafeína/estimulantes en la tarde',
+        ],
+        'regularidad_ritmo': [
+            'Horario fijo de acostarte y levantarte (5–7 días)',
+            'Exposición a luz natural por la mañana (10–15 min)',
+        ],
+        'habitos_entorno': [
+            'Evitar pantallas antes de dormir (modo noche / sin scroll)',
+            'Optimizar entorno: oscuridad, temperatura, ruido',
+        ],
+        'recuperacion_diurna': [
+            'Micro-pausas de 2–3 min durante el día (respiración / estiramientos)',
+            'Evitar siestas largas; siesta corta (10–20 min) si es necesaria',
+        ],
+    }
+
+    next_steps = []
+    for area in focus_areas:
+        next_steps.extend(suggestions.get(area, [])[:2])
+    dedup = []
+    for s in next_steps:
+        if s not in dedup:
+            dedup.append(s)
+    next_steps = dedup[:6]
+
+    return {
+        'codigo_evaluacion': _generate_code('INSOM'),
+        'fecha_evaluacion': input_data.get('fecha') or datetime.utcnow().strftime('%Y-%m-%d'),
+        'respuestas': responses,
+        'puntuaciones': {
+            'indice_0_100': index_0_100,
+            'nivel': tier,
+            'dominios': domain_scores,
+        },
+        'interpretacion': {
+            'resumen': tier_note,
+            'fortalezas': strengths,
+            'areas_enfoque': focus_areas,
+        },
+        'recomendaciones': next_steps,
+        'alertas': {
+            'nota': 'Este resultado es orientativo y no constituye un diagnóstico. Si el malestar persiste, considera consultar con un profesional.',
+        },
+        'validez': {
+            'completo': True,
+            'tiempo_ok': True,
+        },
+    }
+
+
+def compute_nutrition_wellness(input_data: dict) -> dict:
+    """Compute a Wellness Nutrition check (non-medical, non-diagnostic).
+
+    Returns the canonical WELLNESS contract:
+      {
+        "index": 0-100,
+        "level": "bajo|medio|alto",
+        "map": { "strengths": [], "focus_areas": [] },
+        "summary_text": "",
+        "suggested_steps": [],
+        "disclaimer": "...",
+        "raw_inputs": {}
+      }
+    """
+    responses = (input_data.get('responses', {}) or {})
+
+    dimensions = {
+        'señales corporales': ['n1', 'n2', 'n3', 'n4'],
+        'relación emocional': ['n5', 'n6', 'n7', 'n8'],
+        'regularidad y hábitos': ['n9', 'n10', 'n11', 'n12'],
+        'contexto y autocuidado': ['n13', 'n14', 'n15', 'n16'],
+    }
+
+    reverse_items = {'n4', 'n5', 'n7', 'n10', 'n12', 'n16'}
+
+    def _as_int(val) -> int:
+        try:
+            return int(val)
+        except Exception:
+            return 0
+
+    def _normalize_value(qid: str) -> int:
+        v = _as_int(responses.get(qid, 0))
+        v = max(0, min(4, v))
+        if qid in reverse_items:
+            return 4 - v
+        return v
+
+    dim_scores = {}
+    all_vals = []
+    for dim, qids in dimensions.items():
+        vals = [_normalize_value(qid) for qid in qids]
+        all_vals.extend(vals)
+        dim_score = sum(vals)  # 0..16
+        dim_scores[dim] = {
+            'score_0_16': dim_score,
+            'percent_0_100': int(round((dim_score / 16) * 100)),
+        }
+
+    total_score = sum(all_vals)  # 0..64
+    index_0_100 = int(round((total_score / 64) * 100))
+
+    if index_0_100 <= 39:
+        level = 'bajo'
+    elif index_0_100 <= 69:
+        level = 'medio'
+    else:
+        level = 'alto'
+
+    strengths = [k for k, v in dim_scores.items() if v['percent_0_100'] >= 70]
+    focus_areas = [k for k, v in dim_scores.items() if v['percent_0_100'] < 50]
+
+    summary_text = (
+        'Este resultado ofrece una lectura orientativa de tu relación con la alimentación y los hábitos que la rodean. '
+        'No se trata de una evaluación nutricional ni diagnóstica, sino de una invitación a observar cómo te relacionas '
+        'con la comida y contigo.'
+    )
+    suggested_steps = [
+        'Observar señales de hambre y saciedad antes y después de comer.',
+        'Introducir al menos una comida diaria con atención plena.',
+        'Explorar la relación entre emociones y alimentación sin juicio.',
+        'Establecer horarios amables y sostenibles.',
+        'Priorizar una relación respetuosa con la comida, no el control.',
+    ]
+    disclaimer = 'Este resultado es orientativo y no sustituye la valoración de un profesional de la salud o la nutrición.'
+
+    return {
+        'index': index_0_100,
+        'level': level,
+        'map': {
+            'strengths': strengths,
+            'focus_areas': focus_areas,
+        },
+        'summary_text': summary_text,
+        'suggested_steps': suggested_steps[:5],
+        'disclaimer': disclaimer,
+        'raw_inputs': {
+            'responses': responses,
+            'dimensions': dim_scores,
+            'total_score_0_64': total_score,
+        },
+    }
+
+
+def compute_stress_regulation_wellness(input_data: dict) -> dict:
+    """Compute a Wellness Stress-Regulation assessment (non-diagnostic).
+
+    Expects:
+      - responses: dict(questionId -> 0..4) using ids sr1..sr18
+        (0=Nunca, 1=Rara vez, 2=A veces, 3=A menudo, 4=Casi siempre)
+
+    Returns the Wellness-style contract used by insomnia/wellness pages:
+      {
+        "puntuaciones": { "indice_0_100": 0-100, "nivel": "Bajo|Medio|Alto", "dominios": {...} },
+        "interpretacion": { "resumen": "...", "fortalezas": [], "areas_enfoque": [] },
+        "recomendaciones": [],
+        "alertas": { "nota": "Resultado orientativo, no diagnóstico" }
+      }
+    """
+    responses = (input_data.get('responses', {}) or {})
+
+    domains = {
+        'carga_fisiologica': ['sr1', 'sr2', 'sr3'],
+        'carga_mental_emocional': ['sr4', 'sr5', 'sr6'],
+        'recuperacion_descanso': ['sr7', 'sr8', 'sr9'],
+        'regulacion_emocional': ['sr10', 'sr11', 'sr12'],
+        'recursos_personales': ['sr13', 'sr14', 'sr15'],
+        'apoyo_externo': ['sr16', 'sr17', 'sr18'],
+    }
+
+    # Load items: higher means worse (reverse to compute a "wellness/regulation" index)
+    reverse_items = {
+        # carga fisiológica
+        'sr1', 'sr2', 'sr3',
+        # carga mental/emocional
+        'sr4', 'sr5', 'sr6',
+        # recuperación/descanso (negative phrasing)
+        'sr7', 'sr8',
+        # apoyo externo (lack of support)
+        'sr17',
+    }
+
+    def _as_int(val) -> int:
+        try:
+            return int(val)
+        except Exception:
+            return 0
+
+    def _normalize_value(qid: str) -> int:
+        v = _as_int(responses.get(qid, 0))
+        v = max(0, min(4, v))
+        if qid in reverse_items:
+            return 4 - v
+        return v
+
+    domain_scores = {}
+    all_vals = []
+    for domain, qids in domains.items():
+        vals = [_normalize_value(qid) for qid in qids]
+        all_vals.extend(vals)
+        avg = sum(vals) / (len(vals) or 1)
+        domain_scores[domain] = {
+            'avg_0_4': round(avg, 2),
+            'percent_0_100': int(round((avg / 4) * 100)),
+            'items': len(qids),
+        }
+
+    overall_avg = (sum(all_vals) / (len(all_vals) or 1))
+    index_0_100 = int(round((overall_avg / 4) * 100))
+
+    if index_0_100 >= 70:
+        tier = 'Alto'
+        summary = (
+            'Se observa una buena capacidad de regulación y recursos disponibles. '
+            'Tu carga se percibe manejable en este momento.'
+        )
+    elif index_0_100 >= 40:
+        tier = 'Medio'
+        summary = (
+            'Se observa una regulación moderada con señales puntuales de carga. '
+            'Ajustes simples y consistentes pueden ayudarte a sostener el equilibrio.'
+        )
+    else:
+        tier = 'Bajo'
+        summary = (
+            'Se observa una carga elevada y/o recursos de regulación limitados en este momento. '
+            'Prioriza descanso, apoyo y prácticas suaves de regulación; considera acompañamiento si lo necesitas.'
+        )
+
+    ranked = sorted(domain_scores.items(), key=lambda kv: kv[1]['percent_0_100'], reverse=True)
+    strengths = [name for name, v in ranked if v['percent_0_100'] >= 70][:4]
+    focus_areas = [name for name, v in ranked if v['percent_0_100'] < 50][:4]
+
+    recommendations = [
+        'Hacer una pausa breve de regulación (respiración lenta 2–3 min) una vez al día.',
+        'Proteger un bloque corto de descanso sin pantalla antes de dormir.',
+        'Identificar una demanda principal y ajustar límites de forma amable.',
+        'Registrar 1 señal corporal de tensión y practicar soltura (mandíbula/hombros).',
+        'Pedir apoyo concreto si lo necesitas (qué, cuándo, cómo).',
+    ][:5]
+
+    return {
+        'codigo_evaluacion': _generate_code('STRS'),
+        'fecha_evaluacion': input_data.get('fecha') or datetime.utcnow().strftime('%Y-%m-%d'),
+        'respuestas': responses,
+        'puntuaciones': {
+            'indice_0_100': index_0_100,
+            'nivel': tier,
+            'dominios': domain_scores,
+        },
+        'interpretacion': {
+            'resumen': summary,
+            'fortalezas': strengths,
+            'areas_enfoque': focus_areas,
+        },
+        'recomendaciones': recommendations,
+        'alertas': {
+            'nota': 'Resultado orientativo, no diagnóstico.',
+        },
+        'validez': {
+            'completo': True,
+            'tiempo_ok': True,
+        },
+    }
+
+
+def compute_stress_wellness(input_data: dict) -> dict:
+    """Compute an in-house Wellness Stress assessment (non-diagnostic).
+
+    Expects:
+      - responses: dict(questionId -> 0..4) using ids stress-a1..stress-c6
+        (0=Nunca, 1=Rara vez, 2=A veces, 3=A menudo, 4=Casi siempre)
+
+    Returns the Wellness-style shape used by insomnia/wellness pages.
+    """
+    responses = (input_data.get('responses', {}) or {})
+
+    domains = {
+        'carga': ['stress-a1', 'stress-a2', 'stress-a3', 'stress-a4', 'stress-a5', 'stress-a6'],
+        'respuesta_fisica_emocional': ['stress-b1', 'stress-b2', 'stress-b3', 'stress-b4', 'stress-b5', 'stress-b6'],
+        'regulacion_recursos': ['stress-c1', 'stress-c2', 'stress-c3', 'stress-c4', 'stress-c5', 'stress-c6'],
+    }
+
+    # Load items are negative; invert so higher always means "better regulation / lower load"
+    reverse_items = set(domains['carga'] + domains['respuesta_fisica_emocional'])
+
+    def _as_int(val) -> int:
+        try:
+            return int(val)
+        except Exception:
+            return 0
+
+    def _normalize_value(qid: str) -> int:
+        v = _as_int(responses.get(qid, 0))
+        v = max(0, min(4, v))
+        if qid in reverse_items:
+            return 4 - v
+        return v
+
+    domain_scores = {}
+    all_vals = []
+    for domain, qids in domains.items():
+        vals = [_normalize_value(qid) for qid in qids]
+        all_vals.extend(vals)
+        avg = sum(vals) / (len(vals) or 1)
+        domain_scores[domain] = {
+            'avg_0_4': round(avg, 2),
+            'percent_0_100': int(round((avg / 4) * 100)),
+            'items': len(qids),
+        }
+
+    overall_avg = (sum(all_vals) / (len(all_vals) or 1))
+    index_0_100 = int(round((overall_avg / 4) * 100))
+
+    if index_0_100 >= 70:
+        tier = 'Alto'
+        summary = 'Se observa una buena capacidad de regulación y recursos disponibles. Tu carga se percibe manejable en este momento.'
+    elif index_0_100 >= 40:
+        tier = 'Medio'
+        summary = 'Se observa una regulación moderada con señales puntuales de carga. Ajustes simples y consistentes pueden ayudarte a sostener el equilibrio.'
+    else:
+        tier = 'Bajo'
+        summary = 'Se observa una carga elevada y/o recursos de regulación limitados en este momento. Prioriza descanso, apoyo y prácticas suaves de regulación.'
+
+    ranked = sorted(domain_scores.items(), key=lambda kv: kv[1]['percent_0_100'], reverse=True)
+    strengths = [name for name, v in ranked if v['percent_0_100'] >= 70][:3]
+    focus_areas = [name for name, v in ranked if v['percent_0_100'] < 50][:3]
+
+    recommendations = [
+        'Observar una señal corporal de tensión y practicar soltura (mandíbula/hombros) por 2 minutos.',
+        'Introducir una pausa breve de regulación (respiración lenta) una vez al día.',
+        'Proteger un bloque de descanso sin pantallas antes de dormir.',
+        'Identificar una demanda principal y ajustar límites de forma amable.',
+        'Pedir apoyo concreto si lo necesitas (qué, cuándo, cómo).',
+    ]
+
+    return {
+        'codigo_evaluacion': _generate_code('STRS'),
+        'fecha_evaluacion': input_data.get('fecha') or datetime.utcnow().strftime('%Y-%m-%d'),
+        'respuestas': responses,
+        'puntuaciones': {
+            'indice_0_100': index_0_100,
+            'nivel': tier,
+            'dominios': domain_scores,
+        },
+        'interpretacion': {
+            'resumen': summary,
+            'fortalezas': strengths,
+            'areas_enfoque': focus_areas,
+        },
+        'recomendaciones': recommendations[:5],
+        'alertas': {
+            'nota': 'Resultado orientativo, no diagnóstico.',
+        },
+        'validez': {
+            'completo': True,
+            'tiempo_ok': True,
+        },
+    }
+
+
 def compute_screening_general(input_data: dict) -> dict:
     """Compute an in-house general psychological screening (non-diagnostic).
 
@@ -794,6 +1220,124 @@ def compute_stai(input_data: dict) -> dict:
     elif max(state_total, trait_total) >= 39:
         result['recomendaciones'].append('Monitoreo y Psicoeducación')
     return result
+
+
+def compute_stress_screening(input_data: dict) -> dict:
+    """
+    Stress — Carga y regulación (SCREENING ORIENTATIVO, no diagnóstico).
+
+    Contract (do not change):
+    {
+      "index": 0-100,
+      "level": "bajo | medio | alto",
+      "map": { "strengths": [], "focus_areas": [] },
+      "flags": { "high_stress_load": false, "low_regulation": false, "recommend_followup": false },
+      "summary_text": "",
+      "suggested_steps": [],
+      "disclaimer": "...",
+      "raw_inputs": {}
+    }
+    """
+    responses = (input_data.get('responses', {}) or {})
+
+    def _to_int(v):
+        try:
+            iv = int(v)
+        except Exception:
+            iv = 0
+        return max(0, min(3, iv))
+
+    # Dimension ids expected: stress-a1..a6, stress-b1..b6, stress-c1..c6
+    a_keys = [f"stress-a{i}" for i in range(1, 7)]
+    b_keys = [f"stress-b{i}" for i in range(1, 7)]
+    c_keys = [f"stress-c{i}" for i in range(1, 7)]
+
+    a_vals = [_to_int(responses.get(k)) for k in a_keys]
+    b_vals = [_to_int(responses.get(k)) for k in b_keys]
+    c_vals_raw = [_to_int(responses.get(k)) for k in c_keys]
+    c_vals = [3 - v for v in c_vals_raw]  # invert regulation/resources
+
+    score_a = sum(a_vals)
+    score_b = sum(b_vals)
+    score_c = sum(c_vals)
+    total_score = score_a + score_b + score_c  # 0..54
+    index = int(round((total_score / 54) * 100)) if 54 else 0
+
+    if index <= 39:
+        level = 'bajo'
+    elif index <= 69:
+        level = 'medio'
+    else:
+        level = 'alto'
+
+    dim_a = int(round((score_a / 18) * 100)) if 18 else 0
+    dim_b = int(round((score_b / 18) * 100)) if 18 else 0
+    dim_c = int(round((score_c / 18) * 100)) if 18 else 0
+
+    flags = {
+        "high_stress_load": index >= 70,
+        "low_regulation": dim_c < 50,
+        "recommend_followup": (index >= 70) or (dim_c < 40),
+    }
+
+    strengths = []
+    if dim_c >= 70:
+        strengths = ["Regulación", "Apoyo", "Recuperación"]
+
+    focus_areas = []
+    if dim_a >= 70:
+        focus_areas.append("Carga")
+    if dim_b >= 70:
+        focus_areas.append("Reactividad")
+    if dim_c < 50:
+        focus_areas.extend(["Límites", "Recuperación"])
+    # If any condition is met but list ended empty (edge-case), include a generic focus
+    if (dim_a >= 70 or dim_b >= 70 or dim_c < 50) and not focus_areas:
+        focus_areas = ["Carga"]
+
+    summary_text = (
+        "El resultado muestra una carga de estrés relevante en este momento. "
+        "Esta lectura no es diagnóstica, pero puede ayudar a identificar áreas donde la presión es elevada "
+        "y los recursos de regulación podrían necesitar refuerzo."
+    )
+
+    suggested_steps = [
+        "Identificar una fuente principal de presión y revisar límites.",
+        "Introducir pausas breves de regulación durante el día.",
+        "Priorizar descanso real (no solo desconexión digital).",
+        "Activar apoyo (hablar con alguien de confianza).",
+        "Considerar acompañamiento profesional si el malestar persiste.",
+    ]
+
+    disclaimer = (
+        "Este resultado es orientativo y no constituye un diagnóstico. "
+        "Si el estrés es intenso, persistente o interfiere con tu funcionamiento, "
+        "considera consultar con un profesional."
+    )
+
+    raw_inputs = {
+        "responses": responses,
+        "dimensions": {
+            "A": {"score": score_a, "percent_0_100": dim_a},
+            "B": {"score": score_b, "percent_0_100": dim_b},
+            "C": {"score": score_c, "percent_0_100": dim_c, "inverted": True},
+        },
+        "total_score_0_54": total_score,
+    }
+
+    return {
+        "index": max(0, min(100, index)),
+        "level": level,
+        "map": {
+            "strengths": strengths,
+            "focus_areas": focus_areas,
+        },
+        "flags": flags,
+        "summary_text": summary_text,
+        "suggested_steps": suggested_steps,
+        "disclaimer": disclaimer,
+        "raw_inputs": raw_inputs,
+    }
 
 
 def compute_mcmi4(input_data: dict) -> dict:

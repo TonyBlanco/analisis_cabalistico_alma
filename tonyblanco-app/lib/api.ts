@@ -172,12 +172,15 @@ async function apiRequest<T>(
     console.log('✅ API Response:', { status: response.status, ok: response.ok });
 
     if (!response.ok) {
+      const responseClone = response.clone();
+      let rawText: string | null = null;
       // Intentar parsear JSON; si falla, recuperar texto crudo
       let error: any = {};
       try {
         error = await response.json();
       } catch (jsonErr) {
-        const text = await response.text().catch(() => null);
+        const text = await responseClone.text().catch(() => null);
+        rawText = text;
         if (text) {
           try {
             error = JSON.parse(text);
@@ -190,13 +193,28 @@ async function apiRequest<T>(
       }
 
       // Log para debugging incluyendo URL y status text
-      console.error('❌ API Error:', { url, status: response.status, statusText: response.statusText, error });
+      console.error('❌ API Error:', {
+        url,
+        method: options.method || 'GET',
+        status: response.status,
+        statusText: response.statusText,
+        error,
+        raw: rawText ? rawText.slice(0, 500) : null,
+      });
 
       // Construir mensaje útil con varios fallback
-      const errorMsg = error?.message || error?.detail || error?.error || (Object.keys(error).length ? JSON.stringify(error) : null) || `Error ${response.status}: ${response.statusText}`;
+      const fallbackStatus = response.statusText ? `${response.statusText}` : 'Request failed';
+      const errorMsg =
+        error?.message ||
+        error?.detail ||
+        error?.error ||
+        (typeof error === 'string' ? error : null) ||
+        (Object.keys(error || {}).length ? JSON.stringify(error) : null) ||
+        (rawText ? rawText : null) ||
+        `HTTP ${response.status}: ${fallbackStatus}`;
       const errorWithResponse = new Error(errorMsg);
       (errorWithResponse as any).status = response.status;
-      (errorWithResponse as any).response = error;
+      (errorWithResponse as any).response = { ...error, raw: rawText };
       throw errorWithResponse;
     }
 

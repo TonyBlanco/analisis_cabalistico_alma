@@ -34,7 +34,7 @@ export default function ActivePatientIndicator({ onSelectPatient }: ActivePatien
   const [editOpen, setEditOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<
-    { type: 'paused' | 'inactive' | 'archive'; requireReason?: boolean } | null
+    { type: 'active' | 'paused' | 'inactive' | 'archive'; requireReason?: boolean } | null
   >(null);
   const [formName, setFormName] = useState('');
   const [formBirthDate, setFormBirthDate] = useState<string | null>(null);
@@ -117,7 +117,10 @@ export default function ActivePatientIndicator({ onSelectPatient }: ActivePatien
     setEditOpen(true);
   };
 
-  const handleStatusPrompt = (type: 'paused' | 'inactive' | 'archive', requireReason = false) => {
+  const handleStatusPrompt = (
+    type: 'active' | 'paused' | 'inactive' | 'archive',
+    requireReason = false,
+  ) => {
     setPendingAction({ type, requireReason });
     setFormReason('');
     setConfirmOpen(true);
@@ -132,15 +135,20 @@ export default function ActivePatientIndicator({ onSelectPatient }: ActivePatien
       if (type === 'archive') {
         await archivePatient(activePatient.id);
         setFeedback('Paciente archivado.');
+        clearActivePatientId();
+        window.dispatchEvent(new Event('activePatientChanged'));
+        setActivePatient(null);
+        setProfile(null);
+        setProfileError(null);
       } else {
         await updatePatientStatus(activePatient.id, {
           therapy_status: type,
           pause_reason: requireReason ? formReason : undefined,
         });
         setFeedback('Estado del paciente actualizado.');
+        window.dispatchEvent(new Event('activePatientChanged'));
+        loadActivePatient();
       }
-      window.dispatchEvent(new Event('activePatientChanged'));
-      loadActivePatient();
     } catch (error: any) {
       setFeedback(error?.message || 'No se pudo actualizar el estado del paciente.');
     } finally {
@@ -235,6 +243,14 @@ export default function ActivePatientIndicator({ onSelectPatient }: ActivePatien
                 style={{ backgroundColor: 'var(--accent-color)' }}
               >
                 Editar perfil
+              </button>
+              <button
+                onClick={() => handleStatusPrompt('active')}
+                disabled={actionLoading}
+                className="px-3 py-1.5 text-xs font-medium text-emerald-800 bg-emerald-100 border border-emerald-200 rounded-md hover:bg-emerald-200 transition-colors disabled:opacity-60"
+                title="Activar (reanudar terapia)"
+              >
+                Activar
               </button>
               <button
                 onClick={() => handleStatusPrompt('paused', true)}
@@ -411,6 +427,11 @@ export default function ActivePatientIndicator({ onSelectPatient }: ActivePatien
             <DialogTitle>Confirmar acción</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
+            {pendingAction?.type === 'active' && (
+              <p className="text-sm text-gray-700">
+                Este paciente será marcado como <span className="font-semibold">activo</span>.
+              </p>
+            )}
             {pendingAction?.type === 'paused' && (
               <>
                 <p className="text-sm text-gray-700">
@@ -454,7 +475,11 @@ export default function ActivePatientIndicator({ onSelectPatient }: ActivePatien
               onClick={handleConfirmStatusChange}
               disabled={actionLoading || (pendingAction?.requireReason && !formReason.trim())}
               className={`px-4 py-2 text-sm font-medium text-white rounded-md transition-opacity shadow-sm disabled:opacity-60 ${
-                pendingAction?.type === 'archive' ? 'bg-red-600 hover:bg-red-700' : 'bg-amber-600 hover:bg-amber-700'
+                pendingAction?.type === 'archive'
+                  ? 'bg-red-600 hover:bg-red-700'
+                  : pendingAction?.type === 'active'
+                    ? 'bg-emerald-600 hover:bg-emerald-700'
+                    : 'bg-amber-600 hover:bg-amber-700'
               }`}
             >
               {actionLoading ? 'Aplicando...' : 'Confirmar'}

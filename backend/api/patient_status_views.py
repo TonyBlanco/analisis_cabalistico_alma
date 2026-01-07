@@ -16,7 +16,7 @@ class PatientStatusUpdateView(APIView):
     """
     Update patient therapy status.
     
-    Endpoint: PATCH /api/patients/<patient_id>/status/
+    Endpoint: PATCH /api/therapist/patients/<patient_id>/status/
     
     PERMISSIONS:
     - Requester MUST be therapist
@@ -42,8 +42,9 @@ class PatientStatusUpdateView(APIView):
     """
     permission_classes = [IsAuthenticated]
     
-    def patch(self, request, patient_id):
+    def patch(self, request, pk=None, patient_id=None):
         user = request.user
+        patient_id = patient_id or pk
         
         # Security: Verify therapist role
         if not hasattr(user, 'profile') or user.profile.user_type != 'therapist':
@@ -113,7 +114,7 @@ class PatientArchiveView(APIView):
     """
     Archive patient (soft delete).
     
-    Endpoint: DELETE /api/patients/<patient_id>/archive/
+    Endpoint: DELETE /api/therapist/patients/<patient_id>/archive/
     
     FUNCTIONALITY:
     - Sets therapy_status = 'archived'
@@ -126,8 +127,9 @@ class PatientArchiveView(APIView):
     """
     permission_classes = [IsAuthenticated]
     
-    def delete(self, request, patient_id):
+    def delete(self, request, pk=None, patient_id=None):
         user = request.user
+        patient_id = patient_id or pk
         
         # Security: Verify therapist role
         if not hasattr(user, 'profile') or user.profile.user_type != 'therapist':

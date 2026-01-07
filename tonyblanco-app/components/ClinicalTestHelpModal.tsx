@@ -1,6 +1,7 @@
 "use client";
 
 import { clinicalTestKnowledgeRegistry } from "@/lib/clinicalTestKnowledge.registry";
+import { clinicalTestsRegistry } from "@/lib/clinicalTests.registry";
 
 type Props = {
   testCode: string | null;
@@ -11,6 +12,9 @@ export default function ClinicalTestHelpModal({ testCode, onClose }: Props) {
   if (!testCode) return null;
 
   const entry = clinicalTestKnowledgeRegistry[testCode];
+  const holistic = clinicalTestsRegistry.find((t) => t.test_code === testCode) || null;
+  const holisticGuidance = holistic?.guidance || null;
+  const isClinicalKnowledge = Boolean(entry);
 
   return (
     <div
@@ -23,9 +27,13 @@ export default function ClinicalTestHelpModal({ testCode, onClose }: Props) {
       >
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h2 className="text-lg font-semibold text-gray-900">Que es este test?</h2>
+            <h2 className="text-lg font-semibold text-gray-900">
+              {entry ? "Que es este test?" : "Guía del test"}
+            </h2>
             <p className="text-xs text-gray-500">
-              Capa de conocimiento clinico. Solo informativo; no ejecuta ni asigna.
+              {entry
+                ? "Capa de conocimiento clinico. Solo informativo; no ejecuta ni asigna."
+                : "Screening orientativo (no diagnóstico)."}
             </p>
           </div>
           <button
@@ -103,6 +111,27 @@ export default function ClinicalTestHelpModal({ testCode, onClose }: Props) {
               </div>
             )}
           </div>
+        ) : holisticGuidance ? (
+          <div className="space-y-4 text-sm text-gray-800">
+            <div>
+              <h3 className="text-sm font-semibold text-gray-900 mb-1">
+                {holistic?.display_name || testCode}
+              </h3>
+              {holisticGuidance.what ? <p className="text-gray-700">{holisticGuidance.what}</p> : null}
+            </div>
+            {holisticGuidance.when ? (
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900 mb-1">Cuándo usarlo</h3>
+                <p className="text-gray-700">{holisticGuidance.when}</p>
+              </div>
+            ) : null}
+            {holisticGuidance.reminder ? (
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900 mb-1">Nota</h3>
+                <p className="text-gray-700">{holisticGuidance.reminder}</p>
+              </div>
+            ) : null}
+          </div>
         ) : (
           <div className="text-sm text-gray-700">
             Informacion pendiente para este instrumento. Solo visible para terapeutas.
@@ -110,7 +139,9 @@ export default function ClinicalTestHelpModal({ testCode, onClose }: Props) {
         )}
 
         <div className="text-xs text-gray-500">
-          Capa educativa. No sustituye juicio clinico ni protocolos de seguridad.
+          {isClinicalKnowledge
+            ? "Capa educativa. No sustituye juicio clinico ni protocolos de seguridad."
+            : "Guía holística orientativa. No diagnóstico."}
         </div>
       </div>
     </div>

@@ -112,26 +112,4 @@ export const clinicalTestKnowledgeRegistry: Record<string, ClinicalTestKnowledge
     ],
     disclaimers: ["Este instrumento es de cribado, no diagn\u00f3stico cl\u00ednico."],
   },
-  "bdi-ii": {
-    testCode: "bdi-ii",
-    title: "BDI-II — Inventario de Depresi\u00f3n de Beck II",
-    purpose: "Medir severidad de s\u00edntomas depresivos en adultos y adolescentes mayores.",
-    whatIsIt:
-      "Inventario autoadministrado de 21 \u00edtems con opciones de 0 a 3 que reflejan intensidad de s\u00edntomas depresivos.",
-    howToInterpret: [
-      "Suma total 0-63: depresi\u00f3n m\u00ednima, leve, moderada, grave.",
-      "\u00cdtems cubren afecto, cognici\u00f3n y s\u00edntomas f\u00edsicos; ponderar perfiles mixtos.",
-      "Cambios longitudinales son clave para evaluar respuesta terap\u00e9utica.",
-    ],
-    whatToDoNext: [
-      "Si severidad moderada o grave: planificar evaluaci\u00f3n diagn\u00f3stica completa y manejo cl\u00ednico.",
-      "Revisar \u00edtems de ideaci\u00f3n suicida y funcionalidad; activar protocolos seg\u00fan riesgo.",
-      "Reaplicar en seguimiento para medir evoluci\u00f3n.",
-    ],
-    clinicalNotes: [
-      "Instrumento de severidad; no establece diagn\u00f3stico por s\u00ed mismo.",
-      "Atenci\u00f3n especial a \u00edtems de ideaci\u00f3n suicida y cambios en apetito/sue\u00f1o.",
-    ],
-    disclaimers: ["Este instrumento es de cribado, no diagn\u00f3stico cl\u00ednico."],
-  },
 };

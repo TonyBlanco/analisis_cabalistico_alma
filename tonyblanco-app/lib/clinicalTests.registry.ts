@@ -183,12 +183,38 @@ export const clinicalTestsRegistry: ClinicalTestRegistryEntry[] = [
     patient_route: "/dashboard/patient/tests/screening-general",
   },
   {
+    test_code: "stress-regulation",
+    display_name: "Estrés — Carga y regulación",
+    domain: "Bienestar",
+    family: "psicologicos",
+    implemented: true,
+    patient_route: "/dashboard/patient/tests/stress-regulation",
+    guidance: {
+      what: "Screening orientativo para explorar carga de estrés y recursos de regulación.",
+      when: "Útil cuando hay presión sostenida o sensación de agotamiento.",
+      reminder: "No diagnóstico. Uso holístico y de acompañamiento.",
+    },
+  },
+  {
     test_code: "wellness",
     display_name: "Wellness Assessment",
     domain: "Bienestar",
     family: "psicologicos",
     implemented: true,
     patient_route: "/dashboard/patient/tests/wellness",
+  },
+  {
+    test_code: "nutrition",
+    display_name: "Alimentación — Relación y hábitos",
+    domain: "Bienestar y autocuidado",
+    family: "psicologicos",
+    implemented: true,
+    patient_route: "/dashboard/patient/tests/nutrition",
+    guidance: {
+      what: "Lectura wellness (no diagnóstico) sobre hábitos y relación con la alimentación.",
+      when: "Útil para observar señales corporales, emociones y regularidad sin enfoque de dieta o control.",
+      reminder: "No sustituye valoración profesional de salud/nutrición.",
+    },
   },
   {
     test_code: "past-lives",

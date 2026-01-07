@@ -1,0 +1,162 @@
+[
+  {
+    "id": "PCL5_01",
+    "instrument": "PCL-5_sintetico",
+    "position": 1,
+    "text": "He tenido recuerdos angustiosos e intrusivos del evento traumático.",
+    "scale": "PTSD",
+    "weight": 1
+  },
+  {
+    "id": "PCL5_02",
+    "instrument": "PCL-5_sintetico",
+    "position": 2,
+    "text": "He tenido sueños perturbadores relacionados con el trauma.",
+    "scale": "PTSD",
+    "weight": 1
+  },
+  {
+    "id": "PCL5_03",
+    "instrument": "PCL-5_sintetico",
+    "position": 3,
+    "text": "Siento que los recuerdos del trauma me vienen a la mente sin querer.",
+    "scale": "PTSD",
+    "weight": 1
+  },
+  {
+    "id": "PCL5_04",
+    "instrument": "PCL-5_sintetico",
+    "position": 4,
+    "text": "Me asaltan reacciones emocionales intensas al recordar el trauma.",
+    "scale": "PTSD",
+    "weight": 1
+  },
+  {
+    "id": "PCL5_05",
+    "instrument": "PCL-5_sintetico",
+    "position": 5,
+    "text": "Evito pensar o hablar sobre el evento traumático.",
+    "scale": "PTSD",
+    "weight": 1
+  },
+  {
+    "id": "PCL5_06",
+    "instrument": "PCL-5_sintetico",
+    "position": 6,
+    "text": "Evito lugares, personas o actividades que me recuerdan el trauma.",
+    "scale": "PTSD",
+    "weight": 1
+  },
+  {
+    "id": "PCL5_07",
+    "instrument": "PCL-5_sintetico",
+    "position": 7,
+    "text": "No puedo recordar partes importantes del evento traumático.",
+    "scale": "PTSD",
+    "weight": 1
+  },
+  {
+    "id": "PCL5_08",
+    "instrument": "PCL-5_sintetico",
+    "position": 8,
+    "text": "Tengo creencias negativas persistentes sobre mí o el mundo.",
+    "scale": "PTSD",
+    "weight": 1
+  },
+  {
+    "id": "PCL5_09",
+    "instrument": "PCL-5_sintetico",
+    "position": 9,
+    "text": "Siento culpa o vergüenza excesiva relacionada con lo ocurrido.",
+    "scale": "PTSD",
+    "weight": 1
+  },
+  {
+    "id": "PCL5_10",
+    "instrument": "PCL-5_sintetico",
+    "position": 10,
+    "text": "He perdido interés en actividades que antes disfrutaba.",
+    "scale": "PTSD",
+    "weight": 1
+  },
+  {
+    "id": "PCL5_11",
+    "instrument": "PCL-5_sintetico",
+    "position": 11,
+    "text": "Tengo dificultad para sentir emociones positivas.",
+    "scale": "PTSD",
+    "weight": 1
+  },
+  {
+    "id": "PCL5_12",
+    "instrument": "PCL-5_sintetico",
+    "position": 12,
+    "text": "Me siento irritable o tengo arrebatos de ira sin motivo claro.",
+    "scale": "PTSD",
+    "weight": 1
+  },
+  {
+    "id": "PCL5_13",
+    "instrument": "PCL-5_sintetico",
+    "position": 13,
+    "text": "Tengo dificultades para concentrarme en tareas sencillas.",
+    "scale": "PTSD",
+    "weight": 1
+  },
+  {
+    "id": "PCL5_14",
+    "instrument": "PCL-5_sintetico",
+    "position": 14,
+    "text": "Me sobresalto o me siento hipervigilante con facilidad.",
+    "scale": "PTSD",
+    "weight": 1
+  },
+  {
+    "id": "PCL5_15",
+    "instrument": "PCL-5_sintetico",
+    "position": 15,
+    "text": "Tengo problemas para dormir o me despierto a menudo.",
+    "scale": "PTSD",
+    "weight": 1
+  },
+  {
+    "id": "PCL5_16",
+    "instrument": "PCL-5_sintetico",
+    "position": 16,
+    "text": "Evito recordar detalles del trauma por miedo a alterarme.",
+    "scale": "PTSD",
+    "weight": 1
+  },
+  {
+    "id": "PCL5_17",
+    "instrument": "PCL-5_sintetico",
+    "position": 17,
+    "text": "Siento que el trauma ha cambiado mi forma de ver el mundo.",
+    "scale": "PTSD",
+    "weight": 1
+  },
+  {
+    "id": "PCL5_18",
+    "instrument": "PCL-5_sintetico",
+    "position": 18,
+    "text": "Experimento reacciones físicas intensas cuando algo me recuerda el trauma.",
+    "scale": "PTSD",
+    "weight": 1
+  },
+  {
+    "id": "PCL5_19",
+    "instrument": "PCL-5_sintetico",
+    "position": 19,
+    "text": "Me cuesta confiar en la gente desde que ocurrió el evento.",
+    "scale": "PTSD",
+    "weight": 1
+  },
+  {
+    "id": "PCL5_20",
+    "instrument": "PCL-5_sintetico",
+    "position": 20,
+    "text": "He notado disminución de mi sensación de seguridad personal.",
+    "scale": "PTSD",
+    "weight": 1
+  }
+]

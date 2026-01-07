@@ -1,8 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getTestResults, getTestResult } from '@/lib/test-api';
+import { useRouter } from 'next/navigation';
+import { getTestResults, getTestResult, deleteTestResult } from '@/lib/test-api';
 import { TestResult } from '@/lib/test-types';
+import ReadableResult from '@/components/test-results/ReadableResult';
+import { getUserRole } from '@/lib/getUserRole';
 
 /**
  * Patient Results Section Component
@@ -17,6 +20,9 @@ export default function PatientResultsSection() {
   const [selectedResult, setSelectedResult] = useState<TestResult | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [loadingDetail, setLoadingDetail] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     fetchResults();
@@ -41,6 +47,17 @@ export default function PatientResultsSection() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const role = await getUserRole();
+        setUserRole(role);
+      } catch (err) {
+        console.warn('Could not determine user role', err);
+      }
+    })();
+  }, []);
 
   const handleViewDetails = async (result: TestResult) => {
     setSelectedResult(result);
@@ -170,14 +187,44 @@ export default function PatientResultsSection() {
                     })}
                   </p>
                 </div>
-                <button
-                  onClick={handleCloseDetail}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
+                <div className="flex items-center gap-3">
+                  {userRole === 'therapist' && (
+                    <button
+                      onClick={async () => {
+                        if (!selectedResult) return;
+                        const ok = confirm('¿Eliminar este resultado? Esto archivará el resultado.');
+                        if (!ok) return;
+                        try {
+                          setDeleting(true);
+                          await deleteTestResult(selectedResult.id);
+                          // remove deleted result from list
+                          setResults((prev) => prev.filter((r) => r.id !== selectedResult.id));
+                          setShowDetailModal(false);
+                          setSelectedResult(null);
+                          // Return to therapist workspace if applicable
+                          router.back();
+                        } catch (err) {
+                          console.error('Error deleting result:', err);
+                          alert('Error al eliminar el resultado');
+                        } finally {
+                          setDeleting(false);
+                        }
+                      }}
+                      disabled={deleting}
+                      className="px-3 py-2 text-sm font-medium text-white bg-red-600 rounded hover:bg-red-700 disabled:opacity-50"
+                    >
+                      {deleting ? 'Eliminando...' : 'Eliminar resultado'}
+                    </button>
+                  )}
+                  <button
+                    onClick={handleCloseDetail}
+                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
               </div>
 
               {/* Content */}
@@ -189,26 +236,12 @@ export default function PatientResultsSection() {
                 <div className="space-y-4">
                   {/* Result Data */}
                   {selectedResult.result_data && (
-                    <div className="bg-gray-50 border border-gray-200 rounded-md p-4">
-                      <h3 className="text-sm font-medium text-gray-900 mb-3">Resultado</h3>
-                      <div className="text-sm text-gray-700 whitespace-pre-wrap">
-                        {typeof selectedResult.result_data === 'string'
-                          ? selectedResult.result_data
-                          : JSON.stringify(selectedResult.result_data, null, 2)}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Input Data (if available) */}
-                  {selectedResult.input_data && (
-                    <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
-                      <h3 className="text-sm font-medium text-gray-900 mb-3">Información proporcionada</h3>
-                      <div className="text-sm text-gray-700">
-                        {typeof selectedResult.input_data === 'string'
-                          ? selectedResult.input_data
-                          : JSON.stringify(selectedResult.input_data, null, 2)}
-                      </div>
-                    </div>
+                    <ReadableResult 
+                      resultData={selectedResult.result_data} 
+                      showRaw={false}
+                      testCode={selectedResult.test_module?.code}
+                      executionMode={selectedResult.test_module?.execution_mode}
+                    />
                   )}
 
                   {/* Notes */}

@@ -40,6 +40,11 @@ export interface AssignTestResponse {
   message: string;
 }
 
+export interface UnassignTestResponse {
+  success: boolean;
+  message: string;
+}
+
 /**
  * Assign a patient_self test to a patient
  * 
@@ -98,6 +103,56 @@ export async function assignTestToPatient(
 
     if (response.status === 401) {
       throw new Error('No autenticado. Por favor, inicia sesión nuevamente.');
+    }
+    if (response.status === 404) {
+      throw new Error((errorData.message || errorData.error || 'Paciente o test no encontrado.') + ` (status ${response.status})`);
+    }
+
+    throw new Error(baseMsg + ` (status ${response.status})`);
+  }
+
+  return response.json();
+}
+
+/**
+ * Unassign a patient_self test from a patient (therapist only).
+ */
+export async function unassignTestFromPatient(
+  patientId: number,
+  testCode: string
+): Promise<UnassignTestResponse> {
+  const payload = {
+    patient_id: patientId,
+    test_code: testCode,
+  };
+
+  const response = await fetch(`${API_BASE_URL}/tests/unassign-from-patient/`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    let errorData: any = {};
+    let rawText = '';
+    try {
+      errorData = await response.json().catch(() => ({}));
+    } catch (e) {
+      // ignore
+    }
+    try {
+      rawText = await response.text();
+    } catch (e) {
+      rawText = '';
+    }
+
+    const baseMsg = errorData.message || errorData.error || (rawText && rawText.length ? rawText : null) || 'Error al quitar test';
+
+    if (response.status === 403) {
+      throw new Error(baseMsg + ` (status ${response.status})`);
+    }
+    if (response.status === 401) {
+      throw new Error('No autenticado. Por favor, inicia sesi\u00f3n nuevamente.');
     }
     if (response.status === 404) {
       throw new Error((errorData.message || errorData.error || 'Paciente o test no encontrado.') + ` (status ${response.status})`);

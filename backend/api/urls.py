@@ -62,6 +62,7 @@ from .test_views import (
     UserTestStatsView,
     GrantTestAccessView,
     AssignTestToPatientView,
+    UnassignTestFromPatientView,
     PatientPreviousTestsView,
     ProcessTestSubmissionView,
     PHQ9SubmitView,
@@ -247,6 +248,7 @@ urlpatterns = [
     path('tests/stats/', UserTestStatsView.as_view(), name='test_stats'),
     path('tests/grant-access/', GrantTestAccessView.as_view(), name='grant_test_access'),
     path('tests/assign-to-patient/', AssignTestToPatientView.as_view(), name='assign_test_to_patient'),
+    path('tests/unassign-from-patient/', UnassignTestFromPatientView.as_view(), name='unassign_test_from_patient'),
     path('tests/patient-previous/', PatientPreviousTestsView.as_view(), name='patient_previous_tests'),
     path('tests/<str:code>/', TestModuleDetailView.as_view(), name='test_detail'),
     

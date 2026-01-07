@@ -1,0 +1,812 @@
+[
+  {
+    "id": "SCL90_001",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "somatizacion",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He notado molestias físicas inexplicables recientemente.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_002",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "somatizacion",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "Siento molestias en el estómago que no parecen debidas a comida.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_003",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "somatizacion",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "He tenido dolores musculares sin causa clara.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_004",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "somatizacion",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "Me molestan el pecho o punzadas que me preocupan.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_005",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "somatizacion",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "Percibo cambios en mi digestión cuando estoy estresado/a.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_006",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "somatizacion",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "Siento tensión o dolor en la cabeza con frecuencia.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_007",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "somatizacion",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "Experimento sensación de hormigueo o entumecimiento en partes del cuerpo.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_008",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "somatizacion",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "Mi cuerpo presenta molestias que interfieren en mis tareas.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_009",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "somatizacion",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "Siento cansancio físico sin haber hecho esfuerzo.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_010",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "somatizacion",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He notado cambios en mi respiración en momentos de tensión.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_011",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "obsesion_compulsion",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "Me aparecen pensamientos repetitivos que me molestan.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_012",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "obsesion_compulsion",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "Siento la necesidad de revisar cosas más de una vez.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_013",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "obsesion_compulsion",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "Tengo rituales que repito para sentirme seguro/a.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_014",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "obsesion_compulsion",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "Me cuesta detener ideas que vuelven con fuerza.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_015",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "obsesion_compulsion",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "Tengo preocupaciones persistentes sobre la limpieza o el orden.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_016",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "obsesion_compulsion",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "Siento impulsos de comprobar algo aun cuando sé que no es necesario.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_017",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "obsesion_compulsion",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "Me distraigo por pensamientos intrusivos en mi día.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_018",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "obsesion_compulsion",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "A veces actúo según reglas internas que me imponen ansiedad.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_019",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "obsesion_compulsion",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "Los pensamientos repetitivos interfieren en mi concentración.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_020",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "obsesion_compulsion",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "Siento alivio temporal al realizar ciertas acciones repetitivas.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_021",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "sensibilidad_interpersonal",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "Me siento incómodo/a en presencia de personas nuevas.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_022",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "sensibilidad_interpersonal",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "A menudo creo que otros me juzgan negativamente.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_023",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "sensibilidad_interpersonal",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "Me resulta difícil confiar en los demás.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_024",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "sensibilidad_interpersonal",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "Me siento inferior cuando comparo mis habilidades con las de otros.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_025",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "sensibilidad_interpersonal",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "Evito situaciones sociales por miedo a la crítica.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_026",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "sensibilidad_interpersonal",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "Me siento fácilmente herido/a por comentarios ajenos.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_027",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "sensibilidad_interpersonal",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "Tiendo a interpretar de forma negativa las interacciones sociales.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_028",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "sensibilidad_interpersonal",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "Me cuesta expresar mis opiniones por temor al rechazo.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_029",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "sensibilidad_interpersonal",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "Siento vergüenza con facilidad en grupos.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_030",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "sensibilidad_interpersonal",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "Prefiero aislarme cuando siento que no encajo.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_031",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "depresion",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "Me siento con ánimo bajo y sin energía la mayor parte del tiempo.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_032",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "depresion",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He perdido interés en actividades que antes disfrutaba.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_033",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "depresion",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "Me cuesta motivarme para llevar a cabo tareas diarias.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_034",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "depresion",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "Siento tristeza persistente sin causa aparente.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_035",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "depresion",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "Tengo dificultades para conciliar el sueño o duermo demasiado.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_036",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "depresion",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "Me siento inútil o con baja autoestima frecuentemente.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_037",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "depresion",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "Pierdo apetito o como en exceso por emociones.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_038",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "depresion",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "Me cuesta concentrarme en lo que hago.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_039",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "depresion",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "Siento pesadez emocional que me ralentiza.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_040",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "depresion",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "Tengo pensamientos negativos sobre mi futuro.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_041",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "ansiedad",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "Siento nerviosismo o tensión que me resulta difícil controlar.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_042",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "ansiedad",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "Tengo episodios de pánico o aprensión intensa.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_043",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "ansiedad",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "Me preocupa con frecuencia que algo malo ocurra.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_044",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "ansiedad",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "Siento una inquietud interna que no cede.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_045",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "ansiedad",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "Mi corazón se acelera en situaciones cotidianos de estrés.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_046",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "ansiedad",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "Me cuesta relajarme aun en momentos seguros.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_047",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "ansiedad",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "Siento un estado de alerta constante.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_048",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "ansiedad",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "Tengo dificultades para quedarme quieto/a por la inquietud.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_049",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "ansiedad",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "Me preocupo por pequeñas cosas hasta que me angustian.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_050",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "ansiedad",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "Evito situaciones que me producen mucha ansiedad.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_051",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "hostilidad",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "Me siento irritable o fácilmente enojado/a con los demás.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_052",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "hostilidad",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "Tengo pensamientos de enfado que a veces deseo expresar.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_053",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "hostilidad",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "Me cuesta controlar reacciones bruscas ante frustraciones.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_054",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "hostilidad",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "Siento deseos de confrontar a quienes me provocan.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_055",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "hostilidad",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "Me irrito con comentarios que considero injustos.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_056",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "hostilidad",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "A veces tengo impulsos de actuar de forma agresiva.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_057",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "hostilidad",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "Me cuesta perdonar ofensas menores.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_058",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "hostilidad",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "Siento tensión hacia personas que no comparten mis opiniones.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_059",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "hostilidad",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "Me cuesta calmarme una vez que me enfado.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_060",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "hostilidad",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "Puedo mostrar hostilidad en conversaciones tensas.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_061",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "ansiedad_fobica",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "Evito lugares o situaciones que me generan miedo intenso.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_062",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "ansiedad_fobica",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "Siento miedo marcado ante ciertos objetos o animales.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_063",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "ansiedad_fobica",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "Mi vida se ajusta para prevenir encuentros con lo que temo.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_064",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "ansiedad_fobica",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "Me paraliza la idea de enfrentar ciertas situaciones sociales.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_065",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "ansiedad_fobica",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "Siento temor irracional en espacios abiertos o cerrados.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_066",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "ansiedad_fobica",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "Me cuesta moverme por lugares que me provocan ansiedad fóbica.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_067",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "ansiedad_fobica",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "Tengo ataques de fuga o deseo de escapar en presencia de lo que temo.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_068",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "ansiedad_fobica",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "El miedo limita mis actividades cotidianas.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_069",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "ansiedad_fobica",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "Me angustia la posibilidad de encontrar aquello que temo.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_070",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "ansiedad_fobica",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He evitado viajes o encuentros por miedo intenso.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_071",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "ideacion_paranoide",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "Me cuesta confiar en las intenciones de otras personas.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_072",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "ideacion_paranoide",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "A veces creo que otros conspiran en mi contra.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_073",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "ideacion_paranoide",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "Interpreto gestos o palabras como amenazas personales.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_074",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "ideacion_paranoide",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "Me preocupo por la lealtad de quienes me rodean.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_075",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "ideacion_paranoide",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "Estoy atento/a a señales que considero de traición.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_076",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "ideacion_paranoide",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "Sospecho que se habla de mí a mis espaldas sin pruebas.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_077",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "ideacion_paranoide",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "Me siento vigilado/a o evaluado/a por otros frecuentemente.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_078",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "ideacion_paranoide",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "Tengo dificultad para compartir información personal por temor.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_079",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "ideacion_paranoide",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "A veces me siento hostigado/a por acciones ajenas.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_080",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "ideacion_paranoide",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "Me cuesta aceptar explicaciones inocentes de los demás.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_081",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "psicoticismo",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "Me siento a veces desconectado/a de la realidad común.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_082",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "psicoticismo",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He tenido experiencias perceptivas inusuales que me confunden.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_083",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "psicoticismo",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "Siento que mis ideas no son comprendidas por los demás.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_084",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "psicoticismo",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "Me aislo porque creo diferente a la mayoría.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_085",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "psicoticismo",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "Tengo pensamientos extraños que me resultan inquietantes.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_086",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "psicoticismo",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "Ocasionalmente pierdo el hilo de la realidad temporalmente.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_087",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "psicoticismo",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "Me cuesta distinguir entre lo real y lo imaginado en momentos.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_088",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "psicoticismo",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "Siento que nadie comparte mi forma de ver las cosas.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_089",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "psicoticismo",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "Mis comportamientos pueden parecer raros para otros.",
+    "reverse_scored": false
+  },
+  {
+    "id": "SCL90_090",
+    "instrument": "SCL-90-R_sintetico",
+    "dimension": "psicoticismo",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "Experimento episodios breves de despersonalización o desconcierto.",
+    "reverse_scored": false
+  }
+]

@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { getAvailableTests, getTestResults, executeTest, getPatientPreviousTests } from '@/lib/test-api';
 import { TestModule, ExecuteTestRequest } from '@/lib/test-types';
 import { clinicalTestsRegistry } from '@/lib/clinicalTests.registry';
+import { getActivePatientId } from '@/lib/active-patient';
+import { unassignTestFromPatient } from '@/lib/assignment-api';
 
 /**
  * Patient Assigned Tests Section
@@ -22,14 +24,28 @@ export default function PatientAssignedTestsSection() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [executingTestCode, setExecutingTestCode] = useState<string | null>(null);
+  const [removingTestCode, setRemovingTestCode] = useState<string | null>(null);
+  const [userType, setUserType] = useState<string>('');
+
+  const activePatientId = getActivePatientId();
+
+  const normalizeCode = (code?: string | null) =>
+    String(code || '').trim().toLowerCase();
 
   const routeByTestCode = useState(() => {
     const map = new Map<string, string>();
     for (const entry of clinicalTestsRegistry) {
-      if (entry.patient_route) map.set(entry.test_code, entry.patient_route);
+      if (entry.patient_route) map.set(normalizeCode(entry.test_code), entry.patient_route);
     }
     return map;
   })[0];
+
+  const routeAliases = useState(() => new Map<string, string>([
+    ['phq9', 'phq-9'],
+    ['gad7', 'gad-7'],
+    ['bdi2', 'bdi-ii'],
+    ['stai', 'anxiety-state-trait'],
+  ]))[0];
 
   useEffect(() => {
     fetchAssignedTests();
@@ -58,6 +74,9 @@ export default function PatientAssignedTestsSection() {
         }));
 
         setAssignedTests(mapped as any);
+        // Cuando podemos leer desde patient-previous estamos en contexto terapeuta
+        // (esto habilita acciones de terapeuta como "Quitar asignación").
+        setUserType('therapist');
 
         const completedIds = new Set<number>();
         for (const r of results) {
@@ -75,6 +94,7 @@ export default function PatientAssignedTestsSection() {
 
       // Fallback: original flow for patients (uses UserTestAccess info)
       const response = await getAvailableTests();
+      setUserType(response.user_type || '');
       const allTests = response.tests || [];
 
       const tests = allTests.map((t) => ({
@@ -110,10 +130,29 @@ export default function PatientAssignedTestsSection() {
     }
   };
 
+  const handleUnassign = async (test: TestModule) => {
+    if (!activePatientId) return;
+    if (userType !== 'therapist') return;
+    if (!confirm(`¿Deseas quitar la asignación del test "${test.name}"?`)) return;
+
+    setRemovingTestCode(test.code);
+    try {
+      await unassignTestFromPatient(activePatientId, test.code);
+      await fetchAssignedTests();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error al quitar la asignación';
+      setError(message);
+    } finally {
+      setRemovingTestCode(null);
+    }
+  };
+
   const handleExecuteTest = async (test: TestModule) => {
     if (executingTestCode) return; // Prevent double execution
 
-    const route = routeByTestCode.get(test.code);
+    const normalizedCode = normalizeCode(test.code);
+    const mappedCode = routeAliases.get(normalizedCode) || normalizedCode;
+    const route = routeByTestCode.get(mappedCode);
     if (route) {
       if (!confirm(`¿Deseas comenzar el test "${test.name}"?`)) {
         return;
@@ -237,7 +276,7 @@ export default function PatientAssignedTestsSection() {
                     </span>
                   )}
                 </div>
-                <div className="flex-shrink-0">
+                <div className="flex flex-col sm:flex-row gap-2 flex-shrink-0">
                   <button
                     onClick={() => handleExecuteTest(test)}
                     disabled={executingTestCode === test.code}
@@ -246,6 +285,15 @@ export default function PatientAssignedTestsSection() {
                   >
                     {executingTestCode === test.code ? 'Ejecutando...' : 'Realizar test'}
                   </button>
+                  {userType === 'therapist' && activePatientId && (
+                    <button
+                      onClick={() => handleUnassign(test)}
+                      disabled={removingTestCode === test.code}
+                      className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-red-600 border border-red-200 rounded-md hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {removingTestCode === test.code ? 'Quitando...' : 'Quitar asignación'}
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

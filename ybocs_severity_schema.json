@@ -1,0 +1,82 @@
+[
+  {
+    "id": "YBOCS_SV_01",
+    "instrument": "Y-BOCS_severity",
+    "position": 1,
+    "text": null,
+    "scale": "OCD_severity",
+    "weight": 1
+  },
+  {
+    "id": "YBOCS_SV_02",
+    "instrument": "Y-BOCS_severity",
+    "position": 2,
+    "text": null,
+    "scale": "OCD_severity",
+    "weight": 1
+  },
+  {
+    "id": "YBOCS_SV_03",
+    "instrument": "Y-BOCS_severity",
+    "position": 3,
+    "text": null,
+    "scale": "OCD_severity",
+    "weight": 1
+  },
+  {
+    "id": "YBOCS_SV_04",
+    "instrument": "Y-BOCS_severity",
+    "position": 4,
+    "text": null,
+    "scale": "OCD_severity",
+    "weight": 1
+  },
+  {
+    "id": "YBOCS_SV_05",
+    "instrument": "Y-BOCS_severity",
+    "position": 5,
+    "text": null,
+    "scale": "OCD_severity",
+    "weight": 1
+  },
+  {
+    "id": "YBOCS_SV_06",
+    "instrument": "Y-BOCS_severity",
+    "position": 6,
+    "text": null,
+    "scale": "OCD_severity",
+    "weight": 1
+  },
+  {
+    "id": "YBOCS_SV_07",
+    "instrument": "Y-BOCS_severity",
+    "position": 7,
+    "text": null,
+    "scale": "OCD_severity",
+    "weight": 1
+  },
+  {
+    "id": "YBOCS_SV_08",
+    "instrument": "Y-BOCS_severity",
+    "position": 8,
+    "text": null,
+    "scale": "OCD_severity",
+    "weight": 1
+  },
+  {
+    "id": "YBOCS_SV_09",
+    "instrument": "Y-BOCS_severity",
+    "position": 9,
+    "text": null,
+    "scale": "OCD_severity",
+    "weight": 1
+  },
+  {
+    "id": "YBOCS_SV_10",
+    "instrument": "Y-BOCS_severity",
+    "position": 10,
+    "text": null,
+    "scale": "OCD_severity",
+    "weight": 1
+  }
+]

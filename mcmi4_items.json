@@ -1,0 +1,1952 @@
+[
+  {
+    "id": "MCMI_CL_001",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "esquizoide",
+    "facet": null,
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con esquizoide (ítem 1).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_002",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "esquizoide",
+    "facet": "facet_29",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con esquizoide (ítem 2).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_003",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "esquizoide",
+    "facet": "facet_40",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con esquizoide (ítem 3).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_004",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "esquizoide",
+    "facet": "facet_41",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con esquizoide (ítem 4).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_005",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "esquizoide",
+    "facet": "facet_14",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con esquizoide (ítem 5).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_006",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "esquizoide",
+    "facet": null,
+    "intensity": "alto",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con esquizoide (ítem 6).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_007",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "esquizoide",
+    "facet": "facet_11",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con esquizoide (ítem 7).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_008",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "esquizoide_personalidad_severa",
+    "facet": "facet_28",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con esquizoide personalidad severa (ítem 1).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_009",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "esquizoide_personalidad_severa",
+    "facet": "facet_28",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con esquizoide personalidad severa (ítem 2).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_010",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "esquizoide_personalidad_severa",
+    "facet": null,
+    "intensity": "alto",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con esquizoide personalidad severa (ítem 3).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_011",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "esquizoide_personalidad_severa",
+    "facet": "facet_09",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con esquizoide personalidad severa (ítem 4).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_012",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "esquizoide_personalidad_severa",
+    "facet": null,
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con esquizoide personalidad severa (ítem 5).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_013",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "esquizoide_personalidad_severa",
+    "facet": "facet_29",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con esquizoide personalidad severa (ítem 6).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_014",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "esquizoide_personalidad_severa",
+    "facet": "facet_45",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con esquizoide personalidad severa (ítem 7).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_015",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "esquizotipico",
+    "facet": null,
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con esquizotipico (ítem 1).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_016",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "esquizotipico",
+    "facet": null,
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con esquizotipico (ítem 2).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_017",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "esquizotipico",
+    "facet": "facet_04",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con esquizotipico (ítem 3).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_018",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "esquizotipico",
+    "facet": null,
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con esquizotipico (ítem 4).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_019",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "esquizotipico",
+    "facet": null,
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con esquizotipico (ítem 5).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_020",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "esquizotipico",
+    "facet": "facet_22",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con esquizotipico (ítem 6).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_021",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "esquizotipico",
+    "facet": null,
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con esquizotipico (ítem 7).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_022",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "paranoide",
+    "facet": "facet_37",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con paranoide (ítem 1).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_023",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "paranoide",
+    "facet": "facet_13",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con paranoide (ítem 2).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_024",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "paranoide",
+    "facet": "facet_41",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con paranoide (ítem 3).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_025",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "paranoide",
+    "facet": null,
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con paranoide (ítem 4).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_026",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "paranoide",
+    "facet": "facet_45",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con paranoide (ítem 5).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_027",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "paranoide",
+    "facet": "facet_41",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con paranoide (ítem 6).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_028",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "paranoide",
+    "facet": "facet_31",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con paranoide (ítem 7).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_029",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "introversion_egocentrica",
+    "facet": "facet_01",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con introversion egocentrica (ítem 1).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_030",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "introversion_egocentrica",
+    "facet": "facet_39",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con introversion egocentrica (ítem 2).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_031",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "introversion_egocentrica",
+    "facet": "facet_11",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con introversion egocentrica (ítem 3).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_032",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "introversion_egocentrica",
+    "facet": "facet_45",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con introversion egocentrica (ítem 4).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_033",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "introversion_egocentrica",
+    "facet": "facet_33",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con introversion egocentrica (ítem 5).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_034",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "introversion_egocentrica",
+    "facet": null,
+    "intensity": "alto",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con introversion egocentrica (ítem 6).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_035",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "introversion_egocentrica",
+    "facet": "facet_10",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con introversion egocentrica (ítem 7).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_036",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "dependencia",
+    "facet": "facet_15",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con dependencia (ítem 1).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_037",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "dependencia",
+    "facet": null,
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con dependencia (ítem 2).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_038",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "dependencia",
+    "facet": "facet_24",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con dependencia (ítem 3).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_039",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "dependencia",
+    "facet": "facet_02",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con dependencia (ítem 4).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_040",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "dependencia",
+    "facet": "facet_23",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con dependencia (ítem 5).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_041",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "dependencia",
+    "facet": "facet_13",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con dependencia (ítem 6).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_042",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "dependencia",
+    "facet": "facet_40",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con dependencia (ítem 7).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_043",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "depresion_clinica",
+    "facet": null,
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con depresion clinica (ítem 1).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_044",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "depresion_clinica",
+    "facet": "facet_03",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con depresion clinica (ítem 2).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_045",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "depresion_clinica",
+    "facet": null,
+    "intensity": "alto",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con depresion clinica (ítem 3).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_046",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "depresion_clinica",
+    "facet": "facet_35",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con depresion clinica (ítem 4).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_047",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "depresion_clinica",
+    "facet": "facet_17",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con depresion clinica (ítem 5).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_048",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "depresion_clinica",
+    "facet": "facet_41",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con depresion clinica (ítem 6).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_049",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "depresion_clinica",
+    "facet": null,
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con depresion clinica (ítem 7).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_050",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "ansiedad_clinica",
+    "facet": "facet_25",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con ansiedad clinica (ítem 1).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_051",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "ansiedad_clinica",
+    "facet": "facet_18",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con ansiedad clinica (ítem 2).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_052",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "ansiedad_clinica",
+    "facet": null,
+    "intensity": "alto",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con ansiedad clinica (ítem 3).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_053",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "ansiedad_clinica",
+    "facet": "facet_10",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con ansiedad clinica (ítem 4).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_054",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "ansiedad_clinica",
+    "facet": "facet_13",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con ansiedad clinica (ítem 5).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_055",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "ansiedad_clinica",
+    "facet": null,
+    "intensity": "alto",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con ansiedad clinica (ítem 6).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_056",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "ansiedad_clinica",
+    "facet": "facet_21",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con ansiedad clinica (ítem 7).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_057",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "trastorno_bipolar",
+    "facet": "facet_23",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con trastorno bipolar (ítem 1).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_058",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "trastorno_bipolar",
+    "facet": null,
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con trastorno bipolar (ítem 2).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_059",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "trastorno_bipolar",
+    "facet": "facet_11",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con trastorno bipolar (ítem 3).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_060",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "trastorno_bipolar",
+    "facet": "facet_28",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con trastorno bipolar (ítem 4).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_061",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "trastorno_bipolar",
+    "facet": "facet_15",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con trastorno bipolar (ítem 5).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_062",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "trastorno_bipolar",
+    "facet": "facet_26",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con trastorno bipolar (ítem 6).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_063",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "trastorno_bipolar",
+    "facet": "facet_10",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con trastorno bipolar (ítem 7).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_064",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "trastorno_de_personalidad_limite",
+    "facet": "facet_37",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con trastorno de personalidad limite (ítem 1).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_065",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "trastorno_de_personalidad_limite",
+    "facet": "facet_14",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con trastorno de personalidad limite (ítem 2).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_066",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "trastorno_de_personalidad_limite",
+    "facet": "facet_01",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con trastorno de personalidad limite (ítem 3).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_067",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "trastorno_de_personalidad_limite",
+    "facet": "facet_39",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con trastorno de personalidad limite (ítem 4).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_068",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "trastorno_de_personalidad_limite",
+    "facet": "facet_06",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con trastorno de personalidad limite (ítem 5).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_069",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "trastorno_de_personalidad_limite",
+    "facet": null,
+    "intensity": "alto",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con trastorno de personalidad limite (ítem 6).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_070",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "trastorno_de_personalidad_limite",
+    "facet": null,
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con trastorno de personalidad limite (ítem 7).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_071",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "antisocial",
+    "facet": null,
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con antisocial (ítem 1).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_072",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "antisocial",
+    "facet": "facet_07",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con antisocial (ítem 2).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_073",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "antisocial",
+    "facet": "facet_35",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con antisocial (ítem 3).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_074",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "antisocial",
+    "facet": "facet_36",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con antisocial (ítem 4).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_075",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "antisocial",
+    "facet": null,
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con antisocial (ítem 5).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_076",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "antisocial",
+    "facet": null,
+    "intensity": "alto",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con antisocial (ítem 6).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_077",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "antisocial",
+    "facet": "facet_14",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con antisocial (ítem 7).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_078",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "narcisista",
+    "facet": "facet_29",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con narcisista (ítem 1).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_079",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "narcisista",
+    "facet": null,
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con narcisista (ítem 2).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_080",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "narcisista",
+    "facet": "facet_34",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con narcisista (ítem 3).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_081",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "narcisista",
+    "facet": "facet_24",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con narcisista (ítem 4).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_082",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "narcisista",
+    "facet": null,
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con narcisista (ítem 5).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_083",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "narcisista",
+    "facet": null,
+    "intensity": "alto",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con narcisista (ítem 6).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_084",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "narcisista",
+    "facet": "facet_27",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con narcisista (ítem 7).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_085",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "histrionico",
+    "facet": "facet_31",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con histrionico (ítem 1).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_086",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "histrionico",
+    "facet": null,
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con histrionico (ítem 2).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_087",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "histrionico",
+    "facet": "facet_03",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con histrionico (ítem 3).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_088",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "histrionico",
+    "facet": "facet_28",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con histrionico (ítem 4).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_089",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "histrionico",
+    "facet": null,
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con histrionico (ítem 5).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_090",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "histrionico",
+    "facet": "facet_03",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con histrionico (ítem 6).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_091",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "histrionico",
+    "facet": "facet_01",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con histrionico (ítem 7).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_092",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "obsesivo_compulsivo_personalidad",
+    "facet": "facet_32",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con obsesivo compulsivo personalidad (ítem 1).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_093",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "obsesivo_compulsivo_personalidad",
+    "facet": null,
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con obsesivo compulsivo personalidad (ítem 2).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_094",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "obsesivo_compulsivo_personalidad",
+    "facet": "facet_12",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con obsesivo compulsivo personalidad (ítem 3).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_095",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "obsesivo_compulsivo_personalidad",
+    "facet": null,
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con obsesivo compulsivo personalidad (ítem 4).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_096",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "obsesivo_compulsivo_personalidad",
+    "facet": "facet_31",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con obsesivo compulsivo personalidad (ítem 5).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_097",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "obsesivo_compulsivo_personalidad",
+    "facet": "facet_30",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con obsesivo compulsivo personalidad (ítem 6).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_098",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "obsesivo_compulsivo_personalidad",
+    "facet": "facet_12",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con obsesivo compulsivo personalidad (ítem 7).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_099",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "evitativo",
+    "facet": null,
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con evitativo (ítem 1).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_100",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "evitativo",
+    "facet": "facet_42",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con evitativo (ítem 2).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_101",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "evitativo",
+    "facet": "facet_03",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con evitativo (ítem 3).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_102",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "evitativo",
+    "facet": "facet_40",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con evitativo (ítem 4).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_103",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "evitativo",
+    "facet": "facet_42",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con evitativo (ítem 5).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_104",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "evitativo",
+    "facet": "facet_30",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con evitativo (ítem 6).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_105",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "evitativo",
+    "facet": "facet_23",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con evitativo (ítem 7).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_106",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "distimia",
+    "facet": "facet_28",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con distimia (ítem 1).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_107",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "distimia",
+    "facet": "facet_35",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con distimia (ítem 2).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_108",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "distimia",
+    "facet": null,
+    "intensity": "alto",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con distimia (ítem 3).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_109",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "distimia",
+    "facet": "facet_03",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con distimia (ítem 4).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_110",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "distimia",
+    "facet": "facet_03",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con distimia (ítem 5).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_111",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "distimia",
+    "facet": "facet_23",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con distimia (ítem 6).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_112",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "distimia",
+    "facet": null,
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con distimia (ítem 7).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_113",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "consumo_sustancias",
+    "facet": "facet_25",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con consumo sustancias (ítem 1).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_114",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "consumo_sustancias",
+    "facet": "facet_13",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con consumo sustancias (ítem 2).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_115",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "consumo_sustancias",
+    "facet": "facet_13",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con consumo sustancias (ítem 3).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_116",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "consumo_sustancias",
+    "facet": "facet_06",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con consumo sustancias (ítem 4).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_117",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "consumo_sustancias",
+    "facet": null,
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con consumo sustancias (ítem 5).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_118",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "consumo_sustancias",
+    "facet": "facet_07",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con consumo sustancias (ítem 6).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_119",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "consumo_sustancias",
+    "facet": "facet_28",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con consumo sustancias (ítem 7).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_120",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "trastorno_sueño",
+    "facet": "facet_02",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con trastorno sueño (ítem 1).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_121",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "trastorno_sueño",
+    "facet": "facet_42",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con trastorno sueño (ítem 2).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_122",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "trastorno_sueño",
+    "facet": null,
+    "intensity": "alto",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con trastorno sueño (ítem 3).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_123",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "trastorno_sueño",
+    "facet": null,
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con trastorno sueño (ítem 4).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_124",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "trastorno_sueño",
+    "facet": null,
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con trastorno sueño (ítem 5).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_125",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "trastorno_sueño",
+    "facet": "facet_40",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con trastorno sueño (ítem 6).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_126",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "trastorno_sueño",
+    "facet": null,
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con trastorno sueño (ítem 7).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_127",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "ideacion_suicida",
+    "facet": "facet_26",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con ideacion suicida (ítem 1).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_128",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "ideacion_suicida",
+    "facet": null,
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con ideacion suicida (ítem 2).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_129",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "ideacion_suicida",
+    "facet": "facet_10",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con ideacion suicida (ítem 3).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_130",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "ideacion_suicida",
+    "facet": "facet_09",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con ideacion suicida (ítem 4).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_131",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "ideacion_suicida",
+    "facet": "facet_45",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con ideacion suicida (ítem 5).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_132",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "ideacion_suicida",
+    "facet": null,
+    "intensity": "alto",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con ideacion suicida (ítem 6).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_133",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "ideacion_suicida",
+    "facet": "facet_16",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con ideacion suicida (ítem 7).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_134",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "trastorno_psicotico",
+    "facet": "facet_41",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con trastorno psicotico (ítem 1).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_135",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "trastorno_psicotico",
+    "facet": null,
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con trastorno psicotico (ítem 2).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_136",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "trastorno_psicotico",
+    "facet": null,
+    "intensity": "alto",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con trastorno psicotico (ítem 3).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_137",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "trastorno_psicotico",
+    "facet": null,
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con trastorno psicotico (ítem 4).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_138",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "trastorno_psicotico",
+    "facet": null,
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con trastorno psicotico (ítem 5).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_139",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "trastorno_psicotico",
+    "facet": "facet_21",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con trastorno psicotico (ítem 6).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_140",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "trastorno_psicotico",
+    "facet": "facet_04",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con trastorno psicotico (ítem 7).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_141",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "ansiedad_social",
+    "facet": null,
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con ansiedad social (ítem 1).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_142",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "ansiedad_social",
+    "facet": "facet_07",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con ansiedad social (ítem 2).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_143",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "ansiedad_social",
+    "facet": "facet_06",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con ansiedad social (ítem 3).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_144",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "ansiedad_social",
+    "facet": "facet_17",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con ansiedad social (ítem 4).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_145",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "ansiedad_social",
+    "facet": "facet_10",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con ansiedad social (ítem 5).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_146",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "ansiedad_social",
+    "facet": null,
+    "intensity": "alto",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con ansiedad social (ítem 6).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_147",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "ansiedad_social",
+    "facet": "facet_33",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con ansiedad social (ítem 7).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_148",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "conducta_impulsiva",
+    "facet": null,
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con conducta impulsiva (ítem 1).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_149",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "conducta_impulsiva",
+    "facet": "facet_29",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con conducta impulsiva (ítem 2).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_150",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "conducta_impulsiva",
+    "facet": null,
+    "intensity": "alto",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con conducta impulsiva (ítem 3).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_151",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "conducta_impulsiva",
+    "facet": "facet_14",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con conducta impulsiva (ítem 4).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_152",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "conducta_impulsiva",
+    "facet": "facet_13",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con conducta impulsiva (ítem 5).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_153",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "conducta_impulsiva",
+    "facet": "facet_05",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con conducta impulsiva (ítem 6).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_154",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "conducta_impulsiva",
+    "facet": null,
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con conducta impulsiva (ítem 7).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_155",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "tempestuoso",
+    "facet": "facet_16",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con tempestuoso (ítem 1).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_156",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "tempestuoso",
+    "facet": "facet_26",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con tempestuoso (ítem 2).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_157",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "tempestuoso",
+    "facet": "facet_02",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con tempestuoso (ítem 3).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_158",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "tempestuoso",
+    "facet": null,
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con tempestuoso (ítem 4).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_159",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "tempestuoso",
+    "facet": "facet_13",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con tempestuoso (ítem 5).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_160",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "tempestuoso",
+    "facet": "facet_34",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con tempestuoso (ítem 6).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_161",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "tempestuoso",
+    "facet": null,
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con tempestuoso (ítem 7).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_162",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "vulnerabilidad_emocional",
+    "facet": null,
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con vulnerabilidad emocional (ítem 1).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_163",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "vulnerabilidad_emocional",
+    "facet": "facet_01",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con vulnerabilidad emocional (ítem 2).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_164",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "vulnerabilidad_emocional",
+    "facet": "facet_13",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con vulnerabilidad emocional (ítem 3).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_165",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "vulnerabilidad_emocional",
+    "facet": "facet_30",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con vulnerabilidad emocional (ítem 4).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_166",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "vulnerabilidad_emocional",
+    "facet": "facet_09",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con vulnerabilidad emocional (ítem 5).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_167",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "vulnerabilidad_emocional",
+    "facet": "facet_28",
+    "intensity": "alto",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con vulnerabilidad emocional (ítem 6).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_168",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "vulnerabilidad_emocional",
+    "facet": null,
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con vulnerabilidad emocional (ítem 7).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_169",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "agotamiento",
+    "facet": "facet_37",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con agotamiento (ítem 1).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_170",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "agotamiento",
+    "facet": "facet_22",
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con agotamiento (ítem 2).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_171",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "agotamiento",
+    "facet": null,
+    "intensity": "alto",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con agotamiento (ítem 3).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_172",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "agotamiento",
+    "facet": "facet_27",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con agotamiento (ítem 4).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_173",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "agotamiento",
+    "facet": null,
+    "intensity": "moderado",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con agotamiento (ítem 5).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_174",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "agotamiento",
+    "facet": null,
+    "intensity": "alto",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con agotamiento (ítem 6).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_CL_175",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "agotamiento",
+    "facet": "facet_35",
+    "intensity": "leve",
+    "weight": 1,
+    "text": "He experimentado comportamientos o sentimientos relacionados con agotamiento (ítem 7).",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_VA_176",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "inconsistencia",
+    "facet": null,
+    "intensity": "control",
+    "weight": 1,
+    "text": "(Validación) Ítem sobre inconsistencia número 1.",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_VA_177",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "inconsistencia",
+    "facet": null,
+    "intensity": "control",
+    "weight": 1,
+    "text": "(Validación) Ítem sobre inconsistencia número 2.",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_VA_178",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "inconsistencia",
+    "facet": null,
+    "intensity": "control",
+    "weight": 1,
+    "text": "(Validación) Ítem sobre inconsistencia número 3.",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_VA_179",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "inconsistencia",
+    "facet": null,
+    "intensity": "control",
+    "weight": 1,
+    "text": "(Validación) Ítem sobre inconsistencia número 4.",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_VA_180",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "deseabilidad_social",
+    "facet": null,
+    "intensity": "control",
+    "weight": 1,
+    "text": "(Validación) Ítem sobre deseabilidad social número 1.",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_VA_181",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "deseabilidad_social",
+    "facet": null,
+    "intensity": "control",
+    "weight": 1,
+    "text": "(Validación) Ítem sobre deseabilidad social número 2.",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_VA_182",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "deseabilidad_social",
+    "facet": null,
+    "intensity": "control",
+    "weight": 1,
+    "text": "(Validación) Ítem sobre deseabilidad social número 3.",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_VA_183",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "deseabilidad_social",
+    "facet": null,
+    "intensity": "control",
+    "weight": 1,
+    "text": "(Validación) Ítem sobre deseabilidad social número 4.",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_VA_184",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "exageracion",
+    "facet": null,
+    "intensity": "control",
+    "weight": 1,
+    "text": "(Validación) Ítem sobre exageracion número 1.",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_VA_185",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "exageracion",
+    "facet": null,
+    "intensity": "control",
+    "weight": 1,
+    "text": "(Validación) Ítem sobre exageracion número 2.",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_VA_186",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "exageracion",
+    "facet": null,
+    "intensity": "control",
+    "weight": 1,
+    "text": "(Validación) Ítem sobre exageracion número 3.",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_VA_187",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "exageracion",
+    "facet": null,
+    "intensity": "control",
+    "weight": 1,
+    "text": "(Validación) Ítem sobre exageracion número 4.",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_VA_188",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "minimizacion",
+    "facet": null,
+    "intensity": "control",
+    "weight": 1,
+    "text": "(Validación) Ítem sobre minimizacion número 1.",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_VA_189",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "minimizacion",
+    "facet": null,
+    "intensity": "control",
+    "weight": 1,
+    "text": "(Validación) Ítem sobre minimizacion número 2.",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_VA_190",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "minimizacion",
+    "facet": null,
+    "intensity": "control",
+    "weight": 1,
+    "text": "(Validación) Ítem sobre minimizacion número 3.",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_VA_191",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "minimizacion",
+    "facet": null,
+    "intensity": "control",
+    "weight": 1,
+    "text": "(Validación) Ítem sobre minimizacion número 4.",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_VA_192",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "respuesta_atipica",
+    "facet": null,
+    "intensity": "control",
+    "weight": 1,
+    "text": "(Validación) Ítem sobre respuesta atipica número 1.",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_VA_193",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "respuesta_atipica",
+    "facet": null,
+    "intensity": "control",
+    "weight": 1,
+    "text": "(Validación) Ítem sobre respuesta atipica número 2.",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_VA_194",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "respuesta_atipica",
+    "facet": null,
+    "intensity": "control",
+    "weight": 1,
+    "text": "(Validación) Ítem sobre respuesta atipica número 3.",
+    "reverse_scored": false
+  },
+  {
+    "id": "MCMI_VA_195",
+    "instrument": "MCMI-IV_sintetico",
+    "scale": "respuesta_atipica",
+    "facet": null,
+    "intensity": "control",
+    "weight": 1,
+    "text": "(Validación) Ítem sobre respuesta atipica número 4.",
+    "reverse_scored": false
+  }
+]

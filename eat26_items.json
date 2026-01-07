@@ -1,0 +1,202 @@
+[
+  {
+    "id": "EAT26_01",
+    "instrument": "EAT-26_sintetico",
+    "position": 1,
+    "text": "Me preocupo mucho por el control de mi peso.",
+    "scale": "Eating_Attitudes",
+    "weight": 1
+  },
+  {
+    "id": "EAT26_02",
+    "instrument": "EAT-26_sintetico",
+    "position": 2,
+    "text": "Me siento culpable después de comer en exceso.",
+    "scale": "Eating_Attitudes",
+    "weight": 1
+  },
+  {
+    "id": "EAT26_03",
+    "instrument": "EAT-26_sintetico",
+    "position": 3,
+    "text": "Pienso a menudo en querer adelgazar.",
+    "scale": "Eating_Attitudes",
+    "weight": 1
+  },
+  {
+    "id": "EAT26_04",
+    "instrument": "EAT-26_sintetico",
+    "position": 4,
+    "text": "Evito comidas sociales por miedo a perder control.",
+    "scale": "Eating_Attitudes",
+    "weight": 1
+  },
+  {
+    "id": "EAT26_05",
+    "instrument": "EAT-26_sintetico",
+    "position": 5,
+    "text": "Me siento fuera de control al comer ciertos alimentos.",
+    "scale": "Eating_Attitudes",
+    "weight": 1
+  },
+  {
+    "id": "EAT26_06",
+    "instrument": "EAT-26_sintetico",
+    "position": 6,
+    "text": "Cuento las calorías con regularidad.",
+    "scale": "Eating_Attitudes",
+    "weight": 1
+  },
+  {
+    "id": "EAT26_07",
+    "instrument": "EAT-26_sintetico",
+    "position": 7,
+    "text": "Me siento satisfecho/a con mi figura. (invertido)",
+    "scale": "Eating_Attitudes",
+    "weight": 1
+  },
+  {
+    "id": "EAT26_08",
+    "instrument": "EAT-26_sintetico",
+    "position": 8,
+    "text": "Hago esfuerzos para limitar lo que como.",
+    "scale": "Eating_Attitudes",
+    "weight": 1
+  },
+  {
+    "id": "EAT26_09",
+    "instrument": "EAT-26_sintetico",
+    "position": 9,
+    "text": "Hago ejercicio excesivamente para compensar lo que como.",
+    "scale": "Eating_Attitudes",
+    "weight": 1
+  },
+  {
+    "id": "EAT26_10",
+    "instrument": "EAT-26_sintetico",
+    "position": 10,
+    "text": "Me siento feliz cuando controlo mi ingesta de comida. (invertido)",
+    "scale": "Eating_Attitudes",
+    "weight": 1
+  },
+  {
+    "id": "EAT26_11",
+    "instrument": "EAT-26_sintetico",
+    "position": 11,
+    "text": "Me peso frecuentemente para vigilar mi cuerpo.",
+    "scale": "Eating_Attitudes",
+    "weight": 1
+  },
+  {
+    "id": "EAT26_12",
+    "instrument": "EAT-26_sintetico",
+    "position": 12,
+    "text": "Evito comer cuando estoy preocupado/a por mi peso.",
+    "scale": "Eating_Attitudes",
+    "weight": 1
+  },
+  {
+    "id": "EAT26_13",
+    "instrument": "EAT-26_sintetico",
+    "position": 13,
+    "text": "Me gustaría perder una gran cantidad de peso.",
+    "scale": "Eating_Attitudes",
+    "weight": 1
+  },
+  {
+    "id": "EAT26_14",
+    "instrument": "EAT-26_sintetico",
+    "position": 14,
+    "text": "Pienso en métodos para hacerme vomitar o purgar. (si/no conducta)",
+    "scale": "Eating_Attitudes",
+    "weight": 1
+  },
+  {
+    "id": "EAT26_15",
+    "instrument": "EAT-26_sintetico",
+    "position": 15,
+    "text": "Mi bienestar diario se ve afectado por pensamientos sobre la comida.",
+    "scale": "Eating_Attitudes",
+    "weight": 1
+  },
+  {
+    "id": "EAT26_16",
+    "instrument": "EAT-26_sintetico",
+    "position": 16,
+    "text": "Me siento ansioso/a si como algo que considero 'prohibido'.",
+    "scale": "Eating_Attitudes",
+    "weight": 1
+  },
+  {
+    "id": "EAT26_17",
+    "instrument": "EAT-26_sintetico",
+    "position": 17,
+    "text": "Hago dietas extremas para perder peso.",
+    "scale": "Eating_Attitudes",
+    "weight": 1
+  },
+  {
+    "id": "EAT26_18",
+    "instrument": "EAT-26_sintetico",
+    "position": 18,
+    "text": "Siento atracones de comida que luego me avergüenzan.",
+    "scale": "Eating_Attitudes",
+    "weight": 1
+  },
+  {
+    "id": "EAT26_19",
+    "instrument": "EAT-26_sintetico",
+    "position": 19,
+    "text": "Evito ciertos alimentos incluso si me gustan.",
+    "scale": "Eating_Attitudes",
+    "weight": 1
+  },
+  {
+    "id": "EAT26_20",
+    "instrument": "EAT-26_sintetico",
+    "position": 20,
+    "text": "Siento que mi forma de comer afecta mi autoestima.",
+    "scale": "Eating_Attitudes",
+    "weight": 1
+  },
+  {
+    "id": "EAT26_21",
+    "instrument": "EAT-26_sintetico",
+    "position": 21,
+    "text": "Me siento feliz con mi cuerpo la mayor parte del tiempo. (invertido)",
+    "scale": "Eating_Attitudes",
+    "weight": 1
+  },
+  {
+    "id": "EAT26_22",
+    "instrument": "EAT-26_sintetico",
+    "position": 22,
+    "text": "Me esfuerzo por controlar la cantidad que como en cada comida.",
+    "scale": "Eating_Attitudes",
+    "weight": 1
+  },
+  {
+    "id": "EAT26_23",
+    "instrument": "EAT-26_sintetico",
+    "position": 23,
+    "text": "Me preocupo por la idea de engordar aunque esté delgado/a.",
+    "scale": "Eating_Attitudes",
+    "weight": 1
+  },
+  {
+    "id": "EAT26_24",
+    "instrument": "EAT-26_sintetico",
+    "position": 24,
+    "text": "A veces me siento fuera de control con la comida en privado.",
+    "scale": "Eating_Attitudes",
+    "weight": 1
+  },
+  {
+    "id": "EAT26_25",
+    "instrument": "EAT-26_sintetico",
+    "position": 25,
+    "text": "La comida ocupa mucho de mi tiempo pensando o planeando.",
+    "scale": "Eating_Attitudes",
+    "weight": 1
+  }
+]

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { getTestResult } from '@/lib/test-api';
+import ReadableResult from '@/components/test-results/ReadableResult';
 
 export default function PatientResultDetailPage() {
   const params = useParams();
@@ -106,9 +107,10 @@ export default function PatientResultDetailPage() {
 
           <div className="bg-white border border-gray-200 rounded-lg p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-3">Resultado</h2>
-            <pre className="text-sm text-gray-700 whitespace-pre-wrap break-words">
-              {formatPayload(payload)}
-            </pre>
+            <ReadableResult resultData={payload} showRaw={false} />
+            <p className="text-xs text-gray-500 mt-3">
+              Si no aparecen detalles adicionales, consulta con tu terapeuta.
+            </p>
           </div>
         </div>
       )}
@@ -127,12 +129,3 @@ function formatDate(value: unknown): string {
   });
 }
 
-function formatPayload(value: unknown): string {
-  if (value === null || value === undefined) return 'No disponible';
-  if (typeof value === 'string') return value;
-  try {
-    return JSON.stringify(value, null, 2);
-  } catch {
-    return String(value);
-  }
-}

@@ -1,0 +1,402 @@
+[
+  {
+    "id": "AQ50_01",
+    "instrument": "AQ-50_schema",
+    "position": 1,
+    "text": null,
+    "scale": "Autism_Trait",
+    "weight": 1
+  },
+  {
+    "id": "AQ50_02",
+    "instrument": "AQ-50_schema",
+    "position": 2,
+    "text": null,
+    "scale": "Autism_Trait",
+    "weight": 1
+  },
+  {
+    "id": "AQ50_03",
+    "instrument": "AQ-50_schema",
+    "position": 3,
+    "text": null,
+    "scale": "Autism_Trait",
+    "weight": 1
+  },
+  {
+    "id": "AQ50_04",
+    "instrument": "AQ-50_schema",
+    "position": 4,
+    "text": null,
+    "scale": "Autism_Trait",
+    "weight": 1
+  },
+  {
+    "id": "AQ50_05",
+    "instrument": "AQ-50_schema",
+    "position": 5,
+    "text": null,
+    "scale": "Autism_Trait",
+    "weight": 1
+  },
+  {
+    "id": "AQ50_06",
+    "instrument": "AQ-50_schema",
+    "position": 6,
+    "text": null,
+    "scale": "Autism_Trait",
+    "weight": 1
+  },
+  {
+    "id": "AQ50_07",
+    "instrument": "AQ-50_schema",
+    "position": 7,
+    "text": null,
+    "scale": "Autism_Trait",
+    "weight": 1
+  },
+  {
+    "id": "AQ50_08",
+    "instrument": "AQ-50_schema",
+    "position": 8,
+    "text": null,
+    "scale": "Autism_Trait",
+    "weight": 1
+  },
+  {
+    "id": "AQ50_09",
+    "instrument": "AQ-50_schema",
+    "position": 9,
+    "text": null,
+    "scale": "Autism_Trait",
+    "weight": 1
+  },
+  {
+    "id": "AQ50_10",
+    "instrument": "AQ-50_schema",
+    "position": 10,
+    "text": null,
+    "scale": "Autism_Trait",
+    "weight": 1
+  },
+  {
+    "id": "AQ50_11",
+    "instrument": "AQ-50_schema",
+    "position": 11,
+    "text": null,
+    "scale": "Autism_Trait",
+    "weight": 1
+  },
+  {
+    "id": "AQ50_12",
+    "instrument": "AQ-50_schema",
+    "position": 12,
+    "text": null,
+    "scale": "Autism_Trait",
+    "weight": 1
+  },
+  {
+    "id": "AQ50_13",
+    "instrument": "AQ-50_schema",
+    "position": 13,
+    "text": null,
+    "scale": "Autism_Trait",
+    "weight": 1
+  },
+  {
+    "id": "AQ50_14",
+    "instrument": "AQ-50_schema",
+    "position": 14,
+    "text": null,
+    "scale": "Autism_Trait",
+    "weight": 1
+  },
+  {
+    "id": "AQ50_15",
+    "instrument": "AQ-50_schema",
+    "position": 15,
+    "text": null,
+    "scale": "Autism_Trait",
+    "weight": 1
+  },
+  {
+    "id": "AQ50_16",
+    "instrument": "AQ-50_schema",
+    "position": 16,
+    "text": null,
+    "scale": "Autism_Trait",
+    "weight": 1
+  },
+  {
+    "id": "AQ50_17",
+    "instrument": "AQ-50_schema",
+    "position": 17,
+    "text": null,
+    "scale": "Autism_Trait",
+    "weight": 1
+  },
+  {
+    "id": "AQ50_18",
+    "instrument": "AQ-50_schema",
+    "position": 18,
+    "text": null,
+    "scale": "Autism_Trait",
+    "weight": 1
+  },
+  {
+    "id": "AQ50_19",
+    "instrument": "AQ-50_schema",
+    "position": 19,
+    "text": null,
+    "scale": "Autism_Trait",
+    "weight": 1
+  },
+  {
+    "id": "AQ50_20",
+    "instrument": "AQ-50_schema",
+    "position": 20,
+    "text": null,
+    "scale": "Autism_Trait",
+    "weight": 1
+  },
+  {
+    "id": "AQ50_21",
+    "instrument": "AQ-50_schema",
+    "position": 21,
+    "text": null,
+    "scale": "Autism_Trait",
+    "weight": 1
+  },
+  {
+    "id": "AQ50_22",
+    "instrument": "AQ-50_schema",
+    "position": 22,
+    "text": null,
+    "scale": "Autism_Trait",
+    "weight": 1
+  },
+  {
+    "id": "AQ50_23",
+    "instrument": "AQ-50_schema",
+    "position": 23,
+    "text": null,
+    "scale": "Autism_Trait",
+    "weight": 1
+  },
+  {
+    "id": "AQ50_24",
+    "instrument": "AQ-50_schema",
+    "position": 24,
+    "text": null,
+    "scale": "Autism_Trait",
+    "weight": 1
+  },
+  {
+    "id": "AQ50_25",
+    "instrument": "AQ-50_schema",
+    "position": 25,
+    "text": null,
+    "scale": "Autism_Trait",
+    "weight": 1
+  },
+  {
+    "id": "AQ50_26",
+    "instrument": "AQ-50_schema",
+    "position": 26,
+    "text": null,
+    "scale": "Autism_Trait",
+    "weight": 1
+  },
+  {
+    "id": "AQ50_27",
+    "instrument": "AQ-50_schema",
+    "position": 27,
+    "text": null,
+    "scale": "Autism_Trait",
+    "weight": 1
+  },
+  {
+    "id": "AQ50_28",
+    "instrument": "AQ-50_schema",
+    "position": 28,
+    "text": null,
+    "scale": "Autism_Trait",
+    "weight": 1
+  },
+  {
+    "id": "AQ50_29",
+    "instrument": "AQ-50_schema",
+    "position": 29,
+    "text": null,
+    "scale": "Autism_Trait",
+    "weight": 1
+  },
+  {
+    "id": "AQ50_30",
+    "instrument": "AQ-50_schema",
+    "position": 30,
+    "text": null,
+    "scale": "Autism_Trait",
+    "weight": 1
+  },
+  {
+    "id": "AQ50_31",
+    "instrument": "AQ-50_schema",
+    "position": 31,
+    "text": null,
+    "scale": "Autism_Trait",
+    "weight": 1
+  },
+  {
+    "id": "AQ50_32",
+    "instrument": "AQ-50_schema",
+    "position": 32,
+    "text": null,
+    "scale": "Autism_Trait",
+    "weight": 1
+  },
+  {
+    "id": "AQ50_33",
+    "instrument": "AQ-50_schema",
+    "position": 33,
+    "text": null,
+    "scale": "Autism_Trait",
+    "weight": 1
+  },
+  {
+    "id": "AQ50_34",
+    "instrument": "AQ-50_schema",
+    "position": 34,
+    "text": null,
+    "scale": "Autism_Trait",
+    "weight": 1
+  },
+  {
+    "id": "AQ50_35",
+    "instrument": "AQ-50_schema",
+    "position": 35,
+    "text": null,
+    "scale": "Autism_Trait",
+    "weight": 1
+  },
+  {
+    "id": "AQ50_36",
+    "instrument": "AQ-50_schema",
+    "position": 36,
+    "text": null,
+    "scale": "Autism_Trait",
+    "weight": 1
+  },
+  {
+    "id": "AQ50_37",
+    "instrument": "AQ-50_schema",
+    "position": 37,
+    "text": null,
+    "scale": "Autism_Trait",
+    "weight": 1
+  },
+  {
+    "id": "AQ50_38",
+    "instrument": "AQ-50_schema",
+    "position": 38,
+    "text": null,
+    "scale": "Autism_Trait",
+    "weight": 1
+  },
+  {
+    "id": "AQ50_39",
+    "instrument": "AQ-50_schema",
+    "position": 39,
+    "text": null,
+    "scale": "Autism_Trait",
+    "weight": 1
+  },
+  {
+    "id": "AQ50_40",
+    "instrument": "AQ-50_schema",
+    "position": 40,
+    "text": null,
+    "scale": "Autism_Trait",
+    "weight": 1
+  },
+  {
+    "id": "AQ50_41",
+    "instrument": "AQ-50_schema",
+    "position": 41,
+    "text": null,
+    "scale": "Autism_Trait",
+    "weight": 1
+  },
+  {
+    "id": "AQ50_42",
+    "instrument": "AQ-50_schema",
+    "position": 42,
+    "text": null,
+    "scale": "Autism_Trait",
+    "weight": 1
+  },
+  {
+    "id": "AQ50_43",
+    "instrument": "AQ-50_schema",
+    "position": 43,
+    "text": null,
+    "scale": "Autism_Trait",
+    "weight": 1
+  },
+  {
+    "id": "AQ50_44",
+    "instrument": "AQ-50_schema",
+    "position": 44,
+    "text": null,
+    "scale": "Autism_Trait",
+    "weight": 1
+  },
+  {
+    "id": "AQ50_45",
+    "instrument": "AQ-50_schema",
+    "position": 45,
+    "text": null,
+    "scale": "Autism_Trait",
+    "weight": 1
+  },
+  {
+    "id": "AQ50_46",
+    "instrument": "AQ-50_schema",
+    "position": 46,
+    "text": null,
+    "scale": "Autism_Trait",
+    "weight": 1
+  },
+  {
+    "id": "AQ50_47",
+    "instrument": "AQ-50_schema",
+    "position": 47,
+    "text": null,
+    "scale": "Autism_Trait",
+    "weight": 1
+  },
+  {
+    "id": "AQ50_48",
+    "instrument": "AQ-50_schema",
+    "position": 48,
+    "text": null,
+    "scale": "Autism_Trait",
+    "weight": 1
+  },
+  {
+    "id": "AQ50_49",
+    "instrument": "AQ-50_schema",
+    "position": 49,
+    "text": null,
+    "scale": "Autism_Trait",
+    "weight": 1
+  },
+  {
+    "id": "AQ50_50",
+    "instrument": "AQ-50_schema",
+    "position": 50,
+    "text": null,
+    "scale": "Autism_Trait",
+    "weight": 1
+  }
+]

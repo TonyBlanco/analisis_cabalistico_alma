@@ -1,6 +1,10 @@
+import logging
 from datetime import datetime
 from typing import Dict
-from ..tests.wellness.anxiety_state_trait.stai_bank import select_items_for_execution
+from tests.wellness.anxiety_state_trait.stai_bank import select_items_for_execution
+from tests.wellness.scl90 import select_items_scdf  # noqa: F401
+
+logger = logging.getLogger(__name__)
 
 
 def _generate_code(prefix='DIAG'):
@@ -278,6 +282,11 @@ def compute_scl90(input_data: dict) -> dict:
         result['recomendaciones'].append('Seguimiento y psicoeducación')
 
     return result
+
+
+def compute_scl90_wellness(input_data: dict) -> dict:
+    logger.warning('SCL-90 wellness execution stub called before implementation')
+    raise NotImplementedError('SCL-90 wellness execution pending')
 
 
 def compute_scdf(input_data: dict) -> dict:

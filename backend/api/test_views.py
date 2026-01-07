@@ -535,6 +535,12 @@ class ExecuteTestView(APIView):
                 else:
                     result = {'note': 'compute_bdi not available; missing module'}
                 return {'test_type': 'bdi', 'result': result, 'timestamp': str(datetime.now())}
+            if test_module.code == 'scl90':
+                responses = input_data.get('responses', {})
+                logger.warning('SCL-90 wellness execution requested before implementation')
+                if compute_scl90_wellness:
+                    return compute_scl90_wellness({'nombre': input_data.get('nombre'), 'edad': input_data.get('edad'), 'fecha': input_data.get('fecha'), 'terapeuta': input_data.get('terapeuta'), 'responses': responses})
+                raise NotImplementedError('SCL-90 wellness execution pending')
             if test_type == 'scl90' or test_module.code == 'scl-90':
                 responses = input_data.get('responses', {})
                 if compute_scl90:
@@ -962,15 +968,31 @@ class TestResultDetailView(APIView):
                 status=status.HTTP_403_FORBIDDEN
             )
         
-        # Only the user who created the result can delete it
+        # Allow deletion by the user who created the result, or by the
+        # therapist assigned to the patient. Admins remain read-only.
         if result.user != request.user:
-            return Response(
-                {
-                    'error': 'No autorizado',
-                    'message': 'Solo el usuario que creó este resultado puede eliminarlo'
-                },
-                status=status.HTTP_403_FORBIDDEN
-            )
+            try:
+                requester_profile = request.user.profile
+                # If requester is a therapist and owns the patient, allow
+                if getattr(requester_profile, 'user_type', None) == 'therapist' and getattr(result, 'patient', None) and getattr(result.patient, 'therapist', None) == request.user:
+                    # permitted: therapist assigned to the patient
+                    pass
+                else:
+                    return Response(
+                        {
+                            'error': 'No autorizado',
+                            'message': 'Solo el usuario que creó este resultado o el terapeuta asignado pueden eliminarlo'
+                        },
+                        status=status.HTTP_403_FORBIDDEN
+                    )
+            except (AttributeError, UserProfile.DoesNotExist):
+                return Response(
+                    {
+                        'error': 'Perfil de usuario no encontrado',
+                        'message': 'No se pudo verificar permisos del usuario'
+                    },
+                    status=status.HTTP_403_FORBIDDEN
+                )
         
         # Archivar en lugar de eliminar
         result.is_archived = True
@@ -1364,14 +1386,14 @@ class AssignTestToPatientView(APIView):
     """
     Permite a terapeutas asignar tests patient_self a sus propios pacientes.
     
-    Solo terapeutas pueden usar este endpoint (no admins).
+    Solo terapeutas pueden usar este endpoint.
     Solo se pueden asignar tests patient_self (no therapist_clinical).
     El paciente debe pertenecer al terapeuta.
     """
     permission_classes = [IsAuthenticated]
     
     def post(self, request):
-        logger.error("ASSIGN_TEST: step 1 - request received")
+        logger.info("ASSIGN_TEST: step 1 - request received")
         user = request.user
         try:
             profile = user.profile
@@ -1384,7 +1406,7 @@ class AssignTestToPatientView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        logger.error("ASSIGN_TEST: step 2 - user profile loaded")
+        logger.info("ASSIGN_TEST: step 2 - user profile loaded")
         
         # SECURITY: Only therapists can assign tests (not admins)
         user_type = getattr(profile, 'user_type', None)
@@ -1397,25 +1419,10 @@ class AssignTestToPatientView(APIView):
                 status=status.HTTP_403_FORBIDDEN
             )
         
-        # SECURITY: Explicitly block admins even if user_type is 'therapist'
-        is_admin = (
-            getattr(profile, 'is_admin', False) or
-            user.is_staff or
-            user.is_superuser
-        )
-        if is_admin:
-            return Response(
-                {
-                    'error': 'No autorizado',
-                    'message': 'Los administradores no pueden asignar tests a pacientes por razones de seguridad. Solo los terapeutas pueden gestionar sus propios pacientes.'
-                },
-                status=status.HTTP_403_FORBIDDEN
-            )
-        
         patient_id_raw = request.data.get('patient_id')
         test_code = request.data.get('test_code')
         
-        logger.error(f"ASSIGN_TEST: step 3 - payload received patient_id={patient_id_raw}, test_code={test_code}")
+        logger.info(f"ASSIGN_TEST: step 3 - payload received patient_id={patient_id_raw}, test_code={test_code}")
         
         if not patient_id_raw or not test_code:
             return Response(
@@ -1437,12 +1444,12 @@ class AssignTestToPatientView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        logger.error("ASSIGN_TEST: step 4 - patient_id parsed")
+        logger.info("ASSIGN_TEST: step 4 - patient_id parsed")
         
         # Validate patient exists and belongs to therapist
         try:
             patient = Patient.objects.get(id=patient_id, therapist=user)
-            logger.error("ASSIGN_TEST: step 5 - patient loaded")
+            logger.info("ASSIGN_TEST: step 5 - patient loaded")
         except Patient.DoesNotExist:
             return Response(
                 {
@@ -1476,28 +1483,33 @@ class AssignTestToPatientView(APIView):
 
         try:
             # Tolerant lookup: normalize codes by removing hyphens/underscores and lowercasing
-            def _normalize(s: str) -> str:
-                return re.sub(r"[-_]", "", (s or "")).lower()
-
+            # Optimización: Reemplazo de loop en memoria por query directa
+            
             raw_code = test_code
-            norm = _normalize(raw_code)
+            candidates = TestModule.objects.filter(
+                Q(code__iexact=raw_code) | 
+                Q(slug__iexact=raw_code)
+            ).order_by('-is_active', '-updated_at')
 
-            candidates = []
-            for t in TestModule.objects.all():
-                if _normalize(getattr(t, 'code', '')) == norm:
-                    candidates.append(t)
-                    continue
-                if getattr(t, 'slug', None) and _normalize(getattr(t, 'slug')) == norm:
-                    candidates.append(t)
+            # Fallback para códigos normalizados (ej: gad7 vs gad-7) si no hay match directo
+            if not candidates.exists():
+                norm_code = re.sub(r"[-_]", "", (raw_code or "")).lower()
+                if norm_code != raw_code.lower():
+                     # Intento secundario con código normalizado, asumiendo que en DB algunos códigos pueden estar "limpios"
+                     # o que el input vino sucio.
+                     # Nota: Esto no cubre el caso inverso (input limpio, DB sucio) sin un loop o función DB, 
+                     # pero cubre la mayoría de casos de fricción.
+                     candidates = TestModule.objects.filter(
+                        Q(code__iexact=norm_code) | 
+                        Q(slug__iexact=norm_code)
+                     ).order_by('-is_active', '-updated_at')
 
-            # Prefer active and recently updated modules
-            if candidates:
-                candidates.sort(key=lambda x: (getattr(x, 'is_active', False), getattr(x, 'updated_at', None) or 0), reverse=True)
-                test_module = candidates[0]
+            if candidates.exists():
+                test_module = candidates.first()
             else:
                 test_module = None
 
-            logger.error("ASSIGN_TEST: step 6 - test module resolved")
+            logger.info("ASSIGN_TEST: step 6 - test module resolved")
         except Exception as e:
             logger.exception("ASSIGN_TEST: FAIL loading test module")
             return Response(
@@ -1517,7 +1529,6 @@ class AssignTestToPatientView(APIView):
                 "bdi-ii": "bdi-ii",
                 "eating": "eating",
                 "isi": "insomnia",
-                "stai": "stai",
                 "scl-90": "scl-90",
                 "scl90": "scl-90",
                 "mcmi-iv": "mcmi-iv",
@@ -1662,9 +1673,9 @@ class AssignTestToPatientView(APIView):
                 user=patient.user,
                 test_module=test_module
             )
-            logger.error("ASSIGN_TEST: step 7 - assignment resolved (get_or_create)")
+            logger.info("ASSIGN_TEST: step 7 - assignment resolved (get_or_create)")
         except UserTestAccess.MultipleObjectsReturned:
-            logger.error("ASSIGN_TEST: step 7b - multiple assignment rows detected")
+            logger.info("ASSIGN_TEST: step 7b - multiple assignment rows detected")
             access = (
                 UserTestAccess.objects
                 .filter(user=patient.user, test_module=test_module)
@@ -1690,7 +1701,7 @@ class AssignTestToPatientView(APIView):
             # Mark as special access (assigned by therapist)
             access.has_special_access = True
             access.save()
-            logger.error("ASSIGN_TEST: step 8 - assignment saved")
+            logger.info("ASSIGN_TEST: step 8 - assignment saved")
         except Exception as e:
             logger.exception("ASSIGN_TEST: FAIL creating assignment (save)")
             return Response(
@@ -1705,7 +1716,7 @@ class AssignTestToPatientView(APIView):
         )
         test_display_name = getattr(test_module, 'name', None) or test_code
         
-        logger.error("ASSIGN_TEST: step 9 - success")
+        logger.info("ASSIGN_TEST: step 9 - success")
 
         placeholder_cls = EXECUTORS.get(getattr(test_module, 'code', None))
         placeholder_payload = None
@@ -1733,6 +1744,155 @@ class AssignTestToPatientView(APIView):
         }, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
 
 
+
+
+class UnassignTestFromPatientView(APIView):
+    """
+    Permite a terapeutas quitar tests asignados (patient_self) de sus pacientes.
+    Elimina el UserTestAccess y marcadores legacy de asignacion (no borra resultados).
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        try:
+            profile = user.profile
+        except (AttributeError, UserProfile.DoesNotExist):
+            return Response(
+                {
+                    'error': 'Perfil de usuario no encontrado',
+                    'message': 'El usuario autenticado no tiene un perfil valido'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        user_type = getattr(profile, 'user_type', None)
+        if user_type != 'therapist':
+            return Response(
+                {
+                    'error': 'No autorizado',
+                    'message': 'Solo los terapeutas pueden quitar tests asignados a pacientes.'
+                },
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        patient_id_raw = request.data.get('patient_id')
+        test_code = request.data.get('test_code')
+
+        if not patient_id_raw or not test_code:
+            return Response(
+                {
+                    'error': 'Datos incompletos',
+                    'message': 'patient_id y test_code son requeridos'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            patient_id = int(patient_id_raw)
+        except (TypeError, ValueError):
+            return Response(
+                {
+                    'error': 'ID invalido',
+                    'message': 'patient_id debe ser un numero entero valido'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            patient = Patient.objects.get(id=patient_id, therapist=user)
+        except Patient.DoesNotExist:
+            return Response(
+                {
+                    'error': 'Paciente no encontrado',
+                    'message': f'El paciente con ID {patient_id} no existe o no pertenece a este terapeuta'
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        if not getattr(patient, 'user', None):
+            return Response(
+                {
+                    'error': 'Paciente sin cuenta de usuario',
+                    'message': 'El paciente debe tener una cuenta vinculada para quitar asignaciones'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        from django.db.models import Q
+        import re as _re
+
+        def _normalize(s: str) -> str:
+            return _re.sub(r"[-_]", "", (s or "").lower())
+
+        raw_code = str(test_code)
+        norm = _normalize(raw_code)
+
+        candidates = []
+        for t in TestModule.objects.all():
+            if _normalize(getattr(t, 'code', '')) == norm:
+                candidates.append(t)
+                continue
+            if getattr(t, 'slug', None) and _normalize(getattr(t, 'slug')) == norm:
+                candidates.append(t)
+
+        if candidates:
+            candidates.sort(key=lambda x: (getattr(x, 'is_active', False), getattr(x, 'updated_at', None) or 0), reverse=True)
+            test_module = candidates[0]
+        else:
+            test_module = None
+
+        raw_legacy_map = {
+            'phq-9': 'phq-9',
+            'phq9': 'phq-9',
+            'gad-7': 'gad-7',
+            'gad7': 'gad-7',
+            'bai': 'bai',
+            'bdi-ii': 'bdi-ii',
+            'eating': 'eating',
+            'isi': 'insomnia',
+            'scl-90': 'scl-90',
+            'scl90': 'scl-90',
+            'mcmi-iv': 'mcmi-iv',
+            'pai': 'pai',
+        }
+        legacy_map = { _normalize(k): v for k, v in raw_legacy_map.items() }
+        legacy_code = legacy_map.get(norm)
+
+        deleted_access = 0
+        if test_module:
+            deleted_access, _ = UserTestAccess.objects.filter(
+                user=patient.user,
+                test_module=test_module,
+            ).delete()
+
+        delete_markers_qs = TestResult.objects.filter(patient=patient).filter(
+            Q(result_data__assignment_only=True) |
+            Q(details__legacy_assignment=True) |
+            Q(details__assigned_via_user_access=True)
+        )
+
+        if test_module:
+            delete_markers_qs = delete_markers_qs.filter(
+                Q(test_module=test_module) |
+                Q(test_id__iexact=getattr(test_module, 'code', None))
+            )
+        elif legacy_code:
+            delete_markers_qs = delete_markers_qs.filter(test_id__iexact=legacy_code)
+        else:
+            delete_markers_qs = delete_markers_qs.filter(test_id__iexact=raw_code)
+
+        deleted_markers, _ = delete_markers_qs.delete()
+
+        return Response(
+            {
+                'success': True,
+                'message': 'Asignacion eliminada correctamente',
+                'deleted_access': deleted_access,
+                'deleted_markers': deleted_markers,
+            },
+            status=status.HTTP_200_OK,
+        )
 class PHQ9SubmitView(APIView):
     """
     Procesa PHQ-9 en modo patient_self y guarda el resultado.

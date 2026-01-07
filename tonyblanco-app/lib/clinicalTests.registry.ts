@@ -105,11 +105,17 @@ export const clinicalTestsRegistry: ClinicalTestRegistryEntry[] = [
     implemented: false,
   },
   {
-    test_code: "stai",
+    test_code: "anxiety-state-trait",
     display_name: "STAI (Ansiedad Estado-Rasgo)",
     domain: "Ansiedad y estres",
     family: "psicologicos",
-    implemented: false,
+    implemented: true,
+    patient_route: "/dashboard/patient/tests/anxiety-state-trait",
+    guidance: {
+      what: "Evalua ansiedad actual (estado) y tendencia estable (rasgo).",
+      when: "Usar en seguimiento de ansiedad o para diferenciar estado vs. rasgo.",
+      reminder: "Lectura wellness orientativa (no diagnostico).",
+    },
   },
   {
     test_code: "scl-90-r",
@@ -193,6 +199,19 @@ export const clinicalTestsRegistry: ClinicalTestRegistryEntry[] = [
       what: "Screening orientativo para explorar carga de estrés y recursos de regulación.",
       when: "Útil cuando hay presión sostenida o sensación de agotamiento.",
       reminder: "No diagnóstico. Uso holístico y de acompañamiento.",
+    },
+  },
+  {
+    test_code: "scl90",
+    display_name: "SCL-90 — Screening Holístico",
+    domain: "Bienestar general",
+    family: "psicologicos",
+    implemented: true,
+    patient_route: "/dashboard/patient/tests/scl90",
+    guidance: {
+      what: "Lectura orientativa para explorar síntomas amplios desde un enfoque wellness.",
+      when: "Útil cuando se busca entender el bienestar global sin etiquetas diagnósticas.",
+      reminder: "No diagnóstico. Herramienta de acompañamiento y reflexión.",
     },
   },
   {

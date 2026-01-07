@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import { getActivePatientId, getActivePatientName } from '@/lib/active-patient';
 import { getTestResultsForPatient, getPatientPreviousTests } from '@/lib/test-api';
+import { unassignTestFromPatient } from '@/lib/assignment-api';
 import { TestResult } from '@/lib/test-types';
 
 /**
@@ -24,6 +25,7 @@ export default function AssignedTestsSection({
   const [assignedTests, setAssignedTests] = useState<TestResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [removingTestCode, setRemovingTestCode] = useState<string | null>(null);
   const [activePatientId, setActivePatientIdState] = useState<number | null>(null);
   const [activePatientName, setActivePatientNameState] = useState<string | null>(null);
 
@@ -111,6 +113,40 @@ export default function AssignedTestsSection({
       setLoading(false);
     }
   }, [activePatientId]);
+
+  const handleUnassign = useCallback(async (result: any) => {
+    if (!activePatientId) return;
+    const code = result?.test_module?.code || result?.test_module_code || result?.test_id;
+    if (!code) return;
+
+    if (!confirm(`¿Deseas quitar la asignación del test "${result.test_module?.name || result.test_module_name || code}"?`)) {
+      return;
+    }
+
+    setRemovingTestCode(String(code));
+    try {
+      await unassignTestFromPatient(activePatientId, String(code));
+
+      const key = 'assigned_tests_by_patient';
+      const existing = typeof window !== 'undefined' ? localStorage.getItem(key) : null;
+      const parsed = existing ? JSON.parse(existing) : {};
+      const patientKey = String(activePatientId);
+      const current: Array<{ code: string }> = parsed[patientKey] || [];
+      parsed[patientKey] = current.filter((t) => String(t.code).toLowerCase() !== String(code).toLowerCase());
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(key, JSON.stringify(parsed));
+        window.dispatchEvent(new Event('assignedTestsChanged'));
+      }
+
+      await fetchAssignedTests();
+    } catch (err) {
+      console.error('Error unassigning test:', err);
+      const message = err instanceof Error ? err.message : 'Error al quitar la asignación';
+      setError(message);
+    } finally {
+      setRemovingTestCode(null);
+    }
+  }, [activePatientId, fetchAssignedTests]);
 
   if (!activePatientId) {
     return (
@@ -246,6 +282,20 @@ export default function AssignedTestsSection({
                       >
                         Ver resultado
                       </Link>
+                    </div>
+                  )}
+                  {isAssignmentOnly && (
+                    <div className="ml-4 flex-shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => handleUnassign(result)}
+                        disabled={removingTestCode === String(result?.test_module?.code || result?.test_module_code || result?.test_id)}
+                        className="text-sm text-red-600 hover:text-red-800 underline disabled:opacity-50"
+                      >
+                        {removingTestCode === String(result?.test_module?.code || result?.test_module_code || result?.test_id)
+                          ? 'Quitando...'
+                          : 'Quitar asignación'}
+                      </button>
                     </div>
                   )}
                 </div>

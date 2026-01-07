@@ -1,0 +1,26 @@
+id,instrument,position,text,scale,weight
+EAT26_01,EAT-26_sintetico,1,Me preocupo mucho por el control de mi peso.,Eating_Attitudes,1
+EAT26_02,EAT-26_sintetico,2,Me siento culpable después de comer en exceso.,Eating_Attitudes,1
+EAT26_03,EAT-26_sintetico,3,Pienso a menudo en querer adelgazar.,Eating_Attitudes,1
+EAT26_04,EAT-26_sintetico,4,Evito comidas sociales por miedo a perder control.,Eating_Attitudes,1
+EAT26_05,EAT-26_sintetico,5,Me siento fuera de control al comer ciertos alimentos.,Eating_Attitudes,1
+EAT26_06,EAT-26_sintetico,6,Cuento las calorías con regularidad.,Eating_Attitudes,1
+EAT26_07,EAT-26_sintetico,7,Me siento satisfecho/a con mi figura. (invertido),Eating_Attitudes,1
+EAT26_08,EAT-26_sintetico,8,Hago esfuerzos para limitar lo que como.,Eating_Attitudes,1
+EAT26_09,EAT-26_sintetico,9,Hago ejercicio excesivamente para compensar lo que como.,Eating_Attitudes,1
+EAT26_10,EAT-26_sintetico,10,Me siento feliz cuando controlo mi ingesta de comida. (invertido),Eating_Attitudes,1
+EAT26_11,EAT-26_sintetico,11,Me peso frecuentemente para vigilar mi cuerpo.,Eating_Attitudes,1
+EAT26_12,EAT-26_sintetico,12,Evito comer cuando estoy preocupado/a por mi peso.,Eating_Attitudes,1
+EAT26_13,EAT-26_sintetico,13,Me gustaría perder una gran cantidad de peso.,Eating_Attitudes,1
+EAT26_14,EAT-26_sintetico,14,Pienso en métodos para hacerme vomitar o purgar. (si/no conducta),Eating_Attitudes,1
+EAT26_15,EAT-26_sintetico,15,Mi bienestar diario se ve afectado por pensamientos sobre la comida.,Eating_Attitudes,1
+EAT26_16,EAT-26_sintetico,16,Me siento ansioso/a si como algo que considero 'prohibido'.,Eating_Attitudes,1
+EAT26_17,EAT-26_sintetico,17,Hago dietas extremas para perder peso.,Eating_Attitudes,1
+EAT26_18,EAT-26_sintetico,18,Siento atracones de comida que luego me avergüenzan.,Eating_Attitudes,1
+EAT26_19,EAT-26_sintetico,19,Evito ciertos alimentos incluso si me gustan.,Eating_Attitudes,1
+EAT26_20,EAT-26_sintetico,20,Siento que mi forma de comer afecta mi autoestima.,Eating_Attitudes,1
+EAT26_21,EAT-26_sintetico,21,Me siento feliz con mi cuerpo la mayor parte del tiempo. (invertido),Eating_Attitudes,1
+EAT26_22,EAT-26_sintetico,22,Me esfuerzo por controlar la cantidad que como en cada comida.,Eating_Attitudes,1
+EAT26_23,EAT-26_sintetico,23,Me preocupo por la idea de engordar aunque esté delgado/a.,Eating_Attitudes,1
+EAT26_24,EAT-26_sintetico,24,A veces me siento fuera de control con la comida en privado.,Eating_Attitudes,1
+EAT26_25,EAT-26_sintetico,25,La comida ocupa mucho de mi tiempo pensando o planeando.,Eating_Attitudes,1

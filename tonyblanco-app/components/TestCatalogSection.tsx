@@ -9,26 +9,12 @@ import { useToast } from '@/components/ui/toast';
 import ClinicalTestHelpModal from '@/components/ClinicalTestHelpModal';
 import { useRouter } from 'next/navigation';
 import { getAvailableTests } from '@/lib/test-api';
+import { getPatientDetail } from '@/lib/assignment-api';
 
 interface TestCatalogSectionProps {
   onTestAssigned?: () => void;
 }
-
-type CatalogTest = TestModule & {
-  implemented?: boolean;
-  domainLabel?: string;
-  family?: string;
-  execution_mode?: string;
-  available_for_personal?: boolean;
-  mode?: string;
-  domain?: string;
-  requires_license?: boolean;
-};
-
-/**
- * Catálogo holístico global: muestra todos los tests sin ocultar por estado.
- * El patient_id solo afecta acciones (asignar) y estados calculados externamente.
- */
+// ...
 export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectionProps = {}) {
   const [tests, setTests] = useState<CatalogTest[]>([]);
   const [loading, setLoading] = useState(false);
@@ -41,6 +27,7 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
   const [lastAssignedTest, setLastAssignedTest] = useState<string | null>(null);
   const [helpTestCode, setHelpTestCode] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [activePatientHasUser, setActivePatientHasUser] = useState<boolean | null>(null);
 
   const toast = useToast();
   const router = useRouter();
@@ -49,126 +36,32 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
   // Assigned tests fetched from canonical endpoint (used by AssignedTestsSection)
   const [assignedTests, setAssignedTests] = useState<any[]>([]);
 
-  const fetchAssignedTests = useCallback(async () => {
-    if (!activePatientId) return;
-    try {
-      // Use patient-previous because it includes canonical UserTestAccess assignments (pending)
-      const { getPatientPreviousTests } = await import('@/lib/test-api');
-      const data = await getPatientPreviousTests({ patient_id: Number(activePatientId) });
-      const items = Array.isArray(data) ? data : (data?.results || []);
-
-      // Guardrail: only treat canonical UserTestAccess-based assignments as "assigned"
-      // (legacy TestResult history must NOT mark a test as assigned).
-      const canonicalAssignments = (items || []).filter((r: any) => {
-        const details = r?.details || {};
-        return details?.assigned_via_user_access === true || String(r?.id || '').startsWith('useraccess-');
+  useEffect(() => {
+    if (!activePatientId) {
+      setActivePatientHasUser(null);
+      return;
+    }
+    
+    let isMounted = true;
+    getPatientDetail(activePatientId)
+      .then((patient) => {
+        if (isMounted) {
+          // Check if patient has a linked user ID (backend returns 'user' field with ID or object)
+          const hasUser = Boolean(patient.user || patient.user_id);
+          setActivePatientHasUser(hasUser);
+        }
+      })
+      .catch((err) => {
+        console.error('Error checking patient user status:', err);
+        if (isMounted) setActivePatientHasUser(false); // Assume worst case on error to prevent broken calls
       });
 
-      setAssignedTests(canonicalAssignments);
-    } catch (err) {
-      setAssignedTests([]);
-      console.error('Error fetching assigned tests in catalog:', err);
-    }
+    return () => { isMounted = false; };
   }, [activePatientId]);
-
-  useEffect(() => {
-    fetchAssignedTests();
-    const handler = () => fetchAssignedTests();
-    if (typeof window !== 'undefined') window.addEventListener('assignedTestsChanged', handler);
-    return () => {
-      if (typeof window !== 'undefined') window.removeEventListener('assignedTestsChanged', handler);
-    };
-  }, [activePatientId, fetchAssignedTests]);
-
-  useEffect(() => {
-    setMounted(true);
-    fetchTests();
-  }, []);
-
-  // Carga desde el registro declarativo (sin depender de backend).
-  const fetchTests = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      // Build a stable catalog from the declarative registry, then overlay backend truth.
-      // This ensures therapists still see placeholder tests even if the backend only returns active/implemented ones.
-      const registryMapped = clinicalTestsRegistry.map<CatalogTest>((entry, idx) => ({
-        id: idx + 1,
-        code: entry.test_code,
-        name: entry.display_name,
-        description: entry.guidance?.what || entry.domain || 'Instrumento holístico',
-        test_type: TEST_TYPES.BASIC,
-        required_access_level: 'professional',
-        is_active: true,
-        available_for_therapists: true,
-        available_for_personal: entry.family === 'psicologicos',
-        uses_per_month: null,
-        icon: '',
-        order: idx,
-        estimated_duration: 5,
-        is_available: true,
-        user_access: null,
-        implemented: entry.implemented,
-        domainLabel: entry.domain,
-        family: entry.family,
-        requires_license: false,
-      }));
-
-      const remote = await getAvailableTests().catch(() => null);
-      const userTypeFromApi = (remote && remote.user_type) || '';
-      setUserType(userTypeFromApi);
-      const remoteTests: TestModule[] = Array.isArray(remote?.tests) ? remote!.tests : [];
-      const remoteByCode = new Map(remoteTests.map((t) => [t.code, t]));
-
-      const mergedFromRegistry = registryMapped.map<CatalogTest>((local) => {
-        const remoteHit = remoteByCode.get(local.code);
-        if (!remoteHit) return local;
-
-        const meta = clinicalTestsRegistry.find((e) => e.test_code === remoteHit.code) || null;
-        const family: CatalogTest['family'] =
-          meta?.family ||
-          (['basic', 'numerology', 'compatibility', 'career', 'spiritual', 'health', 'financial', 'family', 'purpose', 'past_life'].includes(String(remoteHit.test_type))
-            ? 'cabalisticos'
-            : 'psicologicos');
-
-        return {
-          ...local,
-          ...remoteHit,
-          implemented: meta?.implemented ?? local.implemented,
-          domainLabel: meta?.domain ?? local.domainLabel,
-          family,
-          requires_license: (remoteHit as any).requires_license === true,
-        };
-      });
-
-      const registryCodes = new Set(registryMapped.map((t) => t.code));
-      const remoteOnly = remoteTests
-        .filter((t) => !registryCodes.has(t.code))
-        .map<CatalogTest>((t) => {
-          const family: CatalogTest['family'] =
-            ['basic', 'numerology', 'compatibility', 'career', 'spiritual', 'health', 'financial', 'family', 'purpose', 'past_life'].includes(String(t.test_type))
-              ? 'cabalisticos'
-              : 'psicologicos';
-          return {
-            ...t,
-            implemented: true,
-            domainLabel: (t as any).domainLabel || (t as any).domain || undefined,
-            family,
-            requires_license: (t as any).requires_license === true,
-          };
-        });
-
-      setTests([...mergedFromRegistry, ...remoteOnly]);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Error al cargar catálogo de tests';
-      setError(message);
-      console.error('Error building catalog:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+// ...
   // Normaliza modo para decidir acciones
+  // NOTE: execution_mode is inferred in frontend logic below because backend serializer
+  // does not always provide it explicitly. Logic relies on 'available_for_therapists' flags.
   const normalizedTests = tests.map((test) => {
     const isClinical =
       test.execution_mode === 'therapist_clinical' ||
@@ -178,85 +71,15 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
       mode: isClinical ? 'therapist_clinical' : 'patient_self',
     };
   });
-
-  const handleAssignTest = (test: TestModule) => {
-    if (!activePatientId) {
-      toast.warning(
-        'Selecciona un consultante',
-        'Debes seleccionar un consultante activo antes de asignar un test.'
-      );
-      return;
-    }
-
-    if (userType === 'admin') {
-      toast.error(
-        'Solo terapeutas pueden asignar tests',
-        'Los administradores no pueden asignar tests a pacientes.'
-      );
-      return;
-    }
-    setTestToAssign(test);
-    setShowConfirmModal(true);
-  };
-
-  const confirmAssignTest = async () => {
-    if (!testToAssign || !activePatientId) return;
-    setAssigningTestCode(testToAssign.code);
-    setShowConfirmModal(false);
-    try {
-      const { assignTestToPatient } = await import('@/lib/assignment-api');
-      await assignTestToPatient(activePatientId, testToAssign.code);
-      // Registrar asignación local para reflejar en el workspace mientras el backend responde.
-      const key = 'assigned_tests_by_patient';
-      const existing = typeof window !== 'undefined' ? localStorage.getItem(key) : null;
-      const parsed = existing ? JSON.parse(existing) : {};
-      const patientKey = String(activePatientId);
-      const current: Array<{ code: string; name: string; description?: string; assigned_at: string }> =
-        parsed[patientKey] || [];
-      const now = new Date().toISOString();
-      const deduped = current.filter((t) => t.code !== testToAssign.code);
-      deduped.push({
-        code: testToAssign.code,
-        name: testToAssign.name,
-        description: testToAssign.description,
-        assigned_at: now,
-      });
-      parsed[patientKey] = deduped;
-      if (typeof window !== 'undefined') {
-        localStorage.setItem(key, JSON.stringify(parsed));
-        window.dispatchEvent(new Event('assignedTestsChanged'));
-      }
-
-      setLastAssignedTest(testToAssign.name);
-      setShowSuccessModal(true);
-      if (onTestAssigned) onTestAssigned();
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Error al asignar test';
-      toast.error('Error al asignar test', message);
-      console.error('Error assigning test:', err);
-    } finally {
-      setAssigningTestCode(null);
-      setTestToAssign(null);
-    }
-  };
-
-  const cancelAssignTest = () => {
-    setShowConfirmModal(false);
-    setTestToAssign(null);
-  };
-
+// ...
   const AssignTestButton = ({
     onAssign,
     disabled,
     isAssigning,
-    isImplemented,
-    requiresLicense,
   }: {
     onAssign: () => void;
     disabled: boolean;
     isAssigning: boolean;
-    isImplemented: boolean;
-    requiresLicense: boolean;
   }) => {
     if (!activePatientId) {
       return (
@@ -269,21 +92,27 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
         </button>
       );
     }
+
+    if (activePatientHasUser === false) {
+      return (
+        <button
+          disabled
+          className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-400 bg-gray-100 rounded-md cursor-not-allowed"
+          title="El consultante debe tener una cuenta activa para asignar tests"
+        >
+          Asignar
+        </button>
+      );
+    }
+
     return (
       <button
         onClick={onAssign}
         disabled={disabled}
         className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-white rounded-md hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
         style={{ backgroundColor: '#1f6c8f' }}
-        title={
-          requiresLicense
-            ? 'Este instrumento requiere licencia. Carga contenido licenciado y habilita el acceso correspondiente.'
-            : !isImplemented
-              ? 'Este test está marcado como “En desarrollo”.'
-              : undefined
-        }
       >
-        {isAssigning ? 'Asignando...' : requiresLicense ? 'Requiere licencia' : !isImplemented ? 'En desarrollo' : 'Asignar'}
+        {isAssigning ? 'Asignando...' : 'Asignar'}
       </button>
     );
   };
@@ -431,11 +260,9 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
                               .map((c: any) => String(c).toLowerCase()),
                           );
                           const hasPatientRoute = Boolean((test as any).patient_route);
-                          const isAssignable = Boolean((test as any).available_for_personal);
-                          const isAssigned = hasPatientRoute && isAssignable && assignedCodes.has(String(test.code).toLowerCase());
+                          const isAssignable = Boolean(test.is_active) && Boolean((test as any).available_for_personal) && hasPatientRoute;
+                          const isAssigned = isAssignable && assignedCodes.has(String(test.code).toLowerCase());
                           const isAssigning = assigningTestCode === test.code;
-                          const isImplemented = (test as any).implemented !== false;
-                          const requiresLicense = (test as any).requires_license === true;
 
                           if (isAssigned) {
                             return (
@@ -446,13 +273,19 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
                           }
 
                           // The only criterion for showing the Assign action is whether it's already assigned.
+                          if (!isAssignable) {
+                            return (
+                              <span className="text-xs text-gray-500 px-2 py-1 rounded border border-gray-200">
+                                No asignable
+                              </span>
+                            );
+                          }
+
                           return (
                             <AssignTestButton
                               onAssign={() => handleAssignTest(test)}
                               disabled={isAssigning}
                               isAssigning={isAssigning}
-                              isImplemented={isImplemented}
-                              requiresLicense={requiresLicense}
                             />
                           );
                         })()

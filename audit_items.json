@@ -1,0 +1,82 @@
+[
+  {
+    "id": "AUDIT_01",
+    "instrument": "AUDIT_sintetico",
+    "position": 1,
+    "text": "¿Con qué frecuencia tomas una bebida al día?",
+    "scale": "Alcohol",
+    "weight": 1
+  },
+  {
+    "id": "AUDIT_02",
+    "instrument": "AUDIT_sintetico",
+    "position": 2,
+    "text": "¿Cuántas bebidas tomas en un día típico cuando bebes?",
+    "scale": "Alcohol",
+    "weight": 1
+  },
+  {
+    "id": "AUDIT_03",
+    "instrument": "AUDIT_sintetico",
+    "position": 3,
+    "text": "¿Con qué frecuencia tomas 6 o más bebidas en una sola ocasión?",
+    "scale": "Alcohol",
+    "weight": 1
+  },
+  {
+    "id": "AUDIT_04",
+    "instrument": "AUDIT_sintetico",
+    "position": 4,
+    "text": "¿Con qué frecuencia sientes que no puedes dejar de beber una vez que empiezas?",
+    "scale": "Alcohol",
+    "weight": 1
+  },
+  {
+    "id": "AUDIT_05",
+    "instrument": "AUDIT_sintetico",
+    "position": 5,
+    "text": "¿Con qué frecuencia no puedes cumplir con tus responsabilidades por beber?",
+    "scale": "Alcohol",
+    "weight": 1
+  },
+  {
+    "id": "AUDIT_06",
+    "instrument": "AUDIT_sintetico",
+    "position": 6,
+    "text": "¿Alguna vez has necesitado un trago por la mañana para calmarte o curar una resaca?",
+    "scale": "Alcohol",
+    "weight": 1
+  },
+  {
+    "id": "AUDIT_07",
+    "instrument": "AUDIT_sintetico",
+    "position": 7,
+    "text": "¿Has tenido sentimientos de culpa o remordimiento por beber?",
+    "scale": "Alcohol",
+    "weight": 1
+  },
+  {
+    "id": "AUDIT_08",
+    "instrument": "AUDIT_sintetico",
+    "position": 8,
+    "text": "¿Alguna vez has olvidado lo que hiciste mientras bebías?",
+    "scale": "Alcohol",
+    "weight": 1
+  },
+  {
+    "id": "AUDIT_09",
+    "instrument": "AUDIT_sintetico",
+    "position": 9,
+    "text": "¿Alguna vez alguien se preocupó por tu consumo de alcohol o te sugirió reducirlo?",
+    "scale": "Alcohol",
+    "weight": 1
+  },
+  {
+    "id": "AUDIT_10",
+    "instrument": "AUDIT_sintetico",
+    "position": 10,
+    "text": "¿Has tenido lesiones debido al alcohol (tuyas o de otra persona)?",
+    "scale": "Alcohol",
+    "weight": 1
+  }
+]

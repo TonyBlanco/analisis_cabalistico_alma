@@ -1,0 +1,1202 @@
+[
+  {
+    "id": "E_TENS_001",
+    "domain": "estado",
+    "cluster": "tension_corporal",
+    "intensity": "bajo",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "En este momento siento mis músculos tensos.",
+    "reverse_scored": false
+  },
+  {
+    "id": "E_TENS_002",
+    "domain": "estado",
+    "cluster": "tension_corporal",
+    "intensity": "medio",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "En este momento mi cuerpo está en calma.",
+    "reverse_scored": true
+  },
+  {
+    "id": "E_TENS_003",
+    "domain": "estado",
+    "cluster": "tension_corporal",
+    "intensity": "alto",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Mi cuerpo está muy tenso en este momento.",
+    "reverse_scored": false
+  },
+  {
+    "id": "E_TENS_004",
+    "domain": "estado",
+    "cluster": "tension_corporal",
+    "intensity": "bajo",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "Me siento completamente distendido/a físicamente.",
+    "reverse_scored": true
+  },
+  {
+    "id": "E_TENS_005",
+    "domain": "estado",
+    "cluster": "tension_corporal",
+    "intensity": "medio",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Ahora mis manos están crispadas o apretadas.",
+    "reverse_scored": false
+  },
+  {
+    "id": "E_TENS_006",
+    "domain": "estado",
+    "cluster": "tension_corporal",
+    "intensity": "alto",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "Ahora me siento cómodo/a en mi postura.",
+    "reverse_scored": true
+  },
+  {
+    "id": "E_TENS_007",
+    "domain": "estado",
+    "cluster": "tension_corporal",
+    "intensity": "bajo",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Noto cierta rigidez en mi mandíbula.",
+    "reverse_scored": false
+  },
+  {
+    "id": "E_TENS_008",
+    "domain": "estado",
+    "cluster": "tension_corporal",
+    "intensity": "medio",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "Me siento distendido/a y libre de tensión.",
+    "reverse_scored": true
+  },
+  {
+    "id": "E_TENS_009",
+    "domain": "estado",
+    "cluster": "tension_corporal",
+    "intensity": "alto",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Siento como si mi cuerpo fuera una cuerda estirada.",
+    "reverse_scored": false
+  },
+  {
+    "id": "E_TENS_010",
+    "domain": "estado",
+    "cluster": "tension_corporal",
+    "intensity": "bajo",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "Siento alivio físico y relajación.",
+    "reverse_scored": true
+  },
+  {
+    "id": "E_TENS_011",
+    "domain": "estado",
+    "cluster": "tension_corporal",
+    "intensity": "medio",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Siento tensión en los hombros ahora.",
+    "reverse_scored": false
+  },
+  {
+    "id": "E_TENS_012",
+    "domain": "estado",
+    "cluster": "tension_corporal",
+    "intensity": "alto",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "Mi musculatura está relajada ahora.",
+    "reverse_scored": true
+  },
+  {
+    "id": "E_TENS_013",
+    "domain": "estado",
+    "cluster": "tension_corporal",
+    "intensity": "bajo",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Mi pecho se siente contraído ahora.",
+    "reverse_scored": false
+  },
+  {
+    "id": "E_TENS_014",
+    "domain": "estado",
+    "cluster": "tension_corporal",
+    "intensity": "medio",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "Mi cuerpo está en equilibrio y calma.",
+    "reverse_scored": true
+  },
+  {
+    "id": "E_TENS_015",
+    "domain": "estado",
+    "cluster": "tension_corporal",
+    "intensity": "alto",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Siento incomodidad física por tensión.",
+    "reverse_scored": false
+  },
+  {
+    "id": "E_INQU_001",
+    "domain": "estado",
+    "cluster": "inquietud_mental",
+    "intensity": "bajo",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Mi mente está un poco agitada en este momento.",
+    "reverse_scored": false
+  },
+  {
+    "id": "E_INQU_002",
+    "domain": "estado",
+    "cluster": "inquietud_mental",
+    "intensity": "medio",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "Ahora puedo pensar con claridad.",
+    "reverse_scored": true
+  },
+  {
+    "id": "E_INQU_003",
+    "domain": "estado",
+    "cluster": "inquietud_mental",
+    "intensity": "alto",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Mi mente está dando vueltas sin parar.",
+    "reverse_scored": false
+  },
+  {
+    "id": "E_INQU_004",
+    "domain": "estado",
+    "cluster": "inquietud_mental",
+    "intensity": "bajo",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "Me siento enfocado/a en lo que estoy haciendo.",
+    "reverse_scored": true
+  },
+  {
+    "id": "E_INQU_005",
+    "domain": "estado",
+    "cluster": "inquietud_mental",
+    "intensity": "medio",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Siento mi mente dispersa e inquieta.",
+    "reverse_scored": false
+  },
+  {
+    "id": "E_INQU_006",
+    "domain": "estado",
+    "cluster": "inquietud_mental",
+    "intensity": "alto",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "Me siento mentalmente centrado/a y en paz.",
+    "reverse_scored": true
+  },
+  {
+    "id": "E_INQU_007",
+    "domain": "estado",
+    "cluster": "inquietud_mental",
+    "intensity": "bajo",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Tengo una cascada de pensamientos ansiosos.",
+    "reverse_scored": false
+  },
+  {
+    "id": "E_INQU_008",
+    "domain": "estado",
+    "cluster": "inquietud_mental",
+    "intensity": "medio",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "Siento claridad y calma mental en este momento.",
+    "reverse_scored": true
+  },
+  {
+    "id": "E_INQU_009",
+    "domain": "estado",
+    "cluster": "inquietud_mental",
+    "intensity": "alto",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Me está costando un poco mantener la atención.",
+    "reverse_scored": false
+  },
+  {
+    "id": "E_INQU_010",
+    "domain": "estado",
+    "cluster": "inquietud_mental",
+    "intensity": "bajo",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "Tengo una sensación de quietud mental.",
+    "reverse_scored": true
+  },
+  {
+    "id": "E_INQU_011",
+    "domain": "estado",
+    "cluster": "inquietud_mental",
+    "intensity": "medio",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Me siento mentalmente inquieto/a ahora.",
+    "reverse_scored": false
+  },
+  {
+    "id": "E_INQU_012",
+    "domain": "estado",
+    "cluster": "inquietud_mental",
+    "intensity": "alto",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "Pienso con calma y sin prisa ahora.",
+    "reverse_scored": true
+  },
+  {
+    "id": "E_INQU_013",
+    "domain": "estado",
+    "cluster": "inquietud_mental",
+    "intensity": "bajo",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Siento intranquilidad mental que no se calma.",
+    "reverse_scored": false
+  },
+  {
+    "id": "E_INQU_014",
+    "domain": "estado",
+    "cluster": "inquietud_mental",
+    "intensity": "medio",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "Siento tranquilidad en mis pensamientos.",
+    "reverse_scored": true
+  },
+  {
+    "id": "E_INQU_015",
+    "domain": "estado",
+    "cluster": "inquietud_mental",
+    "intensity": "alto",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Tengo pensamientos acelerados que me incomodan.",
+    "reverse_scored": false
+  },
+  {
+    "id": "E_SINT_001",
+    "domain": "estado",
+    "cluster": "sintomas_fisicos",
+    "intensity": "bajo",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Noto mi corazón latiendo un poco más rápido.",
+    "reverse_scored": false
+  },
+  {
+    "id": "E_SINT_002",
+    "domain": "estado",
+    "cluster": "sintomas_fisicos",
+    "intensity": "medio",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "Mi cuerpo se siente estable y equilibrado.",
+    "reverse_scored": true
+  },
+  {
+    "id": "E_SINT_003",
+    "domain": "estado",
+    "cluster": "sintomas_fisicos",
+    "intensity": "alto",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Siento palpitaciones fuertes en este momento.",
+    "reverse_scored": false
+  },
+  {
+    "id": "E_SINT_004",
+    "domain": "estado",
+    "cluster": "sintomas_fisicos",
+    "intensity": "bajo",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "Mi pulso es constante y tranquilo.",
+    "reverse_scored": true
+  },
+  {
+    "id": "E_SINT_005",
+    "domain": "estado",
+    "cluster": "sintomas_fisicos",
+    "intensity": "medio",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Tengo sensación de ahogo o falta de aire.",
+    "reverse_scored": false
+  },
+  {
+    "id": "E_SINT_006",
+    "domain": "estado",
+    "cluster": "sintomas_fisicos",
+    "intensity": "alto",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "No noto molestias físicas en este momento.",
+    "reverse_scored": true
+  },
+  {
+    "id": "E_SINT_007",
+    "domain": "estado",
+    "cluster": "sintomas_fisicos",
+    "intensity": "bajo",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Sudo más de lo normal en este momento.",
+    "reverse_scored": false
+  },
+  {
+    "id": "E_SINT_008",
+    "domain": "estado",
+    "cluster": "sintomas_fisicos",
+    "intensity": "medio",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "Mi cuerpo está calmado y sin sobresaltos.",
+    "reverse_scored": true
+  },
+  {
+    "id": "E_SINT_009",
+    "domain": "estado",
+    "cluster": "sintomas_fisicos",
+    "intensity": "alto",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Siento mareo o inestabilidad ahora.",
+    "reverse_scored": false
+  },
+  {
+    "id": "E_SINT_010",
+    "domain": "estado",
+    "cluster": "sintomas_fisicos",
+    "intensity": "bajo",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "No tengo síntomas físicos asociados a nervios.",
+    "reverse_scored": true
+  },
+  {
+    "id": "E_SINT_011",
+    "domain": "estado",
+    "cluster": "sintomas_fisicos",
+    "intensity": "medio",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Siento náuseas leves por nervios.",
+    "reverse_scored": false
+  },
+  {
+    "id": "E_SINT_012",
+    "domain": "estado",
+    "cluster": "sintomas_fisicos",
+    "intensity": "alto",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "Percibo calma en mi cuerpo ahora.",
+    "reverse_scored": true
+  },
+  {
+    "id": "E_SINT_013",
+    "domain": "estado",
+    "cluster": "sintomas_fisicos",
+    "intensity": "bajo",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Siento opresión en el pecho.",
+    "reverse_scored": false
+  },
+  {
+    "id": "E_SINT_014",
+    "domain": "estado",
+    "cluster": "sintomas_fisicos",
+    "intensity": "medio",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "Siento estabilidad física y control.",
+    "reverse_scored": true
+  },
+  {
+    "id": "E_SINT_015",
+    "domain": "estado",
+    "cluster": "sintomas_fisicos",
+    "intensity": "alto",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Percibo malestar físico relacionado con nervios.",
+    "reverse_scored": false
+  },
+  {
+    "id": "E_PREO_001",
+    "domain": "estado",
+    "cluster": "preocupacion_inmediata",
+    "intensity": "bajo",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Ahora tengo una pequeña preocupación en mente.",
+    "reverse_scored": false
+  },
+  {
+    "id": "E_PREO_002",
+    "domain": "estado",
+    "cluster": "preocupacion_inmediata",
+    "intensity": "medio",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "Me siento sin cargas mentales en este momento.",
+    "reverse_scored": true
+  },
+  {
+    "id": "E_PREO_003",
+    "domain": "estado",
+    "cluster": "preocupacion_inmediata",
+    "intensity": "alto",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Siento una fuerte preocupación que no me deja en paz.",
+    "reverse_scored": false
+  },
+  {
+    "id": "E_PREO_004",
+    "domain": "estado",
+    "cluster": "preocupacion_inmediata",
+    "intensity": "bajo",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "Ahora confío en que todo saldrá bien.",
+    "reverse_scored": true
+  },
+  {
+    "id": "E_PREO_005",
+    "domain": "estado",
+    "cluster": "preocupacion_inmediata",
+    "intensity": "medio",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Siento que algo malo va a suceder pronto.",
+    "reverse_scored": false
+  },
+  {
+    "id": "E_PREO_006",
+    "domain": "estado",
+    "cluster": "preocupacion_inmediata",
+    "intensity": "alto",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "Ahora me siento seguro/a y confiado/a.",
+    "reverse_scored": true
+  },
+  {
+    "id": "E_PREO_007",
+    "domain": "estado",
+    "cluster": "preocupacion_inmediata",
+    "intensity": "bajo",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Pienso repetidamente en algo que me inquieta.",
+    "reverse_scored": false
+  },
+  {
+    "id": "E_PREO_008",
+    "domain": "estado",
+    "cluster": "preocupacion_inmediata",
+    "intensity": "medio",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "Puedo afrontar lo presente con calma.",
+    "reverse_scored": true
+  },
+  {
+    "id": "E_PREO_009",
+    "domain": "estado",
+    "cluster": "preocupacion_inmediata",
+    "intensity": "alto",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Tengo una leve sensación de alarma interior.",
+    "reverse_scored": false
+  },
+  {
+    "id": "E_PREO_010",
+    "domain": "estado",
+    "cluster": "preocupacion_inmediata",
+    "intensity": "bajo",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "No siento alarma por lo que está pasando.",
+    "reverse_scored": true
+  },
+  {
+    "id": "E_PREO_011",
+    "domain": "estado",
+    "cluster": "preocupacion_inmediata",
+    "intensity": "medio",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Siento inquietud sobre un asunto inmediato.",
+    "reverse_scored": false
+  },
+  {
+    "id": "E_PREO_012",
+    "domain": "estado",
+    "cluster": "preocupacion_inmediata",
+    "intensity": "alto",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "Confío en mi manejo de lo que sucede ahora.",
+    "reverse_scored": true
+  },
+  {
+    "id": "E_PREO_013",
+    "domain": "estado",
+    "cluster": "preocupacion_inmediata",
+    "intensity": "bajo",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "No puedo dejar de pensar en un posible problema.",
+    "reverse_scored": false
+  },
+  {
+    "id": "E_PREO_014",
+    "domain": "estado",
+    "cluster": "preocupacion_inmediata",
+    "intensity": "medio",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "Me encuentro en calma respecto a lo presente.",
+    "reverse_scored": true
+  },
+  {
+    "id": "E_PREO_015",
+    "domain": "estado",
+    "cluster": "preocupacion_inmediata",
+    "intensity": "alto",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Mi atención está ocupada por una preocupación actual.",
+    "reverse_scored": false
+  },
+  {
+    "id": "R_PREO_001",
+    "domain": "rasgo",
+    "cluster": "preocupacion_cronica",
+    "intensity": "bajo",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "A veces me preocupo por cosas sin importancia.",
+    "reverse_scored": false
+  },
+  {
+    "id": "R_PREO_002",
+    "domain": "rasgo",
+    "cluster": "preocupacion_cronica",
+    "intensity": "medio",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "Suelo tomar las cosas con calma.",
+    "reverse_scored": true
+  },
+  {
+    "id": "R_PREO_003",
+    "domain": "rasgo",
+    "cluster": "preocupacion_cronica",
+    "intensity": "alto",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Me preocupo constantemente por muchas cosas.",
+    "reverse_scored": false
+  },
+  {
+    "id": "R_PREO_004",
+    "domain": "rasgo",
+    "cluster": "preocupacion_cronica",
+    "intensity": "bajo",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "Generalmente confío en que las cosas saldrán bien.",
+    "reverse_scored": true
+  },
+  {
+    "id": "R_PREO_005",
+    "domain": "rasgo",
+    "cluster": "preocupacion_cronica",
+    "intensity": "medio",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Es difícil para mí dejar de preocuparme.",
+    "reverse_scored": false
+  },
+  {
+    "id": "R_PREO_006",
+    "domain": "rasgo",
+    "cluster": "preocupacion_cronica",
+    "intensity": "alto",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "Tengo una actitud serena ante los problemas.",
+    "reverse_scored": true
+  },
+  {
+    "id": "R_PREO_007",
+    "domain": "rasgo",
+    "cluster": "preocupacion_cronica",
+    "intensity": "bajo",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Me cuesta desconectar de mis preocupaciones.",
+    "reverse_scored": false
+  },
+  {
+    "id": "R_PREO_008",
+    "domain": "rasgo",
+    "cluster": "preocupacion_cronica",
+    "intensity": "medio",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "Me resulta sencillo relativizar las dificultades.",
+    "reverse_scored": true
+  },
+  {
+    "id": "R_PREO_009",
+    "domain": "rasgo",
+    "cluster": "preocupacion_cronica",
+    "intensity": "alto",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "En ocasiones me inquieta lo que piensan de mí.",
+    "reverse_scored": false
+  },
+  {
+    "id": "R_PREO_010",
+    "domain": "rasgo",
+    "cluster": "preocupacion_cronica",
+    "intensity": "bajo",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "Confío en mi capacidad para resolver problemas.",
+    "reverse_scored": true
+  },
+  {
+    "id": "R_PREO_011",
+    "domain": "rasgo",
+    "cluster": "preocupacion_cronica",
+    "intensity": "medio",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "A menudo me siento inquieto/a por el futuro.",
+    "reverse_scored": false
+  },
+  {
+    "id": "R_PREO_012",
+    "domain": "rasgo",
+    "cluster": "preocupacion_cronica",
+    "intensity": "alto",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "No permito que las preocupaciones dominen mi día a día.",
+    "reverse_scored": true
+  },
+  {
+    "id": "R_PREO_013",
+    "domain": "rasgo",
+    "cluster": "preocupacion_cronica",
+    "intensity": "bajo",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Mis pensamientos suelen centrarse en problemas potenciales.",
+    "reverse_scored": false
+  },
+  {
+    "id": "R_PREO_014",
+    "domain": "rasgo",
+    "cluster": "preocupacion_cronica",
+    "intensity": "medio",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "Me siento con recursos para manejar mis inquietudes.",
+    "reverse_scored": true
+  },
+  {
+    "id": "R_PREO_015",
+    "domain": "rasgo",
+    "cluster": "preocupacion_cronica",
+    "intensity": "alto",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Me cuesta confiar plenamente en que las cosas saldrán bien.",
+    "reverse_scored": false
+  },
+  {
+    "id": "R_TENS_001",
+    "domain": "rasgo",
+    "cluster": "tension_habitual",
+    "intensity": "bajo",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "A veces me siento tenso/a sin motivo aparente.",
+    "reverse_scored": false
+  },
+  {
+    "id": "R_TENS_002",
+    "domain": "rasgo",
+    "cluster": "tension_habitual",
+    "intensity": "medio",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "Suelo estar físicamente cómodo/a.",
+    "reverse_scored": true
+  },
+  {
+    "id": "R_TENS_003",
+    "domain": "rasgo",
+    "cluster": "tension_habitual",
+    "intensity": "alto",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Casi siempre estoy tenso/a o nervioso/a.",
+    "reverse_scored": false
+  },
+  {
+    "id": "R_TENS_004",
+    "domain": "rasgo",
+    "cluster": "tension_habitual",
+    "intensity": "bajo",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "Me siento a gusto en mi cuerpo la mayor parte del tiempo.",
+    "reverse_scored": true
+  },
+  {
+    "id": "R_TENS_005",
+    "domain": "rasgo",
+    "cluster": "tension_habitual",
+    "intensity": "medio",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Me cuesta relajarme al final del día.",
+    "reverse_scored": false
+  },
+  {
+    "id": "R_TENS_006",
+    "domain": "rasgo",
+    "cluster": "tension_habitual",
+    "intensity": "alto",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "Siento descanso y alivio físico de forma habitual.",
+    "reverse_scored": true
+  },
+  {
+    "id": "R_TENS_007",
+    "domain": "rasgo",
+    "cluster": "tension_habitual",
+    "intensity": "bajo",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "A menudo noto molestias físicas por tensión.",
+    "reverse_scored": false
+  },
+  {
+    "id": "R_TENS_008",
+    "domain": "rasgo",
+    "cluster": "tension_habitual",
+    "intensity": "medio",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "Me resulta fácil recuperar la calma corporal.",
+    "reverse_scored": true
+  },
+  {
+    "id": "R_TENS_009",
+    "domain": "rasgo",
+    "cluster": "tension_habitual",
+    "intensity": "alto",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Me encuentro tenso/a en situaciones cotidianas.",
+    "reverse_scored": false
+  },
+  {
+    "id": "R_TENS_010",
+    "domain": "rasgo",
+    "cluster": "tension_habitual",
+    "intensity": "bajo",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "Me acostumbro a momentos de relajación cada día.",
+    "reverse_scored": true
+  },
+  {
+    "id": "R_TENS_011",
+    "domain": "rasgo",
+    "cluster": "tension_habitual",
+    "intensity": "medio",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Es habitual que esté en alerta física.",
+    "reverse_scored": false
+  },
+  {
+    "id": "R_TENS_012",
+    "domain": "rasgo",
+    "cluster": "tension_habitual",
+    "intensity": "alto",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "Puedo gestionar mi tensión corporal con técnicas simples.",
+    "reverse_scored": true
+  },
+  {
+    "id": "R_TENS_013",
+    "domain": "rasgo",
+    "cluster": "tension_habitual",
+    "intensity": "bajo",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Mis músculos tienden a estar contraídos con frecuencia.",
+    "reverse_scored": false
+  },
+  {
+    "id": "R_TENS_014",
+    "domain": "rasgo",
+    "cluster": "tension_habitual",
+    "intensity": "medio",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "Soy capaz de soltar la tensión con relativa facilidad.",
+    "reverse_scored": true
+  },
+  {
+    "id": "R_TENS_015",
+    "domain": "rasgo",
+    "cluster": "tension_habitual",
+    "intensity": "alto",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Con regularidad percibo estrés físico en mi cuerpo.",
+    "reverse_scored": false
+  },
+  {
+    "id": "R_SINT_001",
+    "domain": "rasgo",
+    "cluster": "sintomas_fisicos_habitual",
+    "intensity": "bajo",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Sueles aparecerme palpitaciones en momentos de estrés.",
+    "reverse_scored": false
+  },
+  {
+    "id": "R_SINT_002",
+    "domain": "rasgo",
+    "cluster": "sintomas_fisicos_habitual",
+    "intensity": "medio",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "Mi salud física mantiene estabilidad aun en situaciones estresantes.",
+    "reverse_scored": true
+  },
+  {
+    "id": "R_SINT_003",
+    "domain": "rasgo",
+    "cluster": "sintomas_fisicos_habitual",
+    "intensity": "alto",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Sudo o tiembloy en situaciones de presión.",
+    "reverse_scored": false
+  },
+  {
+    "id": "R_SINT_004",
+    "domain": "rasgo",
+    "cluster": "sintomas_fisicos_habitual",
+    "intensity": "bajo",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "Rara vez experimento palpitaciones o sudoración por nervios.",
+    "reverse_scored": true
+  },
+  {
+    "id": "R_SINT_005",
+    "domain": "rasgo",
+    "cluster": "sintomas_fisicos_habitual",
+    "intensity": "medio",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Siento molestias físicas recurrentes relacionadas con ansiedad.",
+    "reverse_scored": false
+  },
+  {
+    "id": "R_SINT_006",
+    "domain": "rasgo",
+    "cluster": "sintomas_fisicos_habitual",
+    "intensity": "alto",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "No suelo tener síntomas físicos prolongados por ansiedad.",
+    "reverse_scored": true
+  },
+  {
+    "id": "R_SINT_007",
+    "domain": "rasgo",
+    "cluster": "sintomas_fisicos_habitual",
+    "intensity": "bajo",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Experimenté mareos o inestabilidad en situaciones tensas.",
+    "reverse_scored": false
+  },
+  {
+    "id": "R_SINT_008",
+    "domain": "rasgo",
+    "cluster": "sintomas_fisicos_habitual",
+    "intensity": "medio",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "Mi bienestar físico está preservado aun con tensiones.",
+    "reverse_scored": true
+  },
+  {
+    "id": "R_SINT_009",
+    "domain": "rasgo",
+    "cluster": "sintomas_fisicos_habitual",
+    "intensity": "alto",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Me suelen quedar sensaciones físicas molestas después de eventos tensos.",
+    "reverse_scored": false
+  },
+  {
+    "id": "R_SINT_010",
+    "domain": "rasgo",
+    "cluster": "sintomas_fisicos_habitual",
+    "intensity": "bajo",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "Mi cuerpo vuelve a la normalidad con rapidez.",
+    "reverse_scored": true
+  },
+  {
+    "id": "R_SINT_011",
+    "domain": "rasgo",
+    "cluster": "sintomas_fisicos_habitual",
+    "intensity": "medio",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Mis reacciones físicas al estrés son frecuentes.",
+    "reverse_scored": false
+  },
+  {
+    "id": "R_SINT_012",
+    "domain": "rasgo",
+    "cluster": "sintomas_fisicos_habitual",
+    "intensity": "alto",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "Disfruto de estabilidad física la mayor parte del tiempo.",
+    "reverse_scored": true
+  },
+  {
+    "id": "R_SINT_013",
+    "domain": "rasgo",
+    "cluster": "sintomas_fisicos_habitual",
+    "intensity": "bajo",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Los síntomas físicos aparecen con estrés cotidiano.",
+    "reverse_scored": false
+  },
+  {
+    "id": "R_SINT_014",
+    "domain": "rasgo",
+    "cluster": "sintomas_fisicos_habitual",
+    "intensity": "medio",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "Siento equilibrio físico aun en semanas agitadas.",
+    "reverse_scored": true
+  },
+  {
+    "id": "R_SINT_015",
+    "domain": "rasgo",
+    "cluster": "sintomas_fisicos_habitual",
+    "intensity": "alto",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Mi cuerpo responde con síntomas cuando me siento ansioso/a.",
+    "reverse_scored": false
+  },
+  {
+    "id": "R_INQU_001",
+    "domain": "rasgo",
+    "cluster": "inquietud_mental_habitual",
+    "intensity": "bajo",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Suelo tener la mente ocupada por pensamientos preocupantes.",
+    "reverse_scored": false
+  },
+  {
+    "id": "R_INQU_002",
+    "domain": "rasgo",
+    "cluster": "inquietud_mental_habitual",
+    "intensity": "medio",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "Puedo dejar de pensar en un problema cuando lo deseo.",
+    "reverse_scored": true
+  },
+  {
+    "id": "R_INQU_003",
+    "domain": "rasgo",
+    "cluster": "inquietud_mental_habitual",
+    "intensity": "alto",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Mi atención se dispersa con facilidad en el día a día.",
+    "reverse_scored": false
+  },
+  {
+    "id": "R_INQU_004",
+    "domain": "rasgo",
+    "cluster": "inquietud_mental_habitual",
+    "intensity": "bajo",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "Mi mente descansa bien y vuelve a la calma.",
+    "reverse_scored": true
+  },
+  {
+    "id": "R_INQU_005",
+    "domain": "rasgo",
+    "cluster": "inquietud_mental_habitual",
+    "intensity": "medio",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Mis pensamientos suelen acelerarse sin razón clara.",
+    "reverse_scored": false
+  },
+  {
+    "id": "R_INQU_006",
+    "domain": "rasgo",
+    "cluster": "inquietud_mental_habitual",
+    "intensity": "alto",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "No suelo quedarme atrapado/a en pensamientos negativos.",
+    "reverse_scored": true
+  },
+  {
+    "id": "R_INQU_007",
+    "domain": "rasgo",
+    "cluster": "inquietud_mental_habitual",
+    "intensity": "bajo",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Siento inquietud mental con regularidad.",
+    "reverse_scored": false
+  },
+  {
+    "id": "R_INQU_008",
+    "domain": "rasgo",
+    "cluster": "inquietud_mental_habitual",
+    "intensity": "medio",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "Tengo facilidad para centrarme cuando lo necesito.",
+    "reverse_scored": true
+  },
+  {
+    "id": "R_INQU_009",
+    "domain": "rasgo",
+    "cluster": "inquietud_mental_habitual",
+    "intensity": "alto",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Puedo quedarme pensando en problemas durante horas.",
+    "reverse_scored": false
+  },
+  {
+    "id": "R_INQU_010",
+    "domain": "rasgo",
+    "cluster": "inquietud_mental_habitual",
+    "intensity": "bajo",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "Mantengo perspectiva y calma ante mis pensamientos.",
+    "reverse_scored": true
+  },
+  {
+    "id": "R_INQU_011",
+    "domain": "rasgo",
+    "cluster": "inquietud_mental_habitual",
+    "intensity": "medio",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Es habitual que mis pensamientos sean intrusivos.",
+    "reverse_scored": false
+  },
+  {
+    "id": "R_INQU_012",
+    "domain": "rasgo",
+    "cluster": "inquietud_mental_habitual",
+    "intensity": "alto",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "Siento control sobre mi vida mental la mayoría del tiempo.",
+    "reverse_scored": true
+  },
+  {
+    "id": "R_INQU_013",
+    "domain": "rasgo",
+    "cluster": "inquietud_mental_habitual",
+    "intensity": "bajo",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Con frecuencia mi mente anticipa dificultades.",
+    "reverse_scored": false
+  },
+  {
+    "id": "R_INQU_014",
+    "domain": "rasgo",
+    "cluster": "inquietud_mental_habitual",
+    "intensity": "medio",
+    "weight": 1,
+    "valence": "positiva",
+    "text": "Puedo soltar pensamientos repetitivos con facilidad.",
+    "reverse_scored": true
+  },
+  {
+    "id": "R_INQU_015",
+    "domain": "rasgo",
+    "cluster": "inquietud_mental_habitual",
+    "intensity": "alto",
+    "weight": 1,
+    "valence": "negativa",
+    "text": "Mis pensamientos repetitivos interfieren con mi descanso.",
+    "reverse_scored": false
+  }
+]

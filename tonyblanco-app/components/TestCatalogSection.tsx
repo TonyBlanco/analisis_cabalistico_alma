@@ -58,7 +58,25 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
 
     return () => { isMounted = false; };
   }, [activePatientId]);
-// ...
+
+  const fetchTests = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await getAvailableTests();
+      setTests(data.tests as any[]);
+    } catch (err) {
+      console.error('Error fetching tests:', err);
+      setError('Error al cargar el catálogo de tests.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchTests();
+  }, [fetchTests]);
+
   // Normaliza modo para decidir acciones
   // NOTE: execution_mode is inferred in frontend logic below because backend serializer
   // does not always provide it explicitly. Logic relies on 'available_for_therapists' flags.
@@ -158,9 +176,13 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
 
   // Agrupa por familia para mejorar legibilidad sin ocultar tests
   const groupedByFamily = normalizedTests.reduce<Record<string, CatalogTest[]>>((acc, test) => {
-    const rawFamily = (test as any).family ?? clinicalTestsRegistry.find((e) => e.test_code === test.code)?.family;
-    // Normaliza wellness/diagnostic como 'psicologicos' para asegurar visibilidad en UI
-    const family = rawFamily === 'cabalisticos' ? 'cabalisticos' : 'psicologicos';
+    const rawFamily =
+      (test as any).family ??
+      clinicalTestsRegistry.find((e) => e.test_code === test.code)?.family;
+
+    // Regla de oro: todo test no cabalístico debe ser visible como psicológico
+    const family =
+      rawFamily === 'cabalisticos' ? 'cabalisticos' : 'psicologicos';
 
     if (!acc[family]) acc[family] = [];
     acc[family].push(test);

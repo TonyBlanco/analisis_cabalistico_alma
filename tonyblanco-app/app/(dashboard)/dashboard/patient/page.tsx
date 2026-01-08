@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
+import PatientNotesList from '@/components/PatientNotes/PatientNotesList';
 import { AlertCircle, CheckCircle, Clock, MessageSquare } from 'lucide-react';
 import { getUserProfile, acceptConsent, acknowledgeProfileUpdate } from '@/lib/api';
 import TherapeuticConsentModal from '@/components/TherapeuticConsentModal';
@@ -168,15 +169,22 @@ export default function PatientHome() {
         )}
       </div>
 
-      {/* Mensaje del terapeuta (placeholder) */}
+      {/* Mensaje del terapeuta: listado real de mensajes para el paciente */}
       <div className="bg-white border border-gray-200 rounded-lg p-6">
         <div className="flex items-center gap-3 mb-3">
           <MessageSquare className="w-5 h-5 text-gray-500" />
           <h2 className="text-lg font-semibold text-gray-900">Mensaje de tu terapeuta</h2>
         </div>
-        <p className="text-gray-600 text-sm">
-          No hay mensajes nuevos en este momento.
-        </p>
+        <div>
+          {/* Component that fetches /api/patient-notes/ for authenticated patient */}
+          {/* This is a minimal, read-only list and does not affect therapist UI */}
+          {/* eslint-disable-next-line @next/next/no-async-client-component */}
+          <React.Suspense fallback={<p className="text-gray-600 text-sm">Cargando mensajes…</p>}>
+            {/* import dynamically to keep file small */}
+            {/* @ts-ignore */}
+            <PatientNotesList />
+          </React.Suspense>
+        </div>
       </div>
     </div>
     </>

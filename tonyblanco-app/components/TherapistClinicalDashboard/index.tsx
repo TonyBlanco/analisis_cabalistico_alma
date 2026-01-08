@@ -5,6 +5,7 @@ import PatientHeader from './PatientHeader';
 import ContextNav from './ContextNav';
 import CenterVisual from './CenterVisual';
 import RightPanel from './RightPanel';
+import SendPatientNoteBlock from './SendPatientNoteBlock';
 import type { ContextSection, ContextSectionId, IntegrativeNote } from './types';
 import type { VisualizationState } from '@/components/BodySoulVisualization/types';
 import { usePanelManager } from '@/components/TherapistWorkspace/PanelManagerContext';
@@ -192,6 +193,7 @@ export default function TherapistClinicalDashboard({
             notesLoading={notesLoading}
             notesError={notesError}
           />
+          <SendPatientNoteBlock patientId={patientId} />
         </aside>
       </div>
     </div>

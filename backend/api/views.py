@@ -28,6 +28,8 @@ from .models import (
     Booking,
     AvailableSlot,
     BlockedDate,
+    Resource,
+    UserResourceAccess,
 )
 from .birth_data_model import UserBirthData
 from .serializers import (
@@ -46,6 +48,7 @@ from .serializers import (
     AvailableSlotSerializer,
     BlockedDateSerializer,
     UserProfileDetailSerializer,
+    UserResourceAccessSerializer,
 )
 from .serializers import UserBirthDataSerializer
 from .emails import send_welcome_email, send_booking_confirmation_email

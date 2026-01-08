@@ -133,6 +133,49 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
     );
   };
 
+  // ----- Assignment handlers -----
+  const handleAssignTest = (test: TestModule) => {
+    if (!activePatientId) {
+      toast.warning('Selecciona un consultante', 'Debes seleccionar un consultante activo antes de asignar un test.');
+      return;
+    }
+
+    // Prevent admins from assigning via therapist flows
+    if (userType === 'admin') {
+      toast.error('Solo terapeutas pueden asignar tests', 'Los administradores no pueden asignar tests a pacientes.');
+      return;
+    }
+
+    setTestToAssign(test);
+    setShowConfirmModal(true);
+  };
+
+  const cancelAssignTest = () => {
+    setShowConfirmModal(false);
+    setTestToAssign(null);
+  };
+
+  const confirmAssignTest = async () => {
+    if (!testToAssign || !activePatientId) return;
+    setAssigningTestCode(testToAssign.code);
+    setShowConfirmModal(false);
+
+    try {
+      const { assignTestToPatient } = await import('@/lib/assignment-api');
+      await assignTestToPatient(activePatientId, testToAssign.code);
+
+      // optimistic UI: mark as assigned locally
+      setLastAssignedTest(testToAssign.name);
+      setShowSuccessModal(true);
+    } catch (e) {
+      console.error('Error assigning test', e);
+      toast.error('Error', 'No se pudo asignar el test. Intenta nuevamente.');
+    } finally {
+      setAssigningTestCode(null);
+      setTestToAssign(null);
+    }
+  };
+
   if (loading) {
     return (
       <div className="bg-white border border-gray-100 rounded-xl p-6 shadow-sm">

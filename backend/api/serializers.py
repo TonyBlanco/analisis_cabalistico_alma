@@ -5,7 +5,7 @@ from .models import (
     UserProfile,
     Patient,
     Session,
-    TherapistNote,
+    PatientMessage,
     ServiceCategory,
     Service,
     ServicePackage,
@@ -251,6 +251,16 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'first_name', 'last_name', 'profile']
+
+
+class PatientMessageSerializer(serializers.ModelSerializer):
+    therapist = UserSerializer(read_only=True)
+    patient = serializers.PrimaryKeyRelatedField(queryset=Patient.objects.all())
+
+    class Meta:
+        model = PatientMessage
+        fields = ['id', 'therapist', 'patient', 'content', 'created_at', 'is_archived']
+        read_only_fields = ['id', 'therapist', 'created_at', 'is_archived']
 
 
 class RegisterTherapistSerializer(serializers.ModelSerializer):

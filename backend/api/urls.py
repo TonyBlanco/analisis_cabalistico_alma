@@ -71,6 +71,7 @@ from .test_views import (
     ISISubmitView,
     BDI2SubmitView
 )
+from .patient_note_views import PatientNotesView
 from .gematria_views import GematriaInterpretationView
 from .tarot_views import TarotAnalysisView, TarotCabalisticCorrespondenceView
 from .cabalistic_views import (
@@ -250,6 +251,8 @@ urlpatterns = [
     path('tests/assign-to-patient/', AssignTestToPatientView.as_view(), name='assign_test_to_patient'),
     path('tests/unassign-from-patient/', UnassignTestFromPatientView.as_view(), name='unassign_test_from_patient'),
     path('tests/patient-previous/', PatientPreviousTestsView.as_view(), name='patient_previous_tests'),
+    # Therapist -> Patient notes (unidirectional)
+    path('patient-notes/', PatientNotesView.as_view(), name='patient_notes'),
     path('tests/<str:code>/', TestModuleDetailView.as_view(), name='test_detail'),
     
     # AnalysisRecord core (núcleo normalizado de análisis)

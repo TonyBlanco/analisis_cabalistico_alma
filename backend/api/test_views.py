@@ -281,6 +281,22 @@ class ExecuteTestView(APIView):
         }
         execution_mode = self._infer_execution_mode(test_module, request_context)
 
+        # Allow override for patients who have been explicitly assigned this test
+        # If a test is therapist-only but the patient has a UserTestAccess granted
+        # (has_special_access=True), permit execution as patient_self by that user.
+        try:
+            # Allow override for patients or personal users who have been explicitly assigned this test
+            # If a test is therapist-only but the requesting user has a UserTestAccess granted
+            # (has_special_access=True), permit execution as patient_self by that user.
+            if execution_mode == 'therapist_clinical' and getattr(profile, 'user_type', None) in ('patient', 'personal'):
+                from api.test_models import UserTestAccess
+                has_access = UserTestAccess.objects.filter(user=request.user, test_module=test_module, has_special_access=True).exists()
+                if has_access:
+                    execution_mode = 'patient_self'
+        except Exception:
+            # If access check fails for any reason, keep original execution_mode
+            pass
+
         # Pilot guard: legacy-migrated psychological tests must not execute via the generic endpoint.
         if test_code in {"phq-9", "gad-7", "bai"}:
             return Response(
@@ -319,12 +335,23 @@ class ExecuteTestView(APIView):
         
         # PHASE 2: Apply hardened validators (using centralized validators)
         try:
-            # 1. Validate execution mode compatibility with test_module
-            validate_execution_mode(test_module, execution_mode)
-            
+            # Allow assigned patients to execute therapist-only tests as patient_self.
+            assigned_override = False
+            try:
+                if execution_mode == 'patient_self' and not getattr(test_module, 'available_for_personal', False):
+                    from api.test_models import UserTestAccess
+                    if UserTestAccess.objects.filter(user=request.user, test_module=test_module, has_special_access=True).exists():
+                        assigned_override = True
+            except Exception:
+                assigned_override = False
+
+            # 1. Validate execution mode compatibility with test_module (skip if assigned_override)
+            if not assigned_override:
+                validate_execution_mode(test_module, execution_mode)
+
             # 2. Validate role for execution mode
             validate_role_for_execution(request.user, execution_mode)
-            
+
             # 3. Validate context (patient_id requirements based on mode)
             patient = None
             if execution_mode == 'therapist_clinical':
@@ -386,7 +413,7 @@ class ExecuteTestView(APIView):
         test_result = None
         if data.get('save_result', True):
             patient_for_result = patient
-            if execution_mode == 'patient_self' and getattr(profile, 'user_type', None) == 'patient':
+            if execution_mode == 'patient_self' and getattr(profile, 'user_type', None) in ('patient', 'personal'):
                 try:
                     patient_qs = Patient.objects.filter(user=request.user, is_active=True)
                     if patient_qs.count() == 1:
@@ -1307,6 +1334,16 @@ class PatientPreviousTestsView(APIView):
                     if code in seen_codes:
                         continue
 
+                    # Determine if there's an existing TestResult for this patient+module
+                    try:
+                        has_result = False
+                        if patient and getattr(tm, 'id', None):
+                            has_result = TestResult.objects.filter(patient=patient, test_module=tm).exists()
+                    except Exception:
+                        has_result = False
+
+                    status = 'completed' if has_result else 'pending'
+
                     pseudo = {
                         'id': f'useraccess-{access.id}',
                         'test_module_name': getattr(tm, 'name', None),
@@ -1318,7 +1355,10 @@ class PatientPreviousTestsView(APIView):
                         },
                         'result_data': {'assignment_only': True},
                         'details': {'assigned_via_user_access': True},
-                        'created_at': access.created_at.isoformat() if getattr(access, 'created_at', None) else None
+                        'created_at': access.created_at.isoformat() if getattr(access, 'created_at', None) else None,
+                        # Backfill UI-friendly fields so frontend can render pending/completed and route to patient test page
+                        'status': status,
+                        'patient_route': f"/dashboard/patient/tests/{getattr(tm, 'code', '')}"
                     }
                     augmented.append(pseudo)
                     seen_codes.add(code)
@@ -1637,52 +1677,18 @@ class AssignTestToPatientView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        # Functional validation: only allow assignment if the module is authorized for holistic execution
-        if (
-            getattr(test_module, "execution_mode", None) != "holistic"
-            and not getattr(test_module, "available_for_personal", False)
-        ):
+        # Allow assignment when the module explicitly permits therapist assignments.
+        # Simplified rule: if a module is available_for_therapists it may be assigned
+        # by therapists to their patients. Business validation related to execution
+        # mode or patient availability is handled elsewhere or via flags.
+        if not getattr(test_module, 'available_for_therapists', False):
             return Response(
                 {
-                    "error": "Modo de ejecución no permitido",
-                    "message": "El test no está habilitado para asignación",
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        
-        # SECURITY: Only allow patient_self tests (not therapist_clinical)
-        if test_module.available_for_therapists and not test_module.available_for_personal:
-            return Response(
-                {
-                    'error': 'Test no asignable',
-                    'message': 'Solo se pueden asignar tests de tipo patient_self a pacientes. Los tests clínicos (therapist_clinical) no pueden ser asignados.'
+                    'error': 'No autorizado',
+                    'message': 'Este test no está habilitado para asignación por terapeutas.'
                 },
                 status=status.HTTP_403_FORBIDDEN
             )
-        
-        # Ensure test is available for personal/patient execution
-        # Prefer explicit `execution_mode` on the TestModule when present (non-invasive).
-        # If the module declares an execution_mode, allow assignment only for the
-        # holistically-governed mode. Otherwise, fall back to legacy `available_for_personal` flag.
-        exec_mode = getattr(test_module, 'execution_mode', None)
-        if exec_mode is not None:
-            if exec_mode != 'holistic':
-                return Response(
-                    {
-                        'error': 'Modo de ejecución no permitido',
-                        'message': 'El test no está habilitado para asignación en modo holístico'
-                    },
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-        else:
-            if not test_module.available_for_personal:
-                return Response(
-                    {
-                        'error': 'Test no disponible',
-                        'message': 'Este test no está disponible para ejecución por pacientes'
-                    },
-                    status=status.HTTP_403_FORBIDDEN
-                )
         
         # Create or update UserTestAccess for the patient's user account
         try:

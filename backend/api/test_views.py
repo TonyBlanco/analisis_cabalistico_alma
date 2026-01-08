@@ -74,8 +74,17 @@ class AvailableTestsView(APIView):
         user = request.user
         profile = user.profile
         
-        # PHASE 3: Filter tests by execution_mode based on user role
-        tests = TestModule.objects.filter(is_active=True)
+        # PHASE 3: Base catalog — exclude legacy/non-executable entries BEFORE role filters
+        # Legacy identification relies on existing fields/text markers only.
+        # Do NOT add new fields or change permissions logic.
+        tests = (
+            TestModule.objects
+            .filter(is_active=True)
+            # Exclude entries migrated from legacy backup
+            .exclude(description__icontains="_legacy_app_backup")
+            # Exclude non-executable markers present in description
+            .exclude(description__icontains="No ejecutable")
+        )
         
         # Check if user is admin (can view all tests)
         is_admin = (
@@ -84,11 +93,19 @@ class AvailableTestsView(APIView):
             user.is_superuser
         )
         
+        # Robust therapist detection:
+        # User is therapist if explicitly typed, is staff, or has patients assigned.
+        is_therapist = (
+            profile.user_type == 'therapist' or 
+            user.is_staff or 
+            Patient.objects.filter(therapist=user).exists()
+        )
+        
         if is_admin:
             # Admin can view all tests (no execution_mode filter)
             # Still filtered by is_active and is_available_for_user in serializer context
             pass
-        elif profile.user_type == 'therapist':
+        elif is_therapist:
             # Therapist can see both patient_self and therapist_clinical tests
             from django.db.models import Q
             tests = tests.filter(
@@ -104,7 +121,7 @@ class AvailableTestsView(APIView):
         #   This keeps the UI stable as new tests are added without needing code changes.
         # - Personal/Patient: only return tests the user can actually use, plus any
         #   tests granted via special access (assigned by therapist).
-        if is_admin or profile.user_type == 'therapist':
+        if is_admin or is_therapist:
             filtered_tests = list(tests)
         else:
             special_access_codes = set(

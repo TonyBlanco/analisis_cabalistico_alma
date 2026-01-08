@@ -352,7 +352,18 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
 
                           return (
                             <AssignTestButton
-                              onAssign={() => handleAssignTest(test)}
+                              onAssign={() => {
+                                if (!activePatientId) {
+                                  toast.warning('Selecciona un consultante', 'Debes seleccionar un consultante activo antes de asignar un test.');
+                                  return;
+                                }
+                                if (userType === 'admin') {
+                                  toast.error('Solo terapeutas pueden asignar tests', 'Los administradores no pueden asignar tests a pacientes.');
+                                  return;
+                                }
+                                setTestToAssign(test);
+                                setShowConfirmModal(true);
+                              }}
                               disabled={isAssigning}
                               isAssigning={isAssigning}
                             />

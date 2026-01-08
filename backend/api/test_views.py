@@ -1505,7 +1505,7 @@ class AssignTestToPatientView(APIView):
             raw_code = test_code
             candidates = TestModule.objects.filter(
                 Q(code__iexact=raw_code) | 
-                Q(slug__iexact=raw_code)
+                Q(name__iexact=raw_code)
             ).order_by('-is_active', '-updated_at')
 
             # Fallback para códigos normalizados (ej: gad7 vs gad-7) si no hay match directo
@@ -1517,8 +1517,8 @@ class AssignTestToPatientView(APIView):
                      # Nota: Esto no cubre el caso inverso (input limpio, DB sucio) sin un loop o función DB, 
                      # pero cubre la mayoría de casos de fricción.
                      candidates = TestModule.objects.filter(
-                        Q(code__iexact=norm_code) | 
-                        Q(slug__iexact=norm_code)
+                         Q(code__iexact=norm_code) | 
+                         Q(name__iexact=norm_code)
                      ).order_by('-is_active', '-updated_at')
 
             if candidates.exists():

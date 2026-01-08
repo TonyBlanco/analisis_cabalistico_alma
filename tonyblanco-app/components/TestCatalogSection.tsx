@@ -78,12 +78,10 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
   }, [fetchTests]);
 
   // Normaliza modo para decidir acciones
-  // NOTE: execution_mode is inferred in frontend logic below because backend serializer
-  // does not always provide it explicitly. Logic relies on 'available_for_therapists' flags.
+  // NOTE: Tests with T:true P:false are ASSIGNABLE by therapist to patients (patient_self execution).
+  // Only explicitly marked therapist_clinical tests (e.g., SCDF) should be treated as clinical-only.
   const normalizedTests = tests.map((test) => {
-    const isClinical =
-      test.execution_mode === 'therapist_clinical' ||
-      (test.available_for_therapists === true && test.available_for_personal === false);
+    const isClinical = test.execution_mode === 'therapist_clinical';
     return {
       ...test,
       mode: isClinical ? 'therapist_clinical' : 'patient_self',
@@ -285,7 +283,8 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
                               .map((c: any) => String(c).toLowerCase()),
                           );
                           const hasPatientRoute = Boolean((test as any).patient_route);
-                          const isAssignable = Boolean(test.is_active) && Boolean((test as any).available_for_personal) && hasPatientRoute;
+                          // Test is assignable if it's active, available for therapists, and has a patient route
+                          const isAssignable = Boolean(test.is_active) && Boolean((test as any).available_for_therapists) && hasPatientRoute;
                           const isAssigned = isAssignable && assignedCodes.has(String(test.code).toLowerCase());
                           const isAssigning = assigningTestCode === test.code;
 

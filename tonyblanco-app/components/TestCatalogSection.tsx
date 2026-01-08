@@ -283,8 +283,10 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
                               .map((c: any) => String(c).toLowerCase()),
                           );
                           const hasPatientRoute = Boolean((test as any).patient_route);
-                          // Test is assignable if it's active, available for therapists, and has a patient route
-                          const isAssignable = Boolean(test.is_active) && Boolean((test as any).available_for_therapists) && hasPatientRoute;
+                          // Test is assignable if it's active and available for therapists.
+                          // Do NOT require `patient_route` for wellness tests — rely on therapist flag and patient availability.
+                          // Also require the active patient to have a linked user (activePatientHasUser) so assignment is meaningful.
+                          const isAssignable = Boolean(test.is_active) && Boolean((test as any).available_for_therapists) && Boolean(activePatientHasUser);
                           const isAssigned = isAssignable && assignedCodes.has(String(test.code).toLowerCase());
                           const isAssigning = assigningTestCode === test.code;
 

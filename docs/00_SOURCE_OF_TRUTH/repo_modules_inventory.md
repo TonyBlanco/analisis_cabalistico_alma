@@ -1,0 +1,243 @@
+# Repo Modules Inventory
+
+## Tests (repo snapshot)
+
+### Tests catalog (tests_catalog_status.json)
+
+- adhd: status=blocked_schema, schema_valid=False
+- bai: status=inactive, schema_valid=False
+- bdi-ii: status=inactive, schema_valid=False
+- cabalistic-astrology: status=inactive, schema_valid=False
+- complete-numerology: status=inactive, schema_valid=False
+- eating: status=inactive, schema_valid=False
+- financial-abundance: status=inactive, schema_valid=False
+- gad-7: status=inactive, schema_valid=False
+- insomnia: status=inactive, schema_valid=False
+- mcmi-iv: status=inactive, schema_valid=False
+- ocd: status=inactive, schema_valid=False
+- pai: status=inactive, schema_valid=False
+- phq-9: status=active, schema_valid=True
+- professional-pai: status=inactive, schema_valid=False
+- psicologia: status=inactive, schema_valid=False
+- ptsd: status=inactive, schema_valid=False
+- results: status=inactive, schema_valid=False
+- scid-5-rv: status=inactive, schema_valid=False
+- scid5: status=inactive, schema_valid=False
+- scl-90: status=inactive, schema_valid=False
+- scl-90-r: status=inactive, schema_valid=False
+- stai: status=inactive, schema_valid=False
+- substance: status=inactive, schema_valid=False
+
+### Schema files present
+- adhd_asrs6_schema.py
+- aq50_schema.py
+- dudit_schema.py
+- ybocs_schema.py
+
+### Legacy test files (file list)
+
+## Symbolic Modules (repo)
+
+### packages/symbolic/dist contents (sample)
+- packages\symbolic\dist\adapters
+- packages\symbolic\dist\cabala
+- packages\symbolic\dist\catalogs
+- packages\symbolic\dist\correspondences
+- packages\symbolic\dist\data
+- packages\symbolic\dist\index.d.ts
+- packages\symbolic\dist\index.d.ts.map
+- packages\symbolic\dist\index.js
+- packages\symbolic\dist\methods
+- packages\symbolic\dist\tarot
+- packages\symbolic\dist\tree
+
+## Documentation classification
+
+### Active docs
+- docs\AGENT_ONBOARDING_README.md
+- docs\AI_SYMBOLIC_CONTRACT.md
+- docs\ARCHITECTURE_SYMBOLIC_SYSTEM.md
+- docs\ASTROLOGIA_PROFESIONAL.md
+- docs\ASTRO_ENGINE_AUDIT.md
+- docs\ASTRO_ENGINE_ISOLATION.md
+- docs\ASTRO_RESEARCH_LAB_SCOPE.md
+- docs\ASTRO_SANDBOX_LIMITS.md
+- docs\ASTRO_STUDY_LAB_SCOPE.md
+- docs\ASTRO_TRAINING_LIMITS.md
+- docs\CHANGELOG_2025-12-17_1033.md
+- docs\DOCUMENTATION_GOVERNANCE.md
+- docs\DOCUMENT_AUTHORITY_INDEX.md
+- docs\EPHEMERIS_DATA_POLICY.md
+- docs\major-arcana-kabbalistic.md
+- docs\MSHE_IMPLEMENTATION.md
+- docs\MSHE_PDF_EXPORT_IMPLEMENTATION.md
+- docs\MSHE_TRAINING_MODAL_IMPLEMENTATION.md
+- docs\PATIENT_MSHE_VIEW_IMPLEMENTATION.md
+- docs\PROJECT_STATE_ASTROLOGIA.md
+- docs\PROJECT_STATE_RESONANCIA_ANCESTRAL.md
+- docs\PR_RETROACTIVE_AUDIT.md
+- docs\PR_WORKSPACE_GOVERNANCE_CHECKLIST.md
+- docs\README_AUDIT.md
+- docs\RESONANCIA_ANCESTRAL_UI.md
+- docs\RUNBOOK_ASTRO_PROD.md
+- docs\SCID5_AI_ASSISTANT_IMPLEMENTATION.md
+- docs\SCID5_AI_SESSION_EXAMPLE.md
+- docs\SCID5_IMPLEMENTATION.md
+- docs\SOURCE_OF_TRUTH.md
+- docs\SWM_72_ANGELS_ENGINE_FASE_1_COMPLETION.md
+- docs\SWM_V3_GOVERNANCE_ARTIFACTS.md
+- docs\SWM_V3_INTERPRETACION_SIMBOLICA_GOBERNADA.md
+- docs\SWM_V3_PHASE_1_IMPLEMENTATION.md
+- docs\SWM_V3_PHASE_4_PREPARED.md
+- docs\SWM_V3_PHASE_CHECKLIST.md
+- docs\SWM_V3_PR_TEMPLATE.md
+- docs\SYMBOLIC_AI_PHASE_0_CONTRACT.md
+- docs\SYMBOLIC_SYSTEMS_PLANNED.md
+- docs\tarot-ai-plan.md
+- docs\TESTS_SYSTEM.md
+- docs\TEST_CONTRACTS.md
+- docs\TREE_STRUCTURAL_STATE_CONTRACT.md
+- docs\TREE_STRUCTURAL_STATE_PHASE_2_STANDARDIZATION.md
+- docs\UI_COPY_FREEZE.md
+- docs\WORKSPACE_EXPORT_CONTRACT.md
+- docs\WORKSPACE_ISOLATION_POLICY.md
+- docs\WORKSPACE_MATRIX.md
+- docs\00_SOURCE_OF_TRUTH\AUDITORIA CABALA APP 12182025.md
+- docs\00_SOURCE_OF_TRUTH\DOCUMENT_AUTHORITY_INDEX.md
+- docs\00_SOURCE_OF_TRUTH\legacy_tests_runtime_report_2026-01-10.md
+- docs\00_SOURCE_OF_TRUTH\LICENSES.md
+- docs\00_SOURCE_OF_TRUTH\SOURCE_OF_TRUTH.md
+- docs\00_SOURCE_OF_TRUTH\symbolic_contradictions_governance.md
+- docs\00_SOURCE_OF_TRUTH\TESTS_HOLISTIC_CATALOG.md
+- docs\01_CONCEPTUAL_FRAMEWORK\HOLISTIC_REINTERPRETATION_OF_TESTS.md
+- docs\01_PROJECT_STATE\ADMIN_WORKSPACE.md
+- docs\01_PROJECT_STATE\BROWSER_WARNINGS.md
+- docs\01_PROJECT_STATE\CAMBIO NUEVA ESTRUTURA DEC14.md
+- docs\01_PROJECT_STATE\CHANGELOG_assigned_tests_2026-01-08.md
+- docs\01_PROJECT_STATE\DEPLOYMENT.md
+- docs\01_PROJECT_STATE\PHASE_1_COMPLETION_SUMMARY.md
+- docs\01_PROJECT_STATE\PHASE_5_COMPLETION_SUMMARY.md
+- docs\01_PROJECT_STATE\PHASE_5_QUICK_REFERENCE.md
+- docs\01_PROJECT_STATE\PROJECT_STATE_CURRENT.md
+- docs\01_PROJECT_STATE\README-STARTUP.md
+- docs\01_PROJECT_STATE\RENDER-ENV-VARS.md
+- docs\01_PROJECT_STATE\TROUBLESHOOTING_TESTS.md
+- docs\02_GOVERNANCE\TEST_GOVERNANCE_RULES.md
+- docs\03_INITIALIZER\INITIALIZER_IDEMPOTENT_DESIGN.md
+- docs\03_SWM_CONTRACTS\PHASE_5_ARCHITECTURE.md
+- docs\03_SWM_CONTRACTS\WELLNESS_README.md
+- docs\03_SWM_CONTRACTS\WELLNESS_SYSTEM_ADVANCED.md
+- docs\03_SWM_CONTRACTS\WELLNESS_TEST.md
+- docs\04_APPROVAL\INITIALIZER_APPLY_READINESS.md
+- docs\04_SYMBOLIC_SYSTEM\72-ANGELES-SISTEMA.md
+- docs\04_SYMBOLIC_SYSTEM\72_NAMES.md
+- docs\04_SYMBOLIC_SYSTEM\GOVERNANCE.md
+- docs\04_SYMBOLIC_SYSTEM\KABBALAH_POC.md
+- docs\04_SYMBOLIC_SYSTEM\MAPPINGS_README.md
+- docs\04_SYMBOLIC_SYSTEM\SEFER_YETZIRAH_MAPPING.md
+- docs\04_SYMBOLIC_SYSTEM\SEPHIROT_MAPPING.md
+- docs\09_ASSIGNMENT_ISOLATION\THERAPEUTIC_ASSIGNMENT_BOUNDARY.md
+- docs\11_DIAGNOSTICS\IMPLICIT_CLINICAL_BLOCKED_TESTS.md
+- docs\11_DIAGNOSTICS\NEXT_TURBOPACK_FAILED_TO_LOAD_CHUNK.md
+- docs\architecture\CONTRATO TÉCNICO DE WORKSPACES ESPECIALIZADOS (SWM).md
+- docs\architecture\ESTRUCTURA_PLATAFORMA_COMPLETA.md
+- docs\architecture\GOBERNANZA DEL ECOSISTEMA SWM.md
+- docs\architecture\PAQUETE RECTOR — SWM UI · LICENCIAS · QA.md
+- docs\architecture\SYMBOLIC_PATIENT_TIMELINE.md
+- docs\architecture\TRAINING_INTERPRETATIVE_PHASE.md
+- docs\architecture\UX_WORKSPACE_PRINCIPIOS.md
+- docs\architecture\VISUALIZACION_INTEGRADA_PRINCIPIOS.md
+- docs\architecture\WORKSPACE_SYMBOLIC_BOUNDARIES.md
+- docs\bota\editorial\_TEMPLATE.md
+- docs\governance\BOTA_TABLEAU_BASELINE_ACCEPTANCE_CHECKLIST.md
+- docs\incidents\2026-01-05-visibility-assigned-tests.md
+- docs\legacy\Cabala2.md
+- docs\legacy\CHANGELOG_2025-12-17_1033.md
+- docs\legacy\DASHBOARD-ANTES-DESPUES.md
+- docs\legacy\faltan_test.md
+- docs\legacy\FRONTEND-RESET-2025-12-14.md
+- docs\legacy\IMPLEMENTATION-SUMMARY.md
+- docs\legacy\ONBOARDING DE TERAPEUTAS + GUÍA DE USO DEL CORE WORKSPACE.md
+- docs\legacy\PASOS-FINALES.md
+- docs\legacy\PROBLEM-EXPLAINED.md
+- docs\legacy\README_CHANGELOG.md
+- docs\legacy\RESUMEN-SESION-DEPLOY.md
+- docs\modules\MODULO_BIO_EMOCION_ARBOL_TRANSGENERACIONAL.md
+- docs\modules\modulo_personal_experiencial_conciencia_y_reprogramacion.md
+- docs\modules\PHASE_1_COMPLETION_SUMMARY.md
+- docs\modules\PHASE_2_COMPLETION_SUMMARY.md
+- docs\releases\RELEASE_BOTA_TABLEAU_BASELINE.md
+- docs\roadmap\ADMIN-PANEL-GUIDE.md
+- docs\roadmap\MOBILE_OPTIMIZATIONS.md
+- docs\roadmap\PATIENT_DASHBOARD_PHASE_0_DISCOVERY.md
+- docs\roadmap\SESSION_RESULTS_VISUALIZATION_AND_LOGIN_IMPROVEMENTS.md
+- docs\roadmap\THERAPIST_DASHBOARD_PHASE_0_DISCOVERY.md
+- docs\swm\ASTROLOGIA_TRAINING_INVESTIGATIVO.md
+- docs\swm\Astrología Terapéutica (SWM).md
+- docs\swm\BIOEMOCION_EXPERIENCIAL_PROFUNDA_TECHNICAL_SPEC.md
+- docs\swm\PLAN DE IMPLEMENTACIÓN — OLEADAS SWM.md
+- docs\swm\PROMPT MAESTRO ÚNICO CREACIÓN DEL SWM.md
+- docs\swm\ROADMAP INTERNO — SWM BIO-EMOCIÓN EXPERIENCIAL PROFUNDA.md
+- docs\swm\SWM BIODECODIFICACIÓN SIMBÓLICA.md
+- docs\swm\SWM CÁBALA APLICADA.md
+- docs\swm\SWM TRANSGENERACIONAL PROFUNDO.md
+- docs\swm\Tarot Evolutivo (SWM).md
+- docs\swm\ÍNDICE MAESTRO — SPECIALIZED WORKSPACE MODULES (SWM).md
+- docs\technical\AUDITORIA_KERYKEION_ENDPOINT.md
+- docs\technical\ESTRUCTURA_BASE_DATOS_CROSSOVER.md
+- docs\technical\IMPLEMENTACION_RUTAS_TESTS_COMPLETA.md
+- docs\technical\JSON_FILES_DOCUMENTATION.md
+- docs\technical\MODULOS_ANALISIS_CABALISTICO.md
+- docs\technical\README_AI.md
+- docs\technical\REPORTES_ANALISIS_CABALISTICO.md
+- docs\technical\SERVICIOS_IMPLEMENTACION.md
+- docs\technical\SETUP-VERCEL-RENDER.md
+- docs\technical\TEST-EXECUTION-FLOWS-ARCHITECTURE.md
+- docs\technical\TEST-FLOWS-IMPLEMENTATION-SUMMARY.md
+- docs\technical\tests_rutas_map.md
+- docs\technical\TESTS_SYSTEM.md
+- docs\technical\USERPROFILE_FRONTEND_INTEGRATION.md
+- docs\_archive\AI_HOLISTIC_SYMBOLIC_DESIGN.md
+- docs\_archive\ASTROLOGIA_WORKSPACE_TAB_VISUAL_ENTREGA.md
+- docs\_archive\BIOEMOCION_EXPERIENCIAL_PROFUNDA_TECHNICAL_SPEC.md
+- docs\_archive\checklist_tecnico_p_1_bioemocion_y_arbol_de_la_vida.md
+- docs\_archive\HOLISTIC_EXPORTS.md
+- docs\_archive\INTEGRIDAD_DATOS_CABALISTICOS.md
+- docs\_archive\MAPEO LEGACY → CONTRATO.md
+- docs\_archive\PANEL_PACIENTE_DEFINITIVO.md
+- docs\_archive\PASO_1_ASTROLOGY_CORE_ENTREGABLES.md
+- docs\_archive\README.md
+- docs\_archive\SYMBOLIC_AI_MODULE_ACTIVATION_MAP.md
+- docs\_archive\SYMBOLIC_DIAGNOSIS_LONGITUDINAL_VALIDATION.md
+- docs\_archive\SYMBOLIC_EVENT_FLOW.md
+- docs\_archive\SYMBOLIC_GLOBAL_DATA_GRAPH.md
+- docs\_archive\SYMBOLIC_GOVERNANCE_INDEX.md
+- docs\_archive\SYMBOLIC_MODULE_DEPENDENCY_MATRIX.md
+- docs\_archive\SYMBOLIC_TREE_STRUCTURAL_STATE.md
+- docs\_archive\THERAPIST_DASHBOARD_WORKSPACE.md
+- docs\_archive\TREE_STRUCTURAL_STATE_IMPLEMENTATION_SUMMARY.md
+- docs\_drafts\PATIENT_SYMBOLIC_OVERVIEW_IMPLEMENTATION.md
+- docs\_drafts\SYMBOLIC_INTERPRETER_AI_IMPLEMENTATION.md
+- docs\_drafts\SYMBOLIC_INTERPRETER_PROFESSIONAL_PROMPT.md
+- docs\_drafts\TODO.md
+- docs\_historical\CHANGELOG_2025-12-24.md
+- docs\_historical\CHANGELOG_2025-12-25.md
+- docs\_historical\HANDOFF_2025-12-25_CABALA_APLICADA_EXPORTS.md
+- docs\_historical\TreeStructuralState_v0.1.md
+- docs/backLegacy/rescued_docs/PR_WORKSPACE_GOVERNANCE_CHECKLIST.md
+- docs/backLegacy/rescued_docs/UI_COPY_FREEZE.md
+- docs/backLegacy/rescued_docs/tonyblanco-app/components/Tree/README.md
+
+### Draft docs
+
+### Historical docs
+
+## Contradictions (summary rows from CSV)
+- "Symbolic Interpreter AI","Docs claim backend AI service and endpoints implemented (generate/status)","No backend implementation found; frontend calls `/symbolic-interpreter/*` and uses aiCallback; no server-side module located","técnica / flujo","Alto","Alto","Decide: Implement server endpoints & safety contract OR Deprecate/disable frontend feature; urgency: HIGH","Platform / Backend / AI team","docs/backLegacy/obsolete_architecture/SYMBOLIC_INTERPRETER_AI_IMPLEMENTATION.md; tonyblanco-app/lib/api/symbolic-interpreter-api.ts; repo search (no backend files)"} (explanation: update evidence path to moved draft)```jsonวงInterrupted```
+- "Tests Holistic Catalog vs Runtime","Docs claim canonical tests are non-clinical in `TESTS_HOLISTIC_CATALOG.md`","Legacy clinical tests remain active in repo/DB (e.g., phq-9 active per tests_catalog_status.json)","conceptual / ownership","Alto","Medio-Alto","Decide governance: Enforce catalog (archive clinical) OR maintain hybrid; urgency: HIGH","Governance / Product","docs/00_SOURCE_OF_TRUTH/TESTS_HOLISTIC_CATALOG.md; tests_catalog_status.json; backend/api/test_models.py"
+- "packages/symbolic exports & Turbopack","Package should expose subpaths for frontend imports","Turbopack didn't respect deep exports; node resolution and tsconfig path mappings caused build failures until switched to webpack","técnica / packaging","Medio","Medio","Decide packaging policy: maintain deep exports and support bundler OR restructure package to single-entry; urgency: MEDIUM","Frontend / Platform","packages/symbolic/package.json; docs/11_DIAGNOSTICS/NEXT_TURBOPACK_FAILED_TO_LOAD_CHUNK.md; tonyblanco-app/tsconfig.json"
+- "tsconfig path mappings","Paths intended for local dev convenience","Paths point to `../packages/symbolic/dist/*` and override node_modules resolution causing aliasing to workspace and breaking builds","técnica / configuración","Medio","Medio","Decide: remove mappings in production builds and document local dev steps; urgency: MEDIUM","Frontend / Platform","tonyblanco-app/tsconfig.json; build logs"
+- "Symbolic Interpreter docs status","Docs declare implementation complete","Draft states 'COMPLETO' but code lacks backend endpoints; doc is misleading","documentación / técnica","Alto","Alto","Decide: Update doc status to 'Draft/In progress' OR implement backend; urgente: HIGH","Docs / Platform","docs/backLegacy/obsolete_architecture/SYMBOLIC_INTERPRETER_AI_IMPLEMENTATION.md; repo search"} (explanation: update reference to moved draft)```jsonวงInterrupted```
+- "Workspace isolation policy (NO TOCAR)","Docs list Tarot/Astrology workspaces as 'NO TOCAR' (isolation policy)","Workspaces are present and actively used; operational risk exists if modified without governance","ownership / riesgo","Medio","Medio","Confirm & formalize isolation procedures and ownership; urgency: MEDIUM","Governance","docs/WORKSPACE_MATRIX.md; tonyblanco-app/components/*"
+- "Obsolete / rescued docs","Docs repo is canonical and current","Several `_rescued_md` and `legacy` docs are present and could cause confusion","documentación","Bajo","Bajo","Decision: Archive or label historical docs and maintain authoritative index; urgency: LOW","Docs / Governance","docs/backLegacy/rescued_docs/*; docs/backLegacy/legacy_tests/*"} (explanation: point glob evidence to backLegacy)
+- "Frontend TypeScript build errors","Docs / code expect frontend types/build to be stable","TypeScript compile errors present (missing types, JSX flags, etc.) blocking builds in CI/production until addressed","técnica / build","Medio","Medio","Decide: Align tsconfig and dependencies or add missing type declarations; urgency: MEDIUM","Frontend","tsc_full_output.txt; src/components/cabala_analyzer.tsx"

@@ -1,0 +1,1 @@
+export type { PitagorasInput as MisparGadolInput, PitagorasResult as MisparGadolResult, PitagorasSymbolicState as MisparGadolSymbolicState, PitagorasNumberMeaning as MisparGadolNumberMeaning } from '../pitagoras/pitagoras.types';

@@ -62,6 +62,7 @@ from .test_views import (
     UserTestStatsView,
     GrantTestAccessView,
     AssignTestToPatientView,
+    ArchiveTestAssignmentView,
     UnassignTestFromPatientView,
     PatientPreviousTestsView,
     ProcessTestSubmissionView,
@@ -249,6 +250,7 @@ urlpatterns = [
     path('tests/stats/', UserTestStatsView.as_view(), name='test_stats'),
     path('tests/grant-access/', GrantTestAccessView.as_view(), name='grant_test_access'),
     path('tests/assign-to-patient/', AssignTestToPatientView.as_view(), name='assign_test_to_patient'),
+    path('tests/assignments/<int:assignment_id>/archive/', ArchiveTestAssignmentView.as_view(), name='archive_test_assignment'),
     path('tests/unassign-from-patient/', UnassignTestFromPatientView.as_view(), name='unassign_test_from_patient'),
     path('tests/patient-previous/', PatientPreviousTestsView.as_view(), name='patient_previous_tests'),
     # Therapist -> Patient notes (unidirectional)

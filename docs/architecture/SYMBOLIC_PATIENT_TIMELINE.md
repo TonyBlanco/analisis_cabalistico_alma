@@ -1,12 +1,12 @@
-# Symbolic Patient Timeline
+# Symbolic User Timeline
 
-This module provides a read-only, symbolic timeline per patient.
+This module provides a read-only, symbolic timeline per user.
 It stores local events such as tarot sessions and AI-prep drafts.
 
 Scope
-- Observational only, no diagnosis or interpretation.
+- Observational only, no diagnostic claims or interpretation.
 - No AI execution, no backend persistence.
-- Patient-context aware, filtered by patientId.
+- User-context aware, filtered by userId.
 
 Event model
 - Captures system, symbols, source, and timestamp.

@@ -2,7 +2,9 @@
 
 ## Contexto de la Sesión
 
-**Paciente:** Ana García, 34 años, terapeuta ocupacional
+> **Nota:** Este ejemplo es referencial y de desarrollo; no constituye una evaluación ni diagnóstico. Las salidas son interpretativas y requieren validación profesional.
+
+**Consultante:** Ana García, 34 años, terapeuta ocupacional
 **Terapeuta:** Dr. María Rodríguez
 **Sesión:** Exploración holística inicial
 **Módulos previos realizados:** MSHE (Síntesis Holística), Cabala básica
@@ -34,7 +36,7 @@ El terapeuta configura el nivel de profundidad en **2** y hace clic en "Asistent
         "explorado": true,
         "patrones_observados": true,
         "intensidad_experiencial": "moderada",
-        "notas_observacionales": "Paciente reporta fatiga emocional crónica..."
+        "notas_observacionales": "La consultante reporta fatiga emocional crónica..."
       },
       "anxiety_calm": {
         "explorado": true,
@@ -46,7 +48,7 @@ El terapeuta configura el nivel de profundidad en **2** y hace clic en "Asistent
         "explorado": true,
         "patrones_observados": true,
         "intensidad_experiencial": "moderada",
-        "notas_observacionales": "La paciente expresa desconexión con su propósito profesional. Siente que su trabajo como terapeuta no la nutre espiritualmente. Menciona sueños recurrentes sobre 'caminos que se bifurcan'."
+        "notas_observacionales": "La consultante expresa desconexión con su propósito profesional. Siente que su trabajo como terapeuta no la nutre espiritualmente. Menciona sueños recurrentes sobre 'caminos que se bifurcan'."
       }
     }
   },
@@ -101,7 +103,7 @@ El terapeuta configura el nivel de profundidad en **2** y hace clic en "Asistent
   "therapist_actions": [
     {
       "action": "Preguntar sobre sueños con curiosidad genuina, sin interpretar",
-      "why": "Invitar a la paciente a explorar su propio simbolismo"
+      "why": "Invitar a la consultante a explorar su propio simbolismo"
     },
     {
       "action": "Mantener ritmo pausado si la intensidad emocional aumenta",
@@ -137,7 +139,7 @@ El terapeuta configura el nivel de profundidad en **2** y hace clic en "Asistent
 ### Uso del borrador de síntesis:
 El terapeuta toma el borrador de síntesis de la IA como base para sus notas observacionales:
 
-**Notas del terapeuta:** "Proceso en curso de reconstrucción del significado personal, donde la identidad profesional ha eclipsado aspectos más profundos del ser. Los sueños recurrentes sugieren una tensión entre caminos disponibles que requiere atención consciente. La paciente conecta esto con sensaciones corporales de constricción. Pendiente: explorar relación con hallazgos del MSHE sobre propósito existencial."
+**Notas del terapeuta:** "Proceso en curso de reconstrucción del significado personal, donde la identidad profesional ha eclipsado aspectos más profundos del ser. Los sueños recurrentes sugieren una tensión entre caminos disponibles que requiere atención consciente. La consultante conecta esto con sensaciones corporales de constricción. Pendiente: explorar relación con hallazgos del MSHE sobre propósito existencial."
 
 ## Reflexión del Terapeuta
 
@@ -145,7 +147,7 @@ Después de la sesión, el terapeuta registra:
 
 **Acciones tomadas:**
 - ✅ Usé 3 de las 5 preguntas sugeridas, adaptándolas al flujo conversacional
-- ✅ Incorporé dimensión corporal cuando la paciente mostró apertura
+- ✅ Incorporé dimensión corporal cuando la consultante mostró apertura
 - ✅ Mantuve lenguaje simbólico y orientativo
 - ✅ Respeté los recordatorios éticos de la IA
 
@@ -156,17 +158,17 @@ Después de la sesión, el terapeuta registra:
 - ✅ Mantuvo el enfoque holístico integrando MSHE y Cabala
 
 **Limitaciones observadas:**
-- ⚠️ Una correlación resultó menos relevante para esta paciente (necesitaba más contexto cultural)
+- ⚠️ Una correlación resultó menos relevante para esta consultante (necesitaba más contexto cultural)
 - ⚠️ El borrador de síntesis fue útil pero requirió personalización significativa
 
 ## Resultado de la Sesión
 
 La sesión permitió:
-1. **Profundizar** en la experiencia de realidad y significado de la paciente
+1. **Profundizar** en la experiencia de realidad y significado de la consultante
 2. **Conectar** con patrones observados en módulos previos (MSHE)
 3. **Integrar** dimensiones corporal, emocional y espiritual
 4. **Generar** insights simbólicos sobre sueños recurrentes
 5. **Mantener** el ritmo terapéutico apropiado
 
-La IA actuó como **capa asistente efectiva**, proporcionando herramientas de exploración mientras el terapeuta mantuvo el control clínico y la alianza terapéutica.</content>
+La IA actuó como **capa asistente efectiva**, proporcionando herramientas de exploración mientras el terapeuta mantuvo la dirección profesional y la alianza terapéutica.</content>
 <parameter name="filePath">d:\analisis_cabalistico_alma\docs\SCID5_AI_SESSION_EXAMPLE.md

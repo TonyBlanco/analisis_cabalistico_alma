@@ -8,13 +8,13 @@ Existen DOS Y SOLO DOS flujos de ejecución de tests que NUNCA deben mezclarse:
 
 ### FLOW A — Patient Self-Administered Tests
 - Asignados por terapeuta
-- Ejecutados por el paciente en su portal
+- Ejecutados por el usuario en su portal
 - Resultados revisados por el terapeuta
 
 ### FLOW B — Therapist-Led Clinical Evaluations
 - Iniciados y ejecutados SOLO por el terapeuta
-- NUNCA asignados al paciente
-- NUNCA aparecen en el portal del paciente
+- NUNCA asignados al usuario
+- NUNCA aparecen en el portal del usuario
 - Guardados directamente como registros holísticos
 
 ---
@@ -65,7 +65,7 @@ TEST_EXECUTION_MODE_MAP: Record<string, TestExecutionMode>
 
 #### FLOW B - Therapist-Led Clinical Evaluations
 
-**Evaluaciones Clínicas Estructuradas:**
+**Evaluaciones restringidas Estructuradas:**
 - `scdf` - Structured Clinical Diagnostic Framework
 - `scid5` - Entrevista Clínica Integrativa (no diagnóstica)
 
@@ -78,19 +78,19 @@ TEST_EXECUTION_MODE_MAP: Record<string, TestExecutionMode>
 #### Asignación
 - ✅ Pueden ser asignados via "Asignar Test"
 - ✅ Aparecen en el modal de asignación
-- ✅ Se generan links para compartir con el paciente
+- ✅ Se generan links para compartir con el usuario
 
 #### Estados
 - `assigned` - Asignado por terapeuta
-- `in_progress` - Paciente está completando
-- `completed` - Paciente completó el test
+- `in_progress` - Usuario está completando
+- `completed` - Usuario completó el test
 
 #### Vinculación
-- `patient_id` - Paciente que debe completar
+- `patient_id` - Usuario que debe completar
 - `therapist_id` - Terapeuta que asignó (implícito via sesión)
 
 #### Visibilidad
-- ✅ Aparecen en portal del paciente como tareas pendientes
+- ✅ Aparecen en portal del usuario como tareas pendientes
 - ✅ Terapeuta puede ver resultados pero NO ejecuta el test
 
 ### Para Therapist Clinical Evaluations (FLOW B)
@@ -99,7 +99,7 @@ TEST_EXECUTION_MODE_MAP: Record<string, TestExecutionMode>
 - ❌ NO pueden ser asignados a pacientes
 - ❌ NO aparecen en modal de asignación
 - ✅ Solo se inician desde dashboard del terapeuta
-- ✅ Requieren paciente activo seleccionado
+- ✅ Requieren usuario activo seleccionado
 
 #### Estados
 - `draft` - Borrador en progreso
@@ -107,11 +107,11 @@ TEST_EXECUTION_MODE_MAP: Record<string, TestExecutionMode>
 - `reviewed` - Revisado por terapeuta
 
 #### Vinculación
-- `patient_id` - Paciente evaluado (OBLIGATORIO)
+- `patient_id` - Usuario evaluado (OBLIGATORIO)
 - `therapist_id` - Terapeuta que ejecuta (implícito via sesión)
 
 #### Visibilidad
-- ❌ NO aparecen en portal del paciente
+- ❌ NO aparecen en portal del usuario
 - ❌ NO aparecen en listas de tareas del paciente
 - ✅ Solo visibles para el terapeuta que las ejecutó
 
@@ -124,27 +124,27 @@ TEST_EXECUTION_MODE_MAP: Record<string, TestExecutionMode>
 **Sidebar Separado:**
 
 ```
-📋 Tests Asignables al Paciente
+📋 Tests Asignables al Usuario
   └─ Catálogo de Tests
 
-🏥 Evaluaciones Clínicas del Terapeuta
+🏥 Evaluaciones restringidas del Terapeuta
   └─ SCDF - Framework Holístico
   └─ Entrevista Clínica Integrativa
 ```
 
-**Secciones en Página de Paciente:**
+**Secciones en Página de Usuario:**
 
 1. **Tests Asignados al Paciente**
    - Lista de tests asignados
    - Estados: pendiente, en progreso, completado
    - Botón "Asignar Test" (solo muestra `patient_self`)
 
-2. **Evaluaciones Clínicas del Terapeuta**
+2. **Evaluaciones restringidas del Terapeuta**
    - Accesos directos a SCDF y Entrevista Integrativa
    - Requieren paciente activo
    - NO aparecen como asignables
 
-### Portal del Paciente
+### Portal del Usuario
 
 **Solo muestra:**
 - Tests `patient_self` asignados por su terapeuta
@@ -152,7 +152,7 @@ TEST_EXECUTION_MODE_MAP: Record<string, TestExecutionMode>
 - Enlaces para completar tests asignados
 
 **NUNCA muestra:**
-- Evaluaciones clínicas (`therapist_clinical`)
+- Evaluaciones restringidas (`therapist_clinical`)
 - SCDF
 - Entrevista Integrativa
 
@@ -162,7 +162,7 @@ TEST_EXECUTION_MODE_MAP: Record<string, TestExecutionMode>
 - Muestra todos los tests
 - Badge "Evaluación Clínica" para `therapist_clinical`
 - Badge "Asignable" para `patient_self`
-- Advertencia en evaluaciones clínicas: "Solo para terapeutas. Requiere paciente activo."
+- Advertencia en evaluaciones restringidas: "Solo para terapeutas. Requiere usuario activo."
 
 **Para Usuarios Personales:**
 - Solo muestra tests `patient_self`
@@ -188,7 +188,7 @@ TEST_EXECUTION_MODE_MAP: Record<string, TestExecutionMode>
 3. **Guardado de Evaluaciones Clínicas:**
    - SCDF valida `patientId` antes de guardar
    - Entrevista Integrativa valida `patientId` antes de guardar
-   - Mensajes de error claros si falta paciente
+   - Mensajes de error claros si falta usuario
 
 4. **Portal del Paciente:**
    - Filtrado automático de tests `patient_self`
@@ -212,7 +212,7 @@ TEST_EXECUTION_MODE_MAP: Record<string, TestExecutionMode>
 
 3. **Filtrar tests en portal del paciente:**
    ```python
-   # Solo retornar tests patient_self para pacientes
+   # Solo retornar tests patient_self para usuarios
    tests = TestModule.objects.filter(execution_mode='patient_self')
    ```
 
@@ -222,21 +222,21 @@ TEST_EXECUTION_MODE_MAP: Record<string, TestExecutionMode>
 
 | Acción | Patient Self | Therapist Clinical |
 |--------|--------------|-------------------|
-| Asignar a paciente | ✅ Permitido | ❌ Bloqueado |
-| Aparece en portal paciente | ✅ Sí | ❌ No |
+| Asignar a usuario | ✅ Permitido | ❌ Bloqueado |
+| Aparece en portal del usuario | ✅ Sí | ❌ No |
 | Ejecutar desde dashboard terapeuta | ✅ Sí | ✅ Sí |
-| Requiere paciente activo | ⚠️ Opcional | ✅ Obligatorio |
+| Requiere usuario activo | ⚠️ Opcional | ✅ Obligatorio |
 | Estados (assigned/in_progress/completed) | ✅ Sí | ❌ No |
 | Estados (draft/saved/reviewed) | ❌ No | ✅ Sí |
-| Guardar sin paciente | ✅ Permitido | ❌ Bloqueado |
+| Guardar sin usuario | ✅ Permitido | ❌ Bloqueado |
 
 ---
 
 ## 🚨 Reglas Críticas
 
-1. **NUNCA** asignar evaluaciones clínicas a pacientes
-2. **SIEMPRE** validar paciente antes de guardar evaluación clínica
-3. **NUNCA** mostrar evaluaciones clínicas en portal del paciente
+1. **NUNCA** asignar evaluaciones clínicas a usuarios
+2. **SIEMPRE** validar usuario antes de guardar evaluación restringida
+3. **NUNCA** mostrar evaluaciones clínicas en portal del usuario
 4. **SIEMPRE** filtrar tests por `execution_mode` en UI
 5. **NUNCA** permitir que terapeuta se evalúe a sí mismo
 

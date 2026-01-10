@@ -1,0 +1,5 @@
+backend/api/test_views.py
+backend/api/admin_views.py
+
+Therapist dashboard endpoint (AvailableTestsView) now strictly enforces TestModule.objects.assignable().
+Technical tests (and any non-assignable modules) are strictly excluded via the global manager and the hard fail safety net.

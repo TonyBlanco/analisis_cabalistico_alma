@@ -7,12 +7,12 @@
 
 ## 📋 RESUMEN EJECUTIVO
 
-Se ha activado el **TAB VISUAL** del workspace de Astrología en el dashboard del terapeuta, conectando con el backend ya implementado para mostrar cartas natales reales de pacientes.
+Se ha activado el **TAB VISUAL** del workspace de Astrología en el dashboard del terapeuta, conectando con el backend ya implementado para mostrar cartas natales reales de usuarios asignados.
 
 **Alcance cumplido**:
 - ✅ TAB Visual funcional con 4 estados (loading, empty, ready, error)
 - ✅ Conexión con endpoint GET/POST existente
-- ✅ Datos desde perfil del paciente (no desde request)
+- ✅ Datos desde perfil del usuario (no desde request)
 - ✅ Rueda de carta natal con posiciones reales
 - ✅ Tablas de planetas, casas y aspectos
 - ✅ Mensaje de gobernanza obligatorio
@@ -72,7 +72,7 @@ Se ha activado el **TAB VISUAL** del workspace de Astrología en el dashboard de
 ### 4. Página del workspace
 **`tonyblanco-app/app/(dashboard)/dashboard/therapist/(swm)/astrologia/page.tsx`** (115 líneas)
 - Ruta: `/dashboard/therapist/astrologia`
-- Lee paciente activo desde localStorage
+- Lee usuario activo desde localStorage
 - Header con botón de volver y nombre del paciente activo
 - Mensaje si no hay paciente seleccionado
 
@@ -167,7 +167,7 @@ POST /api/therapist/patients/{patientId}/astrology-kerykeion/
 #### GET 404 (sin carta)
 ```json
 {
-  "error": "No hay carta natal calculada para este paciente",
+  "error": "No hay carta natal calculada para este usuario",
   "hint": "Usa POST para calcular"
 }
 ```
@@ -185,9 +185,9 @@ POST /api/therapist/patients/{patientId}/astrology-kerykeion/
 #### POST 400 (campos faltantes)
 ```json
 {
-  "error": "Faltan campos requeridos en el perfil del paciente",
+  "error": "Faltan campos requeridos en el perfil del usuario",
   "missing_fields": ["birth_time", "birth_latitude", "birth_longitude"],
-  "hint": "Completa el perfil del paciente antes de calcular la carta natal"
+  "hint": "Completa el perfil del usuario antes de calcular la carta natal"
 }
 ```
 
@@ -207,7 +207,7 @@ POST /api/therapist/patients/{patientId}/astrology-kerykeion/
 ```
 ┌─────────────────────────────────┐
 │  [Ícono reloj]                  │
-│  Este paciente aún no tiene    │
+│  Este usuario aún no tiene    │
 │  una carta natal calculada      │
 │                                 │
 │  [Calcular carta natal]         │
@@ -285,7 +285,7 @@ POST /api/therapist/patients/{patientId}/astrology-kerykeion/
 #### 1. Acceder al workspace
 ```
 1. Login como terapeuta
-2. Dashboard → Seleccionar paciente activo
+2. Dashboard → Seleccionar usuario activo
 3. Sidebar → Click en "Astrología" (ícono telescopio)
 4. Debe abrir: /dashboard/therapist/astrologia
 ```
@@ -294,13 +294,13 @@ POST /api/therapist/patients/{patientId}/astrology-kerykeion/
 ```
 1. Workspace carga
 2. Tab Visual está activo
-3. Muestra: "Este paciente aún no tiene una carta natal calculada"
+3. Muestra: "Este usuario aún no tiene una carta natal calculada"
 4. Botón: "Calcular carta natal"
 ```
 
 #### 3. Probar validación de campos faltantes
 ```
-1. Si paciente NO tiene birth_time, birth_latitude, etc.
+1. Si usuario NO tiene birth_time, birth_latitude, etc.
 2. Click en "Calcular carta natal"
 3. Debe mostrar lista de campos faltantes
 4. Mensaje: "Completa el perfil del paciente antes de calcular"
@@ -308,7 +308,7 @@ POST /api/therapist/patients/{patientId}/astrology-kerykeion/
 
 #### 4. Completar perfil del paciente
 ```
-1. Ir a perfil del paciente
+1. Ir a perfil del usuario
 2. Completar campos:
    - birth_date: 1990-01-15
    - birth_time: 14:30:00

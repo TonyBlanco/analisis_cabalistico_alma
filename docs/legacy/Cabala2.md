@@ -503,7 +503,7 @@ export const ANGELS_SPANISH: Record<string, AngelTranslation> = {
     - Baremos: 0-59 (Normal), 60-69 (Riesgo Leve), 70-90 (Significativo)
     - Ángel: Nithael (índice 53)
 
-13. **SCID-5-RV** - Entrevista Estructurada DSM-5
+13. **SCID-5-RV** - Entrevista Estructurada (instrumento externo)
     - 8 preguntas (versión screening)
     - Baremos: 0-1 (Sin criterios), 2-8 (Posible diagnóstico - Requiere entrevista)
     - Ángel: Haamiah (índice 37)
@@ -958,7 +958,7 @@ El sistema soporta 4 tipos de usuarios:
 
 ## 📚 Referencias
 
-- **Baremos clínicos**: Basados en estándares DSM-5 y baremos publicados
+- **Baremos de referencia**: Basados en estándares externos y baremos publicados
 - **Cábala**: Sistema basado en el Árbol de la Vida y los 72 Ángeles del Shem ha-Mephorash
 - **Tests**: Versiones screening adaptadas de tests estandarizados
 

@@ -59,8 +59,7 @@
 │  ┌──────────────────────────────────────────────────────────────────────┐ │
 │  │                      DISPLAY & ACTION LAYER                          │ │
 │  │                                                                      │ │
-│  │  For each correlation:                                              │ │
-│  │    • Title + Rationale                                              │ │
+│  │  For each correlation:                                              │ ││  │  Disclaimer: This system DOES NOT provide medical or psychological diagnoses; outputs are interpretative and contextual. │ ││  │    • Title + Rationale                                              │ │
 │  │    • Signal list with evidence                                      │ │
 │  │    • Actions: [Mark] [Copy→Hypothesis] [Copy→Synthesis]            │ │
 │  │                                                                      │ │
@@ -82,7 +81,7 @@
 │  │  → Signal: { domain: 'bio', label: region.label, ... }        │   │
 │  └────────────────────────────────────────────────────────────────┘   │
 │                                                                         │
-│  Source 2: CLINICAL OBSERVATIONS                                       │
+│  Source 2: OBSERVACIONES BIOEMOCIONALES                                 │
 │  ┌────────────────────────────────────────────────────────────────┐   │
 │  │  API: listObservations(patientId)                              │   │
 │  │  → For each observation:                                        │   │

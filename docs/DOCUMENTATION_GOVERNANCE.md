@@ -19,7 +19,9 @@ No se permiten archivos .md en:
 - Estado actual, fases, changelog, decisiones cerradas
 
 02_CORE_WORKSPACES
-- Workspaces clínicos base (terapista, paciente, core)
+- Workspaces base (terapeuta, usuario, core)
+
+**Regla de contenido:** Evitar lenguaje clínico en la documentación; priorizar terminología holística y de acompañamiento. El sistema NO proporciona diagnósticos médicos ni psicológicos. (Disclaimer obligatorio en secciones relevantes)
 
 03_SWM_CONTRACTS
 - Contratos de módulos simbólicos (SWM)

@@ -1,15 +1,15 @@
 # Kabbalah & Symbolic Interpretation Governance (PoC)
 
 ## Purpose
-Define safety, quality, and human-in-the-loop (HITL) rules for introducing Kabbalistic and transpersonal interpretations into clinical workflows.
+Define safety, quality, and human-in-the-loop (HITL) rules for introducing Kabbalistic and transpersonal interpretations into therapeutic workflows.
 
 ## Scope (Phase 1 PoC)
 - Deterministic, rule-based outputs only.
-- No patient-facing generative LLM text in PoC. Any LLM-derived text must be gated by governance and explicit therapist consent.
+- No client-facing generative LLM text in PoC. Any LLM-derived text must be gated by governance and explicit therapist consent.
 
 ## Data & Consent
-- Only therapists may request a PoC interpretation for their patients.
-- Interpretations rely on patient birth data (legal_name, birth_date, birth_time, lat, lng, timezone).
+- Only therapists may request a PoC interpretation for their clients.
+- Interpretations rely on client birth data (legal_name, birth_date, birth_time, lat, lng, timezone).
 - Obtain written consent for symbolic analyses that reference religious/esoteric texts.
 
 ## Sources & Traceability
@@ -21,7 +21,7 @@ Define safety, quality, and human-in-the-loop (HITL) rules for introducing Kabba
 - Each AnalysisRecord must include algorithm_snapshot and references to the mapping versions used.
 
 ## Human-in-the-loop Rules
-- Any generated textual advice flagged as sensitive must be reviewed by a licensed therapist prior to exposing to the patient.
+- Any generated textual advice flagged as sensitive must be reviewed by a licensed therapist prior to exposing to the client.
 - Create a reviewer checklist for interpretation outputs (accuracy, cultural sensitivity, therapeutic relevance, no diagnostic claims, no medical recommendations).
 
 ## LLM Usage (future phases)
@@ -30,7 +30,7 @@ Define safety, quality, and human-in-the-loop (HITL) rules for introducing Kabba
 - LLM outputs must be classified by an automated content filter (hate, violence, medical advice) and then manually reviewed if flagged.
 
 ## Release Gate
-- Minimum QA for release to therapists: deterministic mapping coverage >= 80% for core mappings (Sefer Yetzirah letters → planet/paths, 72 Names base scoring), unit tests, and two clinical reviews.
+- Minimum QA for release to therapists: deterministic mapping coverage >= 80% for core mappings (Sefer Yetzirah letters → planet/paths, 72 Names base scoring), unit tests, and two expert reviews.
 
 ## Audit & Logging
 - All runs must persist AnalysisRecord with computed_result, legacy_output, algorithm_snapshot and mapping references for audit.

@@ -7,10 +7,13 @@ from rest_framework.exceptions import ValidationError, PermissionDenied
 from rest_framework.decorators import permission_classes
 from django.shortcuts import get_object_or_404
 from django.db import IntegrityError
+from django.db import connection
+from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from .test_models import TestModule, UserTestAccess, TestResult
 from datetime import datetime
+from django.utils import timezone
 from .test_serializers import (
     TestModuleSerializer, 
     TestResultSerializer, 
@@ -27,6 +30,65 @@ from .validators.test_execution import (
 )
 
 logger = logging.getLogger(__name__)
+
+TECHNICAL_TEST_CODE_PREFIXES = ("lock-test", "dbg-test", "smoke-test")
+
+
+def _has_testmodule_is_assignable_column() -> bool:
+    if hasattr(_has_testmodule_is_assignable_column, "_cached"):
+        return bool(getattr(_has_testmodule_is_assignable_column, "_cached"))
+
+    table = TestModule._meta.db_table
+    try:
+        with connection.cursor() as cursor:
+            columns = {col.name for col in connection.introspection.get_table_description(cursor, table)}
+    except Exception:
+        columns = set()
+
+    has_column = "is_assignable" in columns
+    setattr(_has_testmodule_is_assignable_column, "_cached", has_column)
+
+    if not has_column:
+        logger.error(
+            "DB schema out of sync: missing column %s.%s; applying safety-net exclusions to avoid exposing technical tests.",
+            table,
+            "is_assignable",
+        )
+
+    return has_column
+
+
+def _safe_testmodule_queryset():
+    # Enforce global manager filter for ALL queries retrieving test lists
+    # We assume the column exists as migrations are confirmed applied.
+    return TestModule.objects._safe_testmodule_queryset()
+
+
+def _assert_safe_testmodule(module, context=None):
+    if not module:
+        return
+    if (
+        module.domain != TestModule.Domain.HOLISTIC
+        or not module.is_assignable
+        or module.is_internal
+        or not module.is_active
+    ):
+        ctx = context or 'protected context'
+        raise RuntimeError(
+            f"SECURITY ERROR: unsafe TestModule '{module.code}' leaked into {ctx}"
+        )
+
+
+def _fetch_safe_testmodule(code, missing_message, context):
+    try:
+        module = _safe_testmodule_queryset().get(code=code)
+    except TestModule.DoesNotExist:
+        return None, Response(
+            {'error': 'Test no encontrado', 'message': missing_message},
+            status=status.HTTP_404_NOT_FOUND,
+        )
+    _assert_safe_testmodule(module, context=context)
+    return module, None
 
 def _resolve_active_patient_for_user(user):
     try:
@@ -72,17 +134,19 @@ class AvailableTestsView(APIView):
     
     def get(self, request):
         user = request.user
-        profile = user.profile
+        # Load fresh profile from DB to avoid stale cached reverse relations
+        try:
+            profile = UserProfile.objects.get(user=user)
+        except Exception:
+            profile = getattr(user, 'profile', None)
         
         # PHASE 3: Base catalog — exclude legacy/non-executable entries BEFORE role filters
         # Legacy identification relies on existing fields/text markers only.
         # Do NOT add new fields or change permissions logic.
-        tests = (
-            TestModule.objects
+        base_tests = (
+            _safe_testmodule_queryset()
             .filter(is_active=True)
-            # Exclude entries migrated from legacy backup
             .exclude(description__icontains="_legacy_app_backup")
-            # Exclude non-executable markers present in description
             .exclude(description__icontains="No ejecutable")
         )
         
@@ -102,46 +166,97 @@ class AvailableTestsView(APIView):
         )
         
         if is_admin:
-            # Admin can view all tests (no execution_mode filter)
-            # Still filtered by is_active and is_available_for_user in serializer context
-            pass
+            tests = base_tests
         elif is_therapist:
-            # Therapist can see both patient_self and therapist_clinical tests
             from django.db.models import Q
-            tests = tests.filter(
+            tests = base_tests.filter(
                 Q(available_for_therapists=True) | Q(available_for_personal=True)
             )
         else:
-            # patient / personal → ONLY patient_self tests
-            tests = tests.filter(available_for_personal=True)
+            assigned_accesses = (
+                UserTestAccess.objects
+                .filter(
+                    user=user,
+                    has_special_access=True,
+                    test_module__is_active=True,
+                )
+                .select_related('test_module')
+                .order_by('-created_at')
+            )
+            seen_codes = set()
+            tests = []
+            for access in assigned_accesses:
+                module = access.test_module
+                if not module:
+                    continue
+                if _has_testmodule_is_assignable_column() and not getattr(module, "is_assignable", False):
+                    continue
+                if not _has_testmodule_is_assignable_column():
+                    if any(str(module.code).startswith(p) for p in TECHNICAL_TEST_CODE_PREFIXES):
+                        continue
+                if module and module.code not in seen_codes:
+                    seen_codes.add(module.code)
+                    tests.append(module)
 
-        # Filtering behavior differs by role:
-        # - Therapists/Admin: return the full visible catalog. Access is enforced via
-        #   `user_access.can_use` and the hardened validators on execution.
-        #   This keeps the UI stable as new tests are added without needing code changes.
-        # - Personal/Patient: only return tests the user can actually use, plus any
-        #   tests granted via special access (assigned by therapist).
         if is_admin or is_therapist:
             filtered_tests = list(tests)
         else:
-            special_access_codes = set(
-                UserTestAccess.objects.filter(user=user, has_special_access=True)
-                .values_list('test_module__code', flat=True)
-            )
-            filtered_tests = [
-                test
-                for test in tests
-                if (test.is_available_for_user(user) or test.code in special_access_codes)
-            ]
+            special_access_codes = {module.code for module in tests}
+            filtered_tests = tests
+
+        for module in filtered_tests:
+            _assert_safe_testmodule(module, context='AvailableTestsView')
         
         serializer = TestModuleSerializer(
             filtered_tests, 
             many=True, 
             context={'request': request}
         )
-        
+        # If a therapist provided a `patient_id` query param, expose patient-aware flags
+        patient_id = request.query_params.get('patient_id')
+        tests_payload = serializer.data
+        if patient_id and (profile.user_type == 'therapist' or profile.is_admin):
+            try:
+                pid = int(patient_id)
+                patient = Patient.objects.get(id=pid, therapist=user)
+                from api.test_models import UserTestAccess as _UserTestAccess, TestResult as _TestResult
+
+                # Serializer was built from `filtered_tests` in the same order,
+                # so we can safely zip modules -> serialized items and annotate directly.
+                for module, item in zip(filtered_tests, tests_payload):
+                    already_assigned = False
+                    has_result = False
+                    try:
+                        if getattr(patient, 'user', None):
+                            already_assigned = _UserTestAccess.objects.filter(
+                                user=patient.user, test_module=module, has_special_access=True
+                            ).exists()
+                            has_result = _TestResult.objects.filter(
+                                patient=patient, test_module=module, is_archived=False
+                            ).exists()
+                    except Exception:
+                        already_assigned = False
+                        has_result = False
+
+                    item['already_assigned'] = already_assigned
+                    item['locked'] = bool(has_result or already_assigned)
+                    if has_result:
+                        item['lock_reason'] = 'completed'
+                    elif already_assigned:
+                        item['lock_reason'] = 'assigned_pending'
+                    else:
+                        item['lock_reason'] = None
+            except Exception:
+                # If patient resolution fails, do not surface flags
+                pass
+
+        # Safety: prevent leaking technical tests
+        if is_admin or is_therapist:
+            if tests.filter(domain=TestModule.Domain.TECHNICAL).exists():
+                raise RuntimeError("SECURITY ERROR: Technical TestModule leaked to therapist")
+
         return Response({
-            'tests': serializer.data,
+            'tests': tests_payload,
             'user_type': profile.user_type,
             'subscription_plan': profile.subscription_plan or 'free',
             'membership_active': profile.membership_active
@@ -153,7 +268,7 @@ class TestModuleDetailView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, code):
-        test_module = get_object_or_404(TestModule, code=code, is_active=True)
+        test_module = get_object_or_404(_safe_testmodule_queryset().filter(is_active=True), code=code)
         
         user = request.user
         profile = user.profile
@@ -267,12 +382,13 @@ class ExecuteTestView(APIView):
 
         # Obtener el test_module
         try:
-            test_module = TestModule.objects.get(code=test_code, is_active=True)
+            test_module = _safe_testmodule_queryset().get(code=test_code)
         except TestModule.DoesNotExist:
             return Response({
                 'error': f'Test "{test_code}" no encontrado o no está activo',
-                'note': 'Verifica que el test esté registrado en la base de datos ejecutando el script initialize_tests.py'
+                'note': 'Verifica que el test está registrado en la base de datos ejecutando el script initialize_tests.py'
             }, status=status.HTTP_404_NOT_FOUND)
+        _assert_safe_testmodule(test_module, context='ExecuteTestView')
         
         # Infer execution mode
         request_context = {
@@ -742,10 +858,10 @@ class ExecuteTestView(APIView):
                     'processed': True,
                     'timestamp': str(datetime.now()),
                     'result': mapa,
-                    'message': f'Test {test_module.name} calculado correctamente'
+                    'message': f'Test {test_module.display_name} calculado correctamente'
                 }
             # If no specific handler matched, return a default processed message
-            return {'test_type': test_type, 'processed': True, 'timestamp': str(datetime.now()), 'message': f'Test {test_module.name} procesado correctamente', 'note': 'Implementación avanzada en desarrollo'}
+            return {'test_type': test_type, 'processed': True, 'timestamp': str(datetime.now()), 'message': f'Test {test_module.display_name} procesado correctamente', 'note': 'Implementación avanzada en desarrollo'}
         except Exception as e:
             return {'error': str(e), 'test_type': test_type, 'timestamp': str(datetime.now())}
 
@@ -1058,6 +1174,7 @@ class UserTestStatsView(APIView):
         # Contar tests disponibles (que el usuario puede usar)
         available_count = 0
         for access in accesses:
+            _assert_safe_testmodule(getattr(access, 'test_module', None), context='UserTestStatsView')
             if access.can_use_test() or access.has_special_access:
                 available_count += 1
         
@@ -1068,7 +1185,7 @@ class UserTestStatsView(APIView):
         tests_this_month = sum(access.current_month_uses for access in accesses)
         
         stats = {
-            'total_tests': TestModule.objects.filter(is_active=True).count(),
+            'total_tests': _safe_testmodule_queryset().filter(is_active=True).count(),
             'available_tests': available_count,
             'total_results': total_results,
             'tests_this_month': tests_this_month,
@@ -1080,7 +1197,7 @@ class UserTestStatsView(APIView):
             if access.uses_count > 0:
                 stats['tests'].append({
                     'code': access.test_module.code,
-                    'name': access.test_module.name,
+                    'name': access.test_module.display_name,
                     'uses_count': access.uses_count,
                     'current_month_uses': access.current_month_uses,
                     'last_used': access.last_used,
@@ -1396,7 +1513,7 @@ class GrantTestAccessView(APIView):
         
         from django.contrib.auth.models import User
         target_user = get_object_or_404(User, id=user_id)
-        test_module = get_object_or_404(TestModule, code=test_code)
+        test_module = get_object_or_404(_safe_testmodule_queryset(), code=test_code)
         
         # PHASE 5: Prevent granting access to therapist_clinical tests to non-therapists
         # Check if test is therapist_clinical only
@@ -1435,7 +1552,7 @@ class GrantTestAccessView(APIView):
         
         return Response({
             'success': True,
-            'message': f'Acceso especial otorgado a {target_user.username} para {test_module.name}'
+            'message': f'Acceso especial otorgado a {target_user.username} para {test_module.display_name}'
         })
 
 
@@ -1452,9 +1569,11 @@ class AssignTestToPatientView(APIView):
     def post(self, request):
         logger.info("ASSIGN_TEST: step 1 - request received")
         user = request.user
+        # Load a fresh UserProfile from the database to avoid stale cached
+        # reverse-one-to-one relation instances on the `user` object.
         try:
-            profile = user.profile
-        except (AttributeError, UserProfile.DoesNotExist):
+            profile = UserProfile.objects.get(user=user)
+        except (UserProfile.DoesNotExist, Exception):
             return Response(
                 {
                     'error': 'Perfil de usuario no encontrado',
@@ -1535,7 +1654,6 @@ class AssignTestToPatientView(APIView):
         # Resolve test module tolerant to code/slug differences (case-insensitive).
         # Do NOT create records here; prefer existing DB entries. Do not filter by is_active
         # to allow assigning historical/legacy entries when execution_mode indicates holistic.
-        from django.db.models import Q
         import re
 
         try:
@@ -1543,7 +1661,7 @@ class AssignTestToPatientView(APIView):
             # Optimización: Reemplazo de loop en memoria por query directa
             
             raw_code = test_code
-            candidates = TestModule.objects.filter(
+            candidates = _safe_testmodule_queryset().filter(
                 Q(code__iexact=raw_code) | 
                 Q(name__iexact=raw_code)
             ).order_by('-is_active', '-updated_at')
@@ -1556,10 +1674,10 @@ class AssignTestToPatientView(APIView):
                      # o que el input vino sucio.
                      # Nota: Esto no cubre el caso inverso (input limpio, DB sucio) sin un loop o función DB, 
                      # pero cubre la mayoría de casos de fricción.
-                     candidates = TestModule.objects.filter(
+                     candidates = _safe_testmodule_queryset().filter(
                          Q(code__iexact=norm_code) | 
                          Q(name__iexact=norm_code)
-                     ).order_by('-is_active', '-updated_at')
+                      ).order_by('-is_active', '-updated_at')
 
             if candidates.exists():
                 test_module = candidates.first()
@@ -1605,8 +1723,8 @@ class AssignTestToPatientView(APIView):
                     # a canonical UserTestAccess assignment so the patient can see it in the UI.
                     # This restores prior behavior for "isi"/insomnia-style assignments.
                     resolved_module = (
-                        TestModule.objects.filter(code__iexact=legacy_code).first()
-                        or TestModule.objects.filter(code__iexact=test_code).first()
+                        _safe_testmodule_queryset().filter(code__iexact=legacy_code).first()
+                        or _safe_testmodule_queryset().filter(code__iexact=test_code).first()
                     )
                     if resolved_module and getattr(patient, 'user', None):
                         logger.warning(
@@ -1677,6 +1795,27 @@ class AssignTestToPatientView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
+        # Prevent reassignment if an active (not archived) TestResult exists for this patient+module.
+        # Run this check early after resolving the test_module so it cannot be preempted
+        # by other permission checks (we want a 409 conflict when a non-archived result exists).
+        try:
+            from api.test_models import TestResult as _TestResult
+            assignment = (
+                _TestResult.objects
+                .filter(patient=patient, test_module=test_module, is_archived=False)
+                .order_by('-created_at')
+                .first()
+            )
+            # Allow reassignments once the completed assignment has been archived.
+            if assignment and not (assignment.result_data or {}).get('assignment_only'):
+                return Response(
+                    {"error": "test_already_completed_and_locked", 'message': 'El test ya fue completado y está bloqueado.'},
+                    status=409
+                )
+        except Exception:
+            # If the check fails for any reason, proceed conservatively (do not block assignment)
+            pass
+
         # Allow assignment when the module explicitly permits therapist assignments.
         # Simplified rule: if a module is available_for_therapists it may be assigned
         # by therapists to their patients. Business validation related to execution
@@ -1689,7 +1828,7 @@ class AssignTestToPatientView(APIView):
                 },
                 status=status.HTTP_403_FORBIDDEN
             )
-        
+
         # Create or update UserTestAccess for the patient's user account
         try:
             access, created = UserTestAccess.objects.get_or_create(
@@ -1765,9 +1904,50 @@ class AssignTestToPatientView(APIView):
                 else None
             )
         }, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
+class ArchiveTestAssignmentView(APIView):
+    """
+    Permite a terapeutas archivar asignaciones completadas sin borrar resultados.
+    """
 
+    permission_classes = [IsAuthenticated]
 
+    def post(self, request, assignment_id):
+        profile = getattr(request.user, 'profile', None)
+        if not profile or profile.user_type != 'therapist':
+            return Response(
+                {'error': 'No autorizado', 'message': 'Solo terapeutas pueden archivar asignaciones.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
 
+        try:
+            assignment = TestResult.objects.get(id=assignment_id)
+        except TestResult.DoesNotExist:
+            return Response(
+                {'error': 'assignment_not_found', 'message': 'La asignación especificada no existe.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        if assignment.patient and assignment.patient.therapist != request.user:
+            return Response(
+                {'error': 'No autorizado', 'message': 'Solo el terapeuta propietario puede archivar esta asignación.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        if (assignment.result_data or {}).get('assignment_only'):
+            return Response(
+                {'error': 'assignment_not_completed', 'message': 'Solo asignaciones completas pueden archivarse.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if assignment.is_archived:
+            serializer = TestResultSerializer(assignment, context={'request': request})
+            return Response(serializer.data)
+
+        assignment.is_archived = True
+        assignment.archived_at = timezone.now()
+        assignment.save(update_fields=['is_archived', 'archived_at'])
+        serializer = TestResultSerializer(assignment, context={'request': request})
+        return Response(serializer.data)
 
 class UnassignTestFromPatientView(APIView):
     """
@@ -1852,7 +2032,7 @@ class UnassignTestFromPatientView(APIView):
         norm = _normalize(raw_code)
 
         candidates = []
-        for t in TestModule.objects.all():
+        for t in _safe_testmodule_queryset().all():
             if _normalize(getattr(t, 'code', '')) == norm:
                 candidates.append(t)
                 continue
@@ -1921,6 +2101,8 @@ class PHQ9SubmitView(APIView):
     Procesa PHQ-9 en modo patient_self y guarda el resultado.
     Ruta: POST /api/tests/phq9/submit/
     """
+    deprecated = True
+    deprecated_mapping = 'Pulse Resonance Mirror (holistic equivalent of PHQ-9)'
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
@@ -1957,14 +2139,13 @@ class PHQ9SubmitView(APIView):
             answers[key] = value
 
         # Pilot mode: persist raw answers without clinical scoring or interpretation.
-        try:
-            test_module = TestModule.objects.get(code='phq-9')
-        except TestModule.DoesNotExist:
-            return Response(
-                {'error': 'Test no encontrado', 'message': 'PHQ-9 no est  registrado.'},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-
+        test_module, error_response = _fetch_safe_testmodule(
+            'phq-9',
+            'PHQ-9 no est  registrado.',
+            'PHQ9SubmitView',
+        )
+        if error_response:
+            return error_response
         TestResult.objects.create(
             user=user,
             patient=patient,
@@ -2054,6 +2235,8 @@ class GAD7SubmitView(APIView):
     Procesa GAD-7 en modo patient_self y guarda el resultado.
     Ruta: POST /api/tests/gad7/submit/
     """
+    deprecated = True
+    deprecated_mapping = 'Calm Alignment Gauge (holistic equivalent of GAD-7)'
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
@@ -2090,13 +2273,13 @@ class GAD7SubmitView(APIView):
             answers[key] = value
 
         # Pilot mode: persist raw answers without clinical scoring or interpretation.
-        try:
-            test_module = TestModule.objects.get(code='gad-7')
-        except TestModule.DoesNotExist:
-            return Response(
-                {'error': 'Test no encontrado', 'message': 'GAD-7 no est  registrado.'},
-                status=status.HTTP_404_NOT_FOUND,
-            )
+        test_module, error_response = _fetch_safe_testmodule(
+            'gad-7',
+            'GAD-7 no est  registrado.',
+            'GAD7SubmitView',
+        )
+        if error_response:
+            return error_response
 
         TestResult.objects.create(
             user=user,
@@ -2124,64 +2307,14 @@ class GAD7SubmitView(APIView):
             status=status.HTTP_200_OK,
         )
 
-        total_score = sum(answers.values())
-        if total_score <= 4:
-            severity_label = 'Mínima'
-        elif total_score <= 9:
-            severity_label = 'Leve'
-        elif total_score <= 14:
-            severity_label = 'Moderada'
-        else:
-            severity_label = 'Grave'
-
-        result_payload = {
-            'total_score': total_score,
-            'severity_label': severity_label,
-            'flags': {},
-            'test_code': 'GAD-7',
-            'execution_mode': 'patient_self',
-        }
-
-        details_payload = {
-            'raw_answers': answers,
-            'flags': {},
-            'test_code': 'GAD-7',
-            'execution_mode': 'patient_self',
-        }
-
-        test_module = None
-        try:
-            test_module = TestModule.objects.get(code='gad-7', is_active=True)
-        except TestModule.DoesNotExist:
-            test_module = None
-
-        TestResult.objects.create(
-            user=user,
-            patient=patient,
-            test_module=test_module,
-            test_id='gad-7',
-            input_data={'answers': answers},
-            result_data=result_payload,
-            score=total_score,
-            clinical_diagnosis=severity_label,
-            details=details_payload
-        )
-
-        response_payload = {
-            'total_score': total_score,
-            'severity_label': severity_label,
-            'flags': {},
-            'message': 'Resultado guardado. Este test es un cribado y no constituye diagnóstico clínico.',
-        }
-
-        return Response(response_payload, status=status.HTTP_200_OK)
-
 
 class BAISubmitView(APIView):
     """
     Procesa BAI en modo patient_self y guarda el resultado.
     Ruta: POST /api/tests/bai/submit/
     """
+    deprecated = True
+    deprecated_mapping = 'Stillness Resonance Inventory (holistic equivalent of BAI)'
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
@@ -2242,11 +2375,13 @@ class BAISubmitView(APIView):
             'execution_mode': 'patient_self',
         }
 
-        test_module = None
-        try:
-            test_module = TestModule.objects.get(code='bai', is_active=True)
-        except TestModule.DoesNotExist:
-            test_module = None
+        test_module, error_response = _fetch_safe_testmodule(
+            'bai',
+            'BAI no est  registrado.',
+            'BAISubmitView',
+        )
+        if error_response:
+            return error_response
 
         TestResult.objects.create(
             user=user,
@@ -2275,6 +2410,8 @@ class ISISubmitView(APIView):
     Procesa ISI en modo patient_self y guarda el resultado.
     Ruta: POST /api/tests/isi/submit/
     """
+    deprecated = True
+    deprecated_mapping = 'Dreamflow Attunement (holistic equivalent of ISI)'
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
@@ -2335,11 +2472,13 @@ class ISISubmitView(APIView):
             'execution_mode': 'patient_self',
         }
 
-        test_module = None
-        try:
-            test_module = TestModule.objects.get(code='isi', is_active=True)
-        except TestModule.DoesNotExist:
-            test_module = None
+        test_module, error_response = _fetch_safe_testmodule(
+            'isi',
+            'ISI no est  registrado.',
+            'ISISubmitView',
+        )
+        if error_response:
+            return error_response
 
         TestResult.objects.create(
             user=user,
@@ -2368,6 +2507,8 @@ class BDI2SubmitView(APIView):
     Procesa BDI-II en modo patient_self y guarda el resultado.
     Ruta: POST /api/tests/bdi2/submit/
     """
+    deprecated = True
+    deprecated_mapping = 'Dawn Reflection Index (holistic equivalent of BDI-II)'
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
@@ -2431,11 +2572,13 @@ class BDI2SubmitView(APIView):
             'execution_mode': 'patient_self',
         }
 
-        test_module = None
-        try:
-            test_module = TestModule.objects.get(code='bdi-ii', is_active=True)
-        except TestModule.DoesNotExist:
-            test_module = None
+        test_module, error_response = _fetch_safe_testmodule(
+            'bdi-ii',
+            'BDI-II no est  registrado.',
+            'BDI2SubmitView',
+        )
+        if error_response:
+            return error_response
 
         TestResult.objects.create(
             user=user,

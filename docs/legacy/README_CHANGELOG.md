@@ -13,7 +13,7 @@ Contexto para cualquier nuevo agente (Cursor, auditoría, colaborador)
 No es marketing. Es estado real del sistema.
 
 📘 SUMARIO GENERAL DEL PROYECTO
-Plataforma Clínica + Cábala Aplicada
+Plataforma Holística + Cábala Aplicada
 
 Estado: reconstrucción estructural + hardening completado
 
@@ -25,7 +25,7 @@ El sistema ahora tiene:
 
 Arquitectura clara por roles
 
-Flujos clínicos inmutables
+Flujos de acceso restringido inmutables
 
 Backend endurecido (no confía en frontend)
 
@@ -150,23 +150,23 @@ Estado: base estable, ampliable
 
 Implementado en 7 fases cerradas:
 
-Contexto de paciente activo
+Contexto de usuario activo
 
-Selector de pacientes
+Selector de usuarios
 
 Catálogo de tests filtrado
 
-Asignación de patient_self
+Asignación de `patient_self` a usuarios
 
-Ejecución clínica (therapist_clinical)
+Ejecución restringida (therapist_clinical)
 
 Panel de resultados
 
-Pulido UX clínico
+Pulido UX profesional
 
 Estado: listo para uso clínico real
 
-🟡 Dashboard Paciente — EN IMPLEMENTACIÓN
+🟡 Dashboard Usuario — EN IMPLEMENTACIÓN
 
 (se acaba de lanzar el prompt correcto)
 
@@ -174,11 +174,11 @@ Objetivo:
 
 Ver tests asignados
 
-Ejecutar patient_self
+Ejecutar `patient_self`
 
 Ver resultados propios
 
-Sin capacidad de asignar ni clínica
+Sin capacidad de asignar ni ejecución restringida por usuarios no autorizados
 
 Estado:
 
@@ -246,11 +246,11 @@ Resumen honesto:
 
 🔒 Seguridad: cerrada
 
-🧑‍⚕️ Clínica: operativa
+🔧 Entorno profesional: operativo
 
-🧑 Paciente: en curso (último bloque crítico)
+👥 Usuario: en curso (último bloque crítico)
 
 💰 Monetización / LMS: pendiente, bien posicionada
 
 👉 El proyecto ya no es un prototipo
-👉 Es una plataforma clínica real en crecimiento controlado
+👉 Es una plataforma profesional real en crecimiento controlado

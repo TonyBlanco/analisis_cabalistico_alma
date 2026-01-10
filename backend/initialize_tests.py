@@ -9,6 +9,36 @@ django.setup()
 
 from api.test_models import TestModule
 
+HOLISTIC_LEGACY_OVERRIDES = {
+    "phq-9": ("Pulse Resonance Mirror", "emotional_balance"),
+    "bdi-ii": ("Dawn Reflection Index", "emotional_balance"),
+    "gad-7": ("Calm Alignment Gauge", "anxiety_balance"),
+    "bai": ("Stillness Resonance Inventory", "anxiety_balance"),
+    "stai": ("Presence Balance Compass", "anxiety_balance"),
+    "isi": ("Dreamflow Attunement", "sleep_harmony"),
+    "insomnia-index": ("Restoration Rhythm Index", "sleep_harmony"),
+    "ptsd-check": ("Soul Echo Release", "trauma_recovery"),
+    "ptsd": ("Soul Echo Release", "trauma_recovery"),
+    "ptsd-pcl5": ("Soul Story Harmonizer", "trauma_recovery"),
+    "ocd-screen": ("Ritual Flow Snapshot", "ritual_balance"),
+    "adhd-adult": ("Attention Flow Compass", "attention_clarity"),
+    "adhd": ("Attention Flow Compass", "attention_clarity"),
+    "substance-use": ("Sustenance Relationship Mirror", "substance_reconciliation"),
+    "substance": ("Sustenance Relationship Mirror", "substance_reconciliation"),
+    "eating-disorder": ("Abundance Relationship Mirror", "abundance_relations"),
+    "eating": ("Abundance Relationship Mirror", "abundance_relations"),
+    "scl90": ("Soul Symmetry Lens", "soul_alignment"),
+    "scl-90": ("Soul Symmetry Lens", "soul_alignment"),
+    "scl-90-r": ("Soul Symmetry Lens", "soul_alignment"),
+    "mcmi-iv": ("Persona Pattern Atlas", "personality_mosaic"),
+    "scid5": ("Structural Insight Dialogue", "personality_mosaic"),
+    "scid-5-rv": ("Structural Insight Dialogue", "personality_mosaic"),
+    "pai": ("Persona Alignment Compass", "persona_alignment"),
+    "professional-pai": ("Persona Alignment Compass", "persona_alignment"),
+}
+
+TECHNICAL_TEST_PREFIXES = ("dbg-test", "lock-test", "smoke-test")
+
 def initialize_tests():
     """Crea los módulos de tests iniciales"""
     
@@ -403,7 +433,18 @@ def initialize_tests():
             'license_info': 'SCID-5-RV es un instrumento protegido. Confirmar licencia y capacitación antes de uso.'
         },
     ]
-    
+
+    for test_data in tests_data:
+        code = test_data['code']
+        override = HOLISTIC_LEGACY_OVERRIDES.get(code)
+        if override:
+            test_data['name'] = override[0]
+            test_data['public_name'] = override[0]
+            test_data['canonical_family'] = override[1]
+        else:
+            test_data.setdefault('public_name', test_data['name'])
+        test_data.setdefault('domain', 'holistic')
+
     created_count = 0
     updated_count = 0
     
@@ -420,6 +461,15 @@ def initialize_tests():
             updated_count += 1
             print(f"↻ Actualizado: {test.name}")
     
+    for prefix in TECHNICAL_TEST_PREFIXES:
+        TestModule.objects.filter(code__startswith=prefix).update(
+            domain="technical",
+            is_internal=True,
+            is_assignable=False,
+            canonical_family="technical_operations",
+            public_name="Hidden Operational Probe",
+        )
+
     print(f"\n{'='*50}")
     print(f"Tests creados: {created_count}")
     print(f"Tests actualizados: {updated_count}")

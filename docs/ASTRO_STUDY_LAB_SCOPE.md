@@ -6,9 +6,9 @@
 - Usa datasets simulados o marcados “research”. No requiere patientId.
 
 **Qué no es**
-- No es parte del flujo clínico ni del workspace con paciente.
+- No es parte del flujo clínico ni del workspace con usuario activo.
 - No expone endpoints nuevos ni modifica el motor astronómico (adapter sellado).
-- No almacena scoring ni resultados clínicos.
+- No almacena scoring ni resultados interpretativos con implicaciones clínicas.
 
 **Datos**
 - Origen: JSON estático/simulado y datasets research.

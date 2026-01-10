@@ -38,7 +38,8 @@ class EnhancedAdminStatsView(APIView):
         active_memberships = UserProfile.objects.filter(membership_active=True).count()
         
         # Tests
-        total_tests = TestModule.objects.filter(is_active=True).count()
+        # Enforce global manager for stats too, to reflect available catalog
+        total_tests = TestModule.objects.assignable().filter(is_active=True).count()
         total_test_results = TestResult.objects.count()
         
         # Nuevos usuarios esta semana

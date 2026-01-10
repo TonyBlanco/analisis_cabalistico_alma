@@ -10,8 +10,8 @@
 Se ha implementado el motor astronómico real para el workspace de Astrología, extendiendo el endpoint existente `KerykeionAnalysisView` para soportar operaciones GET (recuperar última carta) y POST (calcular desde perfil del paciente).
 
 **Características clave**:
-- ✅ Datos de nacimiento SOLO desde perfil del paciente (no request body)
-- ✅ Persistencia mínima: 1 carta por paciente con metadatos
+- ✅ Datos de nacimiento SOLO desde perfil del usuario (no request body)
+- ✅ Persistencia mínima: 1 carta por usuario con metadatos
 - ✅ Contrato normalizado estable para frontend
 - ✅ Fallback automático a Swiss Ephemeris si Kerykeion falla
 - ✅ Validación de campos faltantes con mensajes claros
@@ -138,7 +138,7 @@ def get(self, request, patient_id):
         })
     except AstrologyNatalChart.DoesNotExist:
         return Response({
-            'error': 'No hay carta natal calculada para este paciente',
+            'error': 'No hay carta natal calculada para este usuario',
             'hint': 'Usa POST para calcular'
         }, status=404)
 ```

@@ -1,0 +1,20 @@
+RUNTIME ERROR ANALYSIS
+----------------------
+Error: Failed to load chunk [turbopack] ... hmr-client.ts
+
+Diagnosis:
+This is a browser-side caching issue with the Next.js Turbopack development server. It typically occurs when:
+1. The `.next` build cache becomes corrupted or out of sync.
+2. The browser tries to load a Hot Module Replacement (HMR) chunk that no longer exists on the server.
+3. The development server process has been running for a long time or through significant file changes.
+
+Resolution:
+Since I am restricted from deleting build folders in this environment, please perform the following steps manually:
+
+1. Stop the running Next.js development server (Ctrl+C).
+2. Delete the `.next` folder in `tonyblanco-app/`.
+   - Windows: `rmdir /s /q tonyblanco-app\.next`
+3. Restart the development server:
+   - `npm run dev` (inside `tonyblanco-app/`)
+
+This will force a clean rebuild and resolve the chunk loading error.

@@ -4,13 +4,15 @@ from .test_models import TestModule, UserTestAccess, TestResult
 
 class TestModuleSerializer(serializers.ModelSerializer):
     """Serializer para módulos de tests"""
+    name = serializers.CharField(source='display_name', read_only=True)
     is_available = serializers.SerializerMethodField()
     user_access = serializers.SerializerMethodField()
     
     class Meta:
         model = TestModule
         fields = [
-            'id', 'code', 'name', 'description', 'test_type',
+            'id', 'code', 'name', 'public_name', 'canonical_family', 'domain', 'is_internal',
+            'description', 'test_type',
             'required_access_level', 'is_active',
             'available_for_therapists', 'available_for_personal',
             'uses_per_month', 'icon', 'order', 'estimated_duration',
@@ -61,6 +63,7 @@ class TestModuleSerializer(serializers.ModelSerializer):
 
 class SimpleTestModuleSerializer(serializers.ModelSerializer):
     """Serializer simplificado para TestModule en resultados"""
+    name = serializers.CharField(source='display_name', read_only=True)
     class Meta:
         model = TestModule
         fields = ['id', 'code', 'name', 'description', 'test_type', 'icon']
@@ -71,6 +74,8 @@ class TestResultSerializer(serializers.ModelSerializer):
     test_module = SimpleTestModuleSerializer(read_only=True)
     test_module_name = serializers.SerializerMethodField()
     test_module_code = serializers.CharField(source='test_module.code', read_only=True)
+    status = serializers.SerializerMethodField()
+    patient_route = serializers.SerializerMethodField()
     patient_id = serializers.IntegerField(source='patient.id', read_only=True, allow_null=True)
     patient_name = serializers.CharField(source='patient.full_name', read_only=True, allow_null=True)
     
@@ -78,6 +83,7 @@ class TestResultSerializer(serializers.ModelSerializer):
         model = TestResult
         fields = [
             'id', 'test_module', 'test_module_name', 'test_module_code',
+            'status', 'patient_route',
             'input_data', 'result_data', 'client_name', 'client_birth_date',
             'patient_id', 'patient_name',
             'notes', 'is_favorite', 'is_archived',
@@ -87,11 +93,30 @@ class TestResultSerializer(serializers.ModelSerializer):
 
     def get_test_module_name(self, obj):
         if obj.test_module:
-            return obj.test_module.name
+            return obj.test_module.display_name
         # Fallback: try details/test_code
         try:
             if obj.details and isinstance(obj.details, dict):
                 return obj.details.get('test_code') or obj.details.get('test_id')
+        except Exception:
+            pass
+        return None
+
+    def get_status(self, obj):
+        # If this is an assignment-only marker, consider it pending; otherwise completed
+        try:
+            if getattr(obj, 'result_data', None) and (obj.result_data or {}).get('assignment_only') is True:
+                return 'pending'
+            if isinstance(getattr(obj, 'details', None), dict) and (obj.details or {}).get('legacy_assignment') is True:
+                return 'pending'
+        except Exception:
+            pass
+        return 'completed'
+
+    def get_patient_route(self, obj):
+        try:
+            if obj.test_module and getattr(obj.test_module, 'code', None):
+                return f"/dashboard/patient/tests/{obj.test_module.code}"
         except Exception:
             pass
         return None

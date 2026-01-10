@@ -67,7 +67,7 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
       setTests(data.tests as any[]);
     } catch (err) {
       console.error('Error fetching tests:', err);
-      setError('Error al cargar el catálogo de tests.');
+      setError('Error al cargar el catálogo de exploraciones.');
     } finally {
       setLoading(false);
     }
@@ -102,7 +102,7 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
         <button
           disabled
           className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-400 bg-gray-100 rounded-md cursor-not-allowed"
-          title="Selecciona un consultante activo para asignar tests"
+          title="Selecciona un consultante activo para asignar exploraciones"
         >
           Asignar
         </button>
@@ -114,7 +114,7 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
         <button
           disabled
           className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-400 bg-gray-100 rounded-md cursor-not-allowed"
-          title="El consultante debe tener una cuenta activa para asignar tests"
+          title="El consultante debe tener una cuenta activa para asignar exploraciones"
         >
           Asignar
         </button>
@@ -136,13 +136,16 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
   // ----- Assignment handlers -----
   const handleAssignTest = (test: TestModule) => {
     if (!activePatientId) {
-      toast.warning('Selecciona un consultante', 'Debes seleccionar un consultante activo antes de asignar un test.');
+    toast.warning('Selecciona un consultante', 'Debes seleccionar un consultante activo antes de asignar una exploración.');
       return;
     }
 
     // Prevent admins from assigning via therapist flows
     if (userType === 'admin') {
-      toast.error('Solo terapeutas pueden asignar tests', 'Los administradores no pueden asignar tests a pacientes.');
+      toast.error(
+        'Solo terapeutas pueden asignar exploraciones',
+        'Los administradores no pueden asignar exploraciones a consultantes.'
+      );
       return;
     }
 
@@ -169,7 +172,7 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
       setShowSuccessModal(true);
     } catch (e) {
       console.error('Error assigning test', e);
-      toast.error('Error', 'No se pudo asignar el test. Intenta nuevamente.');
+      toast.error('Error', 'No se pudo asignar la exploración. Intenta nuevamente.');
     } finally {
       setAssigningTestCode(null);
       setTestToAssign(null);
@@ -182,12 +185,12 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <ClipboardList className="w-5 h-5 text-blue-600" />
-            <h2 className="text-lg font-semibold text-gray-900">Catálogo de Tests</h2>
+            <h2 className="text-lg font-semibold text-gray-900">Catálogo de Exploraciones</h2>
           </div>
         </div>
         <div className="text-center py-12">
           <Loader2 className="w-6 h-6 animate-spin text-gray-500 mx-auto" />
-          <p className="text-sm text-gray-500 mt-2">Cargando catálogo de tests...</p>
+          <p className="text-sm text-gray-500 mt-2">Cargando catálogo de exploraciones...</p>
         </div>
       </div>
     );
@@ -199,7 +202,7 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <ClipboardList className="w-5 h-5 text-blue-600" />
-            <h2 className="text-lg font-semibold text-gray-900">Catálogo de Tests</h2>
+            <h2 className="text-lg font-semibold text-gray-900">Catálogo de Exploraciones</h2>
           </div>
         </div>
         <div className="bg-red-50 border border-red-200 rounded-md p-4">
@@ -231,8 +234,16 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
   }, {});
 
   const familyOrder: Array<{ key: string; label: string; desc: string }> = [
-    { key: 'psicologicos', label: 'Tests Psicológicos', desc: 'Cribados y escalas autoaplicadas.' },
-    { key: 'cabalisticos', label: 'Análisis Cabalísticos', desc: 'Herramientas clínicas del terapeuta.' },
+    {
+      key: 'psicologicos',
+      label: 'Exploraciones Holísticas',
+      desc: 'Cribados y escalas holísticas autoaplicadas.',
+    },
+    {
+      key: 'cabalisticos',
+      label: 'Análisis Cabalísticos',
+      desc: 'Herramientas simbólicas del terapeuta.',
+    },
   ];
 
   return (
@@ -241,7 +252,7 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
         <div className="flex items-center gap-2">
           <ClipboardList className="w-5 h-5 text-[#1f6c8f]" />
           <div>
-            <h2 className="text-lg font-semibold text-gray-900">Catálogo de Tests</h2>
+            <h2 className="text-lg font-semibold text-gray-900">Catálogo de Exploraciones</h2>
             <p className="text-sm text-gray-500">Inventario holístico global — acciones según consultante activo.</p>
           </div>
         </div>
@@ -261,7 +272,7 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
       <div className="min-h-[200px]">
         {normalizedTests.length === 0 ? (
           <div className="text-center py-8">
-            <p className="text-sm text-gray-500">No hay tests disponibles.</p>
+            <p className="text-sm text-gray-500">No hay exploraciones disponibles.</p>
           </div>
         ) : (
           <div className="space-y-6">
@@ -308,7 +319,7 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
                         onClick={() => setHelpTestCode(test.code)}
                         className="p-2 rounded-full border border-gray-200 text-[#1f6c8f] hover:bg-gray-50"
                         aria-label="Ver guía holística"
-                        title="Ver guía clínica"
+                        title="Ver guía simbólica"
                       >
                         <Info className="w-4 h-4" />
                       </button>
@@ -395,7 +406,7 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
           >
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Confirmar asignación</h3>
             <p className="text-sm text-gray-600 mb-4">
-              ¿Deseas asignar el test <strong>&quot;{testToAssign.name}&quot;</strong> al consultante activo?
+              ¿Deseas asignar la exploración <strong>&quot;{testToAssign.name}&quot;</strong> al consultante activo?
             </p>
             <div className="flex items-center gap-3 justify-end">
               <button
@@ -429,7 +440,7 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
             <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 flex items-center justify-center">
               <CheckCircle className="w-10 h-10 text-green-600" />
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">¡Test asignado correctamente!</h3>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">¡Exploración asignada correctamente!</h3>
             <p className="text-gray-600 mb-4">
               <strong>&quot;{lastAssignedTest}&quot;</strong> ha sido asignado al consultante.
             </p>
@@ -439,7 +450,7 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
                 <span className="font-medium">Notificación enviada</span>
               </div>
               <p className="text-sm text-blue-600">
-                El consultante ha recibido un email con las instrucciones para completar el test.
+                El consultante ha recibido un email con las instrucciones para completar la exploración.
               </p>
             </div>
             <button

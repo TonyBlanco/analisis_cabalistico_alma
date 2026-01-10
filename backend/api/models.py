@@ -480,12 +480,17 @@ class PatientMessage(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='patient_messages')
     content = models.CharField(max_length=1000, help_text='Texto plano, neutro, no clínico')
     is_archived = models.BooleanField(default=False)
+    archived_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ['-created_at']
         verbose_name = 'Patient Message'
         verbose_name_plural = 'Patient Messages'
+        indexes = [
+            models.Index(fields=['patient', 'created_at']),
+            models.Index(fields=['therapist', 'patient', 'created_at']),
+        ]
 
     def __str__(self):
         return f"Message {self.id} from {self.therapist.username} to {self.patient.full_name}"

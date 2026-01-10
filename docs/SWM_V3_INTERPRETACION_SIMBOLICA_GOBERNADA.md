@@ -3,7 +3,7 @@
 Fecha: 2026-01-01
 
 Introducción
-- SWM v3 (Specialized Workspace Modules v3) define el marco documental y de gobernanza para introducir interpretaciones simbólicas asistidas por IA con carácter educativo y no clínico.
+- SWM v3 (Specialized Workspace Modules v3) define el marco documental y de gobernanza para introducir interpretaciones simbólicas asistidas por IA con carácter educativo y simbólico.
 
 Qué es SWM v3
 - Una extensión documental y de gobernanza del sistema simbólico que permite, bajo control y consentimiento, la ejecución de análisis simbólicos asistidos por IA destinados a apoyo formativo y educativo del terapeuta y consultante.
@@ -18,7 +18,7 @@ Diferencias entre SWM v1 y SWM v3
 - SWM v3: interpretativo / educativo — análisis generado por IA bajo acción humana explícita y gobernanza documental.
 
 Principios NO negociables
-- No clínico, no diagnóstico, no prescriptivo.
+- No médico, no diagnóstico, no prescriptivo.
 - IA como motor de correlación y explicación; el juicio final es siempre humano (terapeuta).
 - Salidas breves, originales y no literales de fuentes externas.
 
@@ -46,7 +46,7 @@ Auditoría y trazabilidad
 Compatibilidad y gobernanza
 - SWM v1 permanece intacto y operativo.
 - SWM v3 es optativo, gobernado por feature flags (ej. `AI_TAROT_ENABLED`) y por el mode/permiso del workspace.
-- Implementación futura deberá respetar la auditoría vigente y no alterar flujos clínicos ni contracts técnicos.
+- Implementación futura deberá respetar la auditoría vigente y no alterar flujos del core ni contracts técnicos.
 
 Nota explícita
 - Este documento habilita la implementación futura de SWM v3 pero NO implica cambios inmediatos en código. Cualquier implementación posterior deberá seguir las fases y controles documentados en `docs/`.

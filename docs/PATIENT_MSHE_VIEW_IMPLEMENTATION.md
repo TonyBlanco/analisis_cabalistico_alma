@@ -90,7 +90,7 @@ interface AIAnalysis {
 ### Security & Safety
 - **Validation Filter**: Only shows records with `professional_annotations.professional_validation: true`
 - **No Technical Data**: Scores, weights, and technical details hidden from consultante view
-- **Safe Language**: All content uses consultante-friendly, non-clinical terminology
+- **Safe Language**: All content uses consultante-friendly, educational terminology
 - **Error Handling**: Graceful handling when no validated MSHE exists
 
 ### API Integration

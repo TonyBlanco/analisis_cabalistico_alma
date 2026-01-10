@@ -31,14 +31,57 @@ ACCESS_LEVEL_CHOICES = [
 ]
 
 
+class TestModuleQuerySet(models.QuerySet):
+    def assignable(self):
+        """
+        Global filter to return ONLY assignable tests.
+        This must be used in all user-facing views.
+        """
+        return self.filter(is_assignable=True)
+
+    def _safe_testmodule_queryset(self):
+        """
+        Strict safety guard used by therapist/patient flows to exclude
+        technical, inactive or internal modules.
+        """
+        return self.filter(
+            domain=self.model.Domain.HOLISTIC,
+            is_assignable=True,
+            is_internal=False,
+            is_active=True,
+        )
+
+
 class TestModule(models.Model):
     """Módulos de tests disponibles en la plataforma"""
     
+    objects = TestModuleQuerySet.as_manager()
+
+    class Domain(models.TextChoices):
+        HOLISTIC = 'holistic', 'Holistic'
+        TECHNICAL = 'technical', 'Technical'
+
     # Información básica
     code = models.CharField(max_length=50, unique=True)  # Código único del test
     name = models.CharField(max_length=200)  # Nombre del test
+    public_name = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text='Nombre amigable visible en UI (sin nomenclatura clínica).'
+    )
+    canonical_family = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        help_text='Familia canónica para agrupar instrumentos heredados.'
+    )
     description = models.TextField()  # Descripción del test
     test_type = models.CharField(max_length=50, choices=TEST_TYPE_CHOICES)
+    domain = models.CharField(
+        max_length=20,
+        choices=Domain.choices,
+        default=Domain.HOLISTIC
+    )
     
     # Control de acceso
     required_access_level = models.CharField(
@@ -51,6 +94,14 @@ class TestModule(models.Model):
     is_active = models.BooleanField(default=True)
     available_for_therapists = models.BooleanField(default=True)
     available_for_personal = models.BooleanField(default=True)
+    is_assignable = models.BooleanField(
+        default=True,
+        help_text='Marca si el módulo puede asignarse desde la UI/terapeuta'
+    )
+    is_internal = models.BooleanField(
+        default=False,
+        help_text='Indica si este módulo es de uso interno (no visible en el catálogo).'
+    )
     
     # Límites de uso
     uses_per_month = models.IntegerField(null=True, blank=True)  # null = ilimitado
@@ -71,8 +122,18 @@ class TestModule(models.Model):
         verbose_name = 'Módulo de Test'
         verbose_name_plural = 'Módulos de Tests'
     
+    @property
+    def display_name(self):
+        """Nombre público derivado de public_name o del nombre interno."""
+        return self.public_name or self.name
+
+    def save(self, *args, **kwargs):
+        if not self.public_name:
+            self.public_name = self.name
+        super().save(*args, **kwargs)
+
     def __str__(self):
-        return f"{self.name} ({self.code})"
+        return f"{self.display_name} ({self.code})"
     
     def is_available_for_user(self, user):
         """Verifica si un usuario tiene acceso a este test"""
@@ -141,7 +202,7 @@ class UserTestLicense(models.Model):
         verbose_name_plural = 'Licencias de Tests'
 
     def __str__(self):
-        return f"License: {self.user.username} - {self.test_module.name} - {'Active' if self.active else 'Inactive'}"
+        return f"License: {self.user.username} - {self.test_module.display_name} - {'Active' if self.active else 'Inactive'}"
 
 
 class UserTestAccess(models.Model):
@@ -172,7 +233,7 @@ class UserTestAccess(models.Model):
         verbose_name_plural = 'Accesos a Tests'
     
     def __str__(self):
-        return f"{self.user.username} - {self.test_module.name}"
+        return f"{self.user.username} - {self.test_module.display_name}"
     
     def can_use_test(self):
         """Verifica si el usuario puede usar este test ahora"""
@@ -280,6 +341,7 @@ class TestResult(models.Model):
     notes = models.TextField(blank=True)  # Notas del usuario
     is_favorite = models.BooleanField(default=False)
     is_archived = models.BooleanField(default=False)
+    archived_at = models.DateTimeField(null=True, blank=True)
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -296,5 +358,5 @@ class TestResult(models.Model):
     
     def __str__(self):
         client = self.client_name if self.client_name else (self.patient.full_name if self.patient else self.user.username)
-        test_name = self.test_module.name if self.test_module else (self.test_id.upper() if self.test_id else 'Test')
+        test_name = self.test_module.display_name if self.test_module else (self.test_id.upper() if self.test_id else 'Test')
         return f"{test_name} - {client} ({self.created_at.strftime('%Y-%m-%d')})"

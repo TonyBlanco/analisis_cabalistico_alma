@@ -46,9 +46,11 @@ class PatientNotesTestCase(APITestCase):
 
     def test_therapist_can_create_note_for_own_patient(self):
         self.client.force_authenticate(user=self.therapist)
-        resp = self.client.post('/api/patient-notes/', {'patient': self.patient.id, 'content': 'Seguimiento después del test'}, format='json')
+        resp = self.client.post('/api/patient-notes/', {'patient_id': self.patient.id, 'content': 'Seguimiento después del test'}, format='json')
         self.assertEqual(resp.status_code, 201)
         self.assertIn('id', resp.data)
+        self.assertEqual(resp.data.get('patient_id'), self.patient.id)
+        self.assertEqual(resp.data.get('therapist_id'), self.therapist.id)
         note = PatientMessage.objects.get(id=resp.data['id'])
         self.assertEqual(note.therapist, self.therapist)
         self.assertEqual(note.patient, self.patient)
@@ -59,7 +61,7 @@ class PatientNotesTestCase(APITestCase):
         self.client.force_authenticate(user=self.patient_user)
         resp = self.client.get('/api/patient-notes/')
         self.assertEqual(resp.status_code, 200)
-        notes = resp.data.get('notes', [])
+        notes = resp.data.get('results', [])
         self.assertTrue(any(n.get('id') == note.id for n in notes))
 
     def test_other_patient_cannot_see_notes(self):
@@ -67,7 +69,7 @@ class PatientNotesTestCase(APITestCase):
         self.client.force_authenticate(user=self.other_patient_user)
         resp = self.client.get('/api/patient-notes/')
         self.assertEqual(resp.status_code, 200)
-        notes = resp.data.get('notes', [])
+        notes = resp.data.get('results', [])
         # other patient should not see the note
         self.assertFalse(any(n.get('id') == note.id for n in notes))
 

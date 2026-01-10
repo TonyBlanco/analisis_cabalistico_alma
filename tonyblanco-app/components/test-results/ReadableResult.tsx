@@ -34,6 +34,59 @@ function titleize(key: string): string {
     .replace(/\b\w/g, (m) => m.toUpperCase());
 }
 
+const DEFAULT_DISCLAIMER =
+  'Este resultado es orientativo y no constituye un diagnóstico. Su interpretación corresponde al acompañamiento profesional.';
+
+const normalizePercent = (value: number | null | undefined) => {
+  if (value === null || value === undefined) return null;
+  const numeric = Number(value);
+  if (Number.isNaN(numeric)) return null;
+  return Math.max(0, Math.min(100, numeric));
+};
+
+const getIntensityDescriptor = (value: number | null) => {
+  if (value === null) return 'Nivel en movimiento';
+  if (value >= 70) return 'Impulso vibrante';
+  if (value >= 40) return 'Flujo armónico';
+  return 'Susurro sereno';
+};
+
+const ReferenceBadge = ({ value }: { value: number | null }) => {
+  if (value === null) return null;
+  return (
+    <span
+      title={`Referencia técnica: ${value}`}
+      className="text-[10px] font-medium text-slate-500 uppercase tracking-wider px-2 py-0.5 border border-slate-200 rounded-full"
+    >
+      Referencia técnica
+    </span>
+  );
+};
+
+const getDomainPercent = (domainValue: any) => {
+  if (domainValue && typeof domainValue === 'object') {
+    const raw = domainValue.percent_0_100 ?? domainValue.percent ?? domainValue.value;
+    return normalizePercent(raw);
+  }
+  if (typeof domainValue === 'number') {
+    return normalizePercent(domainValue);
+  }
+  return null;
+};
+
+const getDomainDescriptor = (domainValue: any) => {
+  const percent = getDomainPercent(domainValue);
+  if (percent !== null) {
+    return getIntensityDescriptor(percent);
+  }
+  const avg = domainValue?.avg_0_4 ?? domainValue?.avg ?? null;
+  const normalizedAvg = normalizePercent(avg && (avg / 4) * 100);
+  if (normalizedAvg !== null) {
+    return getIntensityDescriptor(normalizedAvg);
+  }
+  return 'Ritmo simbólico';
+};
+
 export default function ReadableResult({ 
   resultData, 
   showRaw = true,
@@ -57,7 +110,16 @@ export default function ReadableResult({
   const level = payload.level ?? puntuaciones.nivel ?? null;
 
   const totalScore = payload.total_score ?? payload.score ?? null;
-  const severity = payload.severity_label ?? payload.clinical_diagnosis ?? null;
+  const activationGrade =
+    payload.activation_grade ??
+    payload.grado_activacion ??
+    payload.severity_label ??
+    payload.clinical_diagnosis ??
+    level ??
+    null;
+  const intensityReference = normalizePercent(totalScore ?? index);
+  const intensityLabel =
+    activationGrade || (intensityReference !== null ? getIntensityDescriptor(intensityReference) : 'Nivel en movimiento');
 
   const summary = payload.summary_text ?? payload.interpretacion?.resumen ?? payload.resumen ?? null;
   const strengths = normalizeList(payload.map?.strengths ?? payload.interpretacion?.fortalezas);
@@ -83,9 +145,8 @@ export default function ReadableResult({
     recommendations.length ||
     disclaimer ||
     index !== null ||
-    level ||
     totalScore !== null ||
-    severity ||
+    activationGrade ||
     domains ||
     activeFlags.length > 0;
 
@@ -133,7 +194,11 @@ export default function ReadableResult({
               {executionMode && (
                 <div className="flex items-center gap-1">
                   <Tag size={12} />
-                  <span>{executionMode === 'patient_self' ? 'Reportado por paciente' : 'Evaluación clínica'}</span>
+                  <span>
+                    {executionMode === 'patient_self'
+                      ? 'Reportado por el consultante'
+                      : 'Lectura profesional'}
+                  </span>
                 </div>
               )}
             </div>
@@ -151,33 +216,31 @@ export default function ReadableResult({
 
       <div className="p-6 space-y-6">
         {/* 2. Resumen Visual */}
-        {(totalScore !== null || severity || index !== null || level || activeFlags.length > 0) && (
+        {(totalScore !== null || activationGrade || index !== null || activeFlags.length > 0) && (
           <div className="bg-slate-50 border border-slate-100 rounded-xl p-5">
             <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-center justify-between">
               <div className="space-y-1">
-                <p className="text-xs uppercase tracking-wider font-semibold text-slate-500">Resultado General</p>
-                <div className="flex items-baseline gap-3">
-                  {(totalScore !== null || index !== null) && (
-                    <span className="text-3xl font-bold text-slate-900">
-                      {totalScore ?? index}
-                      {(index !== null && !totalScore) && <span className="text-sm text-slate-400 font-normal ml-1">/100</span>}
-                    </span>
-                  )}
-                  {(severity || level) && (
-                    <span className="text-lg font-medium text-slate-700 px-3 py-1 bg-white border border-slate-200 rounded-lg shadow-sm">
-                      {severity || level}
-                    </span>
-                  )}
+                <p className="text-xs uppercase tracking-wider font-semibold text-slate-500">
+                  Nivel de intensidad
+                </p>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                  <span className="text-3xl font-bold leading-none text-slate-900">{intensityLabel}</span>
+                  <ReferenceBadge value={intensityReference} />
                 </div>
               </div>
 
-              {/* Badges de Riesgo / Flags */}
+              {/* Badges de Áreas de atención */}
               {activeFlags.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {activeFlags.map(flag => (
-                    <div key={flag} className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-full text-xs font-semibold animate-pulse">
+                    <div
+                      key={flag}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-full text-xs font-semibold animate-pulse"
+                    >
                       <AlertTriangle size={14} />
-                      {titleize(flag)} detectado
+                      <span className="whitespace-nowrap">
+                        Área de atención · {titleize(flag)}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -193,7 +256,7 @@ export default function ReadableResult({
             <div className="md:col-span-2">
               <h4 className="text-sm font-semibold text-gray-900 mb-2 flex items-center gap-2">
                 <Info size={16} className="text-blue-500" />
-                Resumen Clínico
+                Resumen Interpretativo
               </h4>
               <p className="text-sm text-gray-700 leading-relaxed bg-white p-3 rounded-lg border border-gray-100">
                 {summary}
@@ -232,22 +295,36 @@ export default function ReadableResult({
           {/* Domains / Scores */}
           {domains && (
             <div className="bg-white rounded-lg border border-gray-100 p-4 h-fit">
-              <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Puntuaciones por Dominio</h4>
+              <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+                Rangos simbólicos por dominio
+              </h4>
               <div className="space-y-3">
                 {Object.entries(domains).map(([key, value]) => {
-                  const percent = (value as any)?.percent_0_100;
-                  const avg = (value as any)?.avg_0_4;
+                  const percent = getDomainPercent(value);
+                  const descriptor = getDomainDescriptor(value);
                   return (
                     <div key={key}>
-                      <div className="flex justify-between text-sm mb-1">
-                        <span className="text-gray-700">{titleize(key)}</span>
-                        <span className="font-medium text-gray-900">{percent !== undefined ? `${percent}%` : avg}</span>
-                      </div>
-                      {percent !== undefined && (
-                        <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
-                          <div className="h-full bg-blue-500 rounded-full" style={{ width: `${percent}%` }} />
+                      <div className="flex flex-col gap-1">
+                        <div className="flex justify-between text-sm mb-1">
+                          <span className="text-gray-700">{titleize(key)}</span>
+                          <span className="text-[11px] uppercase tracking-wider text-gray-500">
+                            {descriptor}
+                          </span>
                         </div>
-                      )}
+                        {percent !== null && (
+                          <div className="h-1.5 w-full bg-gradient-to-r from-slate-200 to-slate-100 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-gradient-to-r from-emerald-400 via-amber-400 to-rose-500 rounded-full transition-[width] duration-500 ease-out"
+                              style={{ width: `${percent}%` }}
+                            />
+                          </div>
+                        )}
+                        {percent !== null && (
+                          <div className="text-[10px] text-slate-500 mt-1">
+                            <span title={`Referencia técnica: ${percent}`}>Referencia técnica</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   );
                 })}
@@ -259,7 +336,7 @@ export default function ReadableResult({
         {/* Recommendations */}
         {recommendations.length > 0 && (
           <div className="bg-blue-50 border border-blue-100 rounded-lg p-4">
-            <h4 className="text-sm font-semibold text-blue-900 mb-3">Recomendaciones</h4>
+            <h4 className="text-sm font-semibold text-blue-900 mb-3">Sugerencias simbólicas</h4>
             <ul className="space-y-2">
               {recommendations.map((r, i) => (
                 <li key={i} className="text-sm text-blue-800 flex items-start gap-2">
@@ -273,9 +350,7 @@ export default function ReadableResult({
 
         {/* Disclaimer / Context */}
         <div className="text-xs text-gray-500 border-t border-gray-100 pt-4 mt-4 italic">
-          <p>
-            {disclaimer || "Este resultado es orientativo y no constituye un diagnóstico médico definitivo. Debe ser interpretado por un profesional en el contexto clínico del paciente."}
-          </p>
+          <p>{disclaimer || DEFAULT_DISCLAIMER}</p>
         </div>
 
         {/* 4. Technical View (Hidden by default) */}

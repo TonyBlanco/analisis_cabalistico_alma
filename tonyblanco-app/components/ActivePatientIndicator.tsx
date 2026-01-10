@@ -17,9 +17,9 @@ interface ActivePatientIndicatorProps {
 }
 
 /**
- * Active Patient Indicator Component
+ * Active Consultant Indicator Component
  *
- * Muestra el paciente activo y un resumen de identidad/consentimiento.
+ * Muestra al consultante activo y un resumen de identidad/consentimiento.
  * No abre modales directamente: el parent controla selección vía onSelectPatient.
  */
 export default function ActivePatientIndicator({ onSelectPatient }: ActivePatientIndicatorProps) {
@@ -59,7 +59,7 @@ export default function ActivePatientIndicator({ onSelectPatient }: ActivePatien
       setProfile(summary);
     } catch (error) {
       console.error('Error fetching patient profile summary:', error);
-      setProfileError('No se pudo cargar el perfil del paciente.');
+      setProfileError('No se pudo cargar el perfil del consultante.');
     } finally {
       setLoadingProfile(false);
     }
@@ -134,7 +134,7 @@ export default function ActivePatientIndicator({ onSelectPatient }: ActivePatien
       setFeedback(null);
       if (type === 'archive') {
         await archivePatient(activePatient.id);
-        setFeedback('Paciente archivado.');
+        setFeedback('Consultante archivado.');
         clearActivePatientId();
         window.dispatchEvent(new Event('activePatientChanged'));
         setActivePatient(null);
@@ -145,12 +145,12 @@ export default function ActivePatientIndicator({ onSelectPatient }: ActivePatien
           therapy_status: type,
           pause_reason: requireReason ? formReason : undefined,
         });
-        setFeedback('Estado del paciente actualizado.');
+        setFeedback('Estado del consultante actualizado.');
         window.dispatchEvent(new Event('activePatientChanged'));
         loadActivePatient();
       }
     } catch (error: any) {
-      setFeedback(error?.message || 'No se pudo actualizar el estado del paciente.');
+        setFeedback(error?.message || 'No se pudo actualizar el estado del consultante.');
     } finally {
       setActionLoading(false);
       setConfirmOpen(false);
@@ -163,8 +163,8 @@ export default function ActivePatientIndicator({ onSelectPatient }: ActivePatien
       <div className="bg-white border border-gray-200 rounded-lg p-4 sm:p-6 shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <p className="text-sm font-medium text-gray-700 mb-1">Paciente activo</p>
-            <p className="text-sm text-gray-500">Selecciona un paciente para comenzar</p>
+            <p className="text-sm font-medium text-gray-700 mb-1">Consultante activo</p>
+            <p className="text-sm text-gray-500">Selecciona un consultante para comenzar</p>
           </div>
           {onSelectPatient && (
             <button
@@ -172,7 +172,7 @@ export default function ActivePatientIndicator({ onSelectPatient }: ActivePatien
               className="px-4 py-2 text-sm font-medium text-white rounded-md hover:opacity-90 transition-opacity shadow-sm"
               style={{ backgroundColor: 'var(--accent-color)' }}
             >
-              Seleccionar paciente
+              Seleccionar consultante
             </button>
           )}
         </div>
@@ -180,7 +180,7 @@ export default function ActivePatientIndicator({ onSelectPatient }: ActivePatien
     );
   }
 
-  const displayName = activePatient.name || `Paciente #${activePatient.id}`;
+  const displayName = activePatient.name || `Consultante #${activePatient.id}`;
   const consentText =
     profile && profile.consent_accepted_at
       ? `Consentimiento aceptado el ${new Date(
@@ -193,11 +193,11 @@ export default function ActivePatientIndicator({ onSelectPatient }: ActivePatien
       <div className="bg-white border border-gray-200 rounded-lg p-4 sm:p-6 shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <p className="text-sm font-medium text-gray-700 mb-1">Paciente activo</p>
+            <p className="text-sm font-medium text-gray-700 mb-1">Consultante activo</p>
             <p className="text-base text-gray-900 font-semibold">{displayName}</p>
             <div className="mt-2 space-y-1">
               {loadingProfile && (
-                <p className="text-xs text-gray-500">Cargando perfil del paciente...</p>
+              <p className="text-xs text-gray-500">Cargando perfil del consultante...</p>
               )}
               {profileError && <p className="text-xs text-red-600">{profileError}</p>}
               {profile && (
@@ -285,7 +285,7 @@ export default function ActivePatientIndicator({ onSelectPatient }: ActivePatien
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Editar perfil del paciente</DialogTitle>
+            <DialogTitle>Editar perfil del consultante</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-1">
@@ -429,14 +429,14 @@ export default function ActivePatientIndicator({ onSelectPatient }: ActivePatien
           <div className="space-y-3">
             {pendingAction?.type === 'active' && (
               <p className="text-sm text-gray-700">
-                Este paciente será marcado como <span className="font-semibold">activo</span>.
+                Este consultante será marcado como <span className="font-semibold">activo</span>.
               </p>
             )}
             {pendingAction?.type === 'paused' && (
               <>
                 <p className="text-sm text-gray-700">
-                  Este paciente será <span className="font-semibold">pausado</span>. No podrá ejecutar
-                  tests hasta reanudar.
+                  Este consultante será <span className="font-semibold">pausado</span>. No podrá iniciar
+                  exploraciones hasta reanudar.
                 </p>
                 <div className="space-y-1">
                   <label className="text-sm font-medium text-gray-700">Motivo de la pausa</label>
@@ -452,13 +452,13 @@ export default function ActivePatientIndicator({ onSelectPatient }: ActivePatien
             )}
             {pendingAction?.type === 'inactive' && (
               <p className="text-sm text-gray-700">
-                Este paciente será marcado como <span className="font-semibold">inactivo</span>. Se
-                limitarán las acciones clínicas y asignación de tests.
+                Este consultante será marcado como <span className="font-semibold">inactivo</span>. Se
+                limitarán las acciones simbólicas y asignación de exploraciones.
               </p>
             )}
             {pendingAction?.type === 'archive' && (
               <p className="text-sm text-gray-700">
-                Este paciente será <span className="font-semibold text-red-600">archivado</span> (soft
+                Este consultante será <span className="font-semibold text-red-600">archivado</span> (soft
                 delete). Podrás restaurarlo más adelante cambiando el estado a activo.
               </p>
             )}

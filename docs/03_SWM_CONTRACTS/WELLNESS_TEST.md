@@ -77,7 +77,7 @@ Cada sistema incluye una **representación visual SVG** del área corporal afect
 
 Los sistemas con puntuación **Regular (51-75%)** o **Crítica (76-100%)** se destacan automáticamente en un panel especial para:
 - Identificación rápida de áreas problemáticas
-- Priorización de atención médica
+- Priorización de seguimiento
 - Seguimiento específico de sistemas comprometidos
 
 ## 🎨 Diseño Visual
@@ -113,18 +113,18 @@ Cada sistema muestra:
 - Autoconocimiento de su estado de salud
 - Identificación temprana de desequilibrios
 - Seguimiento periódico de su bienestar
-- Preparación para consultas médicas
+- Preparación para consultas con profesionales
 
-### Para Profesionales de la Salud
-- Herramienta de screening inicial
-- Seguimiento de pacientes entre consultas
+### Para profesionales
+- Herramienta de screening/triage inicial
+- Seguimiento de usuarios entre sesiones
 - Documentación de evolución sintomática
 - Base objetiva para recomendaciones
 
 ### Para Terapeutas Holísticos
-- Evaluación integral del paciente
+- Evaluación integral del consultante
 - Identificación de patrones sistémicos
-- Priorización de tratamientos
+- Priorización de intervenciones
 - Seguimiento de efectividad de terapias
 
 ## 🔧 Implementación Técnica
@@ -182,10 +182,10 @@ maxPossibleScore = numberOfQuestions * 3
 ## 🎓 Base Científica
 
 El test se basa en:
-- Cuestionarios clínicos validados (PAI, MCMI-IV)
+- Instrumentos validados (PAI, MCMI-IV)
 - Escalas de síntomas somáticos (SSS-8)
 - Evaluaciones de sistemas corporales estándar
-- Metodología de screening de salud integral
+- Metodología de exploración de bienestar integral
 
 ## 📞 Soporte
 

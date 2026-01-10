@@ -2,7 +2,7 @@
 
 ## 📋 Resumen Ejecutivo
 
-Se ha implementado una nueva estructura de rutas para tests organizados por dominio (Cábala, Psicología, Astrología) con diferentes niveles de acceso según el tipo de usuario (terapeuta/profesional, paciente/portal asignado, cliente casual/membresía).
+Se ha implementado una nueva estructura de rutas para tests organizados por dominio (Cábala, Psicología, Astrología) con diferentes niveles de acceso según el tipo de usuario (terapeuta/profesional, usuario/portal asignado, cliente casual/membresía).
 
 **Fecha de implementación:** Diciembre 2024  
 **Estado:** ✅ Base implementada, pendiente rutas de dashboard

@@ -28,7 +28,7 @@ Documentación completa de la estructura de la base de datos, archivos que la ut
 - is_admin: Boolean
 - subscription_status: 'trial' | 'active' | 'canceled' | 'expired'
 - subscription_plan: 'personal' | 'professional' | 'premium'
-- max_patients: Límite de pacientes (terapeutas)
+- max_patients: Límite de consultantes (terapeutas)
 - current_patients_count: Contador actual
 ```
 
@@ -98,7 +98,7 @@ Documentación completa de la estructura de la base de datos, archivos que la ut
 
 **Relaciones:**
 - `test_results` → User (quien ejecutó el test)
-- `test_results` → Patient (si fue ejecutado para un paciente)
+- `test_results` → Patient (si fue ejecutado para un usuario)
 - `test_results` → TestModule (módulo del test)
 
 **Archivos que lo Usan:**
@@ -128,7 +128,7 @@ Documentación completa de la estructura de la base de datos, archivos que la ut
 ```
 
 **Relaciones:**
-- `cabalistic_analyses` → Patient (paciente analizado)
+- `cabalistic_analyses` → Patient (usuario analizado)
 - `cabalistic_analyses` → User (terapeuta que ejecutó)
 
 **Archivos que lo Usan:**

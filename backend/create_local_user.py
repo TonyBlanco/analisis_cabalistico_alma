@@ -53,6 +53,7 @@ def create_or_update_user(username, email, password, is_superuser=False, is_staf
     
     if not profile_created:
         profile.is_admin = is_superuser
+        profile.user_type = 'therapist' if is_superuser else 'personal'
         profile.subscription_status = 'active'
         profile.save()
     

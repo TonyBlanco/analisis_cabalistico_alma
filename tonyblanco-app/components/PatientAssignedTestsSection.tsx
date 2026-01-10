@@ -15,7 +15,7 @@ import { unassignTestFromPatient } from '@/lib/assignment-api';
  * - Fetches tests from GET /api/tests/
  * - Filters: user_access.has_special_access === true AND available_for_personal === true
  * - Shows status: pending / completed
- * - Action button: "Realizar test" (only for pending)
+ * - Action button: "Iniciar exploración" (only for pending)
  */
 export default function PatientAssignedTestsSection() {
   const router = useRouter();
@@ -283,7 +283,7 @@ export default function PatientAssignedTestsSection() {
                     className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-white rounded-md hover:opacity-90 transition-opacity shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                     style={{ backgroundColor: 'var(--accent-color)' }}
                   >
-                    {executingTestCode === test.code ? 'Ejecutando...' : 'Realizar test'}
+                    {executingTestCode === test.code ? 'Explorando...' : 'Iniciar exploración'}
                   </button>
                   {userType === 'therapist' && activePatientId && (
                     <button
@@ -303,7 +303,7 @@ export default function PatientAssignedTestsSection() {
           {completedTests.length > 0 && (
             <div className="mt-6 pt-6 border-t border-gray-200">
               <h3 className="text-sm font-medium text-gray-700 mb-3">
-                Tests completados
+                Exploraciones completadas
               </h3>
               {completedTests.map((test) => (
                 <div

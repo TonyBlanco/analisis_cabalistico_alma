@@ -2,15 +2,15 @@
 
 He analizado la integración entre `TestCatalogSection.tsx` (Frontend) y el backend (`test_views.py`, `test_api.ts`), encontrando los siguientes puntos críticos, desde errores funcionales potenciales hasta "code smells".
 
-## 🔴 1. Error Funcional: Asignación a Pacientes sin Usuario
-El backend (`AssignTestToPatientView`) **bloquea la asignación** si el paciente no tiene una cuenta de usuario (`User`) vinculada.
+## 🔴 1. Error Funcional: Asignación a usuarios sin cuenta
+El backend (`AssignTestToPatientView`) **bloquea la asignación** si el usuario no tiene una cuenta de usuario (`User`) vinculada.
 
 - **Código Backend:**
   ```python
   if not getattr(patient, 'user', None):
       return Response({ ... 'error': 'Paciente sin cuenta de usuario' ... }, status=400)
   ```
-- **Impacto:** Si creas un paciente manualmente en el dashboard sin email/invitación, intentar asignarle un test fallará.
+- **Impacto:** Si creas un usuario manualmente en el dashboard sin email/invitación, intentar asignarle un test fallará.
 - **Frontend:** El error se captura y muestra en un `toast`, pero no hay validación previa en la UI (el botón "Asignar" está habilitado aunque el paciente no tenga usuario).
 
 ## 🟠 2. Contaminación de Logs (Logging Pollution)
@@ -51,7 +51,7 @@ El frontend espera o intenta inferir `execution_mode`, pero el backend no lo env
 - **Consecuencia:** El frontend siempre cae en la lógica de inferencia basada en `available_for_therapists`. Funciona por ahora, pero es frágil si la lógica de negocio cambia.
 
 ## 🟢 5. Estado "Asignado" Desaparece al Completar
-Cuando un paciente completa un test, este deja de aparecer como "Asignado" en el catálogo (porque `getPatientPreviousTests` separa asignaciones pendientes de resultados).
+Cuando un usuario completa un test, este deja de aparecer como "Asignado" en el catálogo (porque `getPatientPreviousTests` separa asignaciones pendientes de resultados).
 - **Comportamiento:** El botón vuelve a mostrarse como "Asignar".
 - **Nota:** Esto puede ser intencional (permitir re-asignar), pero pierde el histórico visual de "Este test ya fue asignado y completado".
 
@@ -61,4 +61,4 @@ Cuando un paciente completa un test, este deja de aparecer como "Asignado" en el
 
 1.  **Limpiar Logs:** Corregir `AssignTestToPatientView` para no usar `logger.error` en flujo exitoso.
 2.  **Optimizar Query:** Reemplazar el loop `TestModule.objects.all()` por filtros `iexact` o `__in`.
-3.  **UI Feedback:** Si el paciente activo no tiene usuario vinculado, deshabilitar el botón "Asignar" o mostrar advertencia.
+3.  **UI Feedback:** Si el usuario activo no tiene cuenta vinculada, deshabilitar el botón "Asignar" o mostrar advertencia.

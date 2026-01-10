@@ -690,7 +690,7 @@ Si algo ejecuta, puntúa, asigna o pregunta → NO es SCDF.
 
 Decisión arquitectónica (final)
 
-El SCDF es el núcleo integrador clínico del sistema.
+El SCDF es el núcleo integrador del sistema.
 
 Los tests son fuentes de señal, no motores de decisión.
 
@@ -699,7 +699,7 @@ Esta separación es irreversible y forma parte del diseño base del sistema.
 
 Diccionario Bioemocional — Integración Árbol de la Vida (P1)
 
-El Diccionario Bioemocional se valida como fuente clínica de consulta con 1106 entradas estructuradas.
+El Diccionario Bioemocional se valida como fuente de consulta con 1106 entradas estructuradas.
 
 Se integra una capa consultiva no persistente del Árbol de la Vida, accesible únicamente para terapeutas.
 
@@ -713,7 +713,7 @@ El dominio cabalístico permanece desacoplado del dominio clínico y de SCDF.
 
 No hay impacto sobre tests, scoring, ni flujos existentes.
 
-La herramienta funciona exclusivamente como apoyo cognitivo clínico interno.
+La herramienta funciona exclusivamente como apoyo cognitivo profesional interno.
 
 ## Contrato SWM (v1) - Congelado
 
@@ -731,7 +731,7 @@ y no altera la arquitectura clinica ni los flujos descritos en esta auditoria.
 
 ### 1. Resumen de Intervención
 **Tipo de Cambio:** Completado de Contrato de Datos (Backend) / Visualización (Frontend)
-**Objetivo:** Exponer la relación `CabalisticAnalysis` dentro de `AnalysisRecord` para permitir la visualización de datos simbólicos (Tarot, Astrología) en el dashboard clínico sin romper la arquitectura sellada.
+**Objetivo:** Exponer la relación `CabalisticAnalysis` dentro de `AnalysisRecord` para permitir la visualización de datos simbólicos (Tarot, Astrología) en el dashboard profesional sin romper la arquitectura sellada.
 
 ### 2. Archivos Auditados y Modificados
 **Backend:**
@@ -786,7 +786,7 @@ Documentos Vinculantes: Se integran formalmente ASTROLOGIA_WORKSPACE_TAB_VISUAL_
 3. Estado de la Arquitectura
 Arquitectura Sellada: No se han detectado regresiones en los flujos inmutables patient_self y therapist_clinical.
 
-Capa Clínica vs Simbólica: Se mantiene la frontera técnica; el SCDF v2 permanece en modo consulta sin procesar la lógica del Árbol de la Vida.
+Capa Central vs Simbólica: Se mantiene la frontera técnica; el SCDF v2 permanece en modo consulta sin procesar la lógica del Árbol de la Vida.
 
 4. Mejoras de Infraestructura (Geocoding Unification)
 Se implementó un sistema unificado de geocodificación para resolver inconsistencias en el manejo de coordenadas geográficas:
@@ -803,7 +803,7 @@ Documentos actualizados: `docs/README.md`, `backend/API_DOCUMENTATION.md`
 Se aprueba la introducción documentada de una fase interpretativa simbólica bajo el nombre SWM v3 con las siguientes condiciones obligatorias:
 
 - SWM v3 está **autorizado** como capa interpretativa educativa asistida por IA.
-- SWM v3 es **no clínica** y **no** altera los flujos clínicos existentes ni el `execution_mode`.
+- SWM v3 es educativa y **no** altera los flujos existentes ni el `execution_mode`.
 - SWM v3 se desplegará de forma gradual y gobernada por feature flags (ej. `AI_TAROT_ENABLED`) y políticas de consentimiento.
 - La implementación debe respetar la auditoría vigente y no sustituye el juicio profesional del terapeuta.
 - Cualquier persistencia de lecturas deberá seguir los modos `no_store`, `store_anonymized`, `store_with_consent` y la propiedad de los datos será clara (ownership terapeutas).

@@ -28,10 +28,10 @@
 **Hallazgo 1**: Solo usa `IsAuthenticated`, no verifica que sea terapeuta
 - **Línea**: 233
 - **Problema**: Cualquier usuario autenticado puede acceder
-- **Riesgo**: Usuario personal podría crear análisis para pacientes ajenos
+- **Riesgo**: Usuario personal podría crear análisis para usuarios ajenos
 - **Solución**: Agregar `IsTherapist` permission class
 
-**Hallazgo 2**: Verificación de ownership del paciente es correcta
+**Hallazgo 2**: Verificación de ownership del usuario es correcta
 - **Línea**: 247-250
 - ✅ Filtra por `therapist=request.user` antes de `get_object_or_404`
 - ✅ Protege contra acceso a pacientes de otros terapeutas
@@ -45,10 +45,10 @@
 - **Riesgo**: Stacktrace parcial en respuesta al cliente
 - **Solución**: Capturar `ValidationError` específicamente y formatear mensajes
 
-**Hallazgo 4**: Validación de fecha/hora del paciente no se usa
+**Hallazgo 4**: Validación de fecha/hora del usuario no se usa
 - **Línea**: 262-266
 - **Problema**: Verifica `patient.birth_date` pero no la usa en el cálculo
-- **Riesgo**: Inconsistencia entre datos del paciente y input del request
+- **Riesgo**: Inconsistencia entre datos del usuario y input del request
 - **Solución**: Opcionalmente validar que coincidan o usar datos del paciente como fallback
 
 **Hallazgo 5**: Validación de coordenadas geográficas en schema
@@ -197,7 +197,7 @@ class KerykeionAnalysisView(APIView):
         4. Retornar analysis_id
         """
         try:
-            # Obtener el paciente (solo si es del terapeuta actual)
+            # Obtener el usuario (solo si es del terapeuta actual)
             try:
                 patient = Patient.objects.get(
                     id=id,
@@ -205,7 +205,7 @@ class KerykeionAnalysisView(APIView):
                 )
             except Patient.DoesNotExist:
                 return Response(
-                    {'error': 'Paciente no encontrado o no tienes acceso'},
+                    {'error': 'Usuario no encontrado o no tienes acceso'},
                     status=status.HTTP_404_NOT_FOUND
                 )
             
@@ -214,7 +214,7 @@ class KerykeionAnalysisView(APIView):
                 input_schema = KerykeionInputSchema(**request.data)
             except Exception as e:
                 # Loggear error completo internamente
-                logger.error(f"Error validando input Kerykeion para paciente {id}: {str(e)}", exc_info=True)
+                logger.error(f"Error validando input Kerykeion para usuario {id}: {str(e)}", exc_info=True)
                 # Retornar mensaje genérico al cliente
                 error_msg = 'Datos de entrada inválidos'
                 if hasattr(e, 'errors'):
@@ -233,7 +233,7 @@ class KerykeionAnalysisView(APIView):
                 result = execute_kerykeion(input_schema)
             except Exception as e:
                 # Loggear error completo internamente
-                logger.error(f"Error ejecutando Kerykeion para paciente {id}: {str(e)}", exc_info=True)
+                logger.error(f"Error ejecutando Kerykeion para usuario {id}: {str(e)}", exc_info=True)
                 # Retornar mensaje genérico al cliente
                 return Response(
                     {'error': 'Error al calcular carta natal. Por favor, verifica los datos de entrada.'},
@@ -257,10 +257,10 @@ class KerykeionAnalysisView(APIView):
                     therapist_notes='Generado automáticamente por Módulo Kerykeion - Fuente técnica objetiva'
                 )
                 
-                logger.info(f"Análisis Kerykeion creado: ID {analysis.id} para paciente {patient.id} por terapeuta {request.user.id}")
+                logger.info(f"Análisis Kerykeion creado: ID {analysis.id} para usuario {patient.id} por terapeuta {request.user.id}")
                 
             except Exception as e:
-                logger.error(f"Error guardando análisis Kerykeion para paciente {id}: {str(e)}", exc_info=True)
+                logger.error(f"Error guardando análisis Kerykeion para usuario {id}: {str(e)}", exc_info=True)
                 return Response(
                     {'error': 'Error al guardar el análisis'},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -277,7 +277,7 @@ class KerykeionAnalysisView(APIView):
             
         except Exception as e:
             # Catch-all para errores inesperados
-            logger.error(f"Error inesperado en KerykeionAnalysisView para paciente {id}: {str(e)}", exc_info=True)
+            logger.error(f"Error inesperado en KerykeionAnalysisView para usuario {id}: {str(e)}", exc_info=True)
             return Response(
                 {'error': 'Error interno del servidor'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR

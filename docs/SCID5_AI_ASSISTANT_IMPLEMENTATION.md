@@ -11,7 +11,7 @@ The SCID-5 AI Assistant is an ethical AI layer that provides therapeutic guidanc
 - **URL Pattern**: `/api/analysis-records/scid5-ai-assistant/`
 
 ### Frontend Components
-- **SCID5ClinicalModule**: Enhanced with AI assistant functionality
+- **SCID5HolisticModule**: Enhanced with AI assistant functionality
 - **AI Assistance Panel**: Displays suggestions, correlations, and ethical reminders
 - **Depth Level Selector**: Configurable exploration depth (1-3)
 
@@ -19,7 +19,7 @@ The SCID-5 AI Assistant is an ethical AI layer that provides therapeutic guidanc
 
 ### Absolute Prohibitions
 - ❌ No diagnosis (medical or psychological)
-- ❌ No DSM, CIE, or clinical pathology terminology
+- ❌ No medical or pathology terminology
 - ❌ No words: "enfermedad", "trastorno", "síndrome", "certeza", "pronóstico"
 - ❌ No treatment prescriptions
 - ❌ No biological causality assertions
@@ -143,15 +143,15 @@ The AI assistant integrates with existing patient data:
 ## Usage Guidelines
 
 ### For Therapists
-1. AI suggestions are tools, not substitutes for clinical judgment
+1. AI suggestions are tools, not substitutes for professional judgment
 2. All AI output must be reviewed and adapted
 3. Maintain therapeutic alliance and ethical boundaries
 4. Use AI assistance to enhance exploration, not direct it
 
 ### For Developers
-1. Never expose AI suggestions as clinical conclusions
+1. Never expose AI suggestions as professional conclusions
 2. Always include ethical disclaimers
-3. Maintain clear separation between AI assistance and clinical logic
+3. Maintain clear separation between AI assistance and core logic
 4. Log AI usage for quality monitoring
 
 ## Future Enhancements

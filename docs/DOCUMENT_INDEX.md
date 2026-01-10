@@ -18,6 +18,7 @@
 | `final_contradictions_matrix.csv` | `docs/00_SOURCE_OF_TRUTH/final_contradictions_matrix.csv` | Proposed | Governance | TBD | Matriz reconciliada y final propuesta. |
 | `final_system_classification.md` | `docs/00_SOURCE_OF_TRUTH/final_system_classification.md` | Proposed | Governance / Product | TBD | Clasificación final: KEEP / REBUILD / REMOVE. |
 | `TESTS_HOLISTIC_CATALOG.md` | `docs/00_SOURCE_OF_TRUTH/TESTS_HOLISTIC_CATALOG.md` | **Active** | Tests Catalog | TBD | Catálogo holístico de tests (actual). |
+| `CHAT_CONTINUITY_PROTOCOL.md` | `docs/CHAT_CONTINUITY_PROTOCOL.md` | **Active** | Governance / Ops | TBD | Protocolo vinculante para continuidad de chats con agentes. |
 | `SYMBOLIC_INTERPRETER_AI_IMPLEMENTATION.md` | `docs/backLegacy/obsolete_architecture/SYMBOLIC_INTERPRETER_AI_IMPLEMENTATION.md` | HISTÓRICO | Docs / Governance | TBD | Archivado tras reconciliación; ver symbolic_contradictions_matrix.csv |
 | `PR_WORKSPACE_GOVERNANCE_CHECKLIST.md` | `docs/backLegacy/rescued_docs/PR_WORKSPACE_GOVERNANCE_CHECKLIST.md` | HISTÓRICO | Docs / Governance | TBD | Archivado tras reconciliación; ver symbolic_contradictions_matrix.csv |
 | `UI_COPY_FREEZE.md` | `docs/backLegacy/rescued_docs/UI_COPY_FREEZE.md` | HISTÓRICO | Docs / Governance | TBD | Archivado tras reconciliación; ver symbolic_contradictions_matrix.csv |

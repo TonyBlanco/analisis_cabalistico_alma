@@ -54,8 +54,10 @@ INSTALLED_APPS = [
     'api',              # Tu app de lógica cabalística
     'astrology',        # Módulo de astrología (cálculos astronómicos)
     'courses',          # Sistema LMS de cursos
-    'symbolic.72_angels',  # SWM 72 Ángeles Engine
-    'symbolic.swm_v3',  # SWM v3 governed symbolic readings (Phase 3)
+    # The `symbolic` package is not a Python package in this repo (it's JS/TS).
+    # Comment out invalid references so Django can start locally.
+    # 'symbolic.72_angels',  # SWM 72 Ángeles Engine
+    # 'symbolic.swm_v3',  # SWM v3 governed symbolic readings (Phase 3)
 ]
 
 MIDDLEWARE = [

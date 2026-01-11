@@ -111,10 +111,21 @@ class Command(BaseCommand):
         deleted_log = []
         with transaction.atomic():
             for mod in candidates.select_for_update():
-                # Recompute counts
-                results_qs = getattr(mod, 'results') if hasattr(mod, 'results') else TestResult.objects.none()
-                access_qs = getattr(mod, 'user_access') if hasattr(mod, 'user_access') else UserTestAccess.objects.none()
-                license_qs = getattr(mod, 'licenses') if hasattr(mod, 'licenses') else UserTestLicense.objects.none()
+                # Recompute counts; ensure we operate on QuerySets (call .all() for RelatedManagers)
+                if hasattr(mod, 'results'):
+                    results_qs = mod.results.all()
+                else:
+                    results_qs = TestResult.objects.none()
+
+                if hasattr(mod, 'user_access'):
+                    access_qs = mod.user_access.all()
+                else:
+                    access_qs = UserTestAccess.objects.none()
+
+                if hasattr(mod, 'licenses'):
+                    license_qs = mod.licenses.all()
+                else:
+                    license_qs = UserTestLicense.objects.none()
 
                 res_count = results_qs.count()
                 acc_count = access_qs.count()

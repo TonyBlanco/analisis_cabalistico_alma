@@ -26,6 +26,8 @@ Incluye el inventario final de contradicciones, dumps runtime, estado del paquet
 - `final_contradictions_matrix.csv` — matriz final después de reconciliación.
 - `final_system_classification.md` — clasificación final (KEEP / REBUILD / REMOVE) con recomendaciones.
 
+- `docs/EXPLORACIONES_CANONICAS/` — paquete canónico para "Exploraciones Canónicas" (holistic, non-clinical): modelo, conversiones legacy→holístico, mapeo sefirot y protocolo IA terapéutica.
+
 ---
 
 ## Checklist de decisiones (para gobernanza)

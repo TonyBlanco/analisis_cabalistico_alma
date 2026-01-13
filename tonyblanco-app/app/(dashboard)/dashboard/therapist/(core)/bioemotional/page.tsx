@@ -420,8 +420,10 @@ export default function TherapistBioEmotionalPage() {
     }
   };
 
+  import confirmAction from '@/lib/confirm';
+
   const handleDeleteHypothesis = async (id: string) => {
-    const confirmed = window.confirm('¿Seguro que quieres eliminar esta hipótesis?');
+    const confirmed = await confirmAction('¿Seguro que quieres eliminar esta hipótesis?');
     if (!confirmed) return;
 
     try {

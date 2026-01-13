@@ -176,13 +176,13 @@ export function AdminWorkspace() {
     });
   };
 
+  import confirmAction from '../../lib/confirm';
+
   const handleDeleteUser = async (id: number) => {
     setActionError(null);
 
-    if (typeof window !== 'undefined') {
-      const ok = window.confirm(`Eliminar usuario ID ${id}? Esta acción no se puede deshacer.`);
-      if (!ok) return;
-    }
+    const ok = await confirmAction(`Eliminar usuario ID ${id}? Esta acción no se puede deshacer.`);
+    if (!ok) return;
 
     await withBusy(id, async () => {
       // Optimistic remove

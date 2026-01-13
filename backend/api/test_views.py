@@ -11,7 +11,7 @@ from django.db import connection
 from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
-from .test_models import TestModule, UserTestAccess, TestResult
+from api.test_models import TestModule, UserTestAccess, TestResult
 from datetime import datetime
 from django.utils import timezone
 from .test_serializers import (
@@ -20,6 +20,7 @@ from .test_serializers import (
     TestExecutionSerializer
 )
 from api.utils import ClinicalScorer, TEST_LINKS
+from .diagnostics import compute_asrs_essence
 from .models import Patient, UserProfile
 from .validators.test_execution import (
     validate_execution_mode,
@@ -220,8 +221,6 @@ class AvailableTestsView(APIView):
             try:
                 pid = int(patient_id)
                 patient = Patient.objects.get(id=pid, therapist=user)
-                from api.test_models import UserTestAccess as _UserTestAccess, TestResult as _TestResult
-
                 # Serializer was built from `filtered_tests` in the same order,
                 # so we can safely zip modules -> serialized items and annotate directly.
                 for module, item in zip(filtered_tests, tests_payload):
@@ -229,10 +228,10 @@ class AvailableTestsView(APIView):
                     has_result = False
                     try:
                         if getattr(patient, 'user', None):
-                            already_assigned = _UserTestAccess.objects.filter(
+                            already_assigned = UserTestAccess.objects.filter(
                                 user=patient.user, test_module=module, has_special_access=True
                             ).exists()
-                            has_result = _TestResult.objects.filter(
+                            has_result = TestResult.objects.filter(
                                 patient=patient, test_module=module, is_archived=False
                             ).exists()
                     except Exception:
@@ -407,7 +406,6 @@ class ExecuteTestView(APIView):
             # If a test is therapist-only but the requesting user has a UserTestAccess granted
             # (has_special_access=True), permit execution as patient_self by that user.
             if execution_mode == 'therapist_clinical' and getattr(profile, 'user_type', None) in ('patient', 'personal'):
-                from api.test_models import UserTestAccess
                 has_access = UserTestAccess.objects.filter(user=request.user, test_module=test_module, has_special_access=True).exists()
                 if has_access:
                     execution_mode = 'patient_self'
@@ -457,7 +455,6 @@ class ExecuteTestView(APIView):
             assigned_override = False
             try:
                 if execution_mode == 'patient_self' and not getattr(test_module, 'available_for_personal', False):
-                    from api.test_models import UserTestAccess
                     if UserTestAccess.objects.filter(user=request.user, test_module=test_module, has_special_access=True).exists():
                         assigned_override = True
             except Exception:
@@ -525,8 +522,47 @@ class ExecuteTestView(APIView):
                 input_data['persona1_fecha_nacimiento'] = input_data.get('fecha_nacimiento') or (str(profile.birth_date) if profile.birth_date else (str(birth_data.birth_date) if birth_data else None))
 
         # Procesar el test
-        result_data = self._process_test(test_module, input_data)
-        user_access.record_use()
+        processed_ok = True
+        if test_module.code == 'asrs_essence':
+            raw_answers = input_data.get('answers')
+            answers = raw_answers if isinstance(raw_answers, dict) else {}
+            required_keys = [f"q{i}" for i in range(1, 9)]
+            normalized_answers = {}
+            missing = []
+            invalid = []
+            for key in required_keys:
+                if key not in answers:
+                    missing.append(key)
+                    continue
+                try:
+                    value = int(answers[key])
+                except Exception:
+                    invalid.append(key)
+                    continue
+                if value < 1 or value > 5:
+                    invalid.append(key)
+                    continue
+                normalized_answers[key] = value
+
+            input_data['answers'] = normalized_answers
+
+            if missing or invalid:
+                processed_ok = False
+                result_data = {
+                    'processed': False,
+                    'structured_data': None,
+                    'raw_answers': {},
+                    'message': 'Respuestas incompletas para ASRS-Essence.',
+                    'timestamp': str(datetime.now()),
+                }
+            else:
+                result_data = compute_asrs_essence({'answers': normalized_answers})
+                processed_ok = bool(result_data.get('processed', True))
+        else:
+            result_data = self._process_test(test_module, input_data)
+
+        if processed_ok:
+            user_access.record_use()
 
         test_result = None
         if data.get('save_result', True):
@@ -568,6 +604,8 @@ class ExecuteTestView(APIView):
             details_dict = {
                 'audit': audit_metadata
             }
+            if test_module.code == 'asrs_essence':
+                details_dict['raw_answers'] = result_data.get('raw_answers', {})
 
             clinician_notes = ''
             try:
@@ -590,7 +628,11 @@ class ExecuteTestView(APIView):
                 notes=clinician_notes
             )
 
-        response_data = {'success': True, 'result': result_data, 'uses_remaining': None}
+        response_data = {
+            'success': bool(processed_ok),
+            'result': result_data,
+            'uses_remaining': None,
+        }
         if test_module.uses_per_month:
             response_data['uses_remaining'] = (test_module.uses_per_month - user_access.current_month_uses)
         if test_result:
@@ -1051,7 +1093,7 @@ class TestResultDetailView(APIView):
                 'details': result.details or {},
             })
 
-        serializer = TestResultSerializer(result)
+        serializer = TestResultSerializer(result, context={'request': request})
         return Response(serializer.data)
     
     def patch(self, request, pk):
@@ -1408,7 +1450,7 @@ class PatientPreviousTestsView(APIView):
         except Exception:
             pass
         
-        serializer = TestResultSerializer(results, many=True)
+        serializer = TestResultSerializer(results, many=True, context={'request': request})
         serialized = serializer.data
 
         # Augment serialized results with legacy assignment info so frontend can display them

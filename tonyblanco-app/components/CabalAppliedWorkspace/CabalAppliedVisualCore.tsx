@@ -9,21 +9,21 @@ import { useTreeStructuralState } from '@/lib/tree-structural-state';
 import TreeOfLifeSVG from '@/components/Tree/TreeOfLifeSVG';
 import { TreeWithFlows } from '@/components/Tree';
 import TreeVisualPlaceholder from './TreeVisualPlaceholder';
-import { ejecutarMetodoPitagorico } from '../../../src/symbolic/methods/pitagoras';
-import type { PitagorasSymbolicState, PitagorasNumberMeaning } from '../../../src/symbolic/methods/pitagoras/pitagoras.types';
-import { adaptPitagorasToTree, type TreeStructuralState } from '../../../src/symbolic/tree';
+import { ejecutarMetodoPitagorico } from '@holistica/symbolic/methods/pitagoras';
+import type { PitagorasSymbolicState, PitagorasNumberMeaning } from '@holistica/symbolic/methods/pitagoras/pitagoras.types';
+import { adaptPitagorasToTree, type TreeStructuralState } from '@holistica/symbolic/tree';
 
 // Additional symbolic methods (FASE 1)
-import { ejecutarMetodoGematriaStandard, adaptGematriaStandardToTree } from '../../../src/symbolic/methods/gematria-standard';
-import { ejecutarMetodoGematriaKatan, adaptGematriaKatanToTree } from '../../../src/symbolic/methods/gematria-katan';
-import { ejecutarMetodoMisparGadol, adaptMisparGadolToTree } from '../../../src/symbolic/methods/mispar-gadol';
-import { ejecutarMetodoMisparSiduri, adaptMisparSiduriToTree } from '../../../src/symbolic/methods/mispar-siduri';
-import { ejecutarMetodoMilui, adaptMiluiToTree } from '../../../src/symbolic/methods/milui';
-import { ejecutarMetodoAtbash, adaptAtbashToTree } from '../../../src/symbolic/methods/atbash';
-import { ejecutarMetodoAlbam, adaptAlbamToTree } from '../../../src/symbolic/methods/albam';
-import { ejecutarMetodoAvgad, adaptAvgadToTree } from '../../../src/symbolic/methods/avgad';
-import { ejecutarMetodoTemurah, adaptTemurahToTree } from '../../../src/symbolic/methods/temurah';
-import { ejecutarMetodoNotarikon, adaptNotarikonToTree } from '../../../src/symbolic/methods/notarikon';
+import { ejecutarMetodoGematriaStandard, adaptGematriaStandardToTree } from '@holistica/symbolic/methods/gematria-standard';
+import { ejecutarMetodoGematriaKatan, adaptGematriaKatanToTree } from '@holistica/symbolic/methods/gematria-katan';
+import { ejecutarMetodoMisparGadol, adaptMisparGadolToTree } from '@holistica/symbolic/methods/mispar-gadol';
+import { ejecutarMetodoMisparSiduri, adaptMisparSiduriToTree } from '@holistica/symbolic/methods/mispar-siduri';
+import { ejecutarMetodoMilui, adaptMiluiToTree } from '@holistica/symbolic/methods/milui';
+import { ejecutarMetodoAtbash, adaptAtbashToTree } from '@holistica/symbolic/methods/atbash';
+import { ejecutarMetodoAlbam, adaptAlbamToTree } from '@holistica/symbolic/methods/albam';
+import { ejecutarMetodoAvgad, adaptAvgadToTree } from '@holistica/symbolic/methods/avgad';
+import { ejecutarMetodoTemurah, adaptTemurahToTree } from '@holistica/symbolic/methods/temurah';
+import { ejecutarMetodoNotarikon, adaptNotarikonToTree } from '@holistica/symbolic/methods/notarikon';
 
 // Symbolic Interpretation AI
 import { saveCabalaAplicadaMethodRecord } from '@/lib/cabala-aplicada-api';

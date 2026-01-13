@@ -6,7 +6,7 @@ import { saveCabalaAplicadaMethodRecord } from '@/lib/cabala-aplicada-api';
 import { generateCabalaAplicadaGraphicPDF } from './cabalaAplicadaPdf';
 import { SymbolicInterpretationPanel } from '@/components/SymbolicInterpretation';
 import { generateAISymbolicInterpretation } from '@/lib/api/symbolic-interpreter-api';
-import type { SymbolicInterpretation } from '../../../src/symbolic/tree/symbolic-interpreter.types';
+import type { SymbolicInterpretation } from '@holistica/symbolic/tree/symbolic-interpreter.types';
 import type { CabalaAplicadaWorkspaceExportState } from './CabalAppliedVisualCore';
 
 function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {

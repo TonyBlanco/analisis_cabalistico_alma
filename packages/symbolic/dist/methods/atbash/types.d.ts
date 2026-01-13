@@ -1,0 +1,2 @@
+export type { PitagorasInput as AtbashInput, PitagorasResult as AtbashResult, PitagorasSymbolicState as AtbashSymbolicState, PitagorasNumberMeaning as AtbashNumberMeaning } from '../pitagoras/pitagoras.types';
+//# sourceMappingURL=types.d.ts.map

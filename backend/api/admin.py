@@ -14,7 +14,7 @@ from .models import (
     AvailableSlot,
     BlockedDate
 )
-from .test_models import TestModule, UserTestAccess, TestResult
+from .test_models import TestModule, UserTestAccess, TestResult, HolisticExploration
 
 
 @admin.register(UserProfile)
@@ -177,3 +177,35 @@ class TestResultAdmin(admin.ModelAdmin):
     search_fields = ['user__username', 'test_module__name', 'client_name', 'notes']
     readonly_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
+
+
+@admin.register(HolisticExploration)
+class HolisticExplorationAdmin(admin.ModelAdmin):
+    list_display = ['code', 'public_name', 'category', 'primary_sefirah', 'source_test']
+    search_fields = ['code', 'public_name']
+    list_filter = ['category', 'primary_sefirah', 'therapist_only_results']
+    readonly_fields = [
+        'code',
+        'public_name',
+        'category',
+        'primary_sefirah',
+        'secondary_sefirot',
+        'client_visible_fields',
+        'therapist_only_fields',
+        'source_test',
+        'therapist_only_results',
+        'ai_interpretation_enabled',
+        'description',
+        'created_at',
+    ]
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        if request.method in ("POST", "PUT", "PATCH", "DELETE"):
+            return False
+        return True

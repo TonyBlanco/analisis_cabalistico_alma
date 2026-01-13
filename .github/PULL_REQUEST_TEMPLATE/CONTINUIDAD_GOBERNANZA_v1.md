@@ -33,3 +33,11 @@ Notas:
 ---
 
 Please mark the checklist and add approvers from the governance committee as reviewers.
+
+
+
+Exacta (recomendada):
+"REANUDAR CONTEXTO: repo=analisis_cabalistico_alma; doc=00_SOURCE_OF_TRUTH.md; last_action=DOCS_MOVE_2026-01-10; owner=TBD"
+
+Versión corta (para canales/chat):
+REANUDAR CONTEXTO: repo=analisis_cabalistico_alma; doc=00_SOURCE_OF_TRUTH.md; last_action=DOCS_MOVE_2026-01-10

@@ -25,13 +25,14 @@ function getAuthHeaders(): HeadersInit {
 /**
  * Obtiene todos los tests disponibles para el usuario actual
  */
-export async function getAvailableTests(): Promise<{
+export async function getAvailableTests(patientId?: number): Promise<{
   tests: TestModule[];
   user_type: string;
   subscription_plan: string;
   membership_active: boolean;
 }> {
-  const response = await fetch(`${API_BASE_URL}/tests/`, {
+  const query = patientId ? `?patient_id=${encodeURIComponent(patientId)}` : '';
+  const response = await fetch(`${API_BASE_URL}/tests/${query}`, {
     headers: getAuthHeaders(),
   });
 

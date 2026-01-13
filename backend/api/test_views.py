@@ -61,7 +61,8 @@ def _has_testmodule_is_assignable_column() -> bool:
 def _safe_testmodule_queryset():
     # Enforce global manager filter for ALL queries retrieving test lists
     # We assume the column exists as migrations are confirmed applied.
-    return TestModule.objects._safe_testmodule_queryset()
+    # Manager doesn't expose private queryset methods; call it on a queryset.
+    return TestModule.objects.all()._safe_testmodule_queryset()
 
 
 def _assert_safe_testmodule(module, context=None):
@@ -259,7 +260,8 @@ class AvailableTestsView(APIView):
             'tests': tests_payload,
             'user_type': profile.user_type,
             'subscription_plan': profile.subscription_plan or 'free',
-            'membership_active': profile.membership_active
+            'membership_active': profile.membership_active,
+            'mode': 'holistic_readonly',
         })
 
 

@@ -1,0 +1,2 @@
+export const MISPAR_SIDURI_METADATA = { id: 'mispar-siduri', name: 'Mispar Siduri', description: 'Valor simplificado de letras según tradición Siduri.', version: '1.0.0' };
+export const MISPAR_SIDURI_EXPLANATION = 'Mispar Siduri: simplificación para formación.';

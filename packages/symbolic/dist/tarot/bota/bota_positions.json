@@ -1,0 +1,17 @@
+{
+    "origen": {
+        "label": "Origen",
+        "definition": "Condición previa o causa estructural que da lugar a la situación observada.",
+        "scope": "pasado / raíz"
+    },
+    "presente": {
+        "label": "Presente",
+        "definition": "Estado observable actual del símbolo dentro del spread.",
+        "scope": "manifestación actual"
+    },
+    "direccion": {
+        "label": "Dirección",
+        "definition": "Vector de movimiento simbólico hacia el que tiende la energía observada.",
+        "scope": "tendencia / proyección"
+    }
+}

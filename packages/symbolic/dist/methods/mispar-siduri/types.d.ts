@@ -1,0 +1,2 @@
+export type { PitagorasInput as MisparSiduriInput, PitagorasResult as MisparSiduriResult, PitagorasSymbolicState as MisparSiduriSymbolicState, PitagorasNumberMeaning as MisparSiduriNumberMeaning } from '../pitagoras/pitagoras.types';
+//# sourceMappingURL=types.d.ts.map

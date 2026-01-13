@@ -1,0 +1,2 @@
+export type { PitagorasInput as AlbamInput, PitagorasResult as AlbamResult, PitagorasSymbolicState as AlbamSymbolicState, PitagorasNumberMeaning as AlbamNumberMeaning } from '../pitagoras/pitagoras.types';
+//# sourceMappingURL=types.d.ts.map

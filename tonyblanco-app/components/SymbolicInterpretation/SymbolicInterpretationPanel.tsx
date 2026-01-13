@@ -12,8 +12,8 @@
 
 import { useState } from 'react';
 import { Sparkles, AlertCircle, Info, BookOpen, X } from 'lucide-react';
-import type { SymbolicInterpretation } from '../../../src/symbolic/tree/symbolic-interpreter.types';
-import { SYMBOLIC_INTERPRETER_META } from '../../../src/symbolic/tree/symbolic-interpreter.types';
+import type { SymbolicInterpretation } from '@holistica/symbolic/tree/symbolic-interpreter.types';
+import { SYMBOLIC_INTERPRETER_META } from '@holistica/symbolic/tree/symbolic-interpreter.types';
 
 interface SymbolicInterpretationPanelProps {
   interpretation: SymbolicInterpretation | null;

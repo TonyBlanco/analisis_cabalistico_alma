@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback, useMemo } from 'react';
-import { ClipboardList, Loader2, Mail, CheckCircle, Info } from 'lucide-react';
+import { ClipboardList, Loader2, Mail, CheckCircle, Info, Sun, Feather, Cloud, Star, Zap } from 'lucide-react';
 import { TEST_TYPES, type TestModule } from '@/lib/test-types';
 import { clinicalTestsRegistry } from '@/lib/clinicalTests.registry';
 import { getActivePatientId } from '@/lib/active-patient';
@@ -63,7 +63,7 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
     try {
       setLoading(true);
       setError(null);
-      const data = await getAvailableTests();
+      const data = await getAvailableTests(activePatientId ?? undefined);
       setTests(data.tests as any[]);
     } catch (err) {
       console.error('Error fetching tests:', err);
@@ -246,6 +246,89 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
     },
   ];
 
+  // Cabalistic stages (UI-only grouping)
+  const cabalisticSections: Array<{
+    key: string;
+    label: string;
+    desc: string;
+    codes: string[];
+  }> = [
+    {
+      key: 'atzilut',
+      label: 'Atzilut — Unidad y Esencia',
+      desc: 'Exploraciones orientadas a la esencia y la unidad.',
+      codes: ['past-lives', 'asrs_essence', 'mcmi4_mystic'],
+    },
+    {
+      key: 'beria',
+      label: 'Beriá — Intelecto y Conciencia',
+      desc: 'Exploraciones centradas en pensamiento y consciencia.',
+      codes: ['wellness', 'screening-general', 'scl90'],
+    },
+    {
+      key: 'ietzira',
+      label: 'Ietzirá — Emoción y Regulación',
+      desc: 'Exploraciones sobre emoción, afecto y regulación.',
+      codes: ['anxiety-state-trait', 'stress-regulation', 'bdi-ii', 'ybocs_soul'],
+    },
+    {
+      key: 'asia',
+      label: 'Asiá — Acción y Cuerpo',
+      desc: 'Exploraciones sobre hábitos, sueño y cuerpo.',
+      codes: ['insomnia', 'nutrition', 'dudit_spirit', 'eat26_spirit'],
+    },
+  ];
+
+  const transversalCodes = ['sha_harmony'];
+
+  // UI-only mapping: Nivel del Alma (soul level) per test code
+  const soulLevels: Record<string, string> = {
+    insomnia: 'Néfesh',
+    nutrition: 'Néfesh',
+    dudit_spirit: 'Rúaj',
+    eat26_spirit: 'Rúaj',
+
+    'anxiety-state-trait': 'Rúaj',
+    'stress-regulation': 'Rúaj',
+    'bdi-ii': 'Neshamá',
+    ybocs_soul: 'Rúaj',
+
+    wellness: 'Neshamá',
+    'screening-general': 'Neshamá',
+    scl90: 'Neshamá',
+
+    asrs_essence: 'Jaiá',
+    mcmi4_mystic: 'Jaiá',
+    'past-lives': 'Iejidá',
+
+    sha_harmony: 'Jaiá',
+  };
+
+  // UI-only mapping: CSS classes and optional icon per soul level
+  const soulLevelClasses: Record<string, string> = {
+    'Néfesh': 'bg-amber-100 text-amber-800',
+    'Rúaj': 'bg-green-100 text-green-800',
+    'Neshamá': 'bg-blue-100 text-blue-800',
+    'Jaiá': 'bg-purple-100 text-purple-800',
+    'Iejidá': 'bg-yellow-100 text-yellow-800',
+  };
+
+  const soulLevelIcons: Record<string, any> = {
+    'Néfesh': Sun,
+    'Rúaj': Feather,
+    'Neshamá': Cloud,
+    'Jaiá': Star,
+    'Iejidá': Zap,
+  };
+
+  // UI-only mapping: header color classes per cabalistic world (Mundo)
+  const sectionHeaderClasses: Record<string, string> = {
+    atzilut: 'border-violet-500 bg-violet-50/60',
+    beria: 'border-blue-500 bg-blue-50/60',
+    ietzira: 'border-green-500 bg-green-50/60',
+    asia: 'border-amber-500 bg-amber-50/60',
+  };
+
   return (
     <div className="bg-white border border-gray-100 rounded-xl p-6 shadow-sm">
       <div className="flex items-center justify-between mb-6">
@@ -276,20 +359,22 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
           </div>
         ) : (
           <div className="space-y-6">
-            {familyOrder.map((family) => {
-              const items = groupedByFamily[family.key] || [];
+            {cabalisticSections.map((section) => {
+              const codesSet = new Set(section.codes.map((c) => c.toLowerCase()));
+              const items = normalizedTests.filter((t) => codesSet.has(String(t.code).toLowerCase()));
               if (items.length === 0) return null;
               return (
-                <section key={family.key} className="space-y-3">
+                <section key={section.key} className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-sm font-semibold text-gray-800">{family.label}</h3>
-                      <p className="text-xs text-gray-500">{family.desc}</p>
+                    <div className={`rounded-xl px-4 py-3 mb-4 border-l-4 ${sectionHeaderClasses[section.key] || 'border-gray-300 bg-gray-50/60'}`}>
+                      <h3 className="text-sm font-semibold text-gray-800">{section.label}</h3>
+                      <p className="text-xs text-gray-500">{section.desc}</p>
                     </div>
                   </div>
                   <div className="space-y-3">
                     {items.map((test) => {
                       const isTherapistOnly = test.mode === 'therapist_clinical';
+                      const soulLevel = soulLevels[String(test.code).toLowerCase()];
                       return (
                         <div
                           key={test.code}
@@ -297,11 +382,22 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
                         >
                           <div className="flex items-start justify-between gap-3">
                             <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-1">
+                        <div className="flex items-center gap-3 mb-1">
                         <span className={`text-xs px-2 py-1 rounded-full ${isTherapistOnly ? 'bg-slate-100 text-slate-700' : 'bg-emerald-50 text-emerald-700'}`}>
                           {isTherapistOnly ? 'Holístico (profesional)' : 'Asignable al consultante'}
                         </span>
                         <span className="text-xs text-gray-500">{(test as any).domainLabel || test.domain || 'Dominio holístico'}</span>
+                        {soulLevel && (() => {
+                          const lvl = soulLevel;
+                          const cls = soulLevelClasses[lvl] || 'bg-indigo-50 text-indigo-700';
+                          const Icon = soulLevelIcons[lvl];
+                          return (
+                            <span className={`text-xs px-2 py-1 rounded-full ${cls} flex items-center gap-1`}>
+                              {Icon ? <Icon className="w-3 h-3" /> : null}
+                              {lvl}
+                            </span>
+                          );
+                        })()}
                         {(test as any).implemented === false && (
                           <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-600 border border-gray-200">
                             En desarrollo
@@ -329,7 +425,6 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
                         </span>
                       ) : (
                         (() => {
-                          // Canonical "assigned" = UserTestAccess assignment + test is assignable and executable (has patient_route)
                           const assignedCodes = new Set(
                             assignedTests
                               .map((t: any) => (t.test_module?.code || t.test_module_code || t.test_id))
@@ -337,11 +432,8 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
                               .map((c: any) => String(c).toLowerCase()),
                           );
                           const hasPatientRoute = Boolean((test as any).patient_route);
-                          // Test is assignable if it's active and available for therapists.
-                          // Do NOT require `patient_route` for wellness tests — rely on therapist flag and patient availability.
-                          // Also require the active patient to have a linked user (activePatientHasUser) so assignment is meaningful.
                           const isAssignable = Boolean(test.is_active) && Boolean((test as any).available_for_therapists) && Boolean(activePatientHasUser);
-                          const isAssigned = isAssignable && assignedCodes.has(String(test.code).toLowerCase());
+                          const isAssigned = Boolean((test as any).already_assigned) || Boolean((test as any).locked) || (isAssignable && assignedCodes.has(String(test.code).toLowerCase()));
                           const isAssigning = assigningTestCode === test.code;
 
                           if (isAssigned) {
@@ -352,7 +444,6 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
                             );
                           }
 
-                          // The only criterion for showing the Assign action is whether it's already assigned.
                           if (!isAssignable) {
                             return (
                               <span className="text-xs text-gray-500 px-2 py-1 rounded border border-gray-200">
@@ -390,6 +481,65 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
                 </section>
               );
             })}
+            {/* Transversal section (sha_harmony and similar) */}
+            {(() => {
+              const items = normalizedTests.filter((t) => transversalCodes.includes(String(t.code).toLowerCase()));
+              if (items.length === 0) return null;
+              return (
+                <section key="transversal" className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-sm font-semibold text-gray-800">Transversal</h3>
+                      <p className="text-xs text-gray-500">Exploraciones transversales aplicables en varias etapas.</p>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    {items.map((test) => {
+                      const soulLevel = soulLevels[String(test.code).toLowerCase()];
+                      return (
+                      <div
+                        key={test.code}
+                        className="border border-gray-100 rounded-lg p-4 hover:border-gray-200 transition-colors bg-white shadow-[0_1px_3px_rgba(0,0,0,0.04)]"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-1">
+                              <span className="text-xs px-2 py-1 rounded-full bg-emerald-50 text-emerald-700">Asignable al consultante</span>
+                              <span className="text-xs text-gray-500">{(test as any).domainLabel || test.domain || 'Dominio holístico'}</span>
+                              {soulLevel && (() => {
+                                const lvl = soulLevel;
+                                const cls = soulLevelClasses[lvl] || 'bg-indigo-50 text-indigo-700';
+                                const Icon = soulLevelIcons[lvl];
+                                return (
+                                  <span className={`text-xs px-2 py-1 rounded-full ${cls} flex items-center gap-1`}>
+                                    {Icon ? <Icon className="w-3 h-3" /> : null}
+                                    {lvl}
+                                  </span>
+                                );
+                              })()}
+                            </div>
+                            <h3 className="font-semibold text-gray-900">{test.name}</h3>
+                            {test.description && <p className="text-sm text-gray-600 mt-1 leading-relaxed">{test.description}</p>}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => setHelpTestCode(test.code)}
+                              className="p-2 rounded-full border border-gray-200 text-[#1f6c8f] hover:bg-gray-50"
+                              aria-label="Ver guía holística"
+                              title="Ver guía simbólica"
+                            >
+                              <Info className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                      )
+                    })}
+                  </div>
+                </section>
+              );
+            })()}
           </div>
         )}
       </div>

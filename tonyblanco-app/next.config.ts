@@ -5,9 +5,7 @@ const nextConfig: NextConfig = {
   experimental: {
     externalDir: true,
   },
-  turbopack: {
-    root: path.resolve(__dirname),
-  },
+  transpilePackages: ['@holistica/symbolic'],
 };
 
 export default nextConfig;

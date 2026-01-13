@@ -2,9 +2,9 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import type { TarotCardDraw } from './TarotSpreadView';
-import { resolveBotaIdentity } from '../../../src/symbolic/tarot/bota/botaIdentityResolver';
-import { buildBotaPositionMeaning } from '../../../src/symbolic/tarot/bota/positionInterpreter';
-import { getBotaVisualStructure } from '../../../src/symbolic/tarot/bota/botaVisualMapper';
+import { resolveBotaIdentity } from '@holistica/symbolic/tarot/bota/botaIdentityResolver';
+import { buildBotaPositionMeaning } from '@holistica/symbolic/tarot/bota/positionInterpreter';
+import { getBotaVisualStructure } from '@holistica/symbolic/tarot/bota/botaVisualMapper';
 
 type Props = {
   systemLabel?: string | null;

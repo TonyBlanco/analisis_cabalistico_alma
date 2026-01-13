@@ -9,11 +9,11 @@ import TarotDrawPanel from '@/components/tarot/TarotDrawPanel';
 import { ARCANOS_MAYORES } from '@/components/BodySoulVisualization/plugins/tarot/tarot.logic';
 import type { PatientContext } from '@/components/BodySoulVisualization/types';
 import BotaImageReferencePanel from '@/components/tarot/bota/BotaImageReferencePanel';
-import { THOTH_MAJOR_ARCANA } from '../../../src/symbolic/tarot/decks/thoth';
-import { GOLDEN_DAWN_MAJOR_ARCANA } from '../../../src/symbolic/tarot/decks/golden-dawn';
-import { BOTA_MAJOR_ARCANA } from '../../../src/symbolic/tarot/decks/bota';
-import { HERMETIC_MAJOR_ARCANA } from '../../../src/symbolic/tarot/decks/hermetic';
-import { SEPHIROTH_MAJOR_ARCANA } from '../../../src/symbolic/tarot/decks/sephiroth';
+import { THOTH_MAJOR_ARCANA } from '@holistica/symbolic/tarot/decks/thoth';
+import { GOLDEN_DAWN_MAJOR_ARCANA } from '@holistica/symbolic/tarot/decks/golden-dawn';
+import { BOTA_MAJOR_ARCANA } from '@holistica/symbolic/tarot/decks/bota';
+import { HERMETIC_MAJOR_ARCANA } from '@holistica/symbolic/tarot/decks/hermetic';
+import { SEPHIROTH_MAJOR_ARCANA } from '@holistica/symbolic/tarot/decks/sephiroth';
 import { addSymbolicTimelineEvent } from '@/components/SymbolicTimeline';
 
 interface AstrologyTarotVisualCoreProps {

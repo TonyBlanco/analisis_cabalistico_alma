@@ -1,1 +1,0 @@
-export type { PitagorasInput as GematriaKatanInput, PitagorasResult as GematriaKatanResult, PitagorasSymbolicState as GematriaKatanSymbolicState, PitagorasNumberMeaning as GematriaNumberMeaning } from '../pitagoras/pitagoras.types';

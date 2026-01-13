@@ -1,1 +1,0 @@
-export type { PitagorasInput as MiluiInput, PitagorasResult as MiluiResult, PitagorasSymbolicState as MiluiSymbolicState, PitagorasNumberMeaning as MiluiNumberMeaning } from '../pitagoras/pitagoras.types';

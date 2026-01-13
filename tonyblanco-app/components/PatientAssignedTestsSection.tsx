@@ -254,9 +254,9 @@ export default function PatientAssignedTestsSection() {
       ) : (
         <div className="space-y-3">
           {/* Pending Tests */}
-          {pendingTests.map((test) => (
+          {pendingTests.map((test, idx) => (
             <div
-              key={test.code}
+              key={test.id ?? `${String(test.code).toLowerCase()}-${idx}`}
               className="border border-gray-200 rounded-md p-4 hover:border-gray-300 hover:shadow-sm transition-all"
             >
               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
@@ -305,9 +305,9 @@ export default function PatientAssignedTestsSection() {
               <h3 className="text-sm font-medium text-gray-700 mb-3">
                 Exploraciones completadas
               </h3>
-              {completedTests.map((test) => (
+              {completedTests.map((test, idx) => (
                 <div
-                  key={test.code}
+                  key={test.id ?? `${String(test.code).toLowerCase()}-completed-${idx}`}
                   className="border border-gray-200 rounded-md p-4 bg-gray-50"
                 >
                   <div className="flex items-center gap-2">

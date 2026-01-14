@@ -1,0 +1,34 @@
+
+> tonyblanco-app@0.1.0 build
+> next build
+
+ ΓÜá Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of D:\pnpm-lock.yaml as the root directory.
+ To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+ Detected additional lockfiles: 
+   * D:\analisis_cabalistico_alma\tonyblanco-app\package-lock.json
+   * D:\analisis_cabalistico_alma\package-lock.json
+
+   Γû▓ Next.js 16.0.7 (Turbopack)
+   - Environments: .env.local
+   - Experiments (use with caution):
+     Γ£ô externalDir
+
+ ΓÜá The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+   Creating an optimized production build ...
+ Γ£ô Compiled successfully in 11.7s
+   Running TypeScript ...
+Failed to compile.
+
+./components/TestCatalogSection.tsx:389:108
+Type error: Property 'domain' does not exist on type '{ mode: string; id: number; code: string; name: string; description: string; test_type: TestType; required_access_level: AccessLevel; is_active: boolean; available_for_therapists: boolean; ... 7 more ...; user_access: UserTestAccess | null; }'.
+
+  387 |                                   {isTherapistOnly ? 'Hol├¡stico (profesional)' : 'Asignable al consultante'}
+  388 |                                 </span>
+> 389 |                                 <span className="text-xs text-gray-500">{(test as any).domainLabel || test.domain || 'Dominio hol├¡stico'}</span>
+      |                                                                                                            ^
+  390 |                                 {soulLevel && (() => {
+  391 |                                   const lvl = soulLevel;
+  392 |                                   const cls = soulLevelClasses[lvl] || 'bg-indigo-50 text-indigo-700';
+Next.js build worker exited with code: 1 and signal: null

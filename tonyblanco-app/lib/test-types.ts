@@ -56,6 +56,7 @@ export interface TestModule {
   order: number;
   estimated_duration: number;
   is_available: boolean;
+  execution_mode: 'patient_self' | 'therapist_clinical';
   user_access: UserTestAccess | null;
 }
 
@@ -87,6 +88,7 @@ export interface TestResult {
     name: string;
     description?: string;
     test_type: TestType;
+    execution_mode: 'patient_self' | 'therapist_clinical';
   };
   // Legacy fields (optional) for backward compatibility
   test_module_name?: string;

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
+import confirmAction from '@/lib/confirm';
 import ActivePatientIndicator from '@/components/ActivePatientIndicator';
 import BodySoulVisualization from '@/components/BodySoulVisualization';
 import { useRoleGuard } from '@/lib/role-guards';
@@ -420,8 +421,6 @@ export default function TherapistBioEmotionalPage() {
     }
   };
 
-  import confirmAction from '@/lib/confirm';
-
   const handleDeleteHypothesis = async (id: string) => {
     const confirmed = await confirmAction('¿Seguro que quieres eliminar esta hipótesis?');
     if (!confirmed) return;
@@ -469,33 +468,30 @@ export default function TherapistBioEmotionalPage() {
           <button
             type="button"
             onClick={() => setActiveTab('dictionary')}
-            className={`px-3 py-1.5 text-sm font-medium rounded-md border transition-colors ${
-              activeTab === 'dictionary'
+            className={`px-3 py-1.5 text-sm font-medium rounded-md border transition-colors ${activeTab === 'dictionary'
                 ? 'bg-gray-900 text-white border-gray-900'
                 : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
-            }`}
+              }`}
           >
             Diccionario
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('tree')}
-            className={`px-3 py-1.5 text-sm font-medium rounded-md border transition-colors ${
-              activeTab === 'tree'
+            className={`px-3 py-1.5 text-sm font-medium rounded-md border transition-colors ${activeTab === 'tree'
                 ? 'bg-gray-900 text-white border-gray-900'
                 : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
-            }`}
+              }`}
           >
             Árbol
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('hypotheses')}
-            className={`px-3 py-1.5 text-sm font-medium rounded-md border transition-colors ${
-              activeTab === 'hypotheses'
+            className={`px-3 py-1.5 text-sm font-medium rounded-md border transition-colors ${activeTab === 'hypotheses'
                 ? 'bg-gray-900 text-white border-gray-900'
                 : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
-            }`}
+              }`}
           >
             Hipótesis
           </button>
@@ -541,11 +537,10 @@ export default function TherapistBioEmotionalPage() {
                           key={entry.termino}
                           type="button"
                           onClick={() => handleSelectDictionaryEntry(entry)}
-                          className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-50 ${
-                            selectedEntry && selectedEntry.termino === entry.termino
+                          className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-50 ${selectedEntry && selectedEntry.termino === entry.termino
                               ? 'bg-gray-900/5 font-semibold'
                               : ''
-                          }`}
+                            }`}
                         >
                           {entry.termino}
                         </button>
@@ -704,202 +699,202 @@ export default function TherapistBioEmotionalPage() {
             {/* Lista de hipótesis */}
             {!hypothesesAccessDenied && (
               <div className="space-y-3">
-              <div className="flex items-center justify-between gap-2">
-                <h2 className="text-sm font-semibold text-gray-900">Hipótesis registradas</h2>
-                {hypothesesLoading && (
-                  <p className="text-xs text-gray-500">Cargando hipótesis del consultante…</p>
+                <div className="flex items-center justify-between gap-2">
+                  <h2 className="text-sm font-semibold text-gray-900">Hipótesis registradas</h2>
+                  {hypothesesLoading && (
+                    <p className="text-xs text-gray-500">Cargando hipótesis del consultante…</p>
+                  )}
+                </div>
+
+                {hypotheses.length === 0 && !hypothesesLoading && activePatientId && (
+                  <p className="text-sm text-gray-500">
+                    Aún no has registrado hipótesis para este consultante.
+                  </p>
                 )}
-              </div>
 
-              {hypotheses.length === 0 && !hypothesesLoading && activePatientId && (
-                <p className="text-sm text-gray-500">
-                  Aún no has registrado hipótesis para este consultante.
-                </p>
-              )}
-
-              {hypotheses.length > 0 && (
-                <div className="space-y-2">
-                  {hypotheses.map((h) => (
-                    <div
-                      key={h.id}
-                      className="border border-gray-200 rounded-md p-3 text-sm flex flex-col gap-2"
-                    >
-                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
-                        <div>
-                          <p className="text-xs uppercase tracking-wide text-gray-500">
-                            Término bio-emocional
-                          </p>
-                          <p className="font-semibold text-gray-900">{h.termino_bioemocional}</p>
-                          <p className="mt-1 text-gray-700 whitespace-pre-line">{h.description}</p>
-                        </div>
-                        <div className="flex flex-row sm:flex-col gap-2 items-start sm:items-end">
-                          <div className="flex flex-col gap-1">
-                            <label className="text-xs text-gray-500">Tipo de hipótesis</label>
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                              {h.hypothesis_type}
-                            </span>
+                {hypotheses.length > 0 && (
+                  <div className="space-y-2">
+                    {hypotheses.map((h) => (
+                      <div
+                        key={h.id}
+                        className="border border-gray-200 rounded-md p-3 text-sm flex flex-col gap-2"
+                      >
+                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                          <div>
+                            <p className="text-xs uppercase tracking-wide text-gray-500">
+                              Término bio-emocional
+                            </p>
+                            <p className="font-semibold text-gray-900">{h.termino_bioemocional}</p>
+                            <p className="mt-1 text-gray-700 whitespace-pre-line">{h.description}</p>
                           </div>
-                          <div className="flex flex-col gap-1">
-                            <label className="text-xs text-gray-500">Estado</label>
-                            <select
-                              className="px-2 py-1 border border-gray-300 rounded-md text-xs bg-white"
-                              value={h.status}
-                              onChange={(e) =>
-                                handleUpdateHypothesisStatus(
-                                  h.id,
-                                  e.target.value as HypothesisStatus,
-                                )
-                              }
-                            >
-                              <option value="open">open</option>
-                              <option value="in_review">in_review</option>
-                              <option value="discarded">discarded</option>
-                            </select>
+                          <div className="flex flex-row sm:flex-col gap-2 items-start sm:items-end">
+                            <div className="flex flex-col gap-1">
+                              <label className="text-xs text-gray-500">Tipo de hipótesis</label>
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                {h.hypothesis_type}
+                              </span>
+                            </div>
+                            <div className="flex flex-col gap-1">
+                              <label className="text-xs text-gray-500">Estado</label>
+                              <select
+                                className="px-2 py-1 border border-gray-300 rounded-md text-xs bg-white"
+                                value={h.status}
+                                onChange={(e) =>
+                                  handleUpdateHypothesisStatus(
+                                    h.id,
+                                    e.target.value as HypothesisStatus,
+                                  )
+                                }
+                              >
+                                <option value="open">open</option>
+                                <option value="in_review">in_review</option>
+                                <option value="discarded">discarded</option>
+                              </select>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      <div className="flex flex-col gap-2 mt-1">
-                        <div className="flex items-center justify-between text-xs text-gray-500">
-                          <p>
-                            Creada:{' '}
-                            {new Date(h.created_at).toLocaleString('es-ES', {
-                              dateStyle: 'short',
-                              timeStyle: 'short',
-                            })}
-                          </p>
-                          <div className="flex items-center gap-2">
-                            <button
-                              type="button"
-                              onClick={() => startEditHypothesis(h)}
-                              className="text-xs text-gray-700 hover:text-gray-900"
-                            >
-                              Editar
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleDeleteHypothesis(h.id)}
-                              className="text-xs text-red-600 hover:text-red-700"
-                            >
-                              Eliminar
-                            </button>
-                          </div>
-                        </div>
-                        {editingId === h.id && (
-                          <form
-                            onSubmit={handleSaveEditHypothesis}
-                            className="mt-1 border-t border-gray-100 pt-2 space-y-2"
-                          >
-                            <label className="block text-xs font-medium text-gray-700">
-                              Editar descripción
-                            </label>
-                            <textarea
-                              value={editDescription}
-                              onChange={(e) => setEditDescription(e.target.value)}
-                              rows={3}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 resize-y"
-                            />
-                            {editError && (
-                              <p className="text-xs text-red-600">
-                                {editError}
-                              </p>
-                            )}
-                            <div className="flex items-center justify-end gap-2">
+                        <div className="flex flex-col gap-2 mt-1">
+                          <div className="flex items-center justify-between text-xs text-gray-500">
+                            <p>
+                              Creada:{' '}
+                              {new Date(h.created_at).toLocaleString('es-ES', {
+                                dateStyle: 'short',
+                                timeStyle: 'short',
+                              })}
+                            </p>
+                            <div className="flex items-center gap-2">
                               <button
                                 type="button"
-                                onClick={cancelEditHypothesis}
-                                className="px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+                                onClick={() => startEditHypothesis(h)}
+                                className="text-xs text-gray-700 hover:text-gray-900"
                               >
-                                Cancelar
+                                Editar
                               </button>
                               <button
-                                type="submit"
-                                disabled={editSaving}
-                                className="px-3 py-1.5 text-xs font-medium text-white bg-gray-900 rounded-md hover:bg-gray-800 disabled:opacity-60"
+                                type="button"
+                                onClick={() => handleDeleteHypothesis(h.id)}
+                                className="text-xs text-red-600 hover:text-red-700"
                               >
-                                {editSaving ? 'Guardando…' : 'Guardar cambios'}
+                                Eliminar
                               </button>
                             </div>
-                          </form>
-                        )}
+                          </div>
+                          {editingId === h.id && (
+                            <form
+                              onSubmit={handleSaveEditHypothesis}
+                              className="mt-1 border-t border-gray-100 pt-2 space-y-2"
+                            >
+                              <label className="block text-xs font-medium text-gray-700">
+                                Editar descripción
+                              </label>
+                              <textarea
+                                value={editDescription}
+                                onChange={(e) => setEditDescription(e.target.value)}
+                                rows={3}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 resize-y"
+                              />
+                              {editError && (
+                                <p className="text-xs text-red-600">
+                                  {editError}
+                                </p>
+                              )}
+                              <div className="flex items-center justify-end gap-2">
+                                <button
+                                  type="button"
+                                  onClick={cancelEditHypothesis}
+                                  className="px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+                                >
+                                  Cancelar
+                                </button>
+                                <button
+                                  type="submit"
+                                  disabled={editSaving}
+                                  className="px-3 py-1.5 text-xs font-medium text-white bg-gray-900 rounded-md hover:bg-gray-800 disabled:opacity-60"
+                                >
+                                  {editSaving ? 'Guardando…' : 'Guardar cambios'}
+                                </button>
+                              </div>
+                            </form>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
             {/* Formulario de nueva hipótesis */}
             {!hypothesesAccessDenied && (
               <div className="border border-gray-200 rounded-md p-4">
-              <h2 className="text-sm font-semibold text-gray-900 mb-3">Nueva hipótesis</h2>
-              <form onSubmit={handleCreateHypothesis} className="space-y-3">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <h2 className="text-sm font-semibold text-gray-900 mb-3">Nueva hipótesis</h2>
+                <form onSubmit={handleCreateHypothesis} className="space-y-3">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div className="flex flex-col gap-1">
+                      <label className="text-xs font-medium text-gray-700">
+                        Término bio-emocional (debe existir en el diccionario)
+                      </label>
+                      <input
+                        type="text"
+                        value={formTerm}
+                        onChange={(e) => setFormTerm(e.target.value)}
+                        placeholder="Coincidir con 'termino' del diccionario"
+                        className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-xs font-medium text-gray-700">Tipo de hipótesis</label>
+                      <select
+                        value={formType}
+                        onChange={(e) => setFormType(e.target.value as HypothesisType)}
+                        className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 bg-white"
+                      >
+                        <option value="lealtad_invisible">lealtad_invisible</option>
+                        <option value="repeticion">repeticion</option>
+                        <option value="aniversario">aniversario</option>
+                        <option value="proyecto_sentido">proyecto_sentido</option>
+                        <option value="otro">otro</option>
+                      </select>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-xs font-medium text-gray-700">Estado inicial</label>
+                      <select
+                        value={formStatus}
+                        onChange={(e) => setFormStatus(e.target.value as HypothesisStatus)}
+                        className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 bg-white"
+                      >
+                        <option value="open">open</option>
+                        <option value="in_review">in_review</option>
+                        <option value="discarded">discarded</option>
+                      </select>
+                    </div>
+                  </div>
+
                   <div className="flex flex-col gap-1">
                     <label className="text-xs font-medium text-gray-700">
-                      Término bio-emocional (debe existir en el diccionario)
+                      Descripción de la hipótesis (texto redactado por ti)
                     </label>
-                    <input
-                      type="text"
-                      value={formTerm}
-                      onChange={(e) => setFormTerm(e.target.value)}
-                      placeholder="Coincidir con 'termino' del diccionario"
-                      className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900"
+                    <textarea
+                      value={formDescription}
+                      onChange={(e) => setFormDescription(e.target.value)}
+                      rows={4}
+                      className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 resize-y"
+                      placeholder="Describe de forma clínica y neutral la hipótesis transgeneracional que estás explorando."
                     />
                   </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs font-medium text-gray-700">Tipo de hipótesis</label>
-                    <select
-                      value={formType}
-                      onChange={(e) => setFormType(e.target.value as HypothesisType)}
-                      className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 bg-white"
+
+                  {formError && <p className="text-sm text-red-600">{formError}</p>}
+
+                  <div className="flex justify-end">
+                    <button
+                      type="submit"
+                      disabled={formSubmitting || !activePatientId}
+                      className="px-4 py-2 text-sm font-medium rounded-md text-white bg-gray-900 hover:bg-gray-800 disabled:opacity-60"
                     >
-                      <option value="lealtad_invisible">lealtad_invisible</option>
-                      <option value="repeticion">repeticion</option>
-                      <option value="aniversario">aniversario</option>
-                      <option value="proyecto_sentido">proyecto_sentido</option>
-                      <option value="otro">otro</option>
-                    </select>
+                      {formSubmitting ? 'Guardando…' : 'Guardar hipótesis'}
+                    </button>
                   </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs font-medium text-gray-700">Estado inicial</label>
-                    <select
-                      value={formStatus}
-                      onChange={(e) => setFormStatus(e.target.value as HypothesisStatus)}
-                      className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 bg-white"
-                    >
-                      <option value="open">open</option>
-                      <option value="in_review">in_review</option>
-                      <option value="discarded">discarded</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-medium text-gray-700">
-                    Descripción de la hipótesis (texto redactado por ti)
-                  </label>
-                  <textarea
-                    value={formDescription}
-                    onChange={(e) => setFormDescription(e.target.value)}
-                    rows={4}
-                    className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 resize-y"
-                    placeholder="Describe de forma clínica y neutral la hipótesis transgeneracional que estás explorando."
-                  />
-                </div>
-
-                {formError && <p className="text-sm text-red-600">{formError}</p>}
-
-                <div className="flex justify-end">
-                  <button
-                    type="submit"
-                    disabled={formSubmitting || !activePatientId}
-                    className="px-4 py-2 text-sm font-medium rounded-md text-white bg-gray-900 hover:bg-gray-800 disabled:opacity-60"
-                  >
-                    {formSubmitting ? 'Guardando…' : 'Guardar hipótesis'}
-                  </button>
-                </div>
-              </form>
+                </form>
               </div>
             )}
           </div>

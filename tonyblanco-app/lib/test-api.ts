@@ -71,14 +71,14 @@ export async function getTestDetail(code: string): Promise<TestModule> {
 export async function executeTest(data: ExecuteTestRequest): Promise<ExecuteTestResponse> {
   const url = `${API_BASE_URL}/tests/execute/`;
   console.log('🔍 Ejecutando test en:', url);
-  
+
   // Prepare payload - include patient_id if provided
   const payload: any = {
     test_module_code: data.test_module_code,
     input_data: data.input_data,
     save_result: data.save_result !== false, // Default to true
   };
-  
+
   if (data.patient_id) {
     payload.patient_id = data.patient_id;
   }
@@ -88,9 +88,9 @@ export async function executeTest(data: ExecuteTestRequest): Promise<ExecuteTest
   if (data.client_birth_date) {
     payload.client_birth_date = data.client_birth_date;
   }
-  
+
   console.log('📦 Payload:', JSON.stringify(payload, null, 2));
-  
+
   const response = await fetch(url, {
     method: 'POST',
     headers: getAuthHeaders(),
@@ -103,7 +103,7 @@ export async function executeTest(data: ExecuteTestRequest): Promise<ExecuteTest
   if (!response.ok) {
     let errorMessage = 'Error al ejecutar el test';
     let errorData: any = {};
-    
+
     try {
       const text = await response.text();
       console.log('📄 Respuesta del servidor (texto):', text);
@@ -135,7 +135,7 @@ export async function executeTest(data: ExecuteTestRequest): Promise<ExecuteTest
         errorMessage = `Error ${response.status}: ${response.statusText}`;
       }
     }
-    
+
     const error = new Error(errorMessage);
     (error as any).response = response;
     (error as any).status = response.status;
@@ -170,7 +170,7 @@ export async function getTestResults(filters?: {
   if (filters?.favorites) params.append('favorites', 'true');
 
   const url = `${API_BASE_URL}/tests/results/${params.toString() ? '?' + params.toString() : ''}`;
-  
+
   const response = await fetch(url, {
     headers: getAuthHeaders(),
     credentials: 'include',
@@ -213,7 +213,7 @@ export async function getTestResultsForPatient(params: {
 /**
  * Obtiene un resultado específico
  */
-export async function getTestResult(id: number): Promise<TestResult> {
+export async function getTestResult(id: string | number): Promise<TestResult> {
   const response = await fetch(`${API_BASE_URL}/tests/results/${id}/`, {
     headers: getAuthHeaders(),
     credentials: 'include',
@@ -229,7 +229,7 @@ export async function getTestResult(id: number): Promise<TestResult> {
 /**
  * Alias para getTestResult (para compatibilidad)
  */
-export async function getTestResultDetail(id: number): Promise<TestResult> {
+export async function getTestResultDetail(id: string | number): Promise<TestResult> {
   return getTestResult(id);
 }
 
@@ -237,7 +237,7 @@ export async function getTestResultDetail(id: number): Promise<TestResult> {
  * Actualiza un resultado (notas, favorito, etc.)
  */
 export async function updateTestResult(
-  id: number,
+  id: string | number,
   data: Partial<TestResult>
 ): Promise<TestResult> {
   const response = await fetch(`${API_BASE_URL}/tests/results/${id}/`, {
@@ -257,7 +257,7 @@ export async function updateTestResult(
 /**
  * Elimina (archiva) un resultado
  */
-export async function deleteTestResult(id: number): Promise<void> {
+export async function deleteTestResult(id: string | number): Promise<void> {
   const response = await fetch(`${API_BASE_URL}/tests/results/${id}/`, {
     method: 'DELETE',
     headers: getAuthHeaders(),
@@ -288,14 +288,14 @@ export async function getUserTestStats(): Promise<UserTestStats> {
 /**
  * Marca/desmarca un resultado como favorito
  */
-export async function toggleFavorite(id: number, isFavorite: boolean): Promise<TestResult> {
+export async function toggleFavorite(id: string | number, isFavorite: boolean): Promise<TestResult> {
   return updateTestResult(id, { is_favorite: isFavorite });
 }
 
 /**
  * Actualiza las notas de un resultado
  */
-export async function updateResultNotes(id: number, notes: string): Promise<TestResult> {
+export async function updateResultNotes(id: string | number, notes: string): Promise<TestResult> {
   return updateTestResult(id, { notes });
 }
 

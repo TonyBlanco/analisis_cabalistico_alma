@@ -16,7 +16,7 @@ interface TestCatalogSectionProps {
 }
 // ...
 export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectionProps = {}) {
-  const [tests, setTests] = useState<CatalogTest[]>([]);
+  const [tests, setTests] = useState<TestModule[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [userType, setUserType] = useState<string>('');
@@ -41,7 +41,7 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
       setActivePatientHasUser(null);
       return;
     }
-    
+
     let isMounted = true;
     getPatientDetail(activePatientId)
       .then((patient) => {
@@ -87,7 +87,7 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
       mode: isClinical ? 'therapist_clinical' : 'patient_self',
     };
   });
-// ...
+  // ...
   const AssignTestButton = ({
     onAssign,
     disabled,
@@ -136,7 +136,7 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
   // ----- Assignment handlers -----
   const handleAssignTest = (test: TestModule) => {
     if (!activePatientId) {
-    toast.warning('Selecciona un consultante', 'Debes seleccionar un consultante activo antes de asignar una exploración.');
+      toast.warning('Selecciona un consultante', 'Debes seleccionar un consultante activo antes de asignar una exploración.');
       return;
     }
 
@@ -219,7 +219,7 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
   }
 
   // Agrupa por familia para mejorar legibilidad sin ocultar tests
-  const groupedByFamily = normalizedTests.reduce<Record<string, CatalogTest[]>>((acc, test) => {
+  const groupedByFamily = normalizedTests.reduce<Record<string, TestModule[]>>((acc, test) => {
     const rawFamily =
       (test as any).family ??
       clinicalTestsRegistry.find((e) => e.test_code === test.code)?.family;
@@ -253,31 +253,31 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
     desc: string;
     codes: string[];
   }> = [
-    {
-      key: 'atzilut',
-      label: 'Atzilut — Unidad y Esencia',
-      desc: 'Exploraciones orientadas a la esencia y la unidad.',
-      codes: ['past-lives', 'asrs_essence', 'mcmi4_mystic'],
-    },
-    {
-      key: 'beria',
-      label: 'Beriá — Intelecto y Conciencia',
-      desc: 'Exploraciones centradas en pensamiento y consciencia.',
-      codes: ['wellness', 'screening-general', 'scl90'],
-    },
-    {
-      key: 'ietzira',
-      label: 'Ietzirá — Emoción y Regulación',
-      desc: 'Exploraciones sobre emoción, afecto y regulación.',
-      codes: ['anxiety-state-trait', 'stress-regulation', 'bdi-ii', 'ybocs_soul'],
-    },
-    {
-      key: 'asia',
-      label: 'Asiá — Acción y Cuerpo',
-      desc: 'Exploraciones sobre hábitos, sueño y cuerpo.',
-      codes: ['insomnia', 'nutrition', 'dudit_spirit', 'eat26_spirit'],
-    },
-  ];
+      {
+        key: 'atzilut',
+        label: 'Atzilut — Unidad y Esencia',
+        desc: 'Exploraciones orientadas a la esencia y la unidad.',
+        codes: ['past-lives', 'asrs_essence', 'mcmi4_mystic'],
+      },
+      {
+        key: 'beria',
+        label: 'Beriá — Intelecto y Conciencia',
+        desc: 'Exploraciones centradas en pensamiento y consciencia.',
+        codes: ['wellness', 'screening-general', 'scl90'],
+      },
+      {
+        key: 'ietzira',
+        label: 'Ietzirá — Emoción y Regulación',
+        desc: 'Exploraciones sobre emoción, afecto y regulación.',
+        codes: ['anxiety-state-trait', 'stress-regulation', 'bdi-ii', 'ybocs_soul'],
+      },
+      {
+        key: 'asia',
+        label: 'Asiá — Acción y Cuerpo',
+        desc: 'Exploraciones sobre hábitos, sueño y cuerpo.',
+        codes: ['insomnia', 'nutrition', 'dudit_spirit', 'eat26_spirit'],
+      },
+    ];
 
   const transversalCodes = ['sha_harmony'];
 
@@ -382,97 +382,97 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
                         >
                           <div className="flex items-start justify-between gap-3">
                             <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-1">
-                        <span className={`text-xs px-2 py-1 rounded-full ${isTherapistOnly ? 'bg-slate-100 text-slate-700' : 'bg-emerald-50 text-emerald-700'}`}>
-                          {isTherapistOnly ? 'Holístico (profesional)' : 'Asignable al consultante'}
-                        </span>
-                        <span className="text-xs text-gray-500">{(test as any).domainLabel || test.domain || 'Dominio holístico'}</span>
-                        {soulLevel && (() => {
-                          const lvl = soulLevel;
-                          const cls = soulLevelClasses[lvl] || 'bg-indigo-50 text-indigo-700';
-                          const Icon = soulLevelIcons[lvl];
-                          return (
-                            <span className={`text-xs px-2 py-1 rounded-full ${cls} flex items-center gap-1`}>
-                              {Icon ? <Icon className="w-3 h-3" /> : null}
-                              {lvl}
-                            </span>
-                          );
-                        })()}
-                        {(test as any).implemented === false && (
-                          <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-600 border border-gray-200">
-                            En desarrollo
-                          </span>
-                        )}
-                      </div>
-                      <h3 className="font-semibold text-gray-900">{test.name}</h3>
-                      {test.description && (
-                        <p className="text-sm text-gray-600 mt-1 leading-relaxed">{test.description}</p>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setHelpTestCode(test.code)}
-                        className="p-2 rounded-full border border-gray-200 text-[#1f6c8f] hover:bg-gray-50"
-                        aria-label="Ver guía holística"
-                        title="Ver guía simbólica"
-                      >
-                        <Info className="w-4 h-4" />
-                      </button>
-                      {isTherapistOnly ? (
-                        <span className="text-xs text-gray-500 px-2 py-1 rounded border border-gray-200">
-                          Ejecutar desde flujos holísticos
-                        </span>
-                      ) : (
-                        (() => {
-                          const assignedCodes = new Set(
-                            assignedTests
-                              .map((t: any) => (t.test_module?.code || t.test_module_code || t.test_id))
-                              .filter(Boolean)
-                              .map((c: any) => String(c).toLowerCase()),
-                          );
-                          const hasPatientRoute = Boolean((test as any).patient_route);
-                          const isAssignable = Boolean(test.is_active) && Boolean((test as any).available_for_therapists) && Boolean(activePatientHasUser);
-                          const isAssigned = Boolean((test as any).already_assigned) || Boolean((test as any).locked) || (isAssignable && assignedCodes.has(String(test.code).toLowerCase()));
-                          const isAssigning = assigningTestCode === test.code;
-
-                          if (isAssigned) {
-                            return (
-                              <div className="flex items-center text-sm text-green-600">
-                                ✔ Asignado · esperando respuesta
+                              <div className="flex items-center gap-3 mb-1">
+                                <span className={`text-xs px-2 py-1 rounded-full ${isTherapistOnly ? 'bg-slate-100 text-slate-700' : 'bg-emerald-50 text-emerald-700'}`}>
+                                  {isTherapistOnly ? 'Holístico (profesional)' : 'Asignable al consultante'}
+                                </span>
+                                <span className="text-xs text-gray-500">{(test as any).domainLabel || (test as any).domain || 'Dominio holístico'}</span>
+                                {soulLevel && (() => {
+                                  const lvl = soulLevel;
+                                  const cls = soulLevelClasses[lvl] || 'bg-indigo-50 text-indigo-700';
+                                  const Icon = soulLevelIcons[lvl];
+                                  return (
+                                    <span className={`text-xs px-2 py-1 rounded-full ${cls} flex items-center gap-1`}>
+                                      {Icon ? <Icon className="w-3 h-3" /> : null}
+                                      {lvl}
+                                    </span>
+                                  );
+                                })()}
+                                {(test as any).implemented === false && (
+                                  <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-600 border border-gray-200">
+                                    En desarrollo
+                                  </span>
+                                )}
                               </div>
-                            );
-                          }
+                              <h3 className="font-semibold text-gray-900">{test.name}</h3>
+                              {test.description && (
+                                <p className="text-sm text-gray-600 mt-1 leading-relaxed">{test.description}</p>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => setHelpTestCode(test.code)}
+                                className="p-2 rounded-full border border-gray-200 text-[#1f6c8f] hover:bg-gray-50"
+                                aria-label="Ver guía holística"
+                                title="Ver guía simbólica"
+                              >
+                                <Info className="w-4 h-4" />
+                              </button>
+                              {isTherapistOnly ? (
+                                <span className="text-xs text-gray-500 px-2 py-1 rounded border border-gray-200">
+                                  Ejecutar desde flujos holísticos
+                                </span>
+                              ) : (
+                                (() => {
+                                  const assignedCodes = new Set(
+                                    assignedTests
+                                      .map((t: any) => (t.test_module?.code || t.test_module_code || t.test_id))
+                                      .filter(Boolean)
+                                      .map((c: any) => String(c).toLowerCase()),
+                                  );
+                                  const hasPatientRoute = Boolean((test as any).patient_route);
+                                  const isAssignable = Boolean(test.is_active) && Boolean((test as any).available_for_therapists) && Boolean(activePatientHasUser);
+                                  const isAssigned = Boolean((test as any).already_assigned) || Boolean((test as any).locked) || (isAssignable && assignedCodes.has(String(test.code).toLowerCase()));
+                                  const isAssigning = assigningTestCode === test.code;
 
-                          if (!isAssignable) {
-                            return (
-                              <span className="text-xs text-gray-500 px-2 py-1 rounded border border-gray-200">
-                                No asignable
-                              </span>
-                            );
-                          }
+                                  if (isAssigned) {
+                                    return (
+                                      <div className="flex items-center text-sm text-green-600">
+                                        ✔ Asignado · esperando respuesta
+                                      </div>
+                                    );
+                                  }
 
-                          return (
-                            <AssignTestButton
-                              onAssign={() => {
-                                if (!activePatientId) {
-                                  toast.warning('Selecciona un consultante', 'Debes seleccionar un consultante activo antes de asignar un test.');
-                                  return;
-                                }
-                                if (userType === 'admin') {
-                                  toast.error('Solo terapeutas pueden asignar tests', 'Los administradores no pueden asignar tests a pacientes.');
-                                  return;
-                                }
-                                setTestToAssign(test);
-                                setShowConfirmModal(true);
-                              }}
-                              disabled={isAssigning}
-                              isAssigning={isAssigning}
-                            />
-                          );
-                        })()
-                      )}
-                    </div>
+                                  if (!isAssignable) {
+                                    return (
+                                      <span className="text-xs text-gray-500 px-2 py-1 rounded border border-gray-200">
+                                        No asignable
+                                      </span>
+                                    );
+                                  }
+
+                                  return (
+                                    <AssignTestButton
+                                      onAssign={() => {
+                                        if (!activePatientId) {
+                                          toast.warning('Selecciona un consultante', 'Debes seleccionar un consultante activo antes de asignar un test.');
+                                          return;
+                                        }
+                                        if (userType === 'admin') {
+                                          toast.error('Solo terapeutas pueden asignar tests', 'Los administradores no pueden asignar tests a pacientes.');
+                                          return;
+                                        }
+                                        setTestToAssign(test);
+                                        setShowConfirmModal(true);
+                                      }}
+                                      disabled={isAssigning}
+                                      isAssigning={isAssigning}
+                                    />
+                                  );
+                                })()
+                              )}
+                            </div>
                           </div>
                         </div>
                       );
@@ -497,43 +497,43 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
                     {items.map((test) => {
                       const soulLevel = soulLevels[String(test.code).toLowerCase()];
                       return (
-                      <div
-                        key={test.code}
-                        className="border border-gray-100 rounded-lg p-4 hover:border-gray-200 transition-colors bg-white shadow-[0_1px_3px_rgba(0,0,0,0.04)]"
-                      >
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-3 mb-1">
-                              <span className="text-xs px-2 py-1 rounded-full bg-emerald-50 text-emerald-700">Asignable al consultante</span>
-                              <span className="text-xs text-gray-500">{(test as any).domainLabel || test.domain || 'Dominio holístico'}</span>
-                              {soulLevel && (() => {
-                                const lvl = soulLevel;
-                                const cls = soulLevelClasses[lvl] || 'bg-indigo-50 text-indigo-700';
-                                const Icon = soulLevelIcons[lvl];
-                                return (
-                                  <span className={`text-xs px-2 py-1 rounded-full ${cls} flex items-center gap-1`}>
-                                    {Icon ? <Icon className="w-3 h-3" /> : null}
-                                    {lvl}
-                                  </span>
-                                );
-                              })()}
+                        <div
+                          key={test.code}
+                          className="border border-gray-100 rounded-lg p-4 hover:border-gray-200 transition-colors bg-white shadow-[0_1px_3px_rgba(0,0,0,0.04)]"
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3 mb-1">
+                                <span className="text-xs px-2 py-1 rounded-full bg-emerald-50 text-emerald-700">Asignable al consultante</span>
+                                <span className="text-xs text-gray-500">{(test as any).domainLabel || (test as any).domain || 'Dominio holístico'}</span>
+                                {soulLevel && (() => {
+                                  const lvl = soulLevel;
+                                  const cls = soulLevelClasses[lvl] || 'bg-indigo-50 text-indigo-700';
+                                  const Icon = soulLevelIcons[lvl];
+                                  return (
+                                    <span className={`text-xs px-2 py-1 rounded-full ${cls} flex items-center gap-1`}>
+                                      {Icon ? <Icon className="w-3 h-3" /> : null}
+                                      {lvl}
+                                    </span>
+                                  );
+                                })()}
+                              </div>
+                              <h3 className="font-semibold text-gray-900">{test.name}</h3>
+                              {test.description && <p className="text-sm text-gray-600 mt-1 leading-relaxed">{test.description}</p>}
                             </div>
-                            <h3 className="font-semibold text-gray-900">{test.name}</h3>
-                            {test.description && <p className="text-sm text-gray-600 mt-1 leading-relaxed">{test.description}</p>}
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <button
-                              type="button"
-                              onClick={() => setHelpTestCode(test.code)}
-                              className="p-2 rounded-full border border-gray-200 text-[#1f6c8f] hover:bg-gray-50"
-                              aria-label="Ver guía holística"
-                              title="Ver guía simbólica"
-                            >
-                              <Info className="w-4 h-4" />
-                            </button>
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => setHelpTestCode(test.code)}
+                                className="p-2 rounded-full border border-gray-200 text-[#1f6c8f] hover:bg-gray-50"
+                                aria-label="Ver guía holística"
+                                title="Ver guía simbólica"
+                              >
+                                <Info className="w-4 h-4" />
+                              </button>
+                            </div>
                           </div>
                         </div>
-                      </div>
                       )
                     })}
                   </div>

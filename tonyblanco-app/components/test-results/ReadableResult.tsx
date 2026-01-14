@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
-import { 
-  AlertTriangle, 
-  CheckCircle, 
-  Info, 
+import {
+  AlertTriangle,
+  CheckCircle,
+  Info,
   HelpCircle,
-  ChevronDown, 
-  ChevronUp, 
-  FileJson, 
+  ChevronDown,
+  ChevronUp,
+  FileJson,
   Activity,
   Calendar,
-  Tag
+  Tag,
+  X
 } from 'lucide-react';
 import ExplorationSuggestionModal from '@/components/ExplorationSuggestionModal';
 import ResultSuggestionsCard, { Suggestion } from './ResultSuggestionsCard';
@@ -98,8 +99,8 @@ const getDomainDescriptor = (domainValue: any) => {
   return 'Ritmo simbólico';
 };
 
-export default function ReadableResult({ 
-  resultData, 
+export default function ReadableResult({
+  resultData,
   resultId: propResultId,
   showRaw = true,
   testName,
@@ -112,8 +113,8 @@ export default function ReadableResult({
 }: ReadableResultProps) {
   const [showTechnical, setShowTechnical] = useState(false);
   const [showSuggestionModal, setShowSuggestionModal] = useState(false);
-  
-  
+
+
   const payload: any = resultData?.result ?? resultData ?? {};
   const puntuaciones = payload?.puntuaciones || {};
 
@@ -153,7 +154,7 @@ export default function ReadableResult({
   const rhythmStateLabel = rhythmState ? (rhythmStateLabelMap[rhythmState] || rhythmState) : null;
 
   // Safe checks for rendering
-  
+
   // Extract flags
   const flags = payload.flags && typeof payload.flags === 'object' ? payload.flags : {};
   const activeFlags = Object.entries(flags)
@@ -220,7 +221,7 @@ export default function ReadableResult({
     therapistSuggestionEffective?.suggested_test_name || therapistSuggestionEffective?.suggested_test_code || null;
   const secondarySuggestions =
     therapistSuggestionEffective?.secondary_suggestions
-      ?.map((item) => item?.name || item?.code)
+      ?.map((item: { name?: string | null; code?: string | null }) => item?.name || item?.code)
       .filter(Boolean) || [];
   const hasTherapistSuggestion = Boolean(
     primarySuggestion || secondarySuggestions.length || therapistSuggestionEffective?.current_world || therapistSuggestionEffective?.next_world
@@ -299,7 +300,7 @@ export default function ReadableResult({
             </div>
           </div>
           {onClose && (
-            <button 
+            <button
               onClick={onClose}
               className="p-1 hover:bg-gray-200 rounded-full text-gray-400 hover:text-gray-600 transition-colors"
             >
@@ -377,7 +378,7 @@ export default function ReadableResult({
                   >
                     <HelpCircle size={16} />
                   </button>
-              
+
                 </div>
                 {worldBridge && (
                   <p className="text-xs text-emerald-700 mt-1">{worldBridge}</p>
@@ -527,13 +528,13 @@ export default function ReadableResult({
               {showTechnical ? 'Ocultar vista técnica (JSON)' : 'Ver vista técnica (JSON)'}
               {showTechnical ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
             </button>
-            
+
             {showTechnical && (
               <div className="mt-3 animate-in fade-in slide-in-from-top-2 duration-200">
                 <div className="bg-slate-900 rounded-lg p-4 overflow-hidden shadow-inner">
                   <div className="flex justify-between items-center mb-2 pb-2 border-b border-slate-700">
                     <span className="text-xs text-slate-400 font-mono">raw_payload.json</span>
-                    <button 
+                    <button
                       onClick={() => navigator.clipboard.writeText(JSON.stringify(resultData, null, 2))}
                       className="text-[10px] text-slate-400 hover:text-white uppercase tracking-wider"
                     >
@@ -553,7 +554,7 @@ export default function ReadableResult({
         open={showSuggestionModal}
         onClose={handleSuggestionModalClose}
       />
-      
+
     </div>
   );
 }

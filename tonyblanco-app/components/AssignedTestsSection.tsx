@@ -116,7 +116,7 @@ export default function AssignedTestsSection({
 
   const handleUnassign = useCallback(async (result: any) => {
     if (!activePatientId) return;
-    const code = result?.test_module?.code || result?.test_module_code || result?.test_id;
+    const code = result?.test_module?.code || result?.test_module_code;
     if (!code) return;
 
     if (!confirm(`¿Deseas quitar la asignación del test "${result.test_module?.name || result.test_module_name || code}"?`)) {
@@ -258,12 +258,12 @@ export default function AssignedTestsSection({
                     </div>
                     <div className="flex items-center gap-3 mt-2">
                       <span className="text-xs text-gray-500">
-                        {result.created_at 
+                        {result.created_at
                           ? new Date(result.created_at).toLocaleDateString('es-ES', {
-                              year: 'numeric',
-                              month: 'long',
-                              day: 'numeric',
-                            })
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                          })
                           : 'Fecha no disponible'}
                       </span>
                       {result.test_module?.code && (
@@ -289,10 +289,10 @@ export default function AssignedTestsSection({
                       <button
                         type="button"
                         onClick={() => handleUnassign(result)}
-                        disabled={removingTestCode === String(result?.test_module?.code || result?.test_module_code || result?.test_id)}
+                        disabled={removingTestCode === String(result?.test_module?.code || result?.test_module_code)}
                         className="text-sm text-red-600 hover:text-red-800 underline disabled:opacity-50"
                       >
-                        {removingTestCode === String(result?.test_module?.code || result?.test_module_code || result?.test_id)
+                        {removingTestCode === String(result?.test_module?.code || result?.test_module_code)
                           ? 'Quitando...'
                           : 'Quitar asignación'}
                       </button>

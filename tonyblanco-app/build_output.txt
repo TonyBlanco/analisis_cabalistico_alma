@@ -1,0 +1,61 @@
+
+> tonyblanco-app@0.1.0 build
+> next build
+
+ ΓÜá Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of D:\pnpm-lock.yaml as the root directory.
+ To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+ Detected additional lockfiles: 
+   * D:\analisis_cabalistico_alma\tonyblanco-app\package-lock.json
+   * D:\analisis_cabalistico_alma\package-lock.json
+
+   Γû▓ Next.js 16.0.7 (Turbopack)
+   - Environments: .env.local
+   - Experiments (use with caution):
+     Γ£ô externalDir
+
+ ΓÜá The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+   Creating an optimized production build ...
+
+> Build error occurred
+Error: Turbopack build failed with 2 errors:
+./analisis_cabalistico_alma/tonyblanco-app/app/(dashboard)/dashboard/therapist/(core)/bioemotional/page.tsx:423:3
+Parsing ecmascript source code failed
+  421 |   };
+  422 |
+> 423 |   import confirmAction from '@/lib/confirm';
+      |   ^^^^^^
+  424 |
+  425 |   const handleDeleteHypothesis = async (id: string) => {
+  426 |     const confirmed = await confirmAction('┬┐Seguro que quieres eliminar esta hip├│tesis?');
+
+'import', and 'export' cannot be used outside of module code
+
+
+./analisis_cabalistico_alma/tonyblanco-app/components/admin-pro/AdminProWorkspace.tsx:174:3
+Parsing ecmascript source code failed
+  172 |   };
+  173 |
+> 174 |   import confirmAction from '@/lib/confirm';
+      |   ^^^^^^
+  175 |
+  176 |   const handleDelete = async (user: AdminUserRow) => {
+  177 |     setActionError(null);
+
+'import', and 'export' cannot be used outside of module code
+
+Import traces:
+  Client Component Browser:
+    ./analisis_cabalistico_alma/tonyblanco-app/components/admin-pro/AdminProWorkspace.tsx [Client Component Browser]
+    ./analisis_cabalistico_alma/tonyblanco-app/app/(dashboard)/dashboard/admin/page.tsx [Client Component Browser]
+    ./analisis_cabalistico_alma/tonyblanco-app/app/(dashboard)/dashboard/admin/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./analisis_cabalistico_alma/tonyblanco-app/components/admin-pro/AdminProWorkspace.tsx [Client Component SSR]
+    ./analisis_cabalistico_alma/tonyblanco-app/app/(dashboard)/dashboard/admin/page.tsx [Client Component SSR]
+    ./analisis_cabalistico_alma/tonyblanco-app/app/(dashboard)/dashboard/admin/page.tsx [Server Component]
+
+
+    at <unknown> (./analisis_cabalistico_alma/tonyblanco-app/app/(dashboard)/dashboard/therapist/(core)/bioemotional/page.tsx:423:3)
+    at <unknown> (./analisis_cabalistico_alma/tonyblanco-app/components/admin-pro/AdminProWorkspace.tsx:174:3)

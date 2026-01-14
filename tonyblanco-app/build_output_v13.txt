@@ -1,0 +1,34 @@
+
+> tonyblanco-app@0.1.0 build
+> next build
+
+ ΓÜá Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of D:\pnpm-lock.yaml as the root directory.
+ To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+ Detected additional lockfiles: 
+   * D:\analisis_cabalistico_alma\tonyblanco-app\package-lock.json
+   * D:\analisis_cabalistico_alma\package-lock.json
+
+   Γû▓ Next.js 16.0.7 (Turbopack)
+   - Environments: .env.local
+   - Experiments (use with caution):
+     Γ£ô externalDir
+
+ ΓÜá The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+   Creating an optimized production build ...
+ Γ£ô Compiled successfully in 10.7s
+   Running TypeScript ...
+Failed to compile.
+
+./components/TestCatalogSection.tsx:19:38
+Type error: Cannot find name 'CatalogTest'.
+
+  17 | // ...
+  18 | export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectionProps = {}) {
+> 19 |   const [tests, setTests] = useState<CatalogTest[]>([]);
+     |                                      ^
+  20 |   const [loading, setLoading] = useState(false);
+  21 |   const [error, setError] = useState<string | null>(null);
+  22 |   const [userType, setUserType] = useState<string>('');
+Next.js build worker exited with code: 1 and signal: null

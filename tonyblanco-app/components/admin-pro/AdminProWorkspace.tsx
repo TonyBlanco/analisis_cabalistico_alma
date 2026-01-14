@@ -14,6 +14,7 @@ import { AdminProSystemOverview } from './AdminProSystemOverview';
 import { AdminProUsersTable } from './AdminProUsersTable';
 import { AdminProUserDrawer } from './AdminProUserDrawer';
 import { AdminProDomainPanels } from './AdminProDomainPanels';
+import confirmAction from '@/lib/confirm';
 
 type Caps = AdminWorkspaceContractV2_1['users']['capabilities'];
 
@@ -170,8 +171,6 @@ export function AdminProWorkspace() {
       setActionError(`No se pudo cambiar el rol: ${first.error}`);
     });
   };
-
-  import confirmAction from '@/lib/confirm';
 
   const handleDelete = async (user: AdminUserRow) => {
     setActionError(null);

@@ -245,7 +245,20 @@ export const clinicalTestsRegistry: ClinicalTestRegistryEntry[] = [
     guidance: {
       what: "Herramienta simbólica de reflexión personal (no diagnóstica).",
       when: "Útil para explorar patrones, emociones y sentido vital en conversación terapéutica.",
-      reminder: "No constituye diagnóstico ni afirma hechos históricos literales.",
+    reminder: "No constituye diagnóstico ni afirma hechos históricos literales.",
+    },
+  },
+  {
+    test_code: "asrs_essence",
+    display_name: "ASRS-Essence (Ritmo del Alma)",
+    domain: "Exploración arquetipal",
+    family: "cabalisticos",
+    implemented: true,
+    patient_route: "/dashboard/patient/tests/asrs-essence",
+    guidance: {
+      what: "Exploración simbólica del ritmo esencial (no diagnóstico).",
+      when: "Útil para observar estabilidad interna y coherencia del pulso vital.",
+      reminder: "Lectura orientativa para acompañamiento terapéutico.",
     },
   },
   // Cabalistico (placeholder)

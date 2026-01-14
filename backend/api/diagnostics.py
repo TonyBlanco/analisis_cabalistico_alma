@@ -1147,6 +1147,60 @@ def compute_screening_general(input_data: dict) -> dict:
     return result
 
 
+def compute_asrs_essence(input_data: dict) -> dict:
+    """Compute ASRS-Essence symbolic profile (non-clinical)."""
+    answers = input_data.get('answers', {}) or {}
+    values = []
+    for key in sorted(answers.keys()):
+        try:
+            values.append(float(answers[key]))
+        except Exception:
+            continue
+
+    if not values:
+        return {
+            'processed': False,
+            'structured_data': None,
+            'raw_answers': {},
+            'message': 'Respuestas incompletas para ASRS-Essence.',
+            'timestamp': str(datetime.now()),
+        }
+
+    score_total = sum(values) / len(values)
+    score_total = round(score_total, 2)
+
+    if score_total >= 4.2:
+        rhythm_state = 'anchored'
+    elif score_total >= 3.2:
+        rhythm_state = 'fluctuating'
+    else:
+        rhythm_state = 'fragmented'
+
+    atzilut_level = 'high' if rhythm_state == 'anchored' else 'medium' if rhythm_state == 'fluctuating' else 'low'
+    transition_suggestion = 'deepening' if rhythm_state == 'anchored' else 'integration' if rhythm_state == 'fluctuating' else 'beriah'
+
+    summary_text_map = {
+        'anchored': 'Ritmo esencial estable. Se percibe coherencia interna y claridad de pulso.',
+        'fluctuating': 'Ritmo esencial variable. Hay momentos de alineacion que alternan con dispersion.',
+        'fragmented': 'Ritmo esencial disperso. Se sugiere volver a un eje sencillo y sostenido.',
+    }
+
+    structured_data = {
+        'score_total': score_total,
+        'rhythm_state': rhythm_state,
+        'atzilut_level': atzilut_level,
+        'transition_suggestion': transition_suggestion,
+    }
+
+    return {
+        'processed': True,
+        'structured_data': structured_data,
+        'raw_answers': answers,
+        'summary_text': summary_text_map.get(rhythm_state, ''),
+        'timestamp': str(datetime.now()),
+    }
+
+
 def compute_past_lives(input_data: dict) -> dict:
     """Compute symbolic (non-diagnostic) aggregation for Past Lives exploration.
 

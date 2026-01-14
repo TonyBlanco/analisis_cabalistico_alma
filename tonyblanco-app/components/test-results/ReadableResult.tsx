@@ -3,22 +3,33 @@ import {
   AlertTriangle, 
   CheckCircle, 
   Info, 
+  HelpCircle,
   ChevronDown, 
   ChevronUp, 
-  X, 
   FileJson, 
   Activity,
   Calendar,
   Tag
 } from 'lucide-react';
+import ExplorationSuggestionModal from '@/components/ExplorationSuggestionModal';
+import ResultSuggestionsCard, { Suggestion } from './ResultSuggestionsCard';
 
 export type ReadableResultProps = {
   resultData: any;
+  resultId?: number | string;
   showRaw?: boolean;
   testName?: string;
   testCode?: string;
   date?: string;
+  isTherapist?: boolean;
   executionMode?: string;
+  therapistSuggestion?: {
+    current_world?: string | null;
+    next_world?: string | null;
+    suggested_test_code?: string | null;
+    suggested_test_name?: string | null;
+    secondary_suggestions?: Array<{ code?: string | null; name?: string | null }>;
+  };
   onClose?: () => void;
 };
 
@@ -89,14 +100,19 @@ const getDomainDescriptor = (domainValue: any) => {
 
 export default function ReadableResult({ 
   resultData, 
+  resultId: propResultId,
   showRaw = true,
   testName,
   testCode,
   date,
+  isTherapist: propsIsTherapist,
   executionMode,
+  therapistSuggestion,
   onClose
 }: ReadableResultProps) {
   const [showTechnical, setShowTechnical] = useState(false);
+  const [showSuggestionModal, setShowSuggestionModal] = useState(false);
+  
   
   const payload: any = resultData?.result ?? resultData ?? {};
   const puntuaciones = payload?.puntuaciones || {};
@@ -126,6 +142,17 @@ export default function ReadableResult({
   const focusAreas = normalizeList(payload.map?.focus_areas ?? payload.interpretacion?.areas_enfoque);
   const recommendations = normalizeList(payload.suggested_steps ?? payload.recomendaciones);
   const disclaimer = payload.disclaimer ?? payload.alertas?.nota ?? payload.alerta ?? null;
+
+  const structuredData = payload?.structured_data ?? null;
+  const rhythmState = structuredData?.rhythm_state ?? null;
+  const rhythmStateLabelMap: Record<string, string> = {
+    anchored: 'Anclado',
+    fluctuating: 'Fluctuante',
+    fragmented: 'Fragmentado',
+  };
+  const rhythmStateLabel = rhythmState ? (rhythmStateLabelMap[rhythmState] || rhythmState) : null;
+
+  // Safe checks for rendering
   
   // Extract flags
   const flags = payload.flags && typeof payload.flags === 'object' ? payload.flags : {};
@@ -136,6 +163,74 @@ export default function ReadableResult({
   const domains = payload.puntuaciones?.dominios && typeof payload.puntuaciones.dominios === 'object'
     ? payload.puntuaciones.dominios
     : null;
+
+  // Effective therapist suggestion: prefer explicit prop, fallback to payload key
+  const therapistSuggestionEffective =
+    therapistSuggestion || payload?.therapist_next_exploration_suggestion || null;
+  // DEBUG: log incoming therapist suggestion
+  // eslint-disable-next-line no-console
+  console.log('DEBUG ReadableResult - therapistSuggestion (effective):', therapistSuggestionEffective);
+
+  // Determine therapist role: prefer explicit prop, fallback to executionMode heuristic
+  const isTherapist = typeof propsIsTherapist !== 'undefined' ? propsIsTherapist : (executionMode && executionMode !== 'patient_self');
+
+  // result id to key sessionStorage
+  const resultId = propResultId ?? payload?.id ?? payload?.result?.id ?? null;
+  const sessionKey = resultId ? `suggestion_seen_${resultId}` : null;
+  const autoOpenedRef = React.useRef(false);
+
+  // DEBUG: quick state dump to help trace why auto-open may not run
+  // eslint-disable-next-line no-console
+  console.log('[DEBUG]', {
+    isTherapist,
+    resultId,
+    hasSuggestion: Boolean(payload?.therapist_next_exploration_suggestion),
+    suggestion: payload?.therapist_next_exploration_suggestion,
+  });
+
+  React.useEffect(() => {
+    // eslint-disable-next-line no-console
+    console.log('[DEBUG useEffect fired]');
+    if (!sessionKey) return;
+    if (!isTherapist) return;
+    if (!therapistSuggestionEffective) return;
+    try {
+      const seen = sessionStorage.getItem(sessionKey);
+      if (!seen && !autoOpenedRef.current) {
+        setShowSuggestionModal(true);
+        autoOpenedRef.current = true;
+        // do not mark as seen here; mark on close to allow manual re-open before closing
+      }
+    } catch (e) {
+      // sessionStorage may be unavailable; ignore
+    }
+  }, [sessionKey, isTherapist, therapistSuggestionEffective]);
+
+  const handleSuggestionModalClose = () => {
+    setShowSuggestionModal(false);
+    if (!sessionKey) return;
+    try {
+      sessionStorage.setItem(sessionKey, 'true');
+    } catch (e) {
+      // ignore
+    }
+  };
+
+  const primarySuggestion =
+    therapistSuggestionEffective?.suggested_test_name || therapistSuggestionEffective?.suggested_test_code || null;
+  const secondarySuggestions =
+    therapistSuggestionEffective?.secondary_suggestions
+      ?.map((item) => item?.name || item?.code)
+      .filter(Boolean) || [];
+  const hasTherapistSuggestion = Boolean(
+    primarySuggestion || secondarySuggestions.length || therapistSuggestionEffective?.current_world || therapistSuggestionEffective?.next_world
+  );
+  const formatWorld = (world?: string | null) =>
+    world ? `${world.charAt(0).toUpperCase()}${world.slice(1)}` : null;
+  const currentWorld = formatWorld(therapistSuggestionEffective?.current_world);
+  const nextWorld = formatWorld(therapistSuggestionEffective?.next_world);
+  const worldBridge =
+    currentWorld && nextWorld ? `De ${currentWorld} a ${nextWorld}` : null;
 
   // Safe checks for rendering
   const hasContent =
@@ -249,8 +344,76 @@ export default function ReadableResult({
           </div>
         )}
 
+        {/* Definitive Suggestions Card (visible to therapists when suggestion exists) */}
+        {hasTherapistSuggestion && therapistSuggestionEffective && isTherapist && (
+          <div className="mt-4">
+            <ResultSuggestionsCard
+              suggestion={therapistSuggestionEffective as Suggestion}
+              onViewReason={() => setShowSuggestionModal(true)}
+              onAssign={undefined}
+              onDiscard={() => {
+                if (!sessionKey) return;
+                try {
+                  sessionStorage.setItem(sessionKey, 'true');
+                } catch (e) {
+                  // ignore
+                }
+              }}
+            />
+          </div>
+        )}
+
+        {hasTherapistSuggestion && (
+          <div className="bg-emerald-50 border border-emerald-100 rounded-lg p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <div className="flex items-center gap-2">
+                  <h4 className="text-sm font-semibold text-emerald-900">Exploración sugerida</h4>
+                  <button
+                    type="button"
+                    onClick={() => setShowSuggestionModal(true)}
+                    className="text-emerald-700 hover:text-emerald-900"
+                    aria-label="Abrir explicacion de exploracion sugerida"
+                  >
+                    <HelpCircle size={16} />
+                  </button>
+              
+                </div>
+                {worldBridge && (
+                  <p className="text-xs text-emerald-700 mt-1">{worldBridge}</p>
+                )}
+              </div>
+            </div>
+            <div className="mt-3 space-y-2 text-sm text-emerald-900">
+              {primarySuggestion && (
+                <div>
+                  <span className="font-medium">Principal:</span> {primarySuggestion}
+                </div>
+              )}
+              {secondarySuggestions.length > 0 && (
+                <div>
+                  <span className="font-medium">Secundaria:</span> {secondarySuggestions.join(', ')}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* 3. Detalle Organizado */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {rhythmStateLabel && (
+            <div className="md:col-span-2 bg-emerald-50 border border-emerald-100 rounded-lg p-4">
+              <p className="text-xs uppercase tracking-wider text-emerald-700 font-semibold mb-2">
+                Estado del Ritmo Esencial
+              </p>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <span className="text-lg font-semibold text-emerald-900">{rhythmStateLabel}</span>
+                {structuredData?.score_total !== undefined && structuredData?.score_total !== null && (
+                  <span className="text-sm text-emerald-800">Score: {structuredData.score_total}</span>
+                )}
+              </div>
+            </div>
+          )}
           {/* Summary Text */}
           {summary && (
             <div className="md:col-span-2">
@@ -386,6 +549,11 @@ export default function ReadableResult({
           </div>
         )}
       </div>
+      <ExplorationSuggestionModal
+        open={showSuggestionModal}
+        onClose={handleSuggestionModalClose}
+      />
+      
     </div>
   );
 }

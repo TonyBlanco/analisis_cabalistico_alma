@@ -34,6 +34,7 @@ export async function getAvailableTests(patientId?: number): Promise<{
   const query = patientId ? `?patient_id=${encodeURIComponent(patientId)}` : '';
   const response = await fetch(`${API_BASE_URL}/tests/${query}`, {
     headers: getAuthHeaders(),
+    credentials: 'include',
   });
 
   if (!response.ok) {
@@ -49,6 +50,7 @@ export async function getAvailableTests(patientId?: number): Promise<{
 export async function getTestDetail(code: string): Promise<TestModule> {
   const response = await fetch(`${API_BASE_URL}/tests/${code}/`, {
     headers: getAuthHeaders(),
+    credentials: 'include',
   });
 
   if (!response.ok) {
@@ -92,6 +94,7 @@ export async function executeTest(data: ExecuteTestRequest): Promise<ExecuteTest
   const response = await fetch(url, {
     method: 'POST',
     headers: getAuthHeaders(),
+    credentials: 'include',
     body: JSON.stringify(payload),
   });
 
@@ -104,14 +107,19 @@ export async function executeTest(data: ExecuteTestRequest): Promise<ExecuteTest
     try {
       const text = await response.text();
       console.log('📄 Respuesta del servidor (texto):', text);
-      
+
       if (text) {
-        errorData = JSON.parse(text);
-        errorMessage = errorData.error || errorData.detail || errorData.message || errorMessage;
-        
-        // Si hay más detalles, agregarlos
-        if (errorData.note) {
-          errorMessage += `: ${errorData.note}`;
+        const isJson = response.headers.get('content-type')?.includes('application/json');
+        if (isJson) {
+          errorData = JSON.parse(text);
+          errorMessage = errorData.error || errorData.detail || errorData.message || errorMessage;
+
+          // Si hay más detalles, agregarlos
+          if (errorData.note) {
+            errorMessage += `: ${errorData.note}`;
+          }
+        } else {
+          errorMessage = text;
         }
       }
     } catch (e) {
@@ -134,7 +142,18 @@ export async function executeTest(data: ExecuteTestRequest): Promise<ExecuteTest
     throw error;
   }
 
-  const result = await response.json();
+  let result: ExecuteTestResponse;
+  try {
+    const text = await response.text();
+    result = text ? JSON.parse(text) : ({} as ExecuteTestResponse);
+  } catch (e) {
+    const error = new Error(
+      `Respuesta no JSON del servidor. Verifica API_BASE_URL (${API_BASE_URL}) y autenticaci¢n.`
+    );
+    (error as any).response = response;
+    (error as any).status = response.status;
+    throw error;
+  }
   console.log('✅ Test ejecutado exitosamente');
   return result;
 }
@@ -154,6 +173,7 @@ export async function getTestResults(filters?: {
   
   const response = await fetch(url, {
     headers: getAuthHeaders(),
+    credentials: 'include',
   });
 
   if (!response.ok) {
@@ -178,6 +198,7 @@ export async function getTestResultsForPatient(params: {
   const url = `${API_BASE_URL}/tests/results/?${queryParams.toString()}`;
   const response = await fetch(url, {
     headers: getAuthHeaders(),
+    credentials: 'include',
     cache: 'no-store',
   });
 
@@ -195,6 +216,7 @@ export async function getTestResultsForPatient(params: {
 export async function getTestResult(id: number): Promise<TestResult> {
   const response = await fetch(`${API_BASE_URL}/tests/results/${id}/`, {
     headers: getAuthHeaders(),
+    credentials: 'include',
   });
 
   if (!response.ok) {
@@ -221,6 +243,7 @@ export async function updateTestResult(
   const response = await fetch(`${API_BASE_URL}/tests/results/${id}/`, {
     method: 'PATCH',
     headers: getAuthHeaders(),
+    credentials: 'include',
     body: JSON.stringify(data),
   });
 
@@ -238,6 +261,7 @@ export async function deleteTestResult(id: number): Promise<void> {
   const response = await fetch(`${API_BASE_URL}/tests/results/${id}/`, {
     method: 'DELETE',
     headers: getAuthHeaders(),
+    credentials: 'include',
   });
 
   if (!response.ok) {
@@ -251,6 +275,7 @@ export async function deleteTestResult(id: number): Promise<void> {
 export async function getUserTestStats(): Promise<UserTestStats> {
   const response = await fetch(`${API_BASE_URL}/tests/stats/`, {
     headers: getAuthHeaders(),
+    credentials: 'include',
   });
 
   if (!response.ok) {
@@ -289,6 +314,7 @@ export async function getPatientPreviousTests(params: {
 
   const response = await fetch(`${API_BASE_URL}/tests/patient-previous/?${queryParams.toString()}`, {
     headers: getAuthHeaders(),
+    credentials: 'include',
     cache: 'no-store',
   });
 

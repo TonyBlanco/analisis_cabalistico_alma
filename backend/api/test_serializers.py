@@ -1,5 +1,11 @@
 from rest_framework import serializers
-from .test_models import TestModule, UserTestAccess, TestResult
+from .test_models import (
+    TestModule,
+    UserTestAccess,
+    TestResult,
+    get_holistic_exploration_for_testmodule,
+    get_therapist_view,
+)
 
 
 class TestModuleSerializer(serializers.ModelSerializer):
@@ -76,6 +82,7 @@ class TestResultSerializer(serializers.ModelSerializer):
     test_module_code = serializers.CharField(source='test_module.code', read_only=True)
     status = serializers.SerializerMethodField()
     patient_route = serializers.SerializerMethodField()
+    therapist_next_exploration_suggestion = serializers.SerializerMethodField()
     patient_id = serializers.IntegerField(source='patient.id', read_only=True, allow_null=True)
     patient_name = serializers.CharField(source='patient.full_name', read_only=True, allow_null=True)
     
@@ -83,13 +90,27 @@ class TestResultSerializer(serializers.ModelSerializer):
         model = TestResult
         fields = [
             'id', 'test_module', 'test_module_name', 'test_module_code',
-            'status', 'patient_route',
+            'status', 'patient_route', 'therapist_next_exploration_suggestion',
             'input_data', 'result_data', 'client_name', 'client_birth_date',
             'patient_id', 'patient_name',
             'notes', 'is_favorite', 'is_archived',
             'created_at', 'updated_at'
         ]
         read_only_fields = ['created_at', 'updated_at']
+
+    def _is_therapist_request(self, request):
+        if not request or not getattr(request, 'user', None):
+            return False
+        user = request.user
+        if not user.is_authenticated:
+            return False
+        if user.is_staff or user.is_superuser:
+            return True
+        try:
+            profile = user.profile
+            return getattr(profile, 'user_type', None) == 'therapist'
+        except Exception:
+            return False
 
     def get_test_module_name(self, obj):
         if obj.test_module:
@@ -120,6 +141,43 @@ class TestResultSerializer(serializers.ModelSerializer):
         except Exception:
             pass
         return None
+
+    def get_therapist_next_exploration_suggestion(self, obj):
+        request = self.context.get('request')
+        if not self._is_therapist_request(request):
+            return None
+        if not obj.test_module:
+            return None
+        exploration = get_holistic_exploration_for_testmodule(obj.test_module)
+        if not exploration:
+            return None
+        therapist_view = get_therapist_view(exploration) or {}
+        return therapist_view.get('therapist_next_exploration_suggestion')
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        request = self.context.get('request')
+        # If requester is a therapist, ensure the therapist suggestion is present
+        if self._is_therapist_request(request):
+            # If the SerializerMethodField didn't return a suggestion, attempt to compute it
+            try:
+                if not data.get('therapist_next_exploration_suggestion'):
+                    tm = getattr(instance, 'test_module', None)
+                    if tm:
+                        exploration = get_holistic_exploration_for_testmodule(tm)
+                        if exploration:
+                            # Use the existing semantic helper to compute the suggestion
+                            from .test_models import get_therapist_next_exploration_suggestion
+                            suggestion = get_therapist_next_exploration_suggestion(exploration, symbolic_result=(getattr(instance, 'result_data', None) or {}))
+                            if suggestion:
+                                data['therapist_next_exploration_suggestion'] = suggestion
+            except Exception:
+                # Fail silently to avoid breaking the API response
+                pass
+        else:
+            # Remove therapist-only field for non-therapist requests
+            data.pop('therapist_next_exploration_suggestion', None)
+        return data
 
 
 class TestExecutionSerializer(serializers.Serializer):

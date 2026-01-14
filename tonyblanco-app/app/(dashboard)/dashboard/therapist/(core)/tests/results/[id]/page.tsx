@@ -23,7 +23,12 @@ export default function Page() {
     (async () => {
       try {
         const r = await getTestResult(resultId);
-        if (mounted) setResult(r ?? null);
+        if (mounted) {
+          setResult(r ?? null);
+          // DEBUG: inspect therapist suggestion coming from backend
+          // eslint-disable-next-line no-console
+          console.log('DEBUG: therapist_next_exploration_suggestion (raw):', (r as any)?.therapist_next_exploration_suggestion);
+        }
       } catch (err: any) {
         if (mounted) setError(err?.message ?? "Error al cargar resultado");
       } finally {
@@ -106,7 +111,14 @@ export default function Page() {
           {result.result_data ? (
             <ReadableResult 
               resultData={result.result_data} 
+              resultId={result.id}
+              isTherapist={userRole === "therapist"}
               executionMode={result.test_module?.execution_mode}
+              therapistSuggestion={
+                userRole === "therapist"
+                  ? result.therapist_next_exploration_suggestion
+                  : undefined
+              }
             />
           ) : (
             <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">

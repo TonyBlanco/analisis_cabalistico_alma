@@ -198,11 +198,6 @@ urlpatterns = [
     path('payments/cancel-subscription/', CancelSubscriptionView.as_view(), name='cancel_subscription'),
     path('payments/subscription-status/', SubscriptionStatusView.as_view(), name='subscription_status'),
     
-    # ========== ADMIN ==========
-    path('admin/stats/', AdminStatsView.as_view(), name='admin_stats'),
-    path('admin/users/', AdminUsersView.as_view(), name='admin_users'),
-    path('admin/users/<int:pk>/', AdminUserDetailView.as_view(), name='admin_user_detail'),
-    
     # ========== SERVICIOS Y RESERVAS ==========
     
     # Categorías y servicios

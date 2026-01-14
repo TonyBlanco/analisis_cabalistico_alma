@@ -7,6 +7,7 @@ import { TestModule, ExecuteTestRequest } from '@/lib/test-types';
 import { clinicalTestsRegistry } from '@/lib/clinicalTests.registry';
 import { getActivePatientId } from '@/lib/active-patient';
 import { unassignTestFromPatient } from '@/lib/assignment-api';
+import StartTestModal from '@/components/StartTestModal';
 
 /**
  * Patient Assigned Tests Section
@@ -26,6 +27,12 @@ export default function PatientAssignedTestsSection() {
   const [executingTestCode, setExecutingTestCode] = useState<string | null>(null);
   const [removingTestCode, setRemovingTestCode] = useState<string | null>(null);
   const [userType, setUserType] = useState<string>('');
+  const [startModalOpen, setStartModalOpen] = useState(false);
+  const [startTestTarget, setStartTestTarget] = useState<TestModule | null>(null);
+  const [actionMessage, setActionMessage] = useState<{
+    type: 'success' | 'error';
+    text: string;
+  } | null>(null);
 
   const activePatientId = getActivePatientId();
 
@@ -148,24 +155,28 @@ export default function PatientAssignedTestsSection() {
   };
 
   const handleExecuteTest = async (test: TestModule) => {
+    setActionMessage(null);
+    setStartTestTarget(test);
+    setStartModalOpen(true);
+  };
+
+  const handleStartTest = async () => {
+    const test = startTestTarget;
+    if (!test) return;
     if (executingTestCode) return; // Prevent double execution
 
     const normalizedCode = normalizeCode(test.code);
     const mappedCode = routeAliases.get(normalizedCode) || normalizedCode;
     const route = routeByTestCode.get(mappedCode);
     if (route) {
-      if (!confirm(`¿Deseas comenzar el test "${test.name}"?`)) {
-        return;
-      }
+      setStartModalOpen(false);
+      setStartTestTarget(null);
       router.push(route);
       return;
     }
 
-    // Confirm execution
-    if (!confirm(`¿Deseas comenzar el test "${test.name}"?`)) {
-      return;
-    }
-
+    setStartModalOpen(false);
+    setStartTestTarget(null);
     setExecutingTestCode(test.code);
 
     try {
@@ -188,16 +199,23 @@ export default function PatientAssignedTestsSection() {
       await fetchAssignedTests();
       
       // Show success message
-      alert(`Test "${test.name}" completado exitosamente. Puedes ver el resultado en la sección "Mis Resultados".`);
+      setActionMessage({
+        type: 'success',
+        text: `Test "${test.name}" completado exitosamente. Puedes ver el resultado en la secci▋ "Mis Resultados".`,
+      });
       
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error al ejecutar el test';
-      alert(`Error: ${errorMessage}`);
+      setActionMessage({
+        type: 'error',
+        text: `Error: ${errorMessage}`,
+      });
       console.error('Error executing test:', err);
     } finally {
       setExecutingTestCode(null);
     }
   };
+
 
   if (loading) {
     return (
@@ -242,10 +260,22 @@ export default function PatientAssignedTestsSection() {
   );
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+    <>
+      <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
       <h2 className="text-lg font-semibold text-gray-900 mb-4">
         Tests asignados
       </h2>
+      {actionMessage && (
+        <div
+          className={`mb-4 rounded-md border p-3 text-sm ${
+            actionMessage.type === 'success'
+              ? 'border-green-200 bg-green-50 text-green-800'
+              : 'border-red-200 bg-red-50 text-red-800'
+          }`}
+        >
+          {actionMessage.text}
+        </div>
+      )}
 
       {assignedTests.length === 0 ? (
         <div className="border border-gray-200 border-dashed rounded-lg p-12 text-center">
@@ -256,7 +286,7 @@ export default function PatientAssignedTestsSection() {
           {/* Pending Tests */}
           {pendingTests.map((test, idx) => (
             <div
-              key={test.id ?? `${String(test.code).toLowerCase()}-${idx}`}
+              key={`${test.id ?? 'pending'}-${String(test.code || 'code').toLowerCase()}-${idx}`}
               className="border border-gray-200 rounded-md p-4 hover:border-gray-300 hover:shadow-sm transition-all"
             >
               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
@@ -307,7 +337,7 @@ export default function PatientAssignedTestsSection() {
               </h3>
               {completedTests.map((test, idx) => (
                 <div
-                  key={test.id ?? `${String(test.code).toLowerCase()}-completed-${idx}`}
+                  key={`${test.id ?? 'completed'}-${String(test.code || 'code').toLowerCase()}-${idx}`}
                   className="border border-gray-200 rounded-md p-4 bg-gray-50"
                 >
                   <div className="flex items-center gap-2">
@@ -322,6 +352,18 @@ export default function PatientAssignedTestsSection() {
           )}
         </div>
       )}
-    </div>
+      </div>
+      <StartTestModal
+        open={startModalOpen}
+        testName={startTestTarget?.name || ''}
+        description={startTestTarget?.description || ''}
+        loading={Boolean(executingTestCode)}
+        onCancel={() => {
+          setStartModalOpen(false);
+          setStartTestTarget(null);
+        }}
+        onConfirm={handleStartTest}
+      />
+    </>
   );
 }

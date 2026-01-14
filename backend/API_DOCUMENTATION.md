@@ -529,6 +529,81 @@ Webhook para recibir eventos de Stripe (configuración del lado de Stripe).
 
 ---
 
+### 👨‍💼 Administración (Solo Administradores)
+
+#### GET `/api/admin/check/`
+Verifica si el usuario actual tiene permisos de administrador.
+
+**Headers:**
+```
+Authorization: Token abc123xyz...
+```
+
+**Response (admin):**
+```json
+{
+  "is_admin": true,
+  "username": "admin",
+  "email": "admin@example.com"
+}
+```
+
+---
+
+#### GET `/api/admin/stats/`
+Obtiene estadísticas mejoradas del sistema.
+
+**Headers:**
+```
+Authorization: Token abc123xyz...
+```
+
+**Permisos:** `is_staff=True`
+
+**Response:**
+```json
+{
+  "total_users": 150,
+  "total_patients": 80,
+  "total_fichas": 450,
+  "users_by_type": {
+    "personal": 100,
+    "therapist": 50
+  },
+  "subscriptions_active": 120
+}
+```
+
+**Nota:** Versión mejorada (`EnhancedAdminStatsView`).
+
+---
+
+#### GET `/api/admin/users/`
+Lista todos los usuarios del sistema con filtrado avanzado.
+
+**Headers:**
+```
+Authorization: Token abc123xyz...
+```
+
+**Permisos:** `is_staff=True`
+
+**Query Parameters:**
+- `user_type`: `personal` | `therapist`
+- `subscription_status`: `trial` | `active` | `canceled` | `expired`
+- `search`: Buscar por username, email o nombre
+
+**Nota:** Versión mejorada (`EnhancedAdminUsersView`).
+
+---
+
+#### GET/PATCH/DELETE `/api/admin/users/<int:user_id>/`
+Gestiona un usuario específico.
+
+**Permisos:** `is_staff=True`
+
+---
+
 ## 🔒 Permisos y Restricciones
 
 ### Usuarios Personales

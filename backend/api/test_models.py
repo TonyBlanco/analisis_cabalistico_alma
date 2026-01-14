@@ -238,6 +238,10 @@ def get_client_view(exploration):
 
 EXPLORATION_WORLD_BY_TEST_CODE = {
     "asrs_essence": "atzilut",
+    "wellness": "beria",
+    "screening-general": "beria",
+    "scl90": "beria",
+    "scl-90": "beria",
 }
 
 WORLD_NEXT_STEP = {
@@ -253,6 +257,13 @@ ASRS_STATE_TO_NEXT_TEST = {
     "fragmentado": "screening-general",
 }
 
+BERIA_TO_YETZIRAH_SUGGESTIONS = {
+    "wellness": {"primary": "stress-regulation"},
+    "screening-general": {"primary": "anxiety-state-trait"},
+    "scl90": {"primary": "stress-regulation", "secondary": ["anxiety-state-trait"]},
+    "scl-90": {"primary": "stress-regulation", "secondary": ["anxiety-state-trait"]},
+}
+
 
 def get_therapist_next_exploration_suggestion(exploration, symbolic_result=None):
     """READ-ONLY SEMANTIC LAYER - therapist-only suggestion helper."""
@@ -266,6 +277,7 @@ def get_therapist_next_exploration_suggestion(exploration, symbolic_result=None)
 
     next_world = WORLD_NEXT_STEP.get(current_world)
     suggestion_code = None
+    secondary_codes = []
 
     if source_code == "asrs_essence" and symbolic_result:
         raw_state = (
@@ -276,18 +288,34 @@ def get_therapist_next_exploration_suggestion(exploration, symbolic_result=None)
         if raw_state is not None:
             state = str(raw_state).strip().lower()
             suggestion_code = ASRS_STATE_TO_NEXT_TEST.get(state)
+    elif current_world == "beria":
+        suggestion_payload = BERIA_TO_YETZIRAH_SUGGESTIONS.get(source_code)
+        if suggestion_payload:
+            suggestion_code = suggestion_payload.get("primary")
+            secondary_codes = list(suggestion_payload.get("secondary") or [])
 
     suggestion_name = None
+    secondary_suggestions = []
+    suggested_codes = [code for code in ([suggestion_code] + secondary_codes) if code]
+    name_by_code = {}
+    if suggested_codes:
+        for tm in TestModule.objects.filter(code__in=suggested_codes):
+            name_by_code[tm.code] = tm.display_name
     if suggestion_code:
-        tm = TestModule.objects.filter(code=suggestion_code).first()
-        if tm:
-            suggestion_name = tm.display_name
+        suggestion_name = name_by_code.get(suggestion_code)
+    if secondary_codes:
+        secondary_suggestions = [
+            {"code": code, "name": name_by_code.get(code)}
+            for code in secondary_codes
+            if code
+        ]
 
     return {
         "current_world": current_world,
         "next_world": next_world,
         "suggested_test_code": suggestion_code,
         "suggested_test_name": suggestion_name,
+        "secondary_suggestions": secondary_suggestions,
     }
 
 
@@ -317,7 +345,13 @@ def get_therapist_view(exploration):
             if tr and tr.input_data:
                 # Collect numeric responses in stable order
                 try:
-                    raw_vals = [v for k, v in sorted(tr.input_data.items()) if isinstance(v, (int, float))]
+                    answers = None
+                    if isinstance(tr.input_data, dict):
+                        answers = tr.input_data.get('answers')
+                    if isinstance(answers, dict) and answers:
+                        raw_vals = [v for _, v in sorted(answers.items()) if isinstance(v, (int, float))]
+                    else:
+                        raw_vals = [v for k, v in sorted(tr.input_data.items()) if isinstance(v, (int, float))]
                 except Exception:
                     # Fallback: take numeric values in insertion order
                     raw_vals = [v for v in (tr.input_data.values() if isinstance(tr.input_data, dict) else []) if isinstance(v, (int, float))]

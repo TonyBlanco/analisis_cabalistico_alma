@@ -238,9 +238,16 @@ export default function PatientResultsSection() {
                   {selectedResult.result_data && (
                     <ReadableResult 
                       resultData={selectedResult.result_data} 
+                      resultId={selectedResult.id}
                       showRaw={false}
                       testCode={selectedResult.test_module?.code}
                       executionMode={selectedResult.test_module?.execution_mode}
+                      isTherapist={userRole === 'therapist'}
+                      therapistSuggestion={
+                        userRole === 'therapist'
+                          ? selectedResult.therapist_next_exploration_suggestion
+                          : undefined
+                      }
                     />
                   )}
 

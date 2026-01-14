@@ -69,6 +69,14 @@ export interface UserTestAccess {
   has_special_access: boolean;
 }
 
+export interface TherapistNextExplorationSuggestion {
+  current_world?: string | null;
+  next_world?: string | null;
+  suggested_test_code?: string | null;
+  suggested_test_name?: string | null;
+  secondary_suggestions?: Array<{ code?: string | null; name?: string | null }>;
+}
+
 // Interface para resultado de test
 export interface TestResult {
   id: number;
@@ -90,6 +98,7 @@ export interface TestResult {
   notes?: string;
   is_favorite: boolean;
   is_archived: boolean;
+  therapist_next_exploration_suggestion?: TherapistNextExplorationSuggestion;
   created_at: string;
   updated_at: string;
 }

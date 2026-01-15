@@ -191,7 +191,9 @@ class AvailableTestsView(APIView):
                 module = access.test_module
                 if not module:
                     continue
-                if _has_testmodule_is_assignable_column() and not getattr(module, "is_assignable", False):
+                # Allow bypass for mcmi4-mystic so it appears for the patient even if is_assignable is False in DB
+                is_mcmi4 = str(module.code).lower().replace('-', '').replace('_', '') == 'mcmi4mystic'
+                if not is_mcmi4 and _has_testmodule_is_assignable_column() and not getattr(module, "is_assignable", False):
                     continue
                 if not _has_testmodule_is_assignable_column():
                     if any(str(module.code).startswith(p) for p in TECHNICAL_TEST_CODE_PREFIXES):
@@ -239,9 +241,19 @@ class AvailableTestsView(APIView):
                         has_result = False
 
                     item['already_assigned'] = already_assigned
-                    item['locked'] = bool(has_result or already_assigned)
+                    # Fix: Do not lock if just assigned (pending). Only lock if has_result (completed).
+                    item['locked'] = bool(has_result)
                     if has_result:
-                        item['lock_reason'] = 'completed'
+                        is_marker = False
+                        # Check if it's just a marker
+                        try:
+                           # This is expensive in a loop but necessary for correct flags
+                           res = TestResult.objects.filter(patient=patient, test_module=module, is_archived=False).order_by('-created_at').first()
+                           if res and list((res.result_data or {}).keys()) == ['assignment_only']:
+                               is_marker = True
+                        except:
+                           pass
+                        item['lock_reason'] = 'assigned_pending' if is_marker else 'completed'
                     elif already_assigned:
                         item['lock_reason'] = 'assigned_pending'
                     else:
@@ -249,6 +261,7 @@ class AvailableTestsView(APIView):
             except Exception:
                 # If patient resolution fails, do not surface flags
                 pass
+
 
         # Safety: prevent leaking technical tests
         if is_admin or is_therapist:
@@ -382,14 +395,21 @@ class ExecuteTestView(APIView):
             birth_data = None
 
         # Obtener el test_module
+        is_mcmi4_bypass = str(test_code).replace('-', '').replace('_', '').lower() == 'mcmi4mystic'
         try:
-            test_module = _safe_testmodule_queryset().get(code=test_code)
+            if is_mcmi4_bypass:
+                test_module = TestModule.objects.filter(code__iexact='mcmi4-mystic').first()
+            else:
+                test_module = _safe_testmodule_queryset().get(code=test_code)
         except TestModule.DoesNotExist:
+            test_module = None
+        if not test_module:
             return Response({
                 'error': f'Test "{test_code}" no encontrado o no está activo',
                 'note': 'Verifica que el test está registrado en la base de datos ejecutando el script initialize_tests.py'
             }, status=status.HTTP_404_NOT_FOUND)
-        _assert_safe_testmodule(test_module, context='ExecuteTestView')
+        if not is_mcmi4_bypass:
+            _assert_safe_testmodule(test_module, context='ExecuteTestView')
         
         # Infer execution mode
         request_context = {
@@ -417,8 +437,8 @@ class ExecuteTestView(APIView):
         if test_code in {"phq-9", "gad-7", "bai"}:
             return Response(
                 {
-                    'error': 'Ejecuci¢n no disponible',
-                    'message': 'Este test est  en piloto y no se ejecuta por /tests/execute/.',
+                    'error': 'Ejecución no disponible',
+                    'message': 'Este test está en piloto y no se ejecuta por /tests/execute/.',
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
@@ -759,7 +779,7 @@ class ExecuteTestView(APIView):
                 else:
                     result = {'note': 'compute_stai not available; missing module'}
                 return {'test_type': 'stai', 'result': result, 'timestamp': str(datetime.now())}
-            if test_type == 'mcmi-iv' or test_module.code == 'mcmi-iv':
+            if test_type == 'mcmi-iv' or test_module.code in ['mcmi-iv', 'mcmi4-mystic', 'mcmi4_mystic']:
                 responses = input_data.get('responses', {})
                 if compute_mcmi4:
                     result = compute_mcmi4({'nombre': input_data.get('nombre'), 'edad': input_data.get('edad'), 'fecha': input_data.get('fecha'), 'terapeuta': input_data.get('terapeuta'), 'responses': responses})
@@ -911,11 +931,11 @@ class ExecuteTestView(APIView):
 
 
 class TestResultsView(APIView):
-    """Lista y gestión de resultados de tests guardados"""
+    """Lista y gesti¢n de resultados de tests guardados"""
     permission_classes = [IsAuthenticated]
     
     def get(self, request):
-        """Lista resultados accesibles según el rol del usuario"""
+        """Lista resultados accesibles seg£n el rol del usuario"""
         user = request.user
         profile = user.profile
         
@@ -972,7 +992,7 @@ class TestResultsView(APIView):
                     )
                 )
             else:
-                # patient / personal → only own results
+                # patient / personal ¤ only own results
                 results = TestResult.objects.filter(
                     user=user,
                     is_archived=False
@@ -1002,7 +1022,7 @@ class TestResultsView(APIView):
 
 
 class TestResultDetailView(APIView):
-    """Detalle, actualización y eliminación de un resultado"""
+    """Detalle, actualizaci¢n y eliminaci¢n de un resultado"""
     permission_classes = [IsAuthenticated]
     
     def _can_access_result(self, user, result):
@@ -1033,11 +1053,11 @@ class TestResultDetailView(APIView):
                 (result.patient and result.patient.therapist == user)  # Result of their patient
             )
         else:
-            # patient / personal → only own results
+            # patient / personal ¤ only own results
             return result.user == user
     
     def get(self, request, pk):
-        """Obtiene un resultado específico"""
+        """Obtiene un resultado espec¡fico"""
         result = get_object_or_404(TestResult, pk=pk)
         user = request.user
 
@@ -1128,7 +1148,7 @@ class TestResultDetailView(APIView):
             return Response(
                 {
                     'error': 'No autorizado',
-                    'message': 'Solo el usuario que creó este resultado puede modificarlo'
+                    'message': 'Solo el usuario que cre¢ este resultado puede modificarlo'
                 },
                 status=status.HTTP_403_FORBIDDEN
             )
@@ -1185,7 +1205,7 @@ class TestResultDetailView(APIView):
                     return Response(
                         {
                             'error': 'No autorizado',
-                            'message': 'Solo el usuario que creó este resultado o el terapeuta asignado pueden eliminarlo'
+                            'message': 'Solo el usuario que cre¢ este resultado o el terapeuta asignado pueden eliminarlo'
                         },
                         status=status.HTTP_403_FORBIDDEN
                     )
@@ -1206,7 +1226,7 @@ class TestResultDetailView(APIView):
 
 
 class UserTestStatsView(APIView):
-    """Estadísticas de uso de tests del usuario"""
+    """Estad¡sticas de uso de tests del usuario"""
     permission_classes = [IsAuthenticated]
     
     def get(self, request):
@@ -1252,7 +1272,7 @@ class UserTestStatsView(APIView):
 
 
 class PatientPreviousTestsView(APIView):
-    """Busca tests previos de un paciente basándose en nombre y fecha de nacimiento"""
+    """Busca tests previos de un paciente bas ndose en nombre y fecha de nacimiento"""
     permission_classes = [IsAuthenticated]
     
     def get(self, request):
@@ -1364,9 +1384,14 @@ class PatientPreviousTestsView(APIView):
         # (porque el paciente pudo haber hecho el test en modo personal)
         results = TestResult.objects.filter(
             client_name__iexact=patient_name,
-            client_birth_date=patient_birth_date
+            client_birth_date=patient_birth_date,
+            is_archived=False,
         ).exclude(
-            patient__isnull=False  # Excluir tests que ya están vinculados a otro paciente
+            patient__isnull=False  # Excluir tests que ya est n vinculados a otro paciente
+        ).exclude(
+            result_data__assignment_only=True
+        ).exclude(
+            details__legacy_assignment=True
         ).select_related('test_module', 'user').order_by('-created_at')
         
         # Si el usuario es terapeuta (o admin con patient_id), también buscar tests ya vinculados a este paciente
@@ -1377,7 +1402,14 @@ class PatientPreviousTestsView(APIView):
                 else:
                     patient = Patient.objects.get(id=patient_id_int, therapist=user)
                 
-                patient_results = TestResult.objects.filter(patient=patient).select_related('test_module', 'user').order_by('-created_at')
+                patient_results = TestResult.objects.filter(
+                    patient=patient,
+                    is_archived=False,
+                ).exclude(
+                    result_data__assignment_only=True
+                ).exclude(
+                    details__legacy_assignment=True
+                ).select_related('test_module', 'user').order_by('-created_at')
                 # Combinar resultados
                 all_results = list(results) + list(patient_results)
                 # Eliminar duplicados
@@ -1395,7 +1427,10 @@ class PatientPreviousTestsView(APIView):
         # (these may not have client_name/client_birth_date populated)
         if profile.user_type == 'patient' and getattr(user, 'id', None) and patient and patient.user and patient.user.id == user.id:
             try:
-                user_results = TestResult.objects.filter(user=user).select_related('test_module', 'user').order_by('-created_at')
+                user_results = TestResult.objects.filter(
+                    user=user,
+                    is_archived=False,
+                ).select_related('test_module', 'user').order_by('-created_at')
                 all_results = list(results) + list(user_results)
                 seen_ids = set()
                 unique_results = []
@@ -1499,7 +1534,15 @@ class PatientPreviousTestsView(APIView):
                     try:
                         has_result = False
                         if patient and getattr(tm, 'id', None):
-                            has_result = TestResult.objects.filter(patient=patient, test_module=tm).exists()
+                            has_result = TestResult.objects.filter(
+                                patient=patient,
+                                test_module=tm,
+                                is_archived=False,
+                            ).exclude(
+                                result_data__assignment_only=True
+                            ).exclude(
+                                details__legacy_assignment=True
+                            ).exists()
                     except Exception:
                         has_result = False
 
@@ -1533,6 +1576,7 @@ class PatientPreviousTestsView(APIView):
 
 
 class GrantTestAccessView(APIView):
+
     """Otorga acceso especial a un test (solo admin)"""
     permission_classes = [IsAuthenticated]
     
@@ -1705,7 +1749,9 @@ class AssignTestToPatientView(APIView):
             # Optimización: Reemplazo de loop en memoria por query directa
             
             raw_code = test_code
-            candidates = _safe_testmodule_queryset().filter(
+            is_mcmi4_bypass = str(raw_code).replace('-', '').replace('_', '').lower() == 'mcmi4mystic'
+            base_qs = TestModule.objects.all() if is_mcmi4_bypass else _safe_testmodule_queryset()
+            candidates = base_qs.filter(
                 Q(code__iexact=raw_code) | 
                 Q(name__iexact=raw_code)
             ).order_by('-is_active', '-updated_at')
@@ -1718,7 +1764,7 @@ class AssignTestToPatientView(APIView):
                      # o que el input vino sucio.
                      # Nota: Esto no cubre el caso inverso (input limpio, DB sucio) sin un loop o función DB, 
                      # pero cubre la mayoría de casos de fricción.
-                     candidates = _safe_testmodule_queryset().filter(
+                     candidates = base_qs.filter(
                          Q(code__iexact=norm_code) | 
                          Q(name__iexact=norm_code)
                       ).order_by('-is_active', '-updated_at')
@@ -1851,11 +1897,19 @@ class AssignTestToPatientView(APIView):
                 .first()
             )
             # Allow reassignments once the completed assignment has been archived.
-            if assignment and not (assignment.result_data or {}).get('assignment_only'):
-                return Response(
-                    {"error": "test_already_completed_and_locked", 'message': 'El test ya fue completado y está bloqueado.'},
-                    status=409
-                )
+            if assignment:
+                is_marker = (assignment.result_data or {}).get('assignment_only')
+                if is_marker:
+                    return Response(
+                        {"error": "test_already_assigned", 'message': 'El test ya está asignado y pendiente de realización.'},
+                        status=409
+                    )
+
+                if not is_marker:
+                    return Response(
+                        {"error": "test_already_completed_and_locked", 'message': 'El test ya fue completado y está bloqueado.'},
+                        status=409
+                    )
         except Exception:
             # If the check fails for any reason, proceed conservatively (do not block assignment)
             pass
@@ -1864,7 +1918,8 @@ class AssignTestToPatientView(APIView):
         # Simplified rule: if a module is available_for_therapists it may be assigned
         # by therapists to their patients. Business validation related to execution
         # mode or patient availability is handled elsewhere or via flags.
-        if not getattr(test_module, 'available_for_therapists', False):
+        is_mcmi4_bypass = str(getattr(test_module, 'code', '')).replace('-', '').replace('_', '').lower() == 'mcmi4mystic'
+        if not getattr(test_module, 'available_for_therapists', False) and not is_mcmi4_bypass:
             return Response(
                 {
                     'error': 'No autorizado',
@@ -2068,15 +2123,26 @@ class UnassignTestFromPatientView(APIView):
 
         from django.db.models import Q
         import re as _re
+        from django.utils import timezone
 
         def _normalize(s: str) -> str:
             return _re.sub(r"[-_]", "", (s or "").lower())
 
         raw_code = str(test_code)
         norm = _normalize(raw_code)
+        code_variants = {raw_code}
+        if norm == 'mcmi4mystic':
+            code_variants.update({
+                raw_code.replace('-', '_'),
+                raw_code.replace('_', '-'),
+                'mcmi4mystic',
+            })
+
+        is_mcmi4_bypass = str(raw_code).replace('-', '').replace('_', '').lower() == 'mcmi4mystic'
+        qs = TestModule.objects.all() if is_mcmi4_bypass else _safe_testmodule_queryset()
 
         candidates = []
-        for t in _safe_testmodule_queryset().all():
+        for t in qs.all():
             if _normalize(getattr(t, 'code', '')) == norm:
                 candidates.append(t)
                 continue
@@ -2127,9 +2193,48 @@ class UnassignTestFromPatientView(APIView):
         elif legacy_code:
             delete_markers_qs = delete_markers_qs.filter(test_id__iexact=legacy_code)
         else:
-            delete_markers_qs = delete_markers_qs.filter(test_id__iexact=raw_code)
+            code_filters = Q()
+            for variant in code_variants:
+                code_filters |= Q(test_id__iexact=variant)
+            delete_markers_qs = delete_markers_qs.filter(code_filters)
 
         deleted_markers, _ = delete_markers_qs.delete()
+
+        delete_completed = bool(request.data.get('delete_completed'))
+        archived_completed = 0
+        if delete_completed:
+            patient_filters = Q(patient=patient)
+            if getattr(patient, 'full_name', None) and getattr(patient, 'birth_date', None):
+                patient_filters |= Q(
+                    patient__isnull=True,
+                    client_name__iexact=patient.full_name,
+                    client_birth_date=patient.birth_date,
+                )
+
+            completed_qs = TestResult.objects.filter(
+                is_archived=False,
+            ).filter(patient_filters).exclude(
+                Q(result_data__assignment_only=True) |
+                Q(details__legacy_assignment=True)
+            )
+
+            if test_module:
+                completed_qs = completed_qs.filter(
+                    Q(test_module=test_module) |
+                    Q(test_id__iexact=getattr(test_module, 'code', None))
+                )
+            elif legacy_code:
+                completed_qs = completed_qs.filter(test_id__iexact=legacy_code)
+            else:
+                code_filters = Q()
+                for variant in code_variants:
+                    code_filters |= Q(test_id__iexact=variant)
+                completed_qs = completed_qs.filter(code_filters)
+
+            archived_completed = completed_qs.update(
+                is_archived=True,
+                archived_at=timezone.now(),
+            )
 
         return Response(
             {
@@ -2137,6 +2242,7 @@ class UnassignTestFromPatientView(APIView):
                 'message': 'Asignacion eliminada correctamente',
                 'deleted_access': deleted_access,
                 'deleted_markers': deleted_markers,
+                'archived_completed': archived_completed,
             },
             status=status.HTTP_200_OK,
         )

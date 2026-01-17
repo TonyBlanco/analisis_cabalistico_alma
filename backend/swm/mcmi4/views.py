@@ -931,7 +931,7 @@ class SealQuestionnaireView(APIView):
         
         # Validar que el cuestionario está completo (195 respuestas)
         progress_artifact = WorkspaceArtifact.objects.filter(
-            workspace=workspace,
+            workspace_instance=workspace,
             artifact_type='questionnaire_progress'
         ).first()
         

@@ -57,9 +57,12 @@ from swm.mcmi4.guards.permissions import (
 )
 from typing import Dict, Any
 from django.core.exceptions import ValidationError
+from django.db import transaction
 import uuid
+import logging
 
 User = get_user_model()
+logger = logging.getLogger(__name__)
 
 
 def get_request_context(request) -> Dict[str, Any]:
@@ -156,16 +159,26 @@ class WorkspaceStatusView(APIView):
         workspace_id = request.query_params.get('workspace_id')
         if not workspace_id:
             return Response(
-                {'error': 'workspace_id required'},
+                {'error': 'workspace_id required', 'code': 'MISSING_WORKSPACE_ID'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Validate UUID format
+        try:
+            workspace_uuid = uuid.UUID(workspace_id)
+        except (ValueError, AttributeError):
+            return Response(
+                {'error': 'Invalid workspace_id format', 'code': 'INVALID_UUID'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         
         try:
-            workspace_status = WorkspaceService.get_workspace_status(
-                uuid.UUID(workspace_id)
-            )
+            workspace_status = WorkspaceService.get_workspace_status(workspace_uuid)
         except ValueError as e:
-            return Response({'error': str(e)}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {'error': str(e), 'code': 'WORKSPACE_NOT_FOUND'},
+                status=status.HTTP_404_NOT_FOUND
+            )
         
         serializer = WorkspaceStatusResponseSerializer(workspace_status)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -541,6 +554,8 @@ class QuestionnaireView(APIView):
     
     Devuelve las 195 preguntas del cuestionario organizadas por mundos
     + progreso actual del workspace.
+    
+    FSM: Permitido solo en estados 'created' o 'in_progress'
     """
     permission_classes = [IsAuthenticated, HasWorkspaceExecutorPermission]
     
@@ -550,7 +565,28 @@ class QuestionnaireView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
         workspace_id = serializer.validated_data['workspace_id']
-        workspace = get_object_or_404(WorkspaceInstance, id=workspace_id)
+        
+        # Validate UUID
+        try:
+            workspace_uuid = uuid.UUID(str(workspace_id))
+        except (ValueError, AttributeError):
+            return Response(
+                {'error': 'Invalid workspace_id format', 'code': 'INVALID_UUID'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        workspace = get_object_or_404(WorkspaceInstance, id=workspace_uuid)
+        
+        # FSM validation: only 'created' or 'in_progress' states allowed
+        if workspace.status not in ['created', 'in_progress']:
+            return Response(
+                {
+                    'error': f"Cannot load questionnaire in state '{workspace.status}'",
+                    'code': 'FSM_INVALID_STATE',
+                    'details': {'current_state': workspace.status, 'allowed_states': ['created', 'in_progress']}
+                },
+                status=status.HTTP_409_CONFLICT
+            )
         
         # Obtener artifacts
         config_artifact = WorkspaceArtifact.objects.filter(
@@ -560,9 +596,22 @@ class QuestionnaireView(APIView):
         
         if not config_artifact:
             return Response(
-                {'error': 'questionnaire_config artifact not found. Has the session started?'},
+                {
+                    'error': 'questionnaire_config artifact not found. Has the session started?',
+                    'code': 'ARTIFACT_NOT_FOUND',
+                    'details': {'artifact_type': 'questionnaire_config'}
+                },
                 status=status.HTTP_404_NOT_FOUND
             )
+        
+        # Audit: questionnaire loaded
+        AuditService.log_action(
+            workspace_instance=workspace,
+            user=request.user,
+            action='questionnaire_loaded',
+            details={'workspace_status': workspace.status},
+            request_context=get_request_context(request)
+        )
         
         progress_artifact = WorkspaceArtifact.objects.filter(
             workspace_instance=workspace,
@@ -636,15 +685,33 @@ class QuestionnaireProgressView(APIView):
         workspace_id = serializer.validated_data['workspace_id']
         session_id = serializer.validated_data.get('session_id')
         
-        workspace = get_object_or_404(WorkspaceInstance, id=workspace_id)
+        # Validate workspace UUID
+        try:
+            workspace_uuid = uuid.UUID(str(workspace_id))
+        except (ValueError, AttributeError):
+            return Response(
+                {'error': 'Invalid workspace_id format', 'code': 'INVALID_UUID'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        workspace = get_object_or_404(WorkspaceInstance, id=workspace_uuid)
         
         # Validar sesión si se proporciona
         session = None
         session_status = None
         if session_id:
+            # Validate session UUID
+            try:
+                session_uuid = uuid.UUID(str(session_id))
+            except (ValueError, AttributeError):
+                return Response(
+                    {'error': 'Invalid session_id format', 'code': 'INVALID_UUID'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
             session = get_object_or_404(
                 WorkspaceSession, 
-                id=session_id, 
+                id=session_uuid, 
                 workspace_instance=workspace
             )
             session_status = session.status
@@ -700,9 +767,12 @@ class ProgressActionView(APIView):
     Ejecuta acciones sobre el progreso del cuestionario:
     - save_response: Guarda una respuesta a una pregunta
     - change_world: Cambia el mundo actual
+    
+    FSM: Requiere workspace en 'in_progress' y sesión 'active'
     """
     permission_classes = [IsAuthenticated, HasWorkspaceExecutorPermission]
     
+    @transaction.atomic
     def post(self, request):
         serializer = ProgressActionSerializer(data=request.data)
         if not serializer.is_valid():
@@ -713,32 +783,50 @@ class ProgressActionView(APIView):
         action = serializer.validated_data['action']
         payload = serializer.validated_data['payload']
         
-        workspace = get_object_or_404(WorkspaceInstance, id=workspace_id)
-        session = get_object_or_404(
-            WorkspaceSession, 
-            id=session_id, 
-            workspace_instance=workspace
-        )
-        
-        # Validar sesión activa
-        if session.status != 'active':
+        # Validate UUIDs
+        try:
+            workspace_uuid = uuid.UUID(str(workspace_id))
+            session_uuid = uuid.UUID(str(session_id))
+        except (ValueError, AttributeError):
             return Response(
-                {'error': f'Session is not active (status: {session.status})'},
+                {'error': 'Invalid UUID format', 'code': 'INVALID_UUID'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Validar workspace en progreso
+        workspace = get_object_or_404(WorkspaceInstance, id=workspace_uuid)
+        session = get_object_or_404(
+            WorkspaceSession, 
+            id=session_uuid, 
+            workspace_instance=workspace
+        )
+        
+        # FSM validation: session must be active
+        if session.status != 'active':
+            return Response(
+                {
+                    'error': f'Session is not active',
+                    'code': 'SESSION_NOT_ACTIVE',
+                    'details': {'session_status': session.status}
+                },
+                status=status.HTTP_409_CONFLICT
+            )
+        
+        # FSM validation: workspace must be in_progress
         if workspace.status != 'in_progress':
             return Response(
-                {'error': f'Workspace must be in_progress (current: {workspace.status})'},
-                status=status.HTTP_400_BAD_REQUEST
+                {
+                    'error': f'Workspace must be in_progress',
+                    'code': 'FSM_INVALID_STATE',
+                    'details': {'workspace_status': workspace.status, 'required': 'in_progress'}
+                },
+                status=status.HTTP_409_CONFLICT
             )
         
         # Ejecutar acción
         try:
             if action == 'save_response':
                 result = self._handle_save_response(
-                    workspace, session, payload
+                    workspace, session, payload, request
                 )
             elif action == 'change_world':
                 result = self._handle_change_world(
@@ -746,11 +834,14 @@ class ProgressActionView(APIView):
                 )
             else:
                 return Response(
-                    {'error': f'Unknown action: {action}'},
+                    {'error': f'Unknown action: {action}', 'code': 'UNKNOWN_ACTION'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
         except ValueError as e:
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {'error': str(e), 'code': 'VALIDATION_ERROR'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         
         response_serializer = ProgressActionResponseSerializer(result)
         return Response(response_serializer.data, status=status.HTTP_200_OK)
@@ -759,12 +850,32 @@ class ProgressActionView(APIView):
         self, 
         workspace: WorkspaceInstance, 
         session: WorkspaceSession, 
-        payload: dict
+        payload: dict,
+        request
     ) -> dict:
         """Maneja la acción save_response."""
         question_id = payload['question_id']
         value = payload['value']
         world = payload['world']
+        
+        # Validate value range (1-5)
+        if not isinstance(value, int) or not (1 <= value <= 5):
+            raise ValueError(f'Value must be integer between 1 and 5, got: {value}')
+        
+        # Validate question_id belongs to workspace config
+        config_artifact = WorkspaceArtifact.objects.filter(
+            workspace_instance=workspace,
+            artifact_type='questionnaire_config'
+        ).first()
+        
+        if not config_artifact:
+            raise ValueError('questionnaire_config artifact not found')
+        
+        selected_question_ids = config_artifact.content.get('selected_question_ids', [])
+        if question_id not in selected_question_ids:
+            raise ValueError(
+                f'question_id {question_id} not in workspace questionnaire'
+            )
         
         # Delegar a QuestionnaireService
         progress_artifact, progress_summary = QuestionnaireService.save_response(
@@ -785,6 +896,20 @@ class ProgressActionView(APIView):
         if config_artifact:
             next_question = QuestionnaireService.get_next_question(
                 config_artifact, progress_artifact
+            )
+        
+        # Audit: response batch saved (not per-response to avoid noise)
+        if progress_summary['total_answered'] % 10 == 0:
+            AuditService.log_action(
+                workspace_instance=workspace,
+                user=session.executor_user,
+                action='response_batch_saved',
+                details={
+                    'total_responses': progress_summary['total_answered'],
+                    'progress_percentage': progress_summary['progress_percentage']
+                },
+                session=session,
+                request_context=get_request_context(request)
             )
         
         return {
@@ -865,7 +990,7 @@ class ProgressActionView(APIView):
         AuditService.log_action(
             workspace_instance=workspace,
             user=session.executor_user,
-            action='questionnaire_world_changed',
+            action='world_changed',
             details={
                 'from_world': current_world,
                 'to_world': target_world,
@@ -884,13 +1009,15 @@ class ProgressActionView(APIView):
 
 class SealQuestionnaireView(APIView):
     """
-    POST /api/swm/mcmi4/seal
+    POST /api/swm/mcmi4/questionnaire/seal
     
     Sella el workspace creando questionnaire_completion artifact.
-    Reemplaza SealWorkspaceView con integración de QuestionnaireService.
+    
+    FSM: Requiere workspace en 'in_progress'
     """
     permission_classes = [IsAuthenticated, HasWorkspaceExecutorPermission]
     
+    @transaction.atomic
     def post(self, request):
         serializer = SealQuestionnaireRequestSerializer(data=request.data)
         if not serializer.is_valid():
@@ -899,21 +1026,43 @@ class SealQuestionnaireView(APIView):
         workspace_id = serializer.validated_data['workspace_id']
         session_id = serializer.validated_data.get('session_id')
         
-        workspace = get_object_or_404(WorkspaceInstance, id=workspace_id)
+        # Validate workspace UUID
+        try:
+            workspace_uuid = uuid.UUID(str(workspace_id))
+        except (ValueError, AttributeError):
+            return Response(
+                {'error': 'Invalid workspace_id format', 'code': 'INVALID_UUID'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         
-        # Validar estado
+        workspace = get_object_or_404(WorkspaceInstance, id=workspace_uuid)
+        
+        # FSM validation: workspace must be in_progress
         if workspace.status != 'in_progress':
             return Response(
-                {'error': f'Cannot seal workspace in status {workspace.status}. Expected in_progress.'},
-                status=status.HTTP_400_BAD_REQUEST
+                {
+                    'error': f'Cannot seal workspace in state \'{workspace.status}\'',
+                    'code': 'FSM_INVALID_STATE',
+                    'details': {'current_state': workspace.status, 'required': 'in_progress'}
+                },
+                status=status.HTTP_409_CONFLICT
             )
         
         # Obtener o validar sesión
         session = None
         if session_id:
+            # Validate session UUID
+            try:
+                session_uuid = uuid.UUID(str(session_id))
+            except (ValueError, AttributeError):
+                return Response(
+                    {'error': 'Invalid session_id format', 'code': 'INVALID_UUID'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
             session = get_object_or_404(
                 WorkspaceSession, 
-                id=session_id, 
+                id=session_uuid, 
                 workspace_instance=workspace
             )
         else:
@@ -925,7 +1074,11 @@ class SealQuestionnaireView(APIView):
         
         if not session:
             return Response(
-                {'error': 'No active session found. Session required to seal workspace.'},
+                {
+                    'error': 'No active session found',
+                    'code': 'SESSION_NOT_ACTIVE',
+                    'details': {'workspace_id': str(workspace.id)}
+                },
                 status=status.HTTP_400_BAD_REQUEST
             )
         
@@ -937,7 +1090,11 @@ class SealQuestionnaireView(APIView):
         
         if not progress_artifact:
             return Response(
-                {'error': 'questionnaire_progress artifact not found'},
+                {
+                    'error': 'questionnaire_progress artifact not found',
+                    'code': 'ARTIFACT_NOT_FOUND',
+                    'details': {'artifact_type': 'questionnaire_progress'}
+                },
                 status=status.HTTP_404_NOT_FOUND
             )
         
@@ -945,8 +1102,13 @@ class SealQuestionnaireView(APIView):
         if responses_count < QuestionnaireService.TOTAL_QUESTIONS:
             return Response(
                 {
-                    'error': f'Questionnaire incomplete. {responses_count}/{QuestionnaireService.TOTAL_QUESTIONS} answered.',
-                    'progress_percentage': progress_artifact.content.get('progress_percentage', 0.0)
+                    'error': f'Questionnaire incomplete',
+                    'code': 'QUESTIONNAIRE_INCOMPLETE',
+                    'details': {
+                        'answered': responses_count,
+                        'required': QuestionnaireService.TOTAL_QUESTIONS,
+                        'progress_percentage': progress_artifact.content.get('progress_percentage', 0.0)
+                    }
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
@@ -960,7 +1122,10 @@ class SealQuestionnaireView(APIView):
                     request_context=get_request_context(request)
                 )
             except ValueError as e:
-                return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {'error': str(e), 'code': 'SESSION_END_FAILED'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
         
         # Finalizar cuestionario usando QuestionnaireService
         try:
@@ -969,7 +1134,10 @@ class SealQuestionnaireView(APIView):
                 session=session
             )
         except (ValueError, ValidationError) as e:
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {'error': str(e), 'code': 'FINALIZE_FAILED'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         
         # Crear synthesis artifact si se proporciona
         final_synthesis = serializer.validated_data.get('final_synthesis')
@@ -985,6 +1153,32 @@ class SealQuestionnaireView(APIView):
                 is_sealed=True,
                 metadata={'sealed_with_questionnaire': True}
             )
+        
+        # Seal all relevant artifacts
+        unsealed_artifacts = WorkspaceArtifact.objects.filter(
+            workspace_instance=workspace,
+            is_sealed=False
+        )
+        for artifact in unsealed_artifacts:
+            artifact.is_sealed = True
+            artifact.save()
+        
+        # Audit: questionnaire sealed
+        AuditService.log_action(
+            workspace_instance=workspace,
+            user=request.user,
+            action='questionnaire_sealed',
+            details={
+                'total_responses': responses_count,
+                'completion_artifact_id': str(completion_artifact.id)
+            },
+            session=session,
+            request_context=get_request_context(request)
+        )
+        
+        logger.info(
+            f'Questionnaire sealed for workspace {workspace.id} by user {request.user.id}'
+        )
         
         # Preparar respuesta
         response_data = {

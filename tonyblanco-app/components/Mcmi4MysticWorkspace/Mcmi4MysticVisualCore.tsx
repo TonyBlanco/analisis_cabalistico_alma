@@ -75,40 +75,6 @@ export default function Mcmi4MysticVisualCore({
     const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string | null>(null);
     const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
 
-    // Render SWM Workspaces section
-    if (activeSection === 'workspaces') {
-        if (showCreateForm) {
-            return (
-                <div className="max-w-4xl mx-auto">
-                    <CreateWorkspaceForm
-                        onSuccess={(workspaceId, sessionId) => {
-                            setSelectedWorkspaceId(workspaceId);
-                            setSelectedSessionId(sessionId);
-                            setShowCreateForm(false);
-                            // Navigate to questionnaire view
-                            // TODO: Update activeSection to 'questionnaire' or handle routing
-                        }}
-                        onCancel={() => setShowCreateForm(false)}
-                    />
-                </div>
-            );
-        }
-
-        return (
-            <WorkspaceListView
-                onOpenWorkspace={(workspaceId, sessionId) => {
-                    setSelectedWorkspaceId(workspaceId);
-                    setSelectedSessionId(sessionId);
-                    // TODO: Navigate to questionnaire view with this workspace
-                }}
-                onViewResults={(workspaceId) => {
-                    // TODO: Navigate to results view
-                }}
-                onCreateNew={() => setShowCreateForm(true)}
-            />
-        );
-    }
-
 
 
     // Check assignment status
@@ -249,6 +215,40 @@ export default function Mcmi4MysticVisualCore({
         }
 
     };
+
+    // Render SWM Workspaces section (after all hooks)
+    if (activeSection === 'workspaces') {
+        if (showCreateForm) {
+            return (
+                <div className="max-w-4xl mx-auto">
+                    <CreateWorkspaceForm
+                        onSuccess={(workspaceId, sessionId) => {
+                            setSelectedWorkspaceId(workspaceId);
+                            setSelectedSessionId(sessionId);
+                            setShowCreateForm(false);
+                            // Navigate to questionnaire view
+                            // TODO: Update activeSection to 'questionnaire' or handle routing
+                        }}
+                        onCancel={() => setShowCreateForm(false)}
+                    />
+                </div>
+            );
+        }
+
+        return (
+            <WorkspaceListView
+                onOpenWorkspace={(workspaceId) => {
+                    setSelectedWorkspaceId(workspaceId);
+                    // TODO: Start or resume session for this workspace
+                    // TODO: Navigate to questionnaire view with this workspace
+                }}
+                onViewResults={(workspaceId) => {
+                    // TODO: Navigate to results view
+                }}
+                onCreateNew={() => setShowCreateForm(true)}
+            />
+        );
+    }
 
 
 

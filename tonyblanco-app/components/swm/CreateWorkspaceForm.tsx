@@ -9,17 +9,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { swmMcmi4Api } from '@/lib/api/swm-mcmi4-api';
+import { fetchPatients, type Patient } from '@/lib/api/patients-api';
 import { SparklesIcon, UserIcon, DocumentTextIcon } from '@heroicons/react/24/solid';
 
 interface CreateWorkspaceFormProps {
   onSuccess?: (workspaceId: string, sessionId: string) => void;
   onCancel?: () => void;
-}
-
-interface PatientOption {
-  id: string;
-  name: string;
-  mcmi4_data_available: boolean;
 }
 
 export const CreateWorkspaceForm: React.FC<CreateWorkspaceFormProps> = ({
@@ -34,15 +29,25 @@ export const CreateWorkspaceForm: React.FC<CreateWorkspaceFormProps> = ({
   const [mcmi4SourceDataId, setMcmi4SourceDataId] = useState('');
   const [focusAreas, setFocusAreas] = useState<string[]>([]);
   
-  // Mock patient list (in real app, fetch from backend)
-  const [patients, setPatients] = useState<PatientOption[]>([]);
+  // Real patient list from backend
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [loadingPatients, setLoadingPatients] = useState(true);
 
   useEffect(() => {
-    // TODO: Fetch real patients list from backend
-    // For now, using mock data
-    setPatients([
-      { id: '1', name: 'Paciente Demo', mcmi4_data_available: true },
-    ]);
+    // Fetch real patients from backend
+    const loadPatients = async () => {
+      try {
+        setLoadingPatients(true);
+        const data = await fetchPatients(false); // Get all active patients
+        setPatients(data);
+      } catch (err: any) {
+        console.error('Error loading patients:', err);
+        setError(err.message || 'Error al cargar pacientes');
+      } finally {
+        setLoadingPatients(false);
+      }
+    };
+    loadPatients();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -125,17 +130,20 @@ export const CreateWorkspaceForm: React.FC<CreateWorkspaceFormProps> = ({
             value={subjectUserId}
             onChange={(e) => setSubjectUserId(e.target.value)}
             required
+            disabled={loadingPatients || loading}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
           >
-            <option value="">Seleccionar paciente...</option>
+            <option value="">
+              {loadingPatients ? 'Cargando pacientes...' : 'Seleccionar paciente...'}
+            </option>
             {patients.map(patient => (
-              <option key={patient.id} value={patient.id} disabled={!patient.mcmi4_data_available}>
-                {patient.name} {!patient.mcmi4_data_available && '(Sin datos MCMI-4)'}
+              <option key={patient.id} value={patient.id}>
+                {patient.full_name || `${patient.first_name || ''} ${patient.last_name || ''}`.trim() || patient.email}
               </option>
             ))}
           </select>
           <p className="text-xs text-gray-500 mt-1">
-            Solo se muestran pacientes con datos MCMI-4 completados
+            Selecciona el paciente para quien se creará el workspace
           </p>
         </div>
 

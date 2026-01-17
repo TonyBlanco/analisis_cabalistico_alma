@@ -24,11 +24,20 @@ export interface PatientListResponse {
 }
 
 /**
+ * Get auth token from localStorage
+ * Uses 'authToken' key (standard in this app)
+ */
+function getAuthToken(): string | null {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem('authToken');
+}
+
+/**
  * Fetch all active patients for the current therapist
  * Filters for patients with MCMI-4 data if filterMcmi4=true
  */
 export async function fetchPatients(filterMcmi4: boolean = false): Promise<Patient[]> {
-  const token = localStorage.getItem('token');
+  const token = getAuthToken();
   if (!token) {
     throw new Error('No authentication token found');
   }
@@ -68,7 +77,7 @@ export async function fetchPatients(filterMcmi4: boolean = false): Promise<Patie
  * Fetch a single patient by ID
  */
 export async function fetchPatientById(patientId: number): Promise<Patient> {
-  const token = localStorage.getItem('token');
+  const token = getAuthToken();
   if (!token) {
     throw new Error('No authentication token found');
   }

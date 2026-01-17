@@ -1,13 +1,14 @@
 'use client';
 
-// LEGACY MCMI4AssignmentModal removed - using SWM system only
 import { WorkspaceListView, CreateWorkspaceForm, QuestionnaireViewer, QuestionnaireSealButton } from '@/components/swm';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import type { Mcmi4MysticSectionId } from './types';
 
-import { SparklesIcon } from '@heroicons/react/24/solid';
+import { SparklesIcon, DocumentTextIcon, ChartBarIcon, FolderIcon } from '@heroicons/react/24/solid';
+
+import * as swmMcmi4Api from '@/lib/api/swm-mcmi4-api';
 
 
 
@@ -41,8 +42,34 @@ export default function Mcmi4MysticVisualCore({
     const [showCreateForm, setShowCreateForm] = useState(false);
     const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string | null>(null);
     const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
+    const [workspaceStatus, setWorkspaceStatus] = useState<swmMcmi4Api.WorkspaceStatus | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-    // Legacy state removed - only using SWM system now
+    // Load workspace status when workspace is selected
+    useEffect(() => {
+        if (!selectedWorkspaceId) return;
+        
+        const loadWorkspaceStatus = async () => {
+            setLoading(true);
+            setError(null);
+            try {
+                const statusData = await swmMcmi4Api.swmMcmi4Api.getWorkspaceStatus(selectedWorkspaceId);
+                setWorkspaceStatus(statusData.status);
+                
+                // If there's an active session, store its ID
+                if (statusData.active_session) {
+                    setSelectedSessionId(statusData.active_session.session_id);
+                }
+            } catch (err: any) {
+                setError(err.message || 'Error cargando estado del workspace');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadWorkspaceStatus();
+    }, [selectedWorkspaceId]);
 
     // Render SWM Workspaces section (after all hooks)
     if (activeSection === 'workspaces') {
@@ -67,30 +94,101 @@ export default function Mcmi4MysticVisualCore({
             <WorkspaceListView
                 onOpenWorkspace={(workspaceId) => {
                     setSelectedWorkspaceId(workspaceId);
-                    // TODO: Start or resume session for this workspace
-                    // TODO: Navigate to questionnaire view with this workspace
+                    // Workspace status will be loaded by useEffect
                 }}
                 onViewResults={(workspaceId) => {
-                    // TODO: Navigate to results view
+                    setSelectedWorkspaceId(workspaceId);
+                    // Navigate to results section would happen here
+                    // For now, just select the workspace
                 }}
                 onCreateNew={() => setShowCreateForm(true)}
             />
         );
     }
 
-    // LEGACY SECTIONS (questionnaire/results) NO LONGER SUPPORTED
-    // These sections now redirect to the 'workspaces' section
-    if (activeSection === 'questionnaire' || activeSection === 'results') {
+    // Questionnaire section - show for workspace in_progress with active session
+    if (activeSection === 'questionnaire') {
+        if (!selectedWorkspaceId || !selectedSessionId) {
+            return (
+                <div className="flex flex-col h-64 items-center justify-center rounded-xl border border-dashed border-blue-200 bg-blue-50 text-blue-700 p-6 text-center">
+                    <DocumentTextIcon className="h-12 w-12 mb-4 text-blue-500" />
+                    <h4 className="text-lg font-semibold mb-2">Selecciona un workspace</h4>
+                    <p className="text-sm">
+                        Ve a la sección <strong>"Workspaces"</strong> y abre un workspace activo para ver el cuestionario.
+                    </p>
+                </div>
+            );
+        }
+
+        if (workspaceStatus !== 'in_progress') {
+            return (
+                <div className="flex flex-col h-64 items-center justify-center rounded-xl border border-dashed border-yellow-200 bg-yellow-50 text-yellow-700 p-6 text-center">
+                    <DocumentTextIcon className="h-12 w-12 mb-4 text-yellow-500" />
+                    <h4 className="text-lg font-semibold mb-2">Workspace no disponible</h4>
+                    <p className="text-sm">
+                        Este workspace está en estado: <strong>{workspaceStatus}</strong><br />
+                        Solo los workspaces en estado <strong>"in_progress"</strong> muestran el cuestionario.
+                    </p>
+                </div>
+            );
+        }
+
         return (
-            <div className="flex flex-col h-64 items-center justify-center rounded-xl border border-dashed border-yellow-200 bg-yellow-50 text-yellow-700 p-6 text-center">
-                <SparklesIcon className="h-12 w-12 mb-4 text-yellow-500" />
-                <h4 className="text-lg font-semibold mb-2">Sistema actualizado</h4>
-                <p className="text-sm mb-4">
-                    El sistema de asignaciones legacy ha sido reemplazado por el nuevo sistema de Workspaces.
-                </p>
-                <p className="text-sm">
-                    Por favor, usa la sección <strong>"Workspaces"</strong> para crear y gestionar evaluaciones MCMI-4.
-                </p>
+            <div className="space-y-4">
+                <QuestionnaireViewer
+                    workspaceId={selectedWorkspaceId}
+                    sessionId={selectedSessionId}
+                />
+                {/* TODO: QuestionnaireSealButton needs answeredCount/totalQuestions from QuestionnaireViewer */}
+                <div className="text-sm text-gray-500 text-center">
+                    <p>Una vez completado el cuestionario, podrás sellarlo para ver resultados.</p>
+                </div>
+            </div>
+        );
+    }
+
+    // Results section - show for workspace sealed or reviewed
+    if (activeSection === 'results') {
+        if (!selectedWorkspaceId) {
+            return (
+                <div className="flex flex-col h-64 items-center justify-center rounded-xl border border-dashed border-green-200 bg-green-50 text-green-700 p-6 text-center">
+                    <ChartBarIcon className="h-12 w-12 mb-4 text-green-500" />
+                    <h4 className="text-lg font-semibold mb-2">Selecciona un workspace</h4>
+                    <p className="text-sm">
+                        Ve a la sección <strong>"Workspaces"</strong> y selecciona un workspace completado para ver resultados.
+                    </p>
+                </div>
+            );
+        }
+
+        if (workspaceStatus !== 'sealed' && workspaceStatus !== 'reviewed') {
+            return (
+                <div className="flex flex-col h-64 items-center justify-center rounded-xl border border-dashed border-yellow-200 bg-yellow-50 text-yellow-700 p-6 text-center">
+                    <ChartBarIcon className="h-12 w-12 mb-4 text-yellow-500" />
+                    <h4 className="text-lg font-semibold mb-2">Resultados no disponibles</h4>
+                    <p className="text-sm">
+                        Este workspace está en estado: <strong>{workspaceStatus}</strong><br />
+                        Los resultados solo están disponibles cuando el workspace está <strong>"sealed"</strong> o <strong>"reviewed"</strong>.
+                    </p>
+                </div>
+            );
+        }
+
+        return (
+            <div className="rounded-lg border border-gray-200 bg-white p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <ChartBarIcon className="h-5 w-5 text-green-600" />
+                    Resultados MCMI-4 Místico
+                </h3>
+                <div className="text-sm text-gray-600">
+                    <p>Los resultados detallados se cargarán desde:</p>
+                    <code className="block mt-2 p-2 bg-gray-50 rounded">
+                        GET /api/swm/mcmi4/results?workspace_id={selectedWorkspaceId}
+                    </code>
+                    <p className="mt-4 text-yellow-700">
+                        TODO: Integrar componente de visualización de resultados
+                    </p>
+                </div>
             </div>
         );
     }

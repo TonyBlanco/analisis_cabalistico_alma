@@ -39,9 +39,13 @@ export const CreateWorkspaceForm: React.FC<CreateWorkspaceFormProps> = ({
       try {
         setLoadingPatients(true);
         const data = await fetchPatients(false); // Get all active patients
+        console.log('[CreateWorkspaceForm] Pacientes cargados:', data.length, data);
         setPatients(data);
+        if (data.length === 0) {
+          setError('No hay pacientes activos disponibles. Por favor, crea un paciente primero.');
+        }
       } catch (err: any) {
-        console.error('Error loading patients:', err);
+        console.error('[CreateWorkspaceForm] Error loading patients:', err);
         setError(err.message || 'Error al cargar pacientes');
       } finally {
         setLoadingPatients(false);
@@ -130,20 +134,27 @@ export const CreateWorkspaceForm: React.FC<CreateWorkspaceFormProps> = ({
             value={subjectUserId}
             onChange={(e) => setSubjectUserId(e.target.value)}
             required
-            disabled={loadingPatients || loading}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            disabled={loadingPatients || loading || patients.length === 0}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:bg-gray-50 disabled:cursor-not-allowed"
           >
             <option value="">
-              {loadingPatients ? 'Cargando pacientes...' : 'Seleccionar paciente...'}
+              {loadingPatients 
+                ? 'Cargando pacientes...' 
+                : patients.length === 0 
+                  ? 'No hay pacientes disponibles'
+                  : 'Seleccionar paciente...'}
             </option>
             {patients.map(patient => (
               <option key={patient.id} value={patient.id}>
                 {patient.full_name || `${patient.first_name || ''} ${patient.last_name || ''}`.trim() || patient.email}
+                {' '}(ID: {patient.id})
               </option>
             ))}
           </select>
           <p className="text-xs text-gray-500 mt-1">
-            Selecciona el paciente para quien se creará el workspace
+            {patients.length > 0 
+              ? `${patients.length} paciente(s) disponible(s). Puedes crear múltiples workspaces para el mismo paciente.`
+              : 'Selecciona el paciente para quien se creará el workspace'}
           </p>
         </div>
 

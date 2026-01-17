@@ -53,14 +53,20 @@ export async function fetchPatients(filterMcmi4: boolean = false): Promise<Patie
   });
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch patients: ${response.statusText}`);
+    const errorText = await response.text();
+    console.error('[fetchPatients] HTTP Error:', response.status, errorText);
+    throw new Error(`Failed to fetch patients: ${response.status} ${response.statusText}`);
   }
 
   const data: PatientListResponse = await response.json();
+  console.log('[fetchPatients] Response data:', data);
+  
   let patients = data.results || [];
+  console.log('[fetchPatients] Total patients:', patients.length);
 
   // Filter for active patients only
   patients = patients.filter(p => p.is_active);
+  console.log('[fetchPatients] Active patients:', patients.length);
 
   // If filterMcmi4=true, filter for patients with MCMI-4 data
   // TODO: Implement backend filtering or check for TestResult with test_type='mcmi4'

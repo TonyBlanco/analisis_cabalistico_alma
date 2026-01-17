@@ -38,15 +38,16 @@ export const CreateWorkspaceForm: React.FC<CreateWorkspaceFormProps> = ({
     const loadPatients = async () => {
       try {
         setLoadingPatients(true);
+        setError(null);
         const data = await fetchPatients(false); // Get all active patients
         console.log('[CreateWorkspaceForm] Pacientes cargados:', data.length, data);
         setPatients(data);
         if (data.length === 0) {
-          setError('No hay pacientes activos disponibles. Por favor, crea un paciente primero.');
+          setError('No se encontraron pacientes para este terapeuta. Verifica que el usuario actual sea un terapeuta con pacientes asignados.');
         }
       } catch (err: any) {
         console.error('[CreateWorkspaceForm] Error loading patients:', err);
-        setError(err.message || 'Error al cargar pacientes');
+        setError(err.message || 'Error al cargar pacientes. Verifica tu sesión.');
       } finally {
         setLoadingPatients(false);
       }

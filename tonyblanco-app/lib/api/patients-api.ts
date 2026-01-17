@@ -39,10 +39,13 @@ function getAuthToken(): string | null {
 export async function fetchPatients(filterMcmi4: boolean = false): Promise<Patient[]> {
   const token = getAuthToken();
   if (!token) {
-    throw new Error('No authentication token found');
+    console.error('[fetchPatients] No auth token found');
+    throw new Error('No authentication token found. Please log in again.');
   }
 
+  console.log('[fetchPatients] Using token:', token.substring(0, 20) + '...');
   const url = `${API_BASE_URL}/therapist/patients/`;
+  console.log('[fetchPatients] Fetching from:', url);
   
   const response = await fetch(url, {
     method: 'GET',
@@ -52,6 +55,8 @@ export async function fetchPatients(filterMcmi4: boolean = false): Promise<Patie
     },
   });
 
+  console.log('[fetchPatients] Response status:', response.status);
+  
   if (!response.ok) {
     const errorText = await response.text();
     console.error('[fetchPatients] HTTP Error:', response.status, errorText);
@@ -62,11 +67,11 @@ export async function fetchPatients(filterMcmi4: boolean = false): Promise<Patie
   console.log('[fetchPatients] Response data:', data);
   
   let patients = data.results || [];
-  console.log('[fetchPatients] Total patients:', patients.length);
+  console.log('[fetchPatients] Total patients from API:', patients.length);
 
   // Filter for active patients only
   patients = patients.filter(p => p.is_active);
-  console.log('[fetchPatients] Active patients:', patients.length);
+  console.log('[fetchPatients] Active patients after filter:', patients.length);
 
   // If filterMcmi4=true, filter for patients with MCMI-4 data
   // TODO: Implement backend filtering or check for TestResult with test_type='mcmi4'

@@ -40,10 +40,10 @@ export const CreateWorkspaceForm: React.FC<CreateWorkspaceFormProps> = ({
         setLoadingPatients(true);
         setError(null);
         const data = await fetchPatients(false); // Get all active patients
-        console.log('[CreateWorkspaceForm] Pacientes cargados:', data.length, data);
+        console.log('[CreateWorkspaceForm] Consultantes cargados:', data.length, data);
         setPatients(data);
         if (data.length === 0) {
-          setError('No se encontraron pacientes para este terapeuta. Verifica que el usuario actual sea un terapeuta con pacientes asignados.');
+          setError('No se encontraron consultantes para este terapeuta. Verifica que tengas consultantes asignados.');
         }
       } catch (err: any) {
         console.error('[CreateWorkspaceForm] Error loading patients:', err);
@@ -129,7 +129,7 @@ export const CreateWorkspaceForm: React.FC<CreateWorkspaceFormProps> = ({
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             <UserIcon className="inline h-4 w-4 mr-1" />
-            Paciente / Sujeto *
+            Consultante *
           </label>
           <select
             value={subjectUserId}
@@ -140,10 +140,10 @@ export const CreateWorkspaceForm: React.FC<CreateWorkspaceFormProps> = ({
           >
             <option value="">
               {loadingPatients 
-                ? 'Cargando pacientes...' 
+                ? 'Cargando consultantes...' 
                 : patients.length === 0 
-                  ? 'No hay pacientes disponibles'
-                  : 'Seleccionar paciente...'}
+                  ? 'No hay consultantes disponibles'
+                  : 'Seleccionar consultante...'}
             </option>
             {patients.map(patient => (
               <option key={patient.id} value={patient.id}>
@@ -154,8 +154,8 @@ export const CreateWorkspaceForm: React.FC<CreateWorkspaceFormProps> = ({
           </select>
           <p className="text-xs text-gray-500 mt-1">
             {patients.length > 0 
-              ? `${patients.length} paciente(s) disponible(s). Puedes crear múltiples workspaces para el mismo paciente.`
-              : 'Selecciona el paciente para quien se creará el workspace'}
+              ? `${patients.length} consultante(s) disponible(s). Puedes crear múltiples workspaces para el mismo consultante.`
+              : 'Selecciona el consultante para quien se creará el workspace'}
           </p>
         </div>
 

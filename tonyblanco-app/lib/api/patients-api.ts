@@ -1,6 +1,7 @@
 /**
- * API client for patient data
- * Used to fetch patients with MCMI-4 test results for workspace creation
+ * API client for consultante data (backend uses 'patient' model)
+ * Used to fetch consultantes with MCMI-4 test results for workspace creation
+ * Note: Backend models use 'Patient' but UI displays 'Consultante' (holistic, not clinical)
  */
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
@@ -33,8 +34,9 @@ function getAuthToken(): string | null {
 }
 
 /**
- * Fetch all active patients for the current therapist
- * Filters for patients with MCMI-4 data if filterMcmi4=true
+ * Fetch all active consultantes for the current therapist
+ * Filters for consultantes with MCMI-4 data if filterMcmi4=true
+ * (Backend endpoint: /api/therapist/patients/ - 'patient' is internal model name)
  */
 export async function fetchPatients(filterMcmi4: boolean = false): Promise<Patient[]> {
   const token = getAuthToken();
@@ -67,15 +69,15 @@ export async function fetchPatients(filterMcmi4: boolean = false): Promise<Patie
   console.log('[fetchPatients] Response data:', data);
   
   let patients = data.results || [];
-  console.log('[fetchPatients] Total patients from API:', patients.length);
+  console.log('[fetchPatients] Total consultantes from API:', patients.length);
 
-  // Filter for active patients only
+  // Filter for active consultantes only
   patients = patients.filter(p => p.is_active);
-  console.log('[fetchPatients] Active patients after filter:', patients.length);
+  console.log('[fetchPatients] Active consultantes after filter:', patients.length);
 
-  // If filterMcmi4=true, filter for patients with MCMI-4 data
+  // If filterMcmi4=true, filter for consultantes with MCMI-4 data
   // TODO: Implement backend filtering or check for TestResult with test_type='mcmi4'
-  // For now, return all active patients
+  // For now, return all active consultantes
   if (filterMcmi4) {
     // Future: call /api/therapist/patients/?has_mcmi4=true
     // For now, we trust the SWM backend will validate mcmi4_source_data_id

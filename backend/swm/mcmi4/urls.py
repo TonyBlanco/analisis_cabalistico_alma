@@ -24,6 +24,7 @@ from swm.mcmi4.views import (
     SealQuestionnaireView,
     ComputeSymbolicAxesView
 )
+from swm.mcmi4.status_views import ProcessStatusView
 
 app_name = 'swm_mcmi4'
 
@@ -49,4 +50,7 @@ urlpatterns = [
     
     # Symbolic Axes
     path('compute-symbolic-axes', ComputeSymbolicAxesView.as_view(), name='compute-symbolic-axes'),
+    
+    # Process Status
+    path('status/<int:user_id>/', ProcessStatusView.as_view(), name='process-status'),
 ]

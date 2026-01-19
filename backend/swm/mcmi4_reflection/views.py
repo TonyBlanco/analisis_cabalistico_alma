@@ -164,3 +164,64 @@ class SealReflectionView(APIView):
         if x_forwarded_for:
             return x_forwarded_for.split(',')[0]
         return request.META.get('REMOTE_ADDR')
+
+
+class ReflectionBySignalView(APIView):
+    """
+    GET /api/swm/mcmi4-reflection/by-signal/{signal_id}
+    
+    Lookup reflection workspace by signal TestResult ID.
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, signal_id):
+        """Get workspace associated with signal TestResult."""
+        try:
+            workspace = WorkspaceInstance.objects.get(linked_test_result_id=signal_id)
+            workspace_status = WorkspaceService.get_workspace_status(str(workspace.id))
+            serializer = ReflectionStatusResponseSerializer(workspace_status)
+            return Response(serializer.data)
+        
+        except WorkspaceInstance.DoesNotExist:
+            return Response({
+                'error': 'No reflection workspace found for this signal'
+            }, status=status.HTTP_404_NOT_FOUND)
+
+
+class ReflectionByUserView(APIView):
+    """
+    GET /api/swm/mcmi4-reflection/by-user/{user_id}
+    
+    Lookup most recent reflection workspace for user.
+    Prefers sealed over draft.
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, user_id):
+        """Get most recent reflection for user (prefer sealed)."""
+        # Try sealed first
+        sealed_workspace = WorkspaceInstance.objects.filter(
+            consultant_user_id=user_id,
+            status='sealed'
+        ).order_by('-sealed_at').first()
+        
+        if sealed_workspace:
+            workspace_status = WorkspaceService.get_workspace_status(str(sealed_workspace.id))
+            serializer = ReflectionStatusResponseSerializer(workspace_status)
+            return Response(serializer.data)
+        
+        # Fallback to most recent draft
+        draft_workspace = WorkspaceInstance.objects.filter(
+            consultant_user_id=user_id,
+            status='draft'
+        ).order_by('-created_at').first()
+        
+        if draft_workspace:
+            workspace_status = WorkspaceService.get_workspace_status(str(draft_workspace.id))
+            serializer = ReflectionStatusResponseSerializer(workspace_status)
+            return Response(serializer.data)
+        
+        # No workspace found
+        return Response({
+            'error': 'No reflection workspace found for this user'
+        }, status=status.HTTP_404_NOT_FOUND)

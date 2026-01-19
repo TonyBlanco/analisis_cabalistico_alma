@@ -73,7 +73,8 @@ export interface ErrorResponse {
 // Helper to get auth token
 function getAuthToken(): string | null {
   if (typeof window === 'undefined') return null;
-  return localStorage.getItem('token');
+  // Try both 'authToken' (primary) and 'token' (fallback)
+  return localStorage.getItem('authToken') || localStorage.getItem('token');
 }
 
 // Helper to build headers

@@ -1,13 +1,18 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
-import Link from "next/link";
+import { useParams } from "next/navigation";
 import {
-  getReflection,
   REFLECTION_QUESTIONS,
   type ReflectionWorkspace,
 } from "@/lib/api/mcmi4-reflection-api";
+
+type MinimalTestResult = {
+  test_module?: { code?: string } | null;
+  test_id?: string | null;
+  created_at?: string;
+  result_data?: Record<string, unknown> | null;
+};
 
 // Helper to get signal test result for specific user
 async function getSignalTestResultForUser(userId: string) {
@@ -25,9 +30,12 @@ async function getSignalTestResultForUser(userId: string) {
   
   if (!res.ok) throw new Error('Failed to fetch test results');
   
-  const results = await res.json();
-  const signalResults = results.filter((r: any) => 
-    r.test_module?.code === 'mcmi4-signal' || r.test_id === 'mcmi4-signal'
+  const payload = await res.json();
+  const results: MinimalTestResult[] = Array.isArray(payload)
+    ? payload
+    : (payload.results || []);
+  const signalResults = results.filter(
+    (r) => r.test_module?.code === 'mcmi4-signal' || r.test_id === 'mcmi4-signal'
   );
   
   return signalResults.length > 0 ? signalResults[0] : null;
@@ -54,7 +62,11 @@ async function findReflectionWorkspaceForUser(userId: string): Promise<Reflectio
       throw new Error('Failed to fetch reflection');
     }
     
-    return res.json();
+    const payload = await res.json();
+    if (Array.isArray(payload)) {
+      return payload[0] as ReflectionWorkspace;
+    }
+    return payload as ReflectionWorkspace;
   } catch (err) {
     console.error('Error finding reflection:', err);
     return null;
@@ -63,12 +75,11 @@ async function findReflectionWorkspaceForUser(userId: string): Promise<Reflectio
 
 export default function TherapistReflectionViewPage() {
   const params = useParams();
-  const router = useRouter();
   const subjectUserId = params?.subjectUserId as string;
   
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [signalResult, setSignalResult] = useState<any>(null);
+  const [signalResult, setSignalResult] = useState<MinimalTestResult | null>(null);
   const [workspace, setWorkspace] = useState<ReflectionWorkspace | null>(null);
   const [answers, setAnswers] = useState<Record<string, string>>({});
 
@@ -162,25 +173,25 @@ export default function TherapistReflectionViewPage() {
               <div>
                 <span className="text-gray-500">Fecha:</span>
                 <p className="font-medium text-gray-900">
-                  {new Date(signalResult.created_at).toLocaleDateString('es-ES')}
+                  {signalResult.created_at ? new Date(signalResult.created_at).toLocaleDateString('es-ES') : 'N/A'}
                 </p>
               </div>
               <div>
                 <span className="text-gray-500">Items:</span>
                 <p className="font-medium text-gray-900">
-                  {signalResult.result_data?.total_items || 'N/A'}
+                  {signalResult.result_data?.total_items ? String(signalResult.result_data.total_items) : 'N/A'}
                 </p>
               </div>
               <div>
                 <span className="text-gray-500">Media:</span>
                 <p className="font-medium text-gray-900">
-                  {signalResult.result_data?.mean?.toFixed(2) || 'N/A'}
+                  {typeof signalResult.result_data?.mean === 'number' ? signalResult.result_data.mean.toFixed(2) : 'N/A'}
                 </p>
               </div>
               <div>
                 <span className="text-gray-500">Variabilidad:</span>
                 <p className="font-medium text-gray-900">
-                  {signalResult.result_data?.stdev?.toFixed(2) || 'N/A'}
+                  {typeof signalResult.result_data?.stdev === 'number' ? signalResult.result_data.stdev.toFixed(2) : 'N/A'}
                 </p>
               </div>
             </div>
@@ -191,9 +202,9 @@ export default function TherapistReflectionViewPage() {
               El consultante no ha completado su reflexión personal aún.
             </p>
             <p className="text-xs text-blue-700 mt-2">
-              Puedes invitarle a completarla compartiendo el enlace:{' '}
+              Genera el workspace desde la orquestación MCMI-4 para obtener el enlace directo con workspace_id:{' '}
               <code className="bg-blue-100 px-2 py-1 rounded text-xs">
-                /dashboard/patient/swm/mcmi4-reflection
+                /dashboard/patient/swm/mcmi4-reflection/{`{workspace_id}`}
               </code>
             </p>
           </div>
@@ -234,25 +245,25 @@ export default function TherapistReflectionViewPage() {
           <div>
             <span className="text-gray-500">Fecha:</span>
             <p className="font-medium text-gray-900">
-              {new Date(signalResult.created_at).toLocaleDateString('es-ES')}
+              {signalResult.created_at ? new Date(signalResult.created_at).toLocaleDateString('es-ES') : 'N/A'}
             </p>
           </div>
           <div>
             <span className="text-gray-500">Items:</span>
             <p className="font-medium text-gray-900">
-              {signalResult.result_data?.total_items || 'N/A'}
+              {signalResult.result_data?.total_items ? String(signalResult.result_data.total_items) : 'N/A'}
             </p>
           </div>
           <div>
             <span className="text-gray-500">Media:</span>
             <p className="font-medium text-gray-900">
-              {signalResult.result_data?.mean?.toFixed(2) || 'N/A'}
+              {typeof signalResult.result_data?.mean === 'number' ? signalResult.result_data.mean.toFixed(2) : 'N/A'}
             </p>
           </div>
           <div>
             <span className="text-gray-500">Variabilidad:</span>
             <p className="font-medium text-gray-900">
-              {signalResult.result_data?.stdev?.toFixed(2) || 'N/A'}
+              {typeof signalResult.result_data?.stdev === 'number' ? signalResult.result_data.stdev.toFixed(2) : 'N/A'}
             </p>
           </div>
         </div>

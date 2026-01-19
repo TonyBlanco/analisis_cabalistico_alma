@@ -42,12 +42,23 @@ export interface CreateReflectionRequest {
   initial_answers?: Record<string, string>;
 }
 
+export interface CreateReflectionBySignalRequest {
+  subject_user_id: number | string;
+  signal_id: string;
+}
+
 export interface CreateReflectionResponse {
   workspace_id: string;
   artifact_id: string;
   status: ReflectionStatus;
   message: string;
 }
+
+export type CreateReflectionBySignalResponse = ReflectionWorkspace & {
+  created?: boolean;
+  existing?: boolean;
+  artifact_id?: string;
+};
 
 export interface UpdateReflectionRequest {
   answers: Record<string, string>;
@@ -97,12 +108,34 @@ export async function createReflection(
 ): Promise<CreateReflectionResponse> {
   const response = await fetch(`${REFLECTION_BASE}/create`, {
     method: 'POST',
+    credentials: 'include',
     headers: buildHeaders(),
     body: JSON.stringify(request),
   });
 
   if (!response.ok) {
     const error: ErrorResponse = await response.json();
+    throw new Error(error.error || `HTTP ${response.status}`);
+  }
+
+  return response.json();
+}
+
+/**
+ * Create or reuse reflection workspace by signal TestResult and subject user.
+ */
+export async function createReflectionBySignal(
+  request: CreateReflectionBySignalRequest
+): Promise<CreateReflectionBySignalResponse> {
+  const response = await fetch(`${REFLECTION_BASE}/create-by-signal`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: buildHeaders(),
+    body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    const error: ErrorResponse = await response.json().catch(() => ({ error: '' } as ErrorResponse));
     throw new Error(error.error || `HTTP ${response.status}`);
   }
 
@@ -117,6 +150,7 @@ export async function getReflection(
 ): Promise<ReflectionWorkspace> {
   const response = await fetch(`${REFLECTION_BASE}/${workspaceId}`, {
     method: 'GET',
+    credentials: 'include',
     headers: buildHeaders(),
   });
 
@@ -137,6 +171,7 @@ export async function updateReflection(
 ): Promise<UpdateReflectionResponse> {
   const response = await fetch(`${REFLECTION_BASE}/${workspaceId}`, {
     method: 'PATCH',
+    credentials: 'include',
     headers: buildHeaders(),
     body: JSON.stringify(request),
   });
@@ -157,6 +192,7 @@ export async function sealReflection(
 ): Promise<SealReflectionResponse> {
   const response = await fetch(`${REFLECTION_BASE}/${workspaceId}/seal`, {
     method: 'POST',
+    credentials: 'include',
     headers: buildHeaders(),
   });
 
@@ -176,6 +212,7 @@ export async function getReflectionBySignalId(signalId: string): Promise<Reflect
   try {
     const response = await fetch(`${REFLECTION_BASE}/by-signal/${signalId}`, {
       method: 'GET',
+      credentials: 'include',
       headers: buildHeaders(),
     });
 

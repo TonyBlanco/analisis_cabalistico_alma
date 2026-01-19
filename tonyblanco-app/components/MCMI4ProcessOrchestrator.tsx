@@ -13,11 +13,11 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ClipboardList, User, CheckCircle, Clock, XCircle, Sparkles, Loader2, Trash2, FileText, Copy, X } from 'lucide-react';
+import { ClipboardList, User, CheckCircle, Clock, XCircle, Sparkles, Loader2, Trash2, FileText } from 'lucide-react';
 import { fetchPatients, type Patient } from '@/lib/api/patients-api';
 import type { AssignmentPayload } from '@/lib/assignment-api';
 import { swmMcmi4Api } from '@/lib/api/swm-mcmi4-api';
-import { getReflectionBySignalId } from '@/lib/api/mcmi4-reflection-api';
+import { createReflectionBySignal, getReflectionBySignalId } from '@/lib/api/mcmi4-reflection-api';
 import { getApiBaseUrl } from '@/lib/api-base';
 import AssignMCMI4Modal from '@/components/AssignMCMI4Modal';
 
@@ -34,6 +34,13 @@ interface ReflectionTestResult {
   patient_id?: number | null;
   created_at?: string;
 }
+
+type BasicTestResult = {
+  id?: number;
+  created_at?: string;
+  test_module?: { code?: string } | null;
+  test_id?: string | null;
+};
 
 interface ProcessState {
   patient: Patient;
@@ -52,10 +59,9 @@ export default function MCMI4ProcessOrchestrator() {
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const [creatingWorkspace, setCreatingWorkspace] = useState<number | null>(null);
+  const [invitingPatientId, setInvitingPatientId] = useState<number | null>(null);
   const [deletingPatient, setDeletingPatient] = useState<number | null>(null);
-  const [showInviteModal, setShowInviteModal] = useState(false);
-  const [inviteLink, setInviteLink] = useState('');
-  const [copied, setCopied] = useState(false);
+  const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -66,9 +72,13 @@ export default function MCMI4ProcessOrchestrator() {
     setError(null);
 
     try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
+      const token = typeof window !== 'undefined'
+        ? localStorage.getItem('authToken')
+        : null;
       if (!token) {
-        throw new Error('No auth token found');
+        setError('Sesión no válida. Inicia sesión nuevamente.');
+        setLoading(false);
+        return;
       }
 
       const API_BASE = getApiBaseUrl();
@@ -81,6 +91,7 @@ export default function MCMI4ProcessOrchestrator() {
 
       // Assignments are informational only; TestResult is the source of truth for the flow.
       const assignmentsResponse = await fetch(`${API_BASE}/assignments?test_type=mcmi4-signal`, {
+        credentials: 'include',
         headers: {
           'Authorization': `Token ${token}`,
           'Content-Type': 'application/json',
@@ -114,12 +125,14 @@ export default function MCMI4ProcessOrchestrator() {
               
               const [signalResp, reflResp] = await Promise.all([
                 fetch(signalUrl, {
+                  credentials: 'include',
                   headers: {
                     'Authorization': `Token ${token}`,
                     'Content-Type': 'application/json',
                   },
                 }),
                 fetch(reflUrl, {
+                  credentials: 'include',
                   headers: {
                     'Authorization': `Token ${token}`,
                     'Content-Type': 'application/json',
@@ -130,16 +143,20 @@ export default function MCMI4ProcessOrchestrator() {
               if (signalResp.ok) {
                 const signalData = await signalResp.json();
                 console.log(`[Orchestrator] Signal response for patient ${patient.id}:`, signalData);
-                const allSignals = Array.isArray(signalData) ? signalData : (signalData.results || []);
+                const allSignals: BasicTestResult[] = Array.isArray(signalData)
+                  ? signalData
+                  : (signalData.results || []);
                 if (allSignals.length > 0) {
                   // Get latest
-                  testResult = allSignals.sort((a: any, b: any) => {
-                    const aTime = a.created_at ? new Date(a.created_at).getTime() : 0;
-                    const bTime = b.created_at ? new Date(b.created_at).getTime() : 0;
-                    return bTime - aTime;
-                  })[0];
-                  if (testResult) {
-                    console.log(`[Orchestrator] Found signal result ID ${testResult.id} for patient ${patient.id}`);
+                  const latestSignal = allSignals
+                    .sort((a, b) => {
+                      const aTime = a?.created_at ? new Date(a.created_at).getTime() : 0;
+                      const bTime = b?.created_at ? new Date(b.created_at).getTime() : 0;
+                      return bTime - aTime;
+                    })[0];
+                  if (latestSignal) {
+                    testResult = latestSignal as SignalTestResult;
+                    console.log(`[Orchestrator] Found signal result ID ${latestSignal.id} for patient ${patient.id}`);
                   }
                 } else {
                   console.log(`[Orchestrator] No signal result found for patient ${patient.id}`);
@@ -150,13 +167,19 @@ export default function MCMI4ProcessOrchestrator() {
 
               if (reflResp.ok) {
                 const reflData = await reflResp.json();
-                const allReflections = Array.isArray(reflData) ? reflData : (reflData.results || []);
+                const allReflections: BasicTestResult[] = Array.isArray(reflData)
+                  ? reflData
+                  : (reflData.results || []);
                 if (allReflections.length > 0) {
-                  reflectionResult = allReflections.sort((a: any, b: any) => {
-                    const aTime = a.created_at ? new Date(a.created_at).getTime() : 0;
-                    const bTime = b.created_at ? new Date(b.created_at).getTime() : 0;
-                    return bTime - aTime;
-                  })[0];
+                  const latestReflection = allReflections
+                    .sort((a, b) => {
+                      const aTime = a?.created_at ? new Date(a.created_at).getTime() : 0;
+                      const bTime = b?.created_at ? new Date(b.created_at).getTime() : 0;
+                      return bTime - aTime;
+                    })[0];
+                  if (latestReflection) {
+                    reflectionResult = latestReflection as ReflectionTestResult;
+                  }
                 }
               }
             } catch (err) {
@@ -177,7 +200,7 @@ export default function MCMI4ProcessOrchestrator() {
               }
             } catch (err) {
               // No reflection workspace yet - that's fine
-              console.log(`No reflection workspace for patient ${patient.id} signal ${testResult.id}`);
+              console.log(`No reflection workspace for patient ${patient.id} signal ${testResult.id}`, err);
             }
           }
 
@@ -251,20 +274,48 @@ export default function MCMI4ProcessOrchestrator() {
     router.push(`/dashboard/therapist/swm/mcmi4/${workspaceId}`);
   };
 
-  const handleInviteReflection = () => {
-    const link = `${window.location.origin}/dashboard/patient/swm/mcmi4-reflection`;
-    setInviteLink(link);
-    setShowInviteModal(true);
-    setCopied(false);
-  };
+  const handleInviteReflection = async (state: ProcessState) => {
+    if (!state.testResult) return;
 
-  const handleCopyLink = async () => {
+    const patientUserId = typeof state.patient.user === 'number' 
+      ? state.patient.user 
+      : state.patient.user?.id;
+
+    if (!patientUserId) {
+      alert('Paciente sin usuario v lido.');
+      return;
+    }
+
     try {
-      await navigator.clipboard.writeText(inviteLink);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setInvitingPatientId(state.patient.id);
+      const workspace = await createReflectionBySignal({
+        subject_user_id: patientUserId,
+        signal_id: String(state.testResult.id),
+      });
+
+      setProcessStates((prev) =>
+        prev.map((ps) =>
+          ps.patient.id === state.patient.id
+            ? {
+                ...ps,
+                reflectionWorkspace: {
+                  id: workspace.workspace_id,
+                  status: workspace.status as 'draft' | 'sealed',
+                },
+              }
+            : ps
+        )
+      );
+
+      setFeedbackMessage('✅ Reflexión creada. El consultante la verá en su panel.');
+      setTimeout(() => setFeedbackMessage(null), 3000);
     } catch (err) {
-      console.error('Error copying link:', err);
+      console.error('Error creating reflection workspace:', err);
+      alert(
+        `Error al generar reflexi¢n: ${err instanceof Error ? err.message : 'Error desconocido'}`
+      );
+    } finally {
+      setInvitingPatientId(null);
     }
   };
 
@@ -284,15 +335,16 @@ export default function MCMI4ProcessOrchestrator() {
     setDeletingPatient(state.patient.id);
 
     try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
+      const token = typeof window !== 'undefined'
+        ? localStorage.getItem('authToken')
+        : null;
       if (!token) {
-        throw new Error('No auth token');
+        alert('❌ Sesión no válida');
+        setDeletingPatient(null);
+        return;
       }
 
       const API_BASE = getApiBaseUrl();
-      const patientUserId = typeof state.patient.user === 'number' 
-        ? state.patient.user 
-        : state.patient.user?.id;
 
       // Delete TestResults (backend will handle cascading if needed)
       const deletePromises = [];
@@ -301,6 +353,7 @@ export default function MCMI4ProcessOrchestrator() {
         deletePromises.push(
           fetch(`${API_BASE}/tests/results/${state.testResult.id}/`, {
             method: 'DELETE',
+            credentials: 'include',
             headers: {
               'Authorization': `Token ${token}`,
               'Content-Type': 'application/json',
@@ -313,6 +366,7 @@ export default function MCMI4ProcessOrchestrator() {
         deletePromises.push(
           fetch(`${API_BASE}/tests/results/${state.reflectionResult.id}/`, {
             method: 'DELETE',
+            credentials: 'include',
             headers: {
               'Authorization': `Token ${token}`,
               'Content-Type': 'application/json',
@@ -325,6 +379,7 @@ export default function MCMI4ProcessOrchestrator() {
         deletePromises.push(
           fetch(`${API_BASE}/assignments/${state.assignment.id}/`, {
             method: 'DELETE',
+            credentials: 'include',
             headers: {
               'Authorization': `Token ${token}`,
               'Content-Type': 'application/json',
@@ -393,12 +448,17 @@ export default function MCMI4ProcessOrchestrator() {
               </p>
             </div>
           </div>
+          {feedbackMessage && (
+            <div className="mt-3 px-4 py-2 bg-green-50 border border-green-200 rounded-md text-sm text-green-800">
+              {feedbackMessage}
+            </div>
+          )}
         </div>
 
         {processStates.length === 0 ? (
           <div className="px-6 py-8">
             <p className="text-sm text-gray-600">
-              No hay consultantes registrados. Crea consultantes primero en "Gestión de Consultantes".
+              No hay consultantes registrados. Crea consultantes primero en Gestión de Consultantes.
             </p>
           </div>
         ) : (
@@ -526,10 +586,11 @@ export default function MCMI4ProcessOrchestrator() {
                           <FileText className="w-4 h-4 text-blue-600" />
                           <div>
                             <button
-                              onClick={handleInviteReflection}
-                              className="text-xs font-medium text-blue-600 hover:text-blue-800 underline cursor-pointer"
+                              onClick={() => handleInviteReflection(state)}
+                              disabled={invitingPatientId === state.patient.id}
+                              className="text-xs font-medium text-blue-600 hover:text-blue-800 underline cursor-pointer disabled:opacity-60"
                             >
-                              Invitar a reflexión
+                              {invitingPatientId === state.patient.id ? 'Generando enlace...' : 'Invitar a reflexión'}
                             </button>
                             <p className="text-xs text-gray-500">Consultante puede completarla</p>
                           </div>
@@ -646,60 +707,6 @@ export default function MCMI4ProcessOrchestrator() {
               : selectedPatient.user?.id || null
           }
         />
-      )}
-
-      {/* Invite Reflection Modal */}
-      {showInviteModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900">Invitar a Reflexión</h3>
-              <button
-                onClick={() => setShowInviteModal(false)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="px-6 py-4">
-              <p className="text-sm text-gray-600 mb-4">
-                Comparte este enlace con el consultante para que complete su reflexión:
-              </p>
-              <div className="flex items-center gap-2">
-                <input
-                  type="text"
-                  value={inviteLink}
-                  readOnly
-                  className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md bg-gray-50 font-mono"
-                />
-                <button
-                  onClick={handleCopyLink}
-                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
-                >
-                  {copied ? (
-                    <>
-                      <CheckCircle className="w-4 h-4" />
-                      Copiado
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="w-4 h-4" />
-                      Copiar
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-            <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 rounded-b-lg">
-              <button
-                onClick={() => setShowInviteModal(false)}
-                className="w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-              >
-                Cerrar
-              </button>
-            </div>
-          </div>
-        </div>
       )}
     </>
   );

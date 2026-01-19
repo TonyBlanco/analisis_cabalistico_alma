@@ -49,6 +49,11 @@ class CreateReflectionRequestSerializer(serializers.Serializer):
     initial_answers = serializers.DictField(required=False, default=dict)
 
 
+class CreateReflectionBySignalRequestSerializer(serializers.Serializer):
+    subject_user_id = serializers.IntegerField(required=True)
+    signal_id = serializers.CharField(required=True)
+
+
 class UpdateReflectionRequestSerializer(serializers.Serializer):
     answers = serializers.DictField(required=True)
 

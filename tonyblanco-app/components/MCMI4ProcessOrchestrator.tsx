@@ -13,10 +13,11 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ClipboardList, User, CheckCircle, Clock, XCircle, Sparkles, Loader2, Trash2 } from 'lucide-react';
+import { ClipboardList, User, CheckCircle, Clock, XCircle, Sparkles, Loader2, Trash2, FileText, Copy, X } from 'lucide-react';
 import { fetchPatients, type Patient } from '@/lib/api/patients-api';
 import type { AssignmentPayload } from '@/lib/assignment-api';
 import { swmMcmi4Api } from '@/lib/api/swm-mcmi4-api';
+import { getReflectionBySignalId } from '@/lib/api/mcmi4-reflection-api';
 import { getApiBaseUrl } from '@/lib/api-base';
 import AssignMCMI4Modal from '@/components/AssignMCMI4Modal';
 
@@ -39,6 +40,7 @@ interface ProcessState {
   assignment: AssignmentPayload | null;
   testResult: SignalTestResult | null;
   reflectionResult: ReflectionTestResult | null;
+  reflectionWorkspace: { id: string; status: 'draft' | 'sealed' } | null;
   workspaceId: string | null;
 }
 
@@ -51,6 +53,9 @@ export default function MCMI4ProcessOrchestrator() {
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const [creatingWorkspace, setCreatingWorkspace] = useState<number | null>(null);
   const [deletingPatient, setDeletingPatient] = useState<number | null>(null);
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [inviteLink, setInviteLink] = useState('');
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -159,6 +164,23 @@ export default function MCMI4ProcessOrchestrator() {
             }
           }
 
+          // Check for reflection workspace if signal exists
+          let reflectionWorkspace: { id: string; status: 'draft' | 'sealed' } | null = null;
+          if (testResult) {
+            try {
+              const reflWs = await getReflectionBySignalId(String(testResult.id));
+              if (reflWs) {
+                reflectionWorkspace = {
+                  id: reflWs.workspace_id,
+                  status: reflWs.status,
+                };
+              }
+            } catch (err) {
+              // No reflection workspace yet - that's fine
+              console.log(`No reflection workspace for patient ${patient.id} signal ${testResult.id}`);
+            }
+          }
+
           const workspaceId = testResult
             ? workspacesList.workspaces.find(
                 (ws) => ws.mcmi4_source_data_id === String(testResult.id)
@@ -170,6 +192,7 @@ export default function MCMI4ProcessOrchestrator() {
             assignment,
             testResult,
             reflectionResult,
+            reflectionWorkspace,
             workspaceId,
           };
         })
@@ -226,6 +249,23 @@ export default function MCMI4ProcessOrchestrator() {
 
   const handleOpenWorkspace = (workspaceId: string) => {
     router.push(`/dashboard/therapist/swm/mcmi4/${workspaceId}`);
+  };
+
+  const handleInviteReflection = () => {
+    const link = `${window.location.origin}/dashboard/patient/swm/mcmi4-reflection`;
+    setInviteLink(link);
+    setShowInviteModal(true);
+    setCopied(false);
+  };
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(inviteLink);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Error copying link:', err);
+    }
   };
 
   const handleResetPatientData = async (state: ProcessState) => {
@@ -455,18 +495,49 @@ export default function MCMI4ProcessOrchestrator() {
 
                     {/* Reflection Status */}
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {state.reflectionResult ? (
+                      {state.reflectionWorkspace?.status === 'sealed' ? (
                         <div className="flex items-center gap-2">
                           <CheckCircle className="w-4 h-4 text-green-600" />
                           <div>
-                            <p className="text-xs font-medium text-gray-900">Completado</p>
-                            <p className="text-xs text-gray-500">ID: {state.reflectionResult.id}</p>
+                            <p className="text-xs font-medium text-gray-900">Completada</p>
+                            <button
+                              onClick={() => {
+                                const userId = typeof state.patient.user === 'number' 
+                                  ? state.patient.user 
+                                  : state.patient.user?.id;
+                                router.push(`/dashboard/therapist/swm/mcmi4-reflection/${userId}`);
+                              }}
+                              className="text-xs text-blue-600 hover:text-blue-800 underline"
+                            >
+                              Ver reflexión
+                            </button>
+                          </div>
+                        </div>
+                      ) : state.reflectionWorkspace?.status === 'draft' ? (
+                        <div className="flex items-center gap-2">
+                          <Clock className="w-4 h-4 text-yellow-600" />
+                          <div>
+                            <p className="text-xs font-medium text-gray-900">En progreso</p>
+                            <p className="text-xs text-gray-500">Borrador activo</p>
+                          </div>
+                        </div>
+                      ) : state.testResult ? (
+                        <div className="flex items-center gap-2">
+                          <FileText className="w-4 h-4 text-blue-600" />
+                          <div>
+                            <button
+                              onClick={handleInviteReflection}
+                              className="text-xs font-medium text-blue-600 hover:text-blue-800 underline cursor-pointer"
+                            >
+                              Invitar a reflexión
+                            </button>
+                            <p className="text-xs text-gray-500">Consultante puede completarla</p>
                           </div>
                         </div>
                       ) : (
                         <div className="flex items-center gap-2 text-gray-400">
                           <XCircle className="w-4 h-4" />
-                          <span className="text-xs">Pendiente</span>
+                          <span className="text-xs">Pendiente señal</span>
                         </div>
                       )}
                     </td>
@@ -575,6 +646,60 @@ export default function MCMI4ProcessOrchestrator() {
               : selectedPatient.user?.id || null
           }
         />
+      )}
+
+      {/* Invite Reflection Modal */}
+      {showInviteModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900">Invitar a Reflexión</h3>
+              <button
+                onClick={() => setShowInviteModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="px-6 py-4">
+              <p className="text-sm text-gray-600 mb-4">
+                Comparte este enlace con el consultante para que complete su reflexión:
+              </p>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={inviteLink}
+                  readOnly
+                  className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md bg-gray-50 font-mono"
+                />
+                <button
+                  onClick={handleCopyLink}
+                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                >
+                  {copied ? (
+                    <>
+                      <CheckCircle className="w-4 h-4" />
+                      Copiado
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-4 h-4" />
+                      Copiar
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+            <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 rounded-b-lg">
+              <button
+                onClick={() => setShowInviteModal(false)}
+                className="w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );

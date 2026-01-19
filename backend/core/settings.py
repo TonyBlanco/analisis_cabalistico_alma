@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'astrology',        # Módulo de astrología (cálculos astronómicos)
     'courses',          # Sistema LMS de cursos
     'swm.mcmi4',        # MCMI-4 Místico SWM (Specialized Workspace Module)
+    'swm.mcmi4_reflection',  # MCMI-4 Reflection SWM (Experiential reflection)
     # The `symbolic` package is not a Python package in this repo (it's JS/TS).
     # Comment out invalid references so Django can start locally.
     # 'symbolic.72_angels',  # SWM 72 Ángeles Engine

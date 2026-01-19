@@ -306,4 +306,7 @@ urlpatterns = [
     
     # SWM MCMI-4 Místico (Specialized Workspace Module)
     path('swm/mcmi4/', include('swm.mcmi4.urls', namespace='swm_mcmi4')),
+    
+    # SWM MCMI-4 Reflection (Experiential Reflection Module)
+    path('swm/mcmi4-reflection/', include('swm.mcmi4_reflection.urls', namespace='swm_mcmi4_reflection')),
 ]

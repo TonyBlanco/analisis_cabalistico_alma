@@ -1,0 +1,509 @@
+{
+    "metadata": {
+        "world": "atzilut",
+        "world_name": "Atzilut - Mundo Emanativo/Espiritual",
+        "description": "El mundo más elevado, donde reside la esencia pura del alma, el propósito divino y la conexión con Ein Sof (lo infinito).",
+        "total_items_required": 49,
+        "sephirot": [
+            "Keter",
+            "Chochmah",
+            "Binah",
+            "Chesed",
+            "Gevurah",
+            "Tiferet"
+        ],
+        "total_dimensions": 7
+    },
+    "dimensions": {
+        "keter_divine_purpose": {
+            "dimension_id": "atzilut_keter_purpose",
+            "name": "Keter - Propósito Divino",
+            "sefirah": "Keter",
+            "description": "Claridad de misión de vida, conexión con Ein Sof, sentido de dirección trascendente",
+            "items_required": 7,
+            "items_available": 10,
+            "questions": [
+                {
+                    "id": "atz_ktr_001",
+                    "text": "Siento una conexión clara con mi propósito divino en esta vida.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_ktr_002",
+                    "text": "Mi existencia tiene un sentido trascendente que guía todas mis decisiones.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_ktr_003",
+                    "text": "Experimento momentos de claridad absoluta sobre mi misión en este plano.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_ktr_004",
+                    "text": "Mi voluntad personal está alineada con una intención superior.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_ktr_005",
+                    "text": "Reconozco el hilo conductor que une todas mis experiencias de vida.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_ktr_006",
+                    "text": "Me siento frecuentemente desconectado de cualquier propósito mayor.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_ktr_007",
+                    "text": "Percibo que mi vida está guiada por una fuerza más allá de mi comprensión.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_ktr_008",
+                    "text": "La idea de un propósito divino me resulta abstracta y lejana.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_ktr_009",
+                    "text": "Puedo articular con claridad el para qué de mi existencia.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_ktr_010",
+                    "text": "Siento que mi camino está iluminado desde una dimensión superior.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                }
+            ]
+        },
+        "chochmah_intuitive_wisdom": {
+            "dimension_id": "atzilut_chochmah_wisdom",
+            "name": "Chochmah - Sabiduría Intuitiva",
+            "sefirah": "Chochmah",
+            "description": "Inspiración súbita, conocimiento revelado, insight espiritual, sabiduría que viene sin razonamiento",
+            "items_required": 7,
+            "items_available": 10,
+            "questions": [
+                {
+                    "id": "atz_chk_001",
+                    "text": "Recibo insights profundos de forma súbita, como destellos de luz.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_chk_002",
+                    "text": "Confío en mi sabiduría intuitiva más que en el análisis racional.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_chk_003",
+                    "text": "Experimento momentos de revelación donde el conocimiento simplemente 'llega'.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_chk_004",
+                    "text": "Mi intuición me guía hacia decisiones acertadas sin necesidad de justificación lógica.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_chk_005",
+                    "text": "Rara vez experimento inspiración o insight espontáneo.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_chk_006",
+                    "text": "Puedo acceder a una fuente de sabiduría que trasciende mi experiencia personal.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_chk_007",
+                    "text": "Las respuestas importantes a menudo me son reveladas en estados de quietud.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_chk_008",
+                    "text": "Necesito siempre analizar y razonar para entender algo.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_chk_009",
+                    "text": "Reconozco la diferencia entre pensamiento ordinario y sabiduría revelada.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_chk_010",
+                    "text": "Mi mente recibe comprensiones profundas sin buscarlas conscientemente.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                }
+            ]
+        },
+        "binah_deep_understanding": {
+            "dimension_id": "atzilut_binah_understanding",
+            "name": "Binah - Comprensión Profunda",
+            "sefirah": "Binah",
+            "description": "Procesamiento analítico de revelaciones, estructura de significado espiritual, integración de sabiduría",
+            "items_required": 7,
+            "items_available": 10,
+            "questions": [
+                {
+                    "id": "atz_bin_001",
+                    "text": "Puedo procesar insights espirituales y darles estructura de significado.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_bin_002",
+                    "text": "Integro naturalmente la sabiduría divina con mi comprensión racional.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_bin_003",
+                    "text": "Puedo explicar conceptos espirituales complejos de manera lógica y coherente.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_bin_004",
+                    "text": "Mi mente analiza las revelaciones hasta entenderlas profundamente.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_bin_005",
+                    "text": "Me cuesta dar sentido lógico a las experiencias espirituales que tengo.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_bin_006",
+                    "text": "Construyo marcos conceptuales que unen lo divino con lo terrenal.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_bin_007",
+                    "text": "Veo patrones y estructuras en el despliegue de la realidad espiritual.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_bin_008",
+                    "text": "Las revelaciones espirituales me resultan confusas y difíciles de procesar.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_bin_009",
+                    "text": "Puedo contemplar verdades divinas hasta que se despliegan en capas de comprensión.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_bin_010",
+                    "text": "Mi intelecto superior traduce la sabiduría en entendimiento aplicable.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                }
+            ]
+        },
+        "chesed_unconditional_love": {
+            "dimension_id": "atzilut_chesed_love",
+            "name": "Atzilut-Chesed - Amor Incondicional",
+            "sefirah": "Chesed",
+            "description": "Capacidad de dar sin esperar, compasión universal, apertura del corazón divino",
+            "items_required": 7,
+            "items_available": 10,
+            "questions": [
+                {
+                    "id": "atz_chd_001",
+                    "text": "Amo a los demás sin necesidad de que me correspondan.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_chd_002",
+                    "text": "Mi corazón se expande naturalmente hacia todos los seres.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_chd_003",
+                    "text": "Experimento compasión universal que trasciende las diferencias.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_chd_004",
+                    "text": "Doy desde un espacio de abundancia divina, no desde la carencia.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_chd_005",
+                    "text": "Me resulta difícil amar sin esperar algo a cambio.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_chd_006",
+                    "text": "Siento amor incluso hacia quienes me han herido.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_chd_007",
+                    "text": "Mi amor fluye como un río inagotable desde una fuente divina.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_chd_008",
+                    "text": "Solo puedo amar a quienes cumplen mis expectativas.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_chd_009",
+                    "text": "Reconozco la chispa divina en cada ser humano.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_chd_010",
+                    "text": "Mi capacidad de amar no tiene límites ni condiciones.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                }
+            ]
+        },
+        "gevurah_divine_justice": {
+            "dimension_id": "atzilut_gevurah_justice",
+            "name": "Atzilut-Gevurah - Justicia Divina",
+            "sefirah": "Gevurah",
+            "description": "Discernimiento moral elevado, límites sagrados, rigor espiritual",
+            "items_required": 7,
+            "items_available": 10,
+            "questions": [
+                {
+                    "id": "atz_gev_001",
+                    "text": "Poseo un sentido claro de justicia divina que guía mis acciones.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_gev_002",
+                    "text": "Establezco límites sagrados cuando es necesario para proteger lo que es correcto.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_gev_003",
+                    "text": "Puedo decir 'no' desde un espacio de amor y claridad espiritual.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_gev_004",
+                    "text": "Mi discernimiento moral viene de una fuente elevada, no solo de normas sociales.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_gev_005",
+                    "text": "Me cuesta establecer límites, incluso cuando algo va en contra de mis valores.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_gev_006",
+                    "text": "Practico disciplina espiritual con rigor amoroso.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_gev_007",
+                    "text": "Reconozco cuando la compasión debe balancearse con límites claros.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_gev_008",
+                    "text": "Tiendo a ser permisivo incluso cuando sé que algo no está bien.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_gev_009",
+                    "text": "Mi sentido de justicia trasciende las leyes humanas y toca lo divino.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_gev_010",
+                    "text": "Puedo sostener la tensión entre amor incondicional y límites necesarios.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                }
+            ]
+        },
+        "tiferet_transcendent_beauty": {
+            "dimension_id": "atzilut_tiferet_beauty",
+            "name": "Atzilut-Tiferet - Belleza Trascendente",
+            "sefirah": "Tiferet",
+            "description": "Armonía con lo divino, balance espiritual, verdad interior",
+            "items_required": 7,
+            "items_available": 10,
+            "questions": [
+                {
+                    "id": "atz_tif_001",
+                    "text": "Experimento la belleza de la existencia como un reflejo de lo divino.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_tif_002",
+                    "text": "Mi vida está en armonía con principios espirituales elevados.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_tif_003",
+                    "text": "Puedo integrar opuestos (amor/rigor, dar/recibir) en una síntesis superior.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_tif_004",
+                    "text": "Vivo desde mi verdad interior, alineada con mi esencia divina.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_tif_005",
+                    "text": "Rara vez siento armonía interna o conexión con algo bello.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_tif_006",
+                    "text": "Mi corazón espiritual es el centro desde donde orquesto mi vida.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_tif_007",
+                    "text": "Reconozco la verdad compasiva que equilibra todos los extremos.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_tif_008",
+                    "text": "Mi vida carece de equilibrio espiritual y me siento fragmentado.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_tif_009",
+                    "text": "Irradio una presencia que refleja la belleza del alma.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_tif_010",
+                    "text": "Experimento momentos de gracia donde todo está perfectamente alineado.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                }
+            ]
+        },
+        "atzilut_integration": {
+            "dimension_id": "atzilut_integration",
+            "name": "Integración Atzilut",
+            "sefirah": "Multiple",
+            "description": "Coherencia entre mundos superiores, manifestación de esencia, alineación con voluntad divina",
+            "items_required": 7,
+            "items_available": 10,
+            "questions": [
+                {
+                    "id": "atz_int_001",
+                    "text": "Mi esencia espiritual se manifiesta coherentemente en todos los aspectos de mi vida.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_int_002",
+                    "text": "Siento una integración profunda entre mi propósito, sabiduría y amor.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_int_003",
+                    "text": "Mi vida refleja la voluntad divina de manera cada vez más clara.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_int_004",
+                    "text": "Los aspectos superiores de mi ser están alineados y fluyen juntos.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_int_005",
+                    "text": "Experimento fragmentación entre lo que siento como divino y cómo vivo.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_int_006",
+                    "text": "Mi conexión con Ein Sof (lo infinito) permea todos mis pensamientos y acciones.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_int_007",
+                    "text": "Vivo como un canal para que lo divino se exprese en el mundo.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_int_008",
+                    "text": "Hay una gran brecha entre mis ideales espirituales y mi realidad diaria.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_int_009",
+                    "text": "Mi ser superior está integrado de tal forma que actúo desde la totalidad.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "atz_int_010",
+                    "text": "Experimento unidad entre los diferentes aspectos de mi naturaleza divina.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                }
+            ]
+        }
+    }
+}

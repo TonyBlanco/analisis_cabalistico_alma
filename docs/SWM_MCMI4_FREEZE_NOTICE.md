@@ -315,3 +315,4 @@ Este módulo está oficialmente congelado. Cualquier cambio requiere RFC formal 
 
 **Commit Frozen:** `93e282c4ba2e4ddf10df03f6a3abb813affaa078`  
 **Firmado Digitalmente:** 2026-01-17T23:59:59Z
+

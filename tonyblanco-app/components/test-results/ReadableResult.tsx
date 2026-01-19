@@ -102,7 +102,7 @@ const getDomainDescriptor = (domainValue: any) => {
 export default function ReadableResult({
   resultData,
   resultId: propResultId,
-  showRaw = true,
+  showRaw = false,
   testName,
   testCode,
   date,
@@ -246,6 +246,86 @@ export default function ReadableResult({
     domains ||
     activeFlags.length > 0;
 
+  // (B) Check for normalized mcmi4-signal schema
+  const isMCMI4Signal = payload?.schema_version === 'mcmi4-signal:v1' || testCode === 'mcmi4-signal';
+  const signalData = isMCMI4Signal ? {
+    total_items: payload?.total_items ?? 0,
+    scale: payload?.scale ?? 'unknown',
+    timestamp: payload?.timestamp ?? date,
+    mean: payload?.responses_summary?.mean ?? null,
+    stdev: payload?.responses_summary?.stdev ?? null,
+    counts: payload?.responses_summary?.counts ?? {},
+  } : null;
+
+  // Render mcmi4-signal schema
+  if (isMCMI4Signal && signalData) {
+    const meanPercent = signalData.mean !== null ? Math.round(signalData.mean * 100) : null;
+    const stdevPercent = signalData.stdev !== null ? Math.round(signalData.stdev * 100) : null;
+    
+    return (
+      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+        <div className="flex items-start justify-between mb-3">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+              {testName || 'SWM MCMI-4 SIGNAL'}
+              {testCode && <span className="text-xs font-normal text-gray-500 px-2 py-0.5 bg-gray-100 rounded-full border border-gray-200">{testCode}</span>}
+            </h3>
+            {signalData.timestamp && (
+              <div className="flex items-center gap-1 mt-1 text-xs text-gray-500">
+                <Calendar size={12} />
+                <span>{new Date(signalData.timestamp).toLocaleString('es-ES', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+              </div>
+            )}
+          </div>
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 transition-colors"
+              aria-label="Cerrar"
+            >
+              <X size={20} />
+            </button>
+          )}
+        </div>
+        
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3">
+          <div className="flex items-center gap-2 text-blue-700 mb-2">
+            <Activity size={16} />
+            <span className="font-medium text-sm">Señal registrada</span>
+          </div>
+          <div className="text-sm text-gray-700 space-y-1">
+            <p><strong>Items totales:</strong> {signalData.total_items}</p>
+            <p><strong>Escala:</strong> {signalData.scale}</p>
+            {meanPercent !== null && <p><strong>Media normalizada:</strong> {meanPercent}%</p>}
+            {stdevPercent !== null && <p><strong>Desviación estándar:</strong> {stdevPercent}%</p>}
+            {signalData.counts && Object.keys(signalData.counts).length > 0 && (
+              <div>
+                <strong>Distribución de respuestas:</strong>
+                <div className="flex gap-2 mt-1">
+                  {Object.entries(signalData.counts).map(([key, count]) => (
+                    <span key={key} className="text-xs bg-white border border-gray-200 px-2 py-1 rounded">
+                      {key}: {String(count)}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <details className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+          <summary className="cursor-pointer text-sm text-gray-600 font-medium flex items-center gap-2">
+            <FileJson size={14} />
+            Ver datos completos (JSON)
+          </summary>
+          <pre className="text-xs whitespace-pre-wrap break-words text-gray-800 mt-3 font-mono bg-white p-2 rounded border border-gray-100">
+            {JSON.stringify(resultData, null, 2)}
+          </pre>
+        </details>
+      </div>
+    );
+  }
+
   // Fallback for completely empty content
   if (!hasContent && !showTechnical && !testName) {
     // Force technical view if no content is available
@@ -253,7 +333,9 @@ export default function ReadableResult({
       <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
         <div className="flex items-center gap-2 text-amber-600 mb-2">
           <AlertTriangle size={18} />
-          <span className="text-sm font-medium">Sin datos estructurados</span>
+          <span className="text-sm font-medium">
+            {isMCMI4Signal ? 'Resultado recibido, pendiente de normalización' : 'Sin datos estructurados'}
+          </span>
         </div>
         <details className="bg-gray-50 border border-gray-200 rounded-lg p-3">
           <summary className="cursor-pointer text-sm text-gray-600 font-medium flex items-center gap-2">
@@ -413,6 +495,36 @@ export default function ReadableResult({
                   <span className="text-sm text-emerald-800">Score: {structuredData.score_total}</span>
                 )}
               </div>
+              {/* Transition Suggestion */}
+              {structuredData?.transition_suggestion && (
+                <div className="mt-3 pt-3 border-t border-emerald-200">
+                  <p className="text-xs uppercase tracking-wider text-emerald-600 font-semibold mb-1">
+                    Sugerencia de Transición
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-emerald-800">
+                      Mundo sugerido: <span className="font-semibold capitalize">{structuredData.transition_suggestion}</span>
+                    </p>
+                    {isTherapist && (
+                      <button
+                        type="button"
+                        onClick={() => setShowSuggestionModal(true)}
+                        className="text-xs px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full hover:bg-emerald-200 transition-colors font-medium"
+                      >
+                        Ver motivo
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+              {/* Atzilut Level */}
+              {structuredData?.atzilut_level && (
+                <div className="mt-2">
+                  <span className="text-xs text-emerald-600">
+                    Nivel Atzilut: <span className="capitalize">{structuredData.atzilut_level}</span>
+                  </span>
+                </div>
+              )}
             </div>
           )}
           {/* Summary Text */}
@@ -553,6 +665,10 @@ export default function ReadableResult({
       <ExplorationSuggestionModal
         open={showSuggestionModal}
         onClose={handleSuggestionModalClose}
+        currentWorld={therapistSuggestionEffective?.current_world || structuredData?.current_world}
+        nextWorld={therapistSuggestionEffective?.next_world || structuredData?.transition_suggestion}
+        atzilutLevel={structuredData?.atzilut_level}
+        rhythmState={structuredData?.rhythm_state}
       />
 
     </div>

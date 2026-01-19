@@ -121,6 +121,9 @@ export interface ExecuteTestResponse {
   result: Record<string, any>;
   uses_remaining: number | null;
   result_id?: number;
+  // Dynamic fields for specific tests (like MCMI-4 question generation)
+  questions?: any[];
+  [key: string]: any;
 }
 
 // Interface para estadísticas de usuario

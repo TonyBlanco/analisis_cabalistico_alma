@@ -45,10 +45,10 @@ export const CreateWorkspaceForm: React.FC<CreateWorkspaceFormProps> = ({
         if (data.length === 0) {
           setError('No se encontraron consultantes para este terapeuta. Verifica que tengas consultantes asignados.');
         }
-      } catch (err: any) {
-        console.error('[CreateWorkspaceForm] Error loading patients:', err);
-        setError(err.message || 'Error al cargar pacientes. Verifica tu sesión.');
-      } finally {
+        } catch (err: any) {
+          console.error('[CreateWorkspaceForm] Error loading patients:', err);
+          setError(err.message || 'Error al cargar pacientes. Verifica tu sesión.');
+        } finally {
         setLoadingPatients(false);
       }
     };
@@ -145,18 +145,24 @@ export const CreateWorkspaceForm: React.FC<CreateWorkspaceFormProps> = ({
                   ? 'No hay consultantes disponibles'
                   : 'Seleccionar consultante...'}
             </option>
-            {patients.map(patient => (
-              <option key={patient.id} value={patient.id}>
-                {patient.full_name || `${patient.first_name || ''} ${patient.last_name || ''}`.trim() || patient.email}
-                {' '}(ID: {patient.id})
-              </option>
-            ))}
+            {patients.map(patient => {
+              // Prefer the linked User id if provided by the backend (patient.user)
+              const userId = patient.user && typeof patient.user === 'object' ? (patient.user as any).id : (patient.user as any) || patient.id;
+              return (
+                <option key={patient.id} value={String(userId)}>
+                  {patient.full_name || `${patient.first_name || ''} ${patient.last_name || ''}`.trim() || patient.email}
+                  {' '}(ID: {userId})
+                </option>
+              );
+            })}
           </select>
           <p className="text-xs text-gray-500 mt-1">
             {patients.length > 0 
               ? `${patients.length} consultante(s) disponible(s). Puedes crear múltiples workspaces para el mismo consultante.`
               : 'Selecciona el consultante para quien se creará el workspace'}
           </p>
+
+          
         </div>
 
         {/* MCMI-4 Data ID */}

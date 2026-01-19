@@ -1,0 +1,11 @@
+--- DIAGNOSTIC FOR PATIENT ID 4 ---
+Patient Found: Luis Antonio Blanco Fontela (User ID: 18)
+Test Module 'mcmi4-mystic': Found (ID: 53)
+
+UserTestAccess Records (1):
+ - ID: 197, Special: True, Created: 2026-01-15 21:07:51.737511+00:00
+
+TestResult Records (for patient):
+ - ID: 90, Type: RESULT, Date: 2026-01-15 19:43:09.516437+00:00
+   Details: {'audit': {'executed_by_user_id': 18, 'executed_by_role': 'patient', 'execution_mode': 'patient_self', 'patient_id': 4, 'execution_timestamp': '2026-01-15T20:43:09.515925'}}
+   ResultData: {'test_type': 'holistic_screening', 'processed': True, 'timestamp': '2026-01-15 20:43:09.260697', 'message': 'Test MCMI-4-Mystic - Inventario Multiaxial Cósmico procesado correctamente', 'note': 'Implementación avanzada en desarrollo'}

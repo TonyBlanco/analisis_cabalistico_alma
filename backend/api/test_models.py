@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from datetime import datetime
+from typing import Optional
 
 # Tipos de tests disponibles
 TEST_TYPE_CHOICES = [
@@ -237,36 +238,63 @@ def get_client_view(exploration):
 
 
 EXPLORATION_WORLD_BY_TEST_CODE = {
+    # ATZILUT (Esencia)
     "asrs_essence": "atzilut",
+    "life-purpose": "atzilut",
+    # BERIA (Intelecto)
     "wellness": "beria",
     "screening-general": "beria",
     "scl90": "beria",
     "scl-90": "beria",
+    "cognitive-map": "beria",
+    "belief-system": "beria",
+    # YETZIRAH (Emoción)
+    "stress-regulation": "yetzirah",
+    "anxiety-state-trait": "yetzirah",
+    "emotional-literacy": "yetzirah",
+    "attachment-style": "yetzirah",
+    # ASSIAH (Acción/Cuerpo)
+    "insomnia": "assiah",
+    "nutrition": "assiah",
+    "daily-rhythm": "assiah",
+    "somatic-awareness": "assiah",
 }
 
 WORLD_NEXT_STEP = {
     "atzilut": "beria",
     "beria": "yetzirah",
-    "yetzirah": "asiah",
+    "yetzirah": "assiah",
+    "assiah": "yetzirah",  # Asiá a menudo vuelve a Ietzirá para procesar síntomas
 }
 
-ASRS_STATE_TO_NEXT_TEST = {
-    "fluido": "wellness",
-    "latente": "screening-general",
-    "forzado": "scl90",
-    "fragmentado": "screening-general",
+WORLD_RECOMMENDED_TESTS = {
+    "atzilut": ["asrs_essence", "life-purpose"],
+    "beria": ["wellness", "screening-general", "cognitive-map", "belief-system"],
+    "yetzirah": ["stress-regulation", "anxiety-state-trait", "emotional-literacy", "attachment-style"],
+    "assiah": ["insomnia", "nutrition", "daily-rhythm", "somatic-awareness"],
 }
 
-BERIA_TO_YETZIRAH_SUGGESTIONS = {
-    "wellness": {"primary": "stress-regulation"},
-    "screening-general": {"primary": "anxiety-state-trait"},
-    "scl90": {"primary": "stress-regulation", "secondary": ["anxiety-state-trait"]},
-    "scl-90": {"primary": "stress-regulation", "secondary": ["anxiety-state-trait"]},
+# Mapping legacy rules to the new engine
+ASRS_STATE_TO_NEXT_WORLD = {
+    "fluido": "atzilut",
+    "latente": "beria",
+    "forzado": "yetzirah",
+    "fragmentado": "beria",
+}
+
+# BERIA -> YETZIRAH specific defaults if no structured data
+BERIA_TO_YETZIRAH_DEFAULTS = {
+    "wellness": "stress-regulation",
+    "screening-general": "anxiety-state-trait",
+    "scl90": "stress-regulation",
 }
 
 
 def get_therapist_next_exploration_suggestion(exploration, symbolic_result=None):
-    """READ-ONLY SEMANTIC LAYER - therapist-only suggestion helper."""
+    """
+    SYMBOLIC TRANSITION ENGINE (CORE PIECE)
+    Calculates next world and recommends tests based on cabalistic model.
+    """
     if not exploration:
         return None
 
@@ -275,50 +303,75 @@ def get_therapist_next_exploration_suggestion(exploration, symbolic_result=None)
     if not current_world:
         return None
 
-    next_world = WORLD_NEXT_STEP.get(current_world)
-    suggestion_code = None
+    # 1. Resolve Next World
+    next_world = None
+    
+    # Priority A: structured_data transition_suggestion
+    if symbolic_result and isinstance(symbolic_result, dict):
+        # Check standard structured_data key
+        sd = symbolic_result.get('structured_data') or symbolic_result
+        next_world = sd.get('transition_suggestion')
+
+    # Priority B: Cabalistic rules (Atzilut rules)
+    if not next_world and source_code == "asrs_essence" and symbolic_result:
+        ritmo = (symbolic_result.get("ritmo_esencial") or symbolic_result.get("state") or "").lower()
+        level = (symbolic_result.get("atzilut_level") or "").lower()
+        
+        if level == "low" or ritmo == "fragmentado":
+            next_world = "beria"
+        else:
+            next_world = ASRS_STATE_TO_NEXT_WORLD.get(ritmo)
+
+    # Priority C: Standard ladder
+    if not next_world:
+        next_world = WORLD_NEXT_STEP.get(current_world) or current_world
+
+    # 2. Recommend Tests for Next World
+    suggested_test_code = None
     secondary_codes = []
+    
+    candidates = WORLD_RECOMMENDED_TESTS.get(next_world, [])
+    
+    # Selection logic:
+    if candidates:
+        # Avoid recommending the same test we just did
+        available_candidates = [c for c in candidates if c != source_code]
+        if available_candidates:
+            suggested_test_code = available_candidates[0]
+            if len(available_candidates) > 1:
+                secondary_codes = available_candidates[1:3]
+    
+    # Fallback to legacy beria defaults if needed
+    if not suggested_test_code and current_world == "beria":
+        suggested_test_code = BERIA_TO_YETZIRAH_DEFAULTS.get(source_code)
 
-    if source_code == "asrs_essence" and symbolic_result:
-        raw_state = (
-            symbolic_result.get("ritmo_esencial")
-            or symbolic_result.get("state")
-            or symbolic_result.get("estado")
-        )
-        if raw_state is not None:
-            state = str(raw_state).strip().lower()
-            suggestion_code = ASRS_STATE_TO_NEXT_TEST.get(state)
-    elif current_world == "beria":
-        suggestion_payload = BERIA_TO_YETZIRAH_SUGGESTIONS.get(source_code)
-        if suggestion_payload:
-            suggestion_code = suggestion_payload.get("primary")
-            secondary_codes = list(suggestion_payload.get("secondary") or [])
-
+    # 3. Build Result Payload
     suggestion_name = None
     secondary_suggestions = []
-    suggested_codes = [code for code in ([suggestion_code] + secondary_codes) if code]
+    
+    lookup_codes = [c for c in ([suggested_test_code] + secondary_codes) if c]
     name_by_code = {}
-    if suggested_codes:
-        for tm in TestModule.objects.filter(code__in=suggested_codes):
+    if lookup_codes:
+        for tm in TestModule.objects.filter(code__in=lookup_codes):
             name_by_code[tm.code] = tm.display_name
-    if suggestion_code:
-        suggestion_name = name_by_code.get(suggestion_code)
-    if secondary_codes:
-        secondary_suggestions = [
-            {"code": code, "name": name_by_code.get(code)}
-            for code in secondary_codes
-            if code
-        ]
+            
+    if suggested_test_code:
+        suggestion_name = name_by_code.get(suggested_test_code)
+    
+    for code in secondary_codes:
+        if code in name_by_code:
+            secondary_suggestions.append({
+                "code": code,
+                "name": name_by_code[code]
+            })
 
     return {
         "current_world": current_world,
         "next_world": next_world,
-        "suggested_test_code": suggestion_code,
+        "suggested_test_code": suggested_test_code,
         "suggested_test_name": suggestion_name,
         "secondary_suggestions": secondary_suggestions,
     }
-
-
 def get_therapist_view(exploration):
     """READ-ONLY SEMANTIC LAYER - therapist view."""
     if not exploration:
@@ -643,3 +696,87 @@ class TestResult(models.Model):
         client = self.client_name if self.client_name else (self.patient.full_name if self.patient else self.user.username)
         test_name = self.test_module.display_name if self.test_module else (self.test_id.upper() if self.test_id else 'Test')
         return f"{test_name} - {client} ({self.created_at.strftime('%Y-%m-%d')})"
+
+
+class Assignment(models.Model):
+    STATUS_CHOICES = [
+        ('assigned', 'Assigned'),
+        ('in_progress', 'In Progress'),
+        ('pending_compute', 'Pending Compute'),
+        ('completed', 'Completed'),
+    ]
+
+    # DEPRECATED: Will be removed in future version
+    # Use subject_user + clinical_profile instead
+    patient = models.ForeignKey(
+        'api.Patient',
+        on_delete=models.CASCADE,
+        related_name='assignments',
+        null=True,
+        blank=True,
+        help_text='(DEPRECATED) Use subject_user + clinical_profile instead'
+    )
+    
+    # NEW IDENTITY-BASED FIELDS (Phase 4)
+    subject_user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='assignments_as_subject',
+        null=True,
+        blank=True,
+        help_text='Usuario sobre el que se ejecuta el análisis (identidad canónica)'
+    )
+    clinical_profile = models.ForeignKey(
+        'api.Patient',
+        on_delete=models.SET_NULL,
+        related_name='clinical_assignments',
+        null=True,
+        blank=True,
+        help_text='Perfil clínico opcional (solo en contexto terapéutico)'
+    )
+    
+    test_type = models.CharField(max_length=64)
+    assigned_by_user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='assignments_created',
+    )
+    assigned_to_user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='assignments_received',
+    )
+
+    questions = models.JSONField(default=list, blank=True)
+    questions_hash = models.CharField(max_length=128, blank=True)
+    raw_responses = models.JSONField(null=True, blank=True)
+    responses_hash = models.CharField(max_length=128, blank=True)
+
+    times_assigned = models.IntegerField(default=1)
+    max_reassign = models.IntegerField(default=4)
+
+    status = models.CharField(max_length=32, choices=STATUS_CHOICES, default='assigned')
+    locked = models.BooleanField(default=False)
+    audit_log = models.JSONField(default=list, blank=True)
+    results = models.JSONField(default=dict, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['patient', 'test_type', '-created_at']),
+            models.Index(fields=['assigned_to_user', '-created_at']),
+            models.Index(fields=['subject_user', '-created_at']),
+        ]
+
+    def append_audit(self, event: str, data: Optional[dict] = None) -> None:
+        entry = {
+            'ts': datetime.utcnow().isoformat(),
+            'event': event,
+            'data': data or {},
+        }
+        log = list(self.audit_log or [])
+        log.append(entry)
+        self.audit_log = log

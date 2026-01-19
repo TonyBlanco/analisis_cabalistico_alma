@@ -81,7 +81,8 @@ export default function PatientHolisticSummary() {
       // Fetch all analysis records for current patient
       const response = await fetch(`${API_BASE_URL}/analysis-records/`, {
         headers: {
-          'Authorization': `Bearer ${getAuthToken()}`,
+          // Backend expects 'Token <token>' (Django token auth)
+          'Authorization': `Token ${getAuthToken()}`,
           'Content-Type': 'application/json'
         }
       });

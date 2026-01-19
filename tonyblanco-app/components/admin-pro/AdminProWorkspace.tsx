@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { adminCheck, deleteAdminUser, getAdminStats, getAdminUsers, patchAdminUser } from '@/lib/admin-pro-api';
+import confirmAction from '@/lib/confirm';
 import {
   buildAdminWorkspaceContractV2_1,
   type AdminRole,
@@ -14,7 +15,6 @@ import { AdminProSystemOverview } from './AdminProSystemOverview';
 import { AdminProUsersTable } from './AdminProUsersTable';
 import { AdminProUserDrawer } from './AdminProUserDrawer';
 import { AdminProDomainPanels } from './AdminProDomainPanels';
-import confirmAction from '@/lib/confirm';
 
 type Caps = AdminWorkspaceContractV2_1['users']['capabilities'];
 
@@ -171,6 +171,7 @@ export function AdminProWorkspace() {
       setActionError(`No se pudo cambiar el rol: ${first.error}`);
     });
   };
+
 
   const handleDelete = async (user: AdminUserRow) => {
     setActionError(null);

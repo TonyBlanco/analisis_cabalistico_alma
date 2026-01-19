@@ -11,7 +11,15 @@ const SWM_BASE = `${API_BASE}/swm/mcmi4`;
 
 export type WorkspaceStatus = 'created' | 'in_progress' | 'sealed' | 'reviewed' | 'archived';
 export type PermissionType = 'executor' | 'observer' | 'reviewer' | 'admin';
-export type ArtifactType = 'progress_snapshot' | 'interpretation_note' | 'decision_log' | 'final_synthesis';
+export type PhaseName = 'discovery' | 'mapping' | 'interpretation' | 'synthesis';
+export type ArtifactType =
+  | 'progress_snapshot'
+  | 'interpretation_note'
+  | 'decision_log'
+  | 'final_synthesis'
+  | 'notes'
+  | 'symbolic_axes'
+  | `phase:${PhaseName}`;
 
 export interface WorkspaceInstance {
   id: string;
@@ -375,6 +383,22 @@ export const swmMcmi4Api = {
   },
 
   /**
+   * POST /api/swm/mcmi4/compute-symbolic-axes
+   * Compute symbolic axes from TestResult signal
+   */
+  async computeSymbolicAxes(data: ComputeSymbolicAxesRequest, token?: string): Promise<ComputeSymbolicAxesResponse> {
+    const response = await fetch(`${SWM_BASE}/compute-symbolic-axes`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...getAuthHeader(token),
+      },
+      body: JSON.stringify(data),
+    });
+    return handleResponse(response);
+  },
+
+  /**
    * GET /api/swm/mcmi4/questionnaire
    * Get questionnaire with 195 questions and current progress
    */
@@ -495,3 +519,24 @@ export interface SealQuestionnaireResponse {
     seal_timestamp: string;
   };
 }
+
+export interface SymbolicAxis {
+  name: string;
+  description: string;
+  value: number; // 0.0 to 1.0
+  level: 'bajo' | 'medio' | 'alto';
+}
+
+export interface ComputeSymbolicAxesRequest {
+  workspace_id: string;
+}
+
+export interface ComputeSymbolicAxesResponse {
+  workspace_id: string;
+  artifact_id: string;
+  artifact_type: 'symbolic_axes';
+  axes: SymbolicAxis[];
+  source_test_result_id: string;
+  computed_at: string | null;
+}
+

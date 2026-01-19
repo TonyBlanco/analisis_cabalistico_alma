@@ -1,0 +1,434 @@
+{
+    "metadata": {
+        "world": "assiah",
+        "world_name": "Assiah - Mundo Material/Físico",
+        "description": "El mundo de la acción, el cuerpo, los hábitos y la manifestación material. Donde todo lo anterior se concreta en realidad física.",
+        "total_items_required": 48,
+        "sephirot": [
+            "Malkhut"
+        ],
+        "total_dimensions": 6
+    },
+    "dimensions": {
+        "malkhut_physical_manifestation": {
+            "dimension_id": "assiah_malkhut_manifestation",
+            "name": "Malkhut - Manifestación Física",
+            "sefirah": "Malkhut",
+            "description": "Presencia corporal, arraigo terrenal, actualización en realidad",
+            "items_required": 8,
+            "items_available": 10,
+            "questions": [
+                {
+                    "id": "ass_mlk_001",
+                    "text": "Estoy plenamente presente en mi cuerpo físico.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_mlk_002",
+                    "text": "Manifiesto mis intenciones en acciones concretas y tangibles.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_mlk_003",
+                    "text": "Me siento arraigado en la realidad terrestre.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_mlk_004",
+                    "text": "Mi existencia física refleja la totalidad de mis mundos superiores.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_mlk_005",
+                    "text": "Me siento desconectado de mi cuerpo o de la realidad física.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_mlk_006",
+                    "text": "Actualizo en el plano material lo que siento, pienso y soy.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_mlk_007",
+                    "text": "Honro el reino físico como sagrado, no como inferior.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_mlk_008",
+                    "text": "Vivo principalmente en mi mente, descuidando el mundo material.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_mlk_009",
+                    "text": "Mi presencia física irradia la luz de mi ser completo.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_mlk_010",
+                    "text": "Veo el mundo material como la manifestación final de lo divino.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                }
+            ]
+        },
+        "habits_and_routines": {
+            "dimension_id": "assiah_habits_routines",
+            "name": "Hábitos y Rutinas",
+            "sefirah": "Malkhut",
+            "description": "Patrones de acción, disciplina diaria, consistencia física",
+            "items_required": 8,
+            "items_available": 10,
+            "questions": [
+                {
+                    "id": "ass_hab_001",
+                    "text": "Mis hábitos diarios están alineados con mis valores más profundos.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_hab_002",
+                    "text": "Mantengo rutinas que apoyan mi bienestar integral.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_hab_003",
+                    "text": "Soy disciplinado en las acciones que nutren mi cuerpo y espíritu.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_hab_004",
+                    "text": "Mis patrones de acción reflejan consciencia y elección.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_hab_005",
+                    "text": "Mis hábitos son caóticos y contradicen lo que valoro.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_hab_006",
+                    "text": "Cultivo rutinas sagradas que conectan lo cotidiano con lo divino.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_hab_007",
+                    "text": "Soy consistente en las prácticas físicas que elegí.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_hab_008",
+                    "text": "Carezco de disciplina y mis acciones son inconsistentes.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_hab_009",
+                    "text": "Mis rutinas crean estructura que libera en lugar de limitar.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_hab_010",
+                    "text": "Los hábitos que practico elevan mi vibración física.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                }
+            ]
+        },
+        "relationship_with_body": {
+            "dimension_id": "assiah_body_relationship",
+            "name": "Relación con el Cuerpo",
+            "sefirah": "Malkhut",
+            "description": "Conciencia somática, cuidado del templo, vitalidad física",
+            "items_required": 8,
+            "items_available": 10,
+            "questions": [
+                {
+                    "id": "ass_bod_001",
+                    "text": "Honro mi cuerpo como un templo sagrado.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_bod_002",
+                    "text": "Tengo consciencia somática refinada y escucho las señales de mi cuerpo.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_bod_003",
+                    "text": "Cuido mi salud física con atención y respeto.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_bod_004",
+                    "text": "Experimento vitalidad y energía en mi ser físico.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_bod_005",
+                    "text": "Descuido mi cuerpo o lo trato con negligencia.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_bod_006",
+                    "text": "Siento gratitud por mi vehículo físico y sus capacidades.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_bod_007",
+                    "text": "Mi relación con el cuerpo está libre de juicio y llena de amor.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_bod_008",
+                    "text": "Rechazo mi cuerpo o estoy en guerra con él.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_bod_009",
+                    "text": "Nutro mi templo corporal con alimento, movimiento y descanso.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_bod_010",
+                    "text": "Mi cuerpo es un aliado en mi trabajo espiritual, no un obstáculo.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                }
+            ]
+        },
+        "action_and_doing": {
+            "dimension_id": "assiah_action_doing",
+            "name": "Acción y Hacer",
+            "sefirah": "Malkhut",
+            "description": "Proactividad, ejecución de planes, concreción de ideas",
+            "items_required": 8,
+            "items_available": 10,
+            "questions": [
+                {
+                    "id": "ass_act_001",
+                    "text": "Paso de las ideas a la acción con facilidad.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_act_002",
+                    "text": "Soy proactivo y tomo iniciativa en mi vida.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_act_003",
+                    "text": "Ejecuto mis planes con efectividad y determinación.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_act_004",
+                    "text": "Concreto mis visiones en resultados tangibles.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_act_005",
+                    "text": "Me quedo en la fase de planificación sin pasar a la acción.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_act_006",
+                    "text": "Mi hacer está alineado con mi ser, no es compulsivo.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_act_007",
+                    "text": "Actúo desde la integridad, no desde la reactividad.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_act_008",
+                    "text": "Procrastino o evito tomar acción en áreas importantes.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_act_009",
+                    "text": "Mi acción en el mundo refleja mi propósito interno.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_act_010",
+                    "text": "Hago lo que digo que haré, con consistencia y compromiso.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                }
+            ]
+        },
+        "material_resources": {
+            "dimension_id": "assiah_material_resources",
+            "name": "Recursos Materiales",
+            "sefirah": "Malkhut",
+            "description": "Relación con abundancia, gestión de recursos, seguridad material",
+            "items_required": 8,
+            "items_available": 10,
+            "questions": [
+                {
+                    "id": "ass_res_001",
+                    "text": "Tengo una relación sana con el dinero y los recursos materiales.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_res_002",
+                    "text": "Gestiono mis recursos con sabiduría y consciencia.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_res_003",
+                    "text": "Experimento seguridad material sin apego ansioso.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_res_004",
+                    "text": "Veo la abundancia material como un flujo que sirve a propósitos elevados.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_res_005",
+                    "text": "Vivo con miedo constante a la carencia material.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_res_006",
+                    "text": "Administro lo que tengo con gratitud y generosidad.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_res_007",
+                    "text": "Mi relación con lo material está libre de codicia o desprecio.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_res_008",
+                    "text": "El dinero es fuente de ansiedad y conflicto en mi vida.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_res_009",
+                    "text": "Confío en que mis necesidades materiales serán satisfechas.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_res_010",
+                    "text": "Uso los recursos materiales como herramientas para el bien.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                }
+            ]
+        },
+        "assiah_integration": {
+            "dimension_id": "assiah_integration",
+            "name": "Integración Assiah",
+            "sefirah": "Malkhut",
+            "description": "Coherencia acción-intención, manifestación de mundos superiores, completitud del flujo",
+            "items_required": 8,
+            "items_available": 10,
+            "questions": [
+                {
+                    "id": "ass_int_001",
+                    "text": "Mis acciones físicas reflejan coherentemente todos mis niveles de ser.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_int_002",
+                    "text": "Lo que hago en el mundo material está alineado con mi propósito divino.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_int_003",
+                    "text": "Experimento completitud en el flujo desde espíritu hasta materia.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_int_004",
+                    "text": "Integro arraigo, hábitos, cuerpo, acción y recursos armónicamente.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_int_005",
+                    "text": "Hay fragmentación entre mis mundos internos y mi vida física.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_int_006",
+                    "text": "Mi vida material es una extensión natural de mi vida espiritual.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_int_007",
+                    "text": "El flujo desde Atzilut hasta Assiah es continuo y sin bloqueos.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_int_008",
+                    "text": "Vivo una vida dividida entre lo espiritual y lo material.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_int_009",
+                    "text": "Mi existencia física es la culminación sagrada de todos los mundos.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ass_int_010",
+                    "text": "Vivo la unidad de los cuatro mundos en mi realidad cotidiana.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                }
+            ]
+        }
+    }
+}

@@ -1,0 +1,130 @@
+[
+  {
+    "id": "MCMI4_SIGNAL_01",
+    "instrument": "SWM_MCMI4_SIGNAL",
+    "position": 1,
+    "text": "Percibo patrones repetitivos en mi día a día.",
+    "scale": "symbolic_signal",
+    "weight": 1
+  },
+  {
+    "id": "MCMI4_SIGNAL_02",
+    "instrument": "SWM_MCMI4_SIGNAL",
+    "position": 2,
+    "text": "Siento que mis elecciones tienen un eco simbólico.",
+    "scale": "symbolic_signal",
+    "weight": 1
+  },
+  {
+    "id": "MCMI4_SIGNAL_03",
+    "instrument": "SWM_MCMI4_SIGNAL",
+    "position": 3,
+    "text": "Me resulta fácil reconocer mis ciclos personales.",
+    "scale": "symbolic_signal",
+    "weight": 1
+  },
+  {
+    "id": "MCMI4_SIGNAL_04",
+    "instrument": "SWM_MCMI4_SIGNAL",
+    "position": 4,
+    "text": "Identifico señales sutiles que orientan mis decisiones.",
+    "scale": "symbolic_signal",
+    "weight": 1
+  },
+  {
+    "id": "MCMI4_SIGNAL_05",
+    "instrument": "SWM_MCMI4_SIGNAL",
+    "position": 5,
+    "text": "Mi energía cambia de forma clara según el contexto.",
+    "scale": "symbolic_signal",
+    "weight": 1
+  },
+  {
+    "id": "MCMI4_SIGNAL_06",
+    "instrument": "SWM_MCMI4_SIGNAL",
+    "position": 6,
+    "text": "Me tomo pausas para observar antes de actuar.",
+    "scale": "symbolic_signal",
+    "weight": 1
+  },
+  {
+    "id": "MCMI4_SIGNAL_07",
+    "instrument": "SWM_MCMI4_SIGNAL",
+    "position": 7,
+    "text": "Puedo sostener una intención sin dispersarme.",
+    "scale": "symbolic_signal",
+    "weight": 1
+  },
+  {
+    "id": "MCMI4_SIGNAL_08",
+    "instrument": "SWM_MCMI4_SIGNAL",
+    "position": 8,
+    "text": "Siento coherencia entre lo que pienso y lo que hago.",
+    "scale": "symbolic_signal",
+    "weight": 1
+  },
+  {
+    "id": "MCMI4_SIGNAL_09",
+    "instrument": "SWM_MCMI4_SIGNAL",
+    "position": 9,
+    "text": "Tengo claridad sobre mis límites personales.",
+    "scale": "symbolic_signal",
+    "weight": 1
+  },
+  {
+    "id": "MCMI4_SIGNAL_10",
+    "instrument": "SWM_MCMI4_SIGNAL",
+    "position": 10,
+    "text": "Percibo cambios internos antes de que ocurran externamente.",
+    "scale": "symbolic_signal",
+    "weight": 1
+  },
+  {
+    "id": "MCMI4_SIGNAL_11",
+    "instrument": "SWM_MCMI4_SIGNAL",
+    "position": 11,
+    "text": "Sostengo mis decisiones aunque el entorno cambie.",
+    "scale": "symbolic_signal",
+    "weight": 1
+  },
+  {
+    "id": "MCMI4_SIGNAL_12",
+    "instrument": "SWM_MCMI4_SIGNAL",
+    "position": 12,
+    "text": "Me adapto sin perder mi foco principal.",
+    "scale": "symbolic_signal",
+    "weight": 1
+  },
+  {
+    "id": "MCMI4_SIGNAL_13",
+    "instrument": "SWM_MCMI4_SIGNAL",
+    "position": 13,
+    "text": "Identifico con facilidad lo que me desequilibra.",
+    "scale": "symbolic_signal",
+    "weight": 1
+  },
+  {
+    "id": "MCMI4_SIGNAL_14",
+    "instrument": "SWM_MCMI4_SIGNAL",
+    "position": 14,
+    "text": "Puedo volver al centro después de una tensión.",
+    "scale": "symbolic_signal",
+    "weight": 1
+  },
+  {
+    "id": "MCMI4_SIGNAL_15",
+    "instrument": "SWM_MCMI4_SIGNAL",
+    "position": 15,
+    "text": "Me es natural traducir experiencias en aprendizajes.",
+    "scale": "symbolic_signal",
+    "weight": 1
+  },
+  {
+    "id": "MCMI4_SIGNAL_16",
+    "instrument": "SWM_MCMI4_SIGNAL",
+    "position": 16,
+    "text": "Reconozco cuándo necesito silencio o pausa.",
+    "scale": "symbolic_signal",
+    "weight": 1
+  }
+]

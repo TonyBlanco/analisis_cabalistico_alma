@@ -55,3 +55,9 @@ Estimulación simbólica → Respuestas → CIE (normalización, indicadores de 
 Nota final de seguridad
 
 La exploración DEBE emplearse exclusivamente como insumo interpretativo por profesionales formados; la IA solo aporta apoyo técnico y nunca decide.
+
+ una regla obligatoria: realizar un commit después de cada cambio
+ Commit message format (use for every commit):
+Type(scope): short description
+Body (optional): why, files changed, risk/rollback notes
+Example: Feature(backend/assignments): add Assignment model and create endpoint; adds tests; rollback: revert migration X.

@@ -17,6 +17,8 @@ export interface Patient {
   is_active: boolean;
   therapist?: number;
   has_mcmi4_data?: boolean; // Flag to indicate if patient has completed MCMI-4
+  // `user` may be a numeric FK or an object depending on serializer config
+  user?: number | { id: number } | null;
 }
 
 export interface PatientListResponse {
@@ -65,10 +67,14 @@ export async function fetchPatients(filterMcmi4: boolean = false): Promise<Patie
     throw new Error(`Failed to fetch patients: ${response.status} ${response.statusText}`);
   }
 
-  const data: PatientListResponse = await response.json();
-  console.log('[fetchPatients] Response data:', data);
-  
-  let patients = data.results || [];
+  const raw = await response.json();
+  console.log('[fetchPatients] Response data:', raw);
+
+  // Support both backend formats: either a JSON array or an object { results: [...] }
+  let patients: Patient[] = Array.isArray(raw)
+    ? raw
+    : (raw && Array.isArray((raw as any).results) ? (raw as any).results : []);
+
   console.log('[fetchPatients] Total consultantes from API:', patients.length);
 
   // Filter for active consultantes only

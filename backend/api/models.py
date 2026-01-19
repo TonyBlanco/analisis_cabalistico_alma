@@ -39,6 +39,87 @@ GENDER_IDENTITY_CHOICES = [
     ('not_recorded', 'Sin registro'),
 ]
 
+class IdentityProfile(models.Model):
+    """
+    Perfil de Identidad Simbólica/Astrológica
+    
+    Separado de Patient porque:
+    - Patient = perfil clínico (terapia)
+    - IdentityProfile = datos de nacimiento para cálculos simbólicos
+    
+    Un usuario puede tener IdentityProfile sin ser Patient (usuarios personales)
+    Un Patient siempre tiene user_id que puede tener IdentityProfile
+    """
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='identity_profile',
+        help_text='Usuario al que pertenece esta identidad simbólica'
+    )
+    
+    # Birth data (astrological/symbolic)
+    birth_date = models.DateField(
+        help_text='Fecha de nacimiento (para astrología y cálculos cabalísticos)'
+    )
+    birth_time = models.TimeField(
+        null=True,
+        blank=True,
+        help_text='Hora exacta de nacimiento (opcional, mejora precisión astrológica)'
+    )
+    
+    # Location data (required for astrological calculations)
+    birth_city = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text='Ciudad de nacimiento'
+    )
+    birth_country = models.CharField(
+        max_length=100,
+        blank=True,
+        help_text='País de nacimiento'
+    )
+    birth_latitude = models.DecimalField(
+        max_digits=9,
+        decimal_places=6,
+        null=True,
+        blank=True,
+        help_text='Latitud del lugar de nacimiento (requerido para astrología)'
+    )
+    birth_longitude = models.DecimalField(
+        max_digits=9,
+        decimal_places=6,
+        null=True,
+        blank=True,
+        help_text='Longitud del lugar de nacimiento (requerido para astrología)'
+    )
+    birth_timezone = models.CharField(
+        max_length=100,
+        blank=True,
+        help_text='Zona horaria del lugar de nacimiento'
+    )
+    
+    # Symbolic identity
+    hebrew_name = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text='Nombre en hebreo (opcional, para análisis cabalístico)'
+    )
+    
+    # Metadata
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = 'Identity Profile'
+        verbose_name_plural = 'Identity Profiles'
+        db_table = 'api_identityprofile'
+        indexes = [
+            models.Index(fields=['user'], name='identity_user_idx'),
+        ]
+    
+    def __str__(self):
+        return f"IdentityProfile({self.user.username}, born {self.birth_date})"
+
 class UserProfile(models.Model):
     """Perfil extendido del usuario con información adicional"""
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
@@ -1186,64 +1267,6 @@ class UserResourceAccess(models.Model):
 
 
 # ========== CONFIGURACIONES DE TERAPEUTAS ==========
-
-class TherapistHolisticConfig(models.Model):
-    """
-    Configuración de pesos para el Motor de Síntesis Holística Evaluativa (MSHE).
-    Cada terapeuta puede personalizar los pesos de los diferentes módulos.
-    """
-    therapist = models.OneToOneField(
-        User,
-        on_delete=models.CASCADE,
-        related_name='holistic_config',
-        help_text="Terapeuta propietario de esta configuración"
-    )
-
-    weights = models.JSONField(
-        default=dict,
-        help_text="Pesos para cada módulo holístico (deben sumar 1.0)"
-    )
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        verbose_name = "Configuración Holística del Terapeuta"
-        verbose_name_plural = "Configuraciones Holísticas de Terapeutas"
-
-    @staticmethod
-    def get_default_weights():
-        """Retorna los pesos por defecto recomendados"""
-        return {
-            'kabbalah_numerology': 0.20,
-            'tarot_evolutivo': 0.20,
-            'astrologia_terapeutica': 0.20,
-            'transgeneracional': 0.20,
-            'biodecodificacion': 0.20
-        }
-
-    def clean(self):
-        """Validar que los pesos sumen 1.0"""
-        from django.core.exceptions import ValidationError
-
-        if not isinstance(self.weights, dict):
-            raise ValidationError('Los pesos deben ser un diccionario JSON')
-
-        total = sum(self.weights.values())
-        if abs(total - 1.0) > 0.001:
-            raise ValidationError(f'Los pesos deben sumar 1.0, actualmente suman {total}')
-
-        # Validar pesos individuales
-        for key, value in self.weights.items():
-            if not isinstance(value, (int, float)) or value < 0 or value > 1:
-                raise ValidationError(f'Peso inválido para {key}: {value}')
-
-    def save(self, *args, **kwargs):
-        self.clean()
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return f'Configuración MSHE de {self.therapist.username}'
 
 
 class ResonanciaObservation(models.Model):

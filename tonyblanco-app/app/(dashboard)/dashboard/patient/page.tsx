@@ -2,6 +2,8 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import PatientNotesList from '@/components/PatientNotes/PatientNotesList';
+import PendingAssignmentsSection from '@/components/PendingAssignmentsSection';
+import MCMI4ReflectionCard from '@/components/MCMI4ReflectionCard';
 import { AlertCircle, CheckCircle, Clock, MessageSquare } from 'lucide-react';
 import { getUserProfile, acceptConsent, acknowledgeProfileUpdate } from '@/lib/api';
 import TherapeuticConsentModal from '@/components/TherapeuticConsentModal';
@@ -15,7 +17,10 @@ export default function PatientHome() {
   const [consentLoading, setConsentLoading] = useState(true);
   const [showProfileUpdateNotice, setShowProfileUpdateNotice] = useState(false);
   const [lastTherapistUpdate, setLastTherapistUpdate] = useState<string | null>(null);
+  const [showReflectionCard, setShowReflectionCard] = useState(false);
+  const [checkingReflection, setCheckingReflection] = useState(true);
   const fetchedConsentRef = useRef(false);
+  const fetchedReflectionRef = useRef(false);
 
   // Check consent status (once)
   useEffect(() => {
@@ -51,6 +56,61 @@ export default function PatientHome() {
 
     checkConsent();
   }, []);
+
+  // Check if MCMI-4 signal is completed but reflection is not
+  useEffect(() => {
+    if (fetchedReflectionRef.current) return;
+    fetchedReflectionRef.current = true;
+
+    const checkReflectionStatus = async () => {
+      try {
+        // Check if mcmi4-signal exists
+        const signalRes = await fetch('/api/tests/results/?test_code=mcmi4-signal', {
+          credentials: 'include'
+        }).catch(() => null);
+        
+        if (!signalRes || !signalRes.ok) {
+          setCheckingReflection(false);
+          return;
+        }
+
+        const signalData = await signalRes.json().catch(() => null);
+        const hasSignal = signalData?.results && signalData.results.length > 0;
+
+        if (!hasSignal) {
+          setCheckingReflection(false);
+          return;
+        }
+
+        // Check if mcmi4-reflection exists
+        const reflectionRes = await fetch('/api/tests/results/?test_code=mcmi4-reflection', {
+          credentials: 'include'
+        }).catch(() => null);
+
+        if (reflectionRes && reflectionRes.ok) {
+          const reflectionData = await reflectionRes.json().catch(() => null);
+          const hasReflection = reflectionData?.results && reflectionData.results.length > 0;
+
+          // Show card if signal exists but reflection doesn't
+          if (!hasReflection) {
+            setShowReflectionCard(true);
+          }
+        }
+      } catch (error) {
+        // Silently fail - reflection card is optional
+      } finally {
+        setCheckingReflection(false);
+      }
+    };
+
+    checkReflectionStatus();
+  }, []);
+
+  const handleReflectionComplete = () => {
+    setShowReflectionCard(false);
+    // Optionally show success message
+    alert('✅ Reflexión completada exitosamente. Tu terapeuta podrá verla pronto.');
+  };
 
   const handleConsentAccept = async () => {
     try {
@@ -92,6 +152,14 @@ export default function PatientHome() {
       />
       
     <div className="max-w-5xl mx-auto space-y-6">
+      {/* MCMI-4 Reflection Card (shown if signal completed but reflection pending) */}
+      {showReflectionCard && !checkingReflection && (
+        <MCMI4ReflectionCard
+          onComplete={handleReflectionComplete}
+          onDismiss={() => setShowReflectionCard(false)}
+        />
+      )}
+
       {/* Bienvenida */}
       <div className="bg-white border border-gray-200 rounded-lg p-6">
         <h1 className="text-2xl font-semibold text-gray-900 mb-2">Bienvenido a tu espacio</h1>
@@ -110,7 +178,7 @@ export default function PatientHome() {
       </div>
 
       {/* Avisos importantes */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Perfil */}
         {!profileComplete && (
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
@@ -126,25 +194,6 @@ export default function PatientHome() {
               className="text-sm text-amber-600 font-medium hover:text-amber-700"
             >
               Completar ahora →
-            </a>
-          </div>
-        )}
-
-        {/* Tests pendientes */}
-        {pendingTests > 0 && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <Clock className="w-5 h-5 text-blue-600" />
-              <h3 className="font-medium text-blue-900">Tests pendientes</h3>
-            </div>
-            <p className="text-sm text-blue-700 mb-3">
-              Tienes {pendingTests} test{pendingTests > 1 ? 's' : ''} asignado{pendingTests > 1 ? 's' : ''} por completar
-            </p>
-            <a
-              href="/dashboard/patient/tests"
-              className="text-sm text-blue-600 font-medium hover:text-blue-700"
-            >
-              Ver tests →
             </a>
           </div>
         )}
@@ -168,6 +217,9 @@ export default function PatientHome() {
           </div>
         )}
       </div>
+
+      {/* Tests Pendientes (real data from assignments) */}
+      <PendingAssignmentsSection />
 
       {/* Mensaje del terapeuta: listado real de mensajes para el paciente */}
       <div className="bg-white border border-gray-200 rounded-lg p-6">

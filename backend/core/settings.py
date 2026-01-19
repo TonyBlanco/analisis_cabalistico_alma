@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'api',              # Tu app de lógica cabalística
     'astrology',        # Módulo de astrología (cálculos astronómicos)
     'courses',          # Sistema LMS de cursos
+    'swm.mcmi4',        # MCMI-4 Místico SWM (Specialized Workspace Module)
     # The `symbolic` package is not a Python package in this repo (it's JS/TS).
     # Comment out invalid references so Django can start locally.
     # 'symbolic.72_angels',  # SWM 72 Ángeles Engine
@@ -156,7 +157,7 @@ CORS_ALLOWED_ORIGINS = config(
     'CORS_ALLOWED_ORIGINS',
     # En producción, este valor debe ser provisto por env var.
     # Incluimos defaults seguros para desarrollo y previews de Vercel.
-    default='http://localhost:3000,http://localhost:3001,https://*.vercel.app',
+    default='http://localhost:3000,http://localhost:3001,http://127.0.0.1:3000,http://127.0.0.1:3001,https://*.vercel.app',
     cast=lambda v: [s.strip() for s in v.split(',')]
 )
 
@@ -184,7 +185,7 @@ CSRF_TRUSTED_ORIGINS = config(
     'CSRF_TRUSTED_ORIGINS',
     # En producción, este valor debe ser provisto por env var.
     # Agregamos wildcard para Vercel previews.
-    default='http://localhost:3000,http://localhost:3001,https://*.vercel.app',
+    default='http://localhost:3000,http://localhost:3001,http://127.0.0.1:3000,http://127.0.0.1:3001,https://*.vercel.app',
     cast=lambda v: [s.strip() for s in v.split(',')]
 )
 

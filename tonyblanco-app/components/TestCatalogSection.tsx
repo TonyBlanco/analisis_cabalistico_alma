@@ -75,6 +75,16 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
 
   useEffect(() => {
     fetchTests();
+
+    // Listen for changes in assigned tests from other components (like AssignedTestsSection)
+    if (typeof window !== 'undefined') {
+      const handleChanges = () => {
+        console.log('🔄 TestCatalogSection: Refreshing tests due to assignedTestsChanged event');
+        fetchTests();
+      };
+      window.addEventListener('assignedTestsChanged', handleChanges);
+      return () => window.removeEventListener('assignedTestsChanged', handleChanges);
+    }
   }, [fetchTests]);
 
   // Normaliza modo para decidir acciones

@@ -1,0 +1,15 @@
+C:\Python310\lib\site-packages\django\db\models\base.py:368: RuntimeWarning: Model 'api.therapistholisticconfig' was already registered. Reloading models is not advised as it can lead to inconsistencies, most notably with related models.
+  new_class._meta.apps.register_model(new_class._meta.app_label, new_class)
+--- DIAGNOSTIC FOR PATIENT ID 4 ---
+Patient Found: Luis Antonio Blanco Fontela (User ID: 18)
+Test Module 'mcmi4-mystic': Found (ID: 53)
+
+UserTestAccess Records (1):
+ - ID: 199, Special: True, Created: 2026-01-15 21:32:17.381358+00:00
+
+--- MCMI-4 MYSTIC RESULTS (Test Code: mcmi4-mystic) ---
+ [ID: 91] Status: RESULT | Date: 2026-01-15 21:29:32.692070+00:00
+      - IsMarker: None, IsLegacy: None
+      - Data Keys: ['test_type', 'processed', 'timestamp', 'message', 'note']
+      - Details: {'audit': {'executed_by_user_id': 18, 'executed_by_role': 'patient', 'execution_mode': 'patient_self', 'patient_id': 4, 'execution_timestamp': '2026-01-15T22:29:32.692070'}}
+----------------------------------------

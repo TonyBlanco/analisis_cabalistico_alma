@@ -1,0 +1,506 @@
+{
+    "metadata": {
+        "world": "briah",
+        "world_name": "Briah - Mundo Creativo/Intelectual",
+        "description": "El mundo del pensamiento, las ideas, las creencias y la narrativa interna. Donde la esencia de Atzilut toma forma conceptual.",
+        "total_items_required": 49,
+        "sephirot": [
+            "Chesed",
+            "Gevurah",
+            "Tiferet"
+        ],
+        "total_dimensions": 7
+    },
+    "dimensions": {
+        "chesed_expansive_thought": {
+            "dimension_id": "briah_chesed_thought",
+            "name": "Chesed - Pensamiento Expansivo",
+            "sefirah": "Chesed",
+            "description": "Creatividad mental, generosidad de ideas, apertura cognitiva",
+            "items_required": 7,
+            "items_available": 10,
+            "questions": [
+                {
+                    "id": "bri_chd_001",
+                    "text": "Mi mente genera ideas creativas con facilidad y abundancia.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_chd_002",
+                    "text": "Pienso de manera expansiva, explorando múltiples posibilidades.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_chd_003",
+                    "text": "Soy generoso al compartir mis ideas y conocimientos con otros.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_chd_004",
+                    "text": "Mi enfoque mental es abierto y receptivo a nuevas perspectivas.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_chd_005",
+                    "text": "Tiendo a ser rígido y cerrado en mi forma de pensar.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_chd_006",
+                    "text": "Disfruto explorando conceptos abstractos y posibilidades infinitas.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_chd_007",
+                    "text": "Mi creatividad intelectual fluye naturalmente sin restricciones.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_chd_008",
+                    "text": "Me cuesta generar ideas nuevas o pensar fuera de lo establecido.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_chd_009",
+                    "text": "Veo conexiones y posibilidades donde otros solo ven limitaciones.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_chd_010",
+                    "text": "Mi mente es como un jardín donde florecen constantemente nuevos pensamientos.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                }
+            ]
+        },
+        "gevurah_analytical_thought": {
+            "dimension_id": "briah_gevurah_analysis",
+            "name": "Gevurah - Pensamiento Analítico",
+            "sefirah": "Gevurah",
+            "description": "Discernimiento crítico, estructura lógica, disciplina mental",
+            "items_required": 7,
+            "items_available": 10,
+            "questions": [
+                {
+                    "id": "bri_gev_001",
+                    "text": "Analizo las ideas con rigor y discernimiento crítico.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_gev_002",
+                    "text": "Mi pensamiento es estructurado, lógico y bien organizado.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_gev_003",
+                    "text": "Puedo identificar falacias y debilidades en argumentos.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_gev_004",
+                    "text": "Practico disciplina mental para mantener el enfoque y la claridad.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_gev_005",
+                    "text": "Mi pensamiento tiende a ser caótico y desorganizado.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_gev_006",
+                    "text": "Soy capaz de discernir entre lo esencial y lo superfluo.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_gev_007",
+                    "text": "Mi mente establece límites claros entre ideas válidas e inválidas.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_gev_008",
+                    "text": "Acepto ideas sin cuestionarlas críticamente.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_gev_009",
+                    "text": "Aplico rigor intelectual para refinar y perfeccionar conceptos.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_gev_010",
+                    "text": "Mi capacidad analítica me permite ver la estructura subyacente de las ideas.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                }
+            ]
+        },
+        "tiferet_cognitive_synthesis": {
+            "dimension_id": "briah_tiferet_synthesis",
+            "name": "Tiferet - Síntesis Cognitiva",
+            "sefirah": "Tiferet",
+            "description": "Balance de perspectivas, visión integrada, comprensión holística",
+            "items_required": 7,
+            "items_available": 10,
+            "questions": [
+                {
+                    "id": "bri_tif_001",
+                    "text": "Integro diferentes perspectivas en una comprensión unificada.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_tif_002",
+                    "text": "Veo la verdad que emerge del balance entre opuestos.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_tif_003",
+                    "text": "Mi pensamiento es holístico, uniendo partes en un todo coherente.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_tif_004",
+                    "text": "Puedo sostener paradojas sin necesidad de resolverlas prematuramente.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_tif_005",
+                    "text": "Me resulta difícil ver más allá de una sola perspectiva.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_tif_006",
+                    "text": "Mi mente equilibra naturalmente creatividad y análisis.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_tif_007",
+                    "text": "Busco la verdad esencial que une todas las perspectivas.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_tif_008",
+                    "text": "Tiendo a pensar en extremos sin integrar posiciones intermedias.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_tif_009",
+                    "text": "Mi comprensión surge de la síntesis armoniosa de ideas diversas.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_tif_010",
+                    "text": "Veo patrones unificadores donde otros solo ven fragmentos.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                }
+            ]
+        },
+        "self_narrative": {
+            "dimension_id": "briah_self_narrative",
+            "name": "Narrativa del Yo",
+            "sefirah": "Multiple",
+            "description": "Historia personal, identidad conceptual, auto-percepción",
+            "items_required": 7,
+            "items_available": 10,
+            "questions": [
+                {
+                    "id": "bri_nar_001",
+                    "text": "Tengo una narrativa coherente sobre quién soy y mi trayectoria de vida.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_nar_002",
+                    "text": "Mi historia personal tiene sentido y propósito.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_nar_003",
+                    "text": "Puedo reescribir mi narrativa desde una perspectiva más elevada.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_nar_004",
+                    "text": "Mi identidad conceptual está alineada con mi esencia verdadera.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_nar_005",
+                    "text": "Mi historia de vida me parece fragmentada y sin sentido.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_nar_006",
+                    "text": "Veo mi vida como un despliegue significativo de aprendizaje del alma.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_nar_007",
+                    "text": "Mi auto-percepción refleja una comprensión profunda de mí mismo.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_nar_008",
+                    "text": "No sé cómo describirme o explicar mi trayectoria de vida.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_nar_009",
+                    "text": "Reconozco los hilos conductores que dan coherencia a mi historia.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_nar_010",
+                    "text": "Mi narrativa personal evoluciona hacia mayor sabiduría y compasión.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                }
+            ]
+        },
+        "belief_systems": {
+            "dimension_id": "briah_belief_systems",
+            "name": "Sistemas de Creencias",
+            "sefirah": "Multiple",
+            "description": "Paradigmas mentales, filtros cognitivos, marcos de referencia",
+            "items_required": 7,
+            "items_available": 10,
+            "questions": [
+                {
+                    "id": "bri_bel_001",
+                    "text": "Examino regularmente mis creencias para verificar si siguen siendo válidas.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_bel_002",
+                    "text": "Mis creencias están abiertas a evolucionar con nueva información.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_bel_003",
+                    "text": "Reconozco que mis filtros mentales influyen en cómo percibo la realidad.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_bel_004",
+                    "text": "Mis paradigmas mentales apoyan mi crecimiento espiritual.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_bel_005",
+                    "text": "Me aferro rígidamente a mis creencias sin cuestionarlas.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_bel_006",
+                    "text": "Puedo sostener creencias diversas sin que entren en conflicto.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_bel_007",
+                    "text": "Mis marcos de referencia están alineados con verdades superiores.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_bel_008",
+                    "text": "Mis creencias limitantes bloquean mi percepción de la realidad.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_bel_009",
+                    "text": "Actualizo mis paradigmas cuando descubro que no sirven a mi evolución.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_bel_010",
+                    "text": "Mis sistemas de creencias son conscientes, elegidos y liberadores.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                }
+            ]
+        },
+        "metacognition": {
+            "dimension_id": "briah_metacognition",
+            "name": "Metacognición",
+            "sefirah": "Multiple",
+            "description": "Pensamiento sobre el pensamiento, autoobservación mental, flexibilidad cognitiva",
+            "items_required": 7,
+            "items_available": 10,
+            "questions": [
+                {
+                    "id": "bri_met_001",
+                    "text": "Puedo observar mis pensamientos sin identificarme con ellos.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_met_002",
+                    "text": "Reconozco los patrones recurrentes en mi forma de pensar.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_met_003",
+                    "text": "Practico autoobservación mental con regularidad.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_met_004",
+                    "text": "Soy flexible en mis estrategias cognitivas, adaptándolas según el contexto.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_met_005",
+                    "text": "No tengo consciencia de cómo funciona mi propia mente.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_met_006",
+                    "text": "Puedo cambiar mi perspectiva mental a voluntad.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_met_007",
+                    "text": "Examino la calidad y utilidad de mis procesos mentales.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_met_008",
+                    "text": "Me identifico completamente con mis pensamientos.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_met_009",
+                    "text": "Cultivo la capacidad de pensar sobre cómo pienso.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_met_010",
+                    "text": "Mi mente puede observarse a sí misma con claridad y discernimiento.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                }
+            ]
+        },
+        "briah_integration": {
+            "dimension_id": "briah_integration",
+            "name": "Integración Briah",
+            "sefirah": "Multiple",
+            "description": "Coherencia de pensamiento, claridad mental, síntesis Atzilut-Briah",
+            "items_required": 7,
+            "items_available": 10,
+            "questions": [
+                {
+                    "id": "bri_int_001",
+                    "text": "Mis pensamientos están alineados con mi propósito divino.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_int_002",
+                    "text": "Experimento coherencia entre mis ideas y mi esencia espiritual.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_int_003",
+                    "text": "Mi mente es un instrumento claro para la manifestación de lo divino.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_int_004",
+                    "text": "Integro creatividad, análisis y síntesis en un todo armónico.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_int_005",
+                    "text": "Hay fragmentación entre mis pensamientos y mi realidad espiritual.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_int_006",
+                    "text": "Mi claridad mental refleja la claridad de mi alma.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_int_007",
+                    "text": "Los conceptos abstractos fluyen naturalmente hacia formas concretas.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_int_008",
+                    "text": "Mis pensamientos están desconectados de cualquier base espiritual.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_int_009",
+                    "text": "Mi mundo mental es un puente funcional entre espíritu y emoción.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "bri_int_010",
+                    "text": "Experimento unidad entre mi ser superior y mi mente conceptual.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                }
+            ]
+        }
+    }
+}

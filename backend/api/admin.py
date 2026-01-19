@@ -15,6 +15,7 @@ from .models import (
     BlockedDate
 )
 from .test_models import TestModule, UserTestAccess, TestResult, HolisticExploration
+from .mcmi4_models import MCMI4MysticQuestionBank, MCMI4MysticTestInstance, DimensionConfig
 
 
 @admin.register(UserProfile)
@@ -209,3 +210,35 @@ class HolisticExplorationAdmin(admin.ModelAdmin):
         if request.method in ("POST", "PUT", "PATCH", "DELETE"):
             return False
         return True
+
+
+# ========== ADMIN PARA MCMI-4-MYSTIC ==========
+
+@admin.register(MCMI4MysticQuestionBank)
+class MCMI4MysticQuestionBankAdmin(admin.ModelAdmin):
+    list_display = ['question_id', 'world', 'dimension_id', 'sefirah', 'is_active']
+    list_filter = ['world', 'sefirah', 'is_active', 'reverse_scored']
+    search_fields = ['question_id', 'text_es', 'dimension_id']
+    ordering = ['world', 'dimension_id', 'question_id']
+    readonly_fields = ['created_at', 'updated_at']
+
+
+@admin.register(MCMI4MysticTestInstance)
+class MCMI4MysticTestInstanceAdmin(admin.ModelAdmin):
+    list_display = ['patient', 'applied_at', 'is_complete', 'get_completion_percentage']
+    list_filter = ['is_complete', 'applied_at']
+    search_fields = ['patient__username', 'patient__email']
+    ordering = ['-applied_at']
+    readonly_fields = ['applied_at', 'completed_at']
+    
+    def get_completion_percentage(self, obj):
+        return f"{obj.get_completion_percentage()}%"
+    get_completion_percentage.short_description = 'Completion'
+
+
+@admin.register(DimensionConfig)
+class DimensionConfigAdmin(admin.ModelAdmin):
+    list_display = ['dimension_id', 'name', 'world', 'sefirah', 'items_required']
+    list_filter = ['world', 'sefirah']
+    search_fields = ['dimension_id', 'name']
+    ordering = ['world', 'dimension_id']

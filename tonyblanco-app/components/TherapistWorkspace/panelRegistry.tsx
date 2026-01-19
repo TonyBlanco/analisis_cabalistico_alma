@@ -6,15 +6,18 @@ export type ToolGroupId =
   | 'resources';
 
 export type ToolId =
-  | 'overview'
   | 'bioemotional'
   | 'tree-of-life'
   | 'hypotheses'
-  | 'tests'
   | 'history'
-  | 'notes'
   | 'kabbalah'
   | 'resources';
+  
+// NOTE: 'notes' is intentionally omitted from the runtime registry
+// because notes panel is provided by the central workspace context map.
+// Including in the type union keeps call sites like `openPanel('notes')`
+// type-safe without reintroducing a runtime tool entry here.
+export type ExtendedToolId = ToolId | 'notes';
 
 export interface ToolDefinition {
   id: ToolId;
@@ -25,46 +28,27 @@ export interface ToolDefinition {
 }
 
 export const toolRegistry: ToolDefinition[] = [
-  {
-    id: 'overview',
-    label: 'Resumen',
-    description: 'Contexto situacional de un vistazo.',
-    summary: 'Un snapshot del caso para orientar la observación.',
-    group: 'observation',
-  },
-  {
-    id: 'notes',
-    label: 'Notas integrativas',
-    description: 'Notas humanas y reflexiones.',
-    summary: 'Notas manuales y consultivas, sin automatización.',
-    group: 'observation',
-  },
-  {
-    id: 'tests',
-    label: 'Tests asignados',
-    description: 'Estado de tests asignados (solo lectura).',
-    summary: 'Referencia secundaria sin salir del espacio clínico.',
-    group: 'evaluation',
-  },
+  // REMOVED: 'overview', 'notes', 'tests' - ya están en el Context Map del workspace central
+
   {
     id: 'bioemotional',
     label: 'Bio-Emocional',
-    description: 'Observaciones simbólicas consultivas.',
-    summary: 'Capa de referencia para contexto simbólico y relacional.',
+    description: 'Workspace de observación simbólica.',
+    summary: 'Abre el workspace completo de Bio-Emoción.',
     group: 'symbolic',
   },
   {
     id: 'tree-of-life',
     label: 'Árbol de la Vida',
-    description: 'Estructura simbólica para reflexión.',
-    summary: 'Soporta la observación sin conclusiones automatizadas.',
+    description: 'Workspace de Cábala aplicada.',
+    summary: 'Abre el workspace completo de Cábala.',
     group: 'symbolic',
   },
   {
     id: 'hypotheses',
     label: 'Transgeneracional',
-    description: 'Hipótesis humanas y notas de linaje.',
-    summary: 'Observación humana, sin interpretación automática.',
+    description: 'Workspace de hipótesis de linaje.',
+    summary: 'Abre el workspace completo de Transgeneracional.',
     group: 'symbolic',
   },
   {
@@ -78,7 +62,7 @@ export const toolRegistry: ToolDefinition[] = [
     id: 'kabbalah',
     label: 'Cábala',
     description: 'Herramientas simbólicas para reflexión.',
-    summary: 'Referencia contextual para herramientas de análisis simbólico.',
+    summary: 'Referencia contextual para análisis simbólico.',
     group: 'resources',
   },
   {

@@ -31,9 +31,6 @@ const groupLabels: Record<ToolGroupId, string> = {
 };
 
 const toolIcons: Record<ToolId, LucideIcon> = {
-  overview: Telescope,
-  notes: NotebookPen,
-  tests: ClipboardCheck,
   bioemotional: Activity,
   'tree-of-life': Layers,
   hypotheses: Stethoscope,
@@ -43,8 +40,7 @@ const toolIcons: Record<ToolId, LucideIcon> = {
 };
 
 const groupOrder: ToolGroupId[] = [
-  'observation',
-  'evaluation',
+  // 'observation' y 'evaluation' removidos - las herramientas ahora están en el Context Map del workspace
   'symbolic',
   'history',
   'resources',
@@ -114,6 +110,14 @@ const swmLaunchers = [
     icon: Activity,
     enabled: true,
   },
+  {
+    id: 'mcmi4-mystic',
+    title: 'MCMI-4 Místico',
+    description: 'Workspace cabalístico para cuestionario Millon.',
+    href: '/dashboard/therapist/swm/mcmi4',
+    icon: Sparkles,
+    enabled: true,
+  },
 ];
 
 export default function TherapistSidebar() {
@@ -135,9 +139,8 @@ export default function TherapistSidebar() {
 
   return (
     <aside
-      className={`hidden sm:flex sm:flex-col ${
-        expanded ? 'w-56 lg:w-64' : 'w-16'
-      } bg-white border-r border-gray-200 min-h-screen transition-all`}
+      className={`hidden sm:flex sm:flex-col ${expanded ? 'w-56 lg:w-64' : 'w-16'
+        } bg-white border-r border-gray-200 min-h-screen transition-all`}
     >
       <div className="flex items-center justify-between p-3 border-b border-gray-200">
         <div className="flex items-center gap-2">
@@ -176,11 +179,10 @@ export default function TherapistSidebar() {
                 const swmHref = swmToolRoutes[tool.id];
                 const content = (
                   <div
-                    className={`flex items-center gap-3 w-full rounded-md px-2 py-2 text-sm transition-colors border ${
-                      isActive
-                        ? 'bg-gray-100 text-gray-900 border-gray-200'
-                        : 'border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                    }`}
+                    className={`flex items-center gap-3 w-full rounded-md px-2 py-2 text-sm transition-colors border ${isActive
+                      ? 'bg-gray-100 text-gray-900 border-gray-200'
+                      : 'border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      }`}
                   >
                     <Icon className={`h-5 w-5 ${isActive ? 'text-gray-900' : 'text-gray-500'}`} />
                     {expanded && (
@@ -229,11 +231,10 @@ export default function TherapistSidebar() {
               const Icon = launcher.icon;
               const content = (
                 <div
-                  className={`flex items-center gap-3 w-full rounded-md px-2 py-2 text-sm transition-colors border ${
-                    launcher.enabled
-                      ? 'border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                      : 'border-transparent text-gray-400 bg-gray-50 cursor-not-allowed'
-                  }`}
+                  className={`flex items-center gap-3 w-full rounded-md px-2 py-2 text-sm transition-colors border ${launcher.enabled
+                    ? 'border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                    : 'border-transparent text-gray-400 bg-gray-50 cursor-not-allowed'
+                    }`}
                 >
                   <Icon className={`h-5 w-5 ${launcher.enabled ? 'text-gray-500' : 'text-gray-400'}`} />
                   {expanded && (
@@ -245,9 +246,8 @@ export default function TherapistSidebar() {
                   {!expanded && <span className="sr-only">{launcher.title}</span>}
                   {expanded && (
                     <span
-                      className={`ml-auto text-[10px] ${
-                        launcher.enabled ? 'text-emerald-600' : 'text-gray-400'
-                      }`}
+                      className={`ml-auto text-[10px] ${launcher.enabled ? 'text-emerald-600' : 'text-gray-400'
+                        }`}
                     >
                       {launcher.enabled ? 'Disponible' : 'Proximamente'}
                     </span>

@@ -22,6 +22,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
+from api.test_models import TestResult
 from swm.mcmi4.models import (
     WorkspaceInstance,
     WorkspaceSession,
@@ -48,7 +49,7 @@ from swm.mcmi4.serializers import (
     ProgressActionResponseSerializer,
     SealQuestionnaireRequestSerializer
 )
-from swm.mcmi4.services import WorkspaceService, SessionService, AuditService
+from swm.mcmi4.services import WorkspaceService, SessionService, AuditService, SymbolicAxesService
 from swm.mcmi4.services.questionnaire_service import QuestionnaireService
 from swm.mcmi4.guards.permissions import (
     HasWorkspaceExecutorPermission,
@@ -87,12 +88,63 @@ class CreateWorkspaceView(APIView):
                 {'error': 'subject_user_id must reference an existing user'},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+        mcmi4_source_data_id = serializer.validated_data['mcmi4_source_data_id']
+        try:
+            test_result_id = int(mcmi4_source_data_id)
+        except (TypeError, ValueError):
+            return Response(
+                {
+                    'error': 'mcmi4_source_data_id must reference a valid TestResult id for mcmi4-signal',
+                    'code': 'INVALID_MCMI4_SIGNAL_SOURCE',
+                    'details': {'mcmi4_source_data_id': mcmi4_source_data_id}
+                },
+                status=status.HTTP_422_UNPROCESSABLE_ENTITY
+            )
+
+        test_result = TestResult.objects.select_related('test_module').filter(pk=test_result_id).first()
+        if not test_result:
+            return Response(
+                {
+                    'error': 'mcmi4_source_data_id must reference an existing TestResult for mcmi4-signal',
+                    'code': 'INVALID_MCMI4_SIGNAL_SOURCE',
+                    'details': {'mcmi4_source_data_id': mcmi4_source_data_id}
+                },
+                status=status.HTTP_422_UNPROCESSABLE_ENTITY
+            )
+
+        if not test_result.test_module or test_result.test_module.code != 'mcmi4-signal':
+            return Response(
+                {
+                    'error': "mcmi4_source_data_id must reference a TestResult whose test_module.code is 'mcmi4-signal'",
+                    'code': 'INVALID_MCMI4_SIGNAL_SOURCE',
+                    'details': {
+                        'mcmi4_source_data_id': mcmi4_source_data_id,
+                        'test_module_code': getattr(test_result.test_module, 'code', None),
+                    }
+                },
+                status=status.HTTP_422_UNPROCESSABLE_ENTITY
+            )
+
+        if test_result.user_id != subject_user.id:
+            return Response(
+                {
+                    'error': 'mcmi4_source_data_id must reference a TestResult that belongs to subject_user_id',
+                    'code': 'INVALID_MCMI4_SIGNAL_SOURCE',
+                    'details': {
+                        'mcmi4_source_data_id': mcmi4_source_data_id,
+                        'subject_user_id': subject_user.id,
+                        'test_result_user_id': test_result.user_id,
+                    }
+                },
+                status=status.HTTP_422_UNPROCESSABLE_ENTITY
+            )
         
         try:
             workspace = WorkspaceService.create_workspace(
                 creator_user=request.user,
                 subject_user=subject_user,
-                mcmi4_source_data_id=serializer.validated_data['mcmi4_source_data_id'],
+                mcmi4_source_data_id=mcmi4_source_data_id,
                 config=serializer.validated_data.get('config', {}),
                 metadata=serializer.validated_data.get('metadata', {}),
                 request_context=get_request_context(request)
@@ -1195,4 +1247,85 @@ class SealQuestionnaireView(APIView):
         }
         
         return Response(response_data, status=status.HTTP_200_OK)
+
+
+class ComputeSymbolicAxesView(APIView):
+    """POST /api/swm/mcmi4/compute-symbolic-axes"""
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        workspace_id = request.data.get('workspace_id')
+        
+        if not workspace_id:
+            return Response(
+                {'error': 'workspace_id is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Get workspace
+        try:
+            workspace = WorkspaceInstance.objects.get(id=workspace_id)
+        except WorkspaceInstance.DoesNotExist:
+            return Response(
+                {'error': f'Workspace {workspace_id} not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Check permission (executor or admin)
+        if not workspace.has_permission(request.user, 'executor') and not workspace.has_permission(request.user, 'admin'):
+            return Response(
+                {'error': 'Insufficient permissions'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        # Get TestResult from mcmi4_source_data_id
+        try:
+            test_result = TestResult.objects.get(id=workspace.mcmi4_source_data_id)
+        except TestResult.DoesNotExist:
+            return Response(
+                {'error': f'TestResult {workspace.mcmi4_source_data_id} not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Compute and store axes
+        try:
+            artifact = SymbolicAxesService.compute_and_store_axes(
+                workspace=workspace,
+                test_result=test_result,
+                user=request.user
+            )
+        except ValueError as e:
+            return Response(
+                {'error': str(e), 'code': 'COMPUTATION_FAILED'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Audit
+        AuditService.log_action(
+            workspace_instance=workspace,
+            user=request.user,
+            action='symbolic_axes_computed',
+            details={
+                'artifact_id': str(artifact.id),
+                'axes_count': len(artifact.content.get('axes', []))
+            },
+            request_context=get_request_context(request)
+        )
+        
+        logger.info(
+            f'Symbolic axes computed for workspace {workspace.id} by user {request.user.id}'
+        )
+        
+        return Response(
+            {
+                'workspace_id': str(workspace.id),
+                'artifact_id': str(artifact.id),
+                'artifact_type': artifact.artifact_type,
+                'axes': artifact.content.get('axes', []),
+                'source_test_result_id': artifact.content.get('source_test_result_id'),
+                'computed_at': artifact.content.get('computed_at'),
+            },
+            status=status.HTTP_200_OK
+        )
+
 

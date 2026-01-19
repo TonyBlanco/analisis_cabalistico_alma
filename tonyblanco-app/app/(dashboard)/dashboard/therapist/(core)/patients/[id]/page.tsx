@@ -5,8 +5,10 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import PatientProfileView from '@/components/patient/PatientProfileView';
 import PatientProfileEditor from '@/components/patient/PatientProfileEditor';
+import CreateWorkspaceButton from '@/components/CreateWorkspaceButton';
 import dynamic from 'next/dynamic'
 import { getActivePatient, setActivePatientId } from '@/lib/active-patient';
+import AssignMCMI4Modal from '@/components/AssignMCMI4Modal';
 
 import { getApiBaseUrl } from '@/lib/api-base';
 import { getAuthToken } from '@/lib/api';
@@ -27,6 +29,7 @@ export default function TherapistPatientDetailPage() {
   const [results, setResults] = useState<any[]>([]);
   const [analysisRecords, setAnalysisRecords] = useState<any[]>([]);
   const [showEditor, setShowEditor] = useState(false);
+  const [showAssignModal, setShowAssignModal] = useState(false);
 
   useEffect(() => {
     if (!patientId) {
@@ -146,13 +149,20 @@ export default function TherapistPatientDetailPage() {
       <div className="bg-white border border-gray-200 rounded-lg p-6">
         <h1 className="text-xl font-semibold text-gray-900">Vista clínica del consultante</h1>
         <p className="text-sm text-gray-600">ID consultante: {patientId}</p>
-        <div className="mt-4">
+        <div className="mt-4 flex flex-wrap gap-3">
           <Link
             href={`/dashboard/therapist/tarot?patient=${encodeURIComponent(patientId)}`}
             className="inline-flex items-center rounded-md border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-900 hover:bg-gray-50"
           >
             Abrir Tarot en workspace simbólico
           </Link>
+          <button
+            onClick={() => setShowAssignModal(true)}
+            className="inline-flex items-center rounded-md px-3 py-2 text-sm font-medium text-white hover:opacity-90 transition-opacity"
+            style={{ backgroundColor: 'var(--accent-color)' }}
+          >
+            Asignar MCMI-4 Místico
+          </button>
         </div>
       </div>
 
@@ -197,16 +207,30 @@ export default function TherapistPatientDetailPage() {
           <div className="space-y-3">
             {results.map((result) => (
               <div key={result.id || result.result_id} className="border border-gray-200 rounded-md p-3">
-                <div className="text-sm text-gray-900">
-                  {valueOrFallback(
-                    result.test_module?.name || result.test_module_name || result.test_name || result.test_module?.code || result.test_code
-                  )}
-                </div>
-                <div className="text-xs text-gray-500">
-                  ID: {valueOrFallback(result.id || result.result_id)}
-                </div>
-                <div className="text-xs text-gray-500">
-                  Date: {valueOrFallback(result.completed_at || result.created_at || result.updated_at)}
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <div className="text-sm text-gray-900">
+                      {valueOrFallback(
+                        result.test_module?.name || result.test_module_name || result.test_name || result.test_module?.code || result.test_code
+                      )}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      ID: {valueOrFallback(result.id || result.result_id)}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      Date: {valueOrFallback(result.completed_at || result.created_at || result.updated_at)}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      Code: {valueOrFallback(result.test_module?.code || result.test_code)}
+                    </div>
+                  </div>
+
+                  {/* Create Workspace Button (only for mcmi4-signal) */}
+                  <CreateWorkspaceButton
+                    testResultId={result.id || result.result_id}
+                    testModuleCode={result.test_module?.code || result.test_code || ''}
+                    subjectUserId={result.user_id || result.subject_user_id || patient?.user?.id || patient?.user || 0}
+                  />
                 </div>
               </div>
             ))}
@@ -250,6 +274,17 @@ export default function TherapistPatientDetailPage() {
           onClose={() => setShowEditor(false)}
         />
       )}
+
+      <AssignMCMI4Modal
+        open={showAssignModal}
+        onClose={() => {
+          setShowAssignModal(false);
+          loadData(); // Refresh results after assignment
+        }}
+        patientId={Number(patientId)}
+        patientName={patient?.full_name || patient?.legal_full_name || patient?.name || 'Consultante'}
+        patientUserId={patient?.user?.id || patient?.user || null}
+      />
     </div>
   );
 }

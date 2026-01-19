@@ -136,7 +136,7 @@ foreach ($c in $checks) {
 
 # Wait for all jobs up to the maximum configured timeout
 $maxTimeout = ($checks | Measure-Object -Property Timeout -Maximum).Maximum
-Wait-Job -Timeout ($maxTimeout + 5)
+Wait-Job -Job $jobs -Timeout ($maxTimeout + 5) | Out-Null
 
 Write-Host "Health check results:" -ForegroundColor Cyan
 foreach ($j in $jobs) {

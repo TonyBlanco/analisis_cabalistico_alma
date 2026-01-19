@@ -120,6 +120,8 @@ class AssignmentListCreateView(APIView):
             test_type=test_type,
             assigned_by_user=request.user,
             assigned_to_user=patient.user,
+            # populate subject_user to satisfy DB constraint/new identity fields
+            subject_user=patient.user,
             questions=questions,
             questions_hash=meta.get("questions_hash", ""),
             times_assigned=times_assigned,

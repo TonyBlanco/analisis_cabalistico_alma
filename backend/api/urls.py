@@ -73,6 +73,14 @@ from .test_views import (
     BDI2SubmitView
 )
 from .patient_note_views import PatientNotesView
+from .assignments import (
+    AssignmentListCreateView,
+    AssignmentDetailView,
+    AssignmentStartView,
+    AssignmentSubmitView,
+    AssignmentComputeView,
+    AssignmentResultsView,
+)
 from .gematria_views import GematriaInterpretationView
 from .tarot_views import TarotAnalysisView, TarotCabalisticCorrespondenceView
 from .cabalistic_views import (
@@ -250,6 +258,13 @@ urlpatterns = [
     path('tests/assignments/<int:assignment_id>/archive/', ArchiveTestAssignmentView.as_view(), name='archive_test_assignment'),
     path('tests/unassign-from-patient/', UnassignTestFromPatientView.as_view(), name='unassign_test_from_patient'),
     path('tests/patient-previous/', PatientPreviousTestsView.as_view(), name='patient_previous_tests'),
+    # Assignment workflow (MCMI4 Mystic)
+    path('assignments', AssignmentListCreateView.as_view(), name='assignment_list_create'),
+    path('assignments/<int:assignment_id>/', AssignmentDetailView.as_view(), name='assignment_detail'),
+    path('assignments/<int:assignment_id>/start', AssignmentStartView.as_view(), name='assignment_start'),
+    path('assignments/<int:assignment_id>/submit', AssignmentSubmitView.as_view(), name='assignment_submit'),
+    path('assignments/<int:assignment_id>/compute', AssignmentComputeView.as_view(), name='assignment_compute'),
+    path('assignments/<int:assignment_id>/results', AssignmentResultsView.as_view(), name='assignment_results'),
     # Therapist -> Patient notes (unidirectional)
     path('patient-notes/', PatientNotesView.as_view(), name='patient_notes'),
     path('tests/<str:code>/', TestModuleDetailView.as_view(), name='test_detail'),
@@ -288,4 +303,7 @@ urlpatterns = [
     path('resources/my/', MyResourcesView.as_view(), name='my_resources'),
     path('patients/<int:patient_id>/resources/assign/', AssignResourceToPatientView.as_view(), name='assign_resource_to_patient'),
     path('resources/<int:resource_id>/acquire/', AcquireResourceView.as_view(), name='acquire_resource'),
+    
+    # SWM MCMI-4 Místico (Specialized Workspace Module)
+    path('swm/mcmi4/', include('swm.mcmi4.urls', namespace='swm_mcmi4')),
 ]

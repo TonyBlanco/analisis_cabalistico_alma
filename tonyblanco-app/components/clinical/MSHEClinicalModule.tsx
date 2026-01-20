@@ -213,7 +213,9 @@ export default function MSHEClinicalModule() {
 
       if (response.ok) {
         const data = await response.json();
-        const msheRecords = data.results.filter((r: AnalysisRecord) =>
+        // Handle both paginated ({results: []}) and direct array responses
+        const records = Array.isArray(data) ? data : (data.results || []);
+        const msheRecords = records.filter((r: AnalysisRecord) =>
           r.kind === 'holistic_evaluative_synthesis'
         );
         setEvolutionHistory(msheRecords);

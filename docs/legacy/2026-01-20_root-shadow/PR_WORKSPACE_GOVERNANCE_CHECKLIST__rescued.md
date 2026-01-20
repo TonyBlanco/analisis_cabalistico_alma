@@ -1,8 +1,11 @@
 ---
-ESTADO: HISTÓRICO / NO VIGENTE
-FECHA_MOVIMIENTO: 2026-01-10
-MOTIVO: Contradicción con Fuente de Verdad actual
-REFERENCIA: symbolic_contradictions_matrix.csv
+ESTADO: LEGACY (SUPERSEDED)
+FECHA_MOVIMIENTO: 2026-01-20
+MOTIVO: Root-shadow cleanup y consolidación bajo la fuente canónica.
+REFERENCIA: docs/PR_WORKSPACE_GOVERNANCE_CHECKLIST.md
+ORIGEN: docs/_rescued_md_2026-01-04/
+TRAZA: symbolic_contradictions_matrix.csv
+NOTAS: Se conserva para trazabilidad de contradicciones previas.
 ---
 
 # PR Workspace Governance Checklist

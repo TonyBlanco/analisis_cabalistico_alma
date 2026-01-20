@@ -31,7 +31,8 @@
 | `SYMBOLIC_AI_PHASE_0_CONTRACT.md` | `docs/legacy/2026-01-20_pre-federation/SYMBOLIC_AI_PHASE_0_CONTRACT.md` | **LEGACY (SUPERSEDED)** | AI / Contracts | Arquitectura | Superseded por SYSTEM_PROMPT_GUARDIAN_HOLISTICO_v2.md. |
 | `PR_RETROACTIVE_AUDIT.md` | `docs/legacy/2026-01-20_pre-federation/PR_RETROACTIVE_AUDIT.md` | **LEGACY (INFORMATIVO)** | Governance / Audit | Arquitectura | Auditoría retroactiva de PRs (histórico). |
 | `SYMBOLIC_INTERPRETER_AI_IMPLEMENTATION.md` | `docs/backLegacy/obsolete_architecture/SYMBOLIC_INTERPRETER_AI_IMPLEMENTATION.md` | HISTÓRICO | Docs / Governance | TBD | Archivado tras reconciliación; ver symbolic_contradictions_matrix.csv |
-| `PR_WORKSPACE_GOVERNANCE_CHECKLIST.md` | `docs/backLegacy/rescued_docs/PR_WORKSPACE_GOVERNANCE_CHECKLIST.md` | HISTÓRICO | Docs / Governance | TBD | Archivado tras reconciliación; ver symbolic_contradictions_matrix.csv |
+| `PR_WORKSPACE_GOVERNANCE_CHECKLIST__rescued.md` | `docs/legacy/2026-01-20_root-shadow/PR_WORKSPACE_GOVERNANCE_CHECKLIST__rescued.md` | **LEGACY (ROOT-SHADOW)** | Docs / Governance | TBD | Copia histórica movida desde `docs/_rescued_md_2026-01-04/` tras la consolidación canonical. |
+| `PR_WORKSPACE_GOVERNANCE_CHECKLIST__backLegacy.md` | `docs/legacy/2026-01-20_root-shadow/PR_WORKSPACE_GOVERNANCE_CHECKLIST__backLegacy.md` | **LEGACY (ROOT-SHADOW)** | Docs / Governance | TBD | Copia histórica movida desde `docs/backLegacy/rescued_docs/` tras la consolidación canonical. |
 | `UI_COPY_FREEZE.md` | `docs/backLegacy/rescued_docs/UI_COPY_FREEZE.md` | HISTÓRICO | Docs / Governance | TBD | Archivado tras reconciliación; ver symbolic_contradictions_matrix.csv |
 | `tonyblanco-app/components/Tree/README.md` | `docs/backLegacy/rescued_docs/tonyblanco-app/components/Tree/README.md` | HISTÓRICO | Docs / Governance | TBD | Archivado tras reconciliación; ver symbolic_contradictions_matrix.csv |
 | `faltan_test.md` | `docs/backLegacy/legacy_tests/faltan_test.md` | HISTÓRICO | Docs / Governance | TBD | Archivado tras reconciliación; ver symbolic_contradictions_matrix.csv |
@@ -45,6 +46,32 @@
 | `README_CHANGELOG.md` | `docs/backLegacy/legacy_tests/README_CHANGELOG.md` | HISTÓRICO | Docs / Governance | TBD | Archivado tras reconciliación; ver symbolic_contradictions_matrix.csv |
 | `PROBLEM-EXPLAINED.md` | `docs/backLegacy/legacy_tests/PROBLEM-EXPLAINED.md` | HISTÓRICO | Docs / Governance | TBD | Archivado tras reconciliación; ver symbolic_contradictions_matrix.csv |
 | `PASOS-FINALES.md` | `docs/backLegacy/legacy_tests/PASOS-FINALES.md` | HISTÓRICO | Docs / Governance | TBD | Archivado tras reconciliación; ver symbolic_contradictions_matrix.csv |
+| `DB_STRUCTURE.md` | `docs/technical/DB_STRUCTURE.md` | **Active** | Technical / Database | TBD | Estructura de base de datos del sistema. |
+| `FEDERATION_PHASE1_IMPLEMENTATION_REPORT.md` | `docs/technical/FEDERATION_PHASE1_IMPLEMENTATION_REPORT.md` | **Active** | Technical / Federation | TBD | Informe de implementación Phase 1 (autorizaciones federadas y controles). |
+| `ARCHITECT_MODE_PHASE_0_COMPLETE.md` | `docs/releases/phase-0/ARCHITECT_MODE_PHASE_0_COMPLETE.md` | **Active** | Releases / Phase 0 | Arquitectura | Reporte de completitud de Fase 0 (Federación Holística). |
+| `ARCHITECT_MODE_PHASE_0.1_PATCHES.md` | `docs/releases/phase-0/ARCHITECT_MODE_PHASE_0.1_PATCHES.md` | **Active** | Releases / Phase 0 | Arquitectura | Patches normativos para Fase 0.1 (eliminación de contradicciones). |
+| `PHASE_0.1_COMPLETION_REPORT.md` | `docs/releases/phase-0/PHASE_0.1_COMPLETION_REPORT.md` | **Active** | Releases / Phase 0 | Arquitectura | Reporte de completitud de Fase 0.1. |
+| `FEDERATION_MVP_COMPLETION_SUMMARY.md` | `docs/releases/phase-1/FEDERATION_MVP_COMPLETION_SUMMARY.md` | **Active** | Releases / Phase 1 | Arquitectura | Resumen de completitud Phase 1 (Federation MVP) y transición Phase 1. |
+| `MCMI4_REFLECTION_IMPLEMENTATION_REPORT.md` | `docs/swm/MCMI4_REFLECTION_IMPLEMENTATION_REPORT.md` | **Active** | SWM / MCMI-4 | SWM | Reporte de implementación de MCMI-4 Reflection. |
+| `SWM_MCMI4_IMPLEMENTATION_SUMMARY.md` | `docs/swm/SWM_MCMI4_IMPLEMENTATION_SUMMARY.md` | **Active** | SWM / MCMI-4 | SWM | Resumen de implementación MCMI-4. |
+| `SWM_MCMI4_MANUAL_TESTING_GUIDE.md` | `docs/swm/SWM_MCMI4_MANUAL_TESTING_GUIDE.md` | **Active** | SWM / MCMI-4 | SWM | Guía de testing manual para MCMI-4. |
+| `IDENTITY_REFACTOR_EXECUTION_REPORT.md` | `docs/swm/IDENTITY_REFACTOR_EXECUTION_REPORT.md` | **Active** | SWM / Identity | SWM | Reporte de refactor de identidad. |
+| `IDENTITY_REFACTOR_PLAN.md` | `docs/swm/IDENTITY_REFACTOR_PLAN.md` | **Active** | SWM / Identity | SWM | Plan de refactor de identidad. |
+| `FASE_2_BACKEND_ENDPOINTS_REPORT.md` | `docs/swm/FASE_2_BACKEND_ENDPOINTS_REPORT.md` | **Active** | SWM / Backend | SWM | Reporte de endpoints backend Fase 2. |
+| `EXPLORACION_CANONICA_II.md` | `docs/EXPLORACIONES_CANONICAS/EXPLORACION_CANONICA_II.md` | **Active** | Exploraciones / Canónica II | Arquitectura | Exploración Canónica II. |
+| `GOBERNANZA_EC_II.md` | `docs/EXPLORACIONES_CANONICAS/GOBERNANZA_EC_II.md` | **Active** | Exploraciones / Canónica II | Arquitectura | Gobernanza de Exploración Canónica II. |
+| `GOBERNANZA_EXPLORACIONES_CANONICAS.md` | `docs/EXPLORACIONES_CANONICAS/GOBERNANZA_EXPLORACIONES_CANONICAS.md` | **Active** | Exploraciones / Governance | Arquitectura | Gobernanza general de Exploraciones Canónicas. |
+| `MAPEo_CABALISTICO_EC_II.md` | `docs/EXPLORACIONES_CANONICAS/MAPEo_CABALISTICO_EC_II.md` | **Active** | Exploraciones / Canónica II | Arquitectura | Mapeo cabalístico de EC II. |
+| `RESULTADOS_Y_VISIBILIDAD_EC_II.md` | `docs/EXPLORACIONES_CANONICAS/RESULTADOS_Y_VISIBILIDAD_EC_II.md` | **Active** | Exploraciones / Canónica II | Arquitectura | Resultados y visibilidad de EC II. |
+| `AUDIT_REPORT_FINAL.md` | `docs/legacy/2026-01-20_root-shadow/AUDIT_REPORT_FINAL.md` | **LEGACY (ROOT-SHADOW)** | Audit / Historical | TBD | Reporte de auditoría final (histórico desde root). |
+| `AUDIT_REPORT_FINAL__copy.md` | `docs/legacy/2026-01-20_root-shadow/AUDIT_REPORT_FINAL__copy.md` | **LEGACY (ROOT-SHADOW)** | Audit / Historical | TBD | Copia duplicada de reporte de auditoría. |
+| `CRITICAL_CORRECTION_APPLIED.md` | `docs/legacy/2026-01-20_root-shadow/CRITICAL_CORRECTION_APPLIED.md` | **LEGACY (ROOT-SHADOW)** | Audit / Historical | TBD | Reporte de corrección crítica aplicada (histórico). |
+| `CRITICAL_CORRECTION_APPLIED__copy.md` | `docs/legacy/2026-01-20_root-shadow/CRITICAL_CORRECTION_APPLIED__copy.md` | **LEGACY (ROOT-SHADOW)** | Audit / Historical | TBD | Copia duplicada de corrección crítica. |
+| `DEBUG_AUDIT_REPORT.md` | `docs/legacy/2026-01-20_root-shadow/DEBUG_AUDIT_REPORT.md` | **LEGACY (ROOT-SHADOW)** | Debug / Historical | TBD | Reporte de debug de auditoría (histórico). |
+| `DEBUG_MCMI4_MYSTIC_FLOW.md` | `docs/legacy/2026-01-20_root-shadow/DEBUG_MCMI4_MYSTIC_FLOW.md` | **LEGACY (ROOT-SHADOW)** | Debug / Historical | TBD | Debug de flujo MCMI-4 Mystic (histórico). |
+| `PR_BODY.md` | `docs/legacy/2026-01-20_drafts/PR_BODY.md` | **LEGACY (DRAFT)** | Drafts / Temporal | TBD | Borrador de PR body (temporal). |
+| `test_mcmi4_reflection_flow.md` | `docs/legacy/2026-01-20_drafts/test_mcmi4_reflection_flow.md` | **LEGACY (DRAFT)** | Drafts / Testing | TBD | Borrador de flujo de testing MCMI-4 (temporal). |
+| `tests_catalog_status.md` | `docs/legacy/2026-01-20_drafts/tests_catalog_status.md` | **LEGACY (DRAFT)** | Drafts / Tests | TBD | Estado del catálogo de tests (temporal). |
 
 ---
 
@@ -52,6 +79,11 @@
 - **Draft (Pending approval):** Documento creado para revisión; no se mueven archivos hasta aprobación.
 - **Proposed:** Recomendación o artefacto que requiere acción de gobernanza.
 - **Active:** Documento/evidencia con validez runtime o de referencia actual.
+- **LEGACY (SUPERSEDED):** Documento superseded por nueva política/versión (archivado con header).
+- **LEGACY (INFORMATIVO):** Documento histórico/informativo sin reemplazo directo.
+- **LEGACY (ROOT-SHADOW):** Documento movido desde root (auditorías/debug históricos).
+- **LEGACY (DRAFT):** Borrador temporal archivado.
+- **HISTÓRICO:** Documento archivado tras reconciliación anterior.
 
 ---
 

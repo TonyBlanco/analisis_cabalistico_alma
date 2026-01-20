@@ -98,6 +98,7 @@ from .admin_views import (
     EnhancedAdminUsersView,
     AdminUserManagementView
 )
+from .federation_views import FederationHubFeedView
 from .views import (
     reset_admin_passwords_temp,
     configure_admin_profiles_temp,
@@ -280,6 +281,10 @@ urlpatterns = [
     
     # Asistente IA para SCID-5 Holístico
     path('analysis-records/scid5-ai-assistant/', SCID5AIAssistantView.as_view(), name='scid5_ai_assistant'),
+    
+    # ========== FEDERACIÓN HOLÍSTICA (Phase-1) ==========
+    # Endpoint read-only para lectura federada cross-workspace (hubs MSHE/SCDF/SCID-5)
+    path('federation/hub-feed/', FederationHubFeedView.as_view(), name='federation_hub_feed'),
 
     # Dominio bio-emocional & árbol transgeneracional (aislado)
     path('bioemotional/', include('api.bioemotional.urls', namespace='bioemotional')),

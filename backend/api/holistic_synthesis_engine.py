@@ -5,8 +5,8 @@ Lee automáticamente analysis-records no clínicos y genera scoring simbólico
 from typing import Dict, List, Any, Optional
 from datetime import datetime
 from django.contrib.auth.models import User
-from ..models import Patient, AnalysisRecord, TherapistHolisticConfig
-from .ai_interpreter import GeminiInterpreter
+from api.models import Patient, AnalysisRecord, TherapistHolisticConfig
+from api.ai_interpreter import GeminiInterpreter
 import logging
 
 logger = logging.getLogger(__name__)

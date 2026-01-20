@@ -86,6 +86,14 @@
 - **LEGACY (DRAFT):** Borrador temporal archivado.
 - **HISTÓRICO:** Documento archivado tras reconciliación anterior.
 
+## Convención editorial (BINDING): Regla A Phase-1
+- Phase-0/0.1 releases → `docs/releases/phase-0/`
+- Phase-1+ (planes, inventarios, implementación, debug/E2E, evidencias) → `docs/technical/`
+- No se utiliza `docs/releases/phase-1/` (decisión cerrada para evitar movimientos repetitivos).
+
+## Verificación de rutas
+- Todas las rutas en este índice deben apuntar a `docs/` (no a la raíz `/`).
+
 ---
 
 ## Procedimiento para movimientos administrativos (solo tras aprobación)

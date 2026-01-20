@@ -39,6 +39,50 @@ Leerlos en ese orden antes de cualquier modificaci├│n de UI, copy o interacc
 - Duplicados históricos / “root-shadow” → `docs/legacy/<YYYY-MM-DD>_root-shadow/`.
 ---
 
+### Regla A (decisión editorial cerrada): Ubicación canónica de documentación (Docs-Only + Regla A Phase-1)
+
+**Fecha efectiva:** 2026-01-20
+**Estado:** BINDING (obligatoria para todos los agentes y revisores)
+
+1) Canon absoluto
+- La única ubicación canónica para documentación es: **`docs/`**
+- Está **prohibido** crear o mantener documentación normativa en la raíz del repositorio (`/`) o fuera de `docs/`.
+
+2) Clasificación de ubicaciones permitidas
+- **`docs/technical/`**  
+  Contiene *toda* la documentación técnica activa y operativa, incluyendo:
+  - planes, contratos, inventarios,
+  - reportes de implementación,
+  - reportes debug/E2E,
+  - resúmenes ejecutivos de ejecución,
+  - cualquier material Phase-1 (Federation MVP) sin excepción.
+
+- **`docs/releases/phase-0/`**  
+  Contiene exclusivamente *releases* y reportes de cierre de **Phase-0 / Phase-0.1** (gobernanza y normalización).
+
+- **`docs/swm/`**  
+  Reportes y documentación específica de SWM.
+
+- **`docs/EXPLORACIONES_CANONICAS/`**  
+  Documentos de Exploraciones Canónicas.
+
+- **`docs/legacy/<YYYY-MM-DD>_root-shadow/`**  
+  Duplicados históricos, auditorías antiguas, trazas no canónicas recuperadas desde root.
+
+- **`docs/legacy/<YYYY-MM-DD>_drafts/`**  
+  Borradores temporales.
+
+3) Regla A (decisión editorial cerrada)
+- **Phase-1 y posteriores NO usan `docs/releases/phase-1/`.**
+- Todo material Phase-1 (incluida evidencia de ejecución) se mantiene en **`docs/technical/`**.
+- Esta decisión es vinculante para evitar loops operativos de documentación.
+
+4) Mecanismo de cumplimiento
+- Si un agente genera un `.md` fuera de `docs/`, se considera incumplimiento y debe corregirse mediante `git mv` antes de cualquier PR.
+- Los movimientos deben hacerse siempre con `git mv` para preservar historial.
+
+**Fin de regla.**
+
 Cualquier `.md` creado fuera de `docs/` debe migrarse en el mismo PR o se bloquea la revisión.
 
 4) Qué SÍ está permitido

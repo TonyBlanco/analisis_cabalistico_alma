@@ -187,7 +187,7 @@
 | `backend/api/services/federation_service.py` | **CREAR** | Lógica `FederationService.generate_hub_feed()` con validación centralizada. |
 | `backend/api/permissions.py` | **MODIFICAR** (opcional) | Añadir `IsFederationAuthorized` permission class si aplica. |
 | `docs/technical/FEDERATION_NAMING_DEBT.md` | **CREAR** | Documentar deuda naming legacy para Phase-2. |
-| `docs/technical/FEDERATION_PHASE1_IMPLEMENTATION_REPORT.md` | **CREAR** | Reporte de implementación (post-ejecución). |
+| `docs/releases/phase-1/FEDERATION_PHASE1_IMPLEMENTATION_REPORT.md` | **CREAR** | Reporte de implementación (post-ejecución). |
 
 ### 2.2 Backend — Archivos PROHIBIDOS modificar
 
@@ -214,7 +214,7 @@
 |------------|-------------|
 | `docs/technical/FEDERATION_MVP_AUTHORIZATION_PLAN.md` | Este documento (plan autorizado). |
 | `docs/technical/FEDERATION_NAMING_DEBT.md` | Deuda naming legacy + roadmap Phase-2. |
-| `docs/technical/FEDERATION_PHASE1_IMPLEMENTATION_REPORT.md` | Reporte post-implementación (checklist DoD cumplido). |
+| `docs/releases/phase-1/FEDERATION_PHASE1_IMPLEMENTATION_REPORT.md` | Reporte post-implementación (checklist DoD cumplido). |
 
 ---
 
@@ -259,7 +259,7 @@
 ### 3.4 Documentación
 
 - [ ] **Deuda naming:** `docs/technical/FEDERATION_NAMING_DEBT.md` creado con roadmap Phase-2.
-- [ ] **Implementation report:** `docs/technical/FEDERATION_PHASE1_IMPLEMENTATION_REPORT.md` generado post-implementación con:
+- [ ] **Implementation report:** `docs/releases/phase-1/FEDERATION_PHASE1_IMPLEMENTATION_REPORT.md` generado post-implementación con:       
   - Archivos tocados (paths + líneas modificadas).
   - Tests ejecutados (pass/fail).
   - Queries ejemplo (curl/Postman).

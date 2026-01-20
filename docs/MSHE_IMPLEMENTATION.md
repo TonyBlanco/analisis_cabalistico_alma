@@ -2,7 +2,7 @@
 
 ## Overview
 
-Motor de Síntesis Holística Evaluativa (MSHE) implemented as an automatic synthesis engine for non-clinical test results with AI assistance and therapist validation.
+Motor de Síntesis Holística Evaluativa (MSHE) implemented as an automatic synthesis engine for holistic/educational results with AI assistance and therapist validation.
 
 **Status**: ✅ Implemented and committed (commit: 16d2b54e)
 
@@ -231,7 +231,7 @@ When AI unavailable, provides basic analysis based on score patterns.
 ## Future Extensions
 
 ### Potential Enhancements
-- Export functionality for clinical records
+- Export functionality for professional records
 - Integration with SCDF for combined analysis
 - Custom axis configuration (advanced therapists)
 - Multi-patient comparative analysis

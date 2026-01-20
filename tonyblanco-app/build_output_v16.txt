@@ -1,0 +1,131 @@
+
+> tonyblanco-app@0.1.0 build
+> next build
+
+ ΓÜá Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of D:\pnpm-lock.yaml as the root directory.
+ To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+ Detected additional lockfiles: 
+   * D:\analisis_cabalistico_alma\tonyblanco-app\package-lock.json
+   * D:\analisis_cabalistico_alma\package-lock.json
+
+   Γû▓ Next.js 16.0.7 (Turbopack)
+   - Environments: .env.local
+   - Experiments (use with caution):
+     Γ£ô externalDir
+
+ ΓÜá The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+   Creating an optimized production build ...
+ Γ£ô Compiled successfully in 10.2s
+   Running TypeScript ...
+   Collecting page data using 15 workers ...
+   Generating static pages using 15 workers (0/84) ...
+   Generating static pages using 15 workers (21/84) 
+   Generating static pages using 15 workers (42/84) 
+   Generating static pages using 15 workers (63/84) 
+ Γ£ô Generating static pages using 15 workers (84/84) in 3.7s
+   Finalizing page optimization ...
+
+Route (app)
+Γöî Γùï /
+Γö£ Γùï /_not-found
+Γö£ Γùï /dashboard
+Γö£ Γùï /dashboard/account
+Γö£ Γùï /dashboard/admin
+Γö£ Γùï /dashboard/astrology-study
+Γö£ Γùï /dashboard/astrology-study/catalog
+Γö£ Γùï /dashboard/astrology-study/compare
+Γö£ Γùï /dashboard/astrology-study/research
+Γö£ Γùï /dashboard/astrology-study/sandbox
+Γö£ Γùï /dashboard/astrology-study/visual
+Γö£ Γùï /dashboard/patient
+Γö£ Γùï /dashboard/patient/account
+Γö£ ╞Æ /dashboard/patient/cabala/results/[id]
+Γö£ Γùï /dashboard/patient/holistic-summary
+Γö£ Γùï /dashboard/patient/process
+Γö£ Γùï /dashboard/patient/profile
+Γö£ Γùï /dashboard/patient/resources
+Γö£ Γùï /dashboard/patient/results
+Γö£ ╞Æ /dashboard/patient/results/[id]
+Γö£ Γùï /dashboard/patient/tests
+Γö£ Γùï /dashboard/patient/tests/anxiety-state-trait
+Γö£ Γùï /dashboard/patient/tests/anxiety-state-trait/result
+Γö£ Γùï /dashboard/patient/tests/asrs-essence
+Γö£ Γùï /dashboard/patient/tests/asrs-essence/result
+Γö£ Γùï /dashboard/patient/tests/bai
+Γö£ Γùï /dashboard/patient/tests/bai/result
+Γö£ Γùï /dashboard/patient/tests/bdi2
+Γö£ Γùï /dashboard/patient/tests/bdi2/result
+Γö£ Γùï /dashboard/patient/tests/gad7
+Γö£ Γùï /dashboard/patient/tests/gad7/result
+Γö£ Γùï /dashboard/patient/tests/insomnia
+Γö£ Γùï /dashboard/patient/tests/insomnia/result
+Γö£ Γùï /dashboard/patient/tests/isi
+Γö£ Γùï /dashboard/patient/tests/isi/result
+Γö£ Γùï /dashboard/patient/tests/nutrition
+Γö£ Γùï /dashboard/patient/tests/nutrition/result
+Γö£ Γùï /dashboard/patient/tests/past-lives
+Γö£ Γùï /dashboard/patient/tests/past-lives/result
+Γö£ Γùï /dashboard/patient/tests/phq9
+Γö£ Γùï /dashboard/patient/tests/phq9/result
+Γö£ Γùï /dashboard/patient/tests/scl90
+Γö£ Γùï /dashboard/patient/tests/scl90/result
+Γö£ Γùï /dashboard/patient/tests/screening-general
+Γö£ Γùï /dashboard/patient/tests/screening-general/result
+Γö£ Γùï /dashboard/patient/tests/stress
+Γö£ Γùï /dashboard/patient/tests/stress-regulation
+Γö£ Γùï /dashboard/patient/tests/stress-regulation/result
+Γö£ Γùï /dashboard/patient/tests/stress/result
+Γö£ Γùï /dashboard/patient/tests/wellness
+Γö£ Γùï /dashboard/patient/tests/wellness/result
+Γö£ Γùï /dashboard/personal
+Γö£ ╞Æ /dashboard/personal/[...slug]
+Γö£ Γùï /dashboard/personal/audios
+Γö£ Γùï /dashboard/personal/basic-analysis
+Γö£ Γùï /dashboard/personal/courses
+Γö£ Γùï /dashboard/personal/explorations
+Γö£ Γùï /dashboard/personal/premium
+Γö£ Γùï /dashboard/personal/resources
+Γö£ Γùï /dashboard/personal/tests
+Γö£ Γùï /dashboard/personal/videos
+Γö£ Γùï /dashboard/profile
+Γö£ Γùï /dashboard/resources
+Γö£ Γùï /dashboard/therapist
+Γö£ Γùï /dashboard/therapist/astrologia
+Γö£ Γùï /dashboard/therapist/astrologia-catalogo
+Γö£ Γùï /dashboard/therapist/astrologia-study
+Γö£ Γùï /dashboard/therapist/astrologia-tarot
+Γö£ Γùï /dashboard/therapist/bioemotional
+Γö£ Γùï /dashboard/therapist/bioemotional-experiencial-profunda
+Γö£ Γùï /dashboard/therapist/cabala
+Γö£ Γùï /dashboard/therapist/cabala-aplicada
+Γö£ ╞Æ /dashboard/therapist/cabala/results/[id]
+Γö£ Γùï /dashboard/therapist/mshe
+Γö£ Γùï /dashboard/therapist/patients
+Γö£ ╞Æ /dashboard/therapist/patients/[id]
+Γö£ ╞Æ /dashboard/therapist/patients/[id]/tests/bai
+Γö£ ╞Æ /dashboard/therapist/patients/[id]/tests/bdi2
+Γö£ ╞Æ /dashboard/therapist/patients/[id]/tests/gad7
+Γö£ ╞Æ /dashboard/therapist/patients/[id]/tests/isi
+Γö£ ╞Æ /dashboard/therapist/patients/[id]/tests/phq9
+Γö£ Γùï /dashboard/therapist/patients/create
+Γö£ Γùï /dashboard/therapist/resonancia-ancestral
+Γö£ Γùï /dashboard/therapist/scdf
+Γö£ Γùï /dashboard/therapist/scid5
+Γö£ Γùï /dashboard/therapist/tarot
+Γö£ Γùï /dashboard/therapist/tests
+Γö£ ╞Æ /dashboard/therapist/tests/results/[id]
+Γö£ Γùï /dashboard/therapist/transgeneracional-profundo
+Γö£ Γùï /dashboard/tools/scdf
+Γö£ Γùï /dev/symbolic-overlay
+Γö£ Γùï /login
+Γö£ Γùï /register/personal
+Γöö Γùï /register/therapist
+
+
+╞Æ Proxy (Middleware)
+
+Γùï  (Static)   prerendered as static content
+╞Æ  (Dynamic)  server-rendered on demand
+

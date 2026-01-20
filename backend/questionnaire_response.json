@@ -1,0 +1,2008 @@
+{
+  "workspace_id": "56dc6785-bb8d-4fa4-96de-e5bc87b3a12f",
+  "status": "in_progress",
+  "questionnaire": {
+    "total_questions": 195,
+    "worlds": {
+      "atzilut": {
+        "name": "atzilut",
+        "total_questions": 49,
+        "questions": [
+          {
+            "id": "atz_bin_001",
+            "text": "Puedo procesar insights espirituales y darles estructura de significado.",
+            "world": "atzilut",
+            "dimension": "binah_deep_understanding",
+            "dimension_id": "binah_deep_understanding",
+            "sefirah": "Binah",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "atz_bin_002",
+            "text": "Integro naturalmente la sabiduría divina con mi comprensión racional.",
+            "world": "atzilut",
+            "dimension": "binah_deep_understanding",
+            "dimension_id": "binah_deep_understanding",
+            "sefirah": "Binah",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "atz_bin_003",
+            "text": "Puedo explicar conceptos espirituales complejos de manera lógica y coherente.",
+            "world": "atzilut",
+            "dimension": "binah_deep_understanding",
+            "dimension_id": "binah_deep_understanding",
+            "sefirah": "Binah",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "atz_bin_004",
+            "text": "Mi mente analiza las revelaciones hasta entenderlas profundamente.",
+            "world": "atzilut",
+            "dimension": "binah_deep_understanding",
+            "dimension_id": "binah_deep_understanding",
+            "sefirah": "Binah",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "atz_bin_005",
+            "text": "Me cuesta dar sentido lógico a las experiencias espirituales que tengo.",
+            "world": "atzilut",
+            "dimension": "binah_deep_understanding",
+            "dimension_id": "binah_deep_understanding",
+            "sefirah": "Binah",
+            "reverse_scored": true,
+            "weight": 1.0
+          },
+          {
+            "id": "atz_bin_006",
+            "text": "Construyo marcos conceptuales que unen lo divino con lo terrenal.",
+            "world": "atzilut",
+            "dimension": "binah_deep_understanding",
+            "dimension_id": "binah_deep_understanding",
+            "sefirah": "Binah",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "atz_bin_007",
+            "text": "Veo patrones y estructuras en el despliegue de la realidad espiritual.",
+            "world": "atzilut",
+            "dimension": "binah_deep_understanding",
+            "dimension_id": "binah_deep_understanding",
+            "sefirah": "Binah",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "atz_bin_008",
+            "text": "Las revelaciones espirituales me resultan confusas y difíciles de procesar.",
+            "world": "atzilut",
+            "dimension": "binah_deep_understanding",
+            "dimension_id": "binah_deep_understanding",
+            "sefirah": "Binah",
+            "reverse_scored": true,
+            "weight": 1.0
+          },
+          {
+            "id": "atz_bin_009",
+            "text": "Puedo contemplar verdades divinas hasta que se despliegan en capas de comprensión.",
+            "world": "atzilut",
+            "dimension": "binah_deep_understanding",
+            "dimension_id": "binah_deep_understanding",
+            "sefirah": "Binah",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "atz_bin_010",
+            "text": "Mi intelecto superior traduce la sabiduría en entendimiento aplicable.",
+            "world": "atzilut",
+            "dimension": "binah_deep_understanding",
+            "dimension_id": "binah_deep_understanding",
+            "sefirah": "Binah",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "atz_chd_001",
+            "text": "Amo a los demás sin necesidad de que me correspondan.",
+            "world": "atzilut",
+            "dimension": "chesed_unconditional_love",
+            "dimension_id": "chesed_unconditional_love",
+            "sefirah": "Chesed",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "atz_chd_002",
+            "text": "Mi corazón se expande naturalmente hacia todos los seres.",
+            "world": "atzilut",
+            "dimension": "chesed_unconditional_love",
+            "dimension_id": "chesed_unconditional_love",
+            "sefirah": "Chesed",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "atz_chd_003",
+            "text": "Experimento compasión universal que trasciende las diferencias.",
+            "world": "atzilut",
+            "dimension": "chesed_unconditional_love",
+            "dimension_id": "chesed_unconditional_love",
+            "sefirah": "Chesed",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "atz_chd_004",
+            "text": "Doy desde un espacio de abundancia divina, no desde la carencia.",
+            "world": "atzilut",
+            "dimension": "chesed_unconditional_love",
+            "dimension_id": "chesed_unconditional_love",
+            "sefirah": "Chesed",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "atz_chd_005",
+            "text": "Me resulta difícil amar sin esperar algo a cambio.",
+            "world": "atzilut",
+            "dimension": "chesed_unconditional_love",
+            "dimension_id": "chesed_unconditional_love",
+            "sefirah": "Chesed",
+            "reverse_scored": true,
+            "weight": 1.0
+          },
+          {
+            "id": "atz_chd_006",
+            "text": "Siento amor incluso hacia quienes me han herido.",
+            "world": "atzilut",
+            "dimension": "chesed_unconditional_love",
+            "dimension_id": "chesed_unconditional_love",
+            "sefirah": "Chesed",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "atz_chd_007",
+            "text": "Mi amor fluye como un río inagotable desde una fuente divina.",
+            "world": "atzilut",
+            "dimension": "chesed_unconditional_love",
+            "dimension_id": "chesed_unconditional_love",
+            "sefirah": "Chesed",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "atz_chd_008",
+            "text": "Solo puedo amar a quienes cumplen mis expectativas.",
+            "world": "atzilut",
+            "dimension": "chesed_unconditional_love",
+            "dimension_id": "chesed_unconditional_love",
+            "sefirah": "Chesed",
+            "reverse_scored": true,
+            "weight": 1.0
+          },
+          {
+            "id": "atz_chd_009",
+            "text": "Reconozco la chispa divina en cada ser humano.",
+            "world": "atzilut",
+            "dimension": "chesed_unconditional_love",
+            "dimension_id": "chesed_unconditional_love",
+            "sefirah": "Chesed",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "atz_chd_010",
+            "text": "Mi capacidad de amar no tiene límites ni condiciones.",
+            "world": "atzilut",
+            "dimension": "chesed_unconditional_love",
+            "dimension_id": "chesed_unconditional_love",
+            "sefirah": "Chesed",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "atz_chk_001",
+            "text": "Recibo insights profundos de forma súbita, como destellos de luz.",
+            "world": "atzilut",
+            "dimension": "chochmah_intuitive_wisdom",
+            "dimension_id": "chochmah_intuitive_wisdom",
+            "sefirah": "Chochmah",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "atz_chk_002",
+            "text": "Confío en mi sabiduría intuitiva más que en el análisis racional.",
+            "world": "atzilut",
+            "dimension": "chochmah_intuitive_wisdom",
+            "dimension_id": "chochmah_intuitive_wisdom",
+            "sefirah": "Chochmah",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "atz_chk_003",
+            "text": "Experimento momentos de revelación donde el conocimiento simplemente 'llega'.",
+            "world": "atzilut",
+            "dimension": "chochmah_intuitive_wisdom",
+            "dimension_id": "chochmah_intuitive_wisdom",
+            "sefirah": "Chochmah",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "atz_chk_004",
+            "text": "Mi intuición me guía hacia decisiones acertadas sin necesidad de justificación lógica.",
+            "world": "atzilut",
+            "dimension": "chochmah_intuitive_wisdom",
+            "dimension_id": "chochmah_intuitive_wisdom",
+            "sefirah": "Chochmah",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "atz_chk_005",
+            "text": "Rara vez experimento inspiración o insight espontáneo.",
+            "world": "atzilut",
+            "dimension": "chochmah_intuitive_wisdom",
+            "dimension_id": "chochmah_intuitive_wisdom",
+            "sefirah": "Chochmah",
+            "reverse_scored": true,
+            "weight": 1.0
+          },
+          {
+            "id": "atz_chk_006",
+            "text": "Puedo acceder a una fuente de sabiduría que trasciende mi experiencia personal.",
+            "world": "atzilut",
+            "dimension": "chochmah_intuitive_wisdom",
+            "dimension_id": "chochmah_intuitive_wisdom",
+            "sefirah": "Chochmah",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "atz_chk_007",
+            "text": "Las respuestas importantes a menudo me son reveladas en estados de quietud.",
+            "world": "atzilut",
+            "dimension": "chochmah_intuitive_wisdom",
+            "dimension_id": "chochmah_intuitive_wisdom",
+            "sefirah": "Chochmah",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "atz_chk_008",
+            "text": "Necesito siempre analizar y razonar para entender algo.",
+            "world": "atzilut",
+            "dimension": "chochmah_intuitive_wisdom",
+            "dimension_id": "chochmah_intuitive_wisdom",
+            "sefirah": "Chochmah",
+            "reverse_scored": true,
+            "weight": 1.0
+          },
+          {
+            "id": "atz_chk_009",
+            "text": "Reconozco la diferencia entre pensamiento ordinario y sabiduría revelada.",
+            "world": "atzilut",
+            "dimension": "chochmah_intuitive_wisdom",
+            "dimension_id": "chochmah_intuitive_wisdom",
+            "sefirah": "Chochmah",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "atz_chk_010",
+            "text": "Mi mente recibe comprensiones profundas sin buscarlas conscientemente.",
+            "world": "atzilut",
+            "dimension": "chochmah_intuitive_wisdom",
+            "dimension_id": "chochmah_intuitive_wisdom",
+            "sefirah": "Chochmah",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "atz_gev_001",
+            "text": "Poseo un sentido claro de justicia divina que guía mis acciones.",
+            "world": "atzilut",
+            "dimension": "gevurah_divine_justice",
+            "dimension_id": "gevurah_divine_justice",
+            "sefirah": "Gevurah",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "atz_gev_002",
+            "text": "Establezco límites sagrados cuando es necesario para proteger lo que es correcto.",
+            "world": "atzilut",
+            "dimension": "gevurah_divine_justice",
+            "dimension_id": "gevurah_divine_justice",
+            "sefirah": "Gevurah",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "atz_gev_003",
+            "text": "Puedo decir 'no' desde un espacio de amor y claridad espiritual.",
+            "world": "atzilut",
+            "dimension": "gevurah_divine_justice",
+            "dimension_id": "gevurah_divine_justice",
+            "sefirah": "Gevurah",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "atz_gev_004",
+            "text": "Mi discernimiento moral viene de una fuente elevada, no solo de normas sociales.",
+            "world": "atzilut",
+            "dimension": "gevurah_divine_justice",
+            "dimension_id": "gevurah_divine_justice",
+            "sefirah": "Gevurah",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "atz_gev_005",
+            "text": "Me cuesta establecer límites, incluso cuando algo va en contra de mis valores.",
+            "world": "atzilut",
+            "dimension": "gevurah_divine_justice",
+            "dimension_id": "gevurah_divine_justice",
+            "sefirah": "Gevurah",
+            "reverse_scored": true,
+            "weight": 1.0
+          },
+          {
+            "id": "atz_gev_006",
+            "text": "Practico disciplina espiritual con rigor amoroso.",
+            "world": "atzilut",
+            "dimension": "gevurah_divine_justice",
+            "dimension_id": "gevurah_divine_justice",
+            "sefirah": "Gevurah",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "atz_gev_007",
+            "text": "Reconozco cuando la compasión debe balancearse con límites claros.",
+            "world": "atzilut",
+            "dimension": "gevurah_divine_justice",
+            "dimension_id": "gevurah_divine_justice",
+            "sefirah": "Gevurah",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "atz_gev_008",
+            "text": "Tiendo a ser permisivo incluso cuando sé que algo no está bien.",
+            "world": "atzilut",
+            "dimension": "gevurah_divine_justice",
+            "dimension_id": "gevurah_divine_justice",
+            "sefirah": "Gevurah",
+            "reverse_scored": true,
+            "weight": 1.0
+          },
+          {
+            "id": "atz_gev_009",
+            "text": "Mi sentido de justicia trasciende las leyes humanas y toca lo divino.",
+            "world": "atzilut",
+            "dimension": "gevurah_divine_justice",
+            "dimension_id": "gevurah_divine_justice",
+            "sefirah": "Gevurah",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "atz_gev_010",
+            "text": "Puedo sostener la tensión entre amor incondicional y límites necesarios.",
+            "world": "atzilut",
+            "dimension": "gevurah_divine_justice",
+            "dimension_id": "gevurah_divine_justice",
+            "sefirah": "Gevurah",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "atz_int_001",
+            "text": "Mi esencia espiritual se manifiesta coherentemente en todos los aspectos de mi vida.",
+            "world": "atzilut",
+            "dimension": "atzilut_integration",
+            "dimension_id": "atzilut_integration",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "atz_int_002",
+            "text": "Siento una integración profunda entre mi propósito, sabiduría y amor.",
+            "world": "atzilut",
+            "dimension": "atzilut_integration",
+            "dimension_id": "atzilut_integration",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "atz_int_003",
+            "text": "Mi vida refleja la voluntad divina de manera cada vez más clara.",
+            "world": "atzilut",
+            "dimension": "atzilut_integration",
+            "dimension_id": "atzilut_integration",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "atz_int_004",
+            "text": "Los aspectos superiores de mi ser están alineados y fluyen juntos.",
+            "world": "atzilut",
+            "dimension": "atzilut_integration",
+            "dimension_id": "atzilut_integration",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "atz_int_005",
+            "text": "Experimento fragmentación entre lo que siento como divino y cómo vivo.",
+            "world": "atzilut",
+            "dimension": "atzilut_integration",
+            "dimension_id": "atzilut_integration",
+            "sefirah": "Multiple",
+            "reverse_scored": true,
+            "weight": 1.0
+          },
+          {
+            "id": "atz_int_006",
+            "text": "Mi conexión con Ein Sof (lo infinito) permea todos mis pensamientos y acciones.",
+            "world": "atzilut",
+            "dimension": "atzilut_integration",
+            "dimension_id": "atzilut_integration",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "atz_int_007",
+            "text": "Vivo como un canal para que lo divino se exprese en el mundo.",
+            "world": "atzilut",
+            "dimension": "atzilut_integration",
+            "dimension_id": "atzilut_integration",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "atz_int_008",
+            "text": "Hay una gran brecha entre mis ideales espirituales y mi realidad diaria.",
+            "world": "atzilut",
+            "dimension": "atzilut_integration",
+            "dimension_id": "atzilut_integration",
+            "sefirah": "Multiple",
+            "reverse_scored": true,
+            "weight": 1.0
+          },
+          {
+            "id": "atz_int_009",
+            "text": "Mi ser superior está integrado de tal forma que actúo desde la totalidad.",
+            "world": "atzilut",
+            "dimension": "atzilut_integration",
+            "dimension_id": "atzilut_integration",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          }
+        ]
+      },
+      "briah": {
+        "name": "briah",
+        "total_questions": 49,
+        "questions": [
+          {
+            "id": "bri_bel_001",
+            "text": "Examino regularmente mis creencias para verificar si siguen siendo válidas.",
+            "world": "briah",
+            "dimension": "belief_systems",
+            "dimension_id": "belief_systems",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "bri_bel_002",
+            "text": "Mis creencias están abiertas a evolucionar con nueva información.",
+            "world": "briah",
+            "dimension": "belief_systems",
+            "dimension_id": "belief_systems",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "bri_bel_003",
+            "text": "Reconozco que mis filtros mentales influyen en cómo percibo la realidad.",
+            "world": "briah",
+            "dimension": "belief_systems",
+            "dimension_id": "belief_systems",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "bri_bel_004",
+            "text": "Mis paradigmas mentales apoyan mi crecimiento espiritual.",
+            "world": "briah",
+            "dimension": "belief_systems",
+            "dimension_id": "belief_systems",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "bri_bel_005",
+            "text": "Me aferro rígidamente a mis creencias sin cuestionarlas.",
+            "world": "briah",
+            "dimension": "belief_systems",
+            "dimension_id": "belief_systems",
+            "sefirah": "Multiple",
+            "reverse_scored": true,
+            "weight": 1.0
+          },
+          {
+            "id": "bri_bel_006",
+            "text": "Puedo sostener creencias diversas sin que entren en conflicto.",
+            "world": "briah",
+            "dimension": "belief_systems",
+            "dimension_id": "belief_systems",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "bri_bel_007",
+            "text": "Mis marcos de referencia están alineados con verdades superiores.",
+            "world": "briah",
+            "dimension": "belief_systems",
+            "dimension_id": "belief_systems",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "bri_bel_008",
+            "text": "Mis creencias limitantes bloquean mi percepción de la realidad.",
+            "world": "briah",
+            "dimension": "belief_systems",
+            "dimension_id": "belief_systems",
+            "sefirah": "Multiple",
+            "reverse_scored": true,
+            "weight": 1.0
+          },
+          {
+            "id": "bri_bel_009",
+            "text": "Actualizo mis paradigmas cuando descubro que no sirven a mi evolución.",
+            "world": "briah",
+            "dimension": "belief_systems",
+            "dimension_id": "belief_systems",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "bri_bel_010",
+            "text": "Mis sistemas de creencias son conscientes, elegidos y liberadores.",
+            "world": "briah",
+            "dimension": "belief_systems",
+            "dimension_id": "belief_systems",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "bri_chd_001",
+            "text": "Mi mente genera ideas creativas con facilidad y abundancia.",
+            "world": "briah",
+            "dimension": "chesed_expansive_thought",
+            "dimension_id": "chesed_expansive_thought",
+            "sefirah": "Chesed",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "bri_chd_002",
+            "text": "Pienso de manera expansiva, explorando múltiples posibilidades.",
+            "world": "briah",
+            "dimension": "chesed_expansive_thought",
+            "dimension_id": "chesed_expansive_thought",
+            "sefirah": "Chesed",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "bri_chd_003",
+            "text": "Soy generoso al compartir mis ideas y conocimientos con otros.",
+            "world": "briah",
+            "dimension": "chesed_expansive_thought",
+            "dimension_id": "chesed_expansive_thought",
+            "sefirah": "Chesed",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "bri_chd_004",
+            "text": "Mi enfoque mental es abierto y receptivo a nuevas perspectivas.",
+            "world": "briah",
+            "dimension": "chesed_expansive_thought",
+            "dimension_id": "chesed_expansive_thought",
+            "sefirah": "Chesed",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "bri_chd_005",
+            "text": "Tiendo a ser rígido y cerrado en mi forma de pensar.",
+            "world": "briah",
+            "dimension": "chesed_expansive_thought",
+            "dimension_id": "chesed_expansive_thought",
+            "sefirah": "Chesed",
+            "reverse_scored": true,
+            "weight": 1.0
+          },
+          {
+            "id": "bri_chd_006",
+            "text": "Disfruto explorando conceptos abstractos y posibilidades infinitas.",
+            "world": "briah",
+            "dimension": "chesed_expansive_thought",
+            "dimension_id": "chesed_expansive_thought",
+            "sefirah": "Chesed",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "bri_chd_007",
+            "text": "Mi creatividad intelectual fluye naturalmente sin restricciones.",
+            "world": "briah",
+            "dimension": "chesed_expansive_thought",
+            "dimension_id": "chesed_expansive_thought",
+            "sefirah": "Chesed",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "bri_chd_008",
+            "text": "Me cuesta generar ideas nuevas o pensar fuera de lo establecido.",
+            "world": "briah",
+            "dimension": "chesed_expansive_thought",
+            "dimension_id": "chesed_expansive_thought",
+            "sefirah": "Chesed",
+            "reverse_scored": true,
+            "weight": 1.0
+          },
+          {
+            "id": "bri_chd_009",
+            "text": "Veo conexiones y posibilidades donde otros solo ven limitaciones.",
+            "world": "briah",
+            "dimension": "chesed_expansive_thought",
+            "dimension_id": "chesed_expansive_thought",
+            "sefirah": "Chesed",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "bri_chd_010",
+            "text": "Mi mente es como un jardín donde florecen constantemente nuevos pensamientos.",
+            "world": "briah",
+            "dimension": "chesed_expansive_thought",
+            "dimension_id": "chesed_expansive_thought",
+            "sefirah": "Chesed",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "bri_gev_001",
+            "text": "Analizo las ideas con rigor y discernimiento crítico.",
+            "world": "briah",
+            "dimension": "gevurah_analytical_thought",
+            "dimension_id": "gevurah_analytical_thought",
+            "sefirah": "Gevurah",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "bri_gev_002",
+            "text": "Mi pensamiento es estructurado, lógico y bien organizado.",
+            "world": "briah",
+            "dimension": "gevurah_analytical_thought",
+            "dimension_id": "gevurah_analytical_thought",
+            "sefirah": "Gevurah",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "bri_gev_003",
+            "text": "Puedo identificar falacias y debilidades en argumentos.",
+            "world": "briah",
+            "dimension": "gevurah_analytical_thought",
+            "dimension_id": "gevurah_analytical_thought",
+            "sefirah": "Gevurah",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "bri_gev_004",
+            "text": "Practico disciplina mental para mantener el enfoque y la claridad.",
+            "world": "briah",
+            "dimension": "gevurah_analytical_thought",
+            "dimension_id": "gevurah_analytical_thought",
+            "sefirah": "Gevurah",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "bri_gev_005",
+            "text": "Mi pensamiento tiende a ser caótico y desorganizado.",
+            "world": "briah",
+            "dimension": "gevurah_analytical_thought",
+            "dimension_id": "gevurah_analytical_thought",
+            "sefirah": "Gevurah",
+            "reverse_scored": true,
+            "weight": 1.0
+          },
+          {
+            "id": "bri_gev_006",
+            "text": "Soy capaz de discernir entre lo esencial y lo superfluo.",
+            "world": "briah",
+            "dimension": "gevurah_analytical_thought",
+            "dimension_id": "gevurah_analytical_thought",
+            "sefirah": "Gevurah",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "bri_gev_007",
+            "text": "Mi mente establece límites claros entre ideas válidas e inválidas.",
+            "world": "briah",
+            "dimension": "gevurah_analytical_thought",
+            "dimension_id": "gevurah_analytical_thought",
+            "sefirah": "Gevurah",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "bri_gev_008",
+            "text": "Acepto ideas sin cuestionarlas críticamente.",
+            "world": "briah",
+            "dimension": "gevurah_analytical_thought",
+            "dimension_id": "gevurah_analytical_thought",
+            "sefirah": "Gevurah",
+            "reverse_scored": true,
+            "weight": 1.0
+          },
+          {
+            "id": "bri_gev_009",
+            "text": "Aplico rigor intelectual para refinar y perfeccionar conceptos.",
+            "world": "briah",
+            "dimension": "gevurah_analytical_thought",
+            "dimension_id": "gevurah_analytical_thought",
+            "sefirah": "Gevurah",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "bri_gev_010",
+            "text": "Mi capacidad analítica me permite ver la estructura subyacente de las ideas.",
+            "world": "briah",
+            "dimension": "gevurah_analytical_thought",
+            "dimension_id": "gevurah_analytical_thought",
+            "sefirah": "Gevurah",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "bri_int_001",
+            "text": "Mis pensamientos están alineados con mi propósito divino.",
+            "world": "briah",
+            "dimension": "briah_integration",
+            "dimension_id": "briah_integration",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "bri_int_002",
+            "text": "Experimento coherencia entre mis ideas y mi esencia espiritual.",
+            "world": "briah",
+            "dimension": "briah_integration",
+            "dimension_id": "briah_integration",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "bri_int_003",
+            "text": "Mi mente es un instrumento claro para la manifestación de lo divino.",
+            "world": "briah",
+            "dimension": "briah_integration",
+            "dimension_id": "briah_integration",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "bri_int_004",
+            "text": "Integro creatividad, análisis y síntesis en un todo armónico.",
+            "world": "briah",
+            "dimension": "briah_integration",
+            "dimension_id": "briah_integration",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "bri_int_005",
+            "text": "Hay fragmentación entre mis pensamientos y mi realidad espiritual.",
+            "world": "briah",
+            "dimension": "briah_integration",
+            "dimension_id": "briah_integration",
+            "sefirah": "Multiple",
+            "reverse_scored": true,
+            "weight": 1.0
+          },
+          {
+            "id": "bri_int_006",
+            "text": "Mi claridad mental refleja la claridad de mi alma.",
+            "world": "briah",
+            "dimension": "briah_integration",
+            "dimension_id": "briah_integration",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "bri_int_007",
+            "text": "Los conceptos abstractos fluyen naturalmente hacia formas concretas.",
+            "world": "briah",
+            "dimension": "briah_integration",
+            "dimension_id": "briah_integration",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "bri_int_008",
+            "text": "Mis pensamientos están desconectados de cualquier base espiritual.",
+            "world": "briah",
+            "dimension": "briah_integration",
+            "dimension_id": "briah_integration",
+            "sefirah": "Multiple",
+            "reverse_scored": true,
+            "weight": 1.0
+          },
+          {
+            "id": "bri_int_009",
+            "text": "Mi mundo mental es un puente funcional entre espíritu y emoción.",
+            "world": "briah",
+            "dimension": "briah_integration",
+            "dimension_id": "briah_integration",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "bri_int_010",
+            "text": "Experimento unidad entre mi ser superior y mi mente conceptual.",
+            "world": "briah",
+            "dimension": "briah_integration",
+            "dimension_id": "briah_integration",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "bri_met_001",
+            "text": "Puedo observar mis pensamientos sin identificarme con ellos.",
+            "world": "briah",
+            "dimension": "metacognition",
+            "dimension_id": "metacognition",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "bri_met_002",
+            "text": "Reconozco los patrones recurrentes en mi forma de pensar.",
+            "world": "briah",
+            "dimension": "metacognition",
+            "dimension_id": "metacognition",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "bri_met_003",
+            "text": "Practico autoobservación mental con regularidad.",
+            "world": "briah",
+            "dimension": "metacognition",
+            "dimension_id": "metacognition",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "bri_met_004",
+            "text": "Soy flexible en mis estrategias cognitivas, adaptándolas según el contexto.",
+            "world": "briah",
+            "dimension": "metacognition",
+            "dimension_id": "metacognition",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "bri_met_005",
+            "text": "No tengo consciencia de cómo funciona mi propia mente.",
+            "world": "briah",
+            "dimension": "metacognition",
+            "dimension_id": "metacognition",
+            "sefirah": "Multiple",
+            "reverse_scored": true,
+            "weight": 1.0
+          },
+          {
+            "id": "bri_met_006",
+            "text": "Puedo cambiar mi perspectiva mental a voluntad.",
+            "world": "briah",
+            "dimension": "metacognition",
+            "dimension_id": "metacognition",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "bri_met_007",
+            "text": "Examino la calidad y utilidad de mis procesos mentales.",
+            "world": "briah",
+            "dimension": "metacognition",
+            "dimension_id": "metacognition",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "bri_met_008",
+            "text": "Me identifico completamente con mis pensamientos.",
+            "world": "briah",
+            "dimension": "metacognition",
+            "dimension_id": "metacognition",
+            "sefirah": "Multiple",
+            "reverse_scored": true,
+            "weight": 1.0
+          },
+          {
+            "id": "bri_met_009",
+            "text": "Cultivo la capacidad de pensar sobre cómo pienso.",
+            "world": "briah",
+            "dimension": "metacognition",
+            "dimension_id": "metacognition",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          }
+        ]
+      },
+      "yetzirah": {
+        "name": "yetzirah",
+        "total_questions": 49,
+        "questions": [
+          {
+            "id": "ytz_bnd_001",
+            "text": "Formo vínculos emocionales profundos y seguros.",
+            "world": "yetzirah",
+            "dimension": "bonds_and_attachment",
+            "dimension_id": "bonds_and_attachment",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ytz_bnd_002",
+            "text": "Me siento seguro en mis relaciones íntimas.",
+            "world": "yetzirah",
+            "dimension": "bonds_and_attachment",
+            "dimension_id": "bonds_and_attachment",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ytz_bnd_003",
+            "text": "Puedo ser vulnerable emocionalmente sin perder mi centro.",
+            "world": "yetzirah",
+            "dimension": "bonds_and_attachment",
+            "dimension_id": "bonds_and_attachment",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ytz_bnd_004",
+            "text": "Mis relaciones están basadas en conexión auténtica, no en dependencia.",
+            "world": "yetzirah",
+            "dimension": "bonds_and_attachment",
+            "dimension_id": "bonds_and_attachment",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ytz_bnd_005",
+            "text": "Me cuesta crear o mantener vínculos emocionales profundos.",
+            "world": "yetzirah",
+            "dimension": "bonds_and_attachment",
+            "dimension_id": "bonds_and_attachment",
+            "sefirah": "Multiple",
+            "reverse_scored": true,
+            "weight": 1.0
+          },
+          {
+            "id": "ytz_bnd_006",
+            "text": "Experimento seguridad emocional en mis lazos significativos.",
+            "world": "yetzirah",
+            "dimension": "bonds_and_attachment",
+            "dimension_id": "bonds_and_attachment",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ytz_bnd_007",
+            "text": "Mis patrones de apego son saludables y me permiten crecer.",
+            "world": "yetzirah",
+            "dimension": "bonds_and_attachment",
+            "dimension_id": "bonds_and_attachment",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ytz_bnd_008",
+            "text": "Evito la intimidad emocional o me apego de forma disfuncional.",
+            "world": "yetzirah",
+            "dimension": "bonds_and_attachment",
+            "dimension_id": "bonds_and_attachment",
+            "sefirah": "Multiple",
+            "reverse_scored": true,
+            "weight": 1.0
+          },
+          {
+            "id": "ytz_bnd_009",
+            "text": "Puedo conectar emocionalmente manteniendo mi autonomía.",
+            "world": "yetzirah",
+            "dimension": "bonds_and_attachment",
+            "dimension_id": "bonds_and_attachment",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ytz_bnd_010",
+            "text": "Mis vínculos emocionales reflejan amor maduro y consciente.",
+            "world": "yetzirah",
+            "dimension": "bonds_and_attachment",
+            "dimension_id": "bonds_and_attachment",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ytz_cre_001",
+            "text": "Canalizo mis emociones a través de expresiones creativas.",
+            "world": "yetzirah",
+            "dimension": "creative_expression",
+            "dimension_id": "creative_expression",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ytz_cre_002",
+            "text": "El arte o la creatividad son vías naturales para mis sentimientos.",
+            "world": "yetzirah",
+            "dimension": "creative_expression",
+            "dimension_id": "creative_expression",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ytz_cre_003",
+            "text": "Encuentro belleza y significado en la expresión emocional creativa.",
+            "world": "yetzirah",
+            "dimension": "creative_expression",
+            "dimension_id": "creative_expression",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ytz_cre_004",
+            "text": "Mi creatividad emocional fluye libremente sin bloqueos.",
+            "world": "yetzirah",
+            "dimension": "creative_expression",
+            "dimension_id": "creative_expression",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ytz_cre_005",
+            "text": "Rara vez expreso mis emociones de forma creativa.",
+            "world": "yetzirah",
+            "dimension": "creative_expression",
+            "dimension_id": "creative_expression",
+            "sefirah": "Multiple",
+            "reverse_scored": true,
+            "weight": 1.0
+          },
+          {
+            "id": "ytz_cre_006",
+            "text": "Transformo el dolor emocional en arte o belleza.",
+            "world": "yetzirah",
+            "dimension": "creative_expression",
+            "dimension_id": "creative_expression",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ytz_cre_007",
+            "text": "Mi expresión creativa es un canal sagrado para mi alma.",
+            "world": "yetzirah",
+            "dimension": "creative_expression",
+            "dimension_id": "creative_expression",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ytz_cre_008",
+            "text": "Me siento bloqueado creativamente y desconectado de mis emociones.",
+            "world": "yetzirah",
+            "dimension": "creative_expression",
+            "dimension_id": "creative_expression",
+            "sefirah": "Multiple",
+            "reverse_scored": true,
+            "weight": 1.0
+          },
+          {
+            "id": "ytz_cre_009",
+            "text": "Mis creaciones reflejan la riqueza de mi vida emocional.",
+            "world": "yetzirah",
+            "dimension": "creative_expression",
+            "dimension_id": "creative_expression",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ytz_cre_010",
+            "text": "Utilizo la creatividad como forma de procesamiento emocional.",
+            "world": "yetzirah",
+            "dimension": "creative_expression",
+            "dimension_id": "creative_expression",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ytz_hod_001",
+            "text": "Puedo articular mis sentimientos con claridad y precisión.",
+            "world": "yetzirah",
+            "dimension": "hod_emotional_expression",
+            "dimension_id": "hod_emotional_expression",
+            "sefirah": "Hod",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ytz_hod_002",
+            "text": "Comunico mis emociones de manera efectiva a los demás.",
+            "world": "yetzirah",
+            "dimension": "hod_emotional_expression",
+            "dimension_id": "hod_emotional_expression",
+            "sefirah": "Hod",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ytz_hod_003",
+            "text": "Reconozco y nombro con facilidad los matices de mis estados afectivos.",
+            "world": "yetzirah",
+            "dimension": "hod_emotional_expression",
+            "dimension_id": "hod_emotional_expression",
+            "sefirah": "Hod",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ytz_hod_004",
+            "text": "Mi expresión emocional es auténtica y coherente con lo que siento.",
+            "world": "yetzirah",
+            "dimension": "hod_emotional_expression",
+            "dimension_id": "hod_emotional_expression",
+            "sefirah": "Hod",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ytz_hod_005",
+            "text": "Me cuesta expresar o comunicar lo que siento emocionalmente.",
+            "world": "yetzirah",
+            "dimension": "hod_emotional_expression",
+            "dimension_id": "hod_emotional_expression",
+            "sefirah": "Hod",
+            "reverse_scored": true,
+            "weight": 1.0
+          },
+          {
+            "id": "ytz_hod_006",
+            "text": "Utilizo el lenguaje emocional con riqueza y precisión.",
+            "world": "yetzirah",
+            "dimension": "hod_emotional_expression",
+            "dimension_id": "hod_emotional_expression",
+            "sefirah": "Hod",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ytz_hod_007",
+            "text": "Mi comunicación afectiva crea puentes de entendimiento con otros.",
+            "world": "yetzirah",
+            "dimension": "hod_emotional_expression",
+            "dimension_id": "hod_emotional_expression",
+            "sefirah": "Hod",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ytz_hod_008",
+            "text": "Desconozco cómo nombrar o describir mis propias emociones.",
+            "world": "yetzirah",
+            "dimension": "hod_emotional_expression",
+            "dimension_id": "hod_emotional_expression",
+            "sefirah": "Hod",
+            "reverse_scored": true,
+            "weight": 1.0
+          },
+          {
+            "id": "ytz_hod_009",
+            "text": "Expreso mis sentimientos de forma que otros pueden comprenderlos.",
+            "world": "yetzirah",
+            "dimension": "hod_emotional_expression",
+            "dimension_id": "hod_emotional_expression",
+            "sefirah": "Hod",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ytz_hod_010",
+            "text": "Mi articulación emocional refleja honestidad y autoconocimiento.",
+            "world": "yetzirah",
+            "dimension": "hod_emotional_expression",
+            "dimension_id": "hod_emotional_expression",
+            "sefirah": "Hod",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ytz_int_001",
+            "text": "Mis emociones están alineadas con mis pensamientos y propósito.",
+            "world": "yetzirah",
+            "dimension": "yetzirah_integration",
+            "dimension_id": "yetzirah_integration",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ytz_int_002",
+            "text": "Experimento coherencia entre lo que siento, pienso y soy.",
+            "world": "yetzirah",
+            "dimension": "yetzirah_integration",
+            "dimension_id": "yetzirah_integration",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ytz_int_003",
+            "text": "Mi vida emocional fluye de manera sana y equilibrada.",
+            "world": "yetzirah",
+            "dimension": "yetzirah_integration",
+            "dimension_id": "yetzirah_integration",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ytz_int_004",
+            "text": "Integro persistencia, expresión, vínculos y regulación armónicamente.",
+            "world": "yetzirah",
+            "dimension": "yetzirah_integration",
+            "dimension_id": "yetzirah_integration",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ytz_int_005",
+            "text": "Hay fragmentación entre mis emociones y el resto de mi ser.",
+            "world": "yetzirah",
+            "dimension": "yetzirah_integration",
+            "dimension_id": "yetzirah_integration",
+            "sefirah": "Multiple",
+            "reverse_scored": true,
+            "weight": 1.0
+          },
+          {
+            "id": "ytz_int_006",
+            "text": "Mi mundo emocional es un puente funcional entre mente y cuerpo.",
+            "world": "yetzirah",
+            "dimension": "yetzirah_integration",
+            "dimension_id": "yetzirah_integration",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ytz_int_007",
+            "text": "Las emociones fluyen desde las ideas hacia las acciones sin bloqueos.",
+            "world": "yetzirah",
+            "dimension": "yetzirah_integration",
+            "dimension_id": "yetzirah_integration",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ytz_int_008",
+            "text": "Mis emociones están desconectadas de mi vida mental y espiritual.",
+            "world": "yetzirah",
+            "dimension": "yetzirah_integration",
+            "dimension_id": "yetzirah_integration",
+            "sefirah": "Multiple",
+            "reverse_scored": true,
+            "weight": 1.0
+          },
+          {
+            "id": "ytz_int_009",
+            "text": "Siento coherencia emocional que refleja integración interna.",
+            "world": "yetzirah",
+            "dimension": "yetzirah_integration",
+            "dimension_id": "yetzirah_integration",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ytz_int_010",
+            "text": "Mi mundo emocional está integrado con los mundos superiores e inferiores.",
+            "world": "yetzirah",
+            "dimension": "yetzirah_integration",
+            "dimension_id": "yetzirah_integration",
+            "sefirah": "Multiple",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ytz_ntz_001",
+            "text": "Mantengo mi pasión y entusiasmo incluso frente a obstáculos.",
+            "world": "yetzirah",
+            "dimension": "netzach_emotional_persistence",
+            "dimension_id": "netzach_emotional_persistence",
+            "sefirah": "Netzach",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ytz_ntz_002",
+            "text": "Soy emocionalmente resiliente y me recupero de las adversidades.",
+            "world": "yetzirah",
+            "dimension": "netzach_emotional_persistence",
+            "dimension_id": "netzach_emotional_persistence",
+            "sefirah": "Netzach",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ytz_ntz_003",
+            "text": "Mi energía emocional persiste a través del tiempo sin decaer.",
+            "world": "yetzirah",
+            "dimension": "netzach_emotional_persistence",
+            "dimension_id": "netzach_emotional_persistence",
+            "sefirah": "Netzach",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ytz_ntz_004",
+            "text": "Puedo sostener el amor y la creatividad a pesar de los desafíos.",
+            "world": "yetzirah",
+            "dimension": "netzach_emotional_persistence",
+            "dimension_id": "netzach_emotional_persistence",
+            "sefirah": "Netzach",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ytz_ntz_005",
+            "text": "Me rindo emocionalmente con facilidad frente a las dificultades.",
+            "world": "yetzirah",
+            "dimension": "netzach_emotional_persistence",
+            "dimension_id": "netzach_emotional_persistence",
+            "sefirah": "Netzach",
+            "reverse_scored": true,
+            "weight": 1.0
+          },
+          {
+            "id": "ytz_ntz_006",
+            "text": "Mi victoria emocional consiste en no ser derrotado por el sufrimiento.",
+            "world": "yetzirah",
+            "dimension": "netzach_emotional_persistence",
+            "dimension_id": "netzach_emotional_persistence",
+            "sefirah": "Netzach",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ytz_ntz_007",
+            "text": "Cultivo una pasión duradera por la vida y sus posibilidades.",
+            "world": "yetzirah",
+            "dimension": "netzach_emotional_persistence",
+            "dimension_id": "netzach_emotional_persistence",
+            "sefirah": "Netzach",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ytz_ntz_008",
+            "text": "Mis emociones se desvanecen rápidamente y carezco de persistencia afectiva.",
+            "world": "yetzirah",
+            "dimension": "netzach_emotional_persistence",
+            "dimension_id": "netzach_emotional_persistence",
+            "sefirah": "Netzach",
+            "reverse_scored": true,
+            "weight": 1.0
+          },
+          {
+            "id": "ytz_ntz_009",
+            "text": "Me levanto emocionalmente una y otra vez, renovando mi esperanza.",
+            "world": "yetzirah",
+            "dimension": "netzach_emotional_persistence",
+            "dimension_id": "netzach_emotional_persistence",
+            "sefirah": "Netzach",
+            "reverse_scored": false,
+            "weight": 1.0
+          }
+        ]
+      },
+      "assiah": {
+        "name": "assiah",
+        "total_questions": 48,
+        "questions": [
+          {
+            "id": "ass_act_001",
+            "text": "Paso de las ideas a la acción con facilidad.",
+            "world": "assiah",
+            "dimension": "action_and_doing",
+            "dimension_id": "action_and_doing",
+            "sefirah": "Malkhut",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ass_act_002",
+            "text": "Soy proactivo y tomo iniciativa en mi vida.",
+            "world": "assiah",
+            "dimension": "action_and_doing",
+            "dimension_id": "action_and_doing",
+            "sefirah": "Malkhut",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ass_act_003",
+            "text": "Ejecuto mis planes con efectividad y determinación.",
+            "world": "assiah",
+            "dimension": "action_and_doing",
+            "dimension_id": "action_and_doing",
+            "sefirah": "Malkhut",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ass_act_004",
+            "text": "Concreto mis visiones en resultados tangibles.",
+            "world": "assiah",
+            "dimension": "action_and_doing",
+            "dimension_id": "action_and_doing",
+            "sefirah": "Malkhut",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ass_act_005",
+            "text": "Me quedo en la fase de planificación sin pasar a la acción.",
+            "world": "assiah",
+            "dimension": "action_and_doing",
+            "dimension_id": "action_and_doing",
+            "sefirah": "Malkhut",
+            "reverse_scored": true,
+            "weight": 1.0
+          },
+          {
+            "id": "ass_act_006",
+            "text": "Mi hacer está alineado con mi ser, no es compulsivo.",
+            "world": "assiah",
+            "dimension": "action_and_doing",
+            "dimension_id": "action_and_doing",
+            "sefirah": "Malkhut",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ass_act_007",
+            "text": "Actúo desde la integridad, no desde la reactividad.",
+            "world": "assiah",
+            "dimension": "action_and_doing",
+            "dimension_id": "action_and_doing",
+            "sefirah": "Malkhut",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ass_act_008",
+            "text": "Procrastino o evito tomar acción en áreas importantes.",
+            "world": "assiah",
+            "dimension": "action_and_doing",
+            "dimension_id": "action_and_doing",
+            "sefirah": "Malkhut",
+            "reverse_scored": true,
+            "weight": 1.0
+          },
+          {
+            "id": "ass_act_009",
+            "text": "Mi acción en el mundo refleja mi propósito interno.",
+            "world": "assiah",
+            "dimension": "action_and_doing",
+            "dimension_id": "action_and_doing",
+            "sefirah": "Malkhut",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ass_act_010",
+            "text": "Hago lo que digo que haré, con consistencia y compromiso.",
+            "world": "assiah",
+            "dimension": "action_and_doing",
+            "dimension_id": "action_and_doing",
+            "sefirah": "Malkhut",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ass_bod_001",
+            "text": "Honro mi cuerpo como un templo sagrado.",
+            "world": "assiah",
+            "dimension": "relationship_with_body",
+            "dimension_id": "relationship_with_body",
+            "sefirah": "Malkhut",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ass_bod_002",
+            "text": "Tengo consciencia somática refinada y escucho las señales de mi cuerpo.",
+            "world": "assiah",
+            "dimension": "relationship_with_body",
+            "dimension_id": "relationship_with_body",
+            "sefirah": "Malkhut",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ass_bod_003",
+            "text": "Cuido mi salud física con atención y respeto.",
+            "world": "assiah",
+            "dimension": "relationship_with_body",
+            "dimension_id": "relationship_with_body",
+            "sefirah": "Malkhut",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ass_bod_004",
+            "text": "Experimento vitalidad y energía en mi ser físico.",
+            "world": "assiah",
+            "dimension": "relationship_with_body",
+            "dimension_id": "relationship_with_body",
+            "sefirah": "Malkhut",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ass_bod_005",
+            "text": "Descuido mi cuerpo o lo trato con negligencia.",
+            "world": "assiah",
+            "dimension": "relationship_with_body",
+            "dimension_id": "relationship_with_body",
+            "sefirah": "Malkhut",
+            "reverse_scored": true,
+            "weight": 1.0
+          },
+          {
+            "id": "ass_bod_006",
+            "text": "Siento gratitud por mi vehículo físico y sus capacidades.",
+            "world": "assiah",
+            "dimension": "relationship_with_body",
+            "dimension_id": "relationship_with_body",
+            "sefirah": "Malkhut",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ass_bod_007",
+            "text": "Mi relación con el cuerpo está libre de juicio y llena de amor.",
+            "world": "assiah",
+            "dimension": "relationship_with_body",
+            "dimension_id": "relationship_with_body",
+            "sefirah": "Malkhut",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ass_bod_008",
+            "text": "Rechazo mi cuerpo o estoy en guerra con él.",
+            "world": "assiah",
+            "dimension": "relationship_with_body",
+            "dimension_id": "relationship_with_body",
+            "sefirah": "Malkhut",
+            "reverse_scored": true,
+            "weight": 1.0
+          },
+          {
+            "id": "ass_bod_009",
+            "text": "Nutro mi templo corporal con alimento, movimiento y descanso.",
+            "world": "assiah",
+            "dimension": "relationship_with_body",
+            "dimension_id": "relationship_with_body",
+            "sefirah": "Malkhut",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ass_bod_010",
+            "text": "Mi cuerpo es un aliado en mi trabajo espiritual, no un obstáculo.",
+            "world": "assiah",
+            "dimension": "relationship_with_body",
+            "dimension_id": "relationship_with_body",
+            "sefirah": "Malkhut",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ass_hab_001",
+            "text": "Mis hábitos diarios están alineados con mis valores más profundos.",
+            "world": "assiah",
+            "dimension": "habits_and_routines",
+            "dimension_id": "habits_and_routines",
+            "sefirah": "Malkhut",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ass_hab_002",
+            "text": "Mantengo rutinas que apoyan mi bienestar integral.",
+            "world": "assiah",
+            "dimension": "habits_and_routines",
+            "dimension_id": "habits_and_routines",
+            "sefirah": "Malkhut",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ass_hab_003",
+            "text": "Soy disciplinado en las acciones que nutren mi cuerpo y espíritu.",
+            "world": "assiah",
+            "dimension": "habits_and_routines",
+            "dimension_id": "habits_and_routines",
+            "sefirah": "Malkhut",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ass_hab_004",
+            "text": "Mis patrones de acción reflejan consciencia y elección.",
+            "world": "assiah",
+            "dimension": "habits_and_routines",
+            "dimension_id": "habits_and_routines",
+            "sefirah": "Malkhut",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ass_hab_005",
+            "text": "Mis hábitos son caóticos y contradicen lo que valoro.",
+            "world": "assiah",
+            "dimension": "habits_and_routines",
+            "dimension_id": "habits_and_routines",
+            "sefirah": "Malkhut",
+            "reverse_scored": true,
+            "weight": 1.0
+          },
+          {
+            "id": "ass_hab_006",
+            "text": "Cultivo rutinas sagradas que conectan lo cotidiano con lo divino.",
+            "world": "assiah",
+            "dimension": "habits_and_routines",
+            "dimension_id": "habits_and_routines",
+            "sefirah": "Malkhut",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ass_hab_007",
+            "text": "Soy consistente en las prácticas físicas que elegí.",
+            "world": "assiah",
+            "dimension": "habits_and_routines",
+            "dimension_id": "habits_and_routines",
+            "sefirah": "Malkhut",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ass_hab_008",
+            "text": "Carezco de disciplina y mis acciones son inconsistentes.",
+            "world": "assiah",
+            "dimension": "habits_and_routines",
+            "dimension_id": "habits_and_routines",
+            "sefirah": "Malkhut",
+            "reverse_scored": true,
+            "weight": 1.0
+          },
+          {
+            "id": "ass_hab_009",
+            "text": "Mis rutinas crean estructura que libera en lugar de limitar.",
+            "world": "assiah",
+            "dimension": "habits_and_routines",
+            "dimension_id": "habits_and_routines",
+            "sefirah": "Malkhut",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ass_hab_010",
+            "text": "Los hábitos que practico elevan mi vibración física.",
+            "world": "assiah",
+            "dimension": "habits_and_routines",
+            "dimension_id": "habits_and_routines",
+            "sefirah": "Malkhut",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ass_int_001",
+            "text": "Mis acciones físicas reflejan coherentemente todos mis niveles de ser.",
+            "world": "assiah",
+            "dimension": "assiah_integration",
+            "dimension_id": "assiah_integration",
+            "sefirah": "Malkhut",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ass_int_002",
+            "text": "Lo que hago en el mundo material está alineado con mi propósito divino.",
+            "world": "assiah",
+            "dimension": "assiah_integration",
+            "dimension_id": "assiah_integration",
+            "sefirah": "Malkhut",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ass_int_003",
+            "text": "Experimento completitud en el flujo desde espíritu hasta materia.",
+            "world": "assiah",
+            "dimension": "assiah_integration",
+            "dimension_id": "assiah_integration",
+            "sefirah": "Malkhut",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ass_int_004",
+            "text": "Integro arraigo, hábitos, cuerpo, acción y recursos armónicamente.",
+            "world": "assiah",
+            "dimension": "assiah_integration",
+            "dimension_id": "assiah_integration",
+            "sefirah": "Malkhut",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ass_int_005",
+            "text": "Hay fragmentación entre mis mundos internos y mi vida física.",
+            "world": "assiah",
+            "dimension": "assiah_integration",
+            "dimension_id": "assiah_integration",
+            "sefirah": "Malkhut",
+            "reverse_scored": true,
+            "weight": 1.0
+          },
+          {
+            "id": "ass_int_006",
+            "text": "Mi vida material es una extensión natural de mi vida espiritual.",
+            "world": "assiah",
+            "dimension": "assiah_integration",
+            "dimension_id": "assiah_integration",
+            "sefirah": "Malkhut",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ass_int_007",
+            "text": "El flujo desde Atzilut hasta Assiah es continuo y sin bloqueos.",
+            "world": "assiah",
+            "dimension": "assiah_integration",
+            "dimension_id": "assiah_integration",
+            "sefirah": "Malkhut",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ass_int_008",
+            "text": "Vivo una vida dividida entre lo espiritual y lo material.",
+            "world": "assiah",
+            "dimension": "assiah_integration",
+            "dimension_id": "assiah_integration",
+            "sefirah": "Malkhut",
+            "reverse_scored": true,
+            "weight": 1.0
+          },
+          {
+            "id": "ass_int_009",
+            "text": "Mi existencia física es la culminación sagrada de todos los mundos.",
+            "world": "assiah",
+            "dimension": "assiah_integration",
+            "dimension_id": "assiah_integration",
+            "sefirah": "Malkhut",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ass_int_010",
+            "text": "Vivo la unidad de los cuatro mundos en mi realidad cotidiana.",
+            "world": "assiah",
+            "dimension": "assiah_integration",
+            "dimension_id": "assiah_integration",
+            "sefirah": "Malkhut",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ass_mlk_001",
+            "text": "Estoy plenamente presente en mi cuerpo físico.",
+            "world": "assiah",
+            "dimension": "malkhut_physical_manifestation",
+            "dimension_id": "malkhut_physical_manifestation",
+            "sefirah": "Malkhut",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ass_mlk_002",
+            "text": "Manifiesto mis intenciones en acciones concretas y tangibles.",
+            "world": "assiah",
+            "dimension": "malkhut_physical_manifestation",
+            "dimension_id": "malkhut_physical_manifestation",
+            "sefirah": "Malkhut",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ass_mlk_003",
+            "text": "Me siento arraigado en la realidad terrestre.",
+            "world": "assiah",
+            "dimension": "malkhut_physical_manifestation",
+            "dimension_id": "malkhut_physical_manifestation",
+            "sefirah": "Malkhut",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ass_mlk_004",
+            "text": "Mi existencia física refleja la totalidad de mis mundos superiores.",
+            "world": "assiah",
+            "dimension": "malkhut_physical_manifestation",
+            "dimension_id": "malkhut_physical_manifestation",
+            "sefirah": "Malkhut",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ass_mlk_005",
+            "text": "Me siento desconectado de mi cuerpo o de la realidad física.",
+            "world": "assiah",
+            "dimension": "malkhut_physical_manifestation",
+            "dimension_id": "malkhut_physical_manifestation",
+            "sefirah": "Malkhut",
+            "reverse_scored": true,
+            "weight": 1.0
+          },
+          {
+            "id": "ass_mlk_006",
+            "text": "Actualizo en el plano material lo que siento, pienso y soy.",
+            "world": "assiah",
+            "dimension": "malkhut_physical_manifestation",
+            "dimension_id": "malkhut_physical_manifestation",
+            "sefirah": "Malkhut",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ass_mlk_007",
+            "text": "Honro el reino físico como sagrado, no como inferior.",
+            "world": "assiah",
+            "dimension": "malkhut_physical_manifestation",
+            "dimension_id": "malkhut_physical_manifestation",
+            "sefirah": "Malkhut",
+            "reverse_scored": false,
+            "weight": 1.0
+          },
+          {
+            "id": "ass_mlk_008",
+            "text": "Vivo principalmente en mi mente, descuidando el mundo material.",
+            "world": "assiah",
+            "dimension": "malkhut_physical_manifestation",
+            "dimension_id": "malkhut_physical_manifestation",
+            "sefirah": "Malkhut",
+            "reverse_scored": true,
+            "weight": 1.0
+          }
+        ]
+      }
+    }
+  },
+  "current_progress": {
+    "current_world": "atzilut",
+    "current_question_index": 0,
+    "answered_count": 0,
+    "progress_percentage": 0.0,
+    "completed_worlds": [],
+    "worlds_progress": {
+      "atzilut": {
+        "answered": 0,
+        "total": 49
+      },
+      "briah": {
+        "answered": 0,
+        "total": 49
+      },
+      "yetzirah": {
+        "answered": 0,
+        "total": 49
+      },
+      "assiah": {
+        "answered": 0,
+        "total": 48
+      }
+    }
+  }
+}

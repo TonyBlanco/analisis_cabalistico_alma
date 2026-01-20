@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import { getActivePatientId, getActivePatientName } from '@/lib/active-patient';
 import { getTestResultsForPatient, getPatientPreviousTests } from '@/lib/test-api';
+import { unassignTestFromPatient } from '@/lib/assignment-api';
 import { TestResult } from '@/lib/test-types';
 
 /**
@@ -24,6 +25,7 @@ export default function AssignedTestsSection({
   const [assignedTests, setAssignedTests] = useState<TestResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [removingTestCode, setRemovingTestCode] = useState<string | null>(null);
   const [activePatientId, setActivePatientIdState] = useState<number | null>(null);
   const [activePatientName, setActivePatientNameState] = useState<string | null>(null);
 
@@ -111,6 +113,59 @@ export default function AssignedTestsSection({
       setLoading(false);
     }
   }, [activePatientId]);
+
+  const handleUnassign = useCallback(async (result: any) => {
+    if (!activePatientId) return;
+    const code = result?.test_module?.code || result?.test_module_code;
+    if (!code) return;
+
+    const isCompleted = !(
+      (result as any)?.result_data?.assignment_only === true ||
+      (result as any)?.details?.legacy_assignment === true
+    );
+
+    const confirmMessage = isCompleted
+      ? `¿Deseas ELIMINAR el resultado completado del test "${result.test_module?.name || result.test_module_name || code}"?\n\nEsto permitirá reasignarlo para ver progreso o testing. El resultado se perderá.`
+      : `¿Deseas quitar la asignación del test "${result.test_module?.name || result.test_module_name || code}"?`;
+
+    if (!confirm(confirmMessage)) {
+      return;
+    }
+
+    setRemovingTestCode(String(code));
+    try {
+      await unassignTestFromPatient(activePatientId, String(code), isCompleted);
+
+      const normalizeCode = (c: any) => String(c || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const targetNorm = normalizeCode(code);
+
+      const key = 'assigned_tests_by_patient';
+      const existing = typeof window !== 'undefined' ? localStorage.getItem(key) : null;
+      const parsed = existing ? JSON.parse(existing) : {};
+      const patientKey = String(activePatientId);
+      const current: Array<{ code: string }> = parsed[patientKey] || [];
+      parsed[patientKey] = current.filter((t: any) => normalizeCode(t.code) !== targetNorm);
+
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(key, JSON.stringify(parsed));
+        window.dispatchEvent(new CustomEvent('assignedTestsChanged', { detail: { patientId: activePatientId, unassigned: code } }));
+      }
+
+      // Optimistic state update
+      setAssignedTests((prev) => prev.filter((t: any) => {
+        const tCode = t?.test_module?.code || t?.test_module_code || t?.test_id;
+        return normalizeCode(tCode) !== targetNorm;
+      }));
+
+      await fetchAssignedTests();
+    } catch (err) {
+      console.error('Error unassigning test:', err);
+      const message = err instanceof Error ? err.message : 'Error al quitar la asignación';
+      setError(message);
+    } finally {
+      setRemovingTestCode(null);
+    }
+  }, [activePatientId, fetchAssignedTests]);
 
   if (!activePatientId) {
     return (
@@ -222,12 +277,12 @@ export default function AssignedTestsSection({
                     </div>
                     <div className="flex items-center gap-3 mt-2">
                       <span className="text-xs text-gray-500">
-                        {result.created_at 
+                        {result.created_at
                           ? new Date(result.created_at).toLocaleDateString('es-ES', {
-                              year: 'numeric',
-                              month: 'long',
-                              day: 'numeric',
-                            })
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                          })
                           : 'Fecha no disponible'}
                       </span>
                       {result.test_module?.code && (
@@ -238,16 +293,29 @@ export default function AssignedTestsSection({
                     </div>
                   </div>
 
-                  {canViewResult && (
-                    <div className="ml-4 flex-shrink-0">
+                  <div className="ml-4 flex-shrink-0 flex items-center gap-3">
+                    {canViewResult && (
                       <Link
                         href={`/dashboard/therapist/tests/results/${result.id}`}
                         className="text-sm text-blue-700 hover:text-blue-900 underline"
                       >
                         Ver resultado
                       </Link>
-                    </div>
-                  )}
+                    )}
+
+                    {/* Allow deleting ANY test (pending or completed) */}
+                    <button
+                      type="button"
+                      onClick={() => handleUnassign(result)}
+                      disabled={removingTestCode === String(result?.test_module?.code || result?.test_module_code)}
+                      className="text-sm text-red-600 hover:text-red-800 underline disabled:opacity-50"
+                      title={isAssignmentOnly ? "Quitar asignación" : "Eliminar resultado para reasignar"}
+                    >
+                      {removingTestCode === String(result?.test_module?.code || result?.test_module_code)
+                        ? 'Eliminando...'
+                        : isAssignmentOnly ? 'Quitar asignación' : 'Eliminar'}
+                    </button>
+                  </div>
                 </div>
               </div>
             );

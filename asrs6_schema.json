@@ -1,0 +1,50 @@
+[
+  {
+    "id": "ASRS6_001",
+    "instrument": "ASRS_v1.1_screener",
+    "position": 1,
+    "text": null,
+    "scale": "ADHD",
+    "weight": 1
+  },
+  {
+    "id": "ASRS6_002",
+    "instrument": "ASRS_v1.1_screener",
+    "position": 2,
+    "text": null,
+    "scale": "ADHD",
+    "weight": 1
+  },
+  {
+    "id": "ASRS6_003",
+    "instrument": "ASRS_v1.1_screener",
+    "position": 3,
+    "text": null,
+    "scale": "ADHD",
+    "weight": 1
+  },
+  {
+    "id": "ASRS6_004",
+    "instrument": "ASRS_v1.1_screener",
+    "position": 4,
+    "text": null,
+    "scale": "ADHD",
+    "weight": 1
+  },
+  {
+    "id": "ASRS6_005",
+    "instrument": "ASRS_v1.1_screener",
+    "position": 5,
+    "text": null,
+    "scale": "ADHD",
+    "weight": 1
+  },
+  {
+    "id": "ASRS6_006",
+    "instrument": "ASRS_v1.1_screener",
+    "position": 6,
+    "text": null,
+    "scale": "ADHD",
+    "weight": 1
+  }
+]

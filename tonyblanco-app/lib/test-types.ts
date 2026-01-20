@@ -6,6 +6,7 @@ export const TEST_TYPES = {
   CAREER: 'career',
   SPIRITUAL: 'spiritual',
   HEALTH: 'health',
+  WELLNESS: 'wellness',
   FINANCIAL: 'financial',
   FAMILY: 'family',
   PURPOSE: 'purpose',
@@ -55,6 +56,7 @@ export interface TestModule {
   order: number;
   estimated_duration: number;
   is_available: boolean;
+  execution_mode: 'patient_self' | 'therapist_clinical';
   user_access: UserTestAccess | null;
 }
 
@@ -68,6 +70,14 @@ export interface UserTestAccess {
   has_special_access: boolean;
 }
 
+export interface TherapistNextExplorationSuggestion {
+  current_world?: string | null;
+  next_world?: string | null;
+  suggested_test_code?: string | null;
+  suggested_test_name?: string | null;
+  secondary_suggestions?: Array<{ code?: string | null; name?: string | null }>;
+}
+
 // Interface para resultado de test
 export interface TestResult {
   id: number;
@@ -78,6 +88,7 @@ export interface TestResult {
     name: string;
     description?: string;
     test_type: TestType;
+    execution_mode: 'patient_self' | 'therapist_clinical';
   };
   // Legacy fields (optional) for backward compatibility
   test_module_name?: string;
@@ -89,6 +100,7 @@ export interface TestResult {
   notes?: string;
   is_favorite: boolean;
   is_archived: boolean;
+  therapist_next_exploration_suggestion?: TherapistNextExplorationSuggestion;
   created_at: string;
   updated_at: string;
 }
@@ -109,6 +121,9 @@ export interface ExecuteTestResponse {
   result: Record<string, any>;
   uses_remaining: number | null;
   result_id?: number;
+  // Dynamic fields for specific tests (like MCMI-4 question generation)
+  questions?: any[];
+  [key: string]: any;
 }
 
 // Interface para estadísticas de usuario
@@ -134,6 +149,7 @@ export const TEST_TYPE_NAMES: Record<TestType, string> = {
   career: 'Orientación Profesional',
   spiritual: 'Camino Espiritual',
   health: 'Salud y Bienestar',
+  wellness: 'Wellness Holístico',
   financial: 'Abundancia Financiera',
   family: 'Relaciones Familiares',
   purpose: 'Propósito de Vida',
@@ -163,6 +179,7 @@ export const TEST_TYPE_ICONS: Record<TestType, string> = {
   career: '💼',
   spiritual: '🕉️',
   health: '🏥',
+  wellness: '🌿',
   financial: '💰',
   family: '👨‍👩‍👧‍👦',
   purpose: '🎯',

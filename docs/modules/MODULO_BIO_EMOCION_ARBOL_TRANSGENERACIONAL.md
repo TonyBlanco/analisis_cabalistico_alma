@@ -1,23 +1,23 @@
 # Módulo "Bio-Emoción & Árbol Transgeneracional"
 
 > **Rol objetivo**: `therapist`  
-> **Contexto**: `therapist_clinical` (conceptual, sin nuevo execution_mode)  
-> **Visibilidad**: **solo terapeuta**, nunca paciente  
-> **Arquitectura**: **cerrada** (ver `PROJECT_STATE_CURRENT.md`)
+> **Contexto**: `therapist_clinical` (legacy/conceptual, no nuevo execution_mode)  
+> **Visibilidad**: **solo terapeuta**, no disponible para usuarios  
+> **Arquitectura**: **cerrada** (ver `PROJECT_STATE_CURRENT.md`) 
 
 ---
 
 ## 1. Propósito del módulo
 
-Este módulo añade un espacio **clínico estructurado** para que el terapeuta pueda:
+Este módulo añade un espacio estructurado de trabajo para que el terapeuta pueda:
 
-- Registrar información cualitativa sobre **bio-emoción** del paciente.
+- Registrar información cualitativa sobre **bio-emoción** del consultante.
 - Mapear y documentar el **árbol transgeneracional** (familia, vínculos, eventos clave).
 - Mantener **trazabilidad y auditabilidad** sin introducir diagnósticos automáticos ni IA.
-- Trabajar SIEMPRE dentro del contexto de un **paciente activo**, nunca en abstracto.
+- Trabajar SIEMPRE dentro del contexto de un **consultante activo**, nunca en abstracto.
 
 ⚠️ **No es un test, no es un scoring automático**.  
-⚠️ **No genera conclusiones diagnósticas**, solo estructura de datos + notas clínicas controladas.
+⚠️ **No genera conclusiones diagnósticas**, solo estructura de datos y notas interpretativas controladas.
 
 ---
 
@@ -30,7 +30,7 @@ Basado en `PROJECT_STATE_CURRENT.md` y `PROMPT_MAESTRO_PLATAFORMA_CLINICA`:
 - **Execution modes sellados**: `patient_self`, `therapist_clinical`.  
   → Este módulo trabaja **conceptualmente** en `therapist_clinical`, pero **no crea** execution modes nuevos.
 - **Separación estricta de dashboards**:  
-  → El módulo vive **dentro del workspace clínico del terapeuta** y **no aparece** en dashboards de paciente/personal.
+  → El módulo vive dentro del workspace del terapeuta y **no aparece** en dashboards de usuario/personal.
 - **Backend no confía en frontend**:  
   → Todos los accesos se validan por backend (propiedad del paciente, rol terapeuta, etc.).
 - **Legacy intocable**:  
@@ -44,9 +44,9 @@ Basado en `PROJECT_STATE_CURRENT.md` y `PROMPT_MAESTRO_PLATAFORMA_CLINICA`:
 
 El módulo se apoya en las entidades ya existentes (`User`, `Patient`, `AnalysisRecord`) y añade **tablas auxiliares** para estructurar la información sin duplicar lógica clínica.
 
-1. **BioEmocionCase** (caso de trabajo bio-emocional por paciente)
+1. **BioEmocionCase** (caso de trabajo bio-emocional por consultante)
    - `id` (UUID)
-   - `patient` (FK → `Patient`)
+   - `patient` (FK → `Patient`) (mapea al consultante/usuario)
    - `therapist` (FK → `User`, rol = therapist)
    - `title` (opcional, texto corto)
    - `description` (opcional, texto largo)
@@ -57,7 +57,7 @@ El módulo se apoya en las entidades ya existentes (`User`, `Patient`, `Analysis
 2. **TransgenerationalNode** (nodo del árbol familiar)
    - `id` (UUID)
    - `case` (FK → `BioEmocionCase`)
-   - `generation` (int, relativa al paciente: 0 = paciente, -1 = padres, -2 = abuelos, etc.)
+   - `generation` (int, relativa al consultante: 0 = consultante, -1 = padres, -2 = abuelos, etc.)
    - `relation` (texto corto: "madre", "padre", "abuelo materno", etc.)
    - `name` (texto, opcional)
    - `birth_year` (int, opcional)
@@ -84,12 +84,12 @@ El módulo se apoya en las entidades ya existentes (`User`, `Patient`, `Analysis
 
 - **Auditabilidad por referencia**:  
   - Las tablas guardan **IDs, metadatos y páginas/contextos**, NO "conclusiones diagnósticas" cerradas.  
-  - Se registran **hechos y observaciones**, no juicios clínicos automatizados.
-- **Ligado a paciente activo**:  
+  - Se registran **hechos y observaciones**, no juicios automáticos sobre diagnóstico.
+- **Ligado a usuario activo**:  
   - Toda entrada requiere `patient` + `therapist` + `case` válidos.
 - **Sin ruptura de AnalysisRecord**:  
   - El módulo NO modifica `AnalysisRecord`.  
-  - Opcionalmente se podrían guardar referencias cruzadas (IDs de análisis relevantes) **solo como FK o UUID**, nunca embebiendo resultados clínicos.
+  - Opcionalmente se podrían guardar referencias cruzadas (IDs de análisis relevantes) **solo como FK o UUID**, nunca embebiendo resultados con connotación diagnóstica.
 
 ---
 
@@ -103,7 +103,7 @@ Base: `/api/therapist/bio-emotion/`
    Lista casos `BioEmocionCase` del terapeuta actual (opcionalmente filtrados por paciente activo).
 
 2. `POST /api/therapist/bio-emotion/cases/`  
-   Crea un caso nuevo para un `patient_id` existente, propiedad del terapeuta.
+   Crea un caso nuevo para un `patient_id` existente (usuario/consultante), propiedad del terapeuta.
 
 3. `GET /api/therapist/bio-emotion/cases/{id}/`  
    Devuelve:
@@ -119,7 +119,7 @@ Base: `/api/therapist/bio-emotion/`
    Crea eventos y los vincula a nodos.
 
 6. `POST /api/therapist/bio-emotion/cases/{id}/notes/`  
-   Añade notas clínicas (auditables) al caso.
+   Añade notas interpretativas (auditables) al caso.
 
 **Permisos:**
 - `IsAuthenticated` + `IsTherapist` (o permiso equivalente ya existente).  
@@ -135,8 +135,8 @@ Base: `/api/therapist/bio-emotion/`
 
 ### 5.1. Ubicación en el dashboard
 
-- Sección nueva dentro del workspace clínico del terapeuta.
-- Integrada en el patrón: **overview → secciones clínicas → acciones contextuales**.
+- Sección nueva dentro del workspace del terapeuta (no visible para usuarios).
+- Integrada en el patrón: **overview → secciones → acciones contextuales**.
 
 Posible estructura (conceptual):
 
@@ -171,9 +171,9 @@ Posible estructura (conceptual):
 
 ---
 
-## 6. UX / UI (fase 0 – clínica segura)
+## 6. UX / UI (fase 0 – segura y conservadora)
 
-- **Tono**: clínico, respetuoso, sin lenguaje diagnóstico automatizado.
+- **Tono**: profesional, respetuoso, sin lenguaje diagnóstico automatizado.
 - **Estados claros**:
   - Sin paciente activo → mensaje explicativo.
   - Sin casos creados → CTA "Crear primer caso".
@@ -188,7 +188,7 @@ Posible estructura (conceptual):
 - ❌ No se modifica `AnalysisRecord` ni sus flujos.
 - ❌ No se añaden nuevos roles.
 - ❌ No se añaden nuevos execution modes.
-- ❌ No se exponen vistas al paciente.
+- ❌ No se exponen vistas al usuario.
 - ❌ No se implementa herramienta gráfica compleja de árbol (solo estructura tabular/lista).
 
 - ✅ Se define una **estructura de datos clara y extensible** para el módulo.
@@ -233,19 +233,19 @@ A día de hoy:
 
 ✅ El hardening de roles y ownership está aplicado en backend.
 
-❌ No existe aún persistencia estructurada de casos bio-emocionales como entidad clínica unificada.
+❌ No existe aún persistencia estructurada de casos bio-emocionales como entidad unificada.
 
 ❌ No existe integración explícita con el Árbol de la Vida (solo implícita en otros módulos).
 
 Conclusión:
-El módulo ya existe funcionalmente, pero no está todavía elevado a módulo clínico de primer nivel.
+El módulo ya existe funcionalmente, pero no está todavía elevado a módulo de primer nivel con alcance de intervención profesional.
 
-9.2 Qué se implementa ahora (prioridad P1 clínica)
+9.2 Qué se implementa ahora (prioridad P1)
 9.2.1 Unificación conceptual del módulo
 
 A partir de ahora, el módulo se considera formalmente:
 
-Un módulo clínico de indagación estructural, exclusivo del terapeuta, que integra:
+Un módulo de indagación estructural, exclusivo del terapeuta, que integra:
 
 Bio-emoción
 
@@ -273,9 +273,9 @@ Lectura de Proyecto Sentido → Yesod como hipótesis estructural.
 
 NO genera diagnósticos.
 
-NO se guarda como dato clínico.
+NO se guarda como dato estructurado de intervención clínica.
 
-NO se muestra al paciente.
+NO se muestra al usuario.
 
 Puede ser generada por IA solo como apoyo privado al terapeuta.
 
@@ -285,7 +285,7 @@ Puede ser generada por IA solo como apoyo privado al terapeuta.
 
 Se establece como siguiente paso técnico crear una entidad unificadora (aunque inicialmente sea mínima):
 
-Un caso activo por paciente (o varios, si el terapeuta lo decide).
+Un caso activo por usuario (o varios, si el terapeuta lo decide).
 
 Que agrupe:
 
@@ -322,7 +322,7 @@ Todo lo anterior pertenece a una capa personal/experiencial, no al módulo clín
 
 9.4 Relación con otros módulos (según auditoría)
 Módulo	Relación con Bio-Emoción
-Tests clínicos (PHQ-9, BDI-II, etc.)	Bio-Emoción lee resultados, no los genera
+Instrumentos externos (PHQ-9, BDI-II, etc.)	Bio-Emoción lee resultados, no los genera
 AnalysisRecord	Puede referenciarse por ID, no modificarse
 Tarot / Astrología / Gematría	Complementarios, no dependientes
 SCDF	Bio-Emoción aporta comprensión, no scoring
@@ -333,7 +333,7 @@ Basado en el roadmap y el estado actual:
 
 Paso 1 (inmediato)
 
-Formalizar el módulo como caso clínico estructurado.
+Formalizar el módulo como caso estructurado y auditado.
 
 Mantener UI simple (lista + notas + genealogía).
 
@@ -361,7 +361,7 @@ El módulo queda:
 
 ✔ preparado para evolución sin deuda técnica
 
-No se introduce riesgo legal ni clínico.
+No se introduce riesgo legal ni operativo.
 
 Se consolida como núcleo diferenciador profesional de la plataforma.
 
@@ -384,7 +384,7 @@ El módulo Bio-Emoción se integra como herramienta contextual
 
 Dentro del Dashboard Terapéutico persistente.
 
-- No rompe el flujo clínico
+- No rompe los flujos existentes
 - No navega fuera del workspace
 - Puede abrirse como panel auxiliar
 - Comparte contexto con la Visualización Cuerpo–Alma
@@ -400,7 +400,7 @@ Los siguientes documentos forman parte del **marco normativo activo del proyecto
    Archivo:  
    `docs/CHECKLIST_TECNICO_P1_BIOEMOCION_Y_ARBOL_DE_LA_VIDA.md`  
 
-   Define las tareas técnicas autorizadas para la fase P1 del módulo Bio-Emoción, incluyendo backend y frontend, sin romper la arquitectura cerrada ni mezclar capas clínicas y experienciales.
+   Define las tareas técnicas autorizadas para la fase P1 del módulo Bio-Emoción, incluyendo backend y frontend, sin romper la arquitectura cerrada ni mezclar capas de intervención profesional y experienciales.
 
 2. **Módulo Personal / Experiencial – Conciencia y Reprogramación (Documento Espejo)**  
    Archivo:  
@@ -419,7 +419,7 @@ En ausencia de dicha experiencia:
 - Nunca se atribuyen experiencias biográficas inexistentes
 - Se protege la coherencia terapéutica y simbólica
 
-Este principio es clínico-terapéutico, no ideológico.
+Este principio es terapéutico-profesional, no ideológico.
 Nota:
 Los campos de sexo biológico e identidad de género
 no determinan ni activan preguntas transgeneracionales.

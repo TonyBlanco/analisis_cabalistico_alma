@@ -1,0 +1,506 @@
+{
+    "metadata": {
+        "world": "yetzirah",
+        "world_name": "Yetzirah - Mundo Formativo/Emocional",
+        "description": "El mundo de las emociones, los vínculos, los patrones afectivos y la expresión creativa. Donde los pensamientos toman forma emocional.",
+        "total_items_required": 49,
+        "sephirot": [
+            "Netzach",
+            "Hod",
+            "Yesod"
+        ],
+        "total_dimensions": 7
+    },
+    "dimensions": {
+        "netzach_emotional_persistence": {
+            "dimension_id": "yetzirah_netzach_persistence",
+            "name": "Netzach - Persistencia Emocional",
+            "sefirah": "Netzach",
+            "description": "Resiliencia afectiva, pasión sostenida, victoria sobre adversidad emocional",
+            "items_required": 7,
+            "items_available": 10,
+            "questions": [
+                {
+                    "id": "ytz_ntz_001",
+                    "text": "Mantengo mi pasión y entusiasmo incluso frente a obstáculos.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_ntz_002",
+                    "text": "Soy emocionalmente resiliente y me recupero de las adversidades.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_ntz_003",
+                    "text": "Mi energía emocional persiste a través del tiempo sin decaer.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_ntz_004",
+                    "text": "Puedo sostener el amor y la creatividad a pesar de los desafíos.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_ntz_005",
+                    "text": "Me rindo emocionalmente con facilidad frente a las dificultades.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_ntz_006",
+                    "text": "Mi victoria emocional consiste en no ser derrotado por el sufrimiento.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_ntz_007",
+                    "text": "Cultivo una pasión duradera por la vida y sus posibilidades.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_ntz_008",
+                    "text": "Mis emociones se desvanecen rápidamente y carezco de persistencia afectiva.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_ntz_009",
+                    "text": "Me levanto emocionalmente una y otra vez, renovando mi esperanza.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_ntz_010",
+                    "text": "Mi energía emocional es como un río que fluye constantemente.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                }
+            ]
+        },
+        "hod_emotional_expression": {
+            "dimension_id": "yetzirah_hod_expression",
+            "name": "Hod - Expresión Emocional",
+            "sefirah": "Hod",
+            "description": "Articulación de sentimientos, comunicación afectiva, reconocimiento emocional",
+            "items_required": 7,
+            "items_available": 10,
+            "questions": [
+                {
+                    "id": "ytz_hod_001",
+                    "text": "Puedo articular mis sentimientos con claridad y precisión.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_hod_002",
+                    "text": "Comunico mis emociones de manera efectiva a los demás.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_hod_003",
+                    "text": "Reconozco y nombro con facilidad los matices de mis estados afectivos.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_hod_004",
+                    "text": "Mi expresión emocional es auténtica y coherente con lo que siento.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_hod_005",
+                    "text": "Me cuesta expresar o comunicar lo que siento emocionalmente.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_hod_006",
+                    "text": "Utilizo el lenguaje emocional con riqueza y precisión.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_hod_007",
+                    "text": "Mi comunicación afectiva crea puentes de entendimiento con otros.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_hod_008",
+                    "text": "Desconozco cómo nombrar o describir mis propias emociones.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_hod_009",
+                    "text": "Expreso mis sentimientos de forma que otros pueden comprenderlos.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_hod_010",
+                    "text": "Mi articulación emocional refleja honestidad y autoconocimiento.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                }
+            ]
+        },
+        "yesod_emotional_foundation": {
+            "dimension_id": "yetzirah_yesod_foundation",
+            "name": "Yesod - Fundamento Emocional",
+            "sefirah": "Yesod",
+            "description": "Memoria emocional, patrones subconscientes, base afectiva",
+            "items_required": 7,
+            "items_available": 10,
+            "questions": [
+                {
+                    "id": "ytz_ysd_001",
+                    "text": "Mi base emocional es estable y proporciona seguridad interna.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_ysd_002",
+                    "text": "Reconozco los patrones emocionales subconscientes que influyen en mi vida.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_ysd_003",
+                    "text": "Mi memoria emocional ha sido procesada y no me domina.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_ysd_004",
+                    "text": "Tengo un fundamento afectivo sólido desde el cual operar.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_ysd_005",
+                    "text": "Mi base emocional es inestable y carezco de raíces afectivas.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_ysd_006",
+                    "text": "Puedo acceder a mi subconsciente emocional y trabajar con él.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_ysd_007",
+                    "text": "Mi fundamento emocional está conectado con fuentes transpersonales.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_ysd_008",
+                    "text": "Patrones emocionales del pasado controlan mi presente sin mi consciencia.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_ysd_009",
+                    "text": "Mi base afectiva me permite sentir seguridad emocional.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_ysd_010",
+                    "text": "He sanado suficiente memoria emocional para tener un fundamento claro.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                }
+            ]
+        },
+        "bonds_and_attachment": {
+            "dimension_id": "yetzirah_bonds_attachment",
+            "name": "Vínculos y Apego",
+            "sefirah": "Multiple",
+            "description": "Relaciones íntimas, seguridad relacional, conexión emocional",
+            "items_required": 7,
+            "items_available": 10,
+            "questions": [
+                {
+                    "id": "ytz_bnd_001",
+                    "text": "Formo vínculos emocionales profundos y seguros.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_bnd_002",
+                    "text": "Me siento seguro en mis relaciones íntimas.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_bnd_003",
+                    "text": "Puedo ser vulnerable emocionalmente sin perder mi centro.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_bnd_004",
+                    "text": "Mis relaciones están basadas en conexión auténtica, no en dependencia.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_bnd_005",
+                    "text": "Me cuesta crear o mantener vínculos emocionales profundos.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_bnd_006",
+                    "text": "Experimento seguridad emocional en mis lazos significativos.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_bnd_007",
+                    "text": "Mis patrones de apego son saludables y me permiten crecer.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_bnd_008",
+                    "text": "Evito la intimidad emocional o me apego de forma disfuncional.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_bnd_009",
+                    "text": "Puedo conectar emocionalmente manteniendo mi autonomía.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_bnd_010",
+                    "text": "Mis vínculos emocionales reflejan amor maduro y consciente.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                }
+            ]
+        },
+        "emotional_regulation": {
+            "dimension_id": "yetzirah_regulation",
+            "name": "Regulación Emocional",
+            "sefirah": "Multiple",
+            "description": "Manejo de afectos, balance emocional, autocontención",
+            "items_required": 7,
+            "items_available": 10,
+            "questions": [
+                {
+                    "id": "ytz_reg_001",
+                    "text": "Puedo regular mis emociones sin suprimirlas ni desbordarme.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_reg_002",
+                    "text": "Manejo estados afectivos intensos con habilidad y consciencia.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_reg_003",
+                    "text": "Encuentro balance entre sentir plenamente y mantener equilibrio.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_reg_004",
+                    "text": "Mi autocontención emocional es flexible, no rígida.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_reg_005",
+                    "text": "Mis emociones me desbordan frecuentemente o las suprimo completamente.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_reg_006",
+                    "text": "Puedo calmarme a mí mismo cuando estoy emocionalmente activado.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_reg_007",
+                    "text": "Manejo el estrés emocional con recursos internos efectivos.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_reg_008",
+                    "text": "No tengo estrategias para manejar emociones difíciles.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_reg_009",
+                    "text": "Mi regulación emocional me permite responder en lugar de reaccionar.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_reg_010",
+                    "text": "Siento, proceso y libero emociones de manera saludable.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                }
+            ]
+        },
+        "creative_expression": {
+            "dimension_id": "yetzirah_creative_expression",
+            "name": "Expresión Creativa",
+            "sefirah": "Multiple",
+            "description": "Arte y emoción, creatividad afectiva, canal de sentimientos",
+            "items_required": 7,
+            "items_available": 10,
+            "questions": [
+                {
+                    "id": "ytz_cre_001",
+                    "text": "Canalizo mis emociones a través de expresiones creativas.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_cre_002",
+                    "text": "El arte o la creatividad son vías naturales para mis sentimientos.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_cre_003",
+                    "text": "Encuentro belleza y significado en la expresión emocional creativa.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_cre_004",
+                    "text": "Mi creatividad emocional fluye libremente sin bloqueos.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_cre_005",
+                    "text": "Rara vez expreso mis emociones de forma creativa.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_cre_006",
+                    "text": "Transformo el dolor emocional en arte o belleza.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_cre_007",
+                    "text": "Mi expresión creativa es un canal sagrado para mi alma.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_cre_008",
+                    "text": "Me siento bloqueado creativamente y desconectado de mis emociones.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_cre_009",
+                    "text": "Mis creaciones reflejan la riqueza de mi vida emocional.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_cre_010",
+                    "text": "Utilizo la creatividad como forma de procesamiento emocional.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                }
+            ]
+        },
+        "yetzirah_integration": {
+            "dimension_id": "yetzirah_integration",
+            "name": "Integración Yetzirah",
+            "sefirah": "Multiple",
+            "description": "Coherencia emocional, flujo afectivo sano, síntesis emocional-mental",
+            "items_required": 7,
+            "items_available": 10,
+            "questions": [
+                {
+                    "id": "ytz_int_001",
+                    "text": "Mis emociones están alineadas con mis pensamientos y propósito.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_int_002",
+                    "text": "Experimento coherencia entre lo que siento, pienso y soy.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_int_003",
+                    "text": "Mi vida emocional fluye de manera sana y equilibrada.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_int_004",
+                    "text": "Integro persistencia, expresión, vínculos y regulación armónicamente.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_int_005",
+                    "text": "Hay fragmentación entre mis emociones y el resto de mi ser.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_int_006",
+                    "text": "Mi mundo emocional es un puente funcional entre mente y cuerpo.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_int_007",
+                    "text": "Las emociones fluyen desde las ideas hacia las acciones sin bloqueos.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_int_008",
+                    "text": "Mis emociones están desconectadas de mi vida mental y espiritual.",
+                    "reverse_scored": true,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_int_009",
+                    "text": "Siento coherencia emocional que refleja integración interna.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                },
+                {
+                    "id": "ytz_int_010",
+                    "text": "Mi mundo emocional está integrado con los mundos superiores e inferiores.",
+                    "reverse_scored": false,
+                    "weight": 1.0
+                }
+            ]
+        }
+    }
+}

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { adminCheck, deleteAdminUser, getAdminStats, getAdminUsers, patchAdminUser } from '@/lib/admin-pro-api';
+import confirmAction from '@/lib/confirm';
 import {
   buildAdminWorkspaceContractV2_1,
   type AdminRole,
@@ -171,10 +172,11 @@ export function AdminProWorkspace() {
     });
   };
 
+
   const handleDelete = async (user: AdminUserRow) => {
     setActionError(null);
 
-    const ok = typeof window !== 'undefined' ? window.confirm(`Eliminar usuario ID ${user.id}? Esta acción no se puede deshacer.`) : false;
+    const ok = await confirmAction(`Eliminar usuario ID ${user.id}? Esta acción no se puede deshacer.`);
     if (!ok) return;
 
     await withBusy(user.id, async () => {

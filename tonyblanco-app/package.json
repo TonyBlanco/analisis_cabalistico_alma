@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:clean": "node -e \"require('fs').rmSync('.next',{recursive:true,force:true})\" && next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
@@ -14,6 +15,7 @@
     "@emotion/styled": "^11.14.1",
     "@google/generative-ai": "^0.24.1",
     "@heroicons/react": "^2.2.0",
+    "@holistica/symbolic": "file:../packages/symbolic",
     "@mui/icons-material": "^7.3.6",
     "@mui/material": "^7.3.6",
     "@radix-ui/react-slot": "^1.2.4",

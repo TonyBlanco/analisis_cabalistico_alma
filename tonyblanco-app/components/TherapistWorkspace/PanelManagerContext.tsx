@@ -2,22 +2,22 @@
 
 import { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
-import type { ToolId } from './panelRegistry';
+import type { ToolId, ExtendedToolId } from './panelRegistry';
 
 export type PanelSize = 'compact' | 'comfortable' | 'wide';
 
 export interface PanelInstance {
   id: string;
-  toolId: ToolId;
+  toolId: ExtendedToolId;
   collapsed: boolean;
 }
 
 interface PanelManagerState {
   panels: PanelInstance[];
   panelSize: PanelSize;
-  openPanel: (toolId: ToolId) => void;
+  openPanel: (toolId: ExtendedToolId) => void;
   closePanel: (id: string) => void;
-  togglePanel: (toolId: ToolId) => void;
+  togglePanel: (toolId: ExtendedToolId) => void;
   toggleCollapse: (id: string) => void;
   setPanelSize: (size: PanelSize) => void;
 }
@@ -30,7 +30,7 @@ export function PanelManagerProvider({ children }: { children: ReactNode }) {
   const [panels, setPanels] = useState<PanelInstance[]>([]);
   const [panelSize, setPanelSize] = useState<PanelSize>('comfortable');
 
-  const openPanel = useCallback((toolId: ToolId) => {
+  const openPanel = useCallback((toolId: ExtendedToolId) => {
     setPanels((prev) => {
       const existingIndex = prev.findIndex((panel) => panel.toolId === toolId);
       if (existingIndex >= 0) {
@@ -42,7 +42,7 @@ export function PanelManagerProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const togglePanel = useCallback((toolId: ToolId) => {
+  const togglePanel = useCallback((toolId: ExtendedToolId) => {
     setPanels((prev) => {
       const existingIndex = prev.findIndex((panel) => panel.toolId === toolId);
       if (existingIndex >= 0) {

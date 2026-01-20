@@ -3,8 +3,8 @@
 ## 🎯 Objetivo Cumplido
 
 Se ha implementado una **separación estricta y explícita** entre dos flujos de ejecución de tests:
-- **FLOW A:** Tests auto-administrados por pacientes
-- **FLOW B:** Evaluaciones clínicas del terapeuta
+- **FLOW A:** Tests auto-administrados por usuarios
+- **FLOW B:** Evaluaciones restringidas del terapeuta
 
 ---
 
@@ -20,7 +20,7 @@ Sistema de clasificación de tests por modo de ejecución:
   - `isTherapistClinicalEvaluation()` - Verifica si es evaluación clínica
   - `filterTestsByExecutionMode()` - Filtra tests por modo
   - `getAssignableTests()` - Obtiene solo tests asignables
-  - `getClinicalEvaluations()` - Obtiene solo evaluaciones clínicas
+  - `getClinicalEvaluations()` - Obtiene solo evaluaciones restringidas
 
 ### 2. Actualización de `lib/test-types.ts`
 - Agregado campo `execution_mode?: 'patient_self' | 'therapist_clinical'` a `TestModule`
@@ -44,22 +44,22 @@ Sistema de clasificación de tests por modo de ejecución:
 - ✅ Terapeutas ven todos los tests con badges distintivos
 - ✅ Badge "Evaluación Clínica" para `therapist_clinical`
 - ✅ Badge "Asignable" para `patient_self` (terapeutas)
-- ✅ Advertencia: "Solo para terapeutas. Requiere paciente activo."
+- ✅ Advertencia: "Solo para terapeutas. Requiere usuario activo."
 - ✅ Evaluaciones clínicas bloqueadas para no-terapeutas
 
 ### SCDF (Evaluación Clínica)
 **Archivo:** `app/dashboard/tools/scdf/page.tsx`
 
 - ✅ Valida `patientId` antes de guardar
-- ✅ Mensaje de error claro si falta paciente
-- ✅ Requiere paciente activo para guardar
+- ✅ Mensaje de error claro si falta usuario
+- ✅ Requiere usuario activo para guardar
 
 ### Entrevista Integrativa (Evaluación Clínica)
 **Archivo:** `app/tests/psicologia/scid5/components/IntegrativeInterview.tsx`
 
 - ✅ Valida `patientId` antes de guardar
-- ✅ Mensaje de error claro si falta paciente
-- ✅ Requiere paciente activo para guardar
+- ✅ Mensaje de error claro si falta usuario
+- ✅ Requiere usuario activo para guardar
 
 ---
 
@@ -71,10 +71,10 @@ Sistema de clasificación de tests por modo de ejecución:
 **Sidebar actualizado con secciones separadas:**
 
 ```
-📋 Tests Asignables al Paciente
+📋 Tests Asignables al Usuario
   └─ Catálogo de Tests
 
-🏥 Evaluaciones Clínicas del Terapeuta
+🏥 Evaluaciones restringidas del Terapeuta
   └─ SCDF - Framework Clínico
   └─ Entrevista Clínica Integrativa
 ```
@@ -100,7 +100,7 @@ Sistema de clasificación de tests por modo de ejecución:
 
 ### FLOW B - Therapist Clinical (NO Asignables)
 
-**Evaluaciones Clínicas:**
+**Evaluaciones restringidas:**
 - SCDF (Structured Clinical Diagnostic Framework)
 - Entrevista Clínica Integrativa (scid5)
 
@@ -108,9 +108,9 @@ Sistema de clasificación de tests por modo de ejecución:
 
 ## 🚨 Reglas Críticas Implementadas
 
-1. ✅ **NUNCA** asignar evaluaciones clínicas a pacientes
-2. ✅ **SIEMPRE** validar paciente antes de guardar evaluación clínica
-3. ✅ **NUNCA** mostrar evaluaciones clínicas en portal del paciente
+1. ✅ **NUNCA** asignar evaluaciones restringidas a usuarios
+2. ✅ **SIEMPRE** validar usuario antes de guardar evaluación restringida
+3. ✅ **NUNCA** mostrar evaluaciones restringidas en el portal del usuario
 4. ✅ **SIEMPRE** filtrar tests por `execution_mode` en UI
 5. ✅ **SIEMPRE** mostrar badges distintivos en catálogo
 
@@ -129,8 +129,8 @@ Sistema de clasificación de tests por modo de ejecución:
 - [x] Mapeo completo de tests existentes
 - [x] Filtrado en modal de asignación
 - [x] Filtrado en catálogo de tests
-- [x] Validación de paciente en SCDF
-- [x] Validación de paciente en Entrevista Integrativa
+- [x] Validación de usuario en SCDF
+- [x] Validación de usuario en Entrevista Integrativa
 - [x] Separación visual en sidebar del terapeuta
 - [x] Badges distintivos en catálogo
 - [x] Documentación completa
@@ -152,11 +152,11 @@ Sistema de clasificación de tests por modo de ejecución:
 2. **En endpoint de ejecución de tests:**
    ```python
    if test.execution_mode == 'therapist_clinical' and not patient_id:
-       return Response({'error': 'Evaluaciones clínicas requieren paciente'}, 
+       return Response({'error': 'Evaluaciones restringidas requieren usuario'}, 
                       status=400)
    ```
 
-3. **En portal del paciente:**
+3. **En portal del usuario:**
    ```python
    # Solo retornar tests patient_self
    tests = TestModule.objects.filter(execution_mode='patient_self')
@@ -169,7 +169,7 @@ Sistema de clasificación de tests por modo de ejecución:
 1. **Testing:**
    - Probar asignación de tests (solo `patient_self`)
    - Verificar que evaluaciones clínicas no aparecen en modal
-   - Validar bloqueos cuando falta paciente
+   - Validar bloqueos cuando falta usuario
 
 2. **Backend:**
    - Implementar validaciones recomendadas

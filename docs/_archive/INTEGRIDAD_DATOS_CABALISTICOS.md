@@ -5,7 +5,7 @@
 Prevenir análisis cabalísticos con datos incompletos o incorrectos mediante:
 1. Validación estricta de perfil completo
 2. Trazabilidad de actualizaciones (quién editó el perfil)
-3. Notificación al paciente cuando su perfil fue corregido
+3. Notificación al usuario cuando su perfil fue corregido
 4. Bloqueo preventivo de tests cabalísticos con datos incompletos
 
 ---
@@ -84,7 +84,7 @@ def is_profile_complete() -> dict:
     }
 ```
 
-### 3. Endpoint: Therapist Update Patient Profile
+### 3. Endpoint: Therapist Update User Profile
 
 ```
 PATCH /api/patients/<patient_id>/profile/
@@ -107,7 +107,7 @@ PATCH /api/patients/<patient_id>/profile/
 **Response:**
 ```json
 {
-  "message": "Perfil del paciente actualizado correctamente",
+  "message": "Perfil del usuario actualizado correctamente",
   "profile_complete": true,
   "profile_updated_by_therapist": true,
   "last_therapist_update": "2025-12-15T20:30:00Z"
@@ -160,7 +160,7 @@ GET /api/patients/<patient_id>/profile/validation/
   onSave={(updated) => {
     // PATCH /api/patients/{id}/profile/
     // Marca profile_updated_by_therapist = true
-    showSuccessToast("Datos del paciente actualizados");
+    showSuccessToast("Datos del usuario actualizados");
   }}
 />
 ```
@@ -274,7 +274,7 @@ const executeCabalisticTest = async (testId) => {
 | Indicador visual en workspace | ✅ ProfileValidationIndicator |
 | Editor para therapist | ✅ PatientProfileEditor |
 | Trazabilidad de quién editó | ✅ profile_updated_by_therapist + updated_by |
-| Notificación al paciente | ✅ ProfileUpdateNotice modal |
+| Notificación al usuario | ✅ ProfileUpdateNotice modal |
 | NO ejecutar tests incompletos | ✅ Validación pre-ejecución |
 | Mensajes claros y específicos | ✅ Lista de campos faltantes |
 

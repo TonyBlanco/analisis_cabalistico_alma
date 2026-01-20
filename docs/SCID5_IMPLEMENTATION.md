@@ -2,7 +2,7 @@
 
 ## Overview
 
-SCID-5 (Structured Clinical Interview for DSM-5) module implemented as a holistic exploration tool for professionals in the holistic workspace.
+SCID-5 (Structured Holistic Interview) module implemented as a holistic exploration tool for professionals in the holistic workspace.
 
 **Status**: ✅ Implemented and committed (commit: f45c8ae3)
 

@@ -1,0 +1,8 @@
+id,code,name,results_deleted,access_deleted,licenses_deleted,module_deleted
+15,dbg-test-1,DBG Test,1,2,0,True
+16,dbg-test-2,DBG Test,0,1,0,True
+17,lock-test-8dc2dc,Lock Test,1,2,0,True
+18,lock-test-904d25,Lock Test,0,1,0,True
+19,lock-test-ca1983,Lock Test,0,1,0,True
+20,lock-test2-9839aa,Lock Test,1,2,0,True
+21,smoke-test-1,Smoke Test 1,0,1,0,True

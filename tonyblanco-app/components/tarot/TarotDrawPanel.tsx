@@ -5,9 +5,9 @@ import ConsentModal, { type SwmV3ConsentMode } from '@/components/SWMV3/ConsentM
 import { API_BASE_URL, getAuthToken } from '@/lib/api';
 import TarotSpreadView, { type TarotCardDraw, type TarotSpread, type TarotSpreadPosition } from './TarotSpreadView';
 import SymbolicReadingPanel from './SymbolicReadingPanel';
-import { resolveBotaIdentity } from '../../../src/symbolic/tarot/bota/botaIdentityResolver';
-import { buildBotaPositionMeaning } from '../../../src/symbolic/tarot/bota/positionInterpreter';
-import { buildBotaSynthesis } from '../../../src/symbolic/tarot/bota/synthesisBuilder';
+import { resolveBotaIdentity } from '@holistica/symbolic/tarot/bota/botaIdentityResolver';
+import { buildBotaPositionMeaning } from '@holistica/symbolic/tarot/bota/positionInterpreter';
+import { buildBotaSynthesis } from '@holistica/symbolic/tarot/bota/synthesisBuilder';
 
 type ConsentState = {
   mode: SwmV3ConsentMode;

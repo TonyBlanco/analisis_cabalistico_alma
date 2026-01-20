@@ -1,0 +1,2 @@
+export type { PitagorasInput as NotarikonInput, PitagorasResult as NotarikonResult, PitagorasSymbolicState as NotarikonSymbolicState, PitagorasNumberMeaning as NotarikonNumberMeaning } from '../pitagoras/pitagoras.types';
+//# sourceMappingURL=types.d.ts.map

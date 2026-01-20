@@ -1,0 +1,1 @@
+{"version":3,"file":"synthesisBuilder.d.ts","sourceRoot":"","sources":["../../../tarot/bota/synthesisBuilder.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,YAAY,EAAE,MAAM,wBAAwB,CAAC;AAE3D,MAAM,MAAM,iBAAiB,GAAG;IAC9B,QAAQ,EAAE,YAAY,CAAC;IACvB,aAAa,CAAC,EAAE,MAAM,GAAG,IAAI,CAAC;CAC/B,CAAC;AAEF,wBAAgB,kBAAkB,CAAC,KAAK,EAAE,iBAAiB,EAAE,GAAG,MAAM,GAAG,IAAI,CAe5E"}

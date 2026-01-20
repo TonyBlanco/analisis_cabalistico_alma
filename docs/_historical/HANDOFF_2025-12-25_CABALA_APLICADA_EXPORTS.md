@@ -6,8 +6,8 @@ Branch actual: `feat/tarot-workspace-e2e`
 
 ## Objetivo del día
 
-1) Que el workspace terapeuta **/dashboard/therapist/cabala-aplicada** reporte/persista ejecuciones como artefactos longitudinales (historia del paciente).
-2) Que esos artefactos queden disponibles para **History/Clinical history** y para el **Holistic Export**.
+1) Que el workspace terapeuta **/dashboard/therapist/cabala-aplicada** reporte/persista ejecuciones como artefactos longitudinales (historia del usuario).
+2) Que esos artefactos queden disponibles para **History/Professional history** y para el **Holistic Export**.
 
 ## Qué quedó implementado
 
@@ -71,14 +71,14 @@ Estos archivos aparecen como modificados en el working tree actual y se incluyen
 - Debe persistir un record (silencioso si falla).
 
 4) Confirmar en backend (opción A: UI)
-- Ir a la ficha del paciente (espacio clínico) y revisar History/exports.
+- Ir a la ficha del usuario (espacio profesional) y revisar History/exports.
 
 5) Confirmar en backend (opción B: API)
 - `GET /api/analysis-records/?patient_id=<id>`
 - Debe aparecer `module_code` tipo `CABALA_APLICADA_pitagoras` (u otro método) y en `computed_result.cabala_aplicada` el payload.
 
 6) Confirmar Holistic Export
-- Generar un Holistic Export del paciente.
+- Generar un Holistic Export del usuario.
 - En el JSON/markdown, la sección “Cábala aplicada (registros)” debe aumentar.
 
 ## Riesgos / notas

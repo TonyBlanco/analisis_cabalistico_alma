@@ -1,4 +1,10 @@
+import logging
 from datetime import datetime
+from typing import Dict
+from tests.wellness.anxiety_state_trait.stai_bank import select_items_for_execution
+from tests.wellness.scl90 import select_items_scdf  # noqa: F401
+
+logger = logging.getLogger(__name__)
 
 
 def _generate_code(prefix='DIAG'):
@@ -276,6 +282,11 @@ def compute_scl90(input_data: dict) -> dict:
         result['recomendaciones'].append('Seguimiento y psicoeducación')
 
     return result
+
+
+def compute_scl90_wellness(input_data: dict) -> dict:
+    logger.warning('SCL-90 wellness execution stub called before implementation')
+    raise NotImplementedError('SCL-90 wellness execution pending')
 
 
 def compute_scdf(input_data: dict) -> dict:
@@ -830,6 +841,92 @@ def compute_stress_regulation_wellness(input_data: dict) -> dict:
     }
 
 
+
+def compute_anxiety_state_trait(input_data: dict) -> dict:
+    """Compute a wellness-oriented anxiety assessment inspired by STAI."""
+
+    seed = input_data.get('seed')
+    selected_items = select_items_for_execution(seed=seed)
+    responses = (input_data.get('responses', {}) or {})
+
+    def _as_int(val) -> int:
+        try:
+            return int(val)
+        except Exception:
+            return 0
+
+    def _normalize_value(item: Dict) -> int:
+        raw_value = responses.get(item['id'], None)
+        if raw_value is None:
+            raw_value = responses.get(item.get('legacy_id', ''), 0)
+        return max(0, min(4, _as_int(raw_value)))
+
+    domain_scores = {}
+    all_vals = []
+    for domain in ('estado', 'rasgo'):
+        domain_items = [item for item in selected_items if item.get('domain') == domain]
+        if len(domain_items) != 10:
+            raise ValueError(
+                f'Canonical selection returned {len(domain_items)} items for domain {domain}; expected 10'
+            )
+        vals = [_normalize_value(item) for item in domain_items]
+        all_vals.extend(vals)
+        avg = sum(vals) / (len(vals) or 1)
+        domain_scores[domain] = {
+            'avg_0_4': round(avg, 2),
+            'percent_0_100': int(round((avg / 4) * 100)),
+            'items': len(domain_items),
+        }
+
+    overall_avg = (sum(all_vals) / (len(all_vals) or 1))
+    index_0_100 = int(round((overall_avg / 4) * 100))
+
+    if index_0_100 >= 70:
+        tier = 'Alto'
+        summary = 'Estado y rasgo muestran gestión sólida de la ansiedad; tus recursos mantienen equilibrio a pesar de señales puntuales.'
+    elif index_0_100 >= 40:
+        tier = 'Medio'
+        summary = 'Hay señales de inquietud moderada, pero continúas contando con recursos para regular y reconectar con la calma.'
+    else:
+        tier = 'Bajo'
+        summary = 'Estado y rasgo reflejan una ansiedad más marcada; prioriza pausas, apoyo y prácticas suaves de regulación.'
+
+    ranked = sorted(domain_scores.items(), key=lambda kv: kv[1]['percent_0_100'], reverse=True)
+    strengths = [name for name, v in ranked if v['percent_0_100'] >= 70][:3]
+    focus_areas = [name for name, v in ranked if v['percent_0_100'] < 50][:3]
+
+    recommendations = [
+        'Respirar conscientemente 2-3 minutos cuando notes que el cuerpo se activa.',
+        'Identificar un pensamiento recurrente que dispara inquietud y reenfocarlo con calma.',
+        'Planificar al menos un espacio diario sin dispositivos para bajar el ritmo.',
+        'Compartir una preocupación con alguien de confianza y acordar un siguiente paso.',
+        'Registrar una acción concreta que te ancle (tocar tierra, beber agua, pausar) cuando sientas alerta.',
+    ]
+
+    return {
+        'codigo_evaluacion': _generate_code('ANST'),
+        'fecha_evaluacion': input_data.get('fecha') or datetime.utcnow().strftime('%Y-%m-%d'),
+        'respuestas': responses,
+        'puntuaciones': {
+            'indice_0_100': index_0_100,
+            'nivel': tier,
+            'dominios': domain_scores,
+        },
+        'interpretacion': {
+            'resumen': summary,
+            'fortalezas': strengths,
+            'areas_enfoque': focus_areas,
+        },
+        'recomendaciones': recommendations,
+        'alertas': {
+            'nota': 'Resultado orientativo, no diagnóstico.',
+        },
+        'raw_inputs': {
+            'selected_items': selected_items,
+        },
+    }
+
+
 def compute_stress_wellness(input_data: dict) -> dict:
     """Compute an in-house Wellness Stress assessment (non-diagnostic).
 
@@ -1048,6 +1145,60 @@ def compute_screening_general(input_data: dict) -> dict:
         }
     }
     return result
+
+
+def compute_asrs_essence(input_data: dict) -> dict:
+    """Compute ASRS-Essence symbolic profile (non-clinical)."""
+    answers = input_data.get('answers', {}) or {}
+    values = []
+    for key in sorted(answers.keys()):
+        try:
+            values.append(float(answers[key]))
+        except Exception:
+            continue
+
+    if not values:
+        return {
+            'processed': False,
+            'structured_data': None,
+            'raw_answers': {},
+            'message': 'Respuestas incompletas para ASRS-Essence.',
+            'timestamp': str(datetime.now()),
+        }
+
+    score_total = sum(values) / len(values)
+    score_total = round(score_total, 2)
+
+    if score_total >= 4.2:
+        rhythm_state = 'anchored'
+    elif score_total >= 3.2:
+        rhythm_state = 'fluctuating'
+    else:
+        rhythm_state = 'fragmented'
+
+    atzilut_level = 'high' if rhythm_state == 'anchored' else 'medium' if rhythm_state == 'fluctuating' else 'low'
+    transition_suggestion = 'deepening' if rhythm_state == 'anchored' else 'integration' if rhythm_state == 'fluctuating' else 'beriah'
+
+    summary_text_map = {
+        'anchored': 'Ritmo esencial estable. Se percibe coherencia interna y claridad de pulso.',
+        'fluctuating': 'Ritmo esencial variable. Hay momentos de alineacion que alternan con dispersion.',
+        'fragmented': 'Ritmo esencial disperso. Se sugiere volver a un eje sencillo y sostenido.',
+    }
+
+    structured_data = {
+        'score_total': score_total,
+        'rhythm_state': rhythm_state,
+        'atzilut_level': atzilut_level,
+        'transition_suggestion': transition_suggestion,
+    }
+
+    return {
+        'processed': True,
+        'structured_data': structured_data,
+        'raw_answers': answers,
+        'summary_text': summary_text_map.get(rhythm_state, ''),
+        'timestamp': str(datetime.now()),
+    }
 
 
 def compute_past_lives(input_data: dict) -> dict:
@@ -1460,3 +1611,855 @@ def compute_scid5(input_data: dict) -> dict:
     if diagnoses.get('PTSD'):
         result['recomendaciones'].append('Criterios sugestivos de PTSD - derivar a especialista')
     return result
+
+# -----------------------------------------------------------------------------
+# SYMBOLIC TRANSITION ENGINE — MISSING TESTS IMPLEMENTATION
+# -----------------------------------------------------------------------------
+
+def compute_life_purpose(input_data: dict) -> dict:
+    """Atzilut - Propósito y Sentido Vital."""
+    responses = input_data.get('responses', {}) or {}
+    # Simple logic: average of responses (assuming 1-5 scale)
+    vals = [int(v) for v in responses.values() if str(v).isdigit()]
+    avg = sum(vals) / len(vals) if vals else 3
+    
+    clarity = "absent" if avg < 2 else ("diffused" if avg < 4 else "clear")
+    suggestion = "beria" if clarity != "clear" else "atzilut"
+
+    return {
+        'processed': True,
+        'structured_data': {
+            'purpose_clarity': clarity,
+            'transition_suggestion': suggestion
+        },
+        'interpretation': f"Claridad de propósito: {clarity}.",
+        'timestamp': str(datetime.now())
+    }
+
+def compute_cognitive_map(input_data: dict) -> dict:
+    """Beriá - Mapa Cognitivo."""
+    responses = input_data.get('responses', {}) or {}
+    vals = [int(v) for v in responses.values() if str(v).isdigit()]
+    avg = sum(vals) / len(vals) if vals else 3
+    
+    style = "chaotic" if avg < 2 else ("rigid" if avg < 3.5 else "adaptive")
+    suggestion = "yetzirah" if style != "adaptive" else "atzilut"
+
+    return {
+        'processed': True,
+        'structured_data': {
+            'cognitive_style': style,
+            'transition_suggestion': suggestion
+        },
+        'interpretation': f"Estilo cognitivo: {style}.",
+        'timestamp': str(datetime.now())
+    }
+
+def compute_belief_system(input_data: dict) -> dict:
+    """Beriá - Sistema de Creencias."""
+    responses = input_data.get('responses', {}) or {}
+    vals = [int(v) for v in responses.values() if str(v).isdigit()]
+    avg = sum(vals) / len(vals) if vals else 3
+    
+    state = "limiting" if avg < 2 else ("mixed" if avg < 4 else "integrated")
+    suggestion = "yetzirah" if state == "limiting" else "assiah"
+
+    return {
+        'processed': True,
+        'structured_data': {
+            'belief_state': state,
+            'transition_suggestion': suggestion
+        },
+        'interpretation': f"Estado de creencias: {state}.",
+        'timestamp': str(datetime.now())
+    }
+
+def compute_emotional_literacy(input_data: dict) -> dict:
+    """Ietzirá - Alfabetización Emocional."""
+    responses = input_data.get('responses', {}) or {}
+    vals = [int(v) for v in responses.values() if str(v).isdigit()]
+    avg = sum(vals) / len(vals) if vals else 3
+    
+    awareness = "low" if avg < 2 else ("medium" if avg < 4 else "high")
+    suggestion = "assiah" if awareness != "high" else "beria"
+
+    return {
+        'processed': True,
+        'structured_data': {
+            'emotional_awareness': awareness,
+            'transition_suggestion': suggestion
+        },
+        'interpretation': f"Conciencia emocional: {awareness}.",
+        'timestamp': str(datetime.now())
+    }
+
+def compute_attachment_style(input_data: dict) -> dict:
+    """Ietzirá - Vínculo y Apego."""
+    responses = input_data.get('responses', {}) or {}
+    # Placeholder for more complex attachment logic
+    vals = [int(v) for v in responses.values() if str(v).isdigit()]
+    avg = sum(vals) / len(vals) if vals else 3
+    
+    style = "avoidant" if avg < 2 else ("anxious" if avg < 3.5 else "secure")
+    suggestion = "assiah" if style != "secure" else "beria"
+
+    return {
+        'processed': True,
+        'structured_data': {
+            'attachment_style': style,
+            'transition_suggestion': suggestion
+        },
+        'interpretation': f"Estilo de apego: {style}.",
+        'timestamp': str(datetime.now())
+    }
+
+def compute_daily_rhythm(input_data: dict) -> dict:
+    """Asiá - Hábitos y Ritmo Vital."""
+    responses = input_data.get('responses', {}) or {}
+    vals = [int(v) for v in responses.values() if str(v).isdigit()]
+    avg = sum(vals) / len(vals) if vals else 3
+    
+    rhythm = "disrupted" if avg < 2 else ("irregular" if avg < 4 else "stable")
+    suggestion = "yetzirah"
+
+    return {
+        'processed': True,
+        'structured_data': {
+            'daily_rhythm': rhythm,
+            'transition_suggestion': suggestion
+        },
+        'interpretation': f"Ritmo diario: {rhythm}.",
+        'timestamp': str(datetime.now())
+    }
+
+def compute_somatic_awareness(input_data: dict) -> dict:
+    """Asiá - Registro Somático."""
+    responses = input_data.get('responses', {}) or {}
+    vals = [int(v) for v in responses.values() if str(v).isdigit()]
+    avg = sum(vals) / len(vals) if vals else 3
+    
+    awareness = "low" if avg < 2 else ("medium" if avg < 4 else "high")
+    suggestion = "yetzirah"
+
+    return {
+        'processed': True,
+        'structured_data': {
+            'body_awareness': awareness,
+            'transition_suggestion': suggestion
+        },
+        'interpretation': f"Conciencia corporal: {awareness}.",
+        'timestamp': str(datetime.now())
+    }
+
+
+def compute_dudit_spirit(input_data: dict) -> dict:
+    """
+    Divine Unity Drug Introspection (DUDIT-Spirit)
+    Mundo: Ietzirá → Asiá
+    
+    Evaluates relationship with substances, regulation, awareness, and compulsion.
+    Based on DUDIT framework but with symbolic-clinical perspective.
+    """
+    responses = input_data.get('responses', {}) or {}
+    
+    # Extract responses (assuming keys like 'q1', 'q2', ... 'q11')
+    # Scale 0-4 for most items
+    def _as_int(val) -> int:
+        try:
+            return int(val)
+        except Exception:
+            return 0
+    
+    def _clamp_0_4(v: int) -> int:
+        return max(0, min(4, v))
+    
+    # DUDIT-style scoring dimensions
+    # Frequency/quantity (q1-q3): consumption pattern
+    freq_keys = ['q1', 'q2', 'q3']
+    freq_vals = [_clamp_0_4(_as_int(responses.get(k, 0))) for k in freq_keys]
+    freq_score = sum(freq_vals)
+    
+    # Problems/consequences (q4-q6): functional impact
+    impact_keys = ['q4', 'q5', 'q6']
+    impact_vals = [_clamp_0_4(_as_int(responses.get(k, 0))) for k in impact_keys]
+    impact_score = sum(impact_vals)
+    
+    # Compulsion/control (q7-q9): loss of regulation
+    control_keys = ['q7', 'q8', 'q9']
+    control_vals = [_clamp_0_4(_as_int(responses.get(k, 0))) for k in control_keys]
+    control_score = sum(control_vals)
+    
+    # Body awareness (q10-q11): somatic connection
+    body_keys = ['q10', 'q11']
+    body_vals = [_clamp_0_4(_as_int(responses.get(k, 0))) for k in body_keys]
+    body_score = sum(body_vals)
+    
+    # Total score (0-44 max if 11 items × 4)
+    score_total = freq_score + impact_score + control_score + body_score
+    
+    # Risk level determination (DUDIT thresholds adapted)
+    if score_total >= 25:
+        risk_level = "high"
+    elif score_total >= 6:
+        risk_level = "medium"
+    else:
+        risk_level = "low"
+    
+    # Usage pattern classification
+    if control_score >= 8:
+        usage_pattern = "compulsive"
+    elif freq_score >= 8:
+        usage_pattern = "habitual"
+    else:
+        usage_pattern = "exploratory"
+    
+    # Body awareness level (inverted: lower body score = lower awareness)
+    body_avg = body_score / (len(body_keys) * 4.0)
+    if body_avg >= 0.66:
+        body_awareness_level = "high"
+    elif body_avg >= 0.33:
+        body_awareness_level = "medium"
+    else:
+        body_awareness_level = "low"
+    
+    # Transition suggestion (Ietzirá → Asiá)
+    # Suggest Asiá if body awareness is low or physical symptoms are high
+    transition_suggestion = None
+    if body_awareness_level == "low" or impact_score >= 8:
+        transition_suggestion = "assiah"
+    
+    # Summary text
+    summary_map = {
+        "low": "Relación de bajo riesgo con sustancias. Mantén atención a patrones y regulación emocional.",
+        "medium": "Relación moderada que merece atención. Observa si hay evasión emocional o patrones automáticos.",
+        "high": "Patrón de alto riesgo detectado. Se sugiere apoyo profesional especializado y exploración de raíces emocionales.",
+    }
+    
+    structured_data = {
+        'score_total': score_total,
+        'risk_level': risk_level,
+        'usage_pattern': usage_pattern,
+        'body_awareness_level': body_awareness_level,
+        'transition_suggestion': transition_suggestion,
+    }
+    
+    return {
+        'processed': True,
+        'structured_data': structured_data,
+        'raw_answers': responses,
+        'summary_text': summary_map.get(risk_level, ''),
+        'timestamp': str(datetime.now()),
+    }
+
+
+def compute_mcmi4_mystic(input_data: dict) -> dict:
+    """
+    Multiaxial Cosmic Matrix (MCMI-4-Mystic)
+    Mundo: Atzilut → Beriá
+    
+    Symbolic-structural assessment of self patterns, coherence, and fragmentation.
+    NOT clinical MCMI-IV; this is a symbolic archetypal profile.
+    """
+    responses = input_data.get('responses', {}) or {}
+    
+    # Symbolic axes (archetypal dimensions, not clinical scales)
+    axes = {
+        'unity': ['q1', 'q2', 'q3', 'q4', 'q5'],           # Coherence, integration
+        'shadow': ['q6', 'q7', 'q8', 'q9', 'q10'],         # Unintegrated aspects
+        'flow': ['q11', 'q12', 'q13', 'q14', 'q15'],       # Adaptive flexibility
+        'structure': ['q16', 'q17', 'q18', 'q19', 'q20'],  # Order, boundaries
+    }
+    
+    def _as_int(val) -> int:
+        try:
+            return int(val)
+        except Exception:
+            return 0
+    
+    def _clamp_0_4(v: int) -> int:
+        return max(0, min(4, v))
+    
+    axis_scores = {}
+    all_vals = []
+    for axis_name, keys in axes.items():
+        vals = [_clamp_0_4(_as_int(responses.get(k, 0))) for k in keys]
+        all_vals.extend(vals)
+        avg = sum(vals) / (len(vals) or 1)
+        axis_scores[axis_name] = round(avg, 2)
+    
+    # Determine dominant axis
+    dominant_axis = max(axis_scores.items(), key=lambda x: x[1])[0] if axis_scores else 'unknown'
+    
+    # Coherence level: unity vs shadow balance
+    unity_score = axis_scores.get('unity', 0)
+    shadow_score = axis_scores.get('shadow', 0)
+    coherence_diff = unity_score - shadow_score
+    
+    if coherence_diff >= 1.5:
+        coherence_level = "integrated"
+    elif coherence_diff >= -1.0:
+        coherence_level = "mixed"
+    else:
+        coherence_level = "fragmented"
+    
+    # Internal conflict index (0-100)
+    # High shadow + low flow = higher conflict
+    flow_score = axis_scores.get('flow', 0)
+    conflict_raw = (shadow_score / 4.0) * 50 + ((4 - flow_score) / 4.0) * 50
+    internal_conflict_index = int(round(conflict_raw))
+    
+    # Symbolic profile (top 2 axes)
+    ranked_axes = sorted(axis_scores.items(), key=lambda x: x[1], reverse=True)
+    symbolic_profile = [name.capitalize() for name, score in ranked_axes[:2]]
+    
+    # Transition suggestion (Atzilut → Beriá or Ietzirá)
+    transition_suggestion = None
+    if coherence_level == "fragmented":
+        transition_suggestion = "beriah"  # Need cognitive clarity
+    elif internal_conflict_index >= 60 and flow_score < 2.0:
+        transition_suggestion = "yetzirah"  # Emotional processing needed
+    
+    # Summary
+    summary_map = {
+        "integrated": "Estructura interna coherente con buen nivel de integración simbólica.",
+        "mixed": "Estructura en proceso de integración. Hay aspectos claros y otros en desarrollo.",
+        "fragmented": "Estructura fragmentada que sugiere explorar narrativa y sentido unificador.",
+    }
+    
+    structured_data = {
+        'dominant_axis': dominant_axis,
+        'coherence_level': coherence_level,
+        'internal_conflict_index': internal_conflict_index,
+        'symbolic_profile': symbolic_profile,
+        'transition_suggestion': transition_suggestion,
+    }
+    
+    return {
+        'processed': True,
+        'structured_data': structured_data,
+        'raw_answers': responses,
+        'summary_text': summary_map.get(coherence_level, ''),
+        'timestamp': str(datetime.now()),
+    }
+
+
+def compute_nutrition_relationship(input_data: dict) -> dict:
+    """
+    Alimentación — Relación y hábitos (Nutrition Relationship)
+    Mundo: Asiá → Ietzirá
+    
+    Evaluates eating awareness, emotional link, control patterns, and body trust.
+    This is a COMPLETE REWRITE with real scoring logic.
+    """
+    responses = input_data.get('responses', {}) or {}
+    
+    # Dimensions
+    dimensions = {
+        'awareness': ['n1', 'n2', 'n3', 'n4'],           # Hunger/satiety signals
+        'emotional_link': ['n5', 'n6', 'n7', 'n8'],      # Emotion-eating connection
+        'control': ['n9', 'n10', 'n11', 'n12'],          # Rigidity, rules, chaos
+        'body_trust': ['n13', 'n14', 'n15', 'n16'],      # Trust in body signals
+    }
+    
+    # Items that need reversing (higher = worse)
+    reverse_items = {'n4', 'n5', 'n7', 'n10', 'n12', 'n16'}
+    
+    def _as_int(val) -> int:
+        try:
+            return int(val)
+        except Exception:
+            return 0
+    
+    def _normalize_value(qid: str) -> int:
+        v = _as_int(responses.get(qid, 0))
+        v = max(0, min(4, v))
+        if qid in reverse_items:
+            return 4 - v
+        return v
+    
+    dim_scores = {}
+    all_vals = []
+    for dim, keys in dimensions.items():
+        vals = [_normalize_value(qid) for qid in keys]
+        all_vals.extend(vals)
+        avg = sum(vals) / (len(vals) or 1)
+        dim_scores[dim] = round(avg, 2)
+    
+    # Overall average
+    overall_avg = sum(all_vals) / (len(all_vals) or 1)
+    
+    # Eating awareness level
+    awareness_avg = dim_scores.get('awareness', 0)
+    if awareness_avg >= 3.0:
+        eating_awareness = "high"
+    elif awareness_avg >= 1.5:
+        eating_awareness = "medium"
+    else:
+        eating_awareness = "low"
+    
+    # Emotional link strength
+    emotional_avg = dim_scores.get('emotional_link', 0)
+    if emotional_avg >= 3.0:
+        emotional_link = "strong"
+    elif emotional_avg >= 1.5:
+        emotional_link = "moderate"
+    else:
+        emotional_link = "absent"
+    
+    # Control pattern
+    control_avg = dim_scores.get('control', 0)
+    if control_avg <= 1.5:
+        control_pattern = "rigid"
+    elif control_avg >= 3.0:
+        control_pattern = "flexible"
+    else:
+        control_pattern = "chaotic"
+    
+    # Body trust level (0-100)
+    body_trust_avg = dim_scores.get('body_trust', 0)
+    body_trust_level = int(round((body_trust_avg / 4.0) * 100))
+    
+    # Transition suggestion (Asiá → Ietzirá)
+    # Suggest Ietzirá if emotional link is strong (needs emotional processing)
+    transition_suggestion = None
+    if emotional_link == "strong":
+        transition_suggestion = "yetzirah"
+    
+    # Summary
+    if overall_avg >= 3.0:
+        summary = "Relación con la alimentación equilibrada y consciente. Hay confianza en las señales del cuerpo."
+    elif overall_avg >= 2.0:
+        summary = "Relación moderada con áreas de mejora. Observa el vínculo emocional y la rigidez de patrones."
+    else:
+        summary = "Relación compleja con la alimentación. Se sugiere explorar el componente emocional y la confianza corporal."
+    
+    structured_data = {
+        'eating_awareness': eating_awareness,
+        'emotional_link': emotional_link,
+        'control_pattern': control_pattern,
+        'body_trust_level': body_trust_level,
+        'transition_suggestion': transition_suggestion,
+    }
+    
+    return {
+        'processed': True,
+        'structured_data': structured_data,
+        'raw_answers': responses,
+        'summary_text': summary,
+        'timestamp': str(datetime.now()),
+    }
+
+
+def compute_ybocs_soul(input_data: dict) -> dict:
+    """
+    Yetziratic Balance Obsessive-Compulsive Sanctuary (Y-BOCS-Soul)
+    Mundo: Ietzirá (Formativo)
+    
+    Conceptualiza pensamientos repetitivos como ecos kármicos que interrumpen 
+    los mundos cabalísticos. Balance entre Gevurah (restricción) y Chesed (expansión).
+    """
+    responses = input_data.get('responses', {}) or {}
+    
+    def _as_int(val) -> int:
+        try:
+            return int(val)
+        except Exception:
+            return 0
+    
+    def _clamp_0_4(v: int) -> int:
+        return max(0, min(4, v))
+    
+    # Y-BOCS structure: 5 obsessions questions + 5 compulsions questions
+    # Scale 0-4 for most items
+    
+    obsession_keys = ['q1', 'q2', 'q3', 'q4', 'q5']  # Time, interference, distress, resistance, control
+    compulsion_keys = ['q6', 'q7', 'q8', 'q9', 'q10']  # Time, interference, anxiety, resistance, control
+    
+    obsession_vals = [_clamp_0_4(_as_int(responses.get(k, 0))) for k in obsession_keys]
+    compulsion_vals = [_clamp_0_4(_as_int(responses.get(k, 0))) for k in compulsion_keys]
+    
+    obsession_score = sum(obsession_vals)  # 0-20
+    compulsion_score = sum(compulsion_vals)  # 0-20
+    total_score = obsession_score + compulsion_score  # 0-40
+    
+    # Severity determination (Y-BOCS standard thresholds)
+    if total_score <= 7:
+        severity = "subclinical"
+        severity_label = "Subclínico"
+    elif total_score <= 15:
+        severity = "mild"
+        severity_label = "Leve"
+    elif total_score <= 23:
+        severity = "moderate"
+        severity_label = "Moderado"
+    elif total_score <= 31:
+        severity = "severe"
+        severity_label = "Severo"
+    else:
+        severity = "extreme"
+        severity_label = "Extremo"
+    
+    # Karmic echo balance: obsessions vs compulsions
+    if obsession_score > compulsion_score + 5:
+        pattern = "thought_dominated"  # Ecos mentales (Yetzirah superior)
+    elif compulsion_score > obsession_score + 5:
+        pattern = "ritual_dominated"  # Rituales físicos (Yetzirah → Asiá)
+    else:
+        pattern = "balanced_burden"  # Carga equilibrada
+    
+    # Gevurah-Chesed balance (control vs expansion)
+    # q4 and q9 are resistance items; q5 and q10 are control items
+    resistance = _clamp_0_4(_as_int(responses.get('q4', 0))) + _clamp_0_4(_as_int(responses.get('q9', 0)))
+    control = _clamp_0_4(_as_int(responses.get('q5', 0))) + _clamp_0_4(_as_int(responses.get('q10', 0)))
+    
+    # Low resistance + low control = overwhelmed (need Gevurah)
+    if resistance <= 2 and control <= 2:
+        sephirotic_balance = "gevurah_needed"
+    # High resistance + moderate control = struggling but active (Tiferet path)
+    elif resistance >= 5:
+        sephirotic_balance = "tiferet_active"
+    else:
+        sephirotic_balance = "seeking_chesed"
+    
+    # Transition suggestion
+    transition_suggestion = None
+    if severity in ["severe", "extreme"]:
+        transition_suggestion = "beriah"  # Need cognitive restructuring
+    elif pattern == "ritual_dominated":
+        transition_suggestion = "assiah"  # Somatic/physical work needed
+    
+    # Summary
+    summary_map = {
+        "subclinical": "Ecos kármicos mínimos. El flujo entre los mundos está mayormente despejado.",
+        "mild": "Bloqueos leves en Yetzirah. La práctica consistente puede restaurar el equilibrio.",
+        "moderate": "Interferencia moderada con el flujo divino. Se sugiere trabajo terapéutico específico.",
+        "severe": "Ecos kármicos significativos que bloquean múltiples Sephirot. Intervención recomendada.",
+        "extreme": "Bloqueo severo de Ein Sof. Se requiere acompañamiento especializado para tikkun (reparación).",
+    }
+    
+    structured_data = {
+        'total_score': total_score,
+        'obsession_score': obsession_score,
+        'compulsion_score': compulsion_score,
+        'severity': severity,
+        'severity_label': severity_label,
+        'karmic_pattern': pattern,
+        'sephirotic_balance': sephirotic_balance,
+        'transition_suggestion': transition_suggestion,
+    }
+    
+    return {
+        'processed': True,
+        'structured_data': structured_data,
+        'raw_answers': responses,
+        'summary_text': summary_map.get(severity, ''),
+        'timestamp': str(datetime.now()),
+    }
+
+
+def compute_sha_harmony(input_data: dict) -> dict:
+    """
+    Sephirotic Harmony Audit (SHA)
+    Mundo: Ietzirá → Asiá
+    
+    Evalúa desequilibrios en fuerza vital relacionados con elíxires terrenales (alcohol).
+    Basado en AUDIT pero con perspectiva de Netzach (victoria/persistencia) y Gevurah (disciplina).
+    """
+    responses = input_data.get('responses', {}) or {}
+    
+    def _as_int(val) -> int:
+        try:
+            return int(val)
+        except Exception:
+            return 0
+    
+    # AUDIT scoring (10 questions, varying scales)
+    # Q1-Q8: 0-4 scale
+    # Q9-Q10: 0,2,4 scale (special scoring for injury/concern)
+    
+    scores = []
+    for i in range(1, 9):
+        val = _as_int(responses.get(f'q{i}', 0))
+        scores.append(max(0, min(4, val)))
+    
+    # Q9 and Q10 special scoring (0, 2, or 4)
+    for i in range(9, 11):
+        val = _as_int(responses.get(f'q{i}', 0))
+        if val == 0:
+            scores.append(0)
+        elif val == 1:
+            scores.append(2)  # "Yes, but not in last year"
+        else:
+            scores.append(4)  # "Yes, in last year"
+    
+    total_score = sum(scores)  # 0-40
+    
+    # AUDIT zones
+    if total_score <= 7:
+        risk_zone = "low"
+        zone_label = "Zona Baja"
+    elif total_score <= 15:
+        risk_zone = "moderate"
+        zone_label = "Zona Moderada"
+    elif total_score <= 19:
+        risk_zone = "high"
+        zone_label = "Zona Alta"
+    else:
+        risk_zone = "severe"
+        zone_label = "Zona Severa"
+    
+    # Consumption pattern (Q1-Q3: frequency, quantity, binge)
+    consumption_score = sum(scores[0:3])
+    if consumption_score >= 8:
+        pattern = "high_frequency"
+    elif consumption_score >= 4:
+        pattern = "moderate_use"
+    else:
+        pattern = "low_use"
+    
+    # Gevurah assessment (Q4: loss of control)
+    gevurah_control = scores[3]  # Q4
+    if gevurah_control >= 3:
+        gevurah_status = "weakened"
+    elif gevurah_control >= 1:
+        gevurah_status = "challenged"
+    else:
+        gevurah_status = "intact"
+    
+    # Netzach assessment (Q1: frequency of seeking altered states)
+    netzach_seeking = scores[0]  # Q1
+    if netzach_seeking >= 3:
+        netzach_status = "excessive_refuge"
+    elif netzach_seeking >= 1:
+        netzach_status = "moderate_refuge"
+    else:
+        netzach_status = "occasional_refuge"
+    
+    # Malkhut impact (Q5: failure to meet obligations)
+    malkhut_impact = scores[4]  # Q5
+    manifestation_impaired = malkhut_impact >= 2
+    
+    # Transition suggestion
+    transition_suggestion = None
+    if risk_zone in ["high", "severe"]:
+        transition_suggestion = "assiah"  # Need physical/behavioral intervention
+    elif gevurah_status == "weakened":
+        transition_suggestion = "beriah"  # Cognitive work on boundaries
+    
+    # Summary
+    summary_map = {
+        "low": "Tu relación con los elíxires terrenales mantiene armonía entre Netzach y Gevurah. Continúa con consciencia.",
+        "moderate": "Se observan señales de desequilibrio. La moderación divina requiere atención antes de que se arraigue.",
+        "high": "Desequilibrio significativo en el flujo de energía vital. Se recomienda explorar raíces emocionales y establecer límites sagrados.",
+        "severe": "Disrupción severa de la armonía sefirótica. Se requiere acompañamiento especializado para restaurar equilibrio.",
+    }
+    
+    structured_data = {
+        'total_score': total_score,
+        'risk_zone': risk_zone,
+        'zone_label': zone_label,
+        'consumption_pattern': pattern,
+        'gevurah_status': gevurah_status,
+        'netzach_status': netzach_status,
+        'manifestation_impaired': manifestation_impaired,
+        'transition_suggestion': transition_suggestion,
+    }
+    
+    return {
+        'processed': True,
+        'structured_data': structured_data,
+        'raw_answers': responses,
+        'summary_text': summary_map.get(risk_zone, ''),
+        'timestamp': str(datetime.now()),
+    }
+
+
+def compute_eat26_spirit(input_data: dict) -> dict:
+    """
+    Eternal Abundance Threshold-26 (EAT-26-Spirit)
+    Mundo: Asiá (Físico) → Ietzirá (Emocional)
+    
+    Actitudes hacia alimentación como reflejo de Malkhut (reino físico) 
+    y conexión con Keter (voluntad divina). Reverencia al templo del cuerpo.
+    """
+    responses = input_data.get('responses', {}) or {}
+    
+    def _as_int(val) -> int:
+        try:
+            return int(val)
+        except Exception:
+            return 0
+    
+    def _clamp_0_5(v: int) -> int:
+        return max(0, min(5, v))
+    
+    # EAT-26 scoring: Most items use 6-point scale (0-5)
+    # Score 3 points for "Always", "Usually", "Often" (values 0,1,2)
+    # Score 0 points for "Sometimes", "Rarely", "Never" (values 3,4,5)
+    # Item 25 (reverse scored): opposite pattern
+    
+    total_score = 0
+    reverse_item = 25  # Q25 is reverse scored
+    
+    for i in range(1, 27):
+        val = _clamp_0_5(_as_int(responses.get(f'q{i}', 5)))  # Default to "Never" (5)
+        
+        if i == reverse_item:
+            # Reverse scoring: 3 points for Sometimes/Rarely/Never
+            if val >= 3:
+                total_score += 3
+        else:
+            # Standard scoring: 3 points for Always/Usually/Often
+            if val <= 2:
+                total_score += 3
+    
+    # Risk threshold (EAT-26 standard)
+    if total_score >= 20:
+        risk_level = "high"
+        risk_label = "Alto Riesgo"
+    elif total_score >= 10:
+        risk_level = "moderate"
+        risk_label = "Riesgo Moderado"
+    else:
+        risk_level = "low"
+        risk_label = "Bajo Riesgo"
+    
+    # Subscale analysis (simplified - actual EAT-26 has 3 validated subscales)
+    # Dieting (restriction): items related to avoidance, control
+    dieting_items = ['q1', 'q2', 'q3', 'q6', 'q7', 'q16', 'q17', 'q19', 'q22', 'q23']
+    dieting_count = sum(1 for k in dieting_items if _clamp_0_5(_as_int(responses.get(k, 5))) <= 2)
+    
+    # Bulimia/food preoccupation: items related to eating episodes, guilt
+    bulimia_items = ['q4', 'q10', 'q18', 'q21', 'q26']
+    bulimia_count = sum(1 for k in bulimia_items if _clamp_0_5(_as_int(responses.get(k, 5))) <= 2)
+    
+    # Oral control: cutting food, eating slowly
+    control_items = ['q5', 'q15', 'q20']
+    control_count = sum(1 for k in control_items if _clamp_0_5(_as_int(responses.get(k, 5))) <= 2)
+    
+    # Dominant pattern
+    if dieting_count >= 5:
+        dominant_pattern = "restriction"  # Gevurah extreme
+    elif bulimia_count >= 3:
+        dominant_pattern = "preoccupation"  # Malkhut-Keter conflict
+    elif control_count >= 2:
+        dominant_pattern = "ritualization"  # Binah rigid
+    else:
+        dominant_pattern = "balanced"  # Chesed-Gevurah harmony
+    
+    # Malkhut-Keter connection assessment
+    # Q1 (fear of overweight) + Q3 (food preoccupation) + Q18 (food controls life)
+    malkhut_keter_disruption = (
+        _clamp_0_5(_as_int(responses.get('q1', 5))) <= 2 or
+        _clamp_0_5(_as_int(responses.get('q3', 5))) <= 2 or
+        _clamp_0_5(_as_int(responses.get('q18', 5))) <= 2
+    )
+    
+    # Body temple reverence (Q25 is about enjoying food - reverse scored)
+    body_reverence = _clamp_0_5(_as_int(responses.get('q25', 5))) >= 3  # Enjoys food = reverence
+    
+    # Gevurah excess (items about control, restriction)
+    gevurah_items_score = sum([
+        _clamp_0_5(_as_int(responses.get('q7', 5))) <= 2,  # Avoid carbs
+        _clamp_0_5(_as_int(responses.get('q16', 5))) <= 2,  # Avoid sugar
+        _clamp_0_5(_as_int(responses.get('q19', 5))) <= 2,  # Demonstrate control
+        _clamp_0_5(_as_int(responses.get('q22', 5))) <= 2,  # Diet commitment
+    ])
+    gevurah_excess = gevurah_items_score >= 3
+    
+    # Transition suggestion
+    transition_suggestion = None
+    if risk_level in ["moderate", "high"]:
+        if dominant_pattern in ["preoccupation", "restriction"]:
+            transition_suggestion = "yetzirah"  # Emotional processing needed
+        else:
+            transition_suggestion = "beriah"  # Cognitive restructuring
+    
+    # Summary
+    summary_map = {
+        "low": "Tu relación con el sustento sagrado muestra reverencia al templo corporal. Malkhut y Keter fluyen en armonía.",
+        "moderate": "Se observan patrones que alejan del equilibrio divino. La exploración emocional puede restaurar la bendición en cada comida.",
+        "high": "Desarmonía significativa en la relación con el cuerpo y la nutrición. Se recomienda acompañamiento especializado para honrar el templo sagrado.",
+    }
+    
+    structured_data = {
+        'total_score': total_score,
+        'risk_level': risk_level,
+        'risk_label': risk_label,
+        'dominant_pattern': dominant_pattern,
+        'malkhut_keter_disruption': malkhut_keter_disruption,
+        'body_reverence': body_reverence,
+        'gevurah_excess': gevurah_excess,
+        'transition_suggestion': transition_suggestion,
+    }
+    
+    return {
+        'processed': True,
+        'structured_data': structured_data,
+        'raw_answers': responses,
+        'summary_text': summary_map.get(risk_level, ''),
+        'timestamp': str(datetime.now()),
+    }
+
+
+def compute_mcmi4_mystic_195(input_data: dict) -> dict:
+    """
+    Multiaxial Cosmic Matrix Inventory-4 (Mystic Edition) - Full 195-item version
+    
+    Comprehensive soul-map tool aligned with the four Kabbalistic worlds
+    (Atzilut, Briah, Yetzirah, Assiah), interpreting patterns as imbalances
+    in elemental forces and guiding toward enlightened personality synthesis.
+    
+    Args:
+        input_data: Dict with 'responses' (question_id: 0-3) and 'questions_used'
+        
+    Returns:
+        Complete results with world scores, sephirotic balance, and interpretations
+    """
+    from api.mcmi4_utils import compute_mcmi4_mystic_full
+    from api.mcmi4_models import MCMI4MysticQuestionBank
+    
+    responses = input_data.get('responses', {}) or {}
+    questions_used_ids = input_data.get('questions_used', [])
+    
+    # Validate we have enough questions
+    if not questions_used_ids or len(questions_used_ids) < 180:
+        return {
+            'processed': False,
+            'error': 'Incomplete test - requires 195 questions',
+            'questions_received': len(questions_used_ids),
+            'timestamp': str(datetime.now()),
+        }
+    
+    # Resolve IDs to full question objects required by the scoring engine
+    questions_db = MCMI4MysticQuestionBank.objects.filter(question_id__in=questions_used_ids)
+    q_map = {q.question_id: q for q in questions_db}
+    
+    questions_used_full = []
+    for q_id in questions_used_ids:
+        q = q_map.get(q_id)
+        if q:
+            questions_used_full.append({
+                'question_id': q.question_id,
+                'world': q.world,
+                'dimension_id': q.dimension_id,
+                'sefirah': q.sefirah,
+                'text': q.text_es,
+                'reverse_scored': q.reverse_scored,
+                'weight': q.weight,
+            })
+    
+    # Handle response conversion (MCMI-4 UI uses binary True/False, scoring engine expects 0-3)
+    # We map False -> 0, True -> 3 to maintain full scale weight
+    normalized_responses = {}
+    for q_id, val in responses.items():
+        if isinstance(val, bool):
+            normalized_responses[q_id] = 3 if val else 0
+        else:
+            try:
+                normalized_responses[q_id] = int(val)
+            except (ValueError, TypeError):
+                normalized_responses[q_id] = 0
+                
+    # Delegate to the comprehensive scoring function
+    return compute_mcmi4_mystic_full(normalized_responses, questions_used_full)

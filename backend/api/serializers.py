@@ -5,7 +5,7 @@ from .models import (
     UserProfile,
     Patient,
     Session,
-    TherapistNote,
+    PatientMessage,
     ServiceCategory,
     Service,
     ServicePackage,
@@ -251,6 +251,25 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'first_name', 'last_name', 'profile']
+
+
+class PatientMessageSerializer(serializers.ModelSerializer):
+    # contract: expose therapist_id and patient_id as integers
+    therapist_id = serializers.IntegerField(source='therapist.id', read_only=True)
+    patient_id = serializers.IntegerField(source='patient.id', read_only=True)
+    # Accept patient via `patient_id` in input
+    patient = serializers.PrimaryKeyRelatedField(queryset=Patient.objects.all(), write_only=True)
+
+    class Meta:
+        model = PatientMessage
+        fields = ['id', 'therapist_id', 'patient_id', 'patient', 'content', 'created_at', 'is_archived']
+        read_only_fields = ['id', 'therapist_id', 'patient_id', 'created_at', 'is_archived']
+
+    def to_representation(self, instance):
+        rep = super().to_representation(instance)
+        # Remove write-only field from representation
+        rep.pop('patient', None)
+        return rep
 
 
 class RegisterTherapistSerializer(serializers.ModelSerializer):
@@ -814,7 +833,7 @@ class AnalysisRecordSerializer(serializers.ModelSerializer):
         execution_mode = None
         if kind == 'clinical_test':
             try:
-                test_module = TestModule.objects.get(code=module_code)
+                test_module = TestModule.objects._safe_testmodule_queryset().get(code=module_code)
             except TestModule.DoesNotExist:
                 raise serializers.ValidationError({"module_code": "TestModule no encontrado para este código."})
 

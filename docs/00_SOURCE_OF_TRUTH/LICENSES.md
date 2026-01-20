@@ -5,7 +5,7 @@ This project contains implementations for several clinical screening tools. Many
 In this repository we include example and placeholder instrument contents; before using or publishing the instruments in production, ensure you obtain the appropriate license from the authors/publishers and configure the platform accordingly.
 
 - MCMI-IV: Licensed (Pearson). Replace demo items with the licensed instrument if you have approval.
-- SCID-5-RV: DSM-5 instrument and resources are protected. Use the official manual and procedures with licensed access.
+- SCID-5-RV: Instrument and resources are protected. Use the official manual and procedures with licensed access.
 - SCL-90-R, STAI: Many translations and items might be copyrighted or require permission to use.
 
 How to enable licensed instruments:

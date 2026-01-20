@@ -6,23 +6,23 @@ No se mezclan visualizaciones, cálculos ni narrativas entre workspaces.
 
 ---
 
-## Contexto Clínico Global
-Todos los workspaces se muestran bajo contexto clínico con paciente activo.
-Ningún workspace opera sin conciencia del paciente seleccionado.
+## Contexto del usuario activo
+Todos los workspaces se muestran con el contexto del usuario activo.
+Ningún workspace opera sin un usuario seleccionado.
 
 ---
 
-## Modos (no clínicos)
+## Modos (no clínico)
 Algunos workspaces pueden exponer un selector explícito de modo.
 
 - **Observacional**: visualización/consulta. Sin correspondencias ni síntesis.
 - **Training / Investigativo**: habilita correspondencias explicativas y síntesis estructurada (uso educativo / no clínico).
-- **Clínico**: fuera del alcance de los SWM; vive en el Core Workspace.
+- **Uso restringido**: fuera del alcance de los SWM; vive en el Core Workspace.
 
 Reglas transversales:
 - No hay diagnóstico.
 - No hay automatización decisoria.
-- No se persisten resultados clínicos.
+- No se persisten resultados de interpretación.
 
 ---
 

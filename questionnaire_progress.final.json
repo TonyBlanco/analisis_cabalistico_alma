@@ -1,0 +1,1394 @@
+{
+  "responses": {
+    "atz_bin_001": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:24:39.019586+00:00",
+      "world": "atzilut",
+      "dimension": "binah_deep_understanding",
+      "sefirah": "Binah"
+    },
+    "atz_bin_002": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:24:41.410921+00:00",
+      "world": "atzilut",
+      "dimension": "binah_deep_understanding",
+      "sefirah": "Binah"
+    },
+    "atz_bin_003": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:24:43.808028+00:00",
+      "world": "atzilut",
+      "dimension": "binah_deep_understanding",
+      "sefirah": "Binah"
+    },
+    "atz_bin_004": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:42.787285+00:00",
+      "world": "atzilut",
+      "dimension": "binah_deep_understanding",
+      "sefirah": "Binah"
+    },
+    "atz_bin_005": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:43.137811+00:00",
+      "world": "atzilut",
+      "dimension": "binah_deep_understanding",
+      "sefirah": "Binah"
+    },
+    "atz_bin_006": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:43.511962+00:00",
+      "world": "atzilut",
+      "dimension": "binah_deep_understanding",
+      "sefirah": "Binah"
+    },
+    "atz_bin_007": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:43.885702+00:00",
+      "world": "atzilut",
+      "dimension": "binah_deep_understanding",
+      "sefirah": "Binah"
+    },
+    "atz_bin_008": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:44.213011+00:00",
+      "world": "atzilut",
+      "dimension": "binah_deep_understanding",
+      "sefirah": "Binah"
+    },
+    "atz_bin_009": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:44.512224+00:00",
+      "world": "atzilut",
+      "dimension": "binah_deep_understanding",
+      "sefirah": "Binah"
+    },
+    "atz_bin_010": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:44.812179+00:00",
+      "world": "atzilut",
+      "dimension": "binah_deep_understanding",
+      "sefirah": "Binah"
+    },
+    "atz_chd_001": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:45.062312+00:00",
+      "world": "atzilut",
+      "dimension": "chesed_unconditional_love",
+      "sefirah": "Chesed"
+    },
+    "atz_chd_002": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:45.296945+00:00",
+      "world": "atzilut",
+      "dimension": "chesed_unconditional_love",
+      "sefirah": "Chesed"
+    },
+    "atz_chd_003": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:45.538066+00:00",
+      "world": "atzilut",
+      "dimension": "chesed_unconditional_love",
+      "sefirah": "Chesed"
+    },
+    "atz_chd_004": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:45.795174+00:00",
+      "world": "atzilut",
+      "dimension": "chesed_unconditional_love",
+      "sefirah": "Chesed"
+    },
+    "atz_chd_005": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:46.070216+00:00",
+      "world": "atzilut",
+      "dimension": "chesed_unconditional_love",
+      "sefirah": "Chesed"
+    },
+    "atz_chd_006": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:46.305631+00:00",
+      "world": "atzilut",
+      "dimension": "chesed_unconditional_love",
+      "sefirah": "Chesed"
+    },
+    "atz_chd_007": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:46.576051+00:00",
+      "world": "atzilut",
+      "dimension": "chesed_unconditional_love",
+      "sefirah": "Chesed"
+    },
+    "atz_chd_008": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:46.901039+00:00",
+      "world": "atzilut",
+      "dimension": "chesed_unconditional_love",
+      "sefirah": "Chesed"
+    },
+    "atz_chd_009": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:47.196792+00:00",
+      "world": "atzilut",
+      "dimension": "chesed_unconditional_love",
+      "sefirah": "Chesed"
+    },
+    "atz_chd_010": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:47.479937+00:00",
+      "world": "atzilut",
+      "dimension": "chesed_unconditional_love",
+      "sefirah": "Chesed"
+    },
+    "atz_chk_001": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:47.829940+00:00",
+      "world": "atzilut",
+      "dimension": "chochmah_intuitive_wisdom",
+      "sefirah": "Chochmah"
+    },
+    "atz_chk_002": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:48.132379+00:00",
+      "world": "atzilut",
+      "dimension": "chochmah_intuitive_wisdom",
+      "sefirah": "Chochmah"
+    },
+    "atz_chk_003": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:48.435591+00:00",
+      "world": "atzilut",
+      "dimension": "chochmah_intuitive_wisdom",
+      "sefirah": "Chochmah"
+    },
+    "atz_chk_004": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:48.704991+00:00",
+      "world": "atzilut",
+      "dimension": "chochmah_intuitive_wisdom",
+      "sefirah": "Chochmah"
+    },
+    "atz_chk_005": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:48.987866+00:00",
+      "world": "atzilut",
+      "dimension": "chochmah_intuitive_wisdom",
+      "sefirah": "Chochmah"
+    },
+    "atz_chk_006": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:49.305728+00:00",
+      "world": "atzilut",
+      "dimension": "chochmah_intuitive_wisdom",
+      "sefirah": "Chochmah"
+    },
+    "atz_chk_007": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:49.654198+00:00",
+      "world": "atzilut",
+      "dimension": "chochmah_intuitive_wisdom",
+      "sefirah": "Chochmah"
+    },
+    "atz_chk_008": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:50.032204+00:00",
+      "world": "atzilut",
+      "dimension": "chochmah_intuitive_wisdom",
+      "sefirah": "Chochmah"
+    },
+    "atz_chk_009": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:50.299795+00:00",
+      "world": "atzilut",
+      "dimension": "chochmah_intuitive_wisdom",
+      "sefirah": "Chochmah"
+    },
+    "atz_chk_010": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:50.534735+00:00",
+      "world": "atzilut",
+      "dimension": "chochmah_intuitive_wisdom",
+      "sefirah": "Chochmah"
+    },
+    "atz_gev_001": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:50.830612+00:00",
+      "world": "atzilut",
+      "dimension": "gevurah_divine_justice",
+      "sefirah": "Gevurah"
+    },
+    "atz_gev_002": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:51.166836+00:00",
+      "world": "atzilut",
+      "dimension": "gevurah_divine_justice",
+      "sefirah": "Gevurah"
+    },
+    "atz_gev_003": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:51.458230+00:00",
+      "world": "atzilut",
+      "dimension": "gevurah_divine_justice",
+      "sefirah": "Gevurah"
+    },
+    "atz_gev_004": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:51.766031+00:00",
+      "world": "atzilut",
+      "dimension": "gevurah_divine_justice",
+      "sefirah": "Gevurah"
+    },
+    "atz_gev_005": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:52.063678+00:00",
+      "world": "atzilut",
+      "dimension": "gevurah_divine_justice",
+      "sefirah": "Gevurah"
+    },
+    "atz_gev_006": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:52.394806+00:00",
+      "world": "atzilut",
+      "dimension": "gevurah_divine_justice",
+      "sefirah": "Gevurah"
+    },
+    "atz_gev_007": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:52.740904+00:00",
+      "world": "atzilut",
+      "dimension": "gevurah_divine_justice",
+      "sefirah": "Gevurah"
+    },
+    "atz_gev_008": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:52.955631+00:00",
+      "world": "atzilut",
+      "dimension": "gevurah_divine_justice",
+      "sefirah": "Gevurah"
+    },
+    "atz_gev_009": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:53.214499+00:00",
+      "world": "atzilut",
+      "dimension": "gevurah_divine_justice",
+      "sefirah": "Gevurah"
+    },
+    "atz_gev_010": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:53.582905+00:00",
+      "world": "atzilut",
+      "dimension": "gevurah_divine_justice",
+      "sefirah": "Gevurah"
+    },
+    "atz_int_001": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:53.830878+00:00",
+      "world": "atzilut",
+      "dimension": "atzilut_integration",
+      "sefirah": "Multiple"
+    },
+    "atz_int_002": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:54.099613+00:00",
+      "world": "atzilut",
+      "dimension": "atzilut_integration",
+      "sefirah": "Multiple"
+    },
+    "atz_int_003": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:54.325203+00:00",
+      "world": "atzilut",
+      "dimension": "atzilut_integration",
+      "sefirah": "Multiple"
+    },
+    "atz_int_004": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:54.658934+00:00",
+      "world": "atzilut",
+      "dimension": "atzilut_integration",
+      "sefirah": "Multiple"
+    },
+    "atz_int_005": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:54.992016+00:00",
+      "world": "atzilut",
+      "dimension": "atzilut_integration",
+      "sefirah": "Multiple"
+    },
+    "atz_int_006": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:55.297048+00:00",
+      "world": "atzilut",
+      "dimension": "atzilut_integration",
+      "sefirah": "Multiple"
+    },
+    "atz_int_007": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:55.620002+00:00",
+      "world": "atzilut",
+      "dimension": "atzilut_integration",
+      "sefirah": "Multiple"
+    },
+    "atz_int_008": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:55.938230+00:00",
+      "world": "atzilut",
+      "dimension": "atzilut_integration",
+      "sefirah": "Multiple"
+    },
+    "atz_int_009": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:56.252464+00:00",
+      "world": "atzilut",
+      "dimension": "atzilut_integration",
+      "sefirah": "Multiple"
+    },
+    "bri_bel_001": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:56.565625+00:00",
+      "world": "briah",
+      "dimension": "belief_systems",
+      "sefirah": "Multiple"
+    },
+    "bri_bel_002": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:56.842434+00:00",
+      "world": "briah",
+      "dimension": "belief_systems",
+      "sefirah": "Multiple"
+    },
+    "bri_bel_003": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:57.144571+00:00",
+      "world": "briah",
+      "dimension": "belief_systems",
+      "sefirah": "Multiple"
+    },
+    "bri_bel_004": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:57.477506+00:00",
+      "world": "briah",
+      "dimension": "belief_systems",
+      "sefirah": "Multiple"
+    },
+    "bri_bel_005": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:57.769261+00:00",
+      "world": "briah",
+      "dimension": "belief_systems",
+      "sefirah": "Multiple"
+    },
+    "bri_bel_006": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:58.099397+00:00",
+      "world": "briah",
+      "dimension": "belief_systems",
+      "sefirah": "Multiple"
+    },
+    "bri_bel_007": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:58.507826+00:00",
+      "world": "briah",
+      "dimension": "belief_systems",
+      "sefirah": "Multiple"
+    },
+    "bri_bel_008": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:58.875992+00:00",
+      "world": "briah",
+      "dimension": "belief_systems",
+      "sefirah": "Multiple"
+    },
+    "bri_bel_009": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:59.216487+00:00",
+      "world": "briah",
+      "dimension": "belief_systems",
+      "sefirah": "Multiple"
+    },
+    "bri_bel_010": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:59.489064+00:00",
+      "world": "briah",
+      "dimension": "belief_systems",
+      "sefirah": "Multiple"
+    },
+    "bri_chd_001": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:42:59.787779+00:00",
+      "world": "briah",
+      "dimension": "chesed_expansive_thought",
+      "sefirah": "Chesed"
+    },
+    "bri_chd_002": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:00.084741+00:00",
+      "world": "briah",
+      "dimension": "chesed_expansive_thought",
+      "sefirah": "Chesed"
+    },
+    "bri_chd_003": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:00.476926+00:00",
+      "world": "briah",
+      "dimension": "chesed_expansive_thought",
+      "sefirah": "Chesed"
+    },
+    "bri_chd_004": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:00.809171+00:00",
+      "world": "briah",
+      "dimension": "chesed_expansive_thought",
+      "sefirah": "Chesed"
+    },
+    "bri_chd_005": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:01.125942+00:00",
+      "world": "briah",
+      "dimension": "chesed_expansive_thought",
+      "sefirah": "Chesed"
+    },
+    "bri_chd_006": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:01.409077+00:00",
+      "world": "briah",
+      "dimension": "chesed_expansive_thought",
+      "sefirah": "Chesed"
+    },
+    "bri_chd_007": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:01.787916+00:00",
+      "world": "briah",
+      "dimension": "chesed_expansive_thought",
+      "sefirah": "Chesed"
+    },
+    "bri_chd_008": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:02.150498+00:00",
+      "world": "briah",
+      "dimension": "chesed_expansive_thought",
+      "sefirah": "Chesed"
+    },
+    "bri_chd_009": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:02.486990+00:00",
+      "world": "briah",
+      "dimension": "chesed_expansive_thought",
+      "sefirah": "Chesed"
+    },
+    "bri_chd_010": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:02.817310+00:00",
+      "world": "briah",
+      "dimension": "chesed_expansive_thought",
+      "sefirah": "Chesed"
+    },
+    "bri_gev_001": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:03.168035+00:00",
+      "world": "briah",
+      "dimension": "gevurah_analytical_thought",
+      "sefirah": "Gevurah"
+    },
+    "bri_gev_002": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:03.505913+00:00",
+      "world": "briah",
+      "dimension": "gevurah_analytical_thought",
+      "sefirah": "Gevurah"
+    },
+    "bri_gev_003": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:03.835826+00:00",
+      "world": "briah",
+      "dimension": "gevurah_analytical_thought",
+      "sefirah": "Gevurah"
+    },
+    "bri_gev_004": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:04.117929+00:00",
+      "world": "briah",
+      "dimension": "gevurah_analytical_thought",
+      "sefirah": "Gevurah"
+    },
+    "bri_gev_005": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:04.429367+00:00",
+      "world": "briah",
+      "dimension": "gevurah_analytical_thought",
+      "sefirah": "Gevurah"
+    },
+    "bri_gev_006": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:04.726820+00:00",
+      "world": "briah",
+      "dimension": "gevurah_analytical_thought",
+      "sefirah": "Gevurah"
+    },
+    "bri_gev_007": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:05.190214+00:00",
+      "world": "briah",
+      "dimension": "gevurah_analytical_thought",
+      "sefirah": "Gevurah"
+    },
+    "bri_gev_008": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:05.487396+00:00",
+      "world": "briah",
+      "dimension": "gevurah_analytical_thought",
+      "sefirah": "Gevurah"
+    },
+    "bri_gev_009": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:05.891014+00:00",
+      "world": "briah",
+      "dimension": "gevurah_analytical_thought",
+      "sefirah": "Gevurah"
+    },
+    "bri_gev_010": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:06.319158+00:00",
+      "world": "briah",
+      "dimension": "gevurah_analytical_thought",
+      "sefirah": "Gevurah"
+    },
+    "bri_int_001": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:06.665690+00:00",
+      "world": "briah",
+      "dimension": "briah_integration",
+      "sefirah": "Multiple"
+    },
+    "bri_int_002": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:07.051362+00:00",
+      "world": "briah",
+      "dimension": "briah_integration",
+      "sefirah": "Multiple"
+    },
+    "bri_int_003": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:07.488268+00:00",
+      "world": "briah",
+      "dimension": "briah_integration",
+      "sefirah": "Multiple"
+    },
+    "bri_int_004": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:07.946572+00:00",
+      "world": "briah",
+      "dimension": "briah_integration",
+      "sefirah": "Multiple"
+    },
+    "bri_int_005": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:08.364939+00:00",
+      "world": "briah",
+      "dimension": "briah_integration",
+      "sefirah": "Multiple"
+    },
+    "bri_int_006": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:08.646707+00:00",
+      "world": "briah",
+      "dimension": "briah_integration",
+      "sefirah": "Multiple"
+    },
+    "bri_int_007": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:08.997854+00:00",
+      "world": "briah",
+      "dimension": "briah_integration",
+      "sefirah": "Multiple"
+    },
+    "bri_int_008": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:09.321194+00:00",
+      "world": "briah",
+      "dimension": "briah_integration",
+      "sefirah": "Multiple"
+    },
+    "bri_int_009": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:09.737818+00:00",
+      "world": "briah",
+      "dimension": "briah_integration",
+      "sefirah": "Multiple"
+    },
+    "bri_int_010": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:10.070359+00:00",
+      "world": "briah",
+      "dimension": "briah_integration",
+      "sefirah": "Multiple"
+    },
+    "bri_met_001": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:10.423540+00:00",
+      "world": "briah",
+      "dimension": "metacognition",
+      "sefirah": "Multiple"
+    },
+    "bri_met_002": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:10.789422+00:00",
+      "world": "briah",
+      "dimension": "metacognition",
+      "sefirah": "Multiple"
+    },
+    "bri_met_003": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:11.138703+00:00",
+      "world": "briah",
+      "dimension": "metacognition",
+      "sefirah": "Multiple"
+    },
+    "bri_met_004": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:11.512968+00:00",
+      "world": "briah",
+      "dimension": "metacognition",
+      "sefirah": "Multiple"
+    },
+    "bri_met_005": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:11.954107+00:00",
+      "world": "briah",
+      "dimension": "metacognition",
+      "sefirah": "Multiple"
+    },
+    "bri_met_006": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:12.292176+00:00",
+      "world": "briah",
+      "dimension": "metacognition",
+      "sefirah": "Multiple"
+    },
+    "bri_met_007": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:12.681267+00:00",
+      "world": "briah",
+      "dimension": "metacognition",
+      "sefirah": "Multiple"
+    },
+    "bri_met_008": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:12.997925+00:00",
+      "world": "briah",
+      "dimension": "metacognition",
+      "sefirah": "Multiple"
+    },
+    "bri_met_009": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:13.274488+00:00",
+      "world": "briah",
+      "dimension": "metacognition",
+      "sefirah": "Multiple"
+    },
+    "ytz_bnd_001": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:13.621823+00:00",
+      "world": "yetzirah",
+      "dimension": "bonds_and_attachment",
+      "sefirah": "Multiple"
+    },
+    "ytz_bnd_002": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:14.064094+00:00",
+      "world": "yetzirah",
+      "dimension": "bonds_and_attachment",
+      "sefirah": "Multiple"
+    },
+    "ytz_bnd_003": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:14.381511+00:00",
+      "world": "yetzirah",
+      "dimension": "bonds_and_attachment",
+      "sefirah": "Multiple"
+    },
+    "ytz_bnd_004": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:14.807178+00:00",
+      "world": "yetzirah",
+      "dimension": "bonds_and_attachment",
+      "sefirah": "Multiple"
+    },
+    "ytz_bnd_005": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:15.147914+00:00",
+      "world": "yetzirah",
+      "dimension": "bonds_and_attachment",
+      "sefirah": "Multiple"
+    },
+    "ytz_bnd_006": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:15.484608+00:00",
+      "world": "yetzirah",
+      "dimension": "bonds_and_attachment",
+      "sefirah": "Multiple"
+    },
+    "ytz_bnd_007": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:15.804961+00:00",
+      "world": "yetzirah",
+      "dimension": "bonds_and_attachment",
+      "sefirah": "Multiple"
+    },
+    "ytz_bnd_008": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:16.188303+00:00",
+      "world": "yetzirah",
+      "dimension": "bonds_and_attachment",
+      "sefirah": "Multiple"
+    },
+    "ytz_bnd_009": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:16.602250+00:00",
+      "world": "yetzirah",
+      "dimension": "bonds_and_attachment",
+      "sefirah": "Multiple"
+    },
+    "ytz_bnd_010": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:16.973234+00:00",
+      "world": "yetzirah",
+      "dimension": "bonds_and_attachment",
+      "sefirah": "Multiple"
+    },
+    "ytz_cre_001": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:17.354508+00:00",
+      "world": "yetzirah",
+      "dimension": "creative_expression",
+      "sefirah": "Multiple"
+    },
+    "ytz_cre_002": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:17.734434+00:00",
+      "world": "yetzirah",
+      "dimension": "creative_expression",
+      "sefirah": "Multiple"
+    },
+    "ytz_cre_003": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:18.075438+00:00",
+      "world": "yetzirah",
+      "dimension": "creative_expression",
+      "sefirah": "Multiple"
+    },
+    "ytz_cre_004": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:18.405251+00:00",
+      "world": "yetzirah",
+      "dimension": "creative_expression",
+      "sefirah": "Multiple"
+    },
+    "ytz_cre_005": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:18.877468+00:00",
+      "world": "yetzirah",
+      "dimension": "creative_expression",
+      "sefirah": "Multiple"
+    },
+    "ytz_cre_006": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:19.314568+00:00",
+      "world": "yetzirah",
+      "dimension": "creative_expression",
+      "sefirah": "Multiple"
+    },
+    "ytz_cre_007": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:19.673737+00:00",
+      "world": "yetzirah",
+      "dimension": "creative_expression",
+      "sefirah": "Multiple"
+    },
+    "ytz_cre_008": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:19.922847+00:00",
+      "world": "yetzirah",
+      "dimension": "creative_expression",
+      "sefirah": "Multiple"
+    },
+    "ytz_cre_009": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:20.287022+00:00",
+      "world": "yetzirah",
+      "dimension": "creative_expression",
+      "sefirah": "Multiple"
+    },
+    "ytz_cre_010": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:20.648158+00:00",
+      "world": "yetzirah",
+      "dimension": "creative_expression",
+      "sefirah": "Multiple"
+    },
+    "ytz_hod_001": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:21.132729+00:00",
+      "world": "yetzirah",
+      "dimension": "hod_emotional_expression",
+      "sefirah": "Hod"
+    },
+    "ytz_hod_002": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:21.539405+00:00",
+      "world": "yetzirah",
+      "dimension": "hod_emotional_expression",
+      "sefirah": "Hod"
+    },
+    "ytz_hod_003": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:21.902814+00:00",
+      "world": "yetzirah",
+      "dimension": "hod_emotional_expression",
+      "sefirah": "Hod"
+    },
+    "ytz_hod_004": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:22.293297+00:00",
+      "world": "yetzirah",
+      "dimension": "hod_emotional_expression",
+      "sefirah": "Hod"
+    },
+    "ytz_hod_005": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:22.701357+00:00",
+      "world": "yetzirah",
+      "dimension": "hod_emotional_expression",
+      "sefirah": "Hod"
+    },
+    "ytz_hod_006": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:23.093310+00:00",
+      "world": "yetzirah",
+      "dimension": "hod_emotional_expression",
+      "sefirah": "Hod"
+    },
+    "ytz_hod_007": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:23.491142+00:00",
+      "world": "yetzirah",
+      "dimension": "hod_emotional_expression",
+      "sefirah": "Hod"
+    },
+    "ytz_hod_008": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:23.816210+00:00",
+      "world": "yetzirah",
+      "dimension": "hod_emotional_expression",
+      "sefirah": "Hod"
+    },
+    "ytz_hod_009": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:24.190655+00:00",
+      "world": "yetzirah",
+      "dimension": "hod_emotional_expression",
+      "sefirah": "Hod"
+    },
+    "ytz_hod_010": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:24.594746+00:00",
+      "world": "yetzirah",
+      "dimension": "hod_emotional_expression",
+      "sefirah": "Hod"
+    },
+    "ytz_int_001": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:24.997047+00:00",
+      "world": "yetzirah",
+      "dimension": "yetzirah_integration",
+      "sefirah": "Multiple"
+    },
+    "ytz_int_002": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:25.386721+00:00",
+      "world": "yetzirah",
+      "dimension": "yetzirah_integration",
+      "sefirah": "Multiple"
+    },
+    "ytz_int_003": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:25.782394+00:00",
+      "world": "yetzirah",
+      "dimension": "yetzirah_integration",
+      "sefirah": "Multiple"
+    },
+    "ytz_int_004": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:26.074436+00:00",
+      "world": "yetzirah",
+      "dimension": "yetzirah_integration",
+      "sefirah": "Multiple"
+    },
+    "ytz_int_005": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:26.567470+00:00",
+      "world": "yetzirah",
+      "dimension": "yetzirah_integration",
+      "sefirah": "Multiple"
+    },
+    "ytz_int_006": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:27.083538+00:00",
+      "world": "yetzirah",
+      "dimension": "yetzirah_integration",
+      "sefirah": "Multiple"
+    },
+    "ytz_int_007": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:27.552102+00:00",
+      "world": "yetzirah",
+      "dimension": "yetzirah_integration",
+      "sefirah": "Multiple"
+    },
+    "ytz_int_008": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:27.993568+00:00",
+      "world": "yetzirah",
+      "dimension": "yetzirah_integration",
+      "sefirah": "Multiple"
+    },
+    "ytz_int_009": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:28.439198+00:00",
+      "world": "yetzirah",
+      "dimension": "yetzirah_integration",
+      "sefirah": "Multiple"
+    },
+    "ytz_int_010": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:28.895374+00:00",
+      "world": "yetzirah",
+      "dimension": "yetzirah_integration",
+      "sefirah": "Multiple"
+    },
+    "ytz_ntz_001": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:29.284570+00:00",
+      "world": "yetzirah",
+      "dimension": "netzach_emotional_persistence",
+      "sefirah": "Netzach"
+    },
+    "ytz_ntz_002": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:29.808220+00:00",
+      "world": "yetzirah",
+      "dimension": "netzach_emotional_persistence",
+      "sefirah": "Netzach"
+    },
+    "ytz_ntz_003": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:30.251205+00:00",
+      "world": "yetzirah",
+      "dimension": "netzach_emotional_persistence",
+      "sefirah": "Netzach"
+    },
+    "ytz_ntz_004": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:30.664645+00:00",
+      "world": "yetzirah",
+      "dimension": "netzach_emotional_persistence",
+      "sefirah": "Netzach"
+    },
+    "ytz_ntz_005": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:31.101163+00:00",
+      "world": "yetzirah",
+      "dimension": "netzach_emotional_persistence",
+      "sefirah": "Netzach"
+    },
+    "ytz_ntz_006": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:31.400234+00:00",
+      "world": "yetzirah",
+      "dimension": "netzach_emotional_persistence",
+      "sefirah": "Netzach"
+    },
+    "ytz_ntz_007": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:31.742405+00:00",
+      "world": "yetzirah",
+      "dimension": "netzach_emotional_persistence",
+      "sefirah": "Netzach"
+    },
+    "ytz_ntz_008": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:32.136495+00:00",
+      "world": "yetzirah",
+      "dimension": "netzach_emotional_persistence",
+      "sefirah": "Netzach"
+    },
+    "ytz_ntz_009": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:32.502348+00:00",
+      "world": "yetzirah",
+      "dimension": "netzach_emotional_persistence",
+      "sefirah": "Netzach"
+    },
+    "ass_act_001": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:32.838036+00:00",
+      "world": "assiah",
+      "dimension": "action_and_doing",
+      "sefirah": "Malkhut"
+    },
+    "ass_act_002": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:33.168523+00:00",
+      "world": "assiah",
+      "dimension": "action_and_doing",
+      "sefirah": "Malkhut"
+    },
+    "ass_act_003": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:33.537217+00:00",
+      "world": "assiah",
+      "dimension": "action_and_doing",
+      "sefirah": "Malkhut"
+    },
+    "ass_act_004": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:33.968472+00:00",
+      "world": "assiah",
+      "dimension": "action_and_doing",
+      "sefirah": "Malkhut"
+    },
+    "ass_act_005": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:34.394657+00:00",
+      "world": "assiah",
+      "dimension": "action_and_doing",
+      "sefirah": "Malkhut"
+    },
+    "ass_act_006": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:34.928459+00:00",
+      "world": "assiah",
+      "dimension": "action_and_doing",
+      "sefirah": "Malkhut"
+    },
+    "ass_act_007": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:35.377617+00:00",
+      "world": "assiah",
+      "dimension": "action_and_doing",
+      "sefirah": "Malkhut"
+    },
+    "ass_act_008": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:35.705251+00:00",
+      "world": "assiah",
+      "dimension": "action_and_doing",
+      "sefirah": "Malkhut"
+    },
+    "ass_act_009": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:36.156209+00:00",
+      "world": "assiah",
+      "dimension": "action_and_doing",
+      "sefirah": "Malkhut"
+    },
+    "ass_act_010": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:36.528959+00:00",
+      "world": "assiah",
+      "dimension": "action_and_doing",
+      "sefirah": "Malkhut"
+    },
+    "ass_bod_001": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:36.911665+00:00",
+      "world": "assiah",
+      "dimension": "relationship_with_body",
+      "sefirah": "Malkhut"
+    },
+    "ass_bod_002": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:37.244635+00:00",
+      "world": "assiah",
+      "dimension": "relationship_with_body",
+      "sefirah": "Malkhut"
+    },
+    "ass_bod_003": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:37.562171+00:00",
+      "world": "assiah",
+      "dimension": "relationship_with_body",
+      "sefirah": "Malkhut"
+    },
+    "ass_bod_004": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:37.972843+00:00",
+      "world": "assiah",
+      "dimension": "relationship_with_body",
+      "sefirah": "Malkhut"
+    },
+    "ass_bod_005": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:38.444965+00:00",
+      "world": "assiah",
+      "dimension": "relationship_with_body",
+      "sefirah": "Malkhut"
+    },
+    "ass_bod_006": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:38.845257+00:00",
+      "world": "assiah",
+      "dimension": "relationship_with_body",
+      "sefirah": "Malkhut"
+    },
+    "ass_bod_007": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:39.252144+00:00",
+      "world": "assiah",
+      "dimension": "relationship_with_body",
+      "sefirah": "Malkhut"
+    },
+    "ass_bod_008": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:39.572476+00:00",
+      "world": "assiah",
+      "dimension": "relationship_with_body",
+      "sefirah": "Malkhut"
+    },
+    "ass_bod_009": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:40.104884+00:00",
+      "world": "assiah",
+      "dimension": "relationship_with_body",
+      "sefirah": "Malkhut"
+    },
+    "ass_bod_010": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:40.441893+00:00",
+      "world": "assiah",
+      "dimension": "relationship_with_body",
+      "sefirah": "Malkhut"
+    },
+    "ass_hab_001": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:40.902108+00:00",
+      "world": "assiah",
+      "dimension": "habits_and_routines",
+      "sefirah": "Malkhut"
+    },
+    "ass_hab_002": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:41.304839+00:00",
+      "world": "assiah",
+      "dimension": "habits_and_routines",
+      "sefirah": "Malkhut"
+    },
+    "ass_hab_003": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:41.683975+00:00",
+      "world": "assiah",
+      "dimension": "habits_and_routines",
+      "sefirah": "Malkhut"
+    },
+    "ass_hab_004": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:42.128395+00:00",
+      "world": "assiah",
+      "dimension": "habits_and_routines",
+      "sefirah": "Malkhut"
+    },
+    "ass_hab_005": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:42.564483+00:00",
+      "world": "assiah",
+      "dimension": "habits_and_routines",
+      "sefirah": "Malkhut"
+    },
+    "ass_hab_006": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:43.019384+00:00",
+      "world": "assiah",
+      "dimension": "habits_and_routines",
+      "sefirah": "Malkhut"
+    },
+    "ass_hab_007": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:43.455419+00:00",
+      "world": "assiah",
+      "dimension": "habits_and_routines",
+      "sefirah": "Malkhut"
+    },
+    "ass_hab_008": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:43.824090+00:00",
+      "world": "assiah",
+      "dimension": "habits_and_routines",
+      "sefirah": "Malkhut"
+    },
+    "ass_hab_009": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:44.146263+00:00",
+      "world": "assiah",
+      "dimension": "habits_and_routines",
+      "sefirah": "Malkhut"
+    },
+    "ass_hab_010": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:44.531533+00:00",
+      "world": "assiah",
+      "dimension": "habits_and_routines",
+      "sefirah": "Malkhut"
+    },
+    "ass_int_001": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:44.891340+00:00",
+      "world": "assiah",
+      "dimension": "assiah_integration",
+      "sefirah": "Malkhut"
+    },
+    "ass_int_002": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:45.258342+00:00",
+      "world": "assiah",
+      "dimension": "assiah_integration",
+      "sefirah": "Malkhut"
+    },
+    "ass_int_003": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:45.713869+00:00",
+      "world": "assiah",
+      "dimension": "assiah_integration",
+      "sefirah": "Malkhut"
+    },
+    "ass_int_004": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:46.236485+00:00",
+      "world": "assiah",
+      "dimension": "assiah_integration",
+      "sefirah": "Malkhut"
+    },
+    "ass_int_005": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:46.580697+00:00",
+      "world": "assiah",
+      "dimension": "assiah_integration",
+      "sefirah": "Malkhut"
+    },
+    "ass_int_006": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:46.910756+00:00",
+      "world": "assiah",
+      "dimension": "assiah_integration",
+      "sefirah": "Malkhut"
+    },
+    "ass_int_007": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:47.242761+00:00",
+      "world": "assiah",
+      "dimension": "assiah_integration",
+      "sefirah": "Malkhut"
+    },
+    "ass_int_008": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:47.662471+00:00",
+      "world": "assiah",
+      "dimension": "assiah_integration",
+      "sefirah": "Malkhut"
+    },
+    "ass_int_009": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:48.106060+00:00",
+      "world": "assiah",
+      "dimension": "assiah_integration",
+      "sefirah": "Malkhut"
+    },
+    "ass_int_010": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:48.441256+00:00",
+      "world": "assiah",
+      "dimension": "assiah_integration",
+      "sefirah": "Malkhut"
+    },
+    "ass_mlk_001": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:48.788489+00:00",
+      "world": "assiah",
+      "dimension": "malkhut_physical_manifestation",
+      "sefirah": "Malkhut"
+    },
+    "ass_mlk_002": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:49.201120+00:00",
+      "world": "assiah",
+      "dimension": "malkhut_physical_manifestation",
+      "sefirah": "Malkhut"
+    },
+    "ass_mlk_003": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:49.609202+00:00",
+      "world": "assiah",
+      "dimension": "malkhut_physical_manifestation",
+      "sefirah": "Malkhut"
+    },
+    "ass_mlk_004": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:49.957361+00:00",
+      "world": "assiah",
+      "dimension": "malkhut_physical_manifestation",
+      "sefirah": "Malkhut"
+    },
+    "ass_mlk_005": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:50.283922+00:00",
+      "world": "assiah",
+      "dimension": "malkhut_physical_manifestation",
+      "sefirah": "Malkhut"
+    },
+    "ass_mlk_006": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:50.665036+00:00",
+      "world": "assiah",
+      "dimension": "malkhut_physical_manifestation",
+      "sefirah": "Malkhut"
+    },
+    "ass_mlk_007": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:51.129654+00:00",
+      "world": "assiah",
+      "dimension": "malkhut_physical_manifestation",
+      "sefirah": "Malkhut"
+    },
+    "ass_mlk_008": {
+      "value": 3,
+      "timestamp": "2026-01-17T16:43:51.686539+00:00",
+      "world": "assiah",
+      "dimension": "malkhut_physical_manifestation",
+      "sefirah": "Malkhut"
+    }
+  },
+  "completed_worlds": [
+    "atzilut",
+    "briah",
+    "yetzirah",
+    "assiah"
+  ],
+  "progress_percentage": 100.0,
+  "worlds_progress": {
+    "atzilut": {
+      "answered": 49,
+      "total": 49
+    },
+    "briah": {
+      "answered": 49,
+      "total": 49
+    },
+    "yetzirah": {
+      "answered": 49,
+      "total": 49
+    },
+    "assiah": {
+      "answered": 48,
+      "total": 48
+    }
+  }
+}

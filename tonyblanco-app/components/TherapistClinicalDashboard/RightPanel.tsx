@@ -161,25 +161,23 @@ export default function RightPanel({
         </div>
       )}
 
+
       {activeSection === 'evaluations' && (
-        <div className="space-y-3">
-          <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm space-y-2">
-            <h3 className="text-sm font-semibold text-gray-900">Evaluaciones</h3>
-            <p className="text-xs text-gray-500">
-              Vista en solo lectura de tests asignados. Sin metricas automaticas.
-            </p>
-            <Link
-              href={
-                normalizedPatientId
-                  ? `/dashboard/therapist/tests?patient_id=${encodeURIComponent(normalizedPatientId)}`
-                  : '/dashboard/therapist/tests'
-              }
-              className="inline-flex items-center text-xs font-medium text-blue-600 hover:text-blue-800"
-            >
-              Abrir catalogo de tests
-            </Link>
-          </div>
-          <AssignedTestsSection patientId={normalizedPatientId} />
+        <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm space-y-2">
+          <h3 className="text-sm font-semibold text-gray-900">Evaluaciones</h3>
+          <p className="text-xs text-gray-500">
+            Vista en solo lectura de tests asignados. Se muestran en el panel central.
+          </p>
+          <Link
+            href={
+              normalizedPatientId
+                ? `/dashboard/therapist/tests?patient_id=${encodeURIComponent(normalizedPatientId)}`
+                : '/dashboard/therapist/tests'
+            }
+            className="inline-flex items-center text-xs font-medium text-blue-600 hover:text-blue-800"
+          >
+            Abrir catálogo de tests
+          </Link>
         </div>
       )}
 

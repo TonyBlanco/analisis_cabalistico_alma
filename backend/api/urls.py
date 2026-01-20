@@ -62,6 +62,8 @@ from .test_views import (
     UserTestStatsView,
     GrantTestAccessView,
     AssignTestToPatientView,
+    ArchiveTestAssignmentView,
+    UnassignTestFromPatientView,
     PatientPreviousTestsView,
     ProcessTestSubmissionView,
     PHQ9SubmitView,
@@ -69,6 +71,15 @@ from .test_views import (
     BAISubmitView,
     ISISubmitView,
     BDI2SubmitView
+)
+from .patient_note_views import PatientNotesView
+from .assignments import (
+    AssignmentListCreateView,
+    AssignmentDetailView,
+    AssignmentStartView,
+    AssignmentSubmitView,
+    AssignmentComputeView,
+    AssignmentResultsView,
 )
 from .gematria_views import GematriaInterpretationView
 from .tarot_views import TarotAnalysisView, TarotCabalisticCorrespondenceView
@@ -87,6 +98,7 @@ from .admin_views import (
     EnhancedAdminUsersView,
     AdminUserManagementView
 )
+from .federation_views import FederationHubFeedView
 from .views import (
     reset_admin_passwords_temp,
     configure_admin_profiles_temp,
@@ -123,7 +135,9 @@ from .resonancia_views import (
     ResonanciaObservationDetailView,
     ResonanciaRelationListCreateView,
 )
-from symbolic.swm_v3.views import SwmV3SymbolicReadingCreateView
+# The symbolic.swm_v3 package is not available as a Python package in this repo.
+# Comment out the import and its URL pattern to avoid import errors at startup.
+# from symbolic.swm_v3.views import SwmV3SymbolicReadingCreateView
 
 urlpatterns = [
     # ⚠️ ENDPOINTS TEMPORALES - ELIMINAR DESPUÉS DE USAR ⚠️
@@ -174,7 +188,7 @@ urlpatterns = [
     path('tarot/cabalistic-correspondence/', TarotCabalisticCorrespondenceView.as_view(), name='tarot_cabalistic_correspondence'),
 
     # SWM v3 (Phase 3): governed persistence for symbolic readings (mock only)
-    path('swm-v3/symbolic-readings/', SwmV3SymbolicReadingCreateView.as_view(), name='swm_v3_symbolic_readings_create'),
+    # path('swm-v3/symbolic-readings/', SwmV3SymbolicReadingCreateView.as_view(), name='swm_v3_symbolic_readings_create'),
 
     path('therapist/patients/<int:id>/tarot-analysis/generate-and-save/', GenerateAndSaveTarotAnalysisView.as_view(), name='tarot_analysis_generate_and_save'),
     path('therapist/patients/<int:id>/cabalistic-analysis/', SaveCabalisticAnalysisView.as_view(), name='save_cabalistic_analysis'),
@@ -192,11 +206,6 @@ urlpatterns = [
     path('payments/webhook/', StripeWebhookView.as_view(), name='stripe_webhook'),
     path('payments/cancel-subscription/', CancelSubscriptionView.as_view(), name='cancel_subscription'),
     path('payments/subscription-status/', SubscriptionStatusView.as_view(), name='subscription_status'),
-    
-    # ========== ADMIN ==========
-    path('admin/stats/', AdminStatsView.as_view(), name='admin_stats'),
-    path('admin/users/', AdminUsersView.as_view(), name='admin_users'),
-    path('admin/users/<int:pk>/', AdminUserDetailView.as_view(), name='admin_user_detail'),
     
     # ========== SERVICIOS Y RESERVAS ==========
     
@@ -247,7 +256,18 @@ urlpatterns = [
     path('tests/stats/', UserTestStatsView.as_view(), name='test_stats'),
     path('tests/grant-access/', GrantTestAccessView.as_view(), name='grant_test_access'),
     path('tests/assign-to-patient/', AssignTestToPatientView.as_view(), name='assign_test_to_patient'),
+    path('tests/assignments/<int:assignment_id>/archive/', ArchiveTestAssignmentView.as_view(), name='archive_test_assignment'),
+    path('tests/unassign-from-patient/', UnassignTestFromPatientView.as_view(), name='unassign_test_from_patient'),
     path('tests/patient-previous/', PatientPreviousTestsView.as_view(), name='patient_previous_tests'),
+    # Assignment workflow (MCMI4 Mystic)
+    path('assignments', AssignmentListCreateView.as_view(), name='assignment_list_create'),
+    path('assignments/<int:assignment_id>/', AssignmentDetailView.as_view(), name='assignment_detail'),
+    path('assignments/<int:assignment_id>/start', AssignmentStartView.as_view(), name='assignment_start'),
+    path('assignments/<int:assignment_id>/submit', AssignmentSubmitView.as_view(), name='assignment_submit'),
+    path('assignments/<int:assignment_id>/compute', AssignmentComputeView.as_view(), name='assignment_compute'),
+    path('assignments/<int:assignment_id>/results', AssignmentResultsView.as_view(), name='assignment_results'),
+    # Therapist -> Patient notes (unidirectional)
+    path('patient-notes/', PatientNotesView.as_view(), name='patient_notes'),
     path('tests/<str:code>/', TestModuleDetailView.as_view(), name='test_detail'),
     
     # AnalysisRecord core (núcleo normalizado de análisis)
@@ -261,6 +281,10 @@ urlpatterns = [
     
     # Asistente IA para SCID-5 Holístico
     path('analysis-records/scid5-ai-assistant/', SCID5AIAssistantView.as_view(), name='scid5_ai_assistant'),
+    
+    # ========== FEDERACIÓN HOLÍSTICA (Phase-1) ==========
+    # Endpoint read-only para lectura federada cross-workspace (hubs MSHE/SCDF/SCID-5)
+    path('federation/hub-feed/', FederationHubFeedView.as_view(), name='federation_hub_feed'),
 
     # Dominio bio-emocional & árbol transgeneracional (aislado)
     path('bioemotional/', include('api.bioemotional.urls', namespace='bioemotional')),
@@ -284,4 +308,10 @@ urlpatterns = [
     path('resources/my/', MyResourcesView.as_view(), name='my_resources'),
     path('patients/<int:patient_id>/resources/assign/', AssignResourceToPatientView.as_view(), name='assign_resource_to_patient'),
     path('resources/<int:resource_id>/acquire/', AcquireResourceView.as_view(), name='acquire_resource'),
+    
+    # SWM MCMI-4 Místico (Specialized Workspace Module)
+    path('swm/mcmi4/', include('swm.mcmi4.urls', namespace='swm_mcmi4')),
+    
+    # SWM MCMI-4 Reflection (Experiential Reflection Module)
+    path('swm/mcmi4-reflection/', include('swm.mcmi4_reflection.urls', namespace='swm_mcmi4_reflection')),
 ]

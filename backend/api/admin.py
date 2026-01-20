@@ -14,7 +14,8 @@ from .models import (
     AvailableSlot,
     BlockedDate
 )
-from .test_models import TestModule, UserTestAccess, TestResult
+from .test_models import TestModule, UserTestAccess, TestResult, HolisticExploration
+from .mcmi4_models import MCMI4MysticQuestionBank, MCMI4MysticTestInstance, DimensionConfig
 
 
 @admin.register(UserProfile)
@@ -177,3 +178,67 @@ class TestResultAdmin(admin.ModelAdmin):
     search_fields = ['user__username', 'test_module__name', 'client_name', 'notes']
     readonly_fields = ['created_at', 'updated_at']
     ordering = ['-created_at']
+
+
+@admin.register(HolisticExploration)
+class HolisticExplorationAdmin(admin.ModelAdmin):
+    list_display = ['code', 'public_name', 'category', 'primary_sefirah', 'source_test']
+    search_fields = ['code', 'public_name']
+    list_filter = ['category', 'primary_sefirah', 'therapist_only_results']
+    readonly_fields = [
+        'code',
+        'public_name',
+        'category',
+        'primary_sefirah',
+        'secondary_sefirot',
+        'client_visible_fields',
+        'therapist_only_fields',
+        'source_test',
+        'therapist_only_results',
+        'ai_interpretation_enabled',
+        'description',
+        'created_at',
+    ]
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        if request.method in ("POST", "PUT", "PATCH", "DELETE"):
+            return False
+        return True
+
+
+# ========== ADMIN PARA MCMI-4-MYSTIC ==========
+
+@admin.register(MCMI4MysticQuestionBank)
+class MCMI4MysticQuestionBankAdmin(admin.ModelAdmin):
+    list_display = ['question_id', 'world', 'dimension_id', 'sefirah', 'is_active']
+    list_filter = ['world', 'sefirah', 'is_active', 'reverse_scored']
+    search_fields = ['question_id', 'text_es', 'dimension_id']
+    ordering = ['world', 'dimension_id', 'question_id']
+    readonly_fields = ['created_at', 'updated_at']
+
+
+@admin.register(MCMI4MysticTestInstance)
+class MCMI4MysticTestInstanceAdmin(admin.ModelAdmin):
+    list_display = ['patient', 'applied_at', 'is_complete', 'get_completion_percentage']
+    list_filter = ['is_complete', 'applied_at']
+    search_fields = ['patient__username', 'patient__email']
+    ordering = ['-applied_at']
+    readonly_fields = ['applied_at', 'completed_at']
+    
+    def get_completion_percentage(self, obj):
+        return f"{obj.get_completion_percentage()}%"
+    get_completion_percentage.short_description = 'Completion'
+
+
+@admin.register(DimensionConfig)
+class DimensionConfigAdmin(admin.ModelAdmin):
+    list_display = ['dimension_id', 'name', 'world', 'sefirah', 'items_required']
+    list_filter = ['world', 'sefirah']
+    search_fields = ['dimension_id', 'name']
+    ordering = ['world', 'dimension_id']

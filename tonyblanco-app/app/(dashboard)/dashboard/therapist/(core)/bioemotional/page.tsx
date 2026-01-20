@@ -6,6 +6,7 @@ import ActivePatientIndicator from '@/components/ActivePatientIndicator';
 import BodySoulVisualization from '@/components/BodySoulVisualization';
 import { useRoleGuard } from '@/lib/role-guards';
 import { getActivePatient } from '@/lib/active-patient';
+import confirmAction from '@/lib/confirm';
 
 type TabId = 'dictionary' | 'tree' | 'hypotheses';
 
@@ -420,8 +421,9 @@ export default function TherapistBioEmotionalPage() {
     }
   };
 
+
   const handleDeleteHypothesis = async (id: string) => {
-    const confirmed = window.confirm('¿Seguro que quieres eliminar esta hipótesis?');
+    const confirmed = await confirmAction('¿Seguro que quieres eliminar esta hipótesis?');
     if (!confirmed) return;
 
     try {

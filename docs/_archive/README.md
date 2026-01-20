@@ -1,4 +1,4 @@
-# Análisis Cabalístico del Alma — Clinical Platform
+# Análisis Cabalístico del Alma — Holistic Platform
 
 **Version**: 2.0  
 **Status**: PRODUCTION  

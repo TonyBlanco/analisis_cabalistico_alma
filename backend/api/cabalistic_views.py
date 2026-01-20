@@ -27,7 +27,23 @@ from .services.analysis_service import create_and_execute_analysis
 from .serializers import AnalysisRecordSerializer
 
 # Symbolic PoC engine
-from .symbolic.kabbalah_engine import score_72_names, compute_tikun_signals
+# The `api.symbolic` package may be missing in some developer checkouts.
+# Guard the import to avoid import-time crashes, but fail fast at runtime
+# if code actually attempts to use the engine (no silent placeholders).
+try:
+    from .symbolic.kabbalah_engine import score_72_names, compute_tikun_signals
+except ModuleNotFoundError:
+    def score_72_names(*args, **kwargs):
+        raise RuntimeError(
+            "Kabbalah engine no disponible: dependencia api.symbolic retirada/no presente. "
+            "Este endpoint requiere restauración explícita del motor o desactivación gobernada."
+        )
+
+    def compute_tikun_signals(*args, **kwargs):
+        raise RuntimeError(
+            "Kabbalah engine no disponible: dependencia api.symbolic retirada/no presente. "
+            "Este endpoint requiere restauración explícita del motor o desactivación gobernada."
+        )
 
 logger = logging.getLogger(__name__)
 

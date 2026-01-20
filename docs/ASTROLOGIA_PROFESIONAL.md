@@ -5,14 +5,14 @@
 ### Propósito
 
 - Visualización profesional (SVG) para lectura holística.
-- El sistema evita lenguaje clínico/diagnóstico y no incluye PDFs en las fases actuales.
+- El sistema evita lenguaje médico/diagnóstico y no incluye PDFs en las fases actuales.
 
 ### Aislamiento por dominios
 
 - Astrologia Profesional vive en su workspace: `tonyblanco-app/app/(dashboard)/dashboard/therapist/(swm)/astrologia/page.tsx` y `tonyblanco-app/components/AstrologyWorkspace/*`.
-- Astrologia Profesional NO debe importar vistas clinicas (`tonyblanco-app/components/clinical/*`) ni usar `_legacy_*`.
-- El Espacio Clinico vive en `tonyblanco-app/app/(dashboard)/dashboard/therapist/(core)/*` y `tonyblanco-app/components/TherapistClinicalDashboard/*`.
-- El Espacio Clinico NO debe importar componentes de Astrologia (`tonyblanco-app/components/AstrologyWorkspace/*`).
+- Astrologia Profesional NO debe importar vistas del core (`tonyblanco-app/components/clinical/*`) ni usar `_legacy_*`.
+- El Espacio Central vive en `tonyblanco-app/app/(dashboard)/dashboard/therapist/(core)/*` y `tonyblanco-app/components/TherapistClinicalDashboard/*`.
+- El Espacio Central NO debe importar componentes de Astrologia (`tonyblanco-app/components/AstrologyWorkspace/*`).
 
 ### Motor astronómico (backend existente)
 
@@ -30,7 +30,7 @@ Si falta información: la UI puede renderizar placeholder, pero **no dispara cá
 
 ### Flujo de cálculo (FASE 3)
 
-1. El terapeuta abre `/dashboard/therapist/astrologia`.
+1. El profesional abre `/dashboard/therapist/astrologia`.
 2. Al pulsar **“Recalcular carta”**:
    - Se ejecuta el cálculo real de la carta natal (backend).
    - El backend puede devolver un `analysis_result` con técnicas adicionales (si están habilitadas en servidor).

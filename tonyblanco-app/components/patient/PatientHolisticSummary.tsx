@@ -81,7 +81,8 @@ export default function PatientHolisticSummary() {
       // Fetch all analysis records for current patient
       const response = await fetch(`${API_BASE_URL}/analysis-records/`, {
         headers: {
-          'Authorization': `Bearer ${getAuthToken()}`,
+          // Backend expects 'Token <token>' (Django token auth)
+          'Authorization': `Token ${getAuthToken()}`,
           'Content-Type': 'application/json'
         }
       });
@@ -91,7 +92,9 @@ export default function PatientHolisticSummary() {
       }
 
       const data = await response.json();
-      const msheRecords = data.results.filter((r: AnalysisRecord) =>
+      // Handle both paginated ({results: []}) and direct array responses
+      const records = Array.isArray(data) ? data : (data.results || []);
+      const msheRecords = records.filter((r: AnalysisRecord) =>
         r.kind === 'holistic_evaluative_synthesis' && r.therapist_annotations?.therapist_validation
       );
 

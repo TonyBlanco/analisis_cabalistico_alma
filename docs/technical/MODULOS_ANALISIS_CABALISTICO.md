@@ -41,7 +41,7 @@ Calcula los valores numéricos de palabras o textos en hebreo usando diferentes 
 - ✅ Búsqueda de resonancias (palabras con el mismo valor)
 - ✅ Diccionario de palabras hebreas con valores
 - ✅ Interpretación con IA (Google Gemini)
-- ✅ Guardado de análisis en ficha del paciente
+- ✅ Guardado de análisis en ficha del usuario
 - ✅ Guía educativa integrada
 
 #### **Datos de Entrada:**
@@ -229,7 +229,7 @@ Genera una carta astral completa interpretada desde la perspectiva cabalística:
 - **Estado**: 🚧 **En Desarrollo (Placeholder)**
 
 #### **¿Qué hace?**
-Análisis profundo de las Sefirot y el diseño energético del paciente:
+Análisis profundo de las Sefirot y el diseño energético del usuario:
 
 1. **Análisis de Sefirot**:
    - Estado de cada una de las 10 Sefirot
@@ -302,7 +302,7 @@ Versión para terapeutas del módulo de Astrología Cabalística, con funcionali
 - **Estado**: 🚧 **En Desarrollo (Placeholder)**
 
 #### **¿Qué hace?**
-Identifica el Tikún (corrección) específico del alma del paciente:
+Identifica el Tikún (corrección) específico del alma del usuario:
 
 1. **Tikún del Alma**:
    - Misión de vida específica
@@ -371,7 +371,7 @@ ANALYSIS_TYPE_CHOICES = [
 
 ### **Campos del Modelo:**
 - `therapist`: Terapeuta que realizó el análisis
-- `patient`: Paciente analizado
+- `patient`: Usuario analizado
 - `analysis_type`: Tipo de análisis (de las opciones arriba)
 - `input_data`: JSON con datos de entrada
 - `result_data`: JSON con resultados
@@ -387,7 +387,7 @@ ANALYSIS_TYPE_CHOICES = [
 - Sección: **"Alta Cábala"**
 - Todos los módulos listados en el sidebar
 
-### **Ficha del Paciente** (`/therapist/patients/[id]`)
+### **Ficha del Usuario** (`/therapist/patients/[id]`)
 - Sección: **"Herramientas de Alta Cábala"**
 - Botones para ejecutar cada análisis
 - Sección: **"Historial de Análisis Cabalísticos"**

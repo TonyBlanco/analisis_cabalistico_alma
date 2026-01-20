@@ -1,0 +1,11 @@
+id,instrument,position,text,scale,weight
+AUDIT_01,AUDIT_sintetico,1,¿Con qué frecuencia tomas una bebida al día?,Alcohol,1
+AUDIT_02,AUDIT_sintetico,2,¿Cuántas bebidas tomas en un día típico cuando bebes?,Alcohol,1
+AUDIT_03,AUDIT_sintetico,3,¿Con qué frecuencia tomas 6 o más bebidas en una sola ocasión?,Alcohol,1
+AUDIT_04,AUDIT_sintetico,4,¿Con qué frecuencia sientes que no puedes dejar de beber una vez que empiezas?,Alcohol,1
+AUDIT_05,AUDIT_sintetico,5,¿Con qué frecuencia no puedes cumplir con tus responsabilidades por beber?,Alcohol,1
+AUDIT_06,AUDIT_sintetico,6,¿Alguna vez has necesitado un trago por la mañana para calmarte o curar una resaca?,Alcohol,1
+AUDIT_07,AUDIT_sintetico,7,¿Has tenido sentimientos de culpa o remordimiento por beber?,Alcohol,1
+AUDIT_08,AUDIT_sintetico,8,¿Alguna vez has olvidado lo que hiciste mientras bebías?,Alcohol,1
+AUDIT_09,AUDIT_sintetico,9,¿Alguna vez alguien se preocupó por tu consumo de alcohol o te sugirió reducirlo?,Alcohol,1
+AUDIT_10,AUDIT_sintetico,10,¿Has tenido lesiones debido al alcohol (tuyas o de otra persona)?,Alcohol,1

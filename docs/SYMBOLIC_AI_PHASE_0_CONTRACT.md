@@ -1,13 +1,13 @@
 # Contrato IA Simbolica Fase 0 (Diseno / No Ejecucion)
 
 Documento de contrato para la IA simbolica del sistema.
-No ejecuta IA. No crea logica clinica. No opera en tiempo real.
+No ejecuta IA. No crea logica medica. No opera en tiempo real.
 
 ## Seccion 1 - Proposito general de la IA simbolica
 La IA simbolica del sistema existe para:
 - Integrar grandes volumenes de datos simbolicos.
 - Cruzar informacion cabalistica, transgeneracional, corporal y temporal.
-- Asistir y, en fases avanzadas, ejecutar diagnostico holistico cabalistico.
+- Asistir y, en fases avanzadas, ejecutar analisis holistico cabalistico.
 - Operar en planos no accesibles a la cognicion humana lineal.
 
 ## Seccion 2 - Fase 0 (estado actual - bloqueado)
@@ -22,22 +22,22 @@ En Fase 0, la IA simbolica:
 - No toma decisiones.
 
 ### Prohibiciones absolutas en Fase 0
-- No diagnostico.
+- No analisis.
 - No prediccion.
 - No recomendaciones.
 - No scoring.
-- No ejecucion clinica.
+- No ejecucion medica.
 - No escritura en sistemas activos.
 
-## Seccion 3 - Fase futura: diagnostico cabalistico holistico (declarativa)
+## Seccion 3 - Fase futura: analisis cabalistico holistico (declarativa)
 Esta seccion es declarativa y NO activa.
 
 Cuando todos los modulos del sistema esten completos, definidos y auditados,
-la IA simbolica pasara a tomar acciones en multiples planos de diagnostico
+la IA simbolica pasara a tomar acciones en multiples planos de analisis
 cabalistico holistico.
 
-## Seccion 4 - Planos de diagnostico futuros (no activos)
-La IA simbolica podra diagnosticar en planos como:
+## Seccion 4 - Planos de analisis futuros (no activos)
+La IA simbolica podra analizar en planos como:
 - Arbol de la Vida (Sefirot, bloqueos, desequilibrios).
 - Bio-emocion y transgeneracional.
 - Tarot estructural (no adivinatorio).
@@ -47,28 +47,28 @@ La IA simbolica podra diagnosticar en planos como:
 - Ciclos temporales y repeticion de patrones.
 - Cruces complejos entre dominios simbolicos.
 
-Estos diagnosticos seran:
+Estos analisis seran:
 - Holisticos.
 - Multidimensionales.
 - Basados en datos cruzados.
 - No lineales.
 - Explicables.
 
-## Seccion 5 - Condiciones obligatorias para activar diagnostico
-El diagnostico automatico solo podra activarse cuando:
+## Seccion 5 - Condiciones obligatorias para activar analisis
+El analisis automatico solo podra activarse cuando:
 - Todos los modulos esten finalizados y versionados.
 - Exista un grafo de datos simbolicos completo.
 - Los contratos de datos esten cerrados.
 - La trazabilidad sea total.
 - Exista auditoria etica y tecnica.
 - El sistema tenga validacion longitudinal.
-- El modo diagnostico sea explicitamente activado.
+- El modo analisis sea explicitamente activado.
 
-Sin estas condiciones el diagnostico esta prohibido.
+Sin estas condiciones el analisis esta prohibido.
 
 ## Seccion 6 - Tipo de acciones futuras de la IA
 En fases avanzadas, la IA simbolica podra:
-- Emitir diagnosticos cabalisticos holisticos.
+- Emitir analisiss cabalisticos holisticos.
 - Detectar causas profundas no evidentes.
 - Priorizar ejes de trabajo espiritual y terapeutico.
 - Proponer hipotesis de tikun.
@@ -81,7 +81,7 @@ Siempre bajo un marco:
 - Reversible.
 
 ## Seccion 7 - Gobernanza avanzada
-Incluso en modo diagnostico:
+Incluso en modo analisis:
 - La IA no es una caja negra.
 - Cada conclusion debe ser explicable.
 - Se conserva historial completo.
@@ -102,11 +102,11 @@ pero no contra lo humano.
 
 ## Regla final (bloqueante)
 Mientras esta seccion no sea activada explicitamente por documento normativo nuevo:
-la IA no diagnostica.
+la IA no interpreta automaticamente.
 
 El contrato existe para que, cuando llegue el momento,
 el salto sea consciente, seguro y legitimo.
 
 ## Fuente de verdad
-- AUDITORIA CABALA APP 12182025.md (normativo clinico).
+- AUDITORIA CABALA APP 12182025.md (normativo del core).
 - SOURCE_OF_TRUTH.md mantiene la jerarquia documental.

@@ -2,7 +2,7 @@
 
 Purpose
 This contract defines the canonical data shapes that future AI agents will
-consume for symbolic, holistic analysis. It is data-only and non-clinical.
+consume for symbolic, holistic analysis. It is data-only and educational.
 
 Data flow
 Consultante → Eventos simbólicos (Timeline) → Sistemas simbólicos
@@ -27,6 +27,6 @@ Contract overview
 - Reference types: TarotCardRef, HebrewLetterRef, SefirahRef, PathRef.
 
 Ethical boundaries
-- Outputs must remain non-clinical.
+- Outputs must remain educational/symbolic.
 - Human interpretation stays in control.
 - Auditability relies on stable inputs and timestamps.

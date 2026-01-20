@@ -25,14 +25,16 @@ function getAuthHeaders(): HeadersInit {
 /**
  * Obtiene todos los tests disponibles para el usuario actual
  */
-export async function getAvailableTests(): Promise<{
+export async function getAvailableTests(patientId?: number): Promise<{
   tests: TestModule[];
   user_type: string;
   subscription_plan: string;
   membership_active: boolean;
 }> {
-  const response = await fetch(`${API_BASE_URL}/tests/`, {
+  const query = patientId ? `?patient_id=${encodeURIComponent(patientId)}` : '';
+  const response = await fetch(`${API_BASE_URL}/tests/${query}`, {
     headers: getAuthHeaders(),
+    credentials: 'include',
   });
 
   if (!response.ok) {
@@ -48,6 +50,7 @@ export async function getAvailableTests(): Promise<{
 export async function getTestDetail(code: string): Promise<TestModule> {
   const response = await fetch(`${API_BASE_URL}/tests/${code}/`, {
     headers: getAuthHeaders(),
+    credentials: 'include',
   });
 
   if (!response.ok) {
@@ -68,14 +71,14 @@ export async function getTestDetail(code: string): Promise<TestModule> {
 export async function executeTest(data: ExecuteTestRequest): Promise<ExecuteTestResponse> {
   const url = `${API_BASE_URL}/tests/execute/`;
   console.log('🔍 Ejecutando test en:', url);
-  
+
   // Prepare payload - include patient_id if provided
   const payload: any = {
     test_module_code: data.test_module_code,
     input_data: data.input_data,
     save_result: data.save_result !== false, // Default to true
   };
-  
+
   if (data.patient_id) {
     payload.patient_id = data.patient_id;
   }
@@ -85,12 +88,13 @@ export async function executeTest(data: ExecuteTestRequest): Promise<ExecuteTest
   if (data.client_birth_date) {
     payload.client_birth_date = data.client_birth_date;
   }
-  
+
   console.log('📦 Payload:', JSON.stringify(payload, null, 2));
-  
+
   const response = await fetch(url, {
     method: 'POST',
     headers: getAuthHeaders(),
+    credentials: 'include',
     body: JSON.stringify(payload),
   });
 
@@ -99,18 +103,23 @@ export async function executeTest(data: ExecuteTestRequest): Promise<ExecuteTest
   if (!response.ok) {
     let errorMessage = 'Error al ejecutar el test';
     let errorData: any = {};
-    
+
     try {
       const text = await response.text();
       console.log('📄 Respuesta del servidor (texto):', text);
-      
+
       if (text) {
-        errorData = JSON.parse(text);
-        errorMessage = errorData.error || errorData.detail || errorData.message || errorMessage;
-        
-        // Si hay más detalles, agregarlos
-        if (errorData.note) {
-          errorMessage += `: ${errorData.note}`;
+        const isJson = response.headers.get('content-type')?.includes('application/json');
+        if (isJson) {
+          errorData = JSON.parse(text);
+          errorMessage = errorData.error || errorData.detail || errorData.message || errorMessage;
+
+          // Si hay más detalles, agregarlos
+          if (errorData.note) {
+            errorMessage += `: ${errorData.note}`;
+          }
+        } else {
+          errorMessage = text;
         }
       }
     } catch (e) {
@@ -126,14 +135,25 @@ export async function executeTest(data: ExecuteTestRequest): Promise<ExecuteTest
         errorMessage = `Error ${response.status}: ${response.statusText}`;
       }
     }
-    
+
     const error = new Error(errorMessage);
     (error as any).response = response;
     (error as any).status = response.status;
     throw error;
   }
 
-  const result = await response.json();
+  let result: ExecuteTestResponse;
+  try {
+    const text = await response.text();
+    result = text ? JSON.parse(text) : ({} as ExecuteTestResponse);
+  } catch (e) {
+    const error = new Error(
+      `Respuesta no JSON del servidor. Verifica API_BASE_URL (${API_BASE_URL}) y autenticaci¢n.`
+    );
+    (error as any).response = response;
+    (error as any).status = response.status;
+    throw error;
+  }
   console.log('✅ Test ejecutado exitosamente');
   return result;
 }
@@ -150,9 +170,10 @@ export async function getTestResults(filters?: {
   if (filters?.favorites) params.append('favorites', 'true');
 
   const url = `${API_BASE_URL}/tests/results/${params.toString() ? '?' + params.toString() : ''}`;
-  
+
   const response = await fetch(url, {
     headers: getAuthHeaders(),
+    credentials: 'include',
   });
 
   if (!response.ok) {
@@ -177,6 +198,7 @@ export async function getTestResultsForPatient(params: {
   const url = `${API_BASE_URL}/tests/results/?${queryParams.toString()}`;
   const response = await fetch(url, {
     headers: getAuthHeaders(),
+    credentials: 'include',
     cache: 'no-store',
   });
 
@@ -191,9 +213,10 @@ export async function getTestResultsForPatient(params: {
 /**
  * Obtiene un resultado específico
  */
-export async function getTestResult(id: number): Promise<TestResult> {
+export async function getTestResult(id: string | number): Promise<TestResult> {
   const response = await fetch(`${API_BASE_URL}/tests/results/${id}/`, {
     headers: getAuthHeaders(),
+    credentials: 'include',
   });
 
   if (!response.ok) {
@@ -206,7 +229,7 @@ export async function getTestResult(id: number): Promise<TestResult> {
 /**
  * Alias para getTestResult (para compatibilidad)
  */
-export async function getTestResultDetail(id: number): Promise<TestResult> {
+export async function getTestResultDetail(id: string | number): Promise<TestResult> {
   return getTestResult(id);
 }
 
@@ -214,12 +237,13 @@ export async function getTestResultDetail(id: number): Promise<TestResult> {
  * Actualiza un resultado (notas, favorito, etc.)
  */
 export async function updateTestResult(
-  id: number,
+  id: string | number,
   data: Partial<TestResult>
 ): Promise<TestResult> {
   const response = await fetch(`${API_BASE_URL}/tests/results/${id}/`, {
     method: 'PATCH',
     headers: getAuthHeaders(),
+    credentials: 'include',
     body: JSON.stringify(data),
   });
 
@@ -233,10 +257,11 @@ export async function updateTestResult(
 /**
  * Elimina (archiva) un resultado
  */
-export async function deleteTestResult(id: number): Promise<void> {
+export async function deleteTestResult(id: string | number): Promise<void> {
   const response = await fetch(`${API_BASE_URL}/tests/results/${id}/`, {
     method: 'DELETE',
     headers: getAuthHeaders(),
+    credentials: 'include',
   });
 
   if (!response.ok) {
@@ -250,6 +275,7 @@ export async function deleteTestResult(id: number): Promise<void> {
 export async function getUserTestStats(): Promise<UserTestStats> {
   const response = await fetch(`${API_BASE_URL}/tests/stats/`, {
     headers: getAuthHeaders(),
+    credentials: 'include',
   });
 
   if (!response.ok) {
@@ -262,14 +288,14 @@ export async function getUserTestStats(): Promise<UserTestStats> {
 /**
  * Marca/desmarca un resultado como favorito
  */
-export async function toggleFavorite(id: number, isFavorite: boolean): Promise<TestResult> {
+export async function toggleFavorite(id: string | number, isFavorite: boolean): Promise<TestResult> {
   return updateTestResult(id, { is_favorite: isFavorite });
 }
 
 /**
  * Actualiza las notas de un resultado
  */
-export async function updateResultNotes(id: number, notes: string): Promise<TestResult> {
+export async function updateResultNotes(id: string | number, notes: string): Promise<TestResult> {
   return updateTestResult(id, { notes });
 }
 
@@ -288,6 +314,7 @@ export async function getPatientPreviousTests(params: {
 
   const response = await fetch(`${API_BASE_URL}/tests/patient-previous/?${queryParams.toString()}`, {
     headers: getAuthHeaders(),
+    credentials: 'include',
     cache: 'no-store',
   });
 

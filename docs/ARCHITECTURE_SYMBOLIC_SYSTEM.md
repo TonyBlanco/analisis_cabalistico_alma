@@ -6,7 +6,7 @@ The symbolic system provides visualization and exploration of symbolic layers (T
 ## 2. Architectural Layers
 - Workspace: Defines context, permissions, and consultante scope for symbolic modules.
 - Workspace Mode (optional): Some SWM UIs may expose an explicit `mode` (e.g. `observational` vs `training`) to gate correspondences/synthesis while keeping the default observational flow intact.
-- Visual Core: Renders and orchestrates visual layers without clinical logic.
+- Visual Core: Renders and orchestrates visual layers without diagnostic logic.
 - Plugins: Modular visual layers (Tarot today, Astrology and others later) composed into the core.
 - Canonical Symbolic Data (CABALA_JSON): Source of truth for symbolic definitions and correspondences.
 - Analysis & AI: Future layer, not implemented, separated from visualization and UI.
@@ -22,7 +22,7 @@ ConsultanteContext
         -> Plugin
           -> Visual Motor
 ```
-ConsultanteContext provides cross-over reference only (non-clinical) and does not drive interpretation.
+ConsultanteContext provides cross-over reference only (consultative) and does not drive interpretation.
 
 ## 4. Role of Plugins and Adapters
 Tarot exists as a plugin to keep symbolic layers modular, reusable, and independent of workspace logic. Adapters bridge workspace context into plugins without coupling. Visual layers remain interpretation-free to preserve governance boundaries.
@@ -38,7 +38,7 @@ Tarot exists as a plugin to keep symbolic layers modular, reusable, and independ
 - ES5 compatible, adapter pattern
 
 **Phase 3**: AI-Assisted Symbolic Interpretation ✅ (commit 356f92ce)
-- **IMPLEMENTED**: Non-clinical symbolic interpretation layer
+- **IMPLEMENTED**: Educational symbolic interpretation layer
 - **Status**: PRODUCTION-READY with 5-layer safety validation
 - **Scope**: READ-ONLY access to TreeStructuralState (no personal data)
 - **Safety**: 14 prohibited terms, no diagnosis, no advice, no determinism
@@ -55,11 +55,11 @@ Tarot exists as a plugin to keep symbolic layers modular, reusable, and independ
 
 ### Current Capabilities:
 - ✅ Symbolic visualization (Tree of Life, Tarot)
-- ✅ AI-assisted symbolic interpretation (consultative, non-clinical)
+- ✅ AI-assisted symbolic interpretation (consultative, educational)
 - ✅ Professional-grade structural analysis
 - ✅ Educational and formative language enforced
 - ❌ NO automatic diagnosis
-- ❌ NO clinical inference
+- ❌ NO medical inference
 - ❌ NO personal advice or deterministic statements
 
 ### Symbolic AI Architecture:
@@ -83,7 +83,7 @@ Symbolic Interpretation (4 observations)
 ### Safety Governance:
 
 **Prohibited Actions**:
-- Clinical diagnosis or psychological labels
+- Medical diagnosis or psychological labels
 - Personal advice or deterministic statements
 - Access to personal data (only structural state)
 - Automatic conclusions or predictions
@@ -104,8 +104,8 @@ Future enhancements may include:
 
 **All future work must**:
 - Maintain 5-layer safety validation
-- Preserve non-clinical boundaries
-- Keep symbolic analysis separate from diagnostic workflows
+- Preserve educational/symbolic boundaries
+- Keep symbolic analysis separate from core workflows
 - Remain auditable and governed
 
 ## Evolution: Interpretative Symbolic Layer (SWM v3)
@@ -113,7 +113,7 @@ Future enhancements may include:
 SWM v3 formaliza la capa interpretativa simbólica asistida por IA como una extensión documentada e integrada en el ecosistema simbólico con las siguientes garantías:
 
 - La ejecución de análisis simbólicos por IA ocurre fuera del motor visual y siempre bajo acción explícita del usuario (ej. botón `Interpretar tirada`).
-- Las salidas son no-clínicas, educativas y sujetas a la misma validación de 5 capas y filtrado de seguridad que el intérprete simbólico existente.
+- Las salidas son educativas y sujetas a la misma validación de 5 capas y filtrado de seguridad que el intérprete simbólico existente.
 - La persistencia de lecturas está gobernada por opciones (`no_store`, `store_anonymized`, `store_with_consent`) y por ownership claro (terapeuta).
 - SWM v3 es optativo y controlado por feature flags; SWM v1 (visual/observacional) no se elimina ni se reescribe.
 - Cualquier implementación práctica debe adherir a `docs/SWM_V3_INTERPRETACION_SIMBOLICA_GOBERNADA.md` y a la auditoría vigente.
@@ -125,9 +125,9 @@ Notas técnicas para implementadores documentales:
 ## 7. Design Principles
 - Separation of concerns
 - Source of truth for symbolic data
-- Explicit patient context
+- Explicit user context
 - Reusability and composability
-- Ethical and clinical boundaries
+- Ethical and holistic boundaries
 
 Related docs:
 - `docs/architecture/TRAINING_INTERPRETATIVE_PHASE.md`

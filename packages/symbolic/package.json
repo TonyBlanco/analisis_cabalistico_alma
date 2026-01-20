@@ -1,0 +1,38 @@
+{
+  "name": "@holistica/symbolic",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./methods/pitagoras": "./dist/methods/pitagoras/index.js",
+    "./methods/pitagoras/*": "./dist/methods/pitagoras/*.js",
+    "./methods/gematria-standard": "./dist/methods/gematria-standard/index.js",
+    "./methods/gematria-katan": "./dist/methods/gematria-katan/index.js",
+    "./methods/mispar-gadol": "./dist/methods/mispar-gadol/index.js",
+    "./methods/mispar-siduri": "./dist/methods/mispar-siduri/index.js",
+    "./methods/milui": "./dist/methods/milui/index.js",
+    "./methods/atbash": "./dist/methods/atbash/index.js",
+    "./methods/albam": "./dist/methods/albam/index.js",
+    "./methods/avgad": "./dist/methods/avgad/index.js",
+    "./methods/temurah": "./dist/methods/temurah/index.js",
+    "./methods/notarikon": "./dist/methods/notarikon/index.js",
+    "./tarot/bota/botaIdentityResolver": "./dist/tarot/bota/botaIdentityResolver.js",
+    "./tarot/bota/positionInterpreter": "./dist/tarot/bota/positionInterpreter.js",
+    "./tarot/bota/botaVisualMapper": "./dist/tarot/bota/botaVisualMapper.js",
+    "./tarot/bota/synthesisBuilder": "./dist/tarot/bota/synthesisBuilder.js",
+    "./tarot/decks/thoth": "./dist/tarot/decks/thoth.js",
+    "./tarot/decks/golden-dawn": "./dist/tarot/decks/golden-dawn.js",
+    "./tarot/decks/bota": "./dist/tarot/decks/bota.js",
+    "./tarot/decks/hermetic": "./dist/tarot/decks/hermetic.js",
+    "./tarot/decks/sephiroth": "./dist/tarot/decks/sephiroth.js",
+    "./tree": "./dist/tree/index.js",
+    "./tree/symbolic-interpreter": "./dist/tree/symbolic-interpreter.js",
+    "./tree/symbolic-interpreter.types": "./dist/tree/symbolic-interpreter.types.js"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  }
+}

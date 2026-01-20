@@ -1,0 +1,1 @@
+{"version":3,"file":"meanings.d.ts","sourceRoot":"","sources":["../../../data/sefirot/meanings.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,QAAQ,EAAE,MAAM,eAAe,CAAC;AAE9C,MAAM,WAAW,aAAa;IAC5B,EAAE,EAAE,QAAQ,CAAC;IACb,KAAK,EAAE,MAAM,CAAC;IACd,MAAM,EAAE,MAAM,CAAC;IACf,MAAM,EAAE,MAAM,CAAC;CAChB;AAED,eAAO,MAAM,gBAAgB,EAAE,aAAa,EA6D3C,CAAC"}

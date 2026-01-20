@@ -39,6 +39,87 @@ GENDER_IDENTITY_CHOICES = [
     ('not_recorded', 'Sin registro'),
 ]
 
+class IdentityProfile(models.Model):
+    """
+    Perfil de Identidad Simbólica/Astrológica
+    
+    Separado de Patient porque:
+    - Patient = perfil clínico (terapia)
+    - IdentityProfile = datos de nacimiento para cálculos simbólicos
+    
+    Un usuario puede tener IdentityProfile sin ser Patient (usuarios personales)
+    Un Patient siempre tiene user_id que puede tener IdentityProfile
+    """
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='identity_profile',
+        help_text='Usuario al que pertenece esta identidad simbólica'
+    )
+    
+    # Birth data (astrological/symbolic)
+    birth_date = models.DateField(
+        help_text='Fecha de nacimiento (para astrología y cálculos cabalísticos)'
+    )
+    birth_time = models.TimeField(
+        null=True,
+        blank=True,
+        help_text='Hora exacta de nacimiento (opcional, mejora precisión astrológica)'
+    )
+    
+    # Location data (required for astrological calculations)
+    birth_city = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text='Ciudad de nacimiento'
+    )
+    birth_country = models.CharField(
+        max_length=100,
+        blank=True,
+        help_text='País de nacimiento'
+    )
+    birth_latitude = models.DecimalField(
+        max_digits=9,
+        decimal_places=6,
+        null=True,
+        blank=True,
+        help_text='Latitud del lugar de nacimiento (requerido para astrología)'
+    )
+    birth_longitude = models.DecimalField(
+        max_digits=9,
+        decimal_places=6,
+        null=True,
+        blank=True,
+        help_text='Longitud del lugar de nacimiento (requerido para astrología)'
+    )
+    birth_timezone = models.CharField(
+        max_length=100,
+        blank=True,
+        help_text='Zona horaria del lugar de nacimiento'
+    )
+    
+    # Symbolic identity
+    hebrew_name = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text='Nombre en hebreo (opcional, para análisis cabalístico)'
+    )
+    
+    # Metadata
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = 'Identity Profile'
+        verbose_name_plural = 'Identity Profiles'
+        db_table = 'api_identityprofile'
+        indexes = [
+            models.Index(fields=['user'], name='identity_user_idx'),
+        ]
+    
+    def __str__(self):
+        return f"IdentityProfile({self.user.username}, born {self.birth_date})"
+
 class UserProfile(models.Model):
     """Perfil extendido del usuario con información adicional"""
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
@@ -251,6 +332,9 @@ class Ficha(models.Model):
         verbose_name_plural = 'Fichas Numerológicas'
 
 
+
+
+
 class Patient(models.Model):
     """Modelo para pacientes de terapeutas - Ficha clínica holística"""
     therapist = models.ForeignKey(
@@ -389,6 +473,17 @@ class Patient(models.Model):
         help_text='Terapeuta que cambió el estado'
     )
     
+    # ========== FEDERACIÓN HOLÍSTICA (Phase-1) ==========
+    consent_federation = models.BooleanField(
+        default=False,
+        help_text='Consentimiento explícito del sujeto para federación de lectura cross-workspace (hubs MSHE/SCDF/SCID-5)'
+    )
+    consent_federation_date = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text='Fecha en que se otorgó el consentimiento de federación'
+    )
+    
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -469,6 +564,28 @@ class TherapistNote(models.Model):
         ordering = ['-created_at']
         verbose_name = 'Nota del Terapeuta'
         verbose_name_plural = 'Notas de Terapeutas'
+
+
+class PatientMessage(models.Model):
+    """Mensajes unidireccionales del terapeuta al paciente (no clínicos)."""
+    therapist = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_patient_messages')
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='patient_messages')
+    content = models.CharField(max_length=1000, help_text='Texto plano, neutro, no clínico')
+    is_archived = models.BooleanField(default=False)
+    archived_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Patient Message'
+        verbose_name_plural = 'Patient Messages'
+        indexes = [
+            models.Index(fields=['patient', 'created_at']),
+            models.Index(fields=['therapist', 'patient', 'created_at']),
+        ]
+
+    def __str__(self):
+        return f"Message {self.id} from {self.therapist.username} to {self.patient.full_name}"
 
 
 # ========== MODELOS PARA SERVICIOS DE TONY BLANCO ==========
@@ -1162,64 +1279,6 @@ class UserResourceAccess(models.Model):
 
 # ========== CONFIGURACIONES DE TERAPEUTAS ==========
 
-class TherapistHolisticConfig(models.Model):
-    """
-    Configuración de pesos para el Motor de Síntesis Holística Evaluativa (MSHE).
-    Cada terapeuta puede personalizar los pesos de los diferentes módulos.
-    """
-    therapist = models.OneToOneField(
-        User,
-        on_delete=models.CASCADE,
-        related_name='holistic_config',
-        help_text="Terapeuta propietario de esta configuración"
-    )
-
-    weights = models.JSONField(
-        default=dict,
-        help_text="Pesos para cada módulo holístico (deben sumar 1.0)"
-    )
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        verbose_name = "Configuración Holística del Terapeuta"
-        verbose_name_plural = "Configuraciones Holísticas de Terapeutas"
-
-    @staticmethod
-    def get_default_weights():
-        """Retorna los pesos por defecto recomendados"""
-        return {
-            'kabbalah_numerology': 0.20,
-            'tarot_evolutivo': 0.20,
-            'astrologia_terapeutica': 0.20,
-            'transgeneracional': 0.20,
-            'biodecodificacion': 0.20
-        }
-
-    def clean(self):
-        """Validar que los pesos sumen 1.0"""
-        from django.core.exceptions import ValidationError
-
-        if not isinstance(self.weights, dict):
-            raise ValidationError('Los pesos deben ser un diccionario JSON')
-
-        total = sum(self.weights.values())
-        if abs(total - 1.0) > 0.001:
-            raise ValidationError(f'Los pesos deben sumar 1.0, actualmente suman {total}')
-
-        # Validar pesos individuales
-        for key, value in self.weights.items():
-            if not isinstance(value, (int, float)) or value < 0 or value > 1:
-                raise ValidationError(f'Peso inválido para {key}: {value}')
-
-    def save(self, *args, **kwargs):
-        self.clean()
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return f'Configuración MSHE de {self.therapist.username}'
-
 
 class ResonanciaObservation(models.Model):
     """Observación simbólica manual (Resonancia Ancestral).
@@ -1327,6 +1386,116 @@ class ResonanciaRelation(models.Model):
     class Meta:
         verbose_name = 'Relación (Resonancia)'
         verbose_name_plural = 'Relaciones (Resonancia)'
+
+
+class FederationAuditLog(models.Model):
+    """Registro inmutable de lecturas federadas cross-workspace.
+    
+    Cada invocación del endpoint de federación genera una entrada de auditoría.
+    Logs son append-only (no updates, no deletes) para compliance.
+    
+    Policy: HOLISTIC_FEDERATION_POLICY.md (v2.0)
+    Contract: FEDERATION_HUBS_CONTRACT.md §2.4
+    """
+    
+    HUB_CHOICES = [
+        ('MSHE', 'Motor de Síntesis Holística Evaluativa'),
+        ('SCDF', 'Structured Clinical Data Formulation'),
+        ('SCID5', 'SCID-5 Holístico'),
+    ]
+    
+    STATUS_CHOICES = [
+        ('allowed', 'Permitido'),
+        ('denied', 'Denegado'),
+    ]
+    
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False,
+        help_text='Identificador único del registro de auditoría'
+    )
+    
+    # Timestamp
+    timestamp = models.DateTimeField(
+        auto_now_add=True,
+        db_index=True,
+        help_text='Momento exacto de la solicitud de lectura federada'
+    )
+    
+    # Actores
+    requested_by_user = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='federation_audit_requests',
+        help_text='Usuario (terapeuta) que solicitó la lectura federada'
+    )
+    
+    subject_patient = models.ForeignKey(
+        Patient,
+        on_delete=models.SET_NULL,
+        null=True,
+        db_index=True,
+        related_name='federation_audit_logs',
+        help_text='Paciente/sujeto cuya información fue consultada'
+    )
+    
+    # Hub consumidor
+    federation_hub = models.CharField(
+        max_length=16,
+        choices=HUB_CHOICES,
+        help_text='Hub federado que consumió los datos (MSHE/SCDF/SCID5)'
+    )
+    
+    # Scope de lectura
+    scope = models.JSONField(
+        help_text='Alcance de la solicitud: {date_range: {start, end}, included_domains: [...]}'
+    )
+    
+    # Resultado
+    status = models.CharField(
+        max_length=16,
+        choices=STATUS_CHOICES,
+        default='allowed',
+        help_text='Si la lectura fue permitida o denegada'
+    )
+    
+    records_accessed_count = models.IntegerField(
+        default=0,
+        help_text='Número de AnalysisRecords incluidos en el feed (0 si denegado)'
+    )
+    
+    denial_reason = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text='Razón de denegación (ej: "no_consent", "no_ownership")'
+    )
+    
+    # Trazabilidad opcional
+    output_snapshot_id = models.UUIDField(
+        null=True,
+        blank=True,
+        help_text='ID del output generado por el hub (si aplica)'
+    )
+    
+    class Meta:
+        verbose_name = 'Auditoría de Federación'
+        verbose_name_plural = 'Auditorías de Federación'
+        ordering = ['-timestamp']
+        indexes = [
+            models.Index(fields=['subject_patient', 'timestamp']),
+            models.Index(fields=['requested_by_user', 'timestamp']),
+            models.Index(fields=['federation_hub', 'timestamp']),
+        ]
+    
+    def __str__(self):
+        return f'FedAudit {self.federation_hub} - {self.subject_patient} by {self.requested_by_user} [{self.status}]'
+    
+    def delete(self, *args, **kwargs):
+        """Prohibir borrado de logs de auditoría (compliance)"""
+        raise Exception("FederationAuditLog records cannot be deleted (immutable for compliance)")
+
         ordering = ['-created_at']
         indexes = [
             models.Index(fields=['subject', '-created_at'], name='resrel_subj_created_idx'),

@@ -248,7 +248,7 @@ export default function ClinicalEvaluationsSection() {
       const result = await executeTest(request);
 
       // Show success message
-      alert(`Evaluación "${testToExecute.name}" ejecutada correctamente.`);
+      alert(`Exploración "${testToExecute.name}" completada correctamente.`);
       
       // Close modal and refresh
       setShowExecuteModal(false);
@@ -638,7 +638,7 @@ export default function ClinicalEvaluationsSection() {
             className="bg-white rounded-lg shadow-lg max-w-md w-full mx-4 p-6"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Ejecutar Evaluación Holística</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Iniciar Exploración Holística</h3>
             
             {patientData ? (
               <>
@@ -653,7 +653,7 @@ export default function ClinicalEvaluationsSection() {
                   )}
                 </div>
                 <p className="text-sm text-gray-600 mb-4">
-                  ¿Deseas ejecutar la evaluación <strong>"{testToExecute.name}"</strong> para este consultante?
+                  ¿Deseas iniciar la exploración <strong>"{testToExecute.name}"</strong> para este consultante?
                 </p>
                 <p className="text-xs text-gray-500 mb-4">
                   Nota: Los datos del consultante se utilizarán para la evaluación. Los resultados se guardarán automáticamente.
@@ -679,7 +679,7 @@ export default function ClinicalEvaluationsSection() {
                 className="px-4 py-2 text-sm font-medium text-white rounded-md hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{ backgroundColor: 'var(--accent-color)' }}
               >
-                {executingTestCode === testToExecute.code ? 'Ejecutando...' : 'Ejecutar'}
+                {executingTestCode === testToExecute.code ? 'Explorando...' : 'Explorar'}
               </button>
             </div>
           </div>
@@ -714,9 +714,9 @@ function ExecuteTestButton({
       <button
         disabled
         className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-400 bg-gray-100 rounded-md cursor-not-allowed"
-        title="Selecciona un consultante activo para ejecutar evaluaciones"
+        title="Selecciona un consultante activo para iniciar exploraciones"
       >
-        Ejecutar
+        Explorar
       </button>
     );
   }
@@ -728,7 +728,7 @@ function ExecuteTestButton({
       className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-white rounded-md hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
       style={{ backgroundColor: 'var(--accent-color)' }}
     >
-      {disabled ? 'Ejecutando...' : 'Ejecutar'}
+      {disabled ? 'Explorando...' : 'Explorar'}
     </button>
   );
 }

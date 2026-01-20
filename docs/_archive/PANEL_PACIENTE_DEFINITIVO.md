@@ -1,8 +1,8 @@
-# Panel Paciente - Implementación Definitiva
+# Panel de Usuario - Implementación Definitiva
 
 ## Objetivo
 
-El panel paciente permite al paciente:
+El panel del usuario permite al usuario:
 - Ver qué tiene asignado
 - Ejecutar lo que le corresponde
 - Consultar sus resultados
@@ -13,7 +13,7 @@ El panel paciente permite al paciente:
 
 ## Principio Rector
 
-> El paciente solo ve lo que puede usar o consultar.  
+> El usuario solo ve lo que puede usar o consultar.  
 > Nunca ve herramientas de control.  
 > Nada de "gestionar", nada de "asignar", nada de "administrar".
 
@@ -36,7 +36,7 @@ Este sidebar **NO crece con el tiempo**.
 
 ## Secciones Implementadas
 
-### 1. Inicio (Landing del paciente)
+### 1. Inicio (Landing del usuario)
 
 **Ruta:** `/dashboard/patient`
 
@@ -47,6 +47,8 @@ Este sidebar **NO crece con el tiempo**.
   - Perfil incompleto
   - Tests pendientes
   - Nuevos resultados disponibles
+
+**Nota:** En documentación y UI preferir la palabra "usuario" cuando se refiera al rol general de la persona usando el portal.
 - Mensaje del terapeuta (si existe)
 
 **Características:**
@@ -69,7 +71,7 @@ Este sidebar **NO crece con el tiempo**.
 **Reglas:**
 - ✅ Solo ve tests asignados por su terapeuta
 - ❌ NO ve catálogo completo de tests
-- ❌ NO puede auto-asignarse tests clínicos
+- ❌ NO puede auto-asignarse tests restringidos
 - ✅ Al completar un test → pasa automáticamente a "Resultados"
 
 **Estado vacío:** "No tienes tests asignados"
@@ -116,15 +118,15 @@ Este sidebar **NO crece con el tiempo**.
 **Tipos de acceso:**
 1. **Gratis** - Recursos de acceso libre
 2. **Recomendado** - Asignados por terapeuta
-3. **Adquirido** - Comprados por el paciente
+3. **Adquirido** - Comprados por el usuario
 
 **Integración con backend:**
-- `GET /api/resources/my/` - Lista recursos del paciente
+- `GET /api/resources/my/` - Lista recursos del usuario
 - `POST /api/resources/{id}/acquire/` - Simular auto-adquisición
 
 **Características:**
-- El terapeuta ve reflejado lo que el paciente compra
-- El paciente puede explorar libremente (según su plan)
+- El terapeuta ve reflejado lo que el usuario compra
+- El usuario puede explorar libremente (según su plan)
 - Diseño visual atractivo (valor emocional y comercial)
 
 **Estado vacío:** "No hay recursos disponibles"
@@ -149,7 +151,7 @@ Este sidebar **NO crece con el tiempo**.
 - Es **narrativa del proceso personal**
 
 **Nota informativa:**
-> "Este espacio refleja el progreso de tu proceso personal. No es un diagnóstico médico ni clínico, sino una guía de tu camino de crecimiento."
+> "Este espacio refleja el progreso de tu proceso personal. El sistema NO proporciona diagnósticos médicos ni psicológicos; las salidas son interpretativas y contextuales. Cualquier interpretación más profunda corresponde al terapeuta o profesional de confianza."
 
 ---
 
@@ -183,22 +185,22 @@ Este sidebar **NO crece con el tiempo**.
 
 ---
 
-## Cosas que el Paciente NO VE
+## Cosas que el Usuario NO VE
 
 Explícitamente prohibido:
 
-❌ Gestión de pacientes  
-❌ Evaluaciones clínicas avanzadas  
-❌ SCDF u otras herramientas internas  
-❌ Catálogo completo de tests clínicos  
-❌ Datos de otros pacientes  
+❌ Gestión de usuarios
+❌ Evaluaciones con alcance profesional
+❌ SCDF u otras herramientas internas
+❌ Catálogo completo de tests
+❌ Datos de otros usuarios
 ❌ Configuración del sistema
 
 ---
 
 ## Diseño Visual
 
-### Paleta de Colores (Paciente)
+### Paleta de Colores (Usuario)
 - **Color principal:** Violeta suave (`#7c3aed`)
 - **Acentos:** Violeta 100-600
 - **Estados:**
@@ -224,15 +226,15 @@ Explícitamente prohibido:
 
 ---
 
-## Relación Paciente–Terapeuta
+## Relación Usuario–Terapeuta
 
-### Autonomía del Paciente
+### Autonomía del Usuario
 ✅ Puede editar su perfil  
 ✅ Puede adquirir recursos  
 ✅ Puede consultar sus resultados  
 ✅ Puede gestionar su cuenta
 
-### Control Clínico del Terapeuta
+### Control del Terapeuta
 ✅ Asigna tests  
 ✅ Asigna recursos  
 ✅ Ve lo que el paciente adquiere  

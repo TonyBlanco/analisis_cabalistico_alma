@@ -6,9 +6,9 @@
 import type {
   SymbolicInterpretation,
   SymbolicInterpretationRequest,
-} from '../../../src/symbolic/tree/symbolic-interpreter.types';
-import { generateSymbolicInterpretation, createFallbackInterpretation } from '../../../src/symbolic/tree/symbolic-interpreter';
-import type { TreeStructuralState } from '../../../src/symbolic/tree';
+} from '@holistica/symbolic/tree/symbolic-interpreter.types';
+import { generateSymbolicInterpretation, createFallbackInterpretation } from '@holistica/symbolic/tree/symbolic-interpreter';
+import type { TreeStructuralState } from '@holistica/symbolic/tree';
 import { getApiBaseUrl } from '../api-base';
 
 const API_BASE_URL = getApiBaseUrl();

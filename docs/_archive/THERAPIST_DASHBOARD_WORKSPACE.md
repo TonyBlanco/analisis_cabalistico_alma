@@ -20,11 +20,11 @@
 
 ## 📊 Resumen Ejecutivo
 
-El **Therapist Dashboard Workspace** es un workspace clínico funcional que permite a los terapeutas:
+El **Therapist Dashboard Workspace** es un workspace profesional funcional que permite a los terapeutas:
 
-- **Seleccionar pacientes activos** (contexto persistente en localStorage)
-- **Asignar tests `patient_self`** a pacientes
-- **Ejecutar evaluaciones clínicas `therapist_clinical`** para pacientes activos
+- **Seleccionar usuarios activos** (contexto persistente en localStorage)
+- **Asignar tests `patient_self`** a usuarios
+- **Ejecutar evaluaciones restringidas `therapist_clinical`** para usuarios activos
 - **Visualizar resultados** de tests asignados y evaluaciones ejecutadas
 
 **Arquitectura:**
@@ -40,19 +40,19 @@ El **Therapist Dashboard Workspace** es un workspace clínico funcional que perm
 ### 1. Selección de Paciente Activo
 
 ```
-Usuario (therapist) → Click "Seleccionar paciente"
+Usuario (therapist) → Click "Seleccionar usuario"
                    ↓
 PatientPicker modal abre → Fetch GET /api/therapist/patients/
                    ↓
-Usuario busca/selecciona paciente
+Usuario busca/selecciona usuario
                    ↓
 setActivePatientId(patientId, patientName) → localStorage
                    ↓
 Evento 'activePatientChanged' disparado
                    ↓
 Todos los componentes se actualizan:
-  - ActivePatientIndicator muestra paciente
-  - PatientResultsSection filtra resultados
+  - ActivePatientIndicator muestra usuario activo
+  - PatientResultsSection filtra resultados del usuario
   - TestCatalogSection habilita botones
   - ClinicalEvaluationsSection habilita ejecución
 ```
@@ -71,13 +71,13 @@ Usuario → Tab "Asignables al paciente" en TestCatalogSection
         ↓
 Click "Asignar" en un test patient_self
         ↓
-Validación UI: ¿activePatientId existe?
+Validación UI: ¿`activePatientId` existe? (usuario activo)
         ↓
-Modal de confirmación muestra test + paciente
+Modal de confirmación muestra test + usuario
         ↓
 Usuario confirma
         ↓
-GET /api/therapist/patients/{id}/ → Obtener patient.user.id
+GET /api/therapist/patients/{id}/ → Obtener patient.user.id (usuario)
         ↓
 POST /api/tests/grant-access/ → Asignar test
   Body: { user_id, test_code }
@@ -95,7 +95,7 @@ PatientResultsSection se refresca automáticamente
 **Reglas:**
 - Solo tests con `available_for_personal === true` tienen botón "Asignar"
 - Requiere `activePatientId` seleccionado
-- Requiere que el paciente tenga `user` vinculado (User account)
+- Requiere que el usuario tenga `user` vinculado (User account)
 
 ---
 

@@ -9,6 +9,36 @@ django.setup()
 
 from api.test_models import TestModule
 
+HOLISTIC_LEGACY_OVERRIDES = {
+    "phq-9": ("Pulse Resonance Mirror", "emotional_balance"),
+    "bdi-ii": ("Dawn Reflection Index", "emotional_balance"),
+    "gad-7": ("Calm Alignment Gauge", "anxiety_balance"),
+    "bai": ("Stillness Resonance Inventory", "anxiety_balance"),
+    "stai": ("Presence Balance Compass", "anxiety_balance"),
+    "isi": ("Dreamflow Attunement", "sleep_harmony"),
+    "insomnia-index": ("Restoration Rhythm Index", "sleep_harmony"),
+    "ptsd-check": ("Soul Echo Release", "trauma_recovery"),
+    "ptsd": ("Soul Echo Release", "trauma_recovery"),
+    "ptsd-pcl5": ("Soul Story Harmonizer", "trauma_recovery"),
+    "ocd-screen": ("Ritual Flow Snapshot", "ritual_balance"),
+    "adhd-adult": ("Attention Flow Compass", "attention_clarity"),
+    "adhd": ("Attention Flow Compass", "attention_clarity"),
+    "substance-use": ("Sustenance Relationship Mirror", "substance_reconciliation"),
+    "substance": ("Sustenance Relationship Mirror", "substance_reconciliation"),
+    "eating-disorder": ("Abundance Relationship Mirror", "abundance_relations"),
+    "eating": ("Abundance Relationship Mirror", "abundance_relations"),
+    "scl90": ("Soul Symmetry Lens", "soul_alignment"),
+    "scl-90": ("Soul Symmetry Lens", "soul_alignment"),
+    "scl-90-r": ("Soul Symmetry Lens", "soul_alignment"),
+    "mcmi-iv": ("Persona Pattern Atlas", "personality_mosaic"),
+    "scid5": ("Structural Insight Dialogue", "personality_mosaic"),
+    "scid-5-rv": ("Structural Insight Dialogue", "personality_mosaic"),
+    "pai": ("Persona Alignment Compass", "persona_alignment"),
+    "professional-pai": ("Persona Alignment Compass", "persona_alignment"),
+}
+
+TECHNICAL_TEST_PREFIXES = ("dbg-test", "lock-test", "smoke-test")
+
 def initialize_tests():
     """Crea los módulos de tests iniciales"""
     
@@ -266,6 +296,20 @@ def initialize_tests():
             'requires_license': False,
         },
         {
+            'code': 'anxiety-state-trait',
+            'name': 'Ansiedad — Estado y rasgo',
+            'description': 'Wellness orientativo para mapear la ansiedad del presente y la tendencia personal.',
+            'test_type': 'wellness',
+            'required_access_level': 'free',
+            'icon': '⚖️',
+            'order': 17,
+            'estimated_duration': 8,
+            'available_for_therapists': True,
+            'available_for_personal': True,
+            'uses_per_month': None,
+            'requires_license': False,
+        },
+        {
             'code': 'ocd-screen',
             'name': 'OCD Screen',
             'description': 'Cuestionario de cribado para transtorno obsesivo-compulsivo (OCD).',
@@ -344,30 +388,19 @@ def initialize_tests():
             'uses_per_month': None,
         },
         {
-            'code': 'scl-90',
-            'name': 'SCL-90-R',
-            'description': 'SCL-90-R - Lista de Síntomas Revisada (pantalla amplia) para evaluación de psicopatología.',
-            'test_type': 'scl90',
-            'required_access_level': 'professional',
-            'icon': '📋',
+            'code': 'scl90',
+            'name': 'SCL-90 - Screening Holistico',
+            'description': 'Version holistica tipo Wellness del SCL-90 para evaluar sintomas generales sin diagnostico.',
+            'test_type': 'wellness',
+            'required_access_level': 'free',
+            'icon': '??',
             'order': 21,
-            'estimated_duration': 15,
-            'available_for_therapists': True,
-            'available_for_personal': False,
-            'uses_per_month': None,
-        },
-        {
-            'code': 'stai',
-            'name': 'STAI - Estado-Rasgo',
-            'description': 'STAI - Inventario de Ansiedad (Estado y Rasgo).',
-            'test_type': 'stai',
-            'required_access_level': 'professional',
-            'icon': '⚖️',
-            'order': 22,
-            'estimated_duration': 8,
-            'available_for_therapists': True,
+            'estimated_duration': 12,
+            'available_for_therapists': False,
             'available_for_personal': True,
             'uses_per_month': None,
+            'requires_license': False,
+            'license_info': '',
         },
         {
             'code': 'mcmi-iv',
@@ -385,6 +418,127 @@ def initialize_tests():
             'license_info': 'MCMI-IV es un instrumento con derechos de autor. Debes tener licencia válida para administrarlo en esta plataforma.'
         },
         {
+            'code': 'life-purpose',
+            'name': 'Propósito de Vida y Sentido Vital',
+            'description': 'Explora la claridad de dirección, el sentido de trascendencia y la conexión con el propósito vital. (Mundo de Atzilut)',
+            'test_type': 'purpose',
+            'required_access_level': 'professional',
+            'icon': '🎯',
+            'order': 9,
+            'estimated_duration': 15,
+            'available_for_therapists': True,
+            'available_for_personal': False,
+            'uses_per_month': None,
+        },
+        {
+            'code': 'cognitive-map',
+            'name': 'Mapa Cognitivo y Narrativa',
+            'description': 'Evalúa la flexibilidad mental, los estilos de pensamiento y la coherencia de la narrativa personal. (Mundo de Beriá)',
+            'test_type': 'holistic_screening',
+            'required_access_level': 'professional',
+            'icon': '🧩',
+            'order': 25,
+            'estimated_duration': 12,
+            'available_for_therapists': True,
+            'available_for_personal': False,
+            'uses_per_month': None,
+        },
+        {
+            'code': 'belief-system',
+            'name': 'Sistema de Creencias',
+            'description': 'Mapeo de creencias potenciadoras y limitantes que configuran la percepción de la realidad. (Mundo de Beriá)',
+            'test_type': 'holistic_screening',
+            'required_access_level': 'professional',
+            'icon': '🕸️',
+            'order': 26,
+            'estimated_duration': 15,
+            'available_for_therapists': True,
+            'available_for_personal': False,
+            'uses_per_month': None,
+        },
+        {
+            'code': 'emotional-literacy',
+            'name': 'Alfabetización Emocional',
+            'description': 'Evalúa la capacidad de reconocer, nombrar y regular procesos emocionales internos. (Mundo de Ietzirá)',
+            'test_type': 'holistic_screening',
+            'required_access_level': 'professional',
+            'icon': '🎭',
+            'order': 27,
+            'estimated_duration': 15,
+            'available_for_therapists': True,
+            'available_for_personal': False,
+            'uses_per_month': None,
+        },
+        {
+            'code': 'attachment-style',
+            'name': 'Vínculo y Estilo de Apego',
+            'description': 'Explora los patrones de vinculación afectiva y la seguridad en las relaciones. (Mundo de Ietzirá)',
+            'test_type': 'holistic_screening',
+            'required_access_level': 'professional',
+            'icon': '🔗',
+            'order': 28,
+            'estimated_duration': 20,
+            'available_for_therapists': True,
+            'available_for_personal': False,
+            'uses_per_month': None,
+        },
+        {
+            'code': 'daily-rhythm',
+            'name': 'Hábitos y Ritmo Vital',
+            'description': 'Evaluación de la regularidad en las rutinas básicas y el equilibrio entre acción y descanso. (Mundo de Asiá)',
+            'test_type': 'holistic_screening',
+            'required_access_level': 'professional',
+            'icon': '⌚',
+            'order': 29,
+            'estimated_duration': 10,
+            'available_for_therapists': True,
+            'available_for_personal': False,
+            'uses_per_month': None,
+        },
+        {
+            'code': 'somatic-awareness',
+            'name': 'Registro Somático y Presencia',
+            'description': 'Evalúa la conexión con las señales del cuerpo, la tensión física y la presencia en el aquí y ahora. (Mundo de Asiá)',
+            'test_type': 'holistic_screening',
+            'required_access_level': 'professional',
+            'icon': '🧘',
+            'order': 30,
+            'estimated_duration': 10,
+            'available_for_therapists': True,
+            'available_for_personal': False,
+            'uses_per_month': None,
+        },
+        {
+            'code': 'mcmi4-mystic',
+            'name': 'MCMI-4-Mystic - Inventario Multiaxial Cósmico',
+            'description': 'Inventario comprensivo de 195 ítems que mapea la personalidad del alma a través de los 4 Mundos Cabalísticos (Atzilut, Briah, Yetzirah, Assiah). Sistema modular con rotación inteligente de preguntas. **Gestionado exclusivamente desde SWM dedicado.**',
+            'test_type': 'holistic_screening',
+            'required_access_level': 'professional',
+            'icon': '🌌',
+            'order': 999,  # High order number to push to bottom of lists
+            'estimated_duration': 45,
+            'available_for_therapists': False,  # Not shown in therapist catalog
+            'available_for_personal': False,    # Not shown in personal catalog
+            'uses_per_month': None,
+            'is_assignable': True,  # Can still be assigned via SWM
+            'requires_license': False,
+        },
+        {
+            'code': 'mcmi4-signal',
+            'name': 'SWM MCMI-4 SIGNAL',
+            'description': 'Señal mínima simbólica para habilitar el flujo SWM MCMI-4 Místico. Cuestionario corto de señal no clínica.',
+            'test_type': 'holistic_screening',
+            'required_access_level': 'free',
+            'icon': '🧭',
+            'order': 998,
+            'estimated_duration': 5,
+            'available_for_therapists': True,
+            'available_for_personal': True,
+            'uses_per_month': None,
+            'is_assignable': True,
+            'requires_license': False,
+        },
+        {
             'code': 'scid5',
             'name': 'SCID-5-RV - Entrevista DSM-5',
             'description': 'SCID-5-RV - Entrevista clínica estructurada para DSM-5 (se requiere adaptación clínica).',
@@ -400,7 +554,18 @@ def initialize_tests():
             'license_info': 'SCID-5-RV es un instrumento protegido. Confirmar licencia y capacitación antes de uso.'
         },
     ]
-    
+
+    for test_data in tests_data:
+        code = test_data['code']
+        override = HOLISTIC_LEGACY_OVERRIDES.get(code)
+        if override:
+            test_data['name'] = override[0]
+            test_data['public_name'] = override[0]
+            test_data['canonical_family'] = override[1]
+        else:
+            test_data.setdefault('public_name', test_data['name'])
+        test_data.setdefault('domain', 'holistic')
+
     created_count = 0
     updated_count = 0
     
@@ -417,6 +582,15 @@ def initialize_tests():
             updated_count += 1
             print(f"↻ Actualizado: {test.name}")
     
+    for prefix in TECHNICAL_TEST_PREFIXES:
+        TestModule.objects.filter(code__startswith=prefix).update(
+            domain="technical",
+            is_internal=True,
+            is_assignable=False,
+            canonical_family="technical_operations",
+            public_name="Hidden Operational Probe",
+        )
+
     print(f"\n{'='*50}")
     print(f"Tests creados: {created_count}")
     print(f"Tests actualizados: {updated_count}")

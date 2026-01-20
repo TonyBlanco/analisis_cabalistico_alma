@@ -1,0 +1,90 @@
+[
+  {
+    "id": "DUDIT_01",
+    "instrument": "DUDIT_schema",
+    "position": 1,
+    "text": null,
+    "scale": "Drug_Use",
+    "weight": 1
+  },
+  {
+    "id": "DUDIT_02",
+    "instrument": "DUDIT_schema",
+    "position": 2,
+    "text": null,
+    "scale": "Drug_Use",
+    "weight": 1
+  },
+  {
+    "id": "DUDIT_03",
+    "instrument": "DUDIT_schema",
+    "position": 3,
+    "text": null,
+    "scale": "Drug_Use",
+    "weight": 1
+  },
+  {
+    "id": "DUDIT_04",
+    "instrument": "DUDIT_schema",
+    "position": 4,
+    "text": null,
+    "scale": "Drug_Use",
+    "weight": 1
+  },
+  {
+    "id": "DUDIT_05",
+    "instrument": "DUDIT_schema",
+    "position": 5,
+    "text": null,
+    "scale": "Drug_Use",
+    "weight": 1
+  },
+  {
+    "id": "DUDIT_06",
+    "instrument": "DUDIT_schema",
+    "position": 6,
+    "text": null,
+    "scale": "Drug_Use",
+    "weight": 1
+  },
+  {
+    "id": "DUDIT_07",
+    "instrument": "DUDIT_schema",
+    "position": 7,
+    "text": null,
+    "scale": "Drug_Use",
+    "weight": 1
+  },
+  {
+    "id": "DUDIT_08",
+    "instrument": "DUDIT_schema",
+    "position": 8,
+    "text": null,
+    "scale": "Drug_Use",
+    "weight": 1
+  },
+  {
+    "id": "DUDIT_09",
+    "instrument": "DUDIT_schema",
+    "position": 9,
+    "text": null,
+    "scale": "Drug_Use",
+    "weight": 1
+  },
+  {
+    "id": "DUDIT_10",
+    "instrument": "DUDIT_schema",
+    "position": 10,
+    "text": null,
+    "scale": "Drug_Use",
+    "weight": 1
+  },
+  {
+    "id": "DUDIT_11",
+    "instrument": "DUDIT_schema",
+    "position": 11,
+    "text": null,
+    "scale": "Drug_Use",
+    "weight": 1
+  }
+]

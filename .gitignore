@@ -51,6 +51,9 @@ dist/
 .dynamodb/
 .tern-port
 
+!packages/symbolic/dist/
+!packages/symbolic/dist/**
+
 # IDE
 .vscode/
 .idea/

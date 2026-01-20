@@ -1,0 +1,1 @@
+{"version":3,"file":"planets.d.ts","sourceRoot":"","sources":["../../../catalogs/astrology/planets.ts"],"names":[],"mappings":"AAAA,MAAM,MAAM,QAAQ,GAChB,KAAK,GACL,MAAM,GACN,SAAS,GACT,OAAO,GACP,MAAM,GACN,SAAS,GACT,QAAQ,GACR,QAAQ,GACR,SAAS,GACT,OAAO,CAAC;AAEZ,MAAM,WAAW,kBAAkB;IACjC,EAAE,EAAE,QAAQ,CAAC;IACb,IAAI,EAAE,MAAM,CAAC;CACd;AAED,eAAO,MAAM,OAAO,EAAE,kBAAkB,EAWvC,CAAC"}

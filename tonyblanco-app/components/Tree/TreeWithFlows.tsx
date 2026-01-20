@@ -14,7 +14,7 @@
 import type { CSSProperties } from 'react';
 import TreeOfLifeSVG from './TreeOfLifeSVG';
 import type { TreeSefirahId } from './tree.types';
-import type { TreeStructuralState, SefiraId, FlowPolarity } from '../../../src/symbolic/tree';
+import type { TreeStructuralState, SefiraId, FlowPolarity } from '@holistica/symbolic/tree';
 
 interface TreeWithFlowsProps {
   /** TreeStructuralState v0.1 para renderizar */

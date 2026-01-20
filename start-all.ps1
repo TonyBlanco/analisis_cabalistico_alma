@@ -76,97 +76,77 @@ if (-not $flaskInstalled -or -not $pandasInstalled) {
 	}
 }
 
-# 3) Start Django backend in a new terminal
-Write-Host "1️⃣  Starting Django Backend (Port 8000)..." -ForegroundColor Yellow
+# 3) Start Django backend, Flask API, and Frontend in new terminals
+Write-Host "1️⃣  Starting Django Backend (Port 8000)... $(Get-Date -Format 'HH:mm:ss')" -ForegroundColor Yellow
 Start-Process pwsh -ArgumentList "-NoExit", "-Command", "& '$PSScriptRoot\start-backend.ps1'"
 
-# 4) Wait for Django backend health (up to 60s)
-function Test-BackendReady {
-	param([string]$Url = "http://127.0.0.1:8000/api/")
-	try {
-		$null = Invoke-WebRequest -Uri $Url -Method GET -TimeoutSec 3 -UseBasicParsing
-		return $true
-	} catch {
-		return $false
-	}
-}
-
-Write-Host "⏳ Waiting for Django backend to become ready (max 60s)..." -ForegroundColor DarkYellow
-$maxTries = 60
-for ($i = 1; $i -le $maxTries; $i++) {
-	if (Test-BackendReady) {
-		Write-Host "✅ Django backend is ready!" -ForegroundColor Green
-		break
-	}
-	Start-Sleep -Seconds 1
-	if ($i -eq $maxTries) {
-		Write-Host "⚠️ Django backend did not respond in time. Continuing anyway..." -ForegroundColor Yellow
-	}
-}
-
-# 5) Start Flask API in a new terminal
-Write-Host "2️⃣  Starting Flask API (Port 5000)..." -ForegroundColor Yellow
+Write-Host "2️⃣  Starting Flask API (Port 5000)... $(Get-Date -Format 'HH:mm:ss')" -ForegroundColor Yellow
 Start-Process pwsh -ArgumentList "-NoExit", "-Command", "& '$PSScriptRoot\start-flask.ps1'"
 
-# 6) Wait for Flask API health (up to 60s)
-function Test-FlaskReady {
-	param([string]$Url = "http://localhost:5000/api/salud")
-	try {
-		$null = Invoke-WebRequest -Uri $Url -Method GET -TimeoutSec 3 -UseBasicParsing
-		return $true
-	} catch {
-		return $false
-	}
-}
-
-Write-Host "⏳ Waiting for Flask API to become ready (max 60s)..." -ForegroundColor DarkYellow
-$maxTries = 60
-for ($i = 1; $i -le $maxTries; $i++) {
-	if (Test-FlaskReady) {
-		Write-Host "✅ Flask API is ready!" -ForegroundColor Green
-		break
-	}
-	Start-Sleep -Seconds 1
-	if ($i -eq $maxTries) {
-		Write-Host "⚠️ Flask API did not respond in time. Continuing anyway..." -ForegroundColor Yellow
-	}
-}
-
-# 7) Start frontend in a new terminal
-Write-Host "2️⃣  Starting Next.js Frontend (Port 3000)..." -ForegroundColor Yellow
+Write-Host "3️⃣  Starting Next.js Frontend (Port 3000)... $(Get-Date -Format 'HH:mm:ss')" -ForegroundColor Yellow
 Start-Process pwsh -ArgumentList "-NoExit", "-Command", "& '$PSScriptRoot\start-frontend.ps1'"
 
-# 8) Wait for frontend health (tries ports 3000 then 3001, up to 90s)
-function Test-FrontendReady {
-	param([string[]]$Urls)
-	foreach ($u in $Urls) {
-		try {
-			$resp = Invoke-WebRequest -Uri $u -Method GET -TimeoutSec 3 -UseBasicParsing
-			if ($resp.StatusCode -ge 200 -and $resp.StatusCode -lt 500) {
-				return $u
+# Parallel health checks for services (faster than sequential polling)
+Write-Host "⏳ Checking service health in parallel..." -ForegroundColor DarkYellow
+
+$checks = @(
+	@{ Name = 'Django Backend'; Url = 'http://127.0.0.1:8000/api/'; Timeout = 30 },
+	@{ Name = 'Flask API'; Url = 'http://localhost:5000/api/salud'; Timeout = 30 },
+	@{ Name = 'Frontend'; Urls = @('http://localhost:3000','http://127.0.0.1:3000','http://localhost:3001','http://127.0.0.1:3001'); Timeout = 60 }
+)
+
+$jobs = @()
+foreach ($c in $checks) {
+	if ($c.ContainsKey('Urls')) {
+		$jobs += Start-Job -Name $c.Name -ArgumentList ($c.Urls, $c.Timeout, $c.Name) -ScriptBlock {
+			param($Urls, $Timeout, $Name)
+			$sw = [Diagnostics.Stopwatch]::StartNew()
+			$end = (Get-Date).AddSeconds($Timeout)
+			foreach ($u in $Urls) {
+				while ((Get-Date) -lt $end) {
+					try {
+						$resp = Invoke-WebRequest -Uri $u -Method GET -TimeoutSec 3 -UseBasicParsing
+						if ($resp.StatusCode -ge 200 -and $resp.StatusCode -lt 500) {
+							$sw.Stop(); return @{ Name = $Name; Url = $u; Success = $true; Elapsed = $sw.Elapsed.TotalSeconds }
+						}
+					} catch { }
+					Start-Sleep -Seconds 1
+				}
 			}
-		} catch { }
+			$sw.Stop(); return @{ Name = $Name; Url = $null; Success = $false; Elapsed = $sw.Elapsed.TotalSeconds }
+		}
+	} else {
+		$jobs += Start-Job -Name $c.Name -ArgumentList ($c.Url, $c.Timeout, $c.Name) -ScriptBlock {
+			param($Url, $Timeout, $Name)
+			$sw = [Diagnostics.Stopwatch]::StartNew()
+			$end = (Get-Date).AddSeconds($Timeout)
+			while ((Get-Date) -lt $end) {
+				try {
+					$resp = Invoke-WebRequest -Uri $Url -Method GET -TimeoutSec 3 -UseBasicParsing
+					if ($resp.StatusCode -ge 200 -and $resp.StatusCode -lt 500) {
+						$sw.Stop(); return @{ Name = $Name; Url = $Url; Success = $true; Elapsed = $sw.Elapsed.TotalSeconds }
+					}
+				} catch { }
+				Start-Sleep -Seconds 1
+			}
+			$sw.Stop(); return @{ Name = $Name; Url = $Url; Success = $false; Elapsed = $sw.Elapsed.TotalSeconds }
+		}
 	}
-	return $null
 }
 
-Write-Host "⏳ Waiting for frontend to become ready (max 90s)..." -ForegroundColor DarkYellow
-$frontendUrls = @(
-	'http://localhost:3000',
-	'http://127.0.0.1:3000',
-	'http://localhost:3001',
-	'http://127.0.0.1:3001'
-)
-$readyUrl = $null
-for ($i = 1; $i -le 90; $i++) {
-	$readyUrl = Test-FrontendReady -Urls $frontendUrls
-	if ($readyUrl) { break }
-	Start-Sleep -Seconds 1
-}
-if ($readyUrl) {
-	Write-Host "✅ Frontend is ready: $readyUrl" -ForegroundColor Green
-} else {
-	Write-Host "⚠️ Frontend did not respond in time. It may still be compiling." -ForegroundColor Yellow
+# Wait for all jobs up to the maximum configured timeout
+$maxTimeout = ($checks | Measure-Object -Property Timeout -Maximum).Maximum
+Wait-Job -Job $jobs -Timeout ($maxTimeout + 5) | Out-Null
+
+Write-Host "Health check results:" -ForegroundColor Cyan
+foreach ($j in $jobs) {
+	$res = Receive-Job -Job $j -ErrorAction SilentlyContinue
+	if ($res -and $res.Success) {
+		Write-Host "✅ $($res.Name) ready at $($res.Url) (after $([math]::Round($res.Elapsed,1))s)" -ForegroundColor Green
+	} else {
+		Write-Host "⚠️ $($j.Name) did not respond within allotted time." -ForegroundColor Yellow
+	}
+	Remove-Job -Job $j -Force
 }
 
 Write-Host ""

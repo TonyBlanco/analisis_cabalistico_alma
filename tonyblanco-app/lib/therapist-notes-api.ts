@@ -31,7 +31,7 @@ export async function listTherapistNotes(patientId?: number | string | null): Pr
   if (!token) throw new Error('No auth token found');
 
   const qs = patientId ? `?patient=${encodeURIComponent(String(patientId))}` : '';
-  const res = await fetch(`${API_URL}/therapist/notes/${qs}`, {
+  const res = await fetch(`${API_URL}/patient-notes/${qs}`, {
     headers: getAuthHeaders(),
   });
 
@@ -41,7 +41,10 @@ export async function listTherapistNotes(patientId?: number | string | null): Pr
   }
 
   const data = await res.json();
-  return Array.isArray(data) ? (data as TherapistNote[]) : [];
+  // The backend may return either a plain array or a paginated object { results: [...] }
+  if (Array.isArray(data)) return data as TherapistNote[];
+  if (data && Array.isArray((data as any).results)) return (data as any).results as TherapistNote[];
+  return [];
 }
 
 export async function createTherapistNote(input: {
@@ -53,14 +56,13 @@ export async function createTherapistNote(input: {
   const token = getAuthToken();
   if (!token) throw new Error('No auth token found');
 
-  const res = await fetch(`${API_URL}/therapist/notes/`, {
+  const res = await fetch(`${API_URL}/patient-notes/`, {
     method: 'POST',
     headers: getAuthHeaders(),
+    // Canonical backend contract: send patient PK and content only.
     body: JSON.stringify({
       patient: input.patientId,
-      title: input.title,
       content: input.content,
-      tags: input.tags || '',
     }),
   });
 

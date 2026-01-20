@@ -1,0 +1,53 @@
+{
+  "workspace_id": "56dc6785-bb8d-4fa4-96de-e5bc87b3a12f",
+  "session_id": "5ec88352-59f6-4cd7-aef0-4d62aedf8b24",
+  "session_status": "active",
+  "current_progress": {
+    "current_world": "atzilut",
+    "current_question_index": 3,
+    "answered_count": 3,
+    "progress_percentage": 1.54,
+    "completed_worlds": [],
+    "worlds_progress": {
+      "atzilut": {
+        "answered": 3,
+        "total": 49
+      },
+      "briah": {
+        "answered": 0,
+        "total": 49
+      },
+      "yetzirah": {
+        "answered": 0,
+        "total": 49
+      },
+      "assiah": {
+        "answered": 0,
+        "total": 48
+      }
+    }
+  },
+  "responses": {
+    "atz_bin_001": {
+      "value": 3,
+      "timestamp": "2026-01-17T17:24:39.019586+01:00",
+      "world": "atzilut",
+      "dimension": "binah_deep_understanding",
+      "sefirah": "Binah"
+    },
+    "atz_bin_002": {
+      "value": 3,
+      "timestamp": "2026-01-17T17:24:41.410921+01:00",
+      "world": "atzilut",
+      "dimension": "binah_deep_understanding",
+      "sefirah": "Binah"
+    },
+    "atz_bin_003": {
+      "value": 3,
+      "timestamp": "2026-01-17T17:24:43.808028+01:00",
+      "world": "atzilut",
+      "dimension": "binah_deep_understanding",
+      "sefirah": "Binah"
+    }
+  }
+}

@@ -47,7 +47,8 @@
 | `PROBLEM-EXPLAINED.md` | `docs/backLegacy/legacy_tests/PROBLEM-EXPLAINED.md` | HISTÓRICO | Docs / Governance | TBD | Archivado tras reconciliación; ver symbolic_contradictions_matrix.csv |
 | `PASOS-FINALES.md` | `docs/backLegacy/legacy_tests/PASOS-FINALES.md` | HISTÓRICO | Docs / Governance | TBD | Archivado tras reconciliación; ver symbolic_contradictions_matrix.csv |
 | `DB_STRUCTURE.md` | `docs/technical/DB_STRUCTURE.md` | **Active** | Technical / Database | TBD | Estructura de base de datos del sistema. |
-| `FEDERATION_PHASE1_IMPLEMENTATION_REPORT.md` | `docs/technical/FEDERATION_PHASE1_IMPLEMENTATION_REPORT.md` | **Active** | Technical / Federation | TBD | Informe de implementación Phase 1 (autorizaciones federadas y controles). |
+| `FEDERATION_PHASE1_IMPLEMENTATION_REPORT.md` | `docs/releases/phase-1/FEDERATION_PHASE1_IMPLEMENTATION_REPORT.md` | **Active** | Releases / Phase 1 | Arquitectura | Informe de implementación Phase 1 (autorizaciones federadas y controles). |
+| `FEDERATION_MVP_PHASE1_DEBUG_E2E_REPORT.md` | `docs/releases/phase-1/FEDERATION_MVP_PHASE1_DEBUG_E2E_REPORT.md` | **Active** | Releases / Phase 1 | Arquitectura | Reporte debug E2E Phase 1 (evidencia de verificación). |
 | `ARCHITECT_MODE_PHASE_0_COMPLETE.md` | `docs/releases/phase-0/ARCHITECT_MODE_PHASE_0_COMPLETE.md` | **Active** | Releases / Phase 0 | Arquitectura | Reporte de completitud de Fase 0 (Federación Holística). |
 | `ARCHITECT_MODE_PHASE_0.1_PATCHES.md` | `docs/releases/phase-0/ARCHITECT_MODE_PHASE_0.1_PATCHES.md` | **Active** | Releases / Phase 0 | Arquitectura | Patches normativos para Fase 0.1 (eliminación de contradicciones). |
 | `PHASE_0.1_COMPLETION_REPORT.md` | `docs/releases/phase-0/PHASE_0.1_COMPLETION_REPORT.md` | **Active** | Releases / Phase 0 | Arquitectura | Reporte de completitud de Fase 0.1. |

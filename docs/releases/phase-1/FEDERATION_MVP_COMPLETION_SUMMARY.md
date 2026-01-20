@@ -140,7 +140,7 @@ for record in response_data['records']:
 
 ## MANUAL TESTING READY
 
-Manual test procedures documented in [FEDERATION_PHASE1_IMPLEMENTATION_REPORT.md](docs/technical/FEDERATION_PHASE1_IMPLEMENTATION_REPORT.md) §"PASOS DE PRUEBA MANUAL":
+Manual test procedures documented in [FEDERATION_PHASE1_IMPLEMENTATION_REPORT.md](docs/releases/phase-1/FEDERATION_PHASE1_IMPLEMENTATION_REPORT.md) §"PASOS DE PRUEBA MANUAL":
 
 1. **Scenario 1:** Therapist sin ownership → expect 403
 2. **Scenario 2:** Patient sin consentimiento → expect 403
@@ -152,7 +152,7 @@ Manual test procedures documented in [FEDERATION_PHASE1_IMPLEMENTATION_REPORT.md
 ## ROLLBACK PLAN
 
 Documented rollback procedures available in:
-- [FEDERATION_PHASE1_IMPLEMENTATION_REPORT.md](docs/technical/FEDERATION_PHASE1_IMPLEMENTATION_REPORT.md) §"PLAN DE ROLLBACK"
+- [FEDERATION_PHASE1_IMPLEMENTATION_REPORT.md](docs/releases/phase-1/FEDERATION_PHASE1_IMPLEMENTATION_REPORT.md) §"PLAN DE ROLLBACK"
 
 **Quick rollback:**
 ```bash

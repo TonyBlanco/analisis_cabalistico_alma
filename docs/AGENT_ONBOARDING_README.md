@@ -32,6 +32,15 @@ Leerlos en ese orden antes de cualquier modificaci├│n de UI, copy o interacc
 - No crear documentos paralelos que contradigan los documentos canónicos listados arriba.
 - No "mejorar" la UX si ello altera la semántica de los datos o crea expectativas de automatismo.
 
+---
+### Regla de Ubicación de Documentación (VINCULANTE)
+- Prohibido crear o mantener documentación normativa en la raíz del repo (/). La única ubicación canónica es `docs/`.
+- Borradores temporales → `docs/legacy/<YYYY-MM-DD>_drafts/` (o `docs/_work/` si existe).
+- Duplicados históricos / “root-shadow” → `docs/legacy/<YYYY-MM-DD>_root-shadow/`.
+---
+
+Cualquier `.md` creado fuera de `docs/` debe migrarse en el mismo PR o se bloquea la revisión.
+
 4) Qué SÍ está permitido
 
 - Cambios explícitos y documentados en UI y copy, tras lectura de los documentos canónicos.

@@ -473,6 +473,17 @@ class Patient(models.Model):
         help_text='Terapeuta que cambió el estado'
     )
     
+    # ========== FEDERACIÓN HOLÍSTICA (Phase-1) ==========
+    consent_federation = models.BooleanField(
+        default=False,
+        help_text='Consentimiento explícito del sujeto para federación de lectura cross-workspace (hubs MSHE/SCDF/SCID-5)'
+    )
+    consent_federation_date = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text='Fecha en que se otorgó el consentimiento de federación'
+    )
+    
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -1375,6 +1386,116 @@ class ResonanciaRelation(models.Model):
     class Meta:
         verbose_name = 'Relación (Resonancia)'
         verbose_name_plural = 'Relaciones (Resonancia)'
+
+
+class FederationAuditLog(models.Model):
+    """Registro inmutable de lecturas federadas cross-workspace.
+    
+    Cada invocación del endpoint de federación genera una entrada de auditoría.
+    Logs son append-only (no updates, no deletes) para compliance.
+    
+    Policy: HOLISTIC_FEDERATION_POLICY.md (v2.0)
+    Contract: FEDERATION_HUBS_CONTRACT.md §2.4
+    """
+    
+    HUB_CHOICES = [
+        ('MSHE', 'Motor de Síntesis Holística Evaluativa'),
+        ('SCDF', 'Structured Clinical Data Formulation'),
+        ('SCID5', 'SCID-5 Holístico'),
+    ]
+    
+    STATUS_CHOICES = [
+        ('allowed', 'Permitido'),
+        ('denied', 'Denegado'),
+    ]
+    
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False,
+        help_text='Identificador único del registro de auditoría'
+    )
+    
+    # Timestamp
+    timestamp = models.DateTimeField(
+        auto_now_add=True,
+        db_index=True,
+        help_text='Momento exacto de la solicitud de lectura federada'
+    )
+    
+    # Actores
+    requested_by_user = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='federation_audit_requests',
+        help_text='Usuario (terapeuta) que solicitó la lectura federada'
+    )
+    
+    subject_patient = models.ForeignKey(
+        Patient,
+        on_delete=models.SET_NULL,
+        null=True,
+        db_index=True,
+        related_name='federation_audit_logs',
+        help_text='Paciente/sujeto cuya información fue consultada'
+    )
+    
+    # Hub consumidor
+    federation_hub = models.CharField(
+        max_length=16,
+        choices=HUB_CHOICES,
+        help_text='Hub federado que consumió los datos (MSHE/SCDF/SCID5)'
+    )
+    
+    # Scope de lectura
+    scope = models.JSONField(
+        help_text='Alcance de la solicitud: {date_range: {start, end}, included_domains: [...]}'
+    )
+    
+    # Resultado
+    status = models.CharField(
+        max_length=16,
+        choices=STATUS_CHOICES,
+        default='allowed',
+        help_text='Si la lectura fue permitida o denegada'
+    )
+    
+    records_accessed_count = models.IntegerField(
+        default=0,
+        help_text='Número de AnalysisRecords incluidos en el feed (0 si denegado)'
+    )
+    
+    denial_reason = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text='Razón de denegación (ej: "no_consent", "no_ownership")'
+    )
+    
+    # Trazabilidad opcional
+    output_snapshot_id = models.UUIDField(
+        null=True,
+        blank=True,
+        help_text='ID del output generado por el hub (si aplica)'
+    )
+    
+    class Meta:
+        verbose_name = 'Auditoría de Federación'
+        verbose_name_plural = 'Auditorías de Federación'
+        ordering = ['-timestamp']
+        indexes = [
+            models.Index(fields=['subject_patient', 'timestamp']),
+            models.Index(fields=['requested_by_user', 'timestamp']),
+            models.Index(fields=['federation_hub', 'timestamp']),
+        ]
+    
+    def __str__(self):
+        return f'FedAudit {self.federation_hub} - {self.subject_patient} by {self.requested_by_user} [{self.status}]'
+    
+    def delete(self, *args, **kwargs):
+        """Prohibir borrado de logs de auditoría (compliance)"""
+        raise Exception("FederationAuditLog records cannot be deleted (immutable for compliance)")
+
         ordering = ['-created_at']
         indexes = [
             models.Index(fields=['subject', '-created_at'], name='resrel_subj_created_idx'),

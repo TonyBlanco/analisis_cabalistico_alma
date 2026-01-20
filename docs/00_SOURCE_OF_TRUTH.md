@@ -65,6 +65,88 @@ Se establece el flujo oficial y obligatorio para interacciones con agentes (AGEN
 - Consultar `docs/CHAT_CONTINUITY_PROTOCOL.md` para el ritual de cierre, ritual de apertura y la frase clave que asegura continuidad del contexto entre sesiones.
 - Cualquier excepción debe estar aprobada por el comité de gobernanza y documentada en un issue referenciado.
 
+---
+
+## Transición a Federación Holística (2026-01-20)
+
+**Decisión de gobernanza:** Aprobada por Arquitectura / Gobernanza el 2026-01-20.
+
+### Cambios Fundamentales
+
+**Política supersedida:**
+- `docs/WORKSPACE_ISOLATION_POLICY.md` (v1.0) → **SUPERSEDED** → migrado a `docs/legacy/2026-01-20_pre-federation/`
+
+**Nueva política vigente:**
+- `docs/HOLISTIC_FEDERATION_POLICY.md` (v2.0) — **ACTIVA** — Autoridad máxima para gobernanza de workspaces.
+
+### Qué Cambia (ANTES → DESPUÉS)
+
+| **Aspecto** | **ANTES (Aislamiento Absoluto)** | **DESPUÉS (Federación Holística)** |
+|------------|----------------------------------|-----------------------------------|
+| **Compartir datos** | ❌ Prohibido (solo export manual estático) | ✅ Lectura federada para hubs autorizados (SCDF/SCID-5/MSHE) |
+| **Escritura cross-workspace** | ❌ Prohibida | ❌ Prohibida (**SIN CAMBIOS**) |
+| **Síntesis holística** | ❌ Bloqueada | ✅ Operacional (lectura federada) |
+| **Auditoría** | ⚠️ Manual (fricción) | ✅ Automática (sin fricción, inmutable, Phase 1+) |
+| **Visibilidad dual** | ⚠️ Mezclada | ✅ Nativa (public/pro) |
+| **No-diagnóstico** | ✅ Mantenido | ✅ **Reforzado** (IA Mayéutica) |
+| **Ecosistema vivo** | ❌ Bloqueado | ✅ **Habilitado** |
+
+### Qué Se Mantiene (SIN CAMBIOS)
+
+- ✅ **Integridad de dominio**: Ningún workspace escribe en otro (prohibición absoluta).
+- ✅ **No-diagnóstico**: Outputs simbólicos, educativos, orientativos — nunca diagnósticos deterministas.
+- ✅ **Visibilidad dual**: Separación estricta consultante (público) vs terapeuta (profesional).
+- ✅ **Consentimiento explícito**: Consultante autoriza síntesis federada (opt-in revocable ligado a `FederationReadScope` con dominios + rango temporal).
+
+### Federation Hubs Autorizados
+
+Solo estos 3 workspaces pueden realizar lectura cross-workspace:
+1. **SCDF** (Structured Contextual Data Formulation) — Formulación holística estructurada.
+2. **SCID-5 Holístico** — Exploración socrática con preguntas mayéuticas.
+3. **MSHE** (Motor de Síntesis Holística Evaluativa) — Síntesis de 6 ejes + alertas.
+
+**Restricciones obligatorias:**
+- Solo lectura de artefactos normalizados (`AnalysisRecordNormalized` / `HubFeedSnapshot`, endpoints NON-BINDING/FUTURE Phase 1+).
+- Prohibida escritura en workspaces fuente.
+- Auditoría automática de toda lectura cross-workspace (`FederationAuditLog` inmutable, concepto Phase 1+).
+- Outputs mayéuticos (preguntas/hipótesis, no sentencias diagnósticas).
+
+### Documentos Canónicos de Federación
+
+| **Documento** | **Propósito** | **Estado** |
+|--------------|-------------|----------|
+| `HOLISTIC_FEDERATION_POLICY.md` (v2.0) | Política completa de federación | **ACTIVA** |
+| `FEDERATION_HUBS_CONTRACT.md` (v1.0) | Contratos técnicos para hubs | **ACTIVA** |
+| `SYSTEM_PROMPT_GUARDIAN_HOLISTICO_v2.md` | IA Mayéutica y no-diagnóstico | **ACTIVA** |
+| `HOLISTIC_FEDERATION_ROADMAP.md` | Plan de implementación (Fases 0-5) | **ACTIVA** |
+| `WORKSPACE_ISOLATION_POLICY.md` (v1.0) | Política anterior (aislamiento absoluto) | **LEGACY (SUPERSEDED)** |
+
+### Impacto en Código
+
+- **Fase 0 (2026-01-20):** Solo documentación y arquitectura — **sin cambios de código, DB ni endpoints**.
+- **Fases 1-5 (4-12 meses):** Implementación gradual sin breaking changes (opt-in).
+  - Fase 1: Meta-Layer Federado + MSHE (4-6 sem)
+  - Fase 2: Motor de Resonancia (6-8 sem)
+  - Fase 3: Co-Investigador (Diarios Simbólicos) (8-10 sem)
+  - Fase 4: Timeline Dinámico (Tree Evolution Player) (6-8 sem)
+  - Fase 5: IA Socrática (SCDF + SCID-5) (8-12 sem)
+
+### Compliance
+
+- **Auditoría automática** obligatoria para toda lectura cross-workspace (Phase 1+).
+- **No-diagnóstico** verificado en 100% de outputs IA.
+- **Visibilidad dual** nativa en todos los artefactos normalizados.
+- **Consentimiento explícito** del consultante para síntesis federada (opt-in revocable con scope).
+
+### Referencias
+
+- **Política completa:** `docs/HOLISTIC_FEDERATION_POLICY.md`
+- **Contratos técnicos:** `docs/FEDERATION_HUBS_CONTRACT.md`
+- **Roadmap detallado:** `docs/HOLISTIC_FEDERATION_ROADMAP.md`
+- **Resumen ejecutivo:** `docs/HOLISTIC_FEDERATION_EXECUTIVE_SUMMARY.md`
+- **Plan de migración legacy:** `docs/LEGACY_MIGRATION_PLAN.md`
+
+---
 
 ## Siguientes pasos propuestos
 - Revisión y aprobación por el comité de gobernanza de los puntos listados en la Checklist (1–4).

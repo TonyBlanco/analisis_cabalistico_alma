@@ -19,6 +19,17 @@
 | `final_system_classification.md` | `docs/00_SOURCE_OF_TRUTH/final_system_classification.md` | Proposed | Governance / Product | TBD | Clasificación final: KEEP / REBUILD / REMOVE. |
 | `TESTS_HOLISTIC_CATALOG.md` | `docs/00_SOURCE_OF_TRUTH/TESTS_HOLISTIC_CATALOG.md` | **Active** | Tests Catalog | TBD | Catálogo holístico de tests (actual). |
 | `CHAT_CONTINUITY_PROTOCOL.md` | `docs/CHAT_CONTINUITY_PROTOCOL.md` | **Active** | Governance / Ops | TBD | Protocolo vinculante para continuidad de chats con agentes. |
+| `HOLISTIC_FEDERATION_POLICY.md` | `docs/HOLISTIC_FEDERATION_POLICY.md` | **Active** | Governance | Arquitectura | Política de federación holística (v2.0). Supersede WORKSPACE_ISOLATION_POLICY.md. |
+| `FEDERATION_HUBS_CONTRACT.md` | `docs/FEDERATION_HUBS_CONTRACT.md` | **Active** | Governance / Contracts | Arquitectura | Contratos técnicos para Federation Hubs (SCDF, SCID-5, MSHE). |
+| `SYSTEM_PROMPT_GUARDIAN_HOLISTICO_v2.md` | `docs/prompts/SYSTEM_PROMPT_GUARDIAN_HOLISTICO_v2.md` | **Active** | AI / Prompts | Arquitectura | System Prompt v2.0 con IA Mayéutica y soporte de federación. |
+| `HOLISTIC_FEDERATION_ROADMAP.md` | `docs/HOLISTIC_FEDERATION_ROADMAP.md` | **Active** | Governance / Roadmap | Arquitectura | Plan de implementación por fases (0-5). Estimado 4-12 meses. |
+| `HOLISTIC_FEDERATION_EXECUTIVE_SUMMARY.md` | `docs/HOLISTIC_FEDERATION_EXECUTIVE_SUMMARY.md` | **Active** | Governance / Executive | Arquitectura | Resumen ejecutivo de transición a federación holística. |
+| `LEGACY_MIGRATION_PLAN.md` | `docs/LEGACY_MIGRATION_PLAN.md` | **Active** | Governance / Migration | Arquitectura | Plan de migración de documentos legacy a nueva estructura. |
+| `WORKSPACE_ISOLATION_POLICY.md` | `docs/legacy/2026-01-20_pre-federation/WORKSPACE_ISOLATION_POLICY.md` | **LEGACY (SUPERSEDED)** | Governance | Arquitectura | Superseded por HOLISTIC_FEDERATION_POLICY.md (v2.0). Archivado 2026-01-20. |
+| `SYSTEM_PROMPT_GUARDIAN_HOLISTICO.md` (v1.0) | `docs/legacy/2026-01-20_pre-federation/SYSTEM_PROMPT_GUARDIAN_HOLISTICO_v1.md` | **LEGACY (SUPERSEDED)** | AI / Prompts | Arquitectura | Superseded por v2.0 con IA Mayéutica. Archivado 2026-01-20. |
+| `TESTS_SYSTEM.md` | `docs/legacy/2026-01-20_pre-federation/TESTS_SYSTEM.md` | **LEGACY (INFORMATIVO)** | Tests / Runtime | Arquitectura | Sistema de tests modulares (histórico). Superseded por runtime reports. |
+| `SYMBOLIC_AI_PHASE_0_CONTRACT.md` | `docs/legacy/2026-01-20_pre-federation/SYMBOLIC_AI_PHASE_0_CONTRACT.md` | **LEGACY (SUPERSEDED)** | AI / Contracts | Arquitectura | Superseded por SYSTEM_PROMPT_GUARDIAN_HOLISTICO_v2.md. |
+| `PR_RETROACTIVE_AUDIT.md` | `docs/legacy/2026-01-20_pre-federation/PR_RETROACTIVE_AUDIT.md` | **LEGACY (INFORMATIVO)** | Governance / Audit | Arquitectura | Auditoría retroactiva de PRs (histórico). |
 | `SYMBOLIC_INTERPRETER_AI_IMPLEMENTATION.md` | `docs/backLegacy/obsolete_architecture/SYMBOLIC_INTERPRETER_AI_IMPLEMENTATION.md` | HISTÓRICO | Docs / Governance | TBD | Archivado tras reconciliación; ver symbolic_contradictions_matrix.csv |
 | `PR_WORKSPACE_GOVERNANCE_CHECKLIST.md` | `docs/backLegacy/rescued_docs/PR_WORKSPACE_GOVERNANCE_CHECKLIST.md` | HISTÓRICO | Docs / Governance | TBD | Archivado tras reconciliación; ver symbolic_contradictions_matrix.csv |
 | `UI_COPY_FREEZE.md` | `docs/backLegacy/rescued_docs/UI_COPY_FREEZE.md` | HISTÓRICO | Docs / Governance | TBD | Archivado tras reconciliación; ver symbolic_contradictions_matrix.csv |

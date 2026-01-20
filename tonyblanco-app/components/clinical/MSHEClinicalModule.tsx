@@ -166,7 +166,7 @@ export default function MSHEClinicalModule() {
     try {
       const response = await fetch(`${API_BASE_URL}/therapist/holistic-config/`, {
         headers: {
-          'Authorization': `Bearer ${getAuthToken()}`,
+          'Authorization': `Token ${getAuthToken()}`,
           'Content-Type': 'application/json'
         }
       });
@@ -185,7 +185,7 @@ export default function MSHEClinicalModule() {
       const response = await fetch(`${API_BASE_URL}/therapist/holistic-config/`, {
         method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${getAuthToken()}`,
+          'Authorization': `Token ${getAuthToken()}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ weights })
@@ -206,7 +206,7 @@ export default function MSHEClinicalModule() {
     try {
       const response = await fetch(`${API_BASE_URL}/analysis-records/?patient_id=${patientId}`, {
         headers: {
-          'Authorization': `Bearer ${getAuthToken()}`,
+          'Authorization': `Token ${getAuthToken()}`,
           'Content-Type': 'application/json'
         }
       });
@@ -273,7 +273,7 @@ export default function MSHEClinicalModule() {
       const response = await fetch(`${API_BASE_URL}/analysis-records/${analysisRecord.id}/annotations/`, {
         method: 'PATCH',
         headers: {
-          'Authorization': `Bearer ${getAuthToken()}`,
+          'Authorization': `Token ${getAuthToken()}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ therapist_annotations: annotations })

@@ -13,12 +13,16 @@ class TestModuleSerializer(serializers.ModelSerializer):
     name = serializers.CharField(source='display_name', read_only=True)
     is_available = serializers.SerializerMethodField()
     user_access = serializers.SerializerMethodField()
+    # GOVERNANCE EXCEPTION (P0.1): execution_mode es contractual y computado
+    # a partir de available_for_therapists/available_for_personal. No hay
+    # campo persistente en el modelo. En casos híbridos (ambos true) devuelve null.
+    execution_mode = serializers.SerializerMethodField()
     
     class Meta:
         model = TestModule
         fields = [
             'id', 'code', 'name', 'public_name', 'canonical_family', 'domain', 'is_internal',
-            'description', 'test_type',
+            'description', 'test_type', 'execution_mode',
             'required_access_level', 'is_active',
             'available_for_therapists', 'available_for_personal',
             'uses_per_month', 'icon', 'order', 'estimated_duration',
@@ -32,6 +36,14 @@ class TestModuleSerializer(serializers.ModelSerializer):
         if request and request.user.is_authenticated:
             return obj.is_available_for_user(request.user)
         return False
+
+    def get_execution_mode(self, obj):
+        """Deriva el modo de ejecución desde flags de disponibilidad."""
+        if obj.available_for_therapists and not obj.available_for_personal:
+            return 'therapist_clinical'
+        if obj.available_for_personal and not obj.available_for_therapists:
+            return 'patient_self'
+        return None
     
     def get_user_access(self, obj):
         """Información de acceso del usuario"""

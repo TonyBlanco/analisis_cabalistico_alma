@@ -20,6 +20,7 @@ import { swmMcmi4Api } from '@/lib/api/swm-mcmi4-api';
 import { createReflectionBySignal, getReflectionBySignalId } from '@/lib/api/mcmi4-reflection-api';
 import { getApiBaseUrl } from '@/lib/api-base';
 import AssignMCMI4Modal from '@/components/AssignMCMI4Modal';
+import { useToast } from '@/components/ui/toast';
 
 interface SignalTestResult {
   id: number;
@@ -53,6 +54,7 @@ interface ProcessState {
 
 export default function MCMI4ProcessOrchestrator() {
   const router = useRouter();
+  const toast = useToast();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [processStates, setProcessStates] = useState<ProcessState[]>([]);
@@ -244,16 +246,19 @@ export default function MCMI4ProcessOrchestrator() {
   const handleCreateWorkspace = async (state: ProcessState) => {
     if (!state.testResult) return;
 
-    setCreatingWorkspace(state.patient.id);
-
     try {
       const patientUserId = typeof state.patient.user === 'number' 
         ? state.patient.user 
         : state.patient.user?.id;
 
       if (!patientUserId) {
-        throw new Error('Patient has no linked user');
+        toast.error(
+          'No disponible: el Sujeto requiere cuenta vinculada para ejecutar esta Exploración. Contacta con soporte para vincular la cuenta.'
+        );
+        return;
       }
+
+      setCreatingWorkspace(state.patient.id);
 
       const workspace = await swmMcmi4Api.createWorkspace({
         subject_user_id: String(patientUserId),

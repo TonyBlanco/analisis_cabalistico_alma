@@ -148,7 +148,7 @@ export default function TherapistReflectionViewPage() {
           </h1>
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
             <p className="text-sm text-yellow-800">
-              Este consultante no ha completado la evaluación MCMI-4 SIGNAL aún.
+              No se encontró resultado de Exploración MCMI-4 Signal para este Sujeto.
             </p>
           </div>
         </div>

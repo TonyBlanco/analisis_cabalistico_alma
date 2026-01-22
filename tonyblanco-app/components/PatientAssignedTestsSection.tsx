@@ -2,12 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { getAvailableTests, getTestResults, executeTest, getPatientPreviousTests } from '@/lib/test-api';
 import { TestModule, ExecuteTestRequest } from '@/lib/test-types';
 import { clinicalTestsRegistry } from '@/lib/clinicalTests.registry';
 import { getActivePatientId } from '@/lib/active-patient';
 import { unassignTestFromPatient } from '@/lib/assignment-api';
 import StartTestModal from '@/components/StartTestModal';
+import { AlertDialog } from '@/components/ui/alert-dialog';
+import { Sparkles } from 'lucide-react';
 
 /**
  * Patient Assigned Tests Section
@@ -33,6 +36,9 @@ export default function PatientAssignedTestsSection() {
     type: 'success' | 'error';
     text: string;
   } | null>(null);
+  // AlertDialog state for unassign confirmation
+  const [unassignDialogOpen, setUnassignDialogOpen] = useState(false);
+  const [unassignTarget, setUnassignTarget] = useState<TestModule | null>(null);
 
   const activePatientId = getActivePatientId();
 
@@ -138,20 +144,40 @@ export default function PatientAssignedTestsSection() {
     }
   };
 
-  const handleUnassign = async (test: TestModule) => {
+  // Opens the AlertDialog for unassign confirmation
+  const handleUnassignClick = (test: TestModule) => {
     if (!activePatientId) return;
     if (userType !== 'therapist') return;
-    if (!confirm(`¿Deseas quitar la asignación del test "${test.name}"?`)) return;
+    setUnassignTarget(test);
+    setUnassignDialogOpen(true);
+  };
 
-    setRemovingTestCode(test.code);
+  // Executes the actual unassign after confirmation
+  const handleUnassignConfirm = async () => {
+    if (!activePatientId || !unassignTarget) return;
+
+    setRemovingTestCode(unassignTarget.code);
+    setUnassignDialogOpen(false);
+    
     try {
-      await unassignTestFromPatient(activePatientId, test.code);
+      await unassignTestFromPatient(activePatientId, unassignTarget.code);
+      // Show success message
+      setActionMessage({
+        type: 'success',
+        text: `Test "${unassignTarget.name}" desasignado correctamente.`,
+      });
+      // Refresh the list
       await fetchAssignedTests();
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error al quitar la asignación';
+      setActionMessage({
+        type: 'error',
+        text: message,
+      });
       setError(message);
     } finally {
       setRemovingTestCode(null);
+      setUnassignTarget(null);
     }
   };
 
@@ -317,7 +343,7 @@ export default function PatientAssignedTestsSection() {
                     </button>
                     {userType === 'therapist' && activePatientId && (
                       <button
-                        onClick={() => handleUnassign(test)}
+                        onClick={() => handleUnassignClick(test)}
                         disabled={removingTestCode === test.code}
                         className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-red-600 border border-red-200 rounded-md hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
@@ -340,11 +366,23 @@ export default function PatientAssignedTestsSection() {
                     key={`${test.id ?? 'completed'}-${String(test.code || 'code').toLowerCase()}-${idx}`}
                     className="border border-gray-200 rounded-md p-4 bg-gray-50"
                   >
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-medium text-gray-900">{test.name}</h3>
-                      <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded">
-                        Completado
-                      </span>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-medium text-gray-900">{test.name}</h3>
+                        <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded">
+                          Completado
+                        </span>
+                      </div>
+                      {/* CTA: Ir a Reflexión for mcmi4-signal */}
+                      {(test.code === 'mcmi4-signal' || test.code === 'mcmi4_signal') && userType !== 'therapist' && (
+                        <Link
+                          href="/dashboard/patient/swm/mcmi4-reflection"
+                          className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-violet-700 bg-violet-100 rounded-md hover:bg-violet-200 transition-colors"
+                        >
+                          <Sparkles className="w-4 h-4" />
+                          Ir a Reflexión
+                        </Link>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -363,6 +401,18 @@ export default function PatientAssignedTestsSection() {
           setStartTestTarget(null);
         }}
         onConfirm={handleStartTest}
+      />
+      {/* AlertDialog for unassign confirmation */}
+      <AlertDialog
+        open={unassignDialogOpen}
+        onOpenChange={setUnassignDialogOpen}
+        title="Quitar asignación"
+        description={`¿Deseas quitar la asignación del test "${unassignTarget?.name || ''}"?`}
+        confirmLabel="Quitar asignación"
+        cancelLabel="Cancelar"
+        onConfirm={handleUnassignConfirm}
+        destructive
+        loading={removingTestCode === unassignTarget?.code}
       />
     </>
   );

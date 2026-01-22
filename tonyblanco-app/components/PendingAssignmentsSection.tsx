@@ -103,9 +103,14 @@ export default function PendingAssignmentsSection() {
   };
 
   const handleStartAssignment = (assignment: Assignment) => {
-    // Navigate to test execution page (existing holistic assessment flow)
-    // Backend flow: Patient executes test → POST /api/assignments/{id}/submit → creates TestResult
-    router.push(`/dashboard/patient/tests/holistic?assignment_id=${assignment.id}`);
+    // Navigate to correct test execution page based on test_type
+    // mcmi4-signal → dedicated signal page
+    // other tests → holistic assessment flow
+    if (assignment.test_type === 'mcmi4-signal') {
+      router.push('/dashboard/patient/tests/mcmi4-signal');
+    } else {
+      router.push(`/dashboard/patient/tests/holistic?assignment_id=${assignment.id}`);
+    }
   };
 
   if (loading) {

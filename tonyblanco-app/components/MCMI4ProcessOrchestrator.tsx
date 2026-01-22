@@ -20,6 +20,7 @@ import { swmMcmi4Api } from '@/lib/api/swm-mcmi4-api';
 import { createReflectionBySignal, getReflectionBySignalId } from '@/lib/api/mcmi4-reflection-api';
 import { getApiBaseUrl } from '@/lib/api-base';
 import AssignMCMI4Modal from '@/components/AssignMCMI4Modal';
+import { AlertDialog } from '@/components/ui/alert-dialog';
 import { useToast } from '@/components/ui/toast';
 
 interface SignalTestResult {
@@ -64,6 +65,9 @@ export default function MCMI4ProcessOrchestrator() {
   const [invitingPatientId, setInvitingPatientId] = useState<number | null>(null);
   const [deletingPatient, setDeletingPatient] = useState<number | null>(null);
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
+  // AlertDialog state for reset confirmation
+  const [resetDialogOpen, setResetDialogOpen] = useState(false);
+  const [resetTarget, setResetTarget] = useState<ProcessState | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -324,19 +328,18 @@ export default function MCMI4ProcessOrchestrator() {
     }
   };
 
-  const handleResetPatientData = async (state: ProcessState) => {
-    const confirmed = confirm(
-      `¿Eliminar TODOS los datos de MCMI-4 para ${state.patient.full_name}?\n\n` +
-      `Esto eliminará:\n` +
-      `- Assignment${state.assignment ? ' (ID: ' + state.assignment.id + ')' : ''}\n` +
-      `- TestResult Signal${state.testResult ? ' (ID: ' + state.testResult.id + ')' : ''}\n` +
-      `- TestResult Reflection${state.reflectionResult ? ' (ID: ' + state.reflectionResult.id + ')' : ''}\n` +
-      `- Workspace${state.workspaceId ? ' (' + state.workspaceId + ')' : ''}\n\n` +
-      `Esta acción NO se puede deshacer.`
-    );
+  // Opens AlertDialog for reset confirmation
+  const handleResetClick = (state: ProcessState) => {
+    setResetTarget(state);
+    setResetDialogOpen(true);
+  };
 
-    if (!confirmed) return;
+  // Executes the actual reset after confirmation
+  const handleResetConfirm = async () => {
+    if (!resetTarget) return;
+    const state = resetTarget;
 
+    setResetDialogOpen(false);
     setDeletingPatient(state.patient.id);
 
     try {
@@ -346,6 +349,7 @@ export default function MCMI4ProcessOrchestrator() {
       if (!token) {
         alert('❌ Sesión no válida');
         setDeletingPatient(null);
+        setResetTarget(null);
         return;
       }
 
@@ -398,12 +402,15 @@ export default function MCMI4ProcessOrchestrator() {
       // Refresh data
       await fetchData();
       
-      alert('✅ Datos eliminados exitosamente');
+      setFeedbackMessage('✅ Datos eliminados exitosamente');
+      setTimeout(() => setFeedbackMessage(null), 3000);
     } catch (err) {
       console.error('Error deleting data:', err);
-      alert(`❌ Error al eliminar: ${err instanceof Error ? err.message : 'Error desconocido'}`);
+      setFeedbackMessage(`❌ Error al eliminar: ${err instanceof Error ? err.message : 'Error desconocido'}`);
+      setTimeout(() => setFeedbackMessage(null), 5000);
     } finally {
       setDeletingPatient(null);
+      setResetTarget(null);
     }
   };
 
@@ -595,9 +602,9 @@ export default function MCMI4ProcessOrchestrator() {
                               disabled={invitingPatientId === state.patient.id}
                               className="text-xs font-medium text-blue-600 hover:text-blue-800 underline cursor-pointer disabled:opacity-60"
                             >
-                              {invitingPatientId === state.patient.id ? 'Generando enlace...' : 'Invitar a reflexión'}
+                              {invitingPatientId === state.patient.id ? 'Creando...' : 'Habilitar reflexión'}
                             </button>
-                            <p className="text-xs text-gray-500">Consultante puede completarla</p>
+                            <p className="text-xs text-gray-500">Consultante la verá en su panel</p>
                           </div>
                         </div>
                       ) : (
@@ -638,9 +645,9 @@ export default function MCMI4ProcessOrchestrator() {
                             style={{ backgroundColor: '#7c3aed' }}
                           >
                             <Sparkles className="w-3 h-3" />
-                            Abrir
+                            Abrir Workspace
                           </button>
-                        ) : state.testResult && state.reflectionResult ? (
+                        ) : state.testResult && state.reflectionWorkspace?.status === 'sealed' ? (
                           <button
                             onClick={() => handleCreateWorkspace(state)}
                             disabled={creatingWorkspace === state.patient.id}
@@ -659,7 +666,9 @@ export default function MCMI4ProcessOrchestrator() {
                               </>
                             )}
                           </button>
-                        ) : state.testResult && !state.reflectionResult ? (
+                        ) : state.testResult && state.reflectionWorkspace?.status === 'draft' ? (
+                          <span className="text-xs text-amber-600">Reflexión en borrador</span>
+                        ) : state.testResult && !state.reflectionWorkspace ? (
                           <span className="text-xs text-amber-600">Esperando reflexión</span>
                         ) : !state.assignment ? (
                           <button
@@ -677,7 +686,7 @@ export default function MCMI4ProcessOrchestrator() {
                         {/* Reset button - always available if there's any data */}
                         {(state.assignment || state.testResult || state.reflectionResult || state.workspaceId) && (
                           <button
-                            onClick={() => handleResetPatientData(state)}
+                            onClick={() => handleResetClick(state)}
                             disabled={deletingPatient === state.patient.id}
                             className="inline-flex items-center gap-1 px-2 py-1.5 text-xs font-medium text-red-600 border border-red-300 rounded-md hover:bg-red-50 disabled:opacity-50"
                             title="Eliminar todos los datos de MCMI-4 para este paciente"
@@ -713,6 +722,25 @@ export default function MCMI4ProcessOrchestrator() {
           }
         />
       )}
+
+      {/* AlertDialog for reset confirmation */}
+      <AlertDialog
+        open={resetDialogOpen}
+        onOpenChange={setResetDialogOpen}
+        title="Eliminar datos MCMI-4"
+        description={`¿Eliminar TODOS los datos de MCMI-4 para ${resetTarget?.patient.full_name}? Esta acción NO se puede deshacer.`}
+        items={resetTarget ? [
+          resetTarget.assignment ? `Assignment (ID: ${resetTarget.assignment.id})` : null,
+          resetTarget.testResult ? `TestResult Signal (ID: ${resetTarget.testResult.id})` : null,
+          resetTarget.reflectionResult ? `TestResult Reflection (ID: ${resetTarget.reflectionResult.id})` : null,
+          resetTarget.workspaceId ? `Workspace (${resetTarget.workspaceId})` : null,
+        ].filter((item): item is string => item !== null) : []}
+        confirmLabel="Eliminar todo"
+        cancelLabel="Cancelar"
+        onConfirm={handleResetConfirm}
+        destructive
+        loading={deletingPatient !== null}
+      />
     </>
   );
 }

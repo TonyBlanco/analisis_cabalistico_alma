@@ -2,78 +2,193 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Loader2, FileText, AlertCircle } from 'lucide-react';
+import { Loader2, FileText, AlertCircle, Sparkles, ShieldAlert } from 'lucide-react';
+import Link from 'next/link';
+import { fetchSession } from '@/lib/session';
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
 /**
  * Patient Entrypoint for MCMI-4 Reflection
- * Checks if patient has a reflection workspace and redirects
+ * 
+ * CRITICAL: Always works with the LATEST signal to avoid workspace reuse bugs.
+ * 
+ * Behavior:
+ * 1. Get latest mcmi4-signal TestResult for user
+ * 2. If no SIGNAL → show CTA to complete SIGNAL first
+ * 3. Check if workspace exists for THAT specific signal_id (by-signal endpoint)
+ * 4. If workspace exists for latest signal → redirect
+ * 5. If no workspace for latest signal → auto-create with create-by-signal
+ * 6. If user is not patient (e.g. therapist) → show permission notice
  */
 export default function PatientReflectionEntrypoint() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [notAvailable, setNotAvailable] = useState(false);
+  const [needsSignal, setNeedsSignal] = useState(false);
+  const [creatingWorkspace, setCreatingWorkspace] = useState(false);
+  const [permissionDenied, setPermissionDenied] = useState(false);
 
   useEffect(() => {
-    checkReflectionWorkspace();
+    checkAndCreateReflectionWorkspace();
   }, []);
 
-  const checkReflectionWorkspace = async () => {
-    try {
-      // Get user_id from localStorage (same pattern as patient dashboard)
-      const userIdStr = typeof window !== 'undefined' ? localStorage.getItem('user_id') : null;
-      const userId = userIdStr ? parseInt(userIdStr, 10) : null;
+  const getAuthHeaders = (): HeadersInit => {
+    const token = typeof window !== 'undefined' 
+      ? localStorage.getItem('authToken') || localStorage.getItem('token')
+      : null;
+    const headers: HeadersInit = { 'Content-Type': 'application/json' };
+    if (token) {
+      headers['Authorization'] = `Token ${token}`;
+    }
+    return headers;
+  };
 
-      if (!userId) {
-        setError('No se pudo obtener tu información de usuario');
+  const checkAndCreateReflectionWorkspace = async () => {
+    try {
+      // Get current user from session API
+      const session = await fetchSession();
+      
+      if (!session.isAuthenticated || !session.user) {
+        setError('Sesión no válida. Por favor inicia sesión nuevamente.');
         setLoading(false);
         return;
       }
 
-      // Check if reflection workspace exists for this user
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/swm/mcmi4-reflection/by-user/${userId}`,
-        {
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
+      const userId = session.user.id;
+
+      // Step 1: Get latest mcmi4-signal TestResult (source of truth)
+      const signalResp = await fetch(
+        `${API_BASE}/tests/results/?test_code=mcmi4-signal&user_id=${userId}`,
+        { credentials: 'include', headers: getAuthHeaders() }
       );
 
-      if (response.status === 404) {
-        // No reflection workspace yet
-        setNotAvailable(true);
+      if (!signalResp.ok) {
+        if (signalResp.status === 401) {
+          setError('Sesión expirada. Por favor inicia sesión nuevamente.');
+          setLoading(false);
+          return;
+        }
+        if (signalResp.status === 403) {
+          setPermissionDenied(true);
+          setLoading(false);
+          return;
+        }
+        throw new Error('Error al verificar tu evaluación MCMI-4.');
+      }
+
+      const signalData = await signalResp.json();
+      const signals = Array.isArray(signalData) ? signalData : (signalData.results || []);
+
+      if (signals.length === 0) {
+        // No SIGNAL completed → show CTA
+        setNeedsSignal(true);
         setLoading(false);
         return;
       }
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
+      // Get latest signal (most recent created_at)
+      const latestSignal = signals.sort((a: any, b: any) => {
+        const aTime = a?.created_at ? new Date(a.created_at).getTime() : 0;
+        const bTime = b?.created_at ? new Date(b.created_at).getTime() : 0;
+        return bTime - aTime;
+      })[0];
+
+      const latestSignalId = String(latestSignal.id);
+
+      // Step 2: Check if workspace exists for THIS specific signal (not by-user!)
+      const bySignalResp = await fetch(
+        `${API_BASE}/swm/mcmi4-reflection/by-signal/${latestSignalId}`,
+        { credentials: 'include', headers: getAuthHeaders() }
+      );
+
+      if (bySignalResp.ok) {
+        // Workspace exists for latest signal → redirect
+        const workspace = await bySignalResp.json();
+        router.replace(`/dashboard/patient/swm/mcmi4-reflection/${workspace.workspace_id}`);
+        return;
       }
 
-      const workspace = await response.json();
-      
-      // Redirect to workspace
-      router.replace(`/dashboard/patient/swm/mcmi4-reflection/${workspace.workspace_id}`);
+      // 404 = no workspace for this signal yet → create it
+      if (bySignalResp.status === 404) {
+        setCreatingWorkspace(true);
+        const createResp = await fetch(
+          `${API_BASE}/swm/mcmi4-reflection/create-by-signal`,
+          {
+            method: 'POST',
+            credentials: 'include',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({
+              subject_user_id: userId,
+              signal_id: latestSignalId,
+            }),
+          }
+        );
+
+        if (!createResp.ok) {
+          const errData = await createResp.json().catch(() => ({}));
+          throw new Error(errData.error || `Error al crear reflexión (HTTP ${createResp.status})`);
+        }
+
+        const newWorkspace = await createResp.json();
+        router.replace(`/dashboard/patient/swm/mcmi4-reflection/${newWorkspace.workspace_id}`);
+        return;
+      }
+
+      // Other error from by-signal
+      throw new Error(`HTTP ${bySignalResp.status}`);
     } catch (err) {
-      console.error('Error checking reflection workspace:', err);
+      console.error('Error in reflection entrypoint:', err);
       setError(err instanceof Error ? err.message : 'Error al cargar reflexión');
       setLoading(false);
     }
   };
 
-  if (loading) {
+  if (loading || creatingWorkspace) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
         <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
+          <Loader2 className="w-12 h-12 animate-spin text-violet-600 mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-gray-900 mb-2">
-            Cargando reflexión...
+            {creatingWorkspace ? 'Preparando tu reflexión...' : 'Cargando...'}
           </h2>
           <p className="text-sm text-gray-600">
-            Verificando tu espacio de reflexión
+            {creatingWorkspace 
+              ? 'Creando tu espacio de reflexión personal'
+              : 'Verificando tu estado de reflexión'
+            }
           </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (permissionDenied) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 flex items-center justify-center p-4">
+        <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full text-center">
+          <ShieldAlert className="w-12 h-12 text-amber-600 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            Vista de Consultante
+          </h2>
+          <p className="text-sm text-gray-600 mb-4">
+            Esta página es exclusiva para consultantes. Si eres terapeuta, usa el panel 
+            de terapeuta para ver las reflexiones de tus consultantes.
+          </p>
+          <div className="space-y-3">
+            <Link
+              href="/dashboard/therapist/tools/mcmi4"
+              className="block w-full px-4 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700 text-center"
+            >
+              Ir al Panel de Terapeuta
+            </Link>
+            <button
+              onClick={() => router.back()}
+              className="text-sm text-gray-500 hover:text-gray-700"
+            >
+              Volver atrás
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -99,23 +214,31 @@ export default function PatientReflectionEntrypoint() {
     );
   }
 
-  if (notAvailable) {
+  if (needsSignal) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-violet-50 to-purple-100 flex items-center justify-center p-4">
         <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full text-center">
-          <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+          <Sparkles className="w-12 h-12 text-violet-600 mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-gray-900 mb-2">
-            Reflexión no disponible
+            Completa tu MCMI-4 primero
           </h2>
           <p className="text-sm text-gray-600 mb-6">
-            Aún no tienes una reflexión asignada. Tu terapeuta te notificará cuando esté disponible.
+            Para acceder a la Reflexión Personal, primero debes completar la evaluación MCMI-4 Señal que te ha asignado tu terapeuta.
           </p>
-          <button
-            onClick={() => router.push('/dashboard/patient')}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-          >
-            Volver al inicio
-          </button>
+          <div className="space-y-3">
+            <Link
+              href="/dashboard/patient"
+              className="block w-full px-4 py-2 bg-violet-600 text-white rounded-md hover:bg-violet-700 text-center"
+            >
+              Ver mis tests pendientes
+            </Link>
+            <button
+              onClick={() => router.push('/dashboard/patient')}
+              className="text-sm text-gray-500 hover:text-gray-700"
+            >
+              Volver al inicio
+            </button>
+          </div>
         </div>
       </div>
     );

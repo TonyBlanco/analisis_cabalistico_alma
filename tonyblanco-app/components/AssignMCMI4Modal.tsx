@@ -46,7 +46,7 @@ export default function AssignMCMI4Modal({
         patient_id: patientId,
         assigned_to_user_id: patientUserId,
         test_type: 'mcmi4-signal',
-        n_questions: 175, // MCMI-4 standard
+        n_questions: 16, // MCMI-4 SIGNAL (16 ítems)
       });
 
       setSuccess(true);
@@ -85,10 +85,10 @@ export default function AssignMCMI4Modal({
         <div className="flex items-start justify-between mb-4">
           <div>
             <h2 className="text-lg font-semibold text-gray-900">
-              Asignar MCMI-4 Místico
+              Asignar SWM MCMI-4 SIGNAL
             </h2>
             <p className="text-sm text-gray-600 mt-1">
-              Test de Cribado Holístico (175 ítems)
+              Cribado inicial (16 ítems · 5-8 min)
             </p>
           </div>
           <button
@@ -135,10 +135,10 @@ export default function AssignMCMI4Modal({
               )}
 
               <div className="text-xs text-gray-600 space-y-1">
-                <p>✓ Test: <span className="font-medium">mcmi4-signal</span> (Cribado Holístico)</p>
+                <p>✓ Test: <span className="font-medium">mcmi4-signal</span> (16 ítems de cribado)</p>
                 <p>✓ Duración estimada: <span className="font-medium">5-8 minutos</span></p>
-                <p>✓ El consultante podrá ejecutarlo desde su panel</p>
-                <p>✓ Los resultados quedarán disponibles para interpretación</p>
+                <p>✓ El consultante lo verá en Tests Pendientes</p>
+                <p>✓ Tras completar, podrá iniciar la Reflexión Experiencial</p>
               </div>
             </div>
 

@@ -6,6 +6,7 @@ import { getActivePatientId, getActivePatientName } from '@/lib/active-patient';
 import { getTestResultsForPatient, getPatientPreviousTests } from '@/lib/test-api';
 import { unassignTestFromPatient } from '@/lib/assignment-api';
 import { TestResult } from '@/lib/test-types';
+import { AlertDialog } from '@/components/ui/alert-dialog';
 
 /**
  * Assigned Tests Section Component
@@ -28,6 +29,10 @@ export default function AssignedTestsSection({
   const [removingTestCode, setRemovingTestCode] = useState<string | null>(null);
   const [activePatientId, setActivePatientIdState] = useState<number | null>(null);
   const [activePatientName, setActivePatientNameState] = useState<string | null>(null);
+  // AlertDialog state
+  const [unassignDialogOpen, setUnassignDialogOpen] = useState(false);
+  const [unassignTarget, setUnassignTarget] = useState<any>(null);
+  const [actionMessage, setActionMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const resolvedPatientId = useMemo(() => {
     if (patientId === undefined) return null;
@@ -114,25 +119,30 @@ export default function AssignedTestsSection({
     }
   }, [activePatientId]);
 
-  const handleUnassign = useCallback(async (result: any) => {
+  // Opens AlertDialog for unassign confirmation
+  const handleUnassignClick = useCallback((result: any) => {
     if (!activePatientId) return;
     const code = result?.test_module?.code || result?.test_module_code;
     if (!code) return;
+    setUnassignTarget(result);
+    setUnassignDialogOpen(true);
+  }, [activePatientId]);
+
+  // Executes the actual unassign after confirmation
+  const handleUnassignConfirm = useCallback(async () => {
+    if (!activePatientId || !unassignTarget) return;
+
+    const code = unassignTarget?.test_module?.code || unassignTarget?.test_module_code;
+    if (!code) return;
 
     const isCompleted = !(
-      (result as any)?.result_data?.assignment_only === true ||
-      (result as any)?.details?.legacy_assignment === true
+      (unassignTarget as any)?.result_data?.assignment_only === true ||
+      (unassignTarget as any)?.details?.legacy_assignment === true
     );
 
-    const confirmMessage = isCompleted
-      ? `¿Deseas ELIMINAR el resultado completado del test "${result.test_module?.name || result.test_module_name || code}"?\n\nEsto permitirá reasignarlo para ver progreso o testing. El resultado se perderá.`
-      : `¿Deseas quitar la asignación del test "${result.test_module?.name || result.test_module_name || code}"?`;
-
-    if (!confirm(confirmMessage)) {
-      return;
-    }
-
+    setUnassignDialogOpen(false);
     setRemovingTestCode(String(code));
+
     try {
       await unassignTestFromPatient(activePatientId, String(code), isCompleted);
 
@@ -157,15 +167,26 @@ export default function AssignedTestsSection({
         return normalizeCode(tCode) !== targetNorm;
       }));
 
+      // Show success message
+      const testName = unassignTarget.test_module?.name || unassignTarget.test_module_name || code;
+      setActionMessage({
+        type: 'success',
+        text: isCompleted 
+          ? `Resultado de "${testName}" eliminado correctamente.`
+          : `Asignación de "${testName}" eliminada correctamente.`,
+      });
+
       await fetchAssignedTests();
     } catch (err) {
       console.error('Error unassigning test:', err);
       const message = err instanceof Error ? err.message : 'Error al quitar la asignación';
+      setActionMessage({ type: 'error', text: message });
       setError(message);
     } finally {
       setRemovingTestCode(null);
+      setUnassignTarget(null);
     }
-  }, [activePatientId, fetchAssignedTests]);
+  }, [activePatientId, fetchAssignedTests, unassignTarget]);
 
   if (!activePatientId) {
     return (
@@ -306,7 +327,7 @@ export default function AssignedTestsSection({
                     {/* Allow deleting ANY test (pending or completed) */}
                     <button
                       type="button"
-                      onClick={() => handleUnassign(result)}
+                      onClick={() => handleUnassignClick(result)}
                       disabled={removingTestCode === String(result?.test_module?.code || result?.test_module_code)}
                       className="text-sm text-red-600 hover:text-red-800 underline disabled:opacity-50"
                       title={isAssignmentOnly ? "Quitar asignación" : "Eliminar resultado para reasignar"}
@@ -322,6 +343,45 @@ export default function AssignedTestsSection({
           })}
         </div>
       )}
+      {/* Action message feedback */}
+      {actionMessage && (
+        <div
+          className={`mt-4 p-3 rounded-md text-sm ${
+            actionMessage.type === 'success'
+              ? 'bg-green-50 border border-green-200 text-green-800'
+              : 'bg-red-50 border border-red-200 text-red-800'
+          }`}
+        >
+          {actionMessage.text}
+        </div>
+      )}
+      {/* AlertDialog for unassign confirmation */}
+      <AlertDialog
+        open={unassignDialogOpen}
+        onOpenChange={setUnassignDialogOpen}
+        title={
+          (unassignTarget?.result_data?.assignment_only === true ||
+           unassignTarget?.details?.legacy_assignment === true)
+            ? 'Quitar asignación'
+            : 'Eliminar resultado'
+        }
+        description={
+          (unassignTarget?.result_data?.assignment_only === true ||
+           unassignTarget?.details?.legacy_assignment === true)
+            ? `¿Deseas quitar la asignación del test "${unassignTarget?.test_module?.name || unassignTarget?.test_module_name || ''}"?`
+            : `¿Deseas eliminar el resultado del test "${unassignTarget?.test_module?.name || unassignTarget?.test_module_name || ''}"? Esto permitirá reasignarlo. El resultado se perderá.`
+        }
+        confirmLabel={
+          (unassignTarget?.result_data?.assignment_only === true ||
+           unassignTarget?.details?.legacy_assignment === true)
+            ? 'Quitar asignación'
+            : 'Eliminar resultado'
+        }
+        cancelLabel="Cancelar"
+        onConfirm={handleUnassignConfirm}
+        destructive
+        loading={removingTestCode !== null}
+      />
     </div>
   );
 }

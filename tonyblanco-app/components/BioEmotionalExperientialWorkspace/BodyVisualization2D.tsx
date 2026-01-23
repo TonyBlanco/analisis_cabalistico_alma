@@ -1,14 +1,19 @@
 'use client';
 
-import { useState } from 'react';
-import type { BodyAnatomy } from './types';
+import { useState, useMemo } from 'react';
+import type { BodyAnatomy, RegionIntensity, HeatmapConfig, EmotionType } from './types';
 import { anatomicalRegions, getRegionPath } from './data/anatomicalRegions';
+import { getColorWithOpacity } from './heatmap-colors';
 
 interface BodyVisualization2DProps {
   anatomy: BodyAnatomy;
   selectedRegionId: string | null;
   onRegionSelect: (regionId: string | null) => void;
   disabled?: boolean;
+  // Heatmap props (PROMPT #6)
+  heatmapData?: RegionIntensity[];
+  heatmapConfig?: HeatmapConfig;
+  onIntensityChange?: (regionId: string, intensity: number, emotionType: EmotionType) => void;
 }
 
 const anatomyLabel: Record<BodyAnatomy, string> = {
@@ -23,8 +28,16 @@ export default function BodyVisualization2D({
   selectedRegionId,
   onRegionSelect,
   disabled = false,
+  heatmapData,
+  heatmapConfig,
 }: BodyVisualization2DProps) {
   const [hoveredRegionId, setHoveredRegionId] = useState<string | null>(null);
+
+  // Memoize heatmap lookup for performance
+  const heatmapLookup = useMemo(() => {
+    if (!heatmapData) return new Map<string, RegionIntensity>();
+    return new Map(heatmapData.map((d) => [d.regionId, d]));
+  }, [heatmapData]);
 
   const handleRegionClick = (regionId: string) => {
     if (disabled) return;
@@ -35,6 +48,65 @@ export default function BodyVisualization2D({
   const handleRegionHover = (regionId: string | null) => {
     if (disabled) return;
     setHoveredRegionId(regionId);
+  };
+
+  // Render heatmap overlay layer
+  const renderHeatmap = () => {
+    if (!heatmapConfig?.enabled || !heatmapData || heatmapData.length === 0) {
+      return null;
+    }
+
+    return (
+      <g className="heatmap-layer">
+        {anatomicalRegions.map((region) => {
+          const intensityData = heatmapLookup.get(region.id);
+
+          if (!intensityData || intensityData.intensity === 0) {
+            return null;
+          }
+
+          const path = getRegionPath(region.id, anatomy);
+          const fillColor = getColorWithOpacity(
+            intensityData.emotionType,
+            intensityData.intensity,
+            heatmapConfig.opacity
+          );
+
+          return (
+            <g key={`heatmap-${region.id}`}>
+              {/* Heatmap overlay */}
+              <path
+                d={path}
+                fill={fillColor}
+                stroke="none"
+                className="transition-all duration-300"
+                style={{
+                  pointerEvents: 'none',
+                }}
+              />
+
+              {/* Intensity label (if enabled) */}
+              {heatmapConfig.showLabels && intensityData.intensity > 0 && (
+                <text
+                  x={(region.hotspot.x / 100) * 200}
+                  y={(region.hotspot.y / 100) * 320}
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  className="pointer-events-none font-bold"
+                  style={{
+                    fontSize: '9px',
+                    fill: intensityData.intensity > 50 ? '#ffffff' : '#374151',
+                    textShadow: '0 0 3px rgba(0,0,0,0.5)',
+                  }}
+                >
+                  {intensityData.intensity}%
+                </text>
+              )}
+            </g>
+          );
+        })}
+      </g>
+    );
   };
 
   return (
@@ -143,6 +215,9 @@ export default function BodyVisualization2D({
               </g>
             );
           })}
+
+          {/* Heatmap layer (rendered on top) */}
+          {renderHeatmap()}
         </svg>
       </div>
 

@@ -68,29 +68,33 @@ export default function ClosurePanel({ synthesisRecord, onClosed, isReadOnly }: 
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm space-y-4">
+    <div className="bio-card-glass rounded-2xl p-6 space-y-4 bio-animate-slide-in-up">
       <div>
-        <h4 className="text-sm font-semibold text-gray-900">Cierre consciente</h4>
+        <h4 className="text-sm font-semibold text-gray-900 flex items-center gap-2">🔒 Cierre consciente</h4>
         <p className="text-xs text-gray-600">
           Cierre manual del espacio. El contenido quedara congelado.
         </p>
       </div>
 
       {loading ? (
-        <p className="text-xs text-gray-500">Cargando resumen...</p>
+        <div className="space-y-2">
+          <div className="bio-skeleton h-10 rounded-lg"></div>
+          <div className="bio-skeleton h-10 rounded-lg"></div>
+          <div className="bio-skeleton h-10 rounded-lg"></div>
+        </div>
       ) : (
         <div className="space-y-2 text-xs text-gray-700">
-          <div className="flex items-center justify-between border border-gray-200 rounded-md px-3 py-2">
-            <span>Observaciones registradas</span>
-            <span className="font-medium">{observationCount}</span>
+          <div className="flex items-center justify-between bio-glass rounded-lg px-3 py-2">
+            <span className="flex items-center gap-2">👁️ Observaciones registradas</span>
+            <span className="bio-badge bio-badge-info">{observationCount}</span>
           </div>
-          <div className="flex items-center justify-between border border-gray-200 rounded-md px-3 py-2">
-            <span>Hipotesis registradas</span>
-            <span className="font-medium">{hypothesisCount}</span>
+          <div className="flex items-center justify-between bio-glass rounded-lg px-3 py-2">
+            <span className="flex items-center gap-2">🔍 Hipotesis registradas</span>
+            <span className="bio-badge bio-badge-info">{hypothesisCount}</span>
           </div>
-          <div className="flex items-center justify-between border border-gray-200 rounded-md px-3 py-2">
-            <span>Sintesis presente</span>
-            <span className="font-medium">{synthesisRecord?.text ? 'Si' : 'No'}</span>
+          <div className="flex items-center justify-between bio-glass rounded-lg px-3 py-2">
+            <span className="flex items-center gap-2">✨ Sintesis presente</span>
+            <span className={`bio-badge ${synthesisRecord?.text ? 'bio-badge-success' : 'bio-badge-warning'}`}>{synthesisRecord?.text ? 'Si' : 'No'}</span>
           </div>
         </div>
       )}
@@ -99,33 +103,33 @@ export default function ClosurePanel({ synthesisRecord, onClosed, isReadOnly }: 
         type="button"
         onClick={() => setConfirmOpen(true)}
         disabled={isReadOnly || loading}
-        className="w-full px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-md hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+        className="w-full bio-btn bio-btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        Cerrar sesion clinica
+        🔒 Cerrar sesion clinica
       </button>
 
       {error && (
-        <div className="rounded-md bg-red-50 border border-red-200 p-3 text-xs text-red-700">
+        <div className="rounded-lg bio-glass border border-red-200/50 p-3 text-xs text-red-700 bio-animate-fade-in">
           {error}
         </div>
       )}
 
       {confirmOpen && (
-        <div className="rounded-md border border-gray-300 bg-white p-4 text-xs text-gray-700 space-y-3">
+        <div className="bio-card-glass rounded-xl p-4 text-xs text-gray-700 space-y-3 bio-animate-scale-in">
           <p className="font-medium">¿Deseas cerrar este espacio de trabajo?</p>
-          <p>El contenido quedara congelado.</p>
+          <p className="text-gray-500">El contenido quedara congelado e inmutable.</p>
           <div className="flex gap-2">
             <button
               type="button"
               onClick={handleClose}
-              className="px-3 py-1.5 text-xs font-medium text-white bg-gray-900 rounded-md hover:bg-gray-800"
+              className="bio-btn bio-btn-secondary text-xs px-3 py-1.5"
             >
-              Confirmar cierre
+              ✓ Confirmar cierre
             </button>
             <button
               type="button"
               onClick={() => setConfirmOpen(false)}
-              className="px-3 py-1.5 text-xs font-medium text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
+              className="bio-btn bio-btn-ghost text-xs px-3 py-1.5"
             >
               Cancelar
             </button>

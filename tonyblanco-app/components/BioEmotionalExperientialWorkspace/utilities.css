@@ -1,0 +1,361 @@
+/**
+ * BioEmotional Workspace Utility Classes
+ * 
+ * Clases reutilizables para glassmorphism, cards, buttons, animaciones.
+ * Importar junto con design-tokens.css
+ */
+
+/* === GLASSMORPHISM === */
+.bio-glass {
+  background: var(--bio-glass-bg);
+  backdrop-filter: blur(var(--bio-glass-blur));
+  -webkit-backdrop-filter: blur(var(--bio-glass-blur));
+  border: 1px solid var(--bio-glass-border);
+  box-shadow: var(--bio-shadow-glass);
+}
+
+.bio-glass-dark {
+  background: var(--bio-glass-bg-dark);
+  backdrop-filter: blur(var(--bio-glass-blur));
+  -webkit-backdrop-filter: blur(var(--bio-glass-blur));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: var(--bio-shadow-glass);
+}
+
+/* === CARDS === */
+.bio-card {
+  background: white;
+  border-radius: var(--bio-radius-xl);
+  box-shadow: var(--bio-shadow-md);
+  padding: var(--bio-space-lg);
+  transition: all var(--bio-transition-base);
+}
+
+.bio-card:hover {
+  box-shadow: var(--bio-shadow-xl);
+  transform: translateY(-2px);
+}
+
+.bio-card-glass {
+  background: var(--bio-glass-bg);
+  backdrop-filter: blur(var(--bio-glass-blur));
+  -webkit-backdrop-filter: blur(var(--bio-glass-blur));
+  border: 1px solid var(--bio-glass-border);
+  box-shadow: var(--bio-shadow-glass);
+  border-radius: var(--bio-radius-xl);
+  transition: all var(--bio-transition-base);
+}
+
+.bio-card-glass:hover {
+  box-shadow: var(--bio-shadow-lg);
+}
+
+/* === BUTTONS === */
+.bio-btn {
+  font-family: var(--bio-font-family);
+  font-weight: var(--bio-font-weight-medium);
+  font-size: var(--bio-font-size-sm);
+  padding: var(--bio-space-sm) var(--bio-space-lg);
+  border-radius: var(--bio-radius-md);
+  transition: all var(--bio-transition-fast);
+  cursor: pointer;
+  border: none;
+  outline: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--bio-space-sm);
+}
+
+.bio-btn:focus-visible {
+  outline: 2px solid var(--bio-primary-500);
+  outline-offset: 2px;
+}
+
+.bio-btn-primary {
+  background: var(--bio-gradient-primary);
+  color: white;
+  box-shadow: var(--bio-shadow-md);
+}
+
+.bio-btn-primary:hover {
+  box-shadow: var(--bio-shadow-lg);
+  transform: translateY(-1px);
+}
+
+.bio-btn-primary:active {
+  transform: translateY(0);
+}
+
+.bio-btn-secondary {
+  background: var(--bio-gray-100);
+  color: var(--bio-gray-700);
+  border: 1px solid var(--bio-gray-300);
+}
+
+.bio-btn-secondary:hover {
+  background: var(--bio-gray-200);
+}
+
+.bio-btn-ghost {
+  background: transparent;
+  color: var(--bio-gray-600);
+}
+
+.bio-btn-ghost:hover {
+  background: var(--bio-gray-100);
+  color: var(--bio-gray-900);
+}
+
+/* === KEYFRAME ANIMATIONS === */
+@keyframes bio-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes bio-slide-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bio-slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes bio-slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes bio-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes bio-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes bio-shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+@keyframes bio-glow {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(99, 102, 241, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+  }
+}
+
+/* === ANIMATION CLASSES === */
+.bio-animate-fade-in {
+  animation: bio-fade-in var(--bio-transition-base) ease-out;
+}
+
+.bio-animate-slide-in-up {
+  animation: bio-slide-in-up var(--bio-transition-base) ease-out;
+}
+
+.bio-animate-slide-in-right {
+  animation: bio-slide-in-right var(--bio-transition-base) ease-out;
+}
+
+.bio-animate-slide-in-left {
+  animation: bio-slide-in-left var(--bio-transition-base) ease-out;
+}
+
+.bio-animate-scale-in {
+  animation: bio-scale-in var(--bio-transition-base) ease-out;
+}
+
+.bio-animate-pulse {
+  animation: bio-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.bio-animate-glow {
+  animation: bio-glow 2s ease-in-out infinite;
+}
+
+/* === STAGGERED ANIMATIONS === */
+.bio-stagger-1 { animation-delay: 50ms; }
+.bio-stagger-2 { animation-delay: 100ms; }
+.bio-stagger-3 { animation-delay: 150ms; }
+.bio-stagger-4 { animation-delay: 200ms; }
+.bio-stagger-5 { animation-delay: 250ms; }
+
+/* === LOADING SKELETON === */
+.bio-skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bio-gray-200) 0%,
+    var(--bio-gray-300) 50%,
+    var(--bio-gray-200) 100%
+  );
+  background-size: 1000px 100%;
+  animation: bio-shimmer 2s infinite;
+  border-radius: var(--bio-radius-md);
+}
+
+/* === PROGRESS BAR === */
+.bio-progress {
+  width: 100%;
+  height: 8px;
+  background: var(--bio-gray-200);
+  border-radius: var(--bio-radius-full);
+  overflow: hidden;
+}
+
+.bio-progress-bar {
+  height: 100%;
+  background: var(--bio-gradient-primary);
+  transition: width var(--bio-transition-slow);
+  border-radius: var(--bio-radius-full);
+}
+
+.bio-progress-sm {
+  height: 4px;
+}
+
+/* === BADGES === */
+.bio-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--bio-space-xs) var(--bio-space-sm);
+  border-radius: var(--bio-radius-full);
+  font-size: var(--bio-font-size-xs);
+  font-weight: var(--bio-font-weight-medium);
+  line-height: 1;
+}
+
+.bio-badge-primary {
+  background: var(--bio-primary-100);
+  color: var(--bio-primary-700);
+}
+
+.bio-badge-secondary {
+  background: var(--bio-secondary-100);
+  color: var(--bio-secondary-700);
+}
+
+.bio-badge-success {
+  background: var(--bio-success-light);
+  color: var(--bio-success-dark);
+}
+
+.bio-badge-warning {
+  background: var(--bio-warning-light);
+  color: var(--bio-warning-dark);
+}
+
+.bio-badge-danger {
+  background: var(--bio-error-light);
+  color: var(--bio-error-dark);
+}
+
+.bio-badge-info {
+  background: var(--bio-info-light);
+  color: var(--bio-info-dark);
+}
+
+/* === DISCLAIMER BANNER === */
+.bio-disclaimer {
+  background: var(--bio-gradient-warning);
+  border-bottom: 1px solid #fbbf24;
+  padding: var(--bio-space-sm) var(--bio-space-lg);
+  display: flex;
+  align-items: center;
+  gap: var(--bio-space-sm);
+}
+
+.bio-disclaimer-icon {
+  flex-shrink: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #d97706;
+}
+
+.bio-disclaimer-text {
+  font-size: var(--bio-font-size-sm);
+  font-weight: var(--bio-font-weight-medium);
+  color: #92400e;
+}
+
+/* === FOCUS STATES (Accessibility) === */
+.bio-focus-ring:focus-visible {
+  outline: 2px solid var(--bio-primary-500);
+  outline-offset: 2px;
+}
+
+/* === SCROLLBAR STYLING === */
+.bio-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.bio-scrollbar::-webkit-scrollbar-track {
+  background: var(--bio-gray-100);
+  border-radius: var(--bio-radius-full);
+}
+
+.bio-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--bio-gray-300);
+  border-radius: var(--bio-radius-full);
+}
+
+.bio-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--bio-gray-400);
+}
+
+/* === RESPONSIVE HELPERS === */
+@media (max-width: 768px) {
+  .bio-hide-mobile {
+    display: none !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .bio-hide-desktop {
+    display: none !important;
+  }
+}

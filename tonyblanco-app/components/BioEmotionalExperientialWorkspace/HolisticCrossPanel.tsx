@@ -220,22 +220,25 @@ export default function HolisticCrossPanel({
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm space-y-4">
+    <div className="bio-card-glass rounded-2xl p-6 space-y-4 bio-animate-slide-in-up">
       <div>
-        <h4 className="text-sm font-semibold text-gray-900">Cruces holísticos internos</h4>
+        <h4 className="text-sm font-semibold text-gray-900 flex items-center gap-2">🔮 Cruces holísticos internos</h4>
         <p className="text-xs text-gray-600">
           Correlaciones orientativas entre señales bio, trans y árbol. No deciden ni diagnostican.
         </p>
       </div>
 
       {loading ? (
-        <p className="text-xs text-gray-500">Cargando señales...</p>
+        <div className="space-y-2">
+          <div className="bio-skeleton h-20 rounded-lg"></div>
+          <div className="bio-skeleton h-20 rounded-lg"></div>
+        </div>
       ) : correlations.length === 0 ? (
-        <p className="text-xs text-gray-500">No hay correlaciones suficientes para mostrar.</p>
+        <p className="text-xs text-gray-500 italic">No hay correlaciones suficientes para mostrar.</p>
       ) : (
-        <div className="space-y-3 max-h-64 overflow-y-auto">
+        <div className="space-y-3 max-h-64 overflow-y-auto bio-scrollbar">
           {correlations.map((correlation, idx) => (
-            <div key={idx} className="rounded-md border border-gray-200 p-3 text-xs text-gray-700 space-y-2">
+            <div key={idx} className="bio-glass rounded-lg p-4 text-xs text-gray-700 space-y-2 bio-animate-slide-in-up" style={{ animationDelay: `${idx * 50}ms` }}>
               <div className="flex items-start justify-between">
                 <div>
                   <p className="font-medium text-gray-900">{correlation.title}</p>
@@ -245,9 +248,9 @@ export default function HolisticCrossPanel({
                   type="button"
                   onClick={() => toggleMarked(correlation.title)}
                   disabled={isReadOnly}
-                  className="text-[11px] text-blue-600 hover:text-blue-700"
+                  className={`text-[11px] font-medium transition-colors ${marked[correlation.title] ? 'text-purple-600' : 'text-gray-400 hover:text-purple-600'}`}
                 >
-                  {marked[correlation.title] ? 'Marcado' : 'Marcar como relevante'}
+                  {marked[correlation.title] ? '★ Marcado' : '☆ Marcar como relevante'}
                 </button>
               </div>
               <div className="space-y-1">
@@ -262,17 +265,17 @@ export default function HolisticCrossPanel({
                   type="button"
                   onClick={() => onCopyToHypothesis(buildCorrelationText(correlation))}
                   disabled={isReadOnly}
-                  className="px-2 py-1 text-xs font-medium text-blue-700 border border-blue-200 rounded-md hover:bg-blue-50"
+                  className="bio-btn bio-btn-ghost text-xs px-2 py-1"
                 >
-                  Copiar a hipótesis
+                  🔍 Copiar a hipótesis
                 </button>
                 <button
                   type="button"
                   onClick={() => onCopyToSynthesis(buildCorrelationText(correlation))}
                   disabled={isReadOnly}
-                  className="px-2 py-1 text-xs font-medium text-blue-700 border border-blue-200 rounded-md hover:bg-blue-50"
+                  className="bio-btn bio-btn-ghost text-xs px-2 py-1"
                 >
-                  Copiar a síntesis
+                  ✨ Copiar a síntesis
                 </button>
               </div>
             </div>
@@ -284,20 +287,20 @@ export default function HolisticCrossPanel({
         type="button"
         onClick={handleExplain}
         disabled={aiLoading || isReadOnly}
-        className="px-3 py-1.5 text-xs font-medium text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
+        className="bio-btn bio-btn-primary disabled:opacity-50"
       >
-        Explicar correlaciones (IA)
+        🤖 Explicar correlaciones (IA)
       </button>
 
       {aiOutput && (
-        <div className="rounded-md border border-gray-200 bg-gray-50 p-3 text-xs text-gray-700">
-          <p className="font-medium text-gray-800">Explicación AI (solo lectura)</p>
+        <div className="bio-card-glass rounded-xl p-4 text-xs text-gray-700 bio-animate-scale-in">
+          <p className="font-medium text-gray-800 flex items-center gap-2 mb-2">🤖 Explicación AI (solo lectura)</p>
           <p className="whitespace-pre-line">{aiOutput}</p>
         </div>
       )}
 
       {error && (
-        <div className="rounded-md bg-red-50 border border-red-200 p-3 text-xs text-red-700">
+        <div className="rounded-lg bio-glass border border-red-200/50 p-3 text-xs text-red-700 bio-animate-fade-in">
           {error}
         </div>
       )}

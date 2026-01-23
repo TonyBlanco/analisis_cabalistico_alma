@@ -245,12 +245,12 @@ export default function GuidedExplorationPanel({
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm space-y-4">
+    <div className="bio-card-glass rounded-2xl p-6 space-y-4 bio-animate-slide-in-up">
       <div>
-        <h4 className="text-sm font-semibold text-gray-900">Exploración Guiada (IA)</h4>
+        <h4 className="text-sm font-semibold text-gray-900 flex items-center gap-2">🤖 Exploración Guiada (IA)</h4>
         <p className="text-xs text-gray-600">Exploración orientativa asistida por IA.</p>
         <p className="text-xs text-gray-600">No es diagnóstico clínico ni definitivo.</p>
-        <p className="text-xs text-gray-500">Requiere validación humana.</p>
+        <p className="text-xs text-gray-500 italic">⚠️ Requiere validación humana.</p>
       </div>
 
       <div className="space-y-2">
@@ -315,86 +315,89 @@ export default function GuidedExplorationPanel({
             type="button"
             onClick={() => runAi('exploration')}
             disabled={loading || isReadOnly}
-            className="px-3 py-1.5 text-xs font-medium text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
+            className="bio-btn bio-btn-ghost text-xs"
           >
-            Generar exploración orientativa (IA)
+            🧪 Generar exploración orientativa (IA)
           </button>
         <button
           type="button"
           onClick={() => runAi('reformulate')}
           disabled={loading || isReadOnly || !aiOutput}
-          className="px-3 py-1.5 text-xs font-medium text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
+          className="bio-btn bio-btn-ghost text-xs"
         >
-          Reformular exploración
+          ✏️ Reformular exploración
         </button>
           <button
             type="button"
             onClick={() => runAi('summary')}
             disabled={loading || isReadOnly}
-            className="px-3 py-1.5 text-xs font-medium text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
+            className="bio-btn bio-btn-ghost text-xs"
           >
-            Resumir exploración
+            📝 Resumir exploración
           </button>
       </div>
 
       {aiOutput && (
-        <div className="rounded-md border border-gray-200 bg-gray-50 p-3 text-xs text-gray-700 space-y-2">
-          <p className="font-medium text-gray-800">Vista previa (no insertada)</p>
+        <div className="bio-card-glass rounded-xl p-4 text-xs text-gray-700 space-y-2 bio-animate-scale-in">
+          <p className="font-medium text-gray-800 flex items-center gap-2">👁️ Vista previa (no insertada)</p>
           <p className="whitespace-pre-line">{aiOutput}</p>
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
               onClick={handleCopy}
-              className="px-2 py-1 text-xs font-medium text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
+              className="bio-btn bio-btn-ghost text-xs px-2 py-1"
             >
-              Copiar al portapapeles
+              📋 Copiar al portapapeles
             </button>
             <button
               type="button"
               onClick={() => onInsertToSynthesis(aiOutput)}
               disabled={isReadOnly}
-              className="px-2 py-1 text-xs font-medium text-blue-700 border border-blue-200 rounded-md hover:bg-blue-50"
+              className="bio-btn bio-btn-ghost text-xs px-2 py-1"
             >
-              Insertar en sintesis
+              ✨ Insertar en sintesis
             </button>
             <button
               type="button"
               onClick={handleSave}
               disabled={isReadOnly || saving}
-              className="px-2 py-1 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:bg-gray-300"
+              className="bio-btn bio-btn-primary text-xs px-2 py-1 disabled:opacity-50"
             >
-              Guardar como exploración guiada
+              💾 Guardar como exploración guiada
             </button>
           </div>
         </div>
       )}
 
       <div className="space-y-2">
-        <p className="text-xs font-medium text-gray-700">Exploraciones guardadas</p>
+        <p className="text-xs font-medium text-gray-700">📚 Exploraciones guardadas</p>
         {loading ? (
-          <p className="text-xs text-gray-500">Cargando exploraciones...</p>
+          <div className="space-y-2">
+            <div className="bio-skeleton h-16 rounded-lg"></div>
+            <div className="bio-skeleton h-16 rounded-lg"></div>
+          </div>
         ) : savedRecords.length === 0 ? (
-          <p className="text-xs text-gray-500">Sin exploraciones guardadas.</p>
+          <p className="text-xs text-gray-500 italic">Sin exploraciones guardadas.</p>
         ) : (
-          <div className="space-y-2 max-h-40 overflow-y-auto">
-            {savedRecords.map((record) => (
-              <div key={record.id} className="rounded-md border border-gray-200 p-2 text-xs text-gray-700">
+          <div className="space-y-2 max-h-40 overflow-y-auto bio-scrollbar">
+            {savedRecords.map((record, index) => (
+              <div key={record.id} className="bio-glass rounded-lg p-3 text-xs text-gray-700 bio-animate-slide-in-up" style={{ animationDelay: `${index * 50}ms` }}>
                 <p className="text-[11px] text-gray-500">
-                  {new Date(record.created_at).toLocaleString()} · {record.prompt_version}
+                  {new Date(record.created_at).toLocaleString()} · <span className="bio-badge bio-badge-info">{record.prompt_version}</span>
                 </p>
                 <p className="mt-1 line-clamp-3">{record.content}</p>
                 <div className="mt-2 flex items-center gap-2">
-                  <span className="text-[11px] text-gray-500">
-                    Validada: {record.is_validated ? 'Si' : 'No'}
+                  <span className="text-[11px] text-gray-500 flex items-center gap-1">
+                    Validada: <span className={`bio-badge ${record.is_validated ? 'bio-badge-success' : 'bio-badge-warning'}`}>{record.is_validated ? 'Si' : 'No'}</span>
                   </span>
                   {!record.is_validated && (
                     <button
                       type="button"
                       onClick={() => handleValidate(record)}
                       disabled={isReadOnly || saving}
-                      className="px-2 py-1 text-xs font-medium text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
+                      className="bio-btn bio-btn-ghost text-xs px-2 py-1"
                     >
-                      Validar (firmar por terapeuta)
+                      ✓ Validar (firmar por terapeuta)
                     </button>
                   )}
                 </div>
@@ -405,12 +408,12 @@ export default function GuidedExplorationPanel({
       </div>
 
       {error && (
-        <div className="rounded-md bg-red-50 border border-red-200 p-3 text-xs text-red-700">
+        <div className="rounded-lg bio-glass border border-red-200/50 p-3 text-xs text-red-700 bio-animate-fade-in">
           {error}
         </div>
       )}
       {success && (
-        <div className="rounded-md bg-emerald-50 border border-emerald-200 p-3 text-xs text-emerald-700">
+        <div className="rounded-lg bio-glass border border-emerald-200/50 p-3 text-xs text-emerald-700 bio-animate-fade-in">
           {success}
         </div>
       )}

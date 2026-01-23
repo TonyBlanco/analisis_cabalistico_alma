@@ -135,9 +135,9 @@ export default function PatientBriefPanel({
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm space-y-4">
+    <div className="bio-card-glass rounded-2xl p-6 space-y-4 bio-animate-slide-in-up">
       <div>
-        <h4 className="text-sm font-semibold text-gray-900">Publicar resumen para paciente</h4>
+        <h4 className="text-sm font-semibold text-gray-900 flex items-center gap-2">📝 Publicar resumen para paciente</h4>
         <p className="text-xs text-gray-600">
           Este contenido será visible para el paciente.
         </p>
@@ -149,7 +149,7 @@ export default function PatientBriefPanel({
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Título del resumen"
-          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="w-full rounded-lg bio-glass border-0 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500/50 focus:outline-none transition-all"
           disabled={saving || isReadOnly}
         />
         <textarea
@@ -157,7 +157,7 @@ export default function PatientBriefPanel({
           onChange={(e) => setContent(e.target.value)}
           rows={4}
           placeholder="Resumen simplificado (lenguaje neutral, no diagnóstico)..."
-          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="w-full rounded-lg bio-glass border-0 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500/50 focus:outline-none transition-all resize-none"
           disabled={saving || isReadOnly}
         />
         <div className="flex flex-wrap gap-2">
@@ -165,9 +165,9 @@ export default function PatientBriefPanel({
             type="button"
             onClick={insertFromSynthesis}
             disabled={isReadOnly || !synthesisRecord?.text}
-            className="px-2 py-1 text-xs font-medium text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-60"
+            className="bio-btn bio-btn-ghost text-xs px-2 py-1 disabled:opacity-60"
           >
-            Usar síntesis actual
+            ✨ Usar síntesis actual
           </button>
           {assisted.map((item) => (
             <button
@@ -175,9 +175,9 @@ export default function PatientBriefPanel({
               type="button"
               onClick={() => insertFromAssisted(item.content)}
               disabled={isReadOnly}
-              className="px-2 py-1 text-xs font-medium text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
+              className="bio-btn bio-btn-ghost text-xs px-2 py-1"
             >
-              Usar lectura asistida #{item.id.slice(0, 6)}
+              🤖 Usar lectura asistida #{item.id.slice(0, 6)}
             </button>
           ))}
         </div>
@@ -241,35 +241,38 @@ export default function PatientBriefPanel({
         type="button"
         onClick={handleSave}
         disabled={saving || isReadOnly}
-        className="w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:bg-gray-300"
+        className="w-full bio-btn bio-btn-primary disabled:opacity-50"
       >
-        Guardar resumen (borrador)
+        💾 Guardar resumen (borrador)
       </button>
 
       {error && (
-        <div className="rounded-md bg-red-50 border border-red-200 p-3 text-xs text-red-700">
+        <div className="rounded-lg bio-glass border border-red-200/50 p-3 text-xs text-red-700 bio-animate-fade-in">
           {error}
         </div>
       )}
       {success && (
-        <div className="rounded-md bg-emerald-50 border border-emerald-200 p-3 text-xs text-emerald-700">
+        <div className="rounded-lg bio-glass border border-emerald-200/50 p-3 text-xs text-emerald-700 bio-animate-fade-in">
           {success}
         </div>
       )}
 
       <div className="space-y-2">
-        <p className="text-xs font-medium text-gray-700">Resúmenes creados</p>
+        <p className="text-xs font-medium text-gray-700">📚 Resúmenes creados</p>
         {loading ? (
-          <p className="text-xs text-gray-500">Cargando resúmenes...</p>
+          <div className="space-y-2">
+            <div className="bio-skeleton h-16 rounded-lg"></div>
+            <div className="bio-skeleton h-16 rounded-lg"></div>
+          </div>
         ) : records.length === 0 ? (
-          <p className="text-xs text-gray-500">Sin resúmenes guardados.</p>
+          <p className="text-xs text-gray-500 italic">Sin resúmenes guardados.</p>
         ) : (
-          <div className="space-y-2 max-h-40 overflow-y-auto">
-            {records.map((record) => (
-              <div key={record.id} className="rounded-md border border-gray-200 p-2 text-xs text-gray-700">
+          <div className="space-y-2 max-h-40 overflow-y-auto bio-scrollbar">
+            {records.map((record, index) => (
+              <div key={record.id} className="bio-glass rounded-lg p-3 text-xs text-gray-700 bio-animate-slide-in-up" style={{ animationDelay: `${index * 50}ms` }}>
                 <p className="font-medium">{record.title}</p>
-                <p className="text-[11px] text-gray-500">
-                  Publicado: {record.is_published ? 'Sí' : 'No'}
+                <p className="text-[11px] text-gray-500 flex items-center gap-2">
+                  Publicado: <span className={`bio-badge ${record.is_published ? 'bio-badge-success' : 'bio-badge-warning'}`}>{record.is_published ? 'Sí' : 'No'}</span>
                 </p>
                 <p className="mt-1 line-clamp-2">{record.content}</p>
                 {!record.is_published && (
@@ -277,9 +280,9 @@ export default function PatientBriefPanel({
                     type="button"
                     onClick={() => handlePublish(record)}
                     disabled={isReadOnly || saving}
-                    className="mt-2 px-2 py-1 text-xs font-medium text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
+                    className="mt-2 bio-btn bio-btn-ghost text-xs px-2 py-1"
                   >
-                    Publicar
+                    🚀 Publicar
                   </button>
                 )}
               </div>

@@ -10,8 +10,8 @@ interface RegionDetailPanelProps {
 export default function RegionDetailPanel({ region, onClear }: RegionDetailPanelProps) {
   if (!region) {
     return (
-      <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-        <h4 className="text-sm font-semibold text-gray-900 mb-2">Región seleccionada</h4>
+      <div className="bio-card-glass rounded-2xl p-6 bio-animate-fade-in">
+        <h4 className="text-sm font-semibold text-gray-900 mb-2 flex items-center gap-2">🎯 Región seleccionada</h4>
         <p className="text-xs text-gray-500">
           Selecciona una región del cuerpo para ver su contexto bio-emocional
         </p>
@@ -20,10 +20,10 @@ export default function RegionDetailPanel({ region, onClear }: RegionDetailPanel
   }
 
   return (
-    <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 shadow-sm space-y-3">
+    <div className="bio-card-glass rounded-2xl p-6 space-y-3 bio-animate-scale-in">
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <h4 className="text-sm font-semibold text-gray-900">{region.label}</h4>
+          <h4 className="text-sm font-semibold text-gray-900 flex items-center gap-2">🎯 {region.label}</h4>
           <p className="text-xs text-gray-600 mt-1">{region.description}</p>
         </div>
         <button
@@ -54,18 +54,19 @@ export default function RegionDetailPanel({ region, onClear }: RegionDetailPanel
           {region.bioEmotionalThemes.map((theme, index) => (
             <li
               key={index}
-              className="text-xs text-gray-600 flex items-start gap-2"
+              className="text-xs text-gray-600 flex items-start gap-2 bio-animate-slide-in-up"
+              style={{ animationDelay: `${index * 50}ms` }}
             >
-              <span className="text-blue-500 mt-0.5">•</span>
+              <span className="text-purple-500 mt-0.5">•</span>
               <span>{theme}</span>
             </li>
           ))}
         </ul>
       </div>
 
-      <div className="pt-2 border-t border-blue-200">
+      <div className="pt-2 border-t border-gray-200/50">
         <p className="text-[11px] text-gray-500 italic">
-          Esta información es consultiva y no diagnóstica. El terapeuta observa y decide.
+          ⚠️ Esta información es consultiva y no diagnóstica. El terapeuta observa y decide.
         </p>
       </div>
     </div>

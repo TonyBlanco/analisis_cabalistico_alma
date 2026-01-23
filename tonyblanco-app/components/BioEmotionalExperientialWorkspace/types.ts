@@ -8,3 +8,13 @@ export interface ExperientialContext {
   biologicalSex: BodyAnatomy;
   sessionLabel: string;
 }
+
+/**
+ * Progress tracking for each workspace phase (0-100)
+ */
+export interface WorkspaceProgress {
+  observation: number;
+  analysis: number;
+  synthesis: number;
+  closure: number;
+}

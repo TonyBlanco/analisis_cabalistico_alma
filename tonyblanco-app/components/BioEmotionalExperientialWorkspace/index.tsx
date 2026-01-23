@@ -1,14 +1,18 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import ExperientialSidebar from './ExperientialSidebar';
 import ExperientialToolPanels from './ExperientialToolPanels';
 import ExperientialVisualCore from './ExperientialVisualCore';
 import { useExperientialContext } from './hooks/useExperientialContext';
 import { useBodySelection } from './hooks/useBodySelection';
-import type { WorkspaceState } from './types';
+import type { WorkspaceState, WorkspaceProgress } from './types';
 import type { BioEmotionalSynthesis } from '@/lib/api/bioemotional-clinical';
+
+// Import design system
+import './design-tokens.css';
+import './utilities.css';
 
 export default function BioEmotionalExperientialWorkspace() {
   const [workspaceState, setWorkspaceState] = useState<WorkspaceState>('observation');
@@ -21,6 +25,21 @@ export default function BioEmotionalExperientialWorkspace() {
   const [referenceSnippets, setReferenceSnippets] = useState<string[]>([]);
 
   const isReadOnly = workspaceState === 'closure' || Boolean(synthesisRecord?.is_closed);
+
+  // Calculate progress for each phase
+  const progress = useMemo<WorkspaceProgress>(() => {
+    const hasPatient = Boolean(context.patientId);
+    const hasRegion = Boolean(selectedRegion);
+    const hasSynthesis = Boolean(synthesisRecord);
+    const isClosed = Boolean(synthesisRecord?.is_closed);
+    
+    return {
+      observation: hasPatient ? (hasRegion ? 100 : 50) : 0,
+      analysis: hasRegion ? (referenceSnippets.length > 0 ? 100 : 50) : 0,
+      synthesis: hasSynthesis ? 100 : (referenceSnippets.length > 0 ? 30 : 0),
+      closure: isClosed ? 100 : (hasSynthesis ? 50 : 0),
+    };
+  }, [context.patientId, selectedRegion, synthesisRecord, referenceSnippets.length]);
 
   const registerReference = (text: string) => {
     setReferenceSnippets((prev) => [text, ...prev].slice(0, 10));
@@ -43,44 +62,70 @@ export default function BioEmotionalExperientialWorkspace() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="flex border-b border-gray-200 bg-white">
-        <div className="flex-1 px-6 py-4">
-          <p className="text-xs uppercase tracking-wide text-gray-500">
-            Bio-Emocion Experiencial Profunda
+      {/* Header con gradiente */}
+      <div className="flex border-b border-gray-200 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500">
+        <div className="flex-1 px-6 py-6">
+          <p className="text-xs uppercase tracking-wide text-white/80 font-medium">
+            Bio-Emoción Experiencial Profunda
           </p>
-          <h1 className="text-2xl font-semibold text-gray-900">Workspace especializado</h1>
-          <p className="text-sm text-gray-600">
-            Espacio consultivo de alta densidad. No diagnostico ni automatizado.
+          <h1 className="text-3xl font-bold text-white mt-1">
+            Workspace Especializado
+          </h1>
+          <p className="text-sm text-white/90 mt-2">
+            Espacio consultivo de alta densidad. No diagnóstico ni automatizado.
           </p>
         </div>
-        <div className="px-6 py-4 flex items-center">
+        <div className="px-6 py-6 flex items-center">
           <Link
             href="/dashboard/therapist"
-            className="text-sm font-medium text-gray-700 bg-gray-100 rounded-md px-3 py-2 hover:bg-gray-200"
+            className="bio-btn bg-white/20 text-white border border-white/30 hover:bg-white/30 backdrop-blur-sm"
           >
-            Volver al espacio clinico
+            ← Volver al espacio clínico
           </Link>
         </div>
       </div>
 
+      {/* Banner de disclaimer */}
+      <div className="sticky top-0 z-50 bio-disclaimer bio-animate-slide-in-up">
+        <svg className="bio-disclaimer-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        <span className="bio-disclaimer-text">
+          Este espacio es consultivo y exploratorio. NO sustituye diagnóstico médico profesional.
+        </span>
+      </div>
+
       <div className="flex">
-        <ExperientialSidebar state={workspaceState} onStateChange={setWorkspaceState} />
+        <ExperientialSidebar 
+          state={workspaceState} 
+          onStateChange={setWorkspaceState}
+          progress={progress}
+        />
 
         <main className="flex-1 px-6 py-6">
-          <div className="mb-4 flex flex-wrap items-center gap-3">
-            <div className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm text-gray-700">
-              {loading ? 'Cargando contexto del paciente...' : 'Contexto heredado del workspace clinico'}
+          {/* Contexto del paciente con glassmorphism */}
+          <div className="mb-6 flex flex-wrap items-center gap-3 bio-animate-fade-in">
+            <div className="bio-card-glass px-4 py-2 text-sm text-gray-700">
+              {loading ? (
+                <div className="bio-skeleton h-4 w-48" />
+              ) : (
+                'Contexto heredado del workspace clínico'
+              )}
             </div>
-            {error && <div className="text-sm text-red-600">{error}</div>}
-            <div className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm text-gray-700">
-              {context.patientName ? `Paciente: ${context.patientName}` : 'Paciente: sin seleccionar'}
+            {error && (
+              <div className="bio-badge bio-badge-danger">
+                {error}
+              </div>
+            )}
+            <div className="bio-card-glass px-4 py-2 text-sm font-medium text-gray-900">
+              👤 {context.patientName || 'Sin seleccionar'}
             </div>
-            <div className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm text-gray-700">
-              {context.sessionLabel}
+            <div className="bio-card-glass px-4 py-2 text-sm text-gray-700">
+              📅 {context.sessionLabel}
             </div>
             {selectedRegion && (
-              <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-sm text-blue-700 font-medium">
-                Región: {selectedRegion.label}
+              <div className="bio-card-glass px-4 py-2 text-sm font-semibold text-indigo-700 border-2 border-indigo-300 bio-animate-slide-in-right">
+                📍 Región: {selectedRegion.label}
               </div>
             )}
           </div>

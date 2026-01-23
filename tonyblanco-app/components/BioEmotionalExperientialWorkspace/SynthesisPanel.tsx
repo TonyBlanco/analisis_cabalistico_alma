@@ -146,15 +146,15 @@ export default function SynthesisPanel({
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm space-y-4">
+    <div className="bio-card-glass rounded-2xl p-6 space-y-4 bio-animate-slide-in-up">
       <div>
-        <h4 className="text-sm font-semibold text-gray-900">Sintesis clinica</h4>
-        <p className="text-xs text-gray-600">Sintesis clinica de trabajo. No es diagnostico.</p>
+        <h4 className="text-sm font-semibold text-gray-900">Síntesis clínica</h4>
+        <p className="text-xs text-gray-600">Síntesis clínica de trabajo. No es diagnóstico.</p>
       </div>
 
       {selectedRegion && (
-        <div className="rounded-md bg-blue-50 border border-blue-200 p-2 text-xs text-blue-700">
-          <p className="font-medium">Region seleccionada: {selectedRegion.label}</p>
+        <div className="rounded-lg bg-indigo-50 border border-indigo-200 p-2 text-xs text-indigo-700">
+          <p className="font-medium">📍 Región seleccionada: {selectedRegion.label}</p>
         </div>
       )}
 
@@ -171,9 +171,9 @@ export default function SynthesisPanel({
         type="button"
         onClick={handleSave}
         disabled={saving || isReadOnly || !text.trim()}
-        className="w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+        className="w-full bio-btn bio-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {saving ? 'Guardando...' : 'Guardar sintesis'}
+        {saving ? 'Guardando...' : 'Guardar síntesis'}
       </button>
 
       <div className="border-t border-gray-200 pt-4 space-y-3">

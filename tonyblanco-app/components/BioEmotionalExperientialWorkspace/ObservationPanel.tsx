@@ -96,10 +96,10 @@ export default function ObservationPanel({
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm space-y-4">
+    <div className="bio-card-glass rounded-2xl p-6 space-y-4 bio-animate-slide-in-up">
       <div>
-        <h4 className="text-sm font-semibold text-gray-900">Observaciones clinicas</h4>
-        <p className="text-xs text-gray-600">Observacion clinica. No es diagnostico.</p>
+        <h4 className="text-sm font-semibold text-gray-900">Observaciones clínicas</h4>
+        <p className="text-xs text-gray-600">Observación clínica. No es diagnóstico.</p>
       </div>
 
       {selectedRegion && (
@@ -145,27 +145,30 @@ export default function ObservationPanel({
           type="button"
           onClick={handleSave}
           disabled={saving || isReadOnly || !noteText.trim()}
-          className="w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+          className="w-full bio-btn bio-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {saving ? 'Guardando...' : 'Guardar observacion'}
+          {saving ? 'Guardando...' : 'Guardar observación'}
         </button>
       </div>
 
       {error && (
-        <div className="rounded-md bg-red-50 border border-red-200 p-3 text-xs text-red-700">
+        <div className="rounded-lg bg-red-50 border border-red-200 p-3 text-xs text-red-700 bio-animate-fade-in">
           {error}
         </div>
       )}
       {success && (
-        <div className="rounded-md bg-emerald-50 border border-emerald-200 p-3 text-xs text-emerald-700">
-          {success}
+        <div className="rounded-lg bg-emerald-50 border border-emerald-200 p-3 text-xs text-emerald-700 bio-animate-fade-in">
+          ✅ {success}
         </div>
       )}
 
       <div className="space-y-2">
         <p className="text-xs font-medium text-gray-700">Observaciones recientes</p>
         {loading ? (
-          <p className="text-xs text-gray-500">Cargando observaciones...</p>
+          <div className="space-y-2">
+            <div className="bio-skeleton h-12 w-full" />
+            <div className="bio-skeleton h-12 w-full" />
+          </div>
         ) : observations.length === 0 ? (
           <p className="text-xs text-gray-500">Sin observaciones registradas.</p>
         ) : (

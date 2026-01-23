@@ -108,10 +108,10 @@ export default function DictionaryPanel({
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm space-y-4">
+    <div className="bio-card-glass rounded-2xl p-6 space-y-4 bio-animate-slide-in-up">
       <div>
-        <h4 className="text-sm font-semibold text-gray-900 mb-1">
-          Diccionario Bio-Emocional
+        <h4 className="text-sm font-semibold text-gray-900 mb-1 flex items-center gap-2">
+          📖 Diccionario Bio-Emocional
         </h4>
         <p className="text-xs text-gray-500">
           Búsqueda manual consultiva. Sin inferencias automáticas.
@@ -127,24 +127,24 @@ export default function DictionaryPanel({
             onChange={(e) => setSearchTerm(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Buscar término bio-emocional..."
-            className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="flex-1 rounded-lg bio-glass border-0 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500/50 focus:outline-none transition-all"
             disabled={loading}
           />
           <button
             type="button"
             onClick={handleSearch}
             disabled={loading || !searchTerm.trim()}
-            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+            className="bio-btn bio-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Buscando...' : 'Buscar'}
+            {loading ? '⏳ Buscando...' : '🔍 Buscar'}
           </button>
         </div>
 
         {/* Region Context (if selected) */}
         {selectedRegion && (
-          <div className="rounded-md bg-blue-50 border border-blue-200 p-2 text-xs text-blue-700">
-            <p className="font-medium">Región seleccionada: {selectedRegion.label}</p>
-            <p className="text-blue-600">
+          <div className="bio-glass rounded-lg p-2 text-xs">
+            <p className="font-medium flex items-center gap-2">🎯 Región seleccionada: <span className="bio-badge bio-badge-info">{selectedRegion.label}</span></p>
+            <p className="text-gray-500 mt-1">
               Puedes buscar términos relacionados con esta región
             </p>
           </div>
@@ -153,7 +153,7 @@ export default function DictionaryPanel({
 
       {/* Error Message */}
       {error && (
-        <div className="rounded-md bg-red-50 border border-red-200 p-3 text-xs text-red-700">
+        <div className="rounded-lg bio-glass border border-red-200/50 p-3 text-xs text-red-700 bio-animate-fade-in">
           {error}
         </div>
       )}
@@ -161,20 +161,22 @@ export default function DictionaryPanel({
       {/* Search Results */}
       {results.length > 0 && (
         <div className="space-y-2">
-          <p className="text-xs font-medium text-gray-700">
-            {results.length} resultado{results.length !== 1 ? 's' : ''} encontrado{results.length !== 1 ? 's' : ''}
+          <p className="text-xs font-medium text-gray-700 flex items-center gap-2">
+            <span className="bio-badge bio-badge-success">{results.length}</span>
+            resultado{results.length !== 1 ? 's' : ''} encontrado{results.length !== 1 ? 's' : ''}
           </p>
-          <div className="space-y-2 max-h-64 overflow-y-auto">
+          <div className="space-y-2 max-h-64 overflow-y-auto bio-scrollbar">
             {results.map((entry, index) => (
               <button
                 key={index}
                 type="button"
                 onClick={() => setSelectedEntry(selectedEntry?.termino === entry.termino ? null : entry)}
-                className={`w-full text-left rounded-md border p-3 transition-colors ${
+                className={`w-full text-left rounded-lg p-3 transition-all bio-animate-slide-in-up ${
                   selectedEntry?.termino === entry.termino
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                    ? 'bio-glass ring-2 ring-purple-500/50'
+                    : 'bio-glass hover:ring-1 hover:ring-purple-300/50'
                 }`}
+                style={{ animationDelay: `${index * 50}ms` }}
               >
                 <p className="text-sm font-medium text-gray-900">{entry.termino}</p>
                 {entry.definicion && (
@@ -190,13 +192,13 @@ export default function DictionaryPanel({
 
       {/* Selected Entry Detail */}
       {selectedEntry && (
-        <div className="rounded-lg border border-blue-300 bg-blue-50 p-4 space-y-3">
+        <div className="bio-card-glass rounded-xl p-4 space-y-3 bio-animate-scale-in">
           <div className="flex items-start justify-between">
-            <h5 className="text-sm font-semibold text-gray-900">{selectedEntry.termino}</h5>
+            <h5 className="text-sm font-semibold text-gray-900 flex items-center gap-2">📚 {selectedEntry.termino}</h5>
             <button
               type="button"
               onClick={() => setSelectedEntry(null)}
-              className="text-gray-400 hover:text-gray-600"
+              className="text-gray-400 hover:text-gray-600 transition-colors"
               aria-label="Cerrar detalle"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -233,40 +235,40 @@ export default function DictionaryPanel({
             </div>
           )}
 
-          <div className="flex flex-wrap gap-2 pt-2 border-t border-blue-200">
+          <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-200/50">
             <button
               type="button"
               onClick={() => onCopyToObservation?.(buildCopyText(selectedEntry))}
               disabled={isReadOnly || !onCopyToObservation}
-              className="px-2 py-1 text-xs font-medium text-blue-700 border border-blue-200 rounded-md hover:bg-blue-50 disabled:opacity-60"
+              className="bio-btn bio-btn-ghost text-xs px-2 py-1 disabled:opacity-60"
             >
-              Copiar a observacion
+              👁️ Copiar a observacion
             </button>
             <button
               type="button"
               onClick={() => onCopyToHypothesis?.(buildCopyText(selectedEntry))}
               disabled={isReadOnly || !onCopyToHypothesis}
-              className="px-2 py-1 text-xs font-medium text-blue-700 border border-blue-200 rounded-md hover:bg-blue-50 disabled:opacity-60"
+              className="bio-btn bio-btn-ghost text-xs px-2 py-1 disabled:opacity-60"
             >
-              Copiar a hipotesis
+              🔍 Copiar a hipotesis
             </button>
             <button
               type="button"
               onClick={() => onCopyToSynthesis?.(buildCopyText(selectedEntry))}
               disabled={isReadOnly || !onCopyToSynthesis}
-              className="px-2 py-1 text-xs font-medium text-blue-700 border border-blue-200 rounded-md hover:bg-blue-50 disabled:opacity-60"
+              className="bio-btn bio-btn-ghost text-xs px-2 py-1 disabled:opacity-60"
             >
-              Copiar a sintesis
+              ✨ Copiar a sintesis
             </button>
           </div>
 
           {/* Possible relation with selected region (informative only) */}
           {selectedRegion && (
-            <div className="pt-2 border-t border-blue-200">
-              <p className="text-xs font-medium text-blue-700 mb-1">
-                Posible relación con {selectedRegion.label}:
+            <div className="pt-2 border-t border-gray-200/50">
+              <p className="text-xs font-medium text-purple-700 mb-1 flex items-center gap-1">
+                🎯 Posible relación con {selectedRegion.label}:
               </p>
-              <p className="text-xs text-blue-600">
+              <p className="text-xs text-gray-600">
                 El terapeuta puede considerar esta información en su observación consultiva.
                 No es una conclusión automática.
               </p>
@@ -274,9 +276,9 @@ export default function DictionaryPanel({
           )}
 
           {/* Non-diagnostic disclaimer */}
-          <div className="pt-2 border-t border-blue-200">
+          <div className="pt-2 border-t border-gray-200/50">
             <p className="text-[11px] text-gray-500 italic">
-              Esta información es consultiva y no diagnóstica. El terapeuta observa y decide.
+              ⚠️ Esta información es consultiva y no diagnóstica. El terapeuta observa y decide.
             </p>
           </div>
         </div>
@@ -284,9 +286,9 @@ export default function DictionaryPanel({
 
       {/* Empty State */}
       {!loading && results.length === 0 && !error && searchTerm === '' && (
-        <div className="text-center py-6 text-xs text-gray-500">
-          <p>Ingresa un término para buscar en el diccionario bio-emocional</p>
-          <p className="mt-1">Ejemplo: "hígado", "miedo", "abandono"</p>
+        <div className="text-center py-6 text-xs text-gray-500 bio-glass rounded-lg">
+          <p>🔍 Ingresa un término para buscar en el diccionario bio-emocional</p>
+          <p className="mt-1 text-gray-400">Ejemplo: "hígado", "miedo", "abandono"</p>
         </div>
       )}
     </div>

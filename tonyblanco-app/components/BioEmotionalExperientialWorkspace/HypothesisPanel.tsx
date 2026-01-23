@@ -134,17 +134,17 @@ export default function HypothesisPanel({
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm space-y-4">
+    <div className="bio-card-glass rounded-2xl p-6 space-y-4 bio-animate-slide-in-up">
       <div>
-        <h4 className="text-sm font-semibold text-gray-900">Hipotesis bio-emocionales</h4>
+        <h4 className="text-sm font-semibold text-gray-900 flex items-center gap-2">🔍 Hipotesis bio-emocionales</h4>
         <p className="text-xs text-gray-600">
           Hipotesis de trabajo consultivas. No son diagnosticos ni conclusiones automaticas.
         </p>
       </div>
 
       {selectedRegion && (
-        <div className="rounded-md bg-blue-50 border border-blue-200 p-2 text-xs text-blue-700">
-          <p className="font-medium">Region seleccionada: {selectedRegion.label}</p>
+        <div className="bio-glass rounded-lg p-2 text-xs">
+          <p className="font-medium flex items-center gap-2">🎯 Region seleccionada: <span className="bio-badge bio-badge-info">{selectedRegion.label}</span></p>
         </div>
       )}
 
@@ -154,7 +154,7 @@ export default function HypothesisPanel({
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Titulo de la hipotesis"
-          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="w-full rounded-lg bio-glass border-0 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500/50 focus:outline-none transition-all"
           disabled={saving || isReadOnly}
         />
 
@@ -163,7 +163,7 @@ export default function HypothesisPanel({
           onChange={(e) => setDescription(e.target.value)}
           rows={4}
           placeholder="Describe la hipotesis de forma neutral..."
-          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="w-full rounded-lg bio-glass border-0 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500/50 focus:outline-none transition-all resize-none"
           disabled={saving || isReadOnly}
         />
 
@@ -184,7 +184,7 @@ export default function HypothesisPanel({
           value={dictionaryTerm}
           onChange={(e) => setDictionaryTerm(e.target.value)}
           placeholder="Vincular termino del diccionario (opcional)"
-          className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="w-full rounded-lg bio-glass border-0 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500/50 focus:outline-none transition-all"
           disabled={saving || isReadOnly}
         />
 
@@ -193,7 +193,7 @@ export default function HypothesisPanel({
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value as HypothesisStatus)}
-            className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="mt-1 w-full rounded-lg bio-glass border-0 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500/50 focus:outline-none transition-all"
             disabled={saving || isReadOnly}
           >
             <option value="open">Abierta</option>
@@ -207,16 +207,16 @@ export default function HypothesisPanel({
             type="button"
             onClick={handleSave}
             disabled={saving || isReadOnly || !title.trim() || !description.trim()}
-            className="flex-1 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+            className="flex-1 bio-btn bio-btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {saving ? 'Guardando...' : selectedId ? 'Actualizar hipotesis' : 'Guardar hipotesis'}
+            {saving ? '⏳ Guardando...' : selectedId ? '📝 Actualizar hipotesis' : '💾 Guardar hipotesis'}
           </button>
           {selectedId && (
             <button
               type="button"
               onClick={resetForm}
               disabled={isReadOnly}
-              className="px-3 py-2 text-sm font-medium text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
+              className="bio-btn bio-btn-ghost"
             >
               Cancelar
             </button>
@@ -225,42 +225,47 @@ export default function HypothesisPanel({
       </div>
 
       {error && (
-        <div className="rounded-md bg-red-50 border border-red-200 p-3 text-xs text-red-700">
+        <div className="rounded-lg bio-glass border border-red-200/50 p-3 text-xs text-red-700 bio-animate-fade-in">
           {error}
         </div>
       )}
       {success && (
-        <div className="rounded-md bg-emerald-50 border border-emerald-200 p-3 text-xs text-emerald-700">
+        <div className="rounded-lg bio-glass border border-emerald-200/50 p-3 text-xs text-emerald-700 bio-animate-fade-in">
           {success}
         </div>
       )}
 
       <div className="space-y-2">
-        <p className="text-xs font-medium text-gray-700">Hipotesis registradas</p>
+        <p className="text-xs font-medium text-gray-700">📚 Hipotesis registradas</p>
         {loading ? (
-          <p className="text-xs text-gray-500">Cargando hipotesis...</p>
+          <div className="space-y-2">
+            <div className="bio-skeleton h-16 rounded-lg"></div>
+            <div className="bio-skeleton h-16 rounded-lg"></div>
+          </div>
         ) : hypotheses.length === 0 ? (
-          <p className="text-xs text-gray-500">Sin hipotesis registradas.</p>
+          <p className="text-xs text-gray-500 italic">Sin hipotesis registradas.</p>
         ) : (
-          <div className="space-y-2 max-h-48 overflow-y-auto">
-            {hypotheses.map((item) => (
+          <div className="space-y-2 max-h-48 overflow-y-auto bio-scrollbar">
+            {hypotheses.map((item, index) => (
               <div
                 key={item.id}
-                className="rounded-md border border-gray-200 p-2 text-xs text-gray-700"
+                className="bio-glass rounded-lg p-3 text-xs text-gray-700 bio-animate-slide-in-up"
+                style={{ animationDelay: `${index * 50}ms` }}
               >
                 <div className="flex items-start justify-between gap-2">
                   <div>
                     <p className="font-medium text-gray-900">{item.title}</p>
-                    <p className="text-[11px] text-gray-500">
-                      {statusLabels[item.status]} · {new Date(item.updated_at).toLocaleString()}
+                    <p className="text-[11px] text-gray-500 flex items-center gap-2">
+                      <span className={`bio-badge ${item.status === 'open' ? 'bio-badge-success' : item.status === 'discarded' ? 'bio-badge-warning' : 'bio-badge-info'}`}>{statusLabels[item.status]}</span>
+                      <span>{new Date(item.updated_at).toLocaleString()}</span>
                     </p>
                   </div>
                   <button
                     type="button"
                     onClick={() => handleEdit(item)}
-                    className="text-xs text-blue-600 hover:text-blue-700"
+                    className="text-xs text-purple-600 hover:text-purple-700 font-medium"
                   >
-                    Editar
+                    ✏️ Editar
                   </button>
                 </div>
                 <p className="mt-1 text-gray-600 line-clamp-2">{item.description}</p>

@@ -314,4 +314,7 @@ urlpatterns = [
     
     # SWM MCMI-4 Reflection (Experiential Reflection Module)
     path('swm/mcmi4-reflection/', include('swm.mcmi4_reflection.urls', namespace='swm_mcmi4_reflection')),
+    
+    # SWM Tarot Evolutivo (Symbolic Tarot Workspace)
+    path('swm/tarot/', include('swm.tarot.urls', namespace='swm_tarot')),
 ]

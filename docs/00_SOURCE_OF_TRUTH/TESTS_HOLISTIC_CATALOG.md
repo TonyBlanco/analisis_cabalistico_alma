@@ -22,7 +22,8 @@
 | `aq_kabbalah` | Aura Quotient for Kabbalistic Alignment (AQ-K) | holistic | patient_self | true | `aq50_schema.py` | Reinterpretación del AQ-50. Foco en estructuras mentales (Binah) y patrones. |
 | `ybocs_soul` | Yetziratic Balance Sanctuary (Y-BOCS-Soul) | holistic | patient_self | true | `ybocs_schema.py` | Reinterpretación del Y-BOCS. Foco en rituales repetitivos y purificación (Gevurah). |
 | `eat26_spirit` | Eternal Abundance Threshold (EAT-26-Spirit) | holistic | patient_self | true | `eat26_bank.py` | Reinterpretación del EAT-26. Foco en la relación sagrada con el sustento (Malkhut). |
-| `mcmi4_mystic` | Multiaxial Cosmic Matrix (MCMI-4-Mystic) | holistic | patient_self | true | `mcmi4_bank.py` | Reinterpretación del MCMI-IV. Mapa complejo de estilos de personalidad y sefirot. |
+| `mcmi4_signal` | MCMI-4 SIGNAL (Cribado) | holistic | patient_self | true | `mcmi4_signal_bank.py` | Cribado inicial de 16 ítems. Detecta mundo predominante y mundo sombra. |
+| `mcmi4_mystic` | Multiaxial Cosmic Matrix (MCMI-4-Mystic) | holistic | patient_self | true | `backend/data/mcmi4_mystic_questions_*.json` | 195 ítems en 4 Mundos (Atzilut/Briah/Yetzirah/Assiah). Pool 270, rotación anti-repetición. |
 
 ---
 

@@ -1,4 +1,17 @@
 """
+⚠️  DEPRECATED — DO NOT USE IN PRODUCTION ⚠️
+================================================================================
+Este archivo está OBSOLETO y NO debe usarse para ninguna funcionalidad activa.
+
+REEMPLAZO: Los ítems MCMI-4 Místico reales están en:
+  - backend/data/mcmi4_mystic_questions_atzilut.json
+  - backend/data/mcmi4_mystic_questions_briah.json
+  - backend/data/mcmi4_mystic_questions_yetzirah.json
+  - backend/data/mcmi4_mystic_questions_assiah.json
+
+Este archivo se conserva SOLO para referencia histórica.
+================================================================================
+
 Banco sintético para MCMI-IV (195 ítems originales).
 Estructura simplificada y orientativa: items originales creados para uso de investigación/wellness,
 no reproducen textos con copyright de MCMI-IV.

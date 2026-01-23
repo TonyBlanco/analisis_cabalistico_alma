@@ -112,6 +112,44 @@ class MCMI4SignalSchemaTest(TestCase):
             self.assertIsNotNone(tr.result_data, "TestResult.result_data should not be None")
             self.assertEqual(tr.result_data.get('schema_version'), 'mcmi4-signal:v1', "Saved TestResult should have schema_version")
 
+    def test_mcmi4_signal_responses_detail_endpoint(self):
+        """Test that GET /api/tests/results/{id}/ includes responses_detail for mcmi4-signal."""
+        # First execute and save
+        responses = {str(i): (i % 5) + 1 for i in range(1, 17)}
+        payload = {
+            'test_module_code': 'mcmi4-signal',
+            'input_data': {'responses': responses},
+            'save_result': True
+        }
+        execute_response = self.client.post(
+            '/api/tests/execute/',
+            data=json.dumps(payload),
+            content_type='application/json'
+        )
+        self.assertEqual(execute_response.status_code, 200)
+        result_id = execute_response.json().get('result_id')
+        self.assertIsNotNone(result_id, "Expected result_id after save_result=True")
+        
+        # Now GET the result detail
+        detail_response = self.client.get(f'/api/tests/results/{result_id}/')
+        self.assertEqual(detail_response.status_code, 200)
+        detail_data = detail_response.json()
+        
+        # Verify responses_detail is present
+        self.assertIn('responses_detail', detail_data, "Expected responses_detail in result detail")
+        responses_detail = detail_data['responses_detail']
+        self.assertEqual(len(responses_detail), 16, "Expected 16 items in responses_detail")
+        
+        # Verify structure of first item
+        first = responses_detail[0]
+        self.assertIn('position', first)
+        self.assertIn('item_text', first)
+        self.assertIn('response_value', first)
+        self.assertIn('response_label', first)
+        self.assertEqual(first['position'], 1)
+        self.assertIsNotNone(first['item_text'])
+        self.assertIn(first['response_value'], [1, 2, 3, 4, 5])
+
     def test_mcmi4_signal_handles_empty_responses(self):
         """Test that empty responses don't crash and produce valid schema with 0 mean/stdev."""
         payload = {

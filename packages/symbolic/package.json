@@ -6,31 +6,106 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./dist/index.js",
-    "./methods/pitagoras": "./dist/methods/pitagoras/index.js",
-    "./methods/pitagoras/*": "./dist/methods/pitagoras/*.js",
-    "./methods/gematria-standard": "./dist/methods/gematria-standard/index.js",
-    "./methods/gematria-katan": "./dist/methods/gematria-katan/index.js",
-    "./methods/mispar-gadol": "./dist/methods/mispar-gadol/index.js",
-    "./methods/mispar-siduri": "./dist/methods/mispar-siduri/index.js",
-    "./methods/milui": "./dist/methods/milui/index.js",
-    "./methods/atbash": "./dist/methods/atbash/index.js",
-    "./methods/albam": "./dist/methods/albam/index.js",
-    "./methods/avgad": "./dist/methods/avgad/index.js",
-    "./methods/temurah": "./dist/methods/temurah/index.js",
-    "./methods/notarikon": "./dist/methods/notarikon/index.js",
-    "./tarot/bota/botaIdentityResolver": "./dist/tarot/bota/botaIdentityResolver.js",
-    "./tarot/bota/positionInterpreter": "./dist/tarot/bota/positionInterpreter.js",
-    "./tarot/bota/botaVisualMapper": "./dist/tarot/bota/botaVisualMapper.js",
-    "./tarot/bota/synthesisBuilder": "./dist/tarot/bota/synthesisBuilder.js",
-    "./tarot/decks/thoth": "./dist/tarot/decks/thoth.js",
-    "./tarot/decks/golden-dawn": "./dist/tarot/decks/golden-dawn.js",
-    "./tarot/decks/bota": "./dist/tarot/decks/bota.js",
-    "./tarot/decks/hermetic": "./dist/tarot/decks/hermetic.js",
-    "./tarot/decks/sephiroth": "./dist/tarot/decks/sephiroth.js",
-    "./tree": "./dist/tree/index.js",
-    "./tree/symbolic-interpreter": "./dist/tree/symbolic-interpreter.js",
-    "./tree/symbolic-interpreter.types": "./dist/tree/symbolic-interpreter.types.js"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./methods/pitagoras": {
+      "types": "./dist/methods/pitagoras/index.d.ts",
+      "import": "./dist/methods/pitagoras/index.js"
+    },
+    "./methods/pitagoras/*": {
+      "types": "./dist/methods/pitagoras/*.d.ts",
+      "import": "./dist/methods/pitagoras/*.js"
+    },
+    "./methods/gematria-standard": {
+      "types": "./dist/methods/gematria-standard/index.d.ts",
+      "import": "./dist/methods/gematria-standard/index.js"
+    },
+    "./methods/gematria-katan": {
+      "types": "./dist/methods/gematria-katan/index.d.ts",
+      "import": "./dist/methods/gematria-katan/index.js"
+    },
+    "./methods/mispar-gadol": {
+      "types": "./dist/methods/mispar-gadol/index.d.ts",
+      "import": "./dist/methods/mispar-gadol/index.js"
+    },
+    "./methods/mispar-siduri": {
+      "types": "./dist/methods/mispar-siduri/index.d.ts",
+      "import": "./dist/methods/mispar-siduri/index.js"
+    },
+    "./methods/milui": {
+      "types": "./dist/methods/milui/index.d.ts",
+      "import": "./dist/methods/milui/index.js"
+    },
+    "./methods/atbash": {
+      "types": "./dist/methods/atbash/index.d.ts",
+      "import": "./dist/methods/atbash/index.js"
+    },
+    "./methods/albam": {
+      "types": "./dist/methods/albam/index.d.ts",
+      "import": "./dist/methods/albam/index.js"
+    },
+    "./methods/avgad": {
+      "types": "./dist/methods/avgad/index.d.ts",
+      "import": "./dist/methods/avgad/index.js"
+    },
+    "./methods/temurah": {
+      "types": "./dist/methods/temurah/index.d.ts",
+      "import": "./dist/methods/temurah/index.js"
+    },
+    "./methods/notarikon": {
+      "types": "./dist/methods/notarikon/index.d.ts",
+      "import": "./dist/methods/notarikon/index.js"
+    },
+    "./tarot/bota/botaIdentityResolver": {
+      "types": "./dist/tarot/bota/botaIdentityResolver.d.ts",
+      "import": "./dist/tarot/bota/botaIdentityResolver.js"
+    },
+    "./tarot/bota/positionInterpreter": {
+      "types": "./dist/tarot/bota/positionInterpreter.d.ts",
+      "import": "./dist/tarot/bota/positionInterpreter.js"
+    },
+    "./tarot/bota/botaVisualMapper": {
+      "types": "./dist/tarot/bota/botaVisualMapper.d.ts",
+      "import": "./dist/tarot/bota/botaVisualMapper.js"
+    },
+    "./tarot/bota/synthesisBuilder": {
+      "types": "./dist/tarot/bota/synthesisBuilder.d.ts",
+      "import": "./dist/tarot/bota/synthesisBuilder.js"
+    },
+    "./tarot/decks/thoth": {
+      "types": "./dist/tarot/decks/thoth.d.ts",
+      "import": "./dist/tarot/decks/thoth.js"
+    },
+    "./tarot/decks/golden-dawn": {
+      "types": "./dist/tarot/decks/golden-dawn.d.ts",
+      "import": "./dist/tarot/decks/golden-dawn.js"
+    },
+    "./tarot/decks/bota": {
+      "types": "./dist/tarot/decks/bota.d.ts",
+      "import": "./dist/tarot/decks/bota.js"
+    },
+    "./tarot/decks/hermetic": {
+      "types": "./dist/tarot/decks/hermetic.d.ts",
+      "import": "./dist/tarot/decks/hermetic.js"
+    },
+    "./tarot/decks/sephiroth": {
+      "types": "./dist/tarot/decks/sephiroth.d.ts",
+      "import": "./dist/tarot/decks/sephiroth.js"
+    },
+    "./tree": {
+      "types": "./dist/tree/index.d.ts",
+      "import": "./dist/tree/index.js"
+    },
+    "./tree/symbolic-interpreter": {
+      "types": "./dist/tree/symbolic-interpreter.d.ts",
+      "import": "./dist/tree/symbolic-interpreter.js"
+    },
+    "./tree/symbolic-interpreter.types": {
+      "types": "./dist/tree/symbolic-interpreter.types.d.ts",
+      "import": "./dist/tree/symbolic-interpreter.types.js"
+    }
   },
   "devDependencies": {
     "typescript": "^5.4.0"

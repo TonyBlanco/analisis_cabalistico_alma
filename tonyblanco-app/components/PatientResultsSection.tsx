@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { getTestResults, getTestResult, deleteTestResult } from '@/lib/test-api';
 import { TestResult } from '@/lib/test-types';
 import ReadableResult from '@/components/test-results/ReadableResult';
 import { getUserRole } from '@/lib/getUserRole';
+import { Sparkles, ArrowRight } from 'lucide-react';
 
 /**
  * Patient Results Section Component
@@ -243,6 +245,7 @@ export default function PatientResultsSection() {
                       testCode={selectedResult.test_module?.code}
                       executionMode={selectedResult.test_module?.execution_mode}
                       isTherapist={userRole === 'therapist'}
+                      responsesDetail={selectedResult.responses_detail}
                       therapistSuggestion={
                         userRole === 'therapist'
                           ? selectedResult.therapist_next_exploration_suggestion
@@ -258,6 +261,27 @@ export default function PatientResultsSection() {
                       <div className="text-sm text-gray-700 whitespace-pre-wrap">
                         {selectedResult.notes}
                       </div>
+                    </div>
+                  )}
+
+                  {/* CTA for MCMI-4 Signal → Reflection */}
+                  {selectedResult.test_module?.code === 'mcmi4-signal' && userRole !== 'therapist' && (
+                    <div className="bg-gradient-to-r from-violet-50 to-purple-50 border border-violet-200 rounded-lg p-4">
+                      <div className="flex items-center gap-3 mb-2">
+                        <Sparkles className="w-5 h-5 text-violet-600" />
+                        <h3 className="text-sm font-semibold text-gray-900">Reflexión Personal</h3>
+                      </div>
+                      <p className="text-sm text-gray-600 mb-3">
+                        Has completado la evaluación. Ahora puedes registrar tus reflexiones personales sobre los resultados.
+                      </p>
+                      <Link 
+                        href="/dashboard/patient/swm/mcmi4-reflection"
+                        className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-violet-600 rounded-md hover:bg-violet-700 transition-colors"
+                      >
+                        <Sparkles className="w-4 h-4" />
+                        Continuar con tu Reflexión
+                        <ArrowRight className="w-4 h-4" />
+                      </Link>
                     </div>
                   )}
 

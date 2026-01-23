@@ -1,5 +1,8 @@
 'use client';
 
+// ⛔ FROZEN: DO NOT ACTIVATE - See FROZEN.md
+console.warn('[AISymbolicWorkspace] FROZEN: Este workspace está congelado hasta definir gobernanza IA');
+
 import AISymbolicDraftView from './AISymbolicDraftView';
 import { mockContext, mockCrossAnalysis } from './mock';
 

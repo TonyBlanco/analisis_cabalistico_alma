@@ -25,98 +25,98 @@ export interface PhaseGuide {
 export const phaseGuides: Record<PhaseName, PhaseGuide> = {
   discovery: {
     phase: 'discovery',
-    title: 'Fase 1: Exploración',
-    description: 'Observa la señal sin interpretarla aún. ¿Qué patrones emergen de forma inmediata?',
+    title: 'Fase 1: Observación — Assiyah',
+    description: 'El mundo de la Acción. Observa la señal como fenómeno tangible: ¿qué emerge ante tus sentidos antes de cualquier análisis?',
     questions: [
       {
         id: 'discovery_q1',
-        text: '¿Qué dimensiones simbólicas destacan en la señal? (intensidad, variabilidad, etc.)',
+        text: '¿Qué percibes de forma inmediata en la señal? (intensidad, variabilidad, textura)',
         placeholder: 'Describe las dimensiones que observas sin conclusiones...',
       },
       {
         id: 'discovery_q2',
-        text: '¿Qué contrastes o polaridades notas en las respuestas?',
+        text: '¿Qué contrastes o tensiones aparecen en el plano concreto?',
         placeholder: 'Ejemplos: estabilidad vs. fluctuación, apertura vs. contención...',
       },
       {
         id: 'discovery_q3',
-        text: '¿Hay algún elemento que "llama la atención" de forma recurrente?',
+        text: '¿Qué elemento se manifiesta con más fuerza en el nivel material?',
         placeholder: 'Anota patrones que se repiten o destacan...',
       },
     ],
   },
   mapping: {
     phase: 'mapping',
-    title: 'Fase 2: Mapeo',
-    description: 'Conecta la señal con marcos simbólicos. ¿Cómo se relaciona con arquetipos, esferas cabalísticas, o narrativas conocidas?',
+    title: 'Fase 2: Formación — Yetzirah',
+    description: 'El mundo de la Formación. Conecta la señal con las corrientes emocionales y los patrones arquetípicos que dan forma a la experiencia.',
     questions: [
       {
         id: 'mapping_q1',
-        text: '¿A qué esfera(s) del Árbol de la Vida resuena esta señal?',
+        text: '¿Qué resonancia emocional evoca esta señal en ti como terapeuta?',
         placeholder: 'Ejemplos: Chesed (expansión), Gevurah (contención), Tiferet (equilibrio)...',
       },
       {
         id: 'mapping_q2',
-        text: '¿Qué arquetipos o patrones simbólicos reconoces en la señal?',
+        text: '¿Qué arquetipos o patrones formativos reconoces? (héroe, guardián, sombra...)',
         placeholder: 'Ejemplos: el héroe, el guardián, el buscador, la sombra...',
       },
       {
         id: 'mapping_q3',
-        text: '¿Hay elementos que sugieren una narrativa o recorrido interno?',
+        text: '¿Qué corriente emocional subyace a este patrón?',
         placeholder: 'Describe el "viaje" que percibes en la señal...',
       },
       {
         id: 'mapping_q4',
-        text: '¿Qué elementos contextuales (externos al test) informan esta lectura?',
+        text: '¿Cómo se relaciona con el momento vital y contexto del consultante?',
         placeholder: 'Historia personal, momento vital, entorno cultural...',
       },
     ],
   },
   interpretation: {
     phase: 'interpretation',
-    title: 'Fase 3: Interpretación',
-    description: 'Integra observación y mapeo. ¿Qué significa este patrón para el consultante?',
+    title: 'Fase 3: Comprensión — Beriah',
+    description: 'El mundo de la Creación intelectual. Integra lo observado y lo sentido: ¿qué significado emerge de este patrón?',
     questions: [
       {
         id: 'interpretation_q1',
-        text: '¿Qué tensión central o nudo interpretativo identificas?',
+        text: '¿Cuál es la tensión central que tu mente identifica?',
         placeholder: 'Ejemplo: tensión entre control y flujo, identidad y transformación...',
       },
       {
         id: 'interpretation_q2',
-        text: '¿Cómo interpretas los ejes simbólicos en relación al momento vital del consultante?',
+        text: '¿Cómo se relaciona este patrón con las esferas del Árbol de la Vida?',
         placeholder: 'Conecta la señal con el contexto actual...',
       },
       {
         id: 'interpretation_q3',
-        text: '¿Qué recursos internos (fortalezas) observas en la señal?',
+        text: '¿Qué fortalezas o recursos internos percibes?',
         placeholder: 'Capacidades de regulación, sensibilidad, integración...',
       },
       {
         id: 'interpretation_q4',
-        text: '¿Qué áreas requieren atención o acompañamiento?',
+        text: '¿Qué áreas requieren trabajo o acompañamiento?',
         placeholder: 'Zonas de vulnerabilidad o trabajo pendiente...',
       },
     ],
   },
   synthesis: {
     phase: 'synthesis',
-    title: 'Fase 4: Síntesis',
-    description: 'Cierra el proceso interpretativo. ¿Cuál es la lectura integrada de esta señal?',
+    title: 'Fase 4: Unificación — Atzilut',
+    description: 'El mundo de la Emanación. Unifica todas las capas en una visión integrada: ¿cuál es la esencia de esta señal?',
     questions: [
       {
         id: 'synthesis_q1',
-        text: '¿Cuál es la narrativa simbólica central que emerge de este proceso?',
+        text: '¿Cuál es la narrativa esencial que emana de todo el proceso?',
         placeholder: 'Sintetiza en 2–3 oraciones la "historia" de esta señal...',
       },
       {
         id: 'synthesis_q2',
-        text: '¿Qué movimiento o dirección sugiere la interpretación?',
+        text: '¿Hacia qué dirección apunta el alma del consultante?',
         placeholder: 'Ejemplos: integración, expansión, contención, transformación...',
       },
       {
         id: 'synthesis_q3',
-        text: '¿Qué preguntas quedan abiertas para sesiones futuras?',
+        text: '¿Qué misterio permanece abierto para futuras exploraciones?',
         placeholder: 'Aspectos que requieren seguimiento o profundización...',
       },
     ],

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import PatientProfileView from '@/components/patient/PatientProfileView';
@@ -9,6 +9,7 @@ import CreateWorkspaceButton from '@/components/CreateWorkspaceButton';
 import dynamic from 'next/dynamic'
 import { getActivePatient, setActivePatientId } from '@/lib/active-patient';
 import AssignMCMI4Modal from '@/components/AssignMCMI4Modal';
+import AssignMCMI4MysticModal from '@/components/AssignMCMI4MysticModal';
 
 import { getApiBaseUrl } from '@/lib/api-base';
 import { getAuthToken } from '@/lib/api';
@@ -30,6 +31,17 @@ export default function TherapistPatientDetailPage() {
   const [analysisRecords, setAnalysisRecords] = useState<any[]>([]);
   const [showEditor, setShowEditor] = useState(false);
   const [showAssignModal, setShowAssignModal] = useState(false);
+  const [showAssignMysticModal, setShowAssignMysticModal] = useState(false);
+
+  // Detect if patient has completed SIGNAL
+  const signalResult = useMemo(() => {
+    return results.find((r: any) => 
+      r.test_module?.code === 'mcmi4-signal' || 
+      r.test_code === 'mcmi4-signal'
+    );
+  }, [results]);
+
+  const hasCompletedSignal = !!signalResult;
 
   useEffect(() => {
     if (!patientId) {
@@ -161,10 +173,29 @@ export default function TherapistPatientDetailPage() {
             className="inline-flex items-center rounded-md px-3 py-2 text-sm font-medium text-white hover:opacity-90 transition-opacity"
             style={{ backgroundColor: 'var(--accent-color)' }}
           >
-            Asignar MCMI-4 Místico
+            Asignar SIGNAL (16 ítems)
           </button>
+          {/* Show 195 assignment only if SIGNAL completed */}
+          {hasCompletedSignal && (
+            <button
+              onClick={() => setShowAssignMysticModal(true)}
+              className="inline-flex items-center rounded-md px-3 py-2 text-sm font-medium text-white hover:opacity-90 transition-opacity"
+              style={{ backgroundColor: '#7c3aed' }}
+            >
+              Asignar MCMI-4 Místico (195)
+            </button>
+          )}
         </div>
+        {/* Signal Status Indicator */}
+        {hasCompletedSignal && (
+          <div className="mt-3 bg-green-50 border border-green-200 rounded-md px-3 py-2">
+            <p className="text-sm text-green-700">
+              ✓ SIGNAL completado — puede asignar MCMI-4 Místico (195 ítems)
+            </p>
+          </div>
+        )}
       </div>
+
 
       {errors.length > 0 && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
@@ -284,6 +315,20 @@ export default function TherapistPatientDetailPage() {
         patientId={Number(patientId)}
         patientName={patient?.full_name || patient?.legal_full_name || patient?.name || 'Consultante'}
         patientUserId={patient?.user?.id || patient?.user || null}
+      />
+
+      <AssignMCMI4MysticModal
+        open={showAssignMysticModal}
+        onClose={() => {
+          setShowAssignMysticModal(false);
+          loadData(); // Refresh results after assignment
+        }}
+        patientId={Number(patientId)}
+        patientName={patient?.full_name || patient?.legal_full_name || patient?.name || 'Consultante'}
+        patientUserId={patient?.user?.id || patient?.user || null}
+        dominantWorld={signalResult?.result_data?.structured_data?.dominant_axis || null}
+        shadowWorld={signalResult?.result_data?.structured_data?.weakest_axis || null}
+        signalTestResultId={signalResult?.id || null}
       />
     </div>
   );

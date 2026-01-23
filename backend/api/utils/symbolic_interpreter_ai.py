@@ -15,11 +15,12 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
+from .genai_response import extract_text
 
 # Import Gemini
 genai = None
 try:
-    import google.generativeai as genai_local
+    from google import genai as genai_local
     genai = genai_local
 except ImportError:
     genai = None
@@ -43,21 +44,20 @@ class SymbolicInterpreterAI:
             return
         
         if not genai:
-            self.error_message = "google.generativeai module not installed"
+            self.error_message = "google.genai module not installed"
             print(f"[WARNING] {self.error_message}")
             return
         
         try:
-            genai.configure(api_key=api_key)
-            self.model = genai.GenerativeModel(
-                model_name,
-                generation_config={
-                    'temperature': 0.7,
-                    'top_p': 0.8,
-                    'top_k': 40,
-                    'max_output_tokens': 1024,
-                }
-            )
+            self.client = genai.Client(api_key=api_key)
+            self.model = self.client.models.generate_content
+            self.model_name = model_name
+            self.generation_config = {
+                'temperature': 0.7,
+                'top_p': 0.8,
+                'top_k': 40,
+                'max_output_tokens': 1024,
+            }
             self.enabled = True
             print(f"[OK] SymbolicInterpreterAI configured with model: {model_name}")
         except Exception as e:
@@ -112,8 +112,12 @@ class SymbolicInterpreterAI:
             raise Exception(self.error_message or "AI service not enabled")
         
         try:
-            response = self.model.generate_content(prompt)
-            return response.text
+            response = self.model(
+                model=self.model_name,
+                contents=prompt,
+                config=self.generation_config
+            )
+            return extract_text(response)
         except Exception as e:
             error_msg = f"Error generating AI interpretation: {str(e)}"
             print(f"[ERROR] {error_msg}")

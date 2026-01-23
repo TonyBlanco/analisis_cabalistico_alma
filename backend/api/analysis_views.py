@@ -1,3 +1,4 @@
+import json
 from rest_framework import status, generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -8,6 +9,7 @@ import logging
 from .models import AnalysisRecord, Patient
 from .serializers import AnalysisRecordSerializer
 from .permissions import IsTherapist
+from .utils.genai_response import extract_debug, extract_text
 
 logger = logging.getLogger(__name__)
 
@@ -368,7 +370,7 @@ class SCID5AIAssistant:
         # Configurar Gemini
         self.genai = None
         try:
-            import google.generativeai as genai_local
+            from google import genai as genai_local
             self.genai = genai_local
         except ImportError:
             pass
@@ -609,19 +611,19 @@ IMPORTANTE:
             prompt = self._build_prompt(scid5_data, depth_level, active_section, context_data)
 
             # Configurar modelo
-            import google.generativeai as genai
-            genai.configure(api_key=self.api_key)
-            model = genai.GenerativeModel(
-                self.model_name,
-                generation_config={
+            from google import genai
+            self.client = genai.Client(api_key=self.api_key)
+            
+            # Generar respuesta
+            response = self.client.models.generate_content(
+                model=self.model_name,
+                contents=prompt,
+                config={
                     'temperature': 0.7,
                     'max_output_tokens': 2048,
                 }
             )
-
-            # Generar respuesta
-            response = model.generate_content(prompt)
-            response_text = response.text.strip()
+            response_text = extract_text(response).strip()
 
             # Limpiar respuesta (remover posibles markdown)
             if response_text.startswith('```json'):
@@ -642,7 +644,13 @@ IMPORTANTE:
                 return result
 
             except (json.JSONDecodeError, ValueError) as e:
-                logger.warning(f"Invalid AI response format: {e}, response: {response_text}")
+                logger.warning(
+                    f"Invalid AI response format: {e}",
+                    extra={
+                        "response_text": response_text,
+                        "response_debug": extract_debug(response),
+                    },
+                )
                 # Fallback
                 return {
                     "section": active_section or "general",

@@ -3,26 +3,26 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useExperientialContext } from './hooks/useExperientialContext';
 import {
-  createAssistedDiagnosis,
-  listAssistedDiagnosis,
+  createAssistedDiagnosis as createGuidedExploration,
+  listAssistedDiagnosis as listGuidedExploration,
   listHypotheses,
   listObservations,
-  validateAssistedDiagnosis,
-  type AssistedDiagnosisBasedOn,
-  type AssistedDiagnosisRecord,
+  validateAssistedDiagnosis as validateGuidedExploration,
+  type AssistedDiagnosisBasedOn as GuidedExplorationBasedOn,
+  type AssistedDiagnosisRecord as GuidedExplorationRecord,
   type BioEmotionalSynthesis,
 } from '@/lib/api/bioemotional-clinical';
 import { generateWithGemini } from '@/lib/gemini-config';
 
-interface AssistedDiagnosisPanelProps {
+interface GuidedExplorationPanelProps {
   synthesisRecord: BioEmotionalSynthesis | null;
   referenceSnippets: string[];
   onInsertToSynthesis: (text: string) => void;
   isReadOnly: boolean;
 }
 
-const PROMPT_DIAGNOSIS =
-  'Elabora una lectura diagnóstica orientativa e integrativa basada EXCLUSIVAMENTE en el texto provisto. No inventes datos. No emitas diagnósticos definitivos. Usa tono neutral y consultivo. Indica explícitamente que requiere validación humana. Salida: 1–2 párrafos en español.';
+const PROMPT_EXPLORATION =
+  'Elabora una lectura exploratoria orientativa e integrativa basada EXCLUSIVAMENTE en el texto provisto. No inventes datos. No generes diagnósticos. Usa tono neutral y consultivo. Indica explícitamente que requiere validación humana. Salida: 1–2 párrafos en español.';
 
 const PROMPT_REFORMULATE =
   'Reformula el texto para mayor claridad y neutralidad. No agregues información nueva. No diagnostiques. Salida: texto continuo en español.';
@@ -30,17 +30,17 @@ const PROMPT_REFORMULATE =
 const PROMPT_SUMMARY =
   'Resume el texto en tono neutral y consultivo. No agregues información nueva. Salida: 3–5 frases en español.';
 
-export default function AssistedDiagnosisPanel({
+export default function GuidedExplorationPanel({
   synthesisRecord,
   referenceSnippets,
   onInsertToSynthesis,
   isReadOnly,
-}: AssistedDiagnosisPanelProps) {
+}: GuidedExplorationPanelProps) {
   const { context } = useExperientialContext();
   const patientId = context.patientId;
   const [observations, setObservations] = useState<{ id: string; note_text: string }[]>([]);
   const [hypotheses, setHypotheses] = useState<{ id: string; title: string; description: string }[]>([]);
-  const [savedRecords, setSavedRecords] = useState<AssistedDiagnosisRecord[]>([]);
+  const [savedRecords, setSavedRecords] = useState<GuidedExplorationRecord[]>([]);
   const [selectedSources, setSelectedSources] = useState<Record<string, boolean>>({});
   const [aiOutput, setAiOutput] = useState<string | null>(null);
   const [promptVersion, setPromptVersion] = useState<string | null>(null);
@@ -63,7 +63,7 @@ export default function AssistedDiagnosisPanel({
         const [obs, hyps, records] = await Promise.all([
           listObservations(patientId),
           listHypotheses(patientId),
-          listAssistedDiagnosis(patientId),
+          listGuidedExploration(patientId),
         ]);
         setObservations(obs.map((item) => ({ id: item.id, note_text: item.note_text })));
         setHypotheses(
@@ -88,8 +88,8 @@ export default function AssistedDiagnosisPanel({
     [referenceSnippets]
   );
 
-  const buildBasedOn = (): AssistedDiagnosisBasedOn[] => {
-    const basedOn: AssistedDiagnosisBasedOn[] = [];
+  const buildBasedOn = (): GuidedExplorationBasedOn[] => {
+    const basedOn: GuidedExplorationBasedOn[] = [];
     observations.forEach((item) => {
       if (selectedSources[`observation-${item.id}`]) {
         basedOn.push({ type: 'observation', id: item.id });
@@ -143,9 +143,9 @@ export default function AssistedDiagnosisPanel({
     return basedOn;
   };
 
-  const runAi = async (mode: 'diagnosis' | 'reformulate' | 'summary') => {
+  const runAi = async (mode: 'exploration' | 'reformulate' | 'summary') => {
     if (!patientId) {
-      setError('Selecciona un paciente antes de usar la lectura asistida.');
+      setError('Selecciona un paciente antes de usar la exploración guiada.');
       return;
     }
     const basedOn = ensureSources();
@@ -162,15 +162,15 @@ export default function AssistedDiagnosisPanel({
     try {
       let prompt = '';
       let version = '';
-      if (mode === 'diagnosis') {
-        prompt = `${PROMPT_DIAGNOSIS}\n\nTexto:\n${sourceText}`;
-        version = 'F4-AD-v1-A';
+      if (mode === 'exploration') {
+        prompt = `${PROMPT_EXPLORATION}\n\nTexto:\n${sourceText}`;
+        version = 'F4-GE-v1-A';
       } else if (mode === 'reformulate') {
         prompt = `${PROMPT_REFORMULATE}\n\nTexto:\n${sourceText}`;
-        version = 'F4-AD-v1-B';
+        version = 'F4-GE-v1-B';
       } else {
         prompt = `${PROMPT_SUMMARY}\n\nTexto:\n${sourceText}`;
-        version = 'F4-AD-v1-C';
+        version = 'F4-GE-v1-C';
       }
       const output = await generateWithGemini(prompt);
       setAiOutput(output || null);
@@ -192,37 +192,37 @@ export default function AssistedDiagnosisPanel({
       return;
     }
     if (!aiOutput || !promptVersion) {
-      setError('Genera una lectura asistida antes de guardar.');
+      setError('Genera una exploración guiada antes de guardar.');
       return;
     }
     setSaving(true);
     setError(null);
     setSuccess(null);
     try {
-      const record = await createAssistedDiagnosis({
+      const record = await createGuidedExploration({
         patient_id: patientId,
         content: aiOutput,
         based_on: basedOn,
         prompt_version: promptVersion,
       });
       setSavedRecords((prev) => [record, ...prev]);
-      setSuccess('Lectura asistida guardada.');
+      setSuccess('Exploración guiada guardada.');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'No se pudo guardar la lectura asistida.');
+      setError(err instanceof Error ? err.message : 'No se pudo guardar la exploración guiada.');
     } finally {
       setSaving(false);
     }
   };
 
-  const handleValidate = async (record: AssistedDiagnosisRecord) => {
+  const handleValidate = async (record: GuidedExplorationRecord) => {
     setSaving(true);
     setError(null);
     try {
-      const updated = await validateAssistedDiagnosis(record.id);
+      const updated = await validateGuidedExploration(record.id);
       setSavedRecords((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
-      setSuccess('Lectura validada.');
+      setSuccess('Exploración validada.');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'No se pudo validar la lectura.');
+      setError(err instanceof Error ? err.message : 'No se pudo validar la exploración.');
     } finally {
       setSaving(false);
     }
@@ -247,9 +247,9 @@ export default function AssistedDiagnosisPanel({
   return (
     <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm space-y-4">
       <div>
-        <h4 className="text-sm font-semibold text-gray-900">Lectura asistida (IA)</h4>
-        <p className="text-xs text-gray-600">Lectura diagnóstica orientativa asistida por IA.</p>
-        <p className="text-xs text-gray-600">No es diagnóstico clínico definitivo.</p>
+        <h4 className="text-sm font-semibold text-gray-900">Exploración Guiada (IA)</h4>
+        <p className="text-xs text-gray-600">Exploración orientativa asistida por IA.</p>
+        <p className="text-xs text-gray-600">No es diagnóstico clínico ni definitivo.</p>
         <p className="text-xs text-gray-500">Requiere validación humana.</p>
       </div>
 
@@ -313,11 +313,11 @@ export default function AssistedDiagnosisPanel({
       <div className="flex flex-wrap gap-2">
           <button
             type="button"
-            onClick={() => runAi('diagnosis')}
+            onClick={() => runAi('exploration')}
             disabled={loading || isReadOnly}
             className="px-3 py-1.5 text-xs font-medium text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
           >
-            Generar lectura diagnóstica orientativa (IA)
+            Generar exploración orientativa (IA)
           </button>
         <button
           type="button"
@@ -325,7 +325,7 @@ export default function AssistedDiagnosisPanel({
           disabled={loading || isReadOnly || !aiOutput}
           className="px-3 py-1.5 text-xs font-medium text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
         >
-          Reformular lectura
+          Reformular exploración
         </button>
           <button
             type="button"
@@ -333,7 +333,7 @@ export default function AssistedDiagnosisPanel({
             disabled={loading || isReadOnly}
             className="px-3 py-1.5 text-xs font-medium text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
           >
-            Resumir lectura
+            Resumir exploración
           </button>
       </div>
 
@@ -363,18 +363,18 @@ export default function AssistedDiagnosisPanel({
               disabled={isReadOnly || saving}
               className="px-2 py-1 text-xs font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:bg-gray-300"
             >
-              Guardar como diagnostico asistido
+              Guardar como exploración guiada
             </button>
           </div>
         </div>
       )}
 
       <div className="space-y-2">
-        <p className="text-xs font-medium text-gray-700">Lecturas guardadas</p>
+        <p className="text-xs font-medium text-gray-700">Exploraciones guardadas</p>
         {loading ? (
-          <p className="text-xs text-gray-500">Cargando lecturas...</p>
+          <p className="text-xs text-gray-500">Cargando exploraciones...</p>
         ) : savedRecords.length === 0 ? (
-          <p className="text-xs text-gray-500">Sin lecturas guardadas.</p>
+          <p className="text-xs text-gray-500">Sin exploraciones guardadas.</p>
         ) : (
           <div className="space-y-2 max-h-40 overflow-y-auto">
             {savedRecords.map((record) => (

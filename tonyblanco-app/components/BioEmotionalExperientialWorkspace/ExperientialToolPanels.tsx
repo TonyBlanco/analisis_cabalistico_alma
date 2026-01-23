@@ -6,7 +6,7 @@ import HypothesisPanel from './HypothesisPanel';
 import HolisticCrossPanel from './HolisticCrossPanel';
 import SynthesisPanel from './SynthesisPanel';
 import ClosurePanel from './ClosurePanel';
-import AssistedDiagnosisPanel from './AssistedDiagnosisPanel';
+import GuidedExplorationPanel from './GuidedExplorationPanel';
 import type { WorkspaceState } from './types';
 import type { AnatomicalRegion } from './data/anatomicalRegions';
 import type { BioEmotionalSynthesis } from '@/lib/api/bioemotional-clinical';
@@ -138,7 +138,7 @@ export default function ExperientialToolPanels({
                 isReadOnly={isReadOnly}
                 referenceSnippets={referenceSnippets}
               />
-              <AssistedDiagnosisPanel
+              <GuidedExplorationPanel
                 synthesisRecord={synthesisRecord}
                 referenceSnippets={referenceSnippets}
                 onInsertToSynthesis={onInsertToSynthesis}

@@ -34,17 +34,24 @@ function formatDate(value?: string) {
   return d.toLocaleString();
 }
 
-async function fetchTestResultById(id: string, token: string): Promise<MinimalTestResult> {
-  const resp = await fetch(`${API_URL}/tests/results/${encodeURIComponent(id)}/`, {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Token ${token}`,
-    },
-  });
-  if (!resp.ok) {
-    throw new Error(`No se pudo obtener TestResult ${id}.`);
+async function fetchTestResultById(id: string, token: string): Promise<MinimalTestResult | null> {
+  try {
+    const resp = await fetch(`${API_URL}/tests/results/${encodeURIComponent(id)}/`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Token ${token}`,
+      },
+    });
+    if (!resp.ok) {
+      // Non-blocking: log warning but return null instead of throwing
+      console.warn(`[SWM Workspace] Could not fetch TestResult ${id}: ${resp.status}`);
+      return null;
+    }
+    return resp.json();
+  } catch (err) {
+    console.warn(`[SWM Workspace] Error fetching TestResult ${id}:`, err);
+    return null;
   }
-  return resp.json();
 }
 
 export default function SwmMcmi4WorkspacePage() {
@@ -57,6 +64,8 @@ export default function SwmMcmi4WorkspacePage() {
   const [status, setStatus] = useState<WorkspaceStatusResponse | null>(null);
   const [signal, setSignal] = useState<MinimalTestResult | null>(null);
   const [reflection, setReflection] = useState<MinimalTestResult | null>(null);
+  // PASO 1: Estado para rastrear el status del workspace de reflexión (sealed/draft)
+  const [reflectionWorkspaceStatus, setReflectionWorkspaceStatus] = useState<'sealed' | 'draft' | null>(null);
 
   const [notes, setNotes] = useState("");
   const [notesSaved, setNotesSaved] = useState("");
@@ -222,6 +231,26 @@ export default function SwmMcmi4WorkspacePage() {
           setReflection(null);
         }
 
+        // PASO 1: Fetch reflection workspace status from SWM endpoint (source of truth for sealed status)
+        if (ws?.mcmi4_source_data_id) {
+          try {
+            const reflWsResp = await fetch(`${API_URL}/swm/mcmi4-reflection/by-signal/${ws.mcmi4_source_data_id}`, {
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Token ${token}`,
+              },
+            });
+            if (reflWsResp.ok) {
+              const reflWsData = await reflWsResp.json();
+              setReflectionWorkspaceStatus(reflWsData.status === 'sealed' ? 'sealed' : 'draft');
+            } else {
+              setReflectionWorkspaceStatus(null);
+            }
+          } catch {
+            setReflectionWorkspaceStatus(null);
+          }
+        }
+
         // Load symbolic axes if available
         try {
           const axesResp = await swmMcmi4Api.getArtifacts(workspaceId, 'symbolic_axes', token);
@@ -288,7 +317,18 @@ export default function SwmMcmi4WorkspacePage() {
       setStatus(statusResp);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "No se pudo iniciar la sesión.";
-      setStartError(msg);
+      // Treat "already has an active session" as success - just refresh status
+      if (msg.includes('already has an active session')) {
+        try {
+          const statusResp = await swmMcmi4Api.getWorkspaceStatus(workspaceId, token);
+          setStatus(statusResp);
+          setStartMessage("Sesión activa encontrada.");
+        } catch {
+          setStartError("Error refrescando estado de sesión.");
+        }
+      } else {
+        setStartError(msg);
+      }
     } finally {
       setStarting(false);
     }
@@ -610,6 +650,15 @@ export default function SwmMcmi4WorkspacePage() {
               );
             })()}
           </div>
+        ) : reflectionWorkspaceStatus === 'sealed' ? (
+          <div className="rounded-md border border-emerald-200 bg-emerald-50 p-4">
+            <p className="text-sm text-emerald-800">
+              ✓ Reflexión del consultante completada y disponible para consulta.
+            </p>
+            <p className="text-xs text-emerald-600 mt-1">
+              Puedes acceder a la reflexión desde el panel de gestión de pacientes.
+            </p>
+          </div>
         ) : (
           <div className="rounded-md border border-gray-200 bg-gray-50 p-4">
             <p className="text-sm text-gray-600">
@@ -621,6 +670,17 @@ export default function SwmMcmi4WorkspacePage() {
 
       <div className="grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-6">
         <div className="space-y-6">
+          {/* PASO 2: Bloque de orientación UX estático para el terapeuta — ANTES DE FASE 1 */}
+          <div className="rounded-lg border border-indigo-200 bg-indigo-50 p-5">
+            <h4 className="text-base font-semibold text-indigo-900 mb-3">Guía del Proceso Interpretativo</h4>
+            <div className="text-sm text-indigo-800 space-y-2">
+              <p>1. La señal y la reflexión ya están completas.</p>
+              <p>2. Ahora interpretas desde los Cuatro Mundos.</p>
+              <p>3. No diagnosticas: acompañas, comprendes, integras.</p>
+              <p>4. El ritmo lo marcas tú. No hay pasos automáticos.</p>
+            </div>
+          </div>
+
           <PhaseGuidedPanel
             phase="discovery"
             responses={getPhaseResponses('discovery')}
@@ -640,6 +700,11 @@ export default function SwmMcmi4WorkspacePage() {
             saved={phaseText.mapping === phaseSaved.mapping}
             error={phaseError.mapping}
           />
+
+          {/* PASO FUTURO — IA ASISTIVA (DESACTIVADO)
+             Aquí se sugerirán preguntas interpretativas opcionales,
+             sin scoring, sin diagnóstico, bajo control del terapeuta. 
+          */}
 
           <PhaseGuidedPanel
             phase="interpretation"

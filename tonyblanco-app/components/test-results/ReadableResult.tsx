@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import ExplorationSuggestionModal from '@/components/ExplorationSuggestionModal';
 import ResultSuggestionsCard, { Suggestion } from './ResultSuggestionsCard';
+import { ResponseDetail } from '@/lib/test-types';
 
 export type ReadableResultProps = {
   resultData: any;
@@ -24,6 +25,8 @@ export type ReadableResultProps = {
   date?: string;
   isTherapist?: boolean;
   executionMode?: string;
+  // For mcmi4-signal: detailed responses with item texts
+  responsesDetail?: ResponseDetail[];
   therapistSuggestion?: {
     current_world?: string | null;
     next_world?: string | null;
@@ -108,11 +111,13 @@ export default function ReadableResult({
   date,
   isTherapist: propsIsTherapist,
   executionMode,
+  responsesDetail,
   therapistSuggestion,
   onClose
 }: ReadableResultProps) {
   const [showTechnical, setShowTechnical] = useState(false);
   const [showSuggestionModal, setShowSuggestionModal] = useState(false);
+  const [showResponses, setShowResponses] = useState(false);
 
 
   const payload: any = resultData?.result ?? resultData ?? {};
@@ -312,6 +317,52 @@ export default function ReadableResult({
             )}
           </div>
         </div>
+
+        {/* Tus respuestas - item-level detail */}
+        {responsesDetail && responsesDetail.length > 0 && (
+          <div className="mb-3">
+            <button
+              onClick={() => setShowResponses(!showResponses)}
+              className="flex items-center gap-2 text-sm font-medium text-violet-700 hover:text-violet-900 transition-colors"
+            >
+              {showResponses ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+              <span>Tus respuestas ({responsesDetail.length} ítems)</span>
+            </button>
+            
+            {showResponses && (
+              <div className="mt-3 space-y-2 bg-violet-50 border border-violet-200 rounded-lg p-3">
+                <p className="text-xs text-violet-600 mb-2">
+                  Estas fueron tus respuestas a cada afirmación de la evaluación:
+                </p>
+                {responsesDetail.map((item) => (
+                  <div 
+                    key={item.position} 
+                    className="flex items-start gap-3 text-sm bg-white rounded-md p-3 border border-violet-100"
+                  >
+                    <span className="flex-shrink-0 w-6 h-6 flex items-center justify-center bg-violet-100 text-violet-700 text-xs font-bold rounded-full">
+                      {item.position}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-gray-700 leading-snug">{item.item_text}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="inline-flex items-center gap-1 text-xs font-medium text-violet-800 bg-violet-100 px-2 py-0.5 rounded">
+                          {item.response_value !== null ? (
+                            <>
+                              <span className="font-bold">{item.response_value}</span>
+                              <span className="text-violet-600">— {item.response_label}</span>
+                            </>
+                          ) : (
+                            <span className="text-gray-500">Sin respuesta</span>
+                          )}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         <details className="bg-gray-50 border border-gray-200 rounded-lg p-3">
           <summary className="cursor-pointer text-sm text-gray-600 font-medium flex items-center gap-2">

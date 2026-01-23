@@ -5,11 +5,12 @@ Integra Psicología, Cábala y Astrología en un solo reporte generado por Gemin
 import json
 from typing import Dict, Any, List, Optional
 from django.conf import settings
+from .genai_response import extract_text
 
 # Importar Gemini
 genai = None
 try:
-    import google.generativeai as genai_local
+    from google import genai as genai_local
     genai = genai_local
 except ImportError:
     genai = None
@@ -33,13 +34,13 @@ class HolisticTherapistAI:
             return
         
         if not genai:
-            self.error_message = "Módulo google.generativeai no está instalado. Ejecuta: pip install google-generativeai"
+            self.error_message = "Módulo google.genai no está instalado. Ejecuta: pip install google-genai"
             print(f"[WARNING] {self.error_message}")
             return
         
         try:
-            genai.configure(api_key=api_key)
-            self.model = genai.GenerativeModel(model_name)
+            client = genai.Client(api_key=api_key)
+            self.model = client.models.generate_content
             self.enabled = True
             print(f"[OK] HolisticTherapistAI configurado con modelo: {model_name}")
         except Exception as e:
@@ -198,10 +199,10 @@ IMPORTANTE:
 """
         
         try:
-            # Generar respuesta con Gemini
-            response = self.model.generate_content(
-                prompt,
-                generation_config={
+            response = self.model(
+                model=getattr(settings, 'GEMINI_MODEL', 'gemini-2.5-flash'),
+                contents=prompt,
+                config={
                     "temperature": 0.7,
                     "top_p": 0.8,
                     "top_k": 40,
@@ -210,7 +211,7 @@ IMPORTANTE:
             )
             
             # Extraer el texto de la respuesta
-            response_text = response.text.strip()
+            response_text = extract_text(response).strip()
             
             # Limpiar el texto si tiene markdown code blocks
             if response_text.startswith('```json'):
@@ -243,4 +244,3 @@ IMPORTANTE:
 
 # Instancia global
 holistic_ai = HolisticTherapistAI()
-

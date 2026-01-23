@@ -22,7 +22,7 @@ urllib3==2.5.0
 google-auth==2.41.1
 google-auth-httplib2==0.2.1
 google-auth-oauthlib==1.2.3
-google-generativeai>=0.7.2
+google-genai>=1.59,<2
 cachetools==6.2.2
 Pillow==12.0.0
 geopy==2.4.1

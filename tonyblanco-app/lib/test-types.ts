@@ -78,6 +78,14 @@ export interface TherapistNextExplorationSuggestion {
   secondary_suggestions?: Array<{ code?: string | null; name?: string | null }>;
 }
 
+// Interface for mcmi4-signal response detail
+export interface ResponseDetail {
+  position: number;
+  item_text: string;
+  response_value: number | null;
+  response_label: string;
+}
+
 // Interface para resultado de test
 export interface TestResult {
   id: number;
@@ -95,6 +103,8 @@ export interface TestResult {
   test_module_code?: string;
   input_data: Record<string, any>;
   result_data: Record<string, any>;
+  // For mcmi4-signal: detailed responses with item texts
+  responses_detail?: ResponseDetail[];
   client_name?: string;
   client_birth_date?: string;
   notes?: string;

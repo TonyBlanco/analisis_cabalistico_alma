@@ -5,6 +5,13 @@ import { useRouter } from "next/navigation";
 import { executeTest } from "@/lib/test-api";
 import { ArrowLeft, ArrowRight, CheckCircle, Loader2 } from "lucide-react";
 
+// Orden de los mundos (fases)
+const WORLDS_ORDER = ["atzilut", "briah", "yetzirah", "assiah"] as const;
+type WorldKey = typeof WORLDS_ORDER[number];
+
+// LocalStorage key for persisting progress
+const STORAGE_KEY = "mcmi4-mystic-progress";
+
 export default function Mcmi4MysticPage() {
     const router = useRouter();
     const [loading, setLoading] = useState(true);
@@ -13,9 +20,8 @@ export default function Mcmi4MysticPage() {
     const [submitLoading, setSubmitLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // Pagination
-    const [currentPage, setCurrentPage] = useState(0);
-    const QUESTIONS_PER_PAGE = 10;
+    // NAVEGACIÓN POR MUNDOS (bloques) - NO por páginas de 10
+    const [currentWorldIndex, setCurrentWorldIndex] = useState(0);
 
     // World display helpers
     const WORLD_NAMES: Record<string, string> = {
@@ -30,8 +36,14 @@ export default function Mcmi4MysticPage() {
         yetzirah: "bg-green-600",
         assiah: "bg-amber-600",
     };
+    const WORLD_DESCRIPTIONS: Record<string, string> = {
+        atzilut: "El mundo de la emanación divina y el propósito trascendente.",
+        briah: "El mundo de la creación intelectual y el pensamiento.",
+        yetzirah: "El mundo de la formación emocional y los vínculos.",
+        assiah: "El mundo de la acción material y la manifestación física.",
+    };
 
-    // Fetch questions on mount
+    // Fetch questions on mount + restore progress from localStorage
     useEffect(() => {
         const initTest = async () => {
             try {
@@ -43,6 +55,18 @@ export default function Mcmi4MysticPage() {
 
                 if (response.questions && Array.isArray(response.questions)) {
                     setQuestions(response.questions);
+                    
+                    // Restore progress from localStorage
+                    const saved = localStorage.getItem(STORAGE_KEY);
+                    if (saved) {
+                        try {
+                            const parsed = JSON.parse(saved);
+                            if (parsed.answers) setAnswers(parsed.answers);
+                            if (typeof parsed.worldIndex === 'number') setCurrentWorldIndex(parsed.worldIndex);
+                        } catch {
+                            // Ignore invalid localStorage data
+                        }
+                    }
                 } else {
                     throw new Error("No se recibieron preguntas del servidor");
                 }
@@ -57,31 +81,46 @@ export default function Mcmi4MysticPage() {
         initTest();
     }, []);
 
+    // Persist progress to localStorage whenever answers or worldIndex change
+    useEffect(() => {
+        if (questions.length > 0) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                answers,
+                worldIndex: currentWorldIndex,
+                timestamp: Date.now()
+            }));
+        }
+    }, [answers, currentWorldIndex, questions.length]);
+
+    // Current world and its questions
+    const currentWorld = WORLDS_ORDER[currentWorldIndex];
+    const worldQuestions = questions.filter(q => q.world === currentWorld);
+    const worldAnsweredCount = worldQuestions.filter(q => answers[q.question_id] !== undefined).length;
+    const isWorldComplete = worldAnsweredCount === worldQuestions.length && worldQuestions.length > 0;
+
+    // Global progress
     const totalQuestions = questions.length;
-    const totalPages = Math.ceil(totalQuestions / QUESTIONS_PER_PAGE);
-    const currentQuestions = questions.slice(
-        currentPage * QUESTIONS_PER_PAGE,
-        (currentPage + 1) * QUESTIONS_PER_PAGE
-    );
+    const totalAnswered = Object.keys(answers).length;
+    const isComplete = totalQuestions > 0 && questions.every(q => answers[q.question_id] !== undefined);
 
     const handleAnswer = (questionId: string, value: boolean) => {
         setAnswers(prev => ({ ...prev, [questionId]: value }));
     };
 
-    const canGoNext = currentQuestions.every(q => answers[q.question_id] !== undefined);
-    const isLastPage = currentPage === totalPages - 1;
-    const isComplete = questions.length > 0 && questions.every(q => answers[q.question_id] !== undefined);
+    // Navigation between worlds (blocks)
+    const canGoNextWorld = isWorldComplete;
+    const isLastWorld = currentWorldIndex === WORLDS_ORDER.length - 1;
 
-    const handleNext = () => {
-        if (currentPage < totalPages - 1) {
-            setCurrentPage(prev => prev + 1);
+    const handleNextWorld = () => {
+        if (currentWorldIndex < WORLDS_ORDER.length - 1 && isWorldComplete) {
+            setCurrentWorldIndex(prev => prev + 1);
             window.scrollTo(0, 0);
         }
     };
 
-    const handlePrev = () => {
-        if (currentPage > 0) {
-            setCurrentPage(prev => prev - 1);
+    const handlePrevWorld = () => {
+        if (currentWorldIndex > 0) {
+            setCurrentWorldIndex(prev => prev - 1);
             window.scrollTo(0, 0);
         }
     };
@@ -89,7 +128,7 @@ export default function Mcmi4MysticPage() {
     const handleSubmit = async () => {
         if (!isComplete || submitLoading) return;
 
-        if (!confirm("¿Estás seguro de que deseas enviar tus respuestas?")) return;
+        if (!confirm("¿Estás seguro de que deseas enviar tus respuestas? Esta acción no se puede deshacer.")) return;
 
         setSubmitLoading(true);
         setError(null);
@@ -113,6 +152,9 @@ export default function Mcmi4MysticPage() {
             if (response.success === false) {
                 throw new Error(response.result?.message || response.message || "El servidor no pudo procesar el test");
             }
+
+            // Clear localStorage on successful submit
+            localStorage.removeItem(STORAGE_KEY);
 
             router.push("/dashboard/patient/results");
         } catch (err: any) {
@@ -158,20 +200,60 @@ export default function Mcmi4MysticPage() {
                     No hay respuestas correctas o incorrectas.
                 </p>
 
-                <div className="mt-6 flex items-center gap-4 text-sm text-gray-500">
+                {/* Indicador de bloque actual (1/4, 2/4, etc.) */}
+                <div className="mt-4 flex items-center gap-3">
+                    <span className="text-sm font-medium text-gray-700">Bloque:</span>
+                    <div className="flex items-center gap-2">
+                        {WORLDS_ORDER.map((world, idx) => {
+                            const worldQs = questions.filter(q => q.world === world);
+                            const answered = worldQs.filter(q => answers[q.question_id] !== undefined).length;
+                            const complete = answered === worldQs.length && worldQs.length > 0;
+                            const isCurrent = idx === currentWorldIndex;
+                            return (
+                                <button
+                                    key={world}
+                                    onClick={() => {
+                                        // Allow navigating to completed blocks or current block
+                                        if (idx <= currentWorldIndex || complete) {
+                                            setCurrentWorldIndex(idx);
+                                            window.scrollTo(0, 0);
+                                        }
+                                    }}
+                                    disabled={idx > currentWorldIndex && !complete}
+                                    className={`w-8 h-8 rounded-full text-sm font-semibold transition-colors ${
+                                        isCurrent
+                                            ? `${WORLD_COLORS[world]} text-white`
+                                            : complete
+                                                ? "bg-emerald-500 text-white"
+                                                : "bg-gray-200 text-gray-500"
+                                    } ${idx <= currentWorldIndex || complete ? "cursor-pointer hover:opacity-80" : "cursor-not-allowed"}`}
+                                >
+                                    {idx + 1}
+                                </button>
+                            );
+                        })}
+                    </div>
+                    <span className="text-sm text-gray-500">
+                        ({currentWorldIndex + 1} de {WORLDS_ORDER.length})
+                    </span>
+                </div>
+
+                {/* Barra de progreso global */}
+                <div className="mt-4 flex items-center gap-4 text-sm text-gray-500">
                     <div className="flex-1 bg-gray-100 rounded-full h-2 overflow-hidden">
                         <div
                             className="h-full bg-violet-600 transition-all duration-300"
-                            style={{ width: `${(Object.keys(answers).length / totalQuestions) * 100}%` }}
+                            style={{ width: `${(totalAnswered / totalQuestions) * 100}%` }}
                         />
                     </div>
                     <span className="font-medium text-gray-900">
-                        {Object.keys(answers).length} / {totalQuestions}
+                        {totalAnswered} / {totalQuestions}
                     </span>
                 </div>
+                
                 {/* World progress breakdown */}
                 <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
-                    {(['atzilut', 'briah', 'yetzirah', 'assiah'] as const).map(world => {
+                    {WORLDS_ORDER.map(world => {
                         const worldQs = questions.filter(q => q.world === world);
                         const answered = worldQs.filter(q => answers[q.question_id] !== undefined).length;
                         return (
@@ -186,20 +268,23 @@ export default function Mcmi4MysticPage() {
                 </div>
             </div>
 
-            {/* Questions List */}
+            {/* Current World Header */}
+            <div className={`rounded-lg p-4 ${WORLD_COLORS[currentWorld]} text-white`}>
+                <h2 className="text-xl font-semibold">{WORLD_NAMES[currentWorld]}</h2>
+                <p className="text-sm opacity-90 mt-1">{WORLD_DESCRIPTIONS[currentWorld]}</p>
+                <p className="text-sm mt-2 font-medium">
+                    Preguntas: {worldAnsweredCount} / {worldQuestions.length} completadas
+                </p>
+            </div>
+
+            {/* Questions List (current world only) */}
             <div className="space-y-4">
-                {currentQuestions.map((q, index) => (
+                {worldQuestions.map((q, index) => (
                     <div key={q.question_id} className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm transition-shadow hover:shadow-md">
                         <div className="flex items-start gap-4">
                             <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-gray-50 text-gray-500 rounded-full text-xs font-medium">
-                                {currentPage * QUESTIONS_PER_PAGE + index + 1}
+                                {index + 1}
                             </span>
-                            {/* World indicator */}
-                            {q.world && (
-                                <span className={`flex-shrink-0 px-2 py-0.5 text-[10px] text-white rounded-full ${WORLD_COLORS[q.world] || 'bg-gray-600'}`}>
-                                    {WORLD_NAMES[q.world] || q.world}
-                                </span>
-                            )}
                             <div className="flex-1">
                                 <p className="text-gray-900 font-medium mb-4">{q.text}</p>
 
@@ -232,8 +317,8 @@ export default function Mcmi4MysticPage() {
             {/* Navigation */}
             <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm flex items-center justify-between sticky bottom-4">
                 <button
-                    onClick={handlePrev}
-                    disabled={currentPage === 0}
+                    onClick={handlePrevWorld}
+                    disabled={currentWorldIndex === 0}
                     className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     <ArrowLeft className="w-4 h-4" />
@@ -241,10 +326,10 @@ export default function Mcmi4MysticPage() {
                 </button>
 
                 <span className="text-sm text-gray-500">
-                    Página {currentPage + 1} de {totalPages}
+                    Bloque {currentWorldIndex + 1} de {WORLDS_ORDER.length}
                 </span>
 
-                {isLastPage ? (
+                {isLastWorld ? (
                     <button
                         onClick={handleSubmit}
                         disabled={!isComplete || submitLoading}
@@ -264,8 +349,8 @@ export default function Mcmi4MysticPage() {
                     </button>
                 ) : (
                     <button
-                        onClick={handleNext}
-                        disabled={!canGoNext}
+                        onClick={handleNextWorld}
+                        disabled={!canGoNextWorld}
                         className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-md hover:bg-gray-800 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         Siguiente

@@ -5,6 +5,7 @@ from django.conf import settings
 genai = None
 import json
 from typing import Dict, Any, Optional
+from .utils.genai_response import extract_text
 
 
 class GeminiInterpreter:
@@ -16,16 +17,17 @@ class GeminiInterpreter:
         # Import gemini lazily to avoid import failures when SDK isn't available in environment
         global genai
         try:
-            import google.generativeai as genai_local
+            from google import genai as genai_local
             genai = genai_local
         except Exception:
             genai = None
         if api_key and genai:
             try:
-                genai.configure(api_key=api_key)
+                client = genai.Client(api_key=api_key)
                 # Usar modelo correcto: gemini-2.0-flash (stable y gratuito)
                 model_name = settings.GEMINI_MODEL if hasattr(settings, 'GEMINI_MODEL') else 'gemini-2.0-flash'
-                self.model = genai.GenerativeModel(model_name)
+                self.model = client.models.generate_content
+                self.model_name = model_name
                 self.enabled = True
                 print(f"✅ Gemini configurado con modelo: {model_name}")
             except Exception as e:
@@ -90,8 +92,11 @@ Formato de respuesta:
 """
         
         try:
-            response = self.model.generate_content(prompt)
-            return response.text
+            response = self.model(
+                model=self.model_name,
+                contents=prompt
+            )
+            return extract_text(response)
         except Exception as e:
             print(f"Error en Gemini API: {e}")
             return self._fallback_interpretation(numeros)
@@ -136,8 +141,11 @@ Usa un tono empático y constructivo. Escribe en español.
 """
         
         try:
-            response = self.model.generate_content(prompt)
-            return response.text
+            response = self.model(
+                model=self.model_name,
+                contents=prompt
+            )
+            return extract_text(response)
         except Exception as e:
             print(f"Error en Gemini API: {e}")
             return self._fallback_compatibility(compatibilidad_score)
@@ -174,8 +182,11 @@ Sé específico con ejemplos de profesiones. Escribe en español.
 """
         
         try:
-            response = self.model.generate_content(prompt)
-            return response.text
+            response = self.model(
+                model=self.model_name,
+                contents=prompt
+            )
+            return extract_text(response)
         except Exception as e:
             print(f"Error en Gemini API: {e}")
             return self._fallback_career(numeros)
@@ -212,8 +223,11 @@ Usa lenguaje poético y profundo. Escribe en español.
 """
         
         try:
-            response = self.model.generate_content(prompt)
-            return response.text
+            response = self.model(
+                model=self.model_name,
+                contents=prompt
+            )
+            return extract_text(response)
         except Exception as e:
             print(f"Error en Gemini API: {e}")
             return self._fallback_spiritual(numeros)

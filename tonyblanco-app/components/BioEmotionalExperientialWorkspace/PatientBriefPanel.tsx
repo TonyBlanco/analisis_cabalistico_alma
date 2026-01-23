@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useExperientialContext } from './hooks/useExperientialContext';
 import {
   createPatientBrief,
-  listAssistedDiagnosis,
+  listAssistedDiagnosis as listGuidedExploration,
   listHypotheses,
   listObservations,
   listPatientBriefs,
@@ -54,7 +54,7 @@ export default function PatientBriefPanel({
           listPatientBriefs(patientId),
           listObservations(patientId),
           listHypotheses(patientId),
-          listAssistedDiagnosis(patientId),
+          listGuidedExploration(patientId),
         ]);
         setRecords(briefs);
         setObservations(obs.map((item) => ({ id: item.id, note_text: item.note_text })));

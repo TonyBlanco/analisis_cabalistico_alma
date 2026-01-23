@@ -17,7 +17,7 @@ from typing import Optional, Dict, Tuple, Any, cast
 from django.conf import settings
 
 try:
-    import google.generativeai as genai  # type: ignore
+    from google import genai  # type: ignore
 except Exception:  # pragma: no cover
     genai = None
 
@@ -208,7 +208,7 @@ class AstrologyKabbalahSnippetAI:
             return
 
         if not genai:
-            self.error_message = "SDK google.generativeai no instalado"
+            self.error_message = "SDK google.genai no instalado"
             return
 
         model_name = getattr(settings, "KERYKEION_AI_SNIPPETS_MODEL", None) or getattr(
@@ -217,8 +217,9 @@ class AstrologyKabbalahSnippetAI:
 
         try:
             genai_any = cast(Any, genai)
-            genai_any.configure(api_key=api_key)
-            self.model = genai_any.GenerativeModel(model_name)
+            self.client = genai_any.Client(api_key=api_key)
+            self.model = self.client.models.generate_content
+            self.model_name = model_name
             self.enabled = True
         except Exception as exc:  # pragma: no cover
             self.enabled = False
@@ -290,19 +291,15 @@ SALIDA: devuelve solo las 3 líneas, sin encabezados.
 """
 
         try:
-            model_any = cast(Any, self.model)
-            response = model_any.generate_content(
-                prompt,
-                generation_config=cast(
-                    Any,
-                    {
+            response = self.model(
+                model=self.model_name,
+                contents=prompt,
+                config={
                     "temperature": 0.5,
                     "top_p": 0.8,
                     "top_k": 40,
                     "max_output_tokens": 220,
-                    },
-                ),
-                request_options=cast(Any, {"timeout": 5}),
+                }
             )
             raw_text = _sanitize_plain_text(_clean_model_text(getattr(response, "text", "") or ""))
             raw = _coerce_three_lines(raw_text)

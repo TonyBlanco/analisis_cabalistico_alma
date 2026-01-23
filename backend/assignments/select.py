@@ -9,22 +9,46 @@ _BANK_CACHE: List[Dict] = []
 
 
 def _load_bank_items() -> List[Dict]:
+    """
+    Load MCMI-4 Místico question bank from the real JSON files.
+    
+    NOTE: The legacy mcmi4_items.json and mcmi4_bank.py are DEPRECATED.
+    This function now loads from backend/data/mcmi4_mystic_questions_*.json
+    """
     global _BANK_CACHE
     if _BANK_CACHE:
         return _BANK_CACHE
 
-    root = Path(__file__).resolve().parents[1]
-    json_path = root.parent / "mcmi4_items.json"
-    if json_path.exists():
-        with json_path.open("r", encoding="utf-8") as handle:
-            _BANK_CACHE = json.load(handle)
-        return _BANK_CACHE
-
-    try:
-        from mcmi4_bank import MCMI4_ITEMS
-        _BANK_CACHE = list(MCMI4_ITEMS)
-    except Exception:
-        _BANK_CACHE = []
+    # Load from the real MCMI-4 Místico question bank (4 worlds)
+    root = Path(__file__).resolve().parents[1]  # backend/
+    data_dir = root / "data"
+    
+    worlds = ['atzilut', 'briah', 'yetzirah', 'assiah']
+    items = []
+    
+    for world in worlds:
+        json_path = data_dir / f"mcmi4_mystic_questions_{world}.json"
+        if json_path.exists():
+            try:
+                with json_path.open("r", encoding="utf-8") as handle:
+                    world_data = json.load(handle)
+                    # Extract questions from each dimension
+                    dimensions = world_data.get('dimensions', {})
+                    for dim_key, dim_data in dimensions.items():
+                        for q in dim_data.get('questions', []):
+                            items.append({
+                                'id': q.get('id'),
+                                'world': world,
+                                'dimension_id': dim_data.get('dimension_id'),
+                                'sefirah': dim_data.get('sefirah'),
+                                'text': q.get('text'),
+                                'reverse_scored': q.get('reverse_scored', False),
+                                'weight': q.get('weight', 1.0),
+                            })
+            except Exception as e:
+                print(f"Warning: Could not load {json_path}: {e}")
+    
+    _BANK_CACHE = items
     return _BANK_CACHE
 
 

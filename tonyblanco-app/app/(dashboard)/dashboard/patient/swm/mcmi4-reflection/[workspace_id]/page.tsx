@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import { ChevronDown, ChevronUp, Activity, Calendar } from "lucide-react";
 import {
   getReflection,
   updateReflection,
@@ -11,13 +12,28 @@ import {
 } from "@/lib/api/mcmi4-reflection-api";
 import { getApiBaseUrl } from "@/lib/api-base";
 
+// Response detail type
+interface ResponseDetail {
+  position: number;
+  item_text: string;
+  response_value: number | null;
+  response_label: string;
+}
+
 type SignalResult = {
   created_at?: string;
   result_data?: {
     total_items?: number;
+    responses_summary?: {
+      mean?: number;
+      stdev?: number;
+      counts?: Record<string, number>;
+    };
+    // Legacy flat fields (backward compat)
     mean?: number;
     stdev?: number;
   };
+  responses_detail?: ResponseDetail[];
 };
 
 const API_BASE = getApiBaseUrl();
@@ -69,6 +85,7 @@ export default function Mcmi4ReflectionWorkspacePage() {
   const [unsavedChanges, setUnsavedChanges] = useState(false);
   const [saving, setSaving] = useState(false);
   const [sealing, setSealing] = useState(false);
+  const [showSignalItems, setShowSignalItems] = useState(false);
 
   useEffect(() => {
     if (!workspaceId) return;
@@ -215,37 +232,104 @@ export default function Mcmi4ReflectionWorkspacePage() {
       {/* Signal Summary (Read-only Mirror) */}
       {signalResult && (
         <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
-          <h2 className="text-lg font-medium text-gray-900 mb-3">
-            Tu Evaluación SIGNAL
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-            <div>
-              <span className="text-gray-500">Fecha:</span>
-              <p className="font-medium text-gray-900">
+          <div className="flex items-center gap-2 mb-4">
+            <Activity className="w-5 h-5 text-violet-600" />
+            <h2 className="text-lg font-medium text-gray-900">
+              Tu Evaluación SIGNAL
+            </h2>
+          </div>
+          
+          {/* Summary stats */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-4">
+            <div className="bg-white rounded-md p-3 border border-gray-100">
+              <span className="text-xs text-gray-500 uppercase tracking-wide">Fecha</span>
+              <p className="font-medium text-gray-900 mt-1">
                 {signalResult.created_at
-                  ? new Date(signalResult.created_at).toLocaleDateString("es-ES")
-                  : "N/A"}
+                  ? new Date(signalResult.created_at).toLocaleDateString("es-ES", { 
+                      year: 'numeric', 
+                      month: 'long', 
+                      day: 'numeric' 
+                    })
+                  : "—"}
               </p>
             </div>
-            <div>
-              <span className="text-gray-500">Items:</span>
-              <p className="font-medium text-gray-900">
-                {signalResult.result_data?.total_items || "N/A"}
+            <div className="bg-white rounded-md p-3 border border-gray-100">
+              <span className="text-xs text-gray-500 uppercase tracking-wide">Items</span>
+              <p className="font-medium text-gray-900 mt-1">
+                {signalResult.result_data?.total_items ?? "—"}
               </p>
             </div>
-            <div>
-              <span className="text-gray-500">Media:</span>
-              <p className="font-medium text-gray-900">
-                {signalResult.result_data?.mean?.toFixed(2) || "N/A"}
+            <div className="bg-white rounded-md p-3 border border-gray-100">
+              <span className="text-xs text-gray-500 uppercase tracking-wide">Media</span>
+              <p className="font-medium text-gray-900 mt-1">
+                {(() => {
+                  const mean = signalResult.result_data?.responses_summary?.mean 
+                    ?? signalResult.result_data?.mean;
+                  return mean !== undefined && mean !== null 
+                    ? `${Math.round(mean * 100)}%` 
+                    : "—";
+                })()}
               </p>
             </div>
-            <div>
-              <span className="text-gray-500">Variabilidad:</span>
-              <p className="font-medium text-gray-900">
-                {signalResult.result_data?.stdev?.toFixed(2) || "N/A"}
+            <div className="bg-white rounded-md p-3 border border-gray-100">
+              <span className="text-xs text-gray-500 uppercase tracking-wide">Variabilidad</span>
+              <p className="font-medium text-gray-900 mt-1">
+                {(() => {
+                  const stdev = signalResult.result_data?.responses_summary?.stdev 
+                    ?? signalResult.result_data?.stdev;
+                  return stdev !== undefined && stdev !== null 
+                    ? `${Math.round(stdev * 100)}%` 
+                    : "—";
+                })()}
               </p>
             </div>
           </div>
+          
+          {/* Collapsible responses detail */}
+          {signalResult.responses_detail && signalResult.responses_detail.length > 0 && (
+            <div className="border-t border-gray-200 pt-4">
+              <button
+                onClick={() => setShowSignalItems(!showSignalItems)}
+                className="flex items-center gap-2 text-sm font-medium text-violet-700 hover:text-violet-900 transition-colors"
+              >
+                {showSignalItems ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                <span>Ver tu Señal ({signalResult.responses_detail.length} ítems)</span>
+              </button>
+              
+              {showSignalItems && (
+                <div className="mt-4 space-y-2">
+                  <p className="text-xs text-gray-600 mb-3">
+                    Aquí puedes revisar tus respuestas originales para dar contexto a tu reflexión:
+                  </p>
+                  {signalResult.responses_detail.map((item) => (
+                    <div 
+                      key={item.position} 
+                      className="flex items-start gap-3 text-sm bg-white rounded-md p-3 border border-gray-200"
+                    >
+                      <span className="flex-shrink-0 w-6 h-6 flex items-center justify-center bg-violet-100 text-violet-700 text-xs font-bold rounded-full">
+                        {item.position}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-gray-700 leading-snug">{item.item_text}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="inline-flex items-center gap-1 text-xs font-medium text-violet-800 bg-violet-100 px-2 py-0.5 rounded">
+                            {item.response_value !== null ? (
+                              <>
+                                <span className="font-bold">{item.response_value}</span>
+                                <span className="text-violet-600">— {item.response_label}</span>
+                              </>
+                            ) : (
+                              <span className="text-gray-500">Sin respuesta</span>
+                            )}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
 

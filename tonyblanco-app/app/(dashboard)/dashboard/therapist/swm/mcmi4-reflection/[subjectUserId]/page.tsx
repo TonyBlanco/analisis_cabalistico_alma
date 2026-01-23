@@ -16,7 +16,9 @@ type MinimalTestResult = {
 
 // Helper to get signal test result for specific user
 async function getSignalTestResultForUser(userId: string) {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+  const token = typeof window !== 'undefined' 
+    ? localStorage.getItem('authToken') || localStorage.getItem('token')
+    : null;
   if (!token) throw new Error('No auth token');
   
   // For therapist view, we need an endpoint to get patient's results
@@ -43,7 +45,9 @@ async function getSignalTestResultForUser(userId: string) {
 
 // Helper to find workspace for user
 async function findReflectionWorkspaceForUser(userId: string): Promise<ReflectionWorkspace | null> {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+  const token = typeof window !== 'undefined' 
+    ? localStorage.getItem('authToken') || localStorage.getItem('token')
+    : null;
   if (!token) return null;
   
   try {
@@ -185,13 +189,21 @@ export default function TherapistReflectionViewPage() {
               <div>
                 <span className="text-gray-500">Media:</span>
                 <p className="font-medium text-gray-900">
-                  {typeof signalResult.result_data?.mean === 'number' ? signalResult.result_data.mean.toFixed(2) : 'N/A'}
+                  {(() => {
+                    const rd = signalResult.result_data as any;
+                    const mean = rd?.responses_summary?.mean ?? rd?.mean;
+                    return typeof mean === 'number' ? `${Math.round(mean * 100)}%` : 'N/A';
+                  })()}
                 </p>
               </div>
               <div>
                 <span className="text-gray-500">Variabilidad:</span>
                 <p className="font-medium text-gray-900">
-                  {typeof signalResult.result_data?.stdev === 'number' ? signalResult.result_data.stdev.toFixed(2) : 'N/A'}
+                  {(() => {
+                    const rd = signalResult.result_data as any;
+                    const stdev = rd?.responses_summary?.stdev ?? rd?.stdev;
+                    return typeof stdev === 'number' ? `${Math.round(stdev * 100)}%` : 'N/A';
+                  })()}
                 </p>
               </div>
             </div>
@@ -257,13 +269,21 @@ export default function TherapistReflectionViewPage() {
           <div>
             <span className="text-gray-500">Media:</span>
             <p className="font-medium text-gray-900">
-              {typeof signalResult.result_data?.mean === 'number' ? signalResult.result_data.mean.toFixed(2) : 'N/A'}
+              {(() => {
+                const rd = signalResult.result_data as any;
+                const mean = rd?.responses_summary?.mean ?? rd?.mean;
+                return typeof mean === 'number' ? `${Math.round(mean * 100)}%` : 'N/A';
+              })()}
             </p>
           </div>
           <div>
             <span className="text-gray-500">Variabilidad:</span>
             <p className="font-medium text-gray-900">
-              {typeof signalResult.result_data?.stdev === 'number' ? signalResult.result_data.stdev.toFixed(2) : 'N/A'}
+              {(() => {
+                const rd = signalResult.result_data as any;
+                const stdev = rd?.responses_summary?.stdev ?? rd?.stdev;
+                return typeof stdev === 'number' ? `${Math.round(stdev * 100)}%` : 'N/A';
+              })()}
             </p>
           </div>
         </div>

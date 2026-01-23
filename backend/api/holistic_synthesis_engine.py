@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 from api.models import Patient, AnalysisRecord, TherapistHolisticConfig
 from api.ai_interpreter import GeminiInterpreter
 import logging
+from .utils.genai_response import extract_text
 
 logger = logging.getLogger(__name__)
 
@@ -321,8 +322,11 @@ class HolisticSynthesisEngine:
         prompt = self._build_ai_prompt(synthesis_data)
 
         try:
-            response = ai_interpreter.model.generate_content(prompt)
-            ai_text = response.text
+            response = ai_interpreter.model(
+                model=ai_interpreter.model_name,
+                contents=prompt
+            )
+            ai_text = extract_text(response)
 
             # Parsear respuesta estructurada
             return self._parse_ai_response(ai_text)

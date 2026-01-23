@@ -3,10 +3,16 @@
  * 
  * Displays 2-4 guiding questions per phase with structured response fields.
  * Responses persist independently per question using existing artifact system.
+ * 
+ * AI INTEGRATION (v2 - safe/mcmi4-mistico-core-v1):
+ * - Optional SymbolicAIPanel for explorative suggestions
+ * - Read-only, never modifies artifacts
+ * - ON/OFF toggle controlled by therapist
  */
 
 import { useMemo, useState } from 'react';
 import { getPhaseGuide, getPhaseCompletionStatus, type PhaseName } from '@/lib/swm-mcmi4/phase-guides.config';
+import SymbolicAIPanel from './SymbolicAIPanel';
 
 interface PhaseGuidedPanelProps {
   phase: PhaseName;
@@ -16,6 +22,11 @@ interface PhaseGuidedPanelProps {
   saving?: boolean;
   saved?: boolean;
   error?: string | null;
+  // AI-related props (optional)
+  dominantWorld?: string;
+  shadowWorld?: string;
+  symbolicTensions?: string[];
+  aiApiKey?: string;
 }
 
 const statusLabels = {
@@ -38,6 +49,10 @@ export default function PhaseGuidedPanel({
   saving,
   saved,
   error,
+  dominantWorld = '',
+  shadowWorld = '',
+  symbolicTensions = [],
+  aiApiKey,
 }: PhaseGuidedPanelProps) {
   const guide = getPhaseGuide(phase);
   const [localResponses, setLocalResponses] = useState<Record<string, string>>(responses);
@@ -139,6 +154,18 @@ export default function PhaseGuidedPanel({
             </div>
           );
         })}
+      </div>
+
+      {/* Symbolic AI Assistant Panel - Optional, therapist-controlled */}
+      <div className="px-6 py-4 border-t border-gray-100">
+        <SymbolicAIPanel
+          phase={phase}
+          dominantWorld={dominantWorld}
+          shadowWorld={shadowWorld}
+          symbolicTensions={symbolicTensions}
+          therapistText={Object.values(localResponses).filter(Boolean).join('\n\n')}
+          apiKey={aiApiKey}
+        />
       </div>
 
       {/* Footer */}

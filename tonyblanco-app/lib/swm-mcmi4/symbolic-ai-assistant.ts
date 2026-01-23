@@ -16,6 +16,8 @@
  */
 
 import type { PhaseName } from './phase-guides.config';
+import { getPhaseSystemPrompt, validateResponse } from './kabbalistic-system-prompts';
+import { recordSuggestionRequested, recordSuggestionReceived } from './ai-usage-metrics';
 
 // ============================================================================
 // TYPES
@@ -146,8 +148,14 @@ export async function generateSymbolicSuggestion(
   context: SymbolicContext,
   apiKey?: string
 ): Promise<AIAssistantResponse> {
+  // Record metrics
+  recordSuggestionRequested(context.phase);
+
   // Build the user prompt
   const userPrompt = buildUserPrompt(context);
+  
+  // Get phase-specific system prompt (Kabbalistic)
+  const phaseSystemPrompt = getPhaseSystemPrompt(context.phase);
 
   // If no API key, return a safe fallback
   if (!apiKey) {
@@ -165,7 +173,7 @@ export async function generateSymbolicSuggestion(
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'system', content: phaseSystemPrompt },
           { role: 'user', content: userPrompt },
         ],
         max_tokens: 150,
@@ -181,17 +189,26 @@ export async function generateSymbolicSuggestion(
     const data = await response.json();
     const suggestion = data.choices?.[0]?.message?.content || '';
 
-    // Post-generation safety check
+    // Post-generation safety check (dual validation)
     const safetyCheck = containsProhibitedTerms(suggestion);
-    if (safetyCheck.blocked) {
-      console.warn('[SymbolicAI] Blocked response containing:', safetyCheck.terms);
+    const validationCheck = validateResponse(suggestion);
+    
+    if (safetyCheck.blocked || !validationCheck.isValid) {
+      const allViolations = [
+        ...safetyCheck.terms.map(t => `Término prohibido: ${t}`),
+        ...validationCheck.violations,
+      ];
+      console.warn('[SymbolicAI] Blocked response:', allViolations);
       return {
         suggestion: '',
         type: 'question',
         blocked: true,
-        blockReason: `Respuesta bloqueada por contener términos prohibidos: ${safetyCheck.terms.join(', ')}`,
+        blockReason: `Respuesta bloqueada: ${allViolations.join('; ')}`,
       };
     }
+
+    // Record successful response
+    recordSuggestionReceived();
 
     return {
       suggestion: suggestion.trim(),

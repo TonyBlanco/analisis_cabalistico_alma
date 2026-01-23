@@ -15,6 +15,8 @@ import { BOTA_MAJOR_ARCANA } from '@holistica/symbolic/tarot/decks/bota';
 import { HERMETIC_MAJOR_ARCANA } from '@holistica/symbolic/tarot/decks/hermetic';
 import { SEPHIROTH_MAJOR_ARCANA } from '@holistica/symbolic/tarot/decks/sephiroth';
 import { addSymbolicTimelineEvent } from '@/components/SymbolicTimeline';
+import { useSaveTarotSpread } from '@/lib/api/swm/tarot/hooks/useSaveTarotSpread';
+import type { TarotCard as SwmTarotCard } from '@/lib/api/swm/tarot/types';
 
 interface AstrologyTarotVisualCoreProps {
   activeSection: AstrologyTarotSectionId;
@@ -26,6 +28,11 @@ interface AstrologyTarotVisualCoreProps {
   onCardSelect?: (card: unknown) => void;
   selectedSystem?: TarotSystemId | null;
   onSystemChange?: (systemId: TarotSystemId) => void;
+  // SWM Integration props
+  instanceId?: string | null;
+  sessionId?: string | null;
+  isWorkspaceActive?: boolean;
+  onSpreadSaved?: () => void;
 }
 
 type SwmV3PayloadCard = {
@@ -84,7 +91,16 @@ export default function AstrologyTarotVisualCore({
   onCardSelect,
   selectedSystem,
   onSystemChange,
+  // SWM Integration
+  instanceId,
+  sessionId,
+  isWorkspaceActive,
+  onSpreadSaved,
 }: AstrologyTarotVisualCoreProps) {
+  // SWM Hook for saving spreads
+  const { saveSpread, isLoading: isSavingSpread, error: saveSpreadError } = useSaveTarotSpread();
+  const [therapistNotes, setTherapistNotes] = useState('');
+  
   const deckCards = useMemo<TarotCardData[]>(
     () =>
       ARCANOS_MAYORES.map((card) => ({
@@ -757,6 +773,73 @@ export default function AstrologyTarotVisualCore({
           </div>
         )}
       </div>
+      
+      {/* SWM Save Spread Panel */}
+      {isWorkspaceActive && instanceId && selectedCard && (
+        <div className="mt-4 rounded-lg border border-indigo-200 bg-indigo-50 p-4">
+          <h4 className="text-sm font-medium text-indigo-900">Guardar Tirada</h4>
+          <p className="mt-1 text-xs text-indigo-700">
+            Carta seleccionada: {selectedCard.name}
+          </p>
+          
+          <div className="mt-3">
+            <label className="block text-xs font-medium text-indigo-800">
+              Notas del terapeuta (opcional)
+            </label>
+            <textarea
+              value={therapistNotes}
+              onChange={(e) => setTherapistNotes(e.target.value)}
+              placeholder="Observaciones simbólicas, contexto de la sesión..."
+              className="mt-1 w-full rounded-md border border-indigo-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              rows={2}
+            />
+          </div>
+          
+          {saveSpreadError && (
+            <p className="mt-2 text-xs text-red-600">{saveSpreadError}</p>
+          )}
+          
+          <button
+            onClick={async () => {
+              if (!instanceId || !selectedCard) return;
+              
+              const cards: SwmTarotCard[] = [{
+                position: 1,
+                card_id: selectedCard.id,
+                reversed: false,
+                name: selectedCard.name,
+                arcana: selectedCard.arcana || 'major',
+                system: systemKey,
+                keywords: selectedCard.keywords,
+              }];
+              
+              try {
+                await saveSpread({
+                  instance_id: instanceId,
+                  cards,
+                  therapist_notes: therapistNotes,
+                });
+                setTherapistNotes('');
+                onSpreadSaved?.();
+                console.log('✅ Tirada guardada');
+              } catch (error) {
+                console.error('❌ Error al guardar tirada:', error);
+              }
+            }}
+            disabled={isSavingSpread}
+            className="mt-3 flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isSavingSpread ? (
+              <>
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                Guardando...
+              </>
+            ) : (
+              'Guardar Tirada'
+            )}
+          </button>
+        </div>
+      )}
     </section>
   );
 }

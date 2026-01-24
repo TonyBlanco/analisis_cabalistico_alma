@@ -236,3 +236,296 @@ export async function publishPatientBrief(id: string): Promise<BioEmotionalPatie
 export async function listMyBriefs(): Promise<BioEmotionalPatientBriefRead[]> {
   return request<BioEmotionalPatientBriefRead[]>(MY_BRIEFS_URL);
 }
+
+// =============================================================================
+// BioEmotional Sessions - Simbiosis Consultante ↔ Terapeuta
+// =============================================================================
+
+export type EmotionalState = "better" | "same" | "worse" | "unknown";
+
+export interface BioEmotionalSession {
+  id: string;
+  therapist_id: number | null;
+  patient_id: number;
+  patient_name: string;
+  date: string;
+  emotional_state: EmotionalState;
+  observations_count: number;
+  hypotheses_count: number;
+  synthesis_completed: boolean;
+  regions_observed: string[];
+  heatmap_data: Record<string, number>;
+  patient_notes: string;
+  patient_feeling_score: number | null;
+  patient_discomfort_regions: string[];
+  is_closed: boolean;
+  closed_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BioEmotionalSessionListItem {
+  id: string;
+  patient_id: number;
+  patient_name: string;
+  date: string;
+  emotional_state: EmotionalState;
+  observations_count: number;
+  hypotheses_count: number;
+  synthesis_completed: boolean;
+  regions_observed: string[];
+  is_closed: boolean;
+}
+
+export interface BioEmotionalSessionCreatePayload {
+  patient_id: number;
+  emotional_state?: EmotionalState;
+  patient_notes?: string;
+  patient_feeling_score?: number;
+  patient_discomfort_regions?: string[];
+}
+
+export interface BioEmotionalSessionUpdatePayload {
+  emotional_state?: EmotionalState;
+  synthesis_completed?: boolean;
+  regions_observed?: string[];
+  heatmap_data?: Record<string, number>;
+}
+
+export interface BioEmotionalSessionPatientInputPayload {
+  patient_notes?: string;
+  patient_feeling_score?: number | null;
+  patient_discomfort_regions?: string[];
+}
+
+const SESSIONS_URL = `${API_BASE_URL}/bioemotional/sessions/`;
+const MY_SESSIONS_URL = `${API_BASE_URL}/bioemotional/sessions/my/`;
+const MY_CURRENT_SESSION_URL = `${API_BASE_URL}/bioemotional/sessions/my/current/`;
+
+// --- Funciones para Terapeuta ---
+
+/**
+ * Lista sesiones de un paciente (solo terapeuta).
+ */
+export async function listSessions(patientId?: number): Promise<BioEmotionalSessionListItem[]> {
+  const url = patientId ? `${SESSIONS_URL}?patient_id=${patientId}` : SESSIONS_URL;
+  return request<BioEmotionalSessionListItem[]>(url);
+}
+
+/**
+ * Crea una nueva sesión para un paciente (solo terapeuta).
+ */
+export async function createSession(
+  payload: BioEmotionalSessionCreatePayload
+): Promise<BioEmotionalSession> {
+  return request<BioEmotionalSession>(SESSIONS_URL, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+/**
+ * Obtiene el detalle de una sesión por ID (solo terapeuta).
+ */
+export async function getSession(sessionId: string): Promise<BioEmotionalSession> {
+  return request<BioEmotionalSession>(`${SESSIONS_URL}${sessionId}/`);
+}
+
+/**
+ * Actualiza una sesión existente (solo terapeuta).
+ */
+export async function updateSession(
+  sessionId: string,
+  payload: BioEmotionalSessionUpdatePayload
+): Promise<BioEmotionalSession> {
+  return request<BioEmotionalSession>(`${SESSIONS_URL}${sessionId}/`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
+/**
+ * Cierra una sesión (solo terapeuta).
+ */
+export async function closeSession(sessionId: string): Promise<BioEmotionalSession> {
+  return request<BioEmotionalSession>(`${SESSIONS_URL}${sessionId}/close/`, {
+    method: "PATCH",
+  });
+}
+
+/**
+ * Elimina una sesión (solo terapeuta).
+ */
+export async function deleteSession(sessionId: string): Promise<void> {
+  await request<void>(`${SESSIONS_URL}${sessionId}/`, {
+    method: "DELETE",
+  });
+}
+
+// --- Funciones para Consultante (Paciente) ---
+
+/**
+ * Lista el historial de sesiones del consultante autenticado.
+ */
+export async function listMySessions(): Promise<BioEmotionalSessionListItem[]> {
+  return request<BioEmotionalSessionListItem[]>(MY_SESSIONS_URL);
+}
+
+/**
+ * Obtiene la sesión actual abierta del consultante.
+ */
+export async function getMyCurrentSession(): Promise<BioEmotionalSession> {
+  return request<BioEmotionalSession>(MY_CURRENT_SESSION_URL);
+}
+
+/**
+ * Actualiza las notas y síntomas del consultante para la sesión actual.
+ */
+export async function updateMySessionInput(
+  payload: BioEmotionalSessionPatientInputPayload
+): Promise<BioEmotionalSession> {
+  return request<BioEmotionalSession>(MY_CURRENT_SESSION_URL, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+// =============================================================================
+// SWM Analytics Integration - Export & Correlation
+// =============================================================================
+
+const EXPORT_URL = `${API_BASE_URL}/bioemotional/export/`;
+const MSHE_IMPORT_URL = `${API_BASE_URL}/bioemotional/mshe-import/`;
+const SCID5_CORRELATE_URL = `${API_BASE_URL}/bioemotional/scid5-correlate/`;
+
+// --- Tipos para integración SWM ---
+
+export interface RegionRanking {
+  region_id: string;
+  observation_count: number;
+  avg_intensity: number;
+  dominant_emotion: string | null;
+}
+
+export interface EmotionalTrend {
+  date: string;
+  state: EmotionalState;
+  feeling_score: number | null;
+}
+
+export interface SessionSummaryExport {
+  id: string;
+  date: string;
+  emotional_state: EmotionalState;
+  observations_count: number;
+  hypotheses_count: number;
+  synthesis_completed: boolean;
+  regions_observed: string[];
+}
+
+export interface BioEmotionalExportData {
+  patient_id: number;
+  patient_name: string;
+  sessions_summary: SessionSummaryExport[];
+  top_regions: RegionRanking[];
+  emotional_trends: EmotionalTrend[];
+  heatmap_aggregate: Record<string, number>;
+  total_sessions: number;
+  total_observations: number;
+  total_hypotheses: number;
+  export_timestamp: string;
+}
+
+export interface MSHEImportResult {
+  integrated: boolean;
+  new_weight_contribution: number;
+  bioemotional_snapshot_id: string;
+  message: string;
+}
+
+export type CorrelationStrength = "low" | "medium" | "high";
+
+export type SCID5SectionKey =
+  | "emotional_vitality"
+  | "anxiety_calm"
+  | "meaning_reality"
+  | "impact_memory"
+  | "self_regulation"
+  | "identity_relationships";
+
+export interface SCID5CorrelationResult {
+  section_key: SCID5SectionKey;
+  correlation_strength: CorrelationStrength;
+  regions_matched: string[];
+  suggested_notes: string;
+  confidence_score: number;
+}
+
+export interface SCID5CorrelationPayload {
+  patient_id: number;
+  section_key: SCID5SectionKey;
+  bioemotional_regions?: string[];
+}
+
+// --- Funciones de integración SWM ---
+
+/**
+ * Exporta datos BioEmotional agregados para integración con SWM Analytics.
+ * Incluye resumen de sesiones, ranking de regiones, tendencias emocionales.
+ */
+export async function exportForSWM(patientId: number): Promise<BioEmotionalExportData> {
+  return request<BioEmotionalExportData>(`${EXPORT_URL}${patientId}/`);
+}
+
+/**
+ * Importa snapshot BioEmotional para integración con MSHE.
+ * Crea una referencia del estado BioEmotional actual para síntesis holística.
+ */
+export async function importToMSHE(patientId: number): Promise<MSHEImportResult> {
+  return request<MSHEImportResult>(MSHE_IMPORT_URL, {
+    method: "POST",
+    body: JSON.stringify({ patient_id: patientId }),
+  });
+}
+
+/**
+ * Correlaciona datos BioEmotional con una sección SCID-5.
+ * Retorna fuerza de correlación y notas sugeridas.
+ */
+export async function correlateSCID5(
+  payload: SCID5CorrelationPayload
+): Promise<SCID5CorrelationResult> {
+  return request<SCID5CorrelationResult>(SCID5_CORRELATE_URL, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+/**
+ * Obtiene correlación para todas las secciones SCID-5 de un paciente.
+ */
+export async function correlateSCID5AllSections(
+  patientId: number,
+  regions?: string[]
+): Promise<Record<SCID5SectionKey, SCID5CorrelationResult>> {
+  const sections: SCID5SectionKey[] = [
+    "emotional_vitality",
+    "anxiety_calm",
+    "meaning_reality",
+    "impact_memory",
+    "self_regulation",
+    "identity_relationships",
+  ];
+
+  const results: Record<string, SCID5CorrelationResult> = {};
+
+  for (const section of sections) {
+    const result = await correlateSCID5({
+      patient_id: patientId,
+      section_key: section,
+      bioemotional_regions: regions,
+    });
+    results[section] = result;
+  }
+
+  return results as Record<SCID5SectionKey, SCID5CorrelationResult>;
+}

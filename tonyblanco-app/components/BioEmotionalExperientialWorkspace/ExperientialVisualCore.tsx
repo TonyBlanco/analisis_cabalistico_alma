@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import BodyVisualization2D from './BodyVisualization2D';
+import BodyVisualizationToggle from './BodyVisualizationToggle';
 import RegionDetailPanel from './RegionDetailPanel';
 import HeatmapControls from './HeatmapControls';
 import type { BodyAnatomy, WorkspaceState, RegionIntensity, HeatmapConfig, EmotionType } from './types';
@@ -20,6 +20,7 @@ const stateLabels: Record<WorkspaceState, string> = {
   analysis: 'Análisis',
   synthesis: 'Síntesis',
   closure: 'Cierre',
+  evolution: 'Evolución',
 };
 
 export default function ExperientialVisualCore({
@@ -87,7 +88,7 @@ export default function ExperientialVisualCore({
               🧘 Cuerpo experiencial
             </h3>
             <p className="text-xs text-gray-500">
-              Vista 2D consultiva. No diagnostica ni automatiza conclusiones.
+              Vista consultiva 2D/3D. No diagnostica ni automatiza conclusiones.
             </p>
           </div>
           <div className="text-right">
@@ -97,15 +98,19 @@ export default function ExperientialVisualCore({
         </div>
       </div>
 
-      {/* Body Visualization with Heatmap */}
+      {/* Body Visualization with Toggle 2D/3D */}
       <div className="bio-card-glass rounded-2xl p-6">
-        <BodyVisualization2D
+        <BodyVisualizationToggle
           anatomy={anatomy}
           selectedRegionId={selectedRegionId}
           onRegionSelect={onRegionSelect}
           disabled={isSelectionDisabled}
           heatmapData={heatmapData}
           heatmapConfig={heatmapConfig}
+          initialMode="auto"
+          allowModeSwitch={true}
+          allowOrbit={true}
+          autoRotate={false}
         />
       </div>
 

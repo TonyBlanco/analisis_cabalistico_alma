@@ -315,3 +315,111 @@ class BioEmotionalPatientBrief(models.Model):
         indexes = [
             models.Index(fields=["patient", "is_published"]),
         ]
+
+
+class BioEmotionalSession(models.Model):
+    """Sesión BioEmotional que representa un encuentro terapeuta-consultante.
+
+    Permite capturar síntomas del consultante antes/durante sesión y registra
+    el estado emocional y datos del cuerpo trabajados. Esta es la entidad
+    principal para el timeline de sesiones del workspace experiencial.
+    """
+
+    EMOTIONAL_STATE_CHOICES = [
+        ("better", "Mejor"),
+        ("same", "Igual"),
+        ("worse", "Peor"),
+        ("unknown", "Sin evaluar"),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    patient = models.ForeignKey(
+        Patient,
+        on_delete=models.CASCADE,
+        related_name="bio_emotional_sessions",
+    )
+    therapist = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="bio_emotional_sessions_as_therapist",
+        help_text="Terapeuta asignado a la sesión",
+    )
+    date = models.DateTimeField(auto_now_add=True)
+    emotional_state = models.CharField(
+        max_length=16,
+        choices=EMOTIONAL_STATE_CHOICES,
+        default="unknown",
+    )
+    # Campos computados (se actualizan al agregar observaciones/hipótesis)
+    observations_count = models.PositiveIntegerField(default=0)
+    hypotheses_count = models.PositiveIntegerField(default=0)
+    synthesis_completed = models.BooleanField(default=False)
+    # Datos del cuerpo (regiones observadas y mapa de calor)
+    regions_observed = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="Lista de IDs de regiones corporales observadas",
+    )
+    heatmap_data = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="Datos de intensidad por región: {region_id: intensity 0-10}",
+    )
+    # Notas del consultante (capturadas antes/durante sesión)
+    patient_notes = models.TextField(
+        blank=True,
+        help_text="Notas del consultante sobre síntomas y sensaciones",
+    )
+    patient_feeling_score = models.PositiveSmallIntegerField(
+        null=True,
+        blank=True,
+        help_text="Puntuación de cómo se siente el consultante (1-10)",
+    )
+    patient_discomfort_regions = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="Regiones donde el consultante reporta molestias",
+    )
+    # Estado de la sesión
+    is_closed = models.BooleanField(
+        default=False,
+        help_text="Indica si la sesión ha sido cerrada",
+    )
+    closed_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Sesión BioEmotional"
+        verbose_name_plural = "Sesiones BioEmotionales"
+        ordering = ["patient", "-date"]
+        indexes = [
+            models.Index(fields=["patient", "date"]),
+            models.Index(fields=["patient", "is_closed"]),
+            models.Index(fields=["therapist", "date"]),
+        ]
+
+    def __str__(self) -> str:
+        return f"Sesión {self.date.strftime('%Y-%m-%d')} - {self.patient}"
+
+    def update_counts(self) -> None:
+        """Actualiza contadores de observaciones e hipótesis desde la BD."""
+        from .models import BioEmotionalObservation, BioEmotionalHypothesis
+
+        self.observations_count = BioEmotionalObservation.objects.filter(
+            patient=self.patient,
+            created_at__gte=self.date,
+            created_at__lte=self.closed_at if self.is_closed else None,
+        ).count() if self.is_closed else BioEmotionalObservation.objects.filter(
+            patient=self.patient,
+            created_at__gte=self.date,
+        ).count()
+
+        self.hypotheses_count = BioEmotionalHypothesis.objects.filter(
+            patient=self.patient,
+            created_at__gte=self.date,
+        ).count()
+
+        self.save(update_fields=["observations_count", "hypotheses_count", "updated_at"])

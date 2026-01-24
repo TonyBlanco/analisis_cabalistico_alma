@@ -6,6 +6,8 @@
 **Fecha:** 2026-01-20  
 **Related:** `HOLISTIC_FEDERATION_POLICY.md`, `FEDERATION_HUBS_CONTRACT.md`
 
+> ⚠️ **Nota operativa (frontend / Node)**: En el entorno actual de trabajo, el workspace `tonyblanco-app` depende de `Node 20.9.0` (64‑bit) gestionado con `nvm`. No cambiar la versión de Node usada por defecto para este workspace sin coordinación explícita con Arquitectura, ya que afecta compilación del frontend y la generación de artefactos de documentación.
+
 ---
 
 ## PROPÓSITO

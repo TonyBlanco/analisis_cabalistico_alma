@@ -149,15 +149,22 @@ function SessionTimelineComponent({
                   />
 
                   {/* Session Card */}
-                  <button
-                    type="button"
+                  <div
                     className={`
                       bio-card rounded-xl p-4 cursor-pointer transition-all duration-300 w-full text-left
                       hover:shadow-md
                       ${isCurrent ? 'ring-2 ring-indigo-500 shadow-lg bg-indigo-50/50' : ''}
                       ${isHovered && !isCurrent ? 'transform -translate-y-1 shadow-md' : ''}
                     `}
+                    role="button"
+                    tabIndex={0}
                     onClick={() => handleSessionClick(session.id)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        handleSessionClick(session.id);
+                      }
+                    }}
                     aria-current={isCurrent ? 'true' : undefined}
                   >
                     {/* Card Header */}
@@ -240,7 +247,7 @@ function SessionTimelineComponent({
                         </button>
                       </div>
                     )}
-                  </button>
+                  </div>
                 </div>
               );
             })}

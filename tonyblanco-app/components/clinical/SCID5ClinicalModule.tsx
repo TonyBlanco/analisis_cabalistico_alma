@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { getActivePatient } from '@/lib/active-patient';
 import { API_BASE_URL, getAuthToken } from '@/lib/api';
-import { Brain, Lightbulb, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Brain, Lightbulb, AlertTriangle, CheckCircle, Activity, MapPin } from 'lucide-react';
+import { correlateSCID5AllSections, SCID5CorrelationResult } from '@/lib/api/bioemotional-clinical';
 
 type SectionKey =
   | 'emotional_vitality'
@@ -99,8 +100,37 @@ export default function SCID5ClinicalModule() {
   const [aiLoading, setAiLoading] = useState<Record<string, boolean>>({});
   const [aiError, setAiError] = useState<Record<string, string>>({});
 
+  // BioEmotional Correlation state
+  const [bioCorrelations, setBioCorrelations] = useState<Record<SectionKey, SCID5CorrelationResult> | null>(null);
+  const [bioCorrelationLoading, setBioCorrelationLoading] = useState(false);
+  const [bioCorrelationError, setBioCorrelationError] = useState<string | null>(null);
+
   const patientId = searchParams?.get('patient_id');
   const activePatient = getActivePatient();
+
+  useEffect(() => {
+    if (patientId) {
+      loadBioEmotionalCorrelations();
+    }
+  }, [patientId]);
+
+  const loadBioEmotionalCorrelations = async () => {
+    if (!patientId) return;
+
+    setBioCorrelationLoading(true);
+    setBioCorrelationError(null);
+
+    try {
+      const correlations = await correlateSCID5AllSections(parseInt(patientId));
+      // correlateSCID5AllSections already returns a Record
+      setBioCorrelations(correlations as Record<SectionKey, SCID5CorrelationResult>);
+    } catch (err) {
+      console.error('Error loading BioEmotional correlations:', err);
+      setBioCorrelationError(err instanceof Error ? err.message : 'Error desconocido');
+    } finally {
+      setBioCorrelationLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!patientId && activePatient) {
@@ -261,7 +291,15 @@ export default function SCID5ClinicalModule() {
           return (
             <details key={key} className="bg-white border border-gray-200 rounded-lg">
               <summary className="cursor-pointer p-4 font-medium text-gray-900 hover:bg-gray-50 flex justify-between items-center">
-                <span>{section.title}</span>
+                <span className="flex items-center gap-2">
+                  {section.title}
+                  {bioCorrelations && bioCorrelations[key] && bioCorrelations[key].matched_regions.length > 0 && (
+                    <span className="px-2 py-0.5 bg-purple-100 text-purple-700 text-xs rounded-full flex items-center gap-1">
+                      <Activity className="h-3 w-3" />
+                      {bioCorrelations[key].matched_regions.length} región{bioCorrelations[key].matched_regions.length !== 1 ? 'es' : ''}
+                    </span>
+                  )}
+                </span>
                 <button
                   onClick={(e) => {
                     e.preventDefault();
@@ -368,6 +406,47 @@ export default function SCID5ClinicalModule() {
                           </div>
                         )}
                       </>
+                    )}
+                  </div>
+                )}
+
+                {/* BioEmotional Correlation Panel */}
+                {bioCorrelations && bioCorrelations[key] && bioCorrelations[key].matched_regions.length > 0 && (
+                  <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 space-y-3">
+                    <div className="flex items-center gap-2">
+                      <Activity className="h-4 w-4 text-purple-600" />
+                      <h4 className="font-medium text-purple-900">Correlación Corporal BioEmotional</h4>
+                      <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                        bioCorrelations[key].correlation_strength >= 0.7 ? 'bg-green-100 text-green-800' :
+                        bioCorrelations[key].correlation_strength >= 0.4 ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {(bioCorrelations[key].correlation_strength * 100).toFixed(0)}% correlación
+                      </span>
+                    </div>
+
+                    <div>
+                      <h5 className="text-sm font-medium text-purple-800 mb-2 flex items-center gap-1">
+                        <MapPin className="h-3 w-3" />
+                        Regiones corporales asociadas:
+                      </h5>
+                      <div className="flex flex-wrap gap-2">
+                        {bioCorrelations[key].matched_regions.map((region, idx) => (
+                          <span
+                            key={idx}
+                            className="px-2 py-1 bg-purple-100 text-purple-800 text-sm rounded-full flex items-center gap-1"
+                          >
+                            {region.region}
+                            <span className="text-xs opacity-70">({region.count}x)</span>
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    {bioCorrelations[key].clinical_notes && (
+                      <div className="text-sm text-purple-700 bg-white rounded p-2 border border-purple-100">
+                        <strong>Nota clínica:</strong> {bioCorrelations[key].clinical_notes}
+                      </div>
                     )}
                   </div>
                 )}

@@ -1,4 +1,4 @@
-export type WorkspaceState = 'observation' | 'analysis' | 'synthesis' | 'closure';
+export type WorkspaceState = 'observation' | 'analysis' | 'synthesis' | 'closure' | 'evolution';
 
 export type BodyAnatomy = 'male' | 'female' | 'intersex' | 'unknown';
 
@@ -17,6 +17,7 @@ export interface WorkspaceProgress {
   analysis: number;
   synthesis: number;
   closure: number;
+  evolution: number;
 }
 
 // ============================================

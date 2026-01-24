@@ -13,6 +13,7 @@ const stateLabels: Record<WorkspaceState, string> = {
   analysis: 'Análisis',
   synthesis: 'Síntesis',
   closure: 'Cierre',
+  evolution: 'Evolución',
 };
 
 const stateIcons: Record<WorkspaceState, string> = {
@@ -20,6 +21,7 @@ const stateIcons: Record<WorkspaceState, string> = {
   analysis: '🔍',
   synthesis: '✨',
   closure: '🔒',
+  evolution: '📊',
 };
 
 const stateDescriptions: Record<WorkspaceState, string> = {
@@ -27,6 +29,7 @@ const stateDescriptions: Record<WorkspaceState, string> = {
   analysis: 'Organización de patrones y referencias.',
   synthesis: 'Integración en notas humanas.',
   closure: 'Cierre consciente del espacio de trabajo.',
+  evolution: 'Historial y comparación de sesiones.',
 };
 
 const defaultProgress: WorkspaceProgress = {
@@ -34,16 +37,17 @@ const defaultProgress: WorkspaceProgress = {
   analysis: 0,
   synthesis: 0,
   closure: 0,
+  evolution: 0,
 };
 
-export default function ExperientialSidebar({ 
-  state, 
+export default function ExperientialSidebar({
+  state,
   onStateChange,
   progress = defaultProgress,
 }: ExperientialSidebarProps) {
   // Calculate overall progress
   const overallProgress = Math.round(
-    (progress.observation + progress.analysis + progress.synthesis + progress.closure) / 4
+    (progress.observation + progress.analysis + progress.synthesis + progress.closure + progress.evolution) / 5
   );
 
   return (
@@ -62,7 +66,7 @@ export default function ExperientialSidebar({
       <div className="px-4 py-4 border-b border-gray-200 bg-white">
         <p className="text-xs font-medium text-gray-600 mb-2">Progreso General</p>
         <div className="bio-progress">
-          <div 
+          <div
             className="bio-progress-bar"
             style={{ width: `${overallProgress}%` }}
           />
@@ -77,7 +81,7 @@ export default function ExperientialSidebar({
         {(Object.keys(stateLabels) as WorkspaceState[]).map((key, index) => {
           const isActive = state === key;
           const stateProgress = progress[key] || 0;
-          
+
           return (
             <button
               key={key}
@@ -110,7 +114,7 @@ export default function ExperientialSidebar({
               </p>
               {stateProgress > 0 && (
                 <div className="mt-2 bio-progress bio-progress-sm">
-                  <div 
+                  <div
                     className="bio-progress-bar"
                     style={{ width: `${stateProgress}%` }}
                   />

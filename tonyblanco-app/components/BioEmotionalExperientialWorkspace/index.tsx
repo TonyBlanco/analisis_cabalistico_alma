@@ -32,12 +32,13 @@ export default function BioEmotionalExperientialWorkspace() {
     const hasRegion = Boolean(selectedRegion);
     const hasSynthesis = Boolean(synthesisRecord);
     const isClosed = Boolean(synthesisRecord?.is_closed);
-    
+
     return {
       observation: hasPatient ? (hasRegion ? 100 : 50) : 0,
       analysis: hasRegion ? (referenceSnippets.length > 0 ? 100 : 50) : 0,
       synthesis: hasSynthesis ? 100 : (referenceSnippets.length > 0 ? 30 : 0),
       closure: isClosed ? 100 : (hasSynthesis ? 50 : 0),
+      evolution: hasPatient ? 100 : 0, // Evolution is always available with patient
     };
   }, [context.patientId, selectedRegion, synthesisRecord, referenceSnippets.length]);
 
@@ -96,8 +97,8 @@ export default function BioEmotionalExperientialWorkspace() {
       </div>
 
       <div className="flex">
-        <ExperientialSidebar 
-          state={workspaceState} 
+        <ExperientialSidebar
+          state={workspaceState}
           onStateChange={setWorkspaceState}
           progress={progress}
         />
@@ -143,6 +144,7 @@ export default function BioEmotionalExperientialWorkspace() {
               <ExperientialToolPanels
                 state={workspaceState}
                 hasPatient={Boolean(context.patientId)}
+                patientId={context.patientId}
                 selectedRegion={selectedRegion}
                 synthesisRecord={synthesisRecord}
                 onSynthesisSaved={setSynthesisRecord}

@@ -31,7 +31,7 @@ Implementación completa del sistema de visualización de timeline y comparació
 ```json
 {
   "engines": {
-    "node": ">=18 <23"
+    "node": ">=20.9.0 <23"
   }
 }
 ```
@@ -52,8 +52,10 @@ const nextConfig: NextConfig = {
 
 ### `.nvmrc` - Archivo de versión de Node
 ```
-18
+20.9.0
 ```
+
+> ⚠️ **AVISO IMPORTANTE (NODE FREEZE)**: Para `tonyblanco-app` se considera **canónica** la versión `Node 20.9.0` gestionada vía `nvm`. No cambiar la versión de Node usada por el workspace sin coordinación con Arquitectura/Gobernanza, ya que rompe compatibilidad con `next@16.0.7`, `lightningcss` y la toolchain de MD/Docs.
 
 ---
 

@@ -2,9 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import type { TarotCardDraw } from './TarotSpreadView';
-import { resolveBotaIdentity } from '@holistica/symbolic/tarot/bota/botaIdentityResolver';
-import { buildBotaPositionMeaning } from '@holistica/symbolic/tarot/bota/positionInterpreter';
-import { getBotaVisualStructure } from '@holistica/symbolic/tarot/bota/botaVisualMapper';
+import { resolveBotaIdentity, buildBotaPositionMeaning, getBotaVisualStructure } from '@holistica/symbolic/tarot/bota';
 
 type Props = {
   systemLabel?: string | null;

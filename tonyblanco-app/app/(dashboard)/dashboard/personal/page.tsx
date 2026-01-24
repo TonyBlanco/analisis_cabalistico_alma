@@ -8,7 +8,7 @@ import { useRoleGuard } from '@/lib/role-guards';
 import { getAvailableTests } from '@/lib/test-api';
 import PersonalExplorationsSection from '@/components/PersonalExplorationsSection';
 import PersonalResultsSection from '@/components/PersonalResultsSection';
-import UpgradeCTASection from '@/components/UpgradeCTASection';
+import UpgradeCTASection from '@/editorial_templates/UpgradeCTASection';
 
 export default function PersonalDashboard() {
   const router = useRouter();

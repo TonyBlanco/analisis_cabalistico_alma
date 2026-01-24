@@ -126,3 +126,16 @@ export function getGradientForEmotion(emotionType: EmotionType): string {
   const colors = emotionColors[emotionType];
   return `linear-gradient(135deg, ${colors.light}, ${colors.medium}, ${colors.dark})`;
 }
+
+/**
+ * Get hex color for 3D material based on emotion and intensity
+ * @param emotionType - The type of emotion
+ * @param intensity - Intensity value from 0 to 100
+ * @returns Hex color string suitable for Three.js materials
+ */
+export function getColorForEmotion(
+  emotionType: EmotionType,
+  intensity: number
+): string {
+  return getColorForIntensity(emotionType, intensity);
+}

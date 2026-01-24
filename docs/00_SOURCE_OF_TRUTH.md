@@ -12,6 +12,7 @@ Incluye el inventario final de contradicciones, dumps runtime, estado del paquet
 - Causa técnica principal detectada: conflictos de resolución de módulos por `tsconfig` path mappings y comportamiento de Turbopack; mitigado temporalmente forzando Webpack y ajustando `package.json` de `@holistica/symbolic`.
 - Estado del build: Con Turbopack → fallos por alias/resolución; Con Webpack → empacado OK pero queda un error TypeScript que impide compilación final (tipo en página `app`).
 - Hallazgos de gobernanza: la documentación de algunos subsistemas (p.ej. "Symbolic Interpreter AI") contradice la realidad del runtime; se requiere decisión sobre mantener, reconstruir o archivar.
+- **Constraint de toolchain frontend**: para el workspace `tonyblanco-app` se fija como versión canónica **Node 20.9.0 (64-bit)** gestionada con `nvm`, alineada con `next@16.0.7`. Cualquier cambio de versión de Node debe tratarse como decisión de gobernanza (no modificar localmente sin coordinación) porque afecta compilación de frontend, `lightningcss` y generación de artefactos `.md`.
 
 ---
 

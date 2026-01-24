@@ -7,6 +7,7 @@ import HolisticCrossPanel from './HolisticCrossPanel';
 import SynthesisPanel from './SynthesisPanel';
 import ClosurePanel from './ClosurePanel';
 import GuidedExplorationPanel from './GuidedExplorationPanel';
+import ExperientialEvolutionPanel from './ExperientialEvolutionPanel';
 import type { WorkspaceState } from './types';
 import type { AnatomicalRegion } from './data/anatomicalRegions';
 import type { BioEmotionalSynthesis } from '@/lib/api/bioemotional-clinical';
@@ -14,6 +15,7 @@ import type { BioEmotionalSynthesis } from '@/lib/api/bioemotional-clinical';
 interface ExperientialToolPanelsProps {
   state: WorkspaceState;
   hasPatient: boolean;
+  patientId: number | null;
   selectedRegion: AnatomicalRegion | null;
   synthesisRecord: BioEmotionalSynthesis | null;
   onSynthesisSaved: (record: BioEmotionalSynthesis) => void;
@@ -35,6 +37,7 @@ interface ExperientialToolPanelsProps {
 export default function ExperientialToolPanels({
   state,
   hasPatient,
+  patientId,
   selectedRegion,
   synthesisRecord,
   onSynthesisSaved,
@@ -168,6 +171,10 @@ export default function ExperientialToolPanels({
               <DictionaryPanel selectedRegion={selectedRegion} isReadOnly={true} />
             </div>
           </>
+        )}
+
+        {state === 'evolution' && (
+          <ExperientialEvolutionPanel patientId={patientId} />
         )}
       </div>
     </aside>

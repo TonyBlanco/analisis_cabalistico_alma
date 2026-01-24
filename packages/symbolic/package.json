@@ -74,6 +74,10 @@
       "types": "./dist/tarot/bota/synthesisBuilder.d.ts",
       "import": "./dist/tarot/bota/synthesisBuilder.js"
     },
+    "./tarot/bota": {
+      "types": "./dist/tarot/bota/index.d.ts",
+      "import": "./dist/tarot/bota/index.js"
+    },
     "./tarot/decks/thoth": {
       "types": "./dist/tarot/decks/thoth.d.ts",
       "import": "./dist/tarot/decks/thoth.js"

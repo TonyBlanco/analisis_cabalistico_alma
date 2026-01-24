@@ -6,7 +6,15 @@ import { API_BASE_URL, getAuthToken } from '@/lib/api';
 import { generateMSHEPDF } from '@lib/pdfUtils';
 import MSHETrainingModal from './MSHETrainingModal';
 import FederationHubFeedBlock from '@/components/federation/FederationHubFeedBlock';
-import { Download, HelpCircle } from 'lucide-react';
+import { Download, HelpCircle, Activity, TrendingUp } from 'lucide-react';
+import {
+  exportForSWM,
+  importToMSHE,
+  type BioEmotionalExportData,
+  type MSHEImportResult,
+  type RegionRanking,
+  type EmotionalTrend,
+} from '@/lib/api/bioemotional-clinical';
 
 interface HolisticWeights {
   kabbalah_numerology: number;
@@ -14,6 +22,7 @@ interface HolisticWeights {
   astrologia_terapeutica: number;
   transgeneracional: number;
   biodecodificacion: number;
+  bioemotional_corporal: number; // NUEVO: Integración BioEmotional
 }
 
 interface SynthesisResult {
@@ -77,11 +86,12 @@ export default function MSHEClinicalModule() {
   const patientId = searchParams.get('patient_id');
 
   const [weights, setWeights] = useState<HolisticWeights>({
-    kabbalah_numerology: 0.20,
-    tarot_evolutivo: 0.20,
-    astrologia_terapeutica: 0.20,
-    transgeneracional: 0.20,
-    biodecodificacion: 0.20
+    kabbalah_numerology: 0.17,
+    tarot_evolutivo: 0.17,
+    astrologia_terapeutica: 0.17,
+    transgeneracional: 0.17,
+    biodecodificacion: 0.17,
+    bioemotional_corporal: 0.15, // NUEVO: peso BioEmotional
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -97,6 +107,12 @@ export default function MSHEClinicalModule() {
   const [isTrainingModalOpen, setIsTrainingModalOpen] = useState(false);
   const [isExportingPDF, setIsExportingPDF] = useState(false);
 
+  // BioEmotional Integration State
+  const [bioEmotionalData, setBioEmotionalData] = useState<BioEmotionalExportData | null>(null);
+  const [bioEmotionalIntegration, setBioEmotionalIntegration] = useState<MSHEImportResult | null>(null);
+  const [isBioEmotionalLoading, setIsBioEmotionalLoading] = useState(false);
+  const [bioEmotionalError, setBioEmotionalError] = useState<string | null>(null);
+
   // Load therapist configuration
   useEffect(() => {
     loadTherapistConfig();
@@ -106,8 +122,53 @@ export default function MSHEClinicalModule() {
   useEffect(() => {
     if (patientId) {
       loadEvolutionHistory();
+      loadBioEmotionalData();
     }
   }, [patientId]);
+
+  // Load BioEmotional data for integration
+  const loadBioEmotionalData = async () => {
+    if (!patientId) return;
+
+    setIsBioEmotionalLoading(true);
+    setBioEmotionalError(null);
+
+    try {
+      const data = await exportForSWM(parseInt(patientId));
+      setBioEmotionalData(data);
+    } catch (error) {
+      console.error('Error loading BioEmotional data:', error);
+      setBioEmotionalError(error instanceof Error ? error.message : 'Error desconocido');
+    } finally {
+      setIsBioEmotionalLoading(false);
+    }
+  };
+
+  // Import BioEmotional data to MSHE
+  const handleBioEmotionalImport = async () => {
+    if (!patientId) return;
+
+    setIsBioEmotionalLoading(true);
+    setBioEmotionalError(null);
+
+    try {
+      const result = await importToMSHE(parseInt(patientId));
+      setBioEmotionalIntegration(result);
+
+      // Auto-ajustar peso si se integró correctamente
+      if (result.integrated && result.new_weight_contribution > 0) {
+        setWeights(prev => ({
+          ...prev,
+          bioemotional_corporal: result.new_weight_contribution
+        }));
+      }
+    } catch (error) {
+      console.error('Error importing BioEmotional data:', error);
+      setBioEmotionalError(error instanceof Error ? error.message : 'Error al importar');
+    } finally {
+      setIsBioEmotionalLoading(false);
+    }
+  };
 
   const loadTherapistConfig = async () => {
     try {
@@ -263,11 +324,12 @@ export default function MSHEClinicalModule() {
 
   const resetWeights = () => {
     setWeights({
-      kabbalah_numerology: 0.20,
-      tarot_evolutivo: 0.20,
-      astrologia_terapeutica: 0.20,
-      transgeneracional: 0.20,
-      biodecodificacion: 0.20
+      kabbalah_numerology: 0.17,
+      tarot_evolutivo: 0.17,
+      astrologia_terapeutica: 0.17,
+      transgeneracional: 0.17,
+      biodecodificacion: 0.17,
+      bioemotional_corporal: 0.15
     });
   };
 
@@ -379,6 +441,130 @@ export default function MSHEClinicalModule() {
             </button>
           </div>
         </div>
+      </div>
+
+      {/* BioEmotional Integration Panel */}
+      <div className="bg-white rounded-lg shadow p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Activity className="w-5 h-5 text-purple-600" />
+            <h3 className="text-lg font-semibold">Integración BioEmotional Corporal</h3>
+          </div>
+          <button
+            onClick={loadBioEmotionalData}
+            disabled={isBioEmotionalLoading}
+            className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
+          >
+            {isBioEmotionalLoading ? 'Cargando...' : 'Actualizar'}
+          </button>
+        </div>
+
+        {bioEmotionalError && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-700 text-sm">
+            {bioEmotionalError}
+          </div>
+        )}
+
+        {bioEmotionalData && bioEmotionalData.total_sessions > 0 ? (
+          <div className="space-y-4">
+            {/* Summary Stats */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="bg-purple-50 rounded-lg p-3">
+                <div className="text-2xl font-bold text-purple-700">{bioEmotionalData.total_sessions}</div>
+                <div className="text-xs text-purple-600">Sesiones registradas</div>
+              </div>
+              <div className="bg-blue-50 rounded-lg p-3">
+                <div className="text-2xl font-bold text-blue-700">{bioEmotionalData.top_regions?.length || 0}</div>
+                <div className="text-xs text-blue-600">Regiones activas</div>
+              </div>
+              <div className="bg-green-50 rounded-lg p-3">
+                <div className="text-2xl font-bold text-green-700">
+                  {bioEmotionalData.emotional_trends?.length || 0}
+                </div>
+                <div className="text-xs text-green-600">Emociones rastreadas</div>
+              </div>
+              <div className="bg-amber-50 rounded-lg p-3">
+                <div className="text-2xl font-bold text-amber-700">
+                  {bioEmotionalData.heatmap_aggregate ? Object.keys(bioEmotionalData.heatmap_aggregate).length : 0}
+                </div>
+                <div className="text-xs text-amber-600">Puntos en mapa térmico</div>
+              </div>
+            </div>
+
+            {/* Top Regions */}
+            {bioEmotionalData.top_regions && bioEmotionalData.top_regions.length > 0 && (
+              <div>
+                <h4 className="text-sm font-medium text-gray-700 mb-2">Regiones Corporales Más Activas</h4>
+                <div className="flex flex-wrap gap-2">
+                  {bioEmotionalData.top_regions.slice(0, 5).map((region: RegionRanking, idx: number) => (
+                    <span
+                      key={region.region_id}
+                      className="px-3 py-1 rounded-full text-sm font-medium"
+                      style={{
+                        backgroundColor: `rgba(147, 51, 234, ${0.2 + (0.6 * (1 - idx / 5))})`,
+                        color: idx < 2 ? 'white' : '#6b21a8'
+                      }}
+                    >
+                      {region.region_id} ({region.observation_count}x, {(region.avg_intensity * 100).toFixed(0)}%)
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Emotional Trends */}
+            {bioEmotionalData.emotional_trends && bioEmotionalData.emotional_trends.length > 0 && (
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <TrendingUp className="w-4 h-4 text-gray-600" />
+                  <h4 className="text-sm font-medium text-gray-700">Tendencias Emocionales</h4>
+                </div>
+                <div className="space-y-1">
+                  {bioEmotionalData.emotional_trends.slice(0, 3).map((trend: EmotionalTrend, idx: number) => (
+                    <div key={`${trend.date}-${idx}`} className="flex items-center gap-2">
+                      <span className="text-sm text-gray-600 w-24">{trend.state}</span>
+                      <div className="flex-1 bg-gray-200 rounded-full h-2">
+                        <div
+                          className="bg-purple-500 rounded-full h-2"
+                          style={{ width: `${(trend.feeling_score ?? 50)}%` }}
+                        />
+                      </div>
+                      <span className="text-xs text-gray-500">{new Date(trend.date).toLocaleDateString()}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Import Button */}
+            <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+              <div className="text-sm text-gray-600">
+                {bioEmotionalIntegration ? (
+                  <span className="text-green-600">
+                    ✓ Integrado: contribución de peso {(bioEmotionalIntegration.new_weight_contribution * 100).toFixed(1)}%
+                  </span>
+                ) : (
+                  'Integrar datos BioEmotional en la síntesis holística'
+                )}
+              </div>
+              <button
+                onClick={handleBioEmotionalImport}
+                disabled={isBioEmotionalLoading || !!bioEmotionalIntegration}
+                className="px-4 py-2 text-sm bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {bioEmotionalIntegration ? 'Ya integrado' : 'Importar a MSHE'}
+              </button>
+            </div>
+          </div>
+        ) : !isBioEmotionalLoading ? (
+          <div className="text-center py-8 text-gray-500">
+            <Activity className="w-12 h-12 mx-auto mb-2 opacity-50" />
+            <p>No hay datos BioEmotional para este paciente</p>
+            <p className="text-sm mt-1">
+              Complete sesiones en el módulo &quot;Simbiosis Consultante-Terapeuta&quot; para integrar datos corporales
+            </p>
+          </div>
+        ) : null}
       </div>
 
       {/* Generate Button */}

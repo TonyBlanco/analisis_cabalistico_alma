@@ -10,6 +10,7 @@ from .models import (
     BioEmotionalSynthesis,
     BioEmotionalAssistedDiagnosis,
     BioEmotionalPatientBrief,
+    BioEmotionalSession,
 )
 from .dictionary_loader import load_bioemotional_dictionary, BioEmotionalDictionaryError
 
@@ -303,3 +304,173 @@ class BioEmotionalPatientBriefReadSerializer(serializers.ModelSerializer):
             "updated_at",
         ]
         read_only_fields = fields
+
+
+class BioEmotionalSessionSerializer(serializers.ModelSerializer):
+    """Serializer completo para sesiones BioEmotionales.
+
+    Expone todos los datos de sesión para el terapeuta, incluyendo
+    notas del consultante, regiones observadas y datos del mapa de calor.
+    """
+
+    therapist_id = serializers.IntegerField(source="therapist.id", read_only=True, allow_null=True)
+    patient_id = serializers.IntegerField(source="patient.id", read_only=True)
+    patient_name = serializers.CharField(source="patient.nombre", read_only=True)
+
+    class Meta:
+        model = BioEmotionalSession
+        fields = [
+            "id",
+            "therapist_id",
+            "patient_id",
+            "patient_name",
+            "date",
+            "emotional_state",
+            "observations_count",
+            "hypotheses_count",
+            "synthesis_completed",
+            "regions_observed",
+            "heatmap_data",
+            "patient_notes",
+            "patient_feeling_score",
+            "patient_discomfort_regions",
+            "is_closed",
+            "closed_at",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = [
+            "id",
+            "therapist_id",
+            "patient_id",
+            "patient_name",
+            "date",
+            "observations_count",
+            "hypotheses_count",
+            "is_closed",
+            "closed_at",
+            "created_at",
+            "updated_at",
+        ]
+
+    def validate_emotional_state(self, value: str) -> str:
+        allowed = {"better", "same", "worse", "unknown"}
+        if value not in allowed:
+            raise serializers.ValidationError("Estado emocional inválido.")
+        return value
+
+    def validate_patient_feeling_score(self, value):
+        if value is not None and (value < 1 or value > 10):
+            raise serializers.ValidationError("La puntuación debe estar entre 1 y 10.")
+        return value
+
+
+# =============================================================================
+# SWM Analytics Integration - Export Serializers
+# =============================================================================
+
+
+class RegionRankingSerializer(serializers.Serializer):
+    """Ranking de regiones corporales más observadas."""
+    region_id = serializers.CharField()
+    observation_count = serializers.IntegerField()
+    avg_intensity = serializers.FloatField()
+    dominant_emotion = serializers.CharField(allow_null=True)
+
+
+class EmotionalTrendSerializer(serializers.Serializer):
+    """Tendencia emocional a lo largo de sesiones."""
+    date = serializers.DateTimeField()
+    state = serializers.CharField()
+    feeling_score = serializers.IntegerField(allow_null=True)
+
+
+class SessionSummarySerializer(serializers.Serializer):
+    """Resumen de sesión para exportación."""
+    id = serializers.UUIDField()
+    date = serializers.DateTimeField()
+    emotional_state = serializers.CharField()
+    observations_count = serializers.IntegerField()
+    hypotheses_count = serializers.IntegerField()
+    synthesis_completed = serializers.BooleanField()
+    regions_observed = serializers.ListField(child=serializers.CharField())
+
+
+class BioEmotionalExportSerializer(serializers.Serializer):
+    """Serializer principal para exportación BioEmotional → SWM Analytics.
+    
+    Agrupa todos los datos relevantes de un paciente para integración
+    con MSHE, SCID-5 y otros módulos analíticos.
+    """
+    patient_id = serializers.IntegerField()
+    patient_name = serializers.CharField()
+    sessions_summary = SessionSummarySerializer(many=True)
+    top_regions = RegionRankingSerializer(many=True)
+    emotional_trends = EmotionalTrendSerializer(many=True)
+    heatmap_aggregate = serializers.DictField(child=serializers.FloatField())
+    total_sessions = serializers.IntegerField()
+    total_observations = serializers.IntegerField()
+    total_hypotheses = serializers.IntegerField()
+    export_timestamp = serializers.DateTimeField()
+
+
+class MSHEImportResultSerializer(serializers.Serializer):
+    """Resultado de importar datos BioEmotional a MSHE."""
+    integrated = serializers.BooleanField()
+    new_weight_contribution = serializers.FloatField()
+    bioemotional_snapshot_id = serializers.CharField()
+    message = serializers.CharField()
+
+
+class SCID5CorrelationResultSerializer(serializers.Serializer):
+    """Resultado de correlación BioEmotional con sección SCID-5."""
+    section_key = serializers.CharField()
+    correlation_strength = serializers.ChoiceField(choices=["low", "medium", "high"])
+    regions_matched = serializers.ListField(child=serializers.CharField())
+    suggested_notes = serializers.CharField()
+    confidence_score = serializers.FloatField()
+
+
+class BioEmotionalSessionListSerializer(serializers.ModelSerializer):
+    """Serializer ligero para listados de sesiones (timeline)."""
+
+    patient_name = serializers.CharField(source="patient.nombre", read_only=True)
+
+    class Meta:
+        model = BioEmotionalSession
+        fields = [
+            "id",
+            "patient_id",
+            "patient_name",
+            "date",
+            "emotional_state",
+            "observations_count",
+            "hypotheses_count",
+            "synthesis_completed",
+            "regions_observed",
+            "is_closed",
+        ]
+        read_only_fields = fields
+
+
+class BioEmotionalSessionPatientInputSerializer(serializers.ModelSerializer):
+    """Serializer para que el consultante capture sus datos pre-sesión.
+
+    Solo expone los campos editables por el consultante. El terapeuta
+    puede leer estos datos pero no editarlos desde este serializer.
+    """
+
+    class Meta:
+        model = BioEmotionalSession
+        fields = [
+            "id",
+            "patient_notes",
+            "patient_feeling_score",
+            "patient_discomfort_regions",
+        ]
+        read_only_fields = ["id"]
+
+    def validate_patient_feeling_score(self, value):
+        if value is not None and (value < 1 or value > 10):
+            raise serializers.ValidationError("La puntuación debe estar entre 1 y 10.")
+        return value

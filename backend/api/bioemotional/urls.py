@@ -40,6 +40,24 @@ from .views import (
 
     BioTransgenerationalHypothesisDetailView,
 
+    BioEmotionalSessionListCreateView,
+
+    BioEmotionalSessionDetailView,
+
+    BioEmotionalSessionCloseView,
+
+    BioEmotionalSessionPatientInputView,
+
+    BioEmotionalSessionPatientListView,
+
+    # SWM Analytics Integration
+
+    BioEmotionalExportView,
+
+    MSHEImportBioEmotionalView,
+
+    SCID5CorrelateBioEmotionalView,
+
 )
 
 
@@ -193,6 +211,73 @@ urlpatterns = [
         "hypotheses/<uuid:id>/",
         BioEmotionalHypothesisUpdateView.as_view(),
         name="hypothesis_detail",
+    ),
+
+    # ==========================================================================
+    # Sesiones BioEmotionales - Simbiosis Consultante ↔ Terapeuta
+    # ==========================================================================
+
+    # Sesiones para terapeuta (CRUD completo)
+    # GET  /api/bioemotional/sessions/?patient_id=<id>
+    # POST /api/bioemotional/sessions/
+    path(
+        "sessions/",
+        BioEmotionalSessionListCreateView.as_view(),
+        name="session_list_create",
+    ),
+    # GET/PATCH/DELETE /api/bioemotional/sessions/{id}/
+    path(
+        "sessions/<uuid:id>/",
+        BioEmotionalSessionDetailView.as_view(),
+        name="session_detail",
+    ),
+    # PATCH /api/bioemotional/sessions/{id}/close/
+    path(
+        "sessions/<uuid:id>/close/",
+        BioEmotionalSessionCloseView.as_view(),
+        name="session_close",
+    ),
+
+    # Sesiones para consultante (solo su propia sesión)
+    # GET/PATCH /api/bioemotional/sessions/my/current/
+    path(
+        "sessions/my/current/",
+        BioEmotionalSessionPatientInputView.as_view(),
+        name="session_patient_input",
+    ),
+    # GET /api/bioemotional/sessions/my/
+    path(
+        "sessions/my/",
+        BioEmotionalSessionPatientListView.as_view(),
+        name="session_patient_list",
+    ),
+
+    # ==========================================================================
+    # SWM Analytics Integration - Export & Correlation Endpoints
+    # ==========================================================================
+
+    # GET /api/bioemotional/export/{patient_id}/
+    # Exporta datos BioEmotional agregados para integración con SWM Analytics
+    path(
+        "export/<int:patient_id>/",
+        BioEmotionalExportView.as_view(),
+        name="export_for_swm",
+    ),
+
+    # POST /api/bioemotional/mshe-import/
+    # Importa snapshot BioEmotional para integración con MSHE
+    path(
+        "mshe-import/",
+        MSHEImportBioEmotionalView.as_view(),
+        name="mshe_import",
+    ),
+
+    # POST /api/bioemotional/scid5-correlate/
+    # Correlaciona datos BioEmotional con secciones SCID-5
+    path(
+        "scid5-correlate/",
+        SCID5CorrelateBioEmotionalView.as_view(),
+        name="scid5_correlate",
     ),
 
 ]

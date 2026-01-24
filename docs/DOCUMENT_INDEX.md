@@ -46,6 +46,7 @@
 | `README_CHANGELOG.md` | `docs/backLegacy/legacy_tests/README_CHANGELOG.md` | HISTÓRICO | Docs / Governance | TBD | Archivado tras reconciliación; ver symbolic_contradictions_matrix.csv |
 | `PROBLEM-EXPLAINED.md` | `docs/backLegacy/legacy_tests/PROBLEM-EXPLAINED.md` | HISTÓRICO | Docs / Governance | TBD | Archivado tras reconciliación; ver symbolic_contradictions_matrix.csv |
 | `PASOS-FINALES.md` | `docs/backLegacy/legacy_tests/PASOS-FINALES.md` | HISTÓRICO | Docs / Governance | TBD | Archivado tras reconciliación; ver symbolic_contradictions_matrix.csv |
+| `CHANGELOG_2026-01-24_TIMELINE_IMPLEMENTATION.md` | `docs/CHANGELOG_2026-01-24_TIMELINE_IMPLEMENTATION.md` | **Active** | Releases / Implementation | Arquitectura | Changelog de implementación PROMPT #7 - Timeline y comparación de sesiones bioemocionales. |
 | `DB_STRUCTURE.md` | `docs/technical/DB_STRUCTURE.md` | **Active** | Technical / Database | TBD | Estructura de base de datos del sistema. |
 | `FEDERATION_PHASE1_IMPLEMENTATION_REPORT.md` | `docs/releases/phase-1/FEDERATION_PHASE1_IMPLEMENTATION_REPORT.md` | **Active** | Releases / Phase 1 | Arquitectura | Informe de implementación Phase 1 (autorizaciones federadas y controles). |
 | `FEDERATION_MVP_PHASE1_DEBUG_E2E_REPORT.md` | `docs/releases/phase-1/FEDERATION_MVP_PHASE1_DEBUG_E2E_REPORT.md` | **Active** | Releases / Phase 1 | Arquitectura | Reporte debug E2E Phase 1 (evidencia de verificación). |

@@ -317,4 +317,10 @@ urlpatterns = [
     
     # SWM Tarot Evolutivo (Symbolic Tarot Workspace)
     path('swm/tarot/', include('swm.tarot.urls', namespace='swm_tarot')),
+    
+    # SWM Cábala Aplicada (Tree of Life Workspace)
+    path('swm/cabala/', include('swm.cabala.urls', namespace='swm_cabala')),
+    
+    # SWM Transgeneracional Profundo (Psychogenealogy Workspace)
+    path('swm/transgenerational/', include('swm.transgenerational.urls', namespace='swm_transgenerational')),
 ]

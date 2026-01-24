@@ -454,9 +454,11 @@ export type SCID5SectionKey =
 
 export interface SCID5CorrelationResult {
   section_key: SCID5SectionKey;
-  correlation_strength: CorrelationStrength;
+  correlation_strength: number;  // 0-1 float, not string
   regions_matched: string[];
+  matched_regions: Array<{ region: string; count: number }>;  // For UI display
   suggested_notes: string;
+  clinical_notes?: string;  // Optional notes from correlation
   confidence_score: number;
 }
 

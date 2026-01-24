@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
-import { Activity, HelpCircle } from 'lucide-react';
+import { Activity, HelpCircle, GitBranch, Repeat, Circle, Minus, AlertTriangle, Sparkles, Users, Network, BookOpen } from 'lucide-react';
 import useActiveConsultante from '@/hooks/useActiveConsultante';
 import {
   createResonanciaObservation,
@@ -22,6 +22,268 @@ function parseCommaSeparatedList(raw: string, maxItems: number): string[] {
     .map((item) => item.trim())
     .filter(Boolean);
   return parts.slice(0, maxItems);
+}
+
+// === LEYENDA SIMBÓLICA TRANSGENERACIONAL ===
+const OBSERVATION_TYPE_LEGEND: Record<ResonanciaObservationType, { color: string; bgColor: string; icon: typeof GitBranch; label: string; description: string }> = {
+  resonancia: {
+    color: 'text-purple-700',
+    bgColor: 'bg-purple-100',
+    icon: Sparkles,
+    label: 'Resonancia',
+    description: 'Eco simbólico que atraviesa generaciones. Patrón que resuena sin explicación causal directa.',
+  },
+  eje: {
+    color: 'text-blue-700',
+    bgColor: 'bg-blue-100',
+    icon: GitBranch,
+    label: 'Eje',
+    description: 'Línea de continuidad observada entre miembros del sistema. Dirección recurrente sin jerarquía.',
+  },
+  repeticion: {
+    color: 'text-amber-700',
+    bgColor: 'bg-amber-100',
+    icon: Repeat,
+    label: 'Repetición',
+    description: 'Tema, evento o dinámica que aparece en múltiples puntos del árbol familiar.',
+  },
+  nota: {
+    color: 'text-gray-700',
+    bgColor: 'bg-gray-100',
+    icon: BookOpen,
+    label: 'Nota',
+    description: 'Anotación observacional libre sin categorización específica.',
+  },
+};
+
+const CONTEXT_LEGEND: Record<ResonanciaObservationContext, { color: string; bgColor: string; icon: typeof Users; label: string; description: string }> = {
+  familiar: {
+    color: 'text-emerald-700',
+    bgColor: 'bg-emerald-100',
+    icon: Users,
+    label: 'Familiar',
+    description: 'Observación situada en el sistema familiar directo (padres, hermanos, abuelos).',
+  },
+  relacional: {
+    color: 'text-indigo-700',
+    bgColor: 'bg-indigo-100',
+    icon: Network,
+    label: 'Relacional',
+    description: 'Observación en vínculos externos significativos (parejas, amistades, mentores).',
+  },
+  sistemico: {
+    color: 'text-rose-700',
+    bgColor: 'bg-rose-100',
+    icon: Circle,
+    label: 'Sistémico',
+    description: 'Observación que abarca el sistema completo o patrones colectivos transgeneracionales.',
+  },
+};
+
+const STATE_LEGEND: Record<ResonanciaObservationState, { color: string; bgColor: string; label: string; description: string }> = {
+  activo: {
+    color: 'text-green-700',
+    bgColor: 'bg-green-100',
+    label: 'Activo',
+    description: 'Observación vigente y presente en la dinámica actual del consultante.',
+  },
+  latente: {
+    color: 'text-slate-600',
+    bgColor: 'bg-slate-100',
+    label: 'Latente',
+    description: 'Observación identificada pero no manifestada activamente en este momento.',
+  },
+};
+
+// === TOOLTIPS EDUCATIVOS TRANSGENERACIONALES ===
+const EDUCATIONAL_CONTENT = {
+  resonancia_ancestral: {
+    title: '¿Qué es la Resonancia Ancestral?',
+    content: `La resonancia ancestral es un fenómeno observacional donde patrones, temas o dinámicas parecen repetirse a través de las generaciones de un sistema familiar.\n\nNo implica causalidad ni determinismo. Es una herramienta de observación simbólica que permite al terapeuta mapear conexiones sin establecer diagnósticos ni conclusiones automáticas.\n\nConceptos relacionados: Psicogenealogía, Constelaciones Familiares, Transgeneracional.`,
+  },
+  mapa_resonancia: {
+    title: 'Mapa de Resonancia',
+    content: `El mapa de resonancia visualiza las conexiones simbólicas entre elementos observados (anchors).\n\n• Los nodos representan elementos mencionados en observaciones\n• Los enlaces indican co-ocurrencia, no causalidad\n• La densidad del mapa refleja la riqueza del registro, no la gravedad\n\nEste mapa es descriptivo: muestra lo que ha sido registrado, sin interpretar por qué existe esa conexión.`,
+  },
+  ejes_ancestrales: {
+    title: 'Ejes Ancestrales',
+    content: `Los ejes ancestrales representan líneas de continuidad observadas dentro del sistema relacional.\n\n• Un eje NO es una causa ni una ley\n• Sirve para organizar observaciones similares\n• Facilita la revisión profesional del terapeuta\n\nTipos de observación:\n• Resonancia: eco simbólico transgeneracional\n• Eje: dirección de repetición observada\n• Repetición: patrón recurrente identificado\n• Nota: anotación libre`,
+  },
+  posicionamiento: {
+    title: 'Posicionamiento Relacional',
+    content: `El sistema de posiciones 1-9 es una coordenada interna para organizar resonancias simbólicamente.\n\nImportante:\n• Una posición NO representa una identidad personal\n• Una misma persona puede ocupar diferentes posiciones según el contexto\n• Las posiciones se agrupan en columnas (A: 1-4-7, B: 2-5-8, C: 3-6-9)\n\nLa matriz relacional permite visualizar la distribución de vínculos sin establecer jerarquías.`,
+  },
+  densidad_karmica: {
+    title: 'Densidad Kármica (Conceptual)',
+    content: `La "densidad kármica" es un indicador simbólico experimental que mide la concentración de patrones observados.\n\n⚠️ Este indicador es puramente descriptivo:\n• NO es un diagnóstico\n• NO predice eventos futuros\n• NO establece gravedad ni urgencia\n\nSu función es facilitar la priorización de áreas de observación por parte del terapeuta.`,
+  },
+};
+
+// Componente de Leyenda Visual
+function SymbolicLegend({ 
+  isOpen, 
+  onToggle 
+}: { 
+  isOpen: boolean; 
+  onToggle: () => void;
+}) {
+  return (
+    <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+      <button
+        type="button"
+        onClick={onToggle}
+        className="flex w-full items-center justify-between text-left"
+      >
+        <div className="flex items-center gap-2">
+          <AlertTriangle className="h-4 w-4 text-amber-500" />
+          <h3 className="text-sm font-semibold text-gray-900">Leyenda Simbólica</h3>
+        </div>
+        <span className="text-xs text-gray-500">{isOpen ? 'Ocultar' : 'Mostrar'}</span>
+      </button>
+
+      {isOpen && (
+        <div className="mt-4 space-y-4">
+          {/* Tipos de Observación */}
+          <div>
+            <div className="text-xs font-medium uppercase tracking-wide text-gray-500 mb-2">Tipos de Observación</div>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+              {(Object.entries(OBSERVATION_TYPE_LEGEND) as [ResonanciaObservationType, typeof OBSERVATION_TYPE_LEGEND[ResonanciaObservationType]][]).map(([key, config]) => {
+                const IconComponent = config.icon;
+                return (
+                  <div
+                    key={key}
+                    className={`rounded-lg ${config.bgColor} p-2`}
+                    title={config.description}
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <IconComponent className={`h-3.5 w-3.5 ${config.color}`} />
+                      <span className={`text-xs font-medium ${config.color}`}>{config.label}</span>
+                    </div>
+                    <p className="mt-1 text-[10px] leading-tight text-gray-600 line-clamp-2">
+                      {config.description}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Contextos */}
+          <div>
+            <div className="text-xs font-medium uppercase tracking-wide text-gray-500 mb-2">Contextos</div>
+            <div className="grid grid-cols-3 gap-2">
+              {(Object.entries(CONTEXT_LEGEND) as [ResonanciaObservationContext, typeof CONTEXT_LEGEND[ResonanciaObservationContext]][]).map(([key, config]) => {
+                const IconComponent = config.icon;
+                return (
+                  <div
+                    key={key}
+                    className={`rounded-lg ${config.bgColor} p-2`}
+                    title={config.description}
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <IconComponent className={`h-3.5 w-3.5 ${config.color}`} />
+                      <span className={`text-xs font-medium ${config.color}`}>{config.label}</span>
+                    </div>
+                    <p className="mt-1 text-[10px] leading-tight text-gray-600 line-clamp-2">
+                      {config.description}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Estados */}
+          <div>
+            <div className="text-xs font-medium uppercase tracking-wide text-gray-500 mb-2">Estados</div>
+            <div className="grid grid-cols-2 gap-2">
+              {(Object.entries(STATE_LEGEND) as [ResonanciaObservationState, typeof STATE_LEGEND[ResonanciaObservationState]][]).map(([key, config]) => (
+                <div
+                  key={key}
+                  className={`rounded-lg ${config.bgColor} p-2`}
+                  title={config.description}
+                >
+                  <div className="flex items-center gap-1.5">
+                    <Minus className={`h-3.5 w-3.5 ${config.color}`} />
+                    <span className={`text-xs font-medium ${config.color}`}>{config.label}</span>
+                  </div>
+                  <p className="mt-1 text-[10px] leading-tight text-gray-600 line-clamp-2">
+                    {config.description}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+            <strong>Nota:</strong> Esta leyenda es orientativa. Los colores e iconos facilitan la navegación visual pero no representan diagnósticos ni valoraciones clínicas.
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Componente de Tooltip Educativo Expandido
+function EducationalTooltip({
+  id,
+  contentKey,
+  openId,
+  setOpenId,
+}: {
+  id: string;
+  contentKey: keyof typeof EDUCATIONAL_CONTENT;
+  openId: string | null;
+  setOpenId: (id: string | null) => void;
+}) {
+  const isOpen = openId === id;
+  const content = EDUCATIONAL_CONTENT[contentKey];
+
+  return (
+    <span className="relative inline-flex items-center" data-tooltip-root={id}>
+      <button
+        type="button"
+        className="inline-flex items-center text-indigo-500 hover:text-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300 rounded"
+        aria-label={`Más información sobre ${content.title}`}
+        aria-haspopup="true"
+        aria-expanded={isOpen}
+        aria-controls={`tooltip-${id}`}
+        onClick={() => setOpenId(isOpen ? null : id)}
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') {
+            setOpenId(null);
+          }
+        }}
+      >
+        <BookOpen className="h-4 w-4" aria-hidden="true" />
+        <span className="sr-only">{content.title}</span>
+      </button>
+
+      <span
+        id={`tooltip-${id}`}
+        role="tooltip"
+        className={[
+          'absolute left-0 top-full z-30 mt-2 w-96 max-w-[90vw] rounded-xl border border-indigo-200 bg-white p-4 text-xs leading-relaxed text-gray-800 shadow-xl',
+          isOpen ? 'block' : 'hidden',
+        ].join(' ')}
+      >
+        <div className="flex items-center gap-2 text-sm font-semibold text-indigo-900 mb-2">
+          <BookOpen className="h-4 w-4" />
+          {content.title}
+        </div>
+        <div className="whitespace-pre-line text-gray-700">
+          {content.content}
+        </div>
+        <button
+          type="button"
+          onClick={() => setOpenId(null)}
+          className="mt-3 text-xs text-indigo-600 hover:text-indigo-800 font-medium"
+        >
+          Cerrar
+        </button>
+      </span>
+    </span>
+  );
 }
 
 function InfoTooltip({
@@ -85,6 +347,7 @@ export default function ResonanciaAncestralWorkspace() {
   const [relationsError, setRelationsError] = useState<string | null>(null);
   const [nowLabel, setNowLabel] = useState<string | null>(null);
   const [openTooltipId, setOpenTooltipId] = useState<string | null>(null);
+  const [showLegend, setShowLegend] = useState(true);
 
   const [filters, setFilters] = useState<{
     type?: ResonanciaObservationType;
@@ -284,6 +547,107 @@ export default function ResonanciaAncestralWorkspace() {
     return { byType, byContext, byTypeAndContext, timeline };
   }, [observations]);
 
+  // === CÁLCULOS OPCIONALES: Densidad Kármica ===
+  const karmicDensityAnalysis = useMemo(() => {
+    if (!observations.length && !relations.length) {
+      return null;
+    }
+
+    // Puntuación base por tipo de observación (pesos simbólicos)
+    const typeWeights: Record<ResonanciaObservationType, number> = {
+      resonancia: 3,  // Mayor peso: eco transgeneracional
+      eje: 2.5,       // Líneas de continuidad
+      repeticion: 2,  // Patrones recurrentes
+      nota: 0.5,      // Anotaciones libres
+    };
+
+    // Puntuación por contexto
+    const contextWeights: Record<ResonanciaObservationContext, number> = {
+      familiar: 2,
+      relacional: 1.5,
+      sistemico: 2.5,
+    };
+
+    // Calcular score de densidad
+    let observationScore = 0;
+    for (const obs of observations) {
+      observationScore += typeWeights[obs.type] * contextWeights[obs.context];
+    }
+
+    // Score de relaciones (conexiones posicionales)
+    const relationScore = relations.length * 1.5;
+
+    // Score de anchors únicos (complejidad del mapa)
+    const uniqueAnchors = new Set<string>();
+    for (const obs of observations) {
+      for (const anchor of obs.anchors || []) {
+        uniqueAnchors.add(anchor);
+      }
+    }
+    const anchorComplexityScore = uniqueAnchors.size * 0.8;
+
+    // Score total normalizado (0-100)
+    const rawScore = observationScore + relationScore + anchorComplexityScore;
+    const normalizedScore = Math.min(100, Math.round(rawScore * 2));
+
+    // Clasificación simbólica
+    let classification: 'bajo' | 'moderado' | 'alto' | 'muy_alto';
+    let classificationLabel: string;
+    let classificationColor: string;
+    if (normalizedScore <= 25) {
+      classification = 'bajo';
+      classificationLabel = 'Emergente';
+      classificationColor = 'text-green-700 bg-green-100';
+    } else if (normalizedScore <= 50) {
+      classification = 'moderado';
+      classificationLabel = 'En desarrollo';
+      classificationColor = 'text-blue-700 bg-blue-100';
+    } else if (normalizedScore <= 75) {
+      classification = 'alto';
+      classificationLabel = 'Significativo';
+      classificationColor = 'text-amber-700 bg-amber-100';
+    } else {
+      classification = 'muy_alto';
+      classificationLabel = 'Denso';
+      classificationColor = 'text-rose-700 bg-rose-100';
+    }
+
+    // Sugerencias de observación basadas en los datos
+    const suggestions: string[] = [];
+    
+    const byType = descriptiveVisualizations.byType;
+    if (byType.resonancia === 0 && observations.length > 3) {
+      suggestions.push('Considere explorar posibles resonancias transgeneracionales en las observaciones.');
+    }
+    if (byType.repeticion > byType.eje && byType.repeticion > 2) {
+      suggestions.push('Se observan múltiples repeticiones. Podría ser útil identificar ejes de continuidad.');
+    }
+    if (relations.length === 0 && observations.length > 2) {
+      suggestions.push('No hay relaciones posicionales registradas. El keypad 1-9 puede ayudar a mapear vínculos.');
+    }
+    if (uniqueAnchors.size > 10) {
+      suggestions.push('Alta complejidad de anchors. Considere agrupar elementos relacionados.');
+    }
+    const byContext = descriptiveVisualizations.byContext;
+    if (byContext.sistemico === 0 && (byContext.familiar > 2 || byContext.relacional > 2)) {
+      suggestions.push('Contexto sistémico sin explorar. Podría revelar patrones colectivos.');
+    }
+
+    return {
+      rawScore,
+      normalizedScore,
+      classification,
+      classificationLabel,
+      classificationColor,
+      breakdown: {
+        observations: Math.round(observationScore),
+        relations: Math.round(relationScore),
+        anchors: Math.round(anchorComplexityScore),
+      },
+      suggestions,
+    };
+  }, [observations, relations, descriptiveVisualizations]);
+
   const neutralRelationGraph = useMemo(() => {
     const nodes = new Set<string>();
     const edges: Array<{ toLabel: string; position: number; context: ResonanciaObservationContext }> = [];
@@ -346,7 +710,15 @@ export default function ResonanciaAncestralWorkspace() {
           </span>
           <div>
             <p className="text-xs uppercase tracking-wide text-gray-500">Workspace simbólico</p>
-            <h1 className="text-3xl font-semibold tracking-tight text-gray-900">Resonancia Ancestral</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-3xl font-semibold tracking-tight text-gray-900">Resonancia Ancestral</h1>
+              <EducationalTooltip
+                id="edu_main"
+                contentKey="resonancia_ancestral"
+                openId={openTooltipId}
+                setOpenId={setOpenTooltipId}
+              />
+            </div>
             <p className="text-sm text-gray-600">Cartografía simbólica — no clínica.</p>
           </div>
         </div>
@@ -399,11 +771,107 @@ export default function ResonanciaAncestralWorkspace() {
               diagnósticos.
             </div>
 
+            {/* LEYENDA SIMBÓLICA */}
+            <SymbolicLegend isOpen={showLegend} onToggle={() => setShowLegend(!showLegend)} />
+
+            {/* PANEL DE DENSIDAD KÁRMICA (Cálculos Opcionales) */}
+            {karmicDensityAnalysis && (
+              <div className="rounded-xl border border-indigo-200 bg-gradient-to-r from-indigo-50 to-purple-50 p-5 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="h-5 w-5 text-indigo-600" />
+                    <h3 className="text-lg font-semibold text-gray-900">Indicador de Densidad Simbólica</h3>
+                    <EducationalTooltip
+                      id="edu_densidad"
+                      contentKey="densidad_karmica"
+                      openId={openTooltipId}
+                      setOpenId={setOpenTooltipId}
+                    />
+                  </div>
+                  <span className={`rounded-full px-3 py-1 text-sm font-medium ${karmicDensityAnalysis.classificationColor}`}>
+                    {karmicDensityAnalysis.classificationLabel}
+                  </span>
+                </div>
+
+                <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-4">
+                  {/* Score Principal */}
+                  <div className="rounded-lg border border-indigo-100 bg-white p-4">
+                    <div className="text-xs font-medium uppercase tracking-wide text-gray-500">Score Total</div>
+                    <div className="mt-2 flex items-baseline gap-1">
+                      <span className="text-3xl font-bold tabular-nums text-indigo-700">
+                        {karmicDensityAnalysis.normalizedScore}
+                      </span>
+                      <span className="text-sm text-gray-500">/100</span>
+                    </div>
+                    <div className="mt-2 h-2 rounded-full bg-gray-100">
+                      <div
+                        className="h-2 rounded-full bg-gradient-to-r from-indigo-400 to-purple-500"
+                        style={{ width: `${karmicDensityAnalysis.normalizedScore}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Breakdown */}
+                  <div className="rounded-lg border border-gray-100 bg-white p-4">
+                    <div className="text-xs font-medium uppercase tracking-wide text-gray-500">Observaciones</div>
+                    <div className="mt-2 text-2xl font-semibold tabular-nums text-gray-900">
+                      {karmicDensityAnalysis.breakdown.observations}
+                    </div>
+                    <div className="mt-1 text-xs text-gray-500">puntos</div>
+                  </div>
+
+                  <div className="rounded-lg border border-gray-100 bg-white p-4">
+                    <div className="text-xs font-medium uppercase tracking-wide text-gray-500">Relaciones</div>
+                    <div className="mt-2 text-2xl font-semibold tabular-nums text-gray-900">
+                      {karmicDensityAnalysis.breakdown.relations}
+                    </div>
+                    <div className="mt-1 text-xs text-gray-500">puntos</div>
+                  </div>
+
+                  <div className="rounded-lg border border-gray-100 bg-white p-4">
+                    <div className="text-xs font-medium uppercase tracking-wide text-gray-500">Complejidad</div>
+                    <div className="mt-2 text-2xl font-semibold tabular-nums text-gray-900">
+                      {karmicDensityAnalysis.breakdown.anchors}
+                    </div>
+                    <div className="mt-1 text-xs text-gray-500">anchors</div>
+                  </div>
+                </div>
+
+                {/* Sugerencias de Observación */}
+                {karmicDensityAnalysis.suggestions.length > 0 && (
+                  <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3">
+                    <div className="flex items-center gap-2 text-sm font-medium text-amber-800">
+                      <AlertTriangle className="h-4 w-4" />
+                      Sugerencias de Observación
+                    </div>
+                    <ul className="mt-2 space-y-1">
+                      {karmicDensityAnalysis.suggestions.map((suggestion, idx) => (
+                        <li key={idx} className="flex items-start gap-2 text-xs text-amber-700">
+                          <span className="mt-0.5">•</span>
+                          <span>{suggestion}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                <div className="mt-3 text-xs text-gray-500">
+                  ⚠️ Este indicador es descriptivo y experimental. No representa un diagnóstico ni establece gravedad clínica.
+                </div>
+              </div>
+            )}
+
             <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
               <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
                 <div className="text-xs uppercase tracking-wide text-gray-500">T1</div>
                 <div className="mt-1 flex items-center gap-2">
                   <h3 className="text-lg font-semibold text-gray-900">Mapa de resonancia</h3>
+                  <EducationalTooltip
+                    id="edu_mapa"
+                    contentKey="mapa_resonancia"
+                    openId={openTooltipId}
+                    setOpenId={setOpenTooltipId}
+                  />
                   <InfoTooltip
                     id="t1_map"
                     label="Mapa de resonancia: ayuda"
@@ -521,6 +989,12 @@ export default function ResonanciaAncestralWorkspace() {
                 <div className="text-xs uppercase tracking-wide text-gray-500">T2</div>
                 <div className="mt-1 flex items-center gap-2">
                   <h3 className="text-lg font-semibold text-gray-900">Ejes ancestrales</h3>
+                  <EducationalTooltip
+                    id="edu_ejes"
+                    contentKey="ejes_ancestrales"
+                    openId={openTooltipId}
+                    setOpenId={setOpenTooltipId}
+                  />
                   <InfoTooltip
                     id="t2_axis"
                     label="Eje simbólico: ayuda"
@@ -678,13 +1152,27 @@ export default function ResonanciaAncestralWorkspace() {
 
                   {!loading && observations.length ? (
                     <ul className="space-y-3">
-                      {observations.map((obs) => (
+                      {observations.map((obs) => {
+                        const typeConfig = OBSERVATION_TYPE_LEGEND[obs.type];
+                        const contextConfig = CONTEXT_LEGEND[obs.context];
+                        const stateConfig = STATE_LEGEND[obs.state];
+                        const TypeIcon = typeConfig.icon;
+                        const ContextIcon = contextConfig.icon;
+                        return (
                         <li key={obs.id} className="rounded-lg border border-gray-200 bg-gray-50 p-3">
                           <div className="flex flex-wrap items-center gap-2 text-xs text-gray-600">
                             <span className="rounded-full bg-white px-2 py-1">{new Date(obs.created_at).toLocaleString('es-ES')}</span>
-                            <span className="rounded-full bg-white px-2 py-1">{obs.type}</span>
-                            <span className="rounded-full bg-white px-2 py-1">{obs.context}</span>
-                            <span className="rounded-full bg-white px-2 py-1">{obs.state}</span>
+                            <span className={`rounded-full ${typeConfig.bgColor} ${typeConfig.color} px-2 py-1 flex items-center gap-1`}>
+                              <TypeIcon className="h-3 w-3" />
+                              {typeConfig.label}
+                            </span>
+                            <span className={`rounded-full ${contextConfig.bgColor} ${contextConfig.color} px-2 py-1 flex items-center gap-1`}>
+                              <ContextIcon className="h-3 w-3" />
+                              {contextConfig.label}
+                            </span>
+                            <span className={`rounded-full ${stateConfig.bgColor} ${stateConfig.color} px-2 py-1`}>
+                              {stateConfig.label}
+                            </span>
                             <InfoTooltip
                               id={`t3_item_${obs.id}`}
                               label="Entrada: ayuda"
@@ -724,7 +1212,8 @@ export default function ResonanciaAncestralWorkspace() {
                             </div>
                           ) : null}
                         </li>
-                      ))}
+                        );
+                      })}
                     </ul>
                   ) : null}
 
@@ -1165,6 +1654,12 @@ export default function ResonanciaAncestralWorkspace() {
                 <div className="mt-6 border-t border-gray-200 pt-4">
                   <div className="flex items-center gap-2">
                     <h4 className="text-base font-semibold text-gray-900">Posicionamiento relacional (simbólico)</h4>
+                    <EducationalTooltip
+                      id="edu_posicionamiento"
+                      contentKey="posicionamiento"
+                      openId={openTooltipId}
+                      setOpenId={setOpenTooltipId}
+                    />
                     <span className="text-xs text-gray-500">Define posiciones relacionales sin interpretación automática.</span>
                   </div>
 

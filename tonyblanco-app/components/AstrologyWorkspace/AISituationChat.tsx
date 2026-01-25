@@ -13,7 +13,8 @@ import {
   ChevronDown,
   ChevronUp,
 } from 'lucide-react';
-import { getApiBaseUrl, getAuthToken } from '@/lib/api-utils';
+import { getApiBaseUrl } from '@/lib/api-base';
+import { getAuthToken } from '@/lib/auth';
 
 /**
  * AISituationChat - Chat interactivo para consultas astrológicas

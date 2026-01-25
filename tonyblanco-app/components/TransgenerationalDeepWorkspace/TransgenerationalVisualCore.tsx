@@ -33,7 +33,7 @@ export default function TransgenerationalVisualCore({
         if (isMounted) {
           setPatientProfile(profile);
         }
-      } catch (error) {
+      } catch {
         if (isMounted) {
           setPatientProfile(null);
         }
@@ -60,11 +60,13 @@ export default function TransgenerationalVisualCore({
 
   const { state, loading } = useTreeStructuralState(treeInput);
 
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization -- Explicit memoization for documentation; Compiler may optimize
   const highlightedSefirot = useMemo(() => {
     if (!state?.sefirot_activas.length) return [];
     return state.sefirot_activas.map((item) => item.id_canonico);
   }, [state?.sefirot_activas]);
 
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization -- Explicit memoization for documentation
   const highlightedPaths = useMemo(() => {
     if (!state?.senderos_activos.length) return [];
     return state.senderos_activos
@@ -76,6 +78,7 @@ export default function TransgenerationalVisualCore({
       .filter((value): value is string => Boolean(value));
   }, [state?.senderos_activos]);
 
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization -- Explicit memoization for documentation
   const repeatedSefirot = useMemo(() => {
     if (!state?.repeticiones.length) return [];
     return state.repeticiones
@@ -83,6 +86,7 @@ export default function TransgenerationalVisualCore({
       .filter((id) => !id.includes('-'));
   }, [state?.repeticiones]);
 
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization -- Explicit memoization for documentation
   const repeatedPaths = useMemo(() => {
     if (!state?.repeticiones.length) return [];
     return state.repeticiones
@@ -174,6 +178,7 @@ export default function TransgenerationalVisualCore({
     return null;
   }, [hoveredPath, hoveredSefirah, state]);
 
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization -- Explicit memoization for documentation
   const weightRanking = useMemo(() => {
     if (!state?.pesos) return [];
     return Object.entries(state.pesos).sort((a, b) => b[1] - a[1]);

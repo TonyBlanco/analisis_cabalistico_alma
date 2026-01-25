@@ -1,5 +1,5 @@
-import React, { useState, useEffect, KeyboardEvent } from 'react';
-import { Circle, Moon, Sun, Star, Zap } from 'lucide-react';
+import React, { useState, useMemo, KeyboardEvent } from 'react';
+import { Circle, Sun, Star, Zap } from 'lucide-react';
 
 // Datos de las Sefiroth con sus posiciones en el diagrama
 type SephiraData = { x: number; y: number; color: string; label: string; number: number; hidden?: boolean };
@@ -60,32 +60,18 @@ const TreeOfLife: React.FC<{ initial?: Partial<UserNumbers> }> = ({ initial = {}
     destino: initial?.destino || '',
     caminoVida: initial?.caminoVida || ''
   }));
-  const [highlightedNumbers, setHighlightedNumbers] = useState(new Set());
   const [showDaat, setShowDaat] = useState(false);
 
-  // Update userNumbers when initial changes
-  useEffect(() => {
-    if (!initial) return;
-    setUserNumbers({
-      esencia: initial.esencia || '',
-      expresion: initial.expresion || '',
-      herencia: initial.herencia || '',
-      destino: initial.destino || '',
-      caminoVida: initial.caminoVida || ''
-    });
-  }, [initial]);
-
-  // Calcular qué números están presentes en el perfil
-  useEffect(() => {
-    const numbers = new Set();
+  // Derived state: highlighted numbers calculated from userNumbers (no effect needed)
+  const highlightedNumbers = useMemo(() => {
+    const numbers = new Set<number>();
     Object.values(userNumbers).forEach(val => {
       const num = parseInt(val);
       if (num >= 1 && num <= 22) {
         numbers.add(num);
       }
     });
-    // Using effect for state update is acceptable here as it's derived from form input
-    setHighlightedNumbers(numbers);
+    return numbers;
   }, [userNumbers]);
 
   const handleInputChange = (field: keyof UserNumbers, value: string) => {

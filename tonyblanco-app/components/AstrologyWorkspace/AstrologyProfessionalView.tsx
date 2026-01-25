@@ -1876,7 +1876,27 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                       </div>
 
                       {solarReturnError ? <div className="mt-2 text-xs text-red-600">{solarReturnError}</div> : null}
-                      {solarReturnSnapshot ? <div className="mt-2 text-xs text-gray-600">Instante: {solarReturnSnapshot.return_datetime_exact}</div> : null}
+                      {solarReturnSnapshot ? (
+                        <>
+                          <div className="mt-2 text-xs text-gray-600">Instante: {solarReturnSnapshot.return_datetime_exact}</div>
+                          {/* Preview del Retorno Solar */}
+                          <div className="mt-4 border rounded bg-gray-50 p-2">
+                            <div className="text-xs text-gray-500 mb-2 text-center">Vista previa — Retorno Solar {solarReturnYear}</div>
+                            <div className="flex justify-center">
+                              <AstroWheelAdvanced
+                                size={400}
+                                ascendantDeg={solarReturnSnapshot.houses?.[0]?.degree ?? 0}
+                                houses={solarReturnSnapshot.houses ?? []}
+                                planets={solarReturnSnapshot.planets ?? []}
+                                asteroids={[]}
+                                showAspects={true}
+                                orbDeg={orb}
+                                visualStyle="classic"
+                              />
+                            </div>
+                          </div>
+                        </>
+                      ) : null}
                     </div>
                   ) : null}
 

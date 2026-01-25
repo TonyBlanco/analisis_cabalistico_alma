@@ -1,12 +1,15 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { ArrowLeft } from 'lucide-react';
 import type { MultiTechAnalysisResult, NatalChartPayload } from '@/hooks/useNatalChart';
 import NatalChartSVGPro from './chart/NatalChartSVGAdvanced';
 import { buildAdvancedInputFromPayload } from './chart/chartLayoutEngine';
 import PsychologicalHoroscopeAdvanced from './psychological/PsychologicalHoroscopeAdvanced';
 import AstrologyDoubleWheelSVG from './AstrologyDoubleWheelSVG';
 import AstroDoubleWheelAdvanced from '@/components/astrology/AstroDoubleWheelAdvanced';
+import InfoTooltip from '@/components/common/InfoTooltip';
 // ... existing imports ...
 import { InquiryWidget } from '@/components/inquiry/InquiryWidget';
 
@@ -42,6 +45,8 @@ type RelationshipRole = 'active' | 'reactive';
 type DevelopmentStage = 'off' | 'early_childhood' | 'childhood_early' | 'childhood_middle' | 'adolescence' | 'young_adult';
 
 export default function AstrologyProfessionalView({ consultante, chart, analysis_result, calculateChart, refetch }: Props) {
+  const router = useRouter();
+
   // Audit log (controlled, local-only): helps verify incoming data shapes
   if (typeof window !== 'undefined') {
     // Keep log minimal and non-sensitive
@@ -1119,7 +1124,18 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
         <div className="max-w-7xl mx-auto p-6">
           {/* Header */}
           <header className="mb-6">
-            <h1 className="text-xl font-semibold text-gray-900">Carta Natal — Astrología Profesional</h1>
+            <div className="flex items-center justify-between mb-2">
+              <h1 className="text-xl font-semibold text-gray-900">Carta Natal — Astrología Profesional</h1>
+              <button
+                type="button"
+                onClick={() => router.back()}
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-900 transition-colors"
+                aria-label="Volver a la página anterior"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Volver
+              </button>
+            </div>
             <p className="text-sm text-gray-600 mt-1">Swiss Ephemeris · Solo lectura</p>
             {hasActiveComputedLayers ? (
               <div className="mt-2 inline-flex items-center rounded border border-emerald-100 bg-emerald-50 px-3 py-2 text-xs text-emerald-900">
@@ -1182,13 +1198,38 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
             </div>
             {/* Capas Profesionales: toggles + calculate buttons */}
             <div className="mb-4 p-3 border rounded-md bg-gray-50">
-              <h3 className="text-sm font-semibold mb-2">Capas Profesionales</h3>
+              <h3 className="flex items-center gap-1 text-sm font-semibold mb-2">
+                Capas Profesionales
+                <InfoTooltip
+                  title="Capas Profesionales"
+                  description="Diferentes técnicas astrológicas que se pueden activar para enriquecer el análisis. Cada capa aporta una perspectiva diferente sobre la carta natal."
+                  examples={[
+                    "Natal: la carta base con posiciones al nacer",
+                    "Tránsitos: planetas actuales sobre la carta natal",
+                    "Progresiones: evolución interna día-por-año",
+                    "Retorno Solar: temas del año astrológico"
+                  ]}
+                  position="bottom"
+                />
+              </h3>
               <div className="grid gap-3 md:grid-cols-3">
                 {/* Natal: locked on - show consultante snapshot details */}
-                <div className="p-3 bg-white border rounded">
+                <div className="p-3 bg-white border rounded relative">
                   <div className="flex items-start justify-between">
                     <div>
-                      <div className="text-sm font-medium">Natal</div>
+                      <div className="flex items-center gap-1 text-sm font-medium">
+                        Natal
+                        <InfoTooltip
+                          title="Carta Natal"
+                          description="La carta base calculada para el momento exacto del nacimiento. Muestra las posiciones de todos los planetas, casas y aspectos fundamentales de la personalidad."
+                          examples={[
+                            "Sol: esencia, vitalidad, propósito de vida",
+                            "Luna: emociones, necesidades, mundo interior",
+                            "Ascendente: cómo nos presentamos al mundo"
+                          ]}
+                          position="bottom"
+                        />
+                      </div>
                       <div className="text-xs text-gray-500 flex items-center gap-2">
                         <span>Estado:</span>
                         {hasChart ? renderLayerStateBadge('solo_lectura') : renderLayerStateBadge('pendiente')}
@@ -1220,10 +1261,22 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                 </div>
 
                 {/* Tránsitos */}
-                <div className="p-2 bg-white border rounded">
+                <div className="p-2 bg-white border rounded relative">
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-sm font-medium">Tránsitos</div>
+                      <div className="flex items-center gap-1 text-sm font-medium">
+                        Tránsitos
+                        <InfoTooltip
+                          title="Tránsitos Planetarios"
+                          description="Posiciones actuales de los planetas superpuestas sobre la carta natal. Muestran las energías cósmicas que están activando diferentes áreas de tu carta en este momento."
+                          examples={[
+                            "Saturno transitando tu Sol: período de maduración",
+                            "Júpiter en tu casa 10: oportunidades profesionales",
+                            "Urano sobre tu Luna: cambios emocionales súbitos"
+                          ]}
+                          position="bottom"
+                        />
+                      </div>
                       <div className="text-xs text-gray-500 flex items-center gap-2">
                         <span>Estado:</span>
                         {!hasChart ? renderLayerStateBadge('pendiente') : (overlays.transits ? renderLayerStateBadge('solo_lectura') : renderLayerStateBadge('no_calculado'))}
@@ -1249,10 +1302,22 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                 </div>
 
                 {/* Progresiones (secundarias) */}
-                <div className="p-2 bg-white border rounded">
+                <div className="p-2 bg-white border rounded relative">
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-sm font-medium">Progresiones (Secundarias)</div>
+                      <div className="flex items-center gap-1 text-sm font-medium">
+                        Progresiones (Secundarias)
+                        <InfoTooltip
+                          title="Progresiones Secundarias"
+                          description="Técnica que equivale cada día después del nacimiento a un año de vida. Muestra el desarrollo interno y la evolución psicológica de la persona a lo largo del tiempo."
+                          examples={[
+                            "Sol progresado cambiando de signo: nueva fase vital",
+                            "Luna progresada: ciclo emocional de ~28 años",
+                            "Venus progresado directo: apertura en relaciones"
+                          ]}
+                          position="bottom"
+                        />
+                      </div>
                       <div className="text-xs text-gray-500 flex items-center gap-2">
                         <span>Estado:</span>
                         {!hasChart ? renderLayerStateBadge('pendiente') : (overlays.progressions ? renderLayerStateBadge('solo_lectura') : renderLayerStateBadge('no_calculado'))}
@@ -1280,10 +1345,22 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
 
               <div className="mt-3 grid gap-3 md:grid-cols-2">
                 {/* Retorno Solar */}
-                <div className="p-2 bg-white border rounded">
+                <div className="p-2 bg-white border rounded relative">
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-sm font-medium">Retorno Solar</div>
+                      <div className="flex items-center gap-1 text-sm font-medium">
+                        Retorno Solar
+                        <InfoTooltip
+                          title="Retorno Solar"
+                          description="Carta calculada para el momento exacto en que el Sol regresa a la posición que tenía al nacimiento, cada año. Define los temas principales del año astrológico personal."
+                          examples={[
+                            "Ascendente del RS: el enfoque principal del año",
+                            "Casa donde cae el Sol RS: área de desarrollo",
+                            "Planetas en casa 1: protagonismo personal"
+                          ]}
+                          position="bottom"
+                        />
+                      </div>
                       <div className="text-xs text-gray-500 flex items-center gap-2">
                         <span>Estado:</span>
                         {!hasChart ? renderLayerStateBadge('pendiente') : (overlays.solarReturn ? renderLayerStateBadge('solo_lectura') : renderLayerStateBadge('no_calculado'))}
@@ -1310,10 +1387,22 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                 </div>
 
                 {/* Arco Solar (cálculo real) */}
-                <div className={`p-2 border rounded ${solarArcData ? 'bg-blue-50 border-blue-200' : 'bg-white border-gray-200'}`}>
+                <div className={`p-2 border rounded relative ${solarArcData ? 'bg-blue-50 border-blue-200' : 'bg-white border-gray-200'}`}>
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-sm font-medium">Arco Solar</div>
+                      <div className="flex items-center gap-1 text-sm font-medium">
+                        Arco Solar
+                        <InfoTooltip
+                          title="Arco Solar (Direcciones)"
+                          description="Técnica predictiva que avanza todos los planetas el mismo número de grados que el Sol ha progresado desde el nacimiento. Muestra activaciones de potencial natal."
+                          examples={[
+                            "Arco Solar a la Luna: eventos emocionales significativos",
+                            "Arco Solar al MC: logros profesionales",
+                            "Arco Solar a Venus: cambios en relaciones"
+                          ]}
+                          position="bottom"
+                        />
+                      </div>
                       <div className="text-xs text-gray-500 flex items-center gap-2">
                         <span>Estado:</span>
                         {!hasChart ? renderLayerStateBadge('pendiente') : (solarArcData ? renderLayerStateBadge('solo_lectura') : (solarArcLoading ? renderLayerStateBadge('calculando') : renderLayerStateBadge('no_calculado')))}
@@ -1365,11 +1454,21 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                 </div>
 
                 {/* Lunar Return Panel */}
-                <div className="mt-4 border-t border-gray-100 pt-4">
+                <div className="mt-4 border-t border-gray-100 pt-4 relative">
                   <div className="flex items-center justify-between">
-                    <div className="text-[13px] font-medium text-purple-900 flex items-center gap-2">
+                    <div className="flex items-center gap-1 text-[13px] font-medium text-purple-900">
                       🌙 Retorno Lunar
                       <span className="text-[10px] text-purple-600 font-normal">(Swiss Ephemeris)</span>
+                      <InfoTooltip
+                        title="Retorno Lunar"
+                        description="Carta calculada para el momento exacto en que la Luna regresa a su posición natal, aproximadamente cada 28 días. Indica el tono emocional y los temas del mes lunar personal."
+                        examples={[
+                          "Luna del RL en casa 10: foco en carrera",
+                          "Aspectos difíciles: mes de desafíos emocionales",
+                          "Júpiter angular: mes de optimismo y expansión"
+                        ]}
+                        position="bottom"
+                      />
                     </div>
                     <div className="flex items-center gap-2">
                       <input

@@ -1,6 +1,7 @@
 'use client';
 
 import ASTRO_METHODS from '@/lib/astrologyMethods';
+import InfoTooltip from '@/components/common/InfoTooltip';
 
 interface AstrologySidebarProps {
   houseSystem: string;
@@ -11,6 +12,10 @@ interface AstrologySidebarProps {
   setShowAsteroids?: (v: boolean) => void;
   synastryEnabled?: boolean;
   setSynastryEnabled?: (v: boolean) => void;
+  compositeEnabled?: boolean;
+  setCompositeEnabled?: (v: boolean) => void;
+  davisonEnabled?: boolean;
+  setDavisonEnabled?: (v: boolean) => void;
   hasIdentity?: boolean;
   activeLayers?: Set<string>;
   onToggleLayer?: (layer: string) => void;
@@ -47,6 +52,8 @@ interface AstrologySidebarProps {
     solarReturn?: boolean;
     solarArc?: boolean;
     lunarReturn?: boolean;
+    compositeChart?: boolean;
+    davisonChart?: boolean;
   };
   lunarReturnMonth?: string;
   setLunarReturnMonth?: (m: string) => void;
@@ -75,6 +82,10 @@ export default function AstrologySidebar({
   setShowAsteroids,
   synastryEnabled = false,
   setSynastryEnabled,
+  compositeEnabled = false,
+  setCompositeEnabled,
+  davisonEnabled = false,
+  setDavisonEnabled,
   hasIdentity = false,
   activeLayers,
   onToggleLayer,
@@ -186,7 +197,19 @@ export default function AstrologySidebar({
       <div className="flex-1 px-3 py-3 space-y-4 overflow-y-auto">
         {/* Tipo de Carta */}
         <div className="pt-2 border-t border-gray-100">
-          <label className="block text-xs font-semibold text-gray-600 mb-2">Tipo de Carta</label>
+          <label className="flex items-center gap-1 text-xs font-semibold text-gray-600 mb-2">
+            Tipo de Carta
+            <InfoTooltip
+              title="Tipo de Carta"
+              description="Define la estructura base de la carta astrológica. La Carta Natal muestra las posiciones planetarias al momento del nacimiento. Asteroides añade cuerpos menores para análisis más profundo. Estilo Huber aplica una lectura psicológica simbólica."
+              examples={[
+                "Carta Natal: posiciones de Sol, Luna, planetas al nacer",
+                "Natal + Asteroides: incluye Quirón, Juno, Ceres, etc.",
+                "Estilo Huber: interpretación psicológica profunda"
+              ]}
+              position="right"
+            />
+          </label>
           <div className="space-y-1 text-xs">
             {ASTRO_METHODS.filter(m => m.category === 'natal').map((m) => (
               m.id === 'huber' ? (
@@ -218,22 +241,101 @@ export default function AstrologySidebar({
 
         {/* Sinastría y Parejas */}
         <div className="pt-2 border-t border-gray-100">
-          <label className="block text-xs font-semibold text-gray-600 mb-2">Sinastría</label>
+          <label className="flex items-center gap-1 text-xs font-semibold text-gray-600 mb-2">
+            Sinastría
+            <InfoTooltip
+              title="Sinastría"
+              description="Técnicas de comparación entre dos cartas natales para analizar dinámicas de relación. Permite ver cómo interactúan las energías de dos personas."
+              examples={[
+                "Doble Rueda: superpone dos cartas para ver aspectos cruzados",
+                "Compuesta: carta media entre dos personas",
+                "Davison: carta del momento/lugar medio de la relación"
+              ]}
+              position="right"
+            />
+          </label>
           <div className="space-y-1 text-[11px]">
             <div className="flex items-center justify-between px-2 py-1 border rounded bg-white">
-              <div className="text-[13px]">Doble Rueda</div>
+              <div className="flex items-center gap-1 text-[13px]">
+                Doble Rueda
+                <InfoTooltip
+                  title="Doble Rueda"
+                  description="Superpone la carta natal de una segunda persona sobre la carta del consultante principal. Permite visualizar aspectos cruzados entre planetas de ambas cartas."
+                  examples={[
+                    "Venus de persona A en conjunción con Marte de persona B",
+                    "Luna de uno tocando el Sol del otro"
+                  ]}
+                  position="right"
+                />
+              </div>
               <label className="inline-flex items-center gap-2 text-sm">
                 <input type="checkbox" checked={Boolean(synastryEnabled)} onChange={(e) => setSynastryEnabled && setSynastryEnabled(e.target.checked)} />
               </label>
             </div>
-            <div className="px-2 py-1 bg-gray-50 border border-gray-200 rounded opacity-60 text-[11px]">Compuesta (próximo)</div>
-            <div className="px-2 py-1 bg-gray-50 border border-gray-200 rounded opacity-60 text-[11px]">Davison (próximo)</div>
+            <div className={`flex items-center justify-between px-2 py-1 border rounded ${canUseForecast ? 'bg-white border-gray-200' : 'bg-gray-50 border-gray-200 opacity-60'}`}>
+              <div className="flex items-center gap-1 text-[13px]" title="Carta Compuesta: puntos medios entre dos cartas natales">
+                Compuesta
+                <InfoTooltip
+                  title="Carta Compuesta"
+                  description="Crea una carta única calculando los puntos medios entre las posiciones planetarias de dos personas. Representa la energía de la relación como entidad."
+                  examples={[
+                    "El Sol compuesto muestra el propósito de la relación",
+                    "Venus compuesto indica cómo se expresa el amor mutuo"
+                  ]}
+                  position="right"
+                />
+              </div>
+              <label className="inline-flex items-center gap-2 text-sm">
+                <input 
+                  type="checkbox" 
+                  checked={Boolean(compositeEnabled)} 
+                  onChange={(e) => setCompositeEnabled && setCompositeEnabled(e.target.checked)}
+                  disabled={!canUseForecast}
+                  title={!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : 'Carta Compuesta: calcular puntos medios entre dos cartas natales'}
+                />
+              </label>
+            </div>
+            <div className={`flex items-center justify-between px-2 py-1 border rounded ${canUseForecast ? 'bg-white border-gray-200' : 'bg-gray-50 border-gray-200 opacity-60'}`}>
+              <div className="flex items-center gap-1 text-[13px]" title="Carta Davison: representa la relación como una entidad única, calculada para el momento y lugar medio entre ambas personas.">
+                Davison
+                <InfoTooltip
+                  title="Carta Davison"
+                  description="Calcula el momento y lugar medio exacto entre dos nacimientos, creando una carta para ese instante. Representa el 'nacimiento' de la relación."
+                  examples={[
+                    "Muestra el potencial energético inherente de la pareja",
+                    "Usado para timing de eventos relacionales"
+                  ]}
+                  position="right"
+                />
+              </div>
+              <label className="inline-flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={Boolean(davisonEnabled)}
+                  onChange={(e) => setDavisonEnabled && setDavisonEnabled(e.target.checked)}
+                  disabled={!canUseForecast}
+                  title={!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : 'Carta Davison: momento/lugar medio entre dos cartas natales'}
+                />
+              </label>
+            </div>
           </div>
         </div>
 
         {/* Pronóstico */}
         <div className="pt-2 border-t border-gray-100">
-          <label className="block text-xs font-semibold text-gray-600 mb-2">Pronóstico</label>
+          <label className="flex items-center gap-1 text-xs font-semibold text-gray-600 mb-2">
+            Pronóstico
+            <InfoTooltip
+              title="Técnicas de Pronóstico"
+              description="Herramientas para analizar ciclos temporales y tendencias. No predicen eventos específicos, sino que muestran patrones energéticos activos en diferentes momentos."
+              examples={[
+                "Tránsitos: planetas actuales vs. carta natal",
+                "Progresiones: desarrollo interno a lo largo del tiempo",
+                "Arco Solar: avance simbólico uniforme"
+              ]}
+              position="right"
+            />
+          </label>
           <div className="space-y-1 text-[11px]">
             <div className={`flex items-center justify-between px-2 py-1 border rounded ${canUseSymbolicDoubleWheel ? 'bg-white border-gray-200' : 'bg-gray-50 border-gray-200 opacity-60'}`}>
               <div
@@ -289,15 +391,35 @@ export default function AstrologySidebar({
 
         {/* Retornos */}
         <div className="pt-2 border-t border-gray-100">
-          <label className="block text-xs font-semibold text-gray-600 mb-2">Retornos</label>
+          <label className="flex items-center gap-1 text-xs font-semibold text-gray-600 mb-2">
+            Retornos
+            <InfoTooltip
+              title="Retornos Planetarios"
+              description="Cartas calculadas para el momento exacto en que un planeta vuelve a su posición natal. Los más usados son el Retorno Solar (anual) y el Retorno Lunar (mensual)."
+              examples={[
+                "Retorno Solar: el 'cumpleaños astrológico', marca temas del año",
+                "Retorno Lunar: marca temas del mes emocional"
+              ]}
+              position="right"
+            />
+          </label>
           <div className="space-y-1 text-[11px]">
             <div className={`px-2 py-2 border rounded ${canUseReturns ? 'bg-white border-gray-200' : 'bg-gray-50 border-gray-200 opacity-60'}`}>
               <div className="flex items-center justify-between">
                 <div
-                  className="text-[13px]"
+                  className="flex items-center gap-1 text-[13px]"
                   title={isRealMode ? 'Retorno Solar (cálculo real): calculado por el motor Swiss Ephemeris al recalcular la carta base.' : 'Retorno Solar · capa anual simbólica. No corresponde a un cálculo astronómico real.'}
                 >
                   Solar · <span className="text-gray-500">{isRealMode ? 'cálculo real' : 'capa anual simbólica'}</span>
+                  <InfoTooltip
+                    title="Retorno Solar"
+                    description="Carta calculada para el momento exacto en que el Sol regresa a su posición natal cada año. Indica los temas y energías principales para ese año de vida."
+                    examples={[
+                      "El Ascendente del Retorno Solar marca el enfoque del año",
+                      "Planetas en casa 1 indican áreas de protagonismo"
+                    ]}
+                    position="right"
+                  />
                 </div>
                 <label className="inline-flex items-center gap-2 text-sm">
                   <input
@@ -336,10 +458,19 @@ export default function AstrologySidebar({
             <div className={`px-2 py-2 border rounded ${canUseReturns ? 'bg-white border-gray-200' : 'bg-gray-50 border-gray-200 opacity-60'}`}>
               <div className="flex items-center justify-between">
                 <div
-                  className="text-[13px]"
+                  className="flex items-center gap-1 text-[13px]"
                   title={isRealMode ? "Retorno Lunar (Swiss Ephemeris) · momento exacto cuando la Luna regresa a su posición natal." : "Retorno Lunar · capa mensual simbólica."}
                 >
                   Lunar · <span className="text-gray-500">{isRealMode ? 'cálculo real' : 'capa mensual simbólica'}</span>
+                  <InfoTooltip
+                    title="Retorno Lunar"
+                    description="Carta calculada para el momento exacto en que la Luna regresa a su posición natal, aproximadamente cada 28 días. Indica los temas emocionales del mes."
+                    examples={[
+                      "Indica el clima emocional del ciclo lunar personal",
+                      "Útil para planificar actividades según la energía disponible"
+                    ]}
+                    position="right"
+                  />
                 </div>
                 <label className="inline-flex items-center gap-2 text-sm">
                   <input
@@ -606,14 +737,21 @@ export default function AstrologySidebar({
                     title={!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : 'Estrellas fijas (modo simbólico): arquetipos culturales.'}
                   />
                 </label>
-                <label className="flex items-center justify-between text-[13px] opacity-60">
-                  <span title="Placeholder: no implementar aún.">★ Estrellas secundarias (placeholder)</span>
+                <label className="flex items-center justify-between text-[13px]">
+                  <span title="Estrellas de magnitud 0-2 (complementarias): Achernar, Hamal, Polaris, Deneb, Betelgeuse, Rigel, Procyon, Capella, Vega, Arcturus.">
+                    ☆ Estrellas secundarias
+                  </span>
                   <input
                     type="checkbox"
                     checked={Boolean(fixedStars.secondary)}
-                    onChange={() => {}}
-                    disabled={true}
-                    title="Placeholder: no implementar aún."
+                    onChange={(e) => setFixedStars && setFixedStars({
+                      ...fixedStars,
+                      secondary: e.target.checked
+                    })}
+                    disabled={!canUseForecast}
+                    title={!canUseForecast 
+                      ? 'Requiere identidad válida' 
+                      : 'Estrellas secundarias (magnitud 0-2): complementan las principales con arquetipos adicionales.'}
                   />
                 </label>
               </div>

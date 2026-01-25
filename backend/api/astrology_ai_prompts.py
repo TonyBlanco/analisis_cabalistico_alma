@@ -9,7 +9,12 @@ REGLAS DE CONTENIDO:
 1. Terminología: "consultante" (no "paciente")
 2. Enfoque: Lectura simbólica/holística (no clínico/diagnóstico)
 3. Tono: Profesional, orientativo, sin absolutismos
-4. Longitud: Respuestas concisas pero completas (300-500 palabras)
+4. Longitud: Respuestas detalladas y profundas (800-1200 palabras)
+
+NOTA TÉCNICA:
+- max_tokens=8192 en todos los prompts principales
+- Necesario para gemini-2.5-flash que usa tokens en "thinking" interno
+- Ver docs/AI_INTEGRATION_GUIDE.md para detalles completos
 """
 
 from typing import Dict, Any, Optional
@@ -30,6 +35,8 @@ class PromptConfig:
 # ==============================================================================
 
 SYSTEM_BASE = """Eres un astrólogo profesional especializado en lectura simbólica y holística.
+Eres reconocido por tus interpretaciones DETALLADAS Y PROFUNDAS que ayudan a los terapeutas
+a comprender verdaderamente a sus consultantes.
 
 REGLAS ESTRICTAS:
 1. NUNCA uses terminología clínica o diagnóstica
@@ -37,7 +44,9 @@ REGLAS ESTRICTAS:
 3. Ofrece orientaciones, NO predicciones absolutas
 4. Incluye siempre el disclaimer de lectura simbólica
 5. Responde en español profesional pero accesible
-6. Máximo 500 palabras por respuesta
+6. IMPORTANTE: Proporciona interpretaciones DETALLADAS de 800-1200 palabras
+7. Desarrolla CADA sección con profundidad, no solo menciones superficiales
+8. Incluye ejemplos concretos de cómo se puede manifestar cada energía
 
 Tu enfoque integra:
 - Astrología psicológica (Liz Greene, Howard Sasportas)
@@ -57,7 +66,7 @@ DISCLAIMER = """
 
 NATAL_PROMPT = PromptConfig(
     system_prompt=SYSTEM_BASE,
-    user_template="""Analiza la siguiente carta natal para el terapeuta:
+    user_template="""Analiza la siguiente carta natal para el terapeuta de forma DETALLADA Y PROFUNDA:
 
 **Datos del Consultante:**
 - Signo Solar: {sun_sign}
@@ -72,15 +81,32 @@ NATAL_PROMPT = PromptConfig(
 **Aspectos mayores:**
 {aspects_summary}
 
-**Estructura de tu respuesta:**
-1. **Síntesis de Personalidad** (Sol-Luna-Ascendente): Describe la dinámica central
-2. **Patrones Energéticos**: Identifica los temas principales
-3. **Áreas de Desarrollo**: Sugiere focos de crecimiento
-4. **Orientación Terapéutica**: Cómo puede el terapeuta acompañar este patrón
+**Estructura de tu respuesta (desarrolla CADA sección con profundidad, mínimo 2-3 párrafos por sección):**
 
+1. **Síntesis de Personalidad** (Sol-Luna-Ascendente): 
+   - Describe la dinámica central y cómo interactúan estas tres energías
+   - Explica las posibles tensiones o armonías entre ellas
+   - Ofrece ejemplos concretos de cómo se manifiesta esta combinación
+
+2. **Patrones Energéticos**: 
+   - Identifica los 3-4 temas principales de la carta
+   - Explica qué planetas dominan y por qué
+   - Describe cómo los aspectos más importantes moldean la experiencia
+
+3. **Áreas de Desarrollo**: 
+   - Sugiere focos de crecimiento específicos
+   - Relaciona cada área con las posiciones planetarias relevantes
+   - Ofrece perspectivas sobre el potencial de transformación
+
+4. **Orientación Terapéutica**: 
+   - Cómo puede el terapeuta acompañar este patrón
+   - Qué temas pueden emerger en sesión
+   - Recursos internos del consultante que se pueden potenciar
+
+IMPORTANTE: Proporciona una interpretación COMPLETA y PROFESIONAL de al menos 800 palabras.
 Incluye el disclaimer de lectura simbólica al final.
 """,
-    max_tokens=1024,
+    max_tokens=8192,
     temperature=0.7,
 )
 
@@ -91,7 +117,7 @@ Incluye el disclaimer de lectura simbólica al final.
 
 TRANSITS_PROMPT = PromptConfig(
     system_prompt=SYSTEM_BASE,
-    user_template="""Analiza los tránsitos actuales sobre la carta natal:
+    user_template="""Analiza los tránsitos actuales sobre la carta natal de forma DETALLADA Y PROFUNDA:
 
 **Carta Natal Base:**
 - Sol natal: {natal_sun}
@@ -104,16 +130,37 @@ TRANSITS_PROMPT = PromptConfig(
 **Aspectos Tránsito-Natal relevantes:**
 {transit_aspects}
 
-**Estructura de tu respuesta:**
-1. **Clima Energético Actual**: Describe el tono general del momento
-2. **Tránsitos Destacados**: Los 2-3 más significativos
-3. **Desafíos del Período**: Qué requiere atención consciente
-4. **Oportunidades**: Qué se puede aprovechar
-5. **Recomendación Terapéutica**: Cómo acompañar este momento
+**Estructura de tu respuesta (desarrolla CADA sección con profundidad):**
 
+1. **Clima Energético Actual**: 
+   - Describe el tono general del momento cósmico
+   - Explica cómo los planetas lentos están influyendo
+   - Relaciona con los ciclos personales del consultante
+
+2. **Tránsitos Destacados**: 
+   - Analiza los 3-4 tránsitos más significativos en detalle
+   - Explica qué área de vida activan
+   - Describe la naturaleza de cada tránsito y su duración aproximada
+
+3. **Desafíos del Período**: 
+   - Identifica qué requiere atención consciente
+   - Ofrece perspectiva sobre los propósitos evolutivos
+   - Sugiere cómo trabajar constructivamente con estas energías
+
+4. **Oportunidades**: 
+   - Qué se puede aprovechar en este período
+   - Áreas favorecidas por los tránsitos actuales
+   - Momentos óptimos para iniciativas específicas
+
+5. **Recomendación Terapéutica**: 
+   - Cómo puede el terapeuta acompañar este momento
+   - Temas que pueden surgir en sesión
+   - Estrategias de apoyo alineadas con las energías actuales
+
+IMPORTANTE: Proporciona una interpretación COMPLETA y PROFESIONAL de al menos 800 palabras.
 Incluye el disclaimer de lectura simbólica al final.
 """,
-    max_tokens=1024,
+    max_tokens=8192,
     temperature=0.7,
 )
 
@@ -124,7 +171,7 @@ Incluye el disclaimer de lectura simbólica al final.
 
 PROGRESSIONS_PROMPT = PromptConfig(
     system_prompt=SYSTEM_BASE,
-    user_template="""Analiza las progresiones secundarias actuales:
+    user_template="""Analiza las progresiones secundarias actuales de forma DETALLADA Y PROFUNDA:
 
 **Carta Natal Base:**
 - Sol natal: {natal_sun} en Casa {natal_sun_house}
@@ -139,16 +186,37 @@ PROGRESSIONS_PROMPT = PromptConfig(
 **Detalles:**
 {progressions_summary}
 
-**Estructura de tu respuesta:**
-1. **Ciclo Evolutivo**: En qué fase de desarrollo se encuentra
-2. **Sol Progresado**: Cómo evoluciona la identidad/propósito
-3. **Luna Progresada**: Ciclo emocional de 28 años
-4. **Temas de Desarrollo**: Qué está madurando internamente
-5. **Orientación Terapéutica**: Cómo acompañar esta evolución
+**Estructura de tu respuesta (desarrolla CADA sección con profundidad):**
 
+1. **Ciclo Evolutivo**: 
+   - En qué fase de desarrollo se encuentra el consultante
+   - Cómo se relaciona con el ciclo de vida más amplio
+   - Qué etapa de maduración representa
+
+2. **Sol Progresado**: 
+   - Cómo está evolucionando la identidad y el propósito
+   - Significado del cambio de signo o casa (si aplica)
+   - Temas de autoexpresión que están madurando
+
+3. **Luna Progresada**: 
+   - Dónde se encuentra en el ciclo emocional de 28 años
+   - Qué necesidades emocionales están en primer plano
+   - Cómo afecta las relaciones y la vida interior
+
+4. **Temas de Desarrollo**: 
+   - Qué está madurando internamente
+   - Aspectos progresados significativos
+   - Integración de experiencias pasadas
+
+5. **Orientación Terapéutica**: 
+   - Cómo puede el terapeuta acompañar esta evolución
+   - Procesos internos que pueden necesitar apoyo
+   - Potenciales que están emergiendo
+
+IMPORTANTE: Proporciona una interpretación COMPLETA y PROFESIONAL de al menos 800 palabras.
 Incluye el disclaimer de lectura simbólica al final.
 """,
-    max_tokens=1024,
+    max_tokens=8192,
     temperature=0.7,
 )
 
@@ -159,7 +227,7 @@ Incluye el disclaimer de lectura simbólica al final.
 
 SOLAR_RETURN_PROMPT = PromptConfig(
     system_prompt=SYSTEM_BASE,
-    user_template="""Analiza el Retorno Solar para el año actual:
+    user_template="""Analiza el Retorno Solar para el año actual de forma DETALLADA Y PROFUNDA:
 
 **Carta Natal Base:**
 - Sol natal: {natal_sun}
@@ -174,16 +242,37 @@ SOLAR_RETURN_PROMPT = PromptConfig(
 **Posiciones del Retorno:**
 {solar_return_summary}
 
-**Estructura de tu respuesta:**
-1. **Tema del Año Solar**: El enfoque principal del período
-2. **Ascendente del Retorno**: Cómo se presentará ante el mundo
-3. **Luna del Retorno**: Necesidades emocionales del año
-4. **Casas Activadas**: Áreas de vida en foco
-5. **Recomendaciones para el Año**: Orientación práctica
+**Estructura de tu respuesta (desarrolla CADA sección con profundidad):**
 
+1. **Tema del Año Solar**: 
+   - El enfoque principal del período anual
+   - Cómo se relaciona con el ciclo de vida actual
+   - Lecciones y oportunidades del año
+
+2. **Ascendente del Retorno**: 
+   - Cómo se presentará el consultante ante el mundo este año
+   - Nueva "máscara" o enfoque en la interacción social
+   - Energías que proyectará
+
+3. **Luna del Retorno**: 
+   - Necesidades emocionales del año
+   - Dónde buscará seguridad y nutrición
+   - Ritmos emocionales del período
+
+4. **Casas Activadas**: 
+   - Áreas de vida en foco este año
+   - Dónde se concentrará la energía
+   - Sectores que requerirán atención
+
+5. **Recomendaciones para el Año**: 
+   - Orientación práctica para el terapeuta
+   - Cómo apoyar al consultante en este ciclo
+   - Momentos clave del año solar
+
+IMPORTANTE: Proporciona una interpretación COMPLETA y PROFESIONAL de al menos 800 palabras.
 Incluye el disclaimer de lectura simbólica al final.
 """,
-    max_tokens=1024,
+    max_tokens=8192,
     temperature=0.7,
 )
 
@@ -210,10 +299,11 @@ nunca para predecir con certeza.
 **Tránsitos Actuales (si relevantes):**
 {transits_context}
 
-Responde de forma directa y práctica, enfocándote en la pregunta.
-Máximo 300 palabras. Incluye el disclaimer al final.
+Responde de forma directa pero completa, enfocándote en la pregunta.
+Proporciona una respuesta de 400-600 palabras que sea práctica y útil para el terapeuta.
+Incluye el disclaimer al final.
 """,
-    max_tokens=800,
+    max_tokens=4096,
     temperature=0.7,
 )
 

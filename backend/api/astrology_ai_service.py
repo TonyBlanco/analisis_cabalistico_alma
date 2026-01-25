@@ -4,12 +4,20 @@ Servicio AI para Interpretaciones Astrológicas
 Este servicio conecta con Gemini API para generar interpretaciones
 profesionales de las diferentes capas astrológicas.
 
+CONFIGURACIÓN CRÍTICA:
+- Modelo: gemini-2.5-flash
+- max_tokens: 8192 (necesario para respuestas completas)
+- Temperatura: 0.7 (balance creatividad/precisión)
+
+NOTA: gemini-2.5-flash es un modelo "thinking" que usa tokens internamente
+para razonar antes de responder. Por eso necesitamos max_tokens alto.
+Ver docs/AI_INTEGRATION_GUIDE.md para detalles completos.
+
 Uso:
-    from api.astrology_ai_service import AstrologyAIService
+    from api.astrology_ai_service import astrology_ai_service
     
-    service = AstrologyAIService()
-    if service.enabled:
-        result = service.interpret_natal(chart_data)
+    if astrology_ai_service.enabled:
+        result = astrology_ai_service.interpret_natal(chart_data)
 """
 
 import logging
@@ -75,21 +83,25 @@ class AstrologyAIService:
         self.client = None
         self.error_message = None
         self._genai = None
+        self._init_attempted = False
         
         # Defer actual initialization
         AstrologyAIService._initialized = True
     
     def _ensure_initialized(self):
         """Lazy initialization of Gemini client."""
-        if self.client is not None or self.error_message:
-            return  # Already initialized
+        if self._init_attempted:
+            return  # Already attempted (success or failure)
+        
+        self._init_attempted = True
             
         # Import genai lazily
         try:
             from google import genai
             self._genai = genai
-        except ImportError:
-            self.error_message = "Módulo google.genai no instalado"
+            logger.info("google.genai imported successfully")
+        except ImportError as e:
+            self.error_message = f"Módulo google.genai no instalado: {e}"
             logger.warning(f"AstrologyAIService: {self.error_message}")
             return
         
@@ -137,25 +149,46 @@ class AstrologyAIService:
             return f"Error: {self.error_message or 'Servicio AI no disponible'}"
         
         try:
-            # Combinar prompts para Gemini
-            full_prompt = f"{system_prompt}\n\n---\n\n{user_prompt}"
+            # Import types for proper configuration
+            from google.genai import types
+            
+            print(f"[AI DEBUG] Generating content with max_tokens={max_tokens}, model={self.model_name}")
+            
+            # Create proper configuration with GenerateContentConfig
+            config = types.GenerateContentConfig(
+                temperature=temperature,
+                maxOutputTokens=max_tokens,
+                systemInstruction=system_prompt,
+            )
             
             response = self.client.models.generate_content(
                 model=self.model_name,
-                contents=full_prompt,
-                config={
-                    'temperature': temperature,
-                    'max_output_tokens': max_tokens,
-                }
+                contents=user_prompt,
+                config=config,
             )
             
+            # Log response metadata for debugging
+            if hasattr(response, 'candidates') and response.candidates:
+                candidate = response.candidates[0]
+                finish_reason = getattr(candidate, 'finish_reason', 'unknown')
+                print(f"[AI DEBUG] Response finish_reason: {finish_reason}")
+                
+                # Check if response was cut short
+                if hasattr(candidate, 'safety_ratings'):
+                    print(f"[AI DEBUG] Safety ratings: {candidate.safety_ratings}")
+            
             # Extraer texto de la respuesta
+            text = None
             if hasattr(response, 'text'):
-                return response.text
+                text = response.text
             elif hasattr(response, 'candidates') and response.candidates:
                 candidate = response.candidates[0]
                 if hasattr(candidate, 'content') and hasattr(candidate.content, 'parts'):
-                    return ''.join(part.text for part in candidate.content.parts if hasattr(part, 'text'))
+                    text = ''.join(part.text for part in candidate.content.parts if hasattr(part, 'text'))
+            
+            if text:
+                logger.info(f"Generated text length: {len(text)} characters")
+                return text
             
             return extract_text(response) if response else "Sin respuesta del modelo"
             
@@ -173,6 +206,9 @@ class AstrologyAIService:
         Returns:
             AIInterpretationResult con la interpretación
         """
+        # Ensure service is initialized
+        self._ensure_initialized()
+        
         if not self.enabled:
             return AIInterpretationResult(
                 success=False,
@@ -228,6 +264,9 @@ class AstrologyAIService:
         Returns:
             AIInterpretationResult con la interpretación
         """
+        # Ensure service is initialized
+        self._ensure_initialized()
+        
         if not self.enabled:
             return AIInterpretationResult(
                 success=False,
@@ -282,6 +321,9 @@ class AstrologyAIService:
         Returns:
             AIInterpretationResult con la interpretación
         """
+        # Ensure service is initialized
+        self._ensure_initialized()
+        
         if not self.enabled:
             return AIInterpretationResult(
                 success=False,
@@ -338,6 +380,9 @@ class AstrologyAIService:
         Returns:
             AIInterpretationResult con la interpretación
         """
+        # Ensure service is initialized
+        self._ensure_initialized()
+        
         if not self.enabled:
             return AIInterpretationResult(
                 success=False,
@@ -394,6 +439,9 @@ class AstrologyAIService:
         Returns:
             AIInterpretationResult con la respuesta
         """
+        # Ensure service is initialized
+        self._ensure_initialized()
+        
         if not self.enabled:
             return AIInterpretationResult(
                 success=False,

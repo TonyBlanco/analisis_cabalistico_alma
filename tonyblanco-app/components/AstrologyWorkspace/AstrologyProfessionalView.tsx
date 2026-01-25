@@ -21,6 +21,7 @@ import { normalizeNatalForWheel } from '@/components/astrology/normalizer';
 import CalculationStatusPanel from './CalculationStatusPanel';
 import AstrologySidebar from './AstrologySidebar';
 import AIInterpretationPanel from './AIInterpretationPanel';
+import AISituationChat from './AISituationChat';
 
 interface Props {
   consultante: ActiveConsultante;
@@ -1439,6 +1440,15 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                 hasTransits={overlays.transits}
                 hasProgressions={overlays.progressions}
                 hasSolarReturn={overlays.solarReturn}
+              />
+            </div>
+
+            {/* AI Situation Chat */}
+            <div className="mb-6">
+              <AISituationChat
+                patientId={consultante?.id ?? null}
+                hasChart={hasChart}
+                patientName={consultante?.first_name || consultante?.name || undefined}
               />
             </div>
 

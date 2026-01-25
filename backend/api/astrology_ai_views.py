@@ -607,3 +607,195 @@ class AstrologyAIInterpretationDetailView(APIView):
             'success': True,
             'message': 'Interpretation archived successfully'
         })
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class AstrologyInterpretPsychologicalView(APIView):
+    """
+    POST /api/astrology/interpret/psychological/
+    
+    Genera interpretación AI psicológica junguiana de secciones específicas.
+    
+    Request body:
+        {
+            "patient_id": 4,
+            "section": "archetypes" | "shadow" | "individuation" | "sins",
+            "data": [...],
+            "profile_summary": {...}
+        }
+    
+    Response:
+        {
+            "success": true,
+            "interpretation": "...",
+            "section": "archetypes"
+        }
+    """
+    permission_classes = [IsAuthenticated, IsTherapist]
+    
+    SECTION_PROMPTS = {
+        'archetypes': """Analiza los arquetipos dominantes de esta carta natal desde una perspectiva junguiana (estilo Liz Greene).
+
+Para cada arquetipo planetario identificado, explica:
+1. El significado psicológico profundo del planeta como arquetipo
+2. Cómo se manifiesta en la personalidad según su peso/importancia
+3. Aspectos de luz (expresión positiva) y sombra (expresión distorsionada)
+4. Cómo este arquetipo interactúa con los demás dominantes
+
+Arquetipos dominantes identificados:
+{data}
+
+Contexto del perfil completo:
+{profile_summary}
+
+Genera una interpretación profunda, psicológica y terapéuticamente útil. 
+Usa lenguaje accesible pero manteniendo la profundidad junguiana.
+No hagas predicciones - enfócate en dinámicas psicológicas internas.""",
+
+        'shadow': """Analiza los conflictos internos (Sombra junguiana) presentes en esta carta natal.
+
+Para cada aspecto tenso (cuadraturas, oposiciones) identificado:
+1. El conflicto arquetípico que representa
+2. Cómo puede manifestarse en la vida cotidiana
+3. El mensaje evolutivo detrás de la tensión
+4. Vías de integración y trabajo terapéutico sugerido
+
+Aspectos de sombra identificados:
+{data}
+
+Contexto del perfil completo:
+{profile_summary}
+
+Genera una interpretación que ayude al terapeuta a entender las dinámicas internas 
+del consultante y posibles áreas de trabajo psicológico.""",
+
+        'individuation': """Analiza las pistas de individuación (proceso de integración junguiano) en esta carta natal.
+
+Para cada aspecto armónico (trígonos, sextiles) identificado:
+1. El potencial de integración que representa
+2. Recursos internos disponibles para el desarrollo
+3. Cómo estos aspectos facilitan el camino de individuación
+4. Sugerencias para potenciar estos recursos en terapia
+
+Claves de individuación identificadas:
+{data}
+
+Contexto del perfil completo:
+{profile_summary}
+
+Genera una interpretación que ilumine el camino de desarrollo personal 
+y los recursos disponibles para el proceso terapéutico.""",
+
+        'sins': """Analiza los arquetipos de los "Siete Pecados Capitales" presentes en esta carta natal.
+
+Estos no son juicios morales sino arquetipos simbólicos de energías intensas:
+- Ira (Marte): impulso, acción, agresión
+- Orgullo (Sol): ego, identidad, reconocimiento
+- Lujuria (Venus/Marte): deseo, pasión, sensualidad
+- Pereza (Luna/Neptuno): resistencia, evasión, pasividad
+- Gula (Júpiter): exceso, expansión, indulgencia
+- Envidia (Saturno/Plutón): comparación, carencia, ambición oscura
+- Avaricia (Saturno): control, retención, miedo a la pérdida
+
+Arquetipos detectados:
+{data}
+
+Contexto del perfil completo:
+{profile_summary}
+
+Interpreta cada arquetipo detectado desde una perspectiva compasiva y terapéutica.
+El objetivo es comprensión, no juicio. Explica cómo trabajar con estas energías.""",
+    }
+    
+    def post(self, request):
+        patient_id = request.data.get('patient_id')
+        section = request.data.get('section')
+        data = request.data.get('data', [])
+        profile_summary = request.data.get('profile_summary', {})
+        
+        if not patient_id:
+            return Response(
+                {'error': 'patient_id es requerido'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if section not in self.SECTION_PROMPTS:
+            return Response(
+                {'error': f'Sección inválida. Opciones: {list(self.SECTION_PROMPTS.keys())}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            patient = Patient.objects.get(id=patient_id, therapist=request.user)
+        except Patient.DoesNotExist:
+            return Response(
+                {'error': 'Paciente no encontrado o sin acceso'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        astrology_ai_service._ensure_initialized()
+        if not astrology_ai_service.enabled:
+            return Response(
+                {'error': astrology_ai_service.error_message or 'Servicio AI no disponible'},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE
+            )
+        
+        # Format the prompt with data
+        import json
+        prompt = self.SECTION_PROMPTS[section].format(
+            data=json.dumps(data, indent=2, ensure_ascii=False),
+            profile_summary=json.dumps(profile_summary, indent=2, ensure_ascii=False)
+        )
+        
+        # Generate interpretation using the AI service
+        try:
+            result = astrology_ai_service._call_gemini(
+                prompt=prompt,
+                system_instruction="""Eres un astrólogo psicológico experto en el enfoque junguiano, 
+especializado en la obra de Liz Greene y el análisis arquetípico profundo.
+
+Tu objetivo es proporcionar interpretaciones que:
+1. Sean psicológicamente profundas pero accesibles
+2. Ayuden al terapeuta a entender la estructura psíquica del consultante
+3. Sugieran vías de trabajo terapéutico
+4. Eviten predicciones - solo dinámicas psicológicas
+5. Sean compasivas y no enjuiciadoras
+
+Escribe en español, con un tono profesional pero cálido."""
+            )
+            
+            if result:
+                # Save to database
+                interpretation = AstrologyAIInterpretation.objects.create(
+                    patient=patient,
+                    created_by=request.user,
+                    interpretation_type=f'psychological_{section}',
+                    interpretation_text=result,
+                    input_context={
+                        'section': section,
+                        'data': data,
+                        'profile_summary': profile_summary
+                    },
+                    model_version='gemini-2.5-flash',
+                )
+                
+                logger.info(f"Saved psychological interpretation ({section}) for patient {patient_id}")
+                
+                return Response({
+                    'success': True,
+                    'interpretation': result,
+                    'section': section,
+                    'patient_id': patient_id,
+                    'interpretation_id': interpretation.id,
+                })
+            else:
+                return Response(
+                    {'error': 'No se pudo generar la interpretación'},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+        except Exception as e:
+            logger.error(f"Error generating psychological interpretation: {e}")
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

@@ -99,7 +99,7 @@ interface InterpretationResult {
 }
 
 interface Props {
-  patientId: number | null;
+  patientId: string | number | null;
   hasChart: boolean;
   hasTransits?: boolean;
   hasProgressions?: boolean;

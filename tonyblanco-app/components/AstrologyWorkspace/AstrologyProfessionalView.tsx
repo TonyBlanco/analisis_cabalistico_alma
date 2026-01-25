@@ -1547,7 +1547,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
               <AISituationChat
                 patientId={consultante?.id ?? null}
                 hasChart={hasChart}
-                patientName={consultante?.first_name || consultante?.name || undefined}
+                patientName={consultante?.nombre_completo ?? undefined}
               />
             </div>
 
@@ -2480,7 +2480,10 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
               ) : (
                 // Advanced psychological panel uses deterministic psychEngine
                 (hasChart && natal ? (
-                  <PsychologicalHoroscopeAdvanced advanced={buildAdvancedInputFromPayload(natal)!} />
+                  <PsychologicalHoroscopeAdvanced 
+                    advanced={buildAdvancedInputFromPayload(natal)!} 
+                    patientId={consultante?.id}
+                  />
                 ) : (
                   <div className="p-6 text-center text-sm text-gray-600">
                     Datos psicológicos pendientes — completa los datos de nacimiento para generar la lectura.

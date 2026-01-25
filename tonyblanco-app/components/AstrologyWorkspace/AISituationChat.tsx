@@ -74,7 +74,7 @@ const SUGGESTED_QUESTIONS: SuggestedQuestion[] = [
 ];
 
 interface Props {
-  patientId: number | null;
+  patientId: string | number | null;
   hasChart: boolean;
   patientName?: string;
 }

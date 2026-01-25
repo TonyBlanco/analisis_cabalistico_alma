@@ -23,6 +23,10 @@ class AstrologyAIInterpretation(models.Model):
         ('progressions', 'Progresiones'),
         ('solar_return', 'Retorno Solar'),
         ('situation', 'Situación Actual'),
+        ('psychological_archetypes', 'Psico: Arquetipos'),
+        ('psychological_shadow', 'Psico: Sombra'),
+        ('psychological_individuation', 'Psico: Individuación'),
+        ('psychological_sins', 'Psico: Arquetipos Pecados'),
     ]
     
     # Relations
@@ -41,7 +45,7 @@ class AstrologyAIInterpretation(models.Model):
     
     # Interpretation metadata
     interpretation_type = models.CharField(
-        max_length=20,
+        max_length=30,  # Increased for psychological types
         choices=INTERPRETATION_TYPES,
         help_text='Type of astrological interpretation'
     )

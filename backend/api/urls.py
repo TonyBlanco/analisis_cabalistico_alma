@@ -49,6 +49,7 @@ from .astrology_ai_views import (
     AstrologyInterpretTransitsView,
     AstrologyInterpretProgressionsView,
     AstrologyInterpretSolarReturnView,
+    AstrologyInterpretPsychologicalView,
     AstrologyQuerySituationView,
     AstrologyAIStatusView,
     AstrologyAIInterpretationListView,
@@ -262,6 +263,7 @@ urlpatterns = [
     path('astrology/interpret/transits/', AstrologyInterpretTransitsView.as_view(), name='astrology_interpret_transits'),
     path('astrology/interpret/progressions/', AstrologyInterpretProgressionsView.as_view(), name='astrology_interpret_progressions'),
     path('astrology/interpret/solar-return/', AstrologyInterpretSolarReturnView.as_view(), name='astrology_interpret_solar_return'),
+    path('astrology/interpret/psychological/', AstrologyInterpretPsychologicalView.as_view(), name='astrology_interpret_psychological'),
     path('astrology/interpret/situation/', AstrologyQuerySituationView.as_view(), name='astrology_interpret_situation'),
     
     # Astrology AI Interpretation Management

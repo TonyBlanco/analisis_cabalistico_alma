@@ -323,4 +323,7 @@ urlpatterns = [
     
     # SWM Transgeneracional Profundo (Psychogenealogy Workspace)
     path('swm/transgenerational/', include('swm.transgenerational.urls', namespace='swm_transgenerational')),
+    
+    # Active Inquiry Engine (Patient context collection)
+    path('inquiry/', include('api.inquiry.urls')),
 ]

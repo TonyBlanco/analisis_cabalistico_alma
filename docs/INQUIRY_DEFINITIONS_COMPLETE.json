@@ -1,0 +1,612 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "created_date": "2026-01-25",
+    "total_inquiries": 30,
+    "author": "AGENTE_ARQ",
+    "description": "Definiciones completas de las 30 Inquiry Definitions para Active Inquiry Engine MVP"
+  },
+  "inquiries": {
+    "astrology": [
+      {
+        "code": "astro_current_life_events",
+        "source_module": "astrology",
+        "priority": "critical",
+        "category": "contexto_temporal",
+        "question_type": "text_long",
+        "question_text": "¿Qué eventos significativos han ocurrido en tu vida en los últimos 30 días? Por favor, incluye cambios importantes como: mudanzas, cambios de trabajo, inicios o finales de relaciones, pérdidas, logros, decisiones importantes, etc.",
+        "question_text_short": "Eventos vitales recientes (últimos 30 días)",
+        "help_text": "Esta información nos ayuda a contextualizar los tránsitos planetarios actuales con tu experiencia real. No hay eventos 'demasiado pequeños' - si fue significativo para ti, es importante.",
+        "placeholder": "Ej: 'Comencé un nuevo trabajo hace 2 semanas, mi padre se enfermó gravemente, decidí mudarme...'",
+        "validation": {
+          "min_length": 20,
+          "max_length": 1000
+        },
+        "trigger_condition": {
+          "on_module_open": true,
+          "refresh_after_days": 30
+        },
+        "valid_for_days": 30,
+        "collected_by_default": "therapist_session"
+      },
+      {
+        "code": "astro_transit_resonance",
+        "source_module": "astrology",
+        "priority": "important",
+        "category": "experiencia_subjetiva",
+        "question_type": "choice_multi",
+        "question_text": "Al revisar los tránsitos astrológicos actuales, ¿cuáles de estos temas sientes especialmente presentes en tu vida en este momento? (Puedes seleccionar varios)",
+        "question_text_short": "Temas vitales actuales",
+        "help_text": "Los tránsitos planetarios pueden manifestarse de múltiples formas. Esto nos ayuda a identificar qué áreas de tu vida están más activas.",
+        "choices": [
+          {"value": "identity_direction", "label": "Cambios en identidad o dirección de vida", "related_planets": ["Sol", "Plutón", "Urano"]},
+          {"value": "emotional_family", "label": "Temas emocionales o familiares profundos", "related_planets": ["Luna", "Cáncer", "Casa 4"]},
+          {"value": "communication_learning", "label": "Comunicación, aprendizaje, ideas nuevas", "related_planets": ["Mercurio", "Géminis"]},
+          {"value": "relationships_values", "label": "Relaciones, amor, valores personales", "related_planets": ["Venus", "Libra"]},
+          {"value": "action_energy", "label": "Acción, energía, conflictos o asertividad", "related_planets": ["Marte", "Aries"]},
+          {"value": "expansion_growth", "label": "Expansión, crecimiento, viajes, educación", "related_planets": ["Júpiter", "Sagitario"]},
+          {"value": "restrictions_responsibility", "label": "Restricciones, responsabilidades, estructuras", "related_planets": ["Saturno", "Capricornio"]},
+          {"value": "unexpected_changes", "label": "Cambios inesperados, liberación, rebeldía", "related_planets": ["Urano", "Acuario"]},
+          {"value": "spirituality_intuition", "label": "Espiritualidad, intuición, confusión o inspiración", "related_planets": ["Neptuno", "Piscis"]},
+          {"value": "transformation_power", "label": "Transformación profunda, poder, intensidad", "related_planets": ["Plutón", "Escorpio"]},
+          {"value": "none", "label": "Ninguno de estos temas resuena especialmente"}
+        ],
+        "trigger_condition": {
+          "analysis_exists": "astrology",
+          "field_calculated": "transits"
+        },
+        "valid_for_days": 60
+      },
+      {
+        "code": "astro_birth_time_confidence",
+        "source_module": "astrology",
+        "priority": "important",
+        "category": "datos_basicos",
+        "question_type": "choice_single",
+        "question_text": "¿Qué tan seguro/a estás de tu hora exacta de nacimiento?",
+        "question_text_short": "Confianza en hora natal",
+        "help_text": "La precisión de la hora de nacimiento afecta el cálculo del Ascendente y las Casas astrológicas. Esto nos ayuda a interpretar con el nivel de certeza apropiado.",
+        "choices": [
+          {"value": "certified", "label": "Muy seguro (tengo certificado de nacimiento o partida oficial)", "precision_level": "high"},
+          {"value": "family_memory", "label": "Bastante seguro (familiar directo lo recuerda)", "precision_level": "medium-high"},
+          {"value": "approximate", "label": "Aproximado (± 1-2 horas de margen)", "precision_level": "medium"},
+          {"value": "unknown", "label": "No lo sé / No estoy seguro", "precision_level": "low"},
+          {"value": "rectified", "label": "Hora rectificada por astrólogo profesional", "precision_level": "rectified"}
+        ],
+        "trigger_condition": {
+          "missing_field": "birth_time_confidence"
+        }
+      },
+      {
+        "code": "astro_active_life_areas",
+        "source_module": "astrology",
+        "priority": "optional",
+        "category": "casas_astrologicas",
+        "question_type": "choice_multi",
+        "question_text": "¿En qué áreas de tu vida sientes más actividad, cambios o desafíos actualmente?",
+        "question_text_short": "Áreas de vida activas",
+        "help_text": "Esto nos ayuda a correlacionar las casas astrológicas con tu experiencia real.",
+        "choices": [
+          {"value": "casa1", "label": "Identidad personal, apariencia, cómo me presento"},
+          {"value": "casa2", "label": "Dinero, recursos propios, valores"},
+          {"value": "casa3", "label": "Comunicación, hermanos, vecinos, estudios cortos"},
+          {"value": "casa4", "label": "Hogar, familia, raíces, vida privada"},
+          {"value": "casa5", "label": "Creatividad, romance, hijos, diversión"},
+          {"value": "casa6", "label": "Trabajo diario, salud, rutinas, servicio"},
+          {"value": "casa7", "label": "Relaciones de pareja, asociaciones, contratos"},
+          {"value": "casa8", "label": "Transformación, sexualidad, recursos compartidos"},
+          {"value": "casa9", "label": "Viajes largos, filosofía, educación superior"},
+          {"value": "casa10", "label": "Carrera, reputación, vocación pública"},
+          {"value": "casa11", "label": "Amistades, grupos, proyectos colectivos"},
+          {"value": "casa12", "label": "Espiritualidad, inconsciente, retiro"}
+        ],
+        "valid_for_days": 90
+      },
+      {
+        "code": "astro_synchronicities",
+        "source_module": "astrology",
+        "priority": "optional",
+        "category": "experiencia_subjetiva",
+        "question_type": "text_long",
+        "question_text": "¿Has experimentado coincidencias significativas o sincronicidades recientemente?",
+        "question_text_short": "Sincronicidades recientes",
+        "help_text": "Las sincronicidades pueden indicar momentos de alta resonancia astrológica.",
+        "placeholder": "Ej: 'Pensé en una persona y me llamó ese mismo día, números que se repiten, encuentros inesperados...'",
+        "validation": {
+          "max_length": 500
+        },
+        "valid_for_days": 30
+      },
+      {
+        "code": "astro_solar_return_intentions",
+        "source_module": "astrology",
+        "priority": "important",
+        "category": "contexto_temporal",
+        "question_type": "text_long",
+        "question_text": "Tu cumpleaños (retorno solar) está próximo. ¿Qué intenciones o deseos tienes para este nuevo ciclo anual?",
+        "question_text_short": "Intenciones para el nuevo año solar",
+        "help_text": "El retorno solar marca el inicio de un nuevo ciclo anual personal. Conocer tus intenciones nos ayuda a enfocar la interpretación.",
+        "trigger_condition": {
+          "days_to_birthday": {"min": -7, "max": 30}
+        },
+        "valid_for_days": 365
+      }
+    ],
+    "cabala": [
+      {
+        "code": "cabala_purpose_satisfaction",
+        "source_module": "cabala",
+        "priority": "critical",
+        "category": "proposito_vida",
+        "question_type": "scale_1_10",
+        "question_text": "En una escala del 1 al 10, ¿qué tan alineado/a te sientes con tu propósito de vida actualmente?",
+        "question_text_short": "Alineación con propósito (1-10)",
+        "help_text": "1 = Completamente perdido/a, sin dirección. 10 = Totalmente alineado/a, viviendo mi propósito plenamente.",
+        "scale_labels": {
+          "1": "Completamente perdido/a",
+          "5": "Parcialmente alineado/a",
+          "10": "Totalmente alineado/a"
+        },
+        "trigger_condition": {
+          "analysis_exists": "kabbalah",
+          "calculation_includes": "life_path"
+        },
+        "valid_for_days": 90,
+        "follow_up": {
+          "if_score": {"max": 4},
+          "then_ask": "cabala_purpose_obstacles"
+        }
+      },
+      {
+        "code": "cabala_purpose_obstacles",
+        "source_module": "cabala",
+        "priority": "important",
+        "category": "proposito_vida",
+        "question_type": "text_long",
+        "question_text": "¿Qué sientes que te impide vivir más alineado/a con tu propósito?",
+        "question_text_short": "Obstáculos al propósito",
+        "help_text": "Pueden ser factores externos (trabajo, familia) o internos (miedo, creencias limitantes).",
+        "trigger_condition": {
+          "response_exists": "cabala_purpose_satisfaction",
+          "response_value": {"max": 4}
+        },
+        "valid_for_days": 90
+      },
+      {
+        "code": "cabala_name_relationship",
+        "source_module": "cabala",
+        "priority": "important",
+        "category": "identidad_nombre",
+        "question_type": "choice_single",
+        "question_text": "¿Cómo te sientes con tu nombre completo actual?",
+        "question_text_short": "Relación con el nombre",
+        "help_text": "En Cábala, el nombre tiene un poder vibracional significativo. Tu relación con él es importante.",
+        "choices": [
+          {"value": "comfortable", "label": "Cómodo/a, me identifico plenamente con mi nombre"},
+          {"value": "neutral", "label": "Neutral, no me genera sentimientos fuertes"},
+          {"value": "occasional_discomfort", "label": "A veces me incomoda o no resuena completamente"},
+          {"value": "strong_conflict", "label": "Tengo un conflicto importante con mi nombre"},
+          {"value": "changed_it", "label": "Ya cambié mi nombre legalmente"},
+          {"value": "planning_change", "label": "Estoy considerando o planeo cambiar mi nombre"}
+        ],
+        "trigger_condition": {
+          "analysis_exists": "kabbalah",
+          "calculation_includes": "name_gematria"
+        },
+        "follow_up": {
+          "if_value": ["strong_conflict", "planning_change"],
+          "then_ask": "cabala_name_conflict_detail"
+        }
+      },
+      {
+        "code": "cabala_name_conflict_detail",
+        "source_module": "cabala",
+        "priority": "important",
+        "category": "identidad_nombre",
+        "question_type": "text_long",
+        "question_text": "¿Qué aspecto de tu nombre te genera conflicto o incomodidad?",
+        "question_text_short": "Detalle del conflicto con nombre",
+        "help_text": "Puede ser fonética, significado, asociaciones familiares, género, o simplemente 'no se siente como yo'.",
+        "trigger_condition": {
+          "response_exists": "cabala_name_relationship",
+          "response_value": ["strong_conflict", "planning_change"]
+        }
+      },
+      {
+        "code": "cabala_spiritual_practices",
+        "source_module": "cabala",
+        "priority": "optional",
+        "category": "practica_espiritual",
+        "question_type": "choice_multi",
+        "question_text": "¿Qué prácticas espirituales o de autoconocimiento realizas regularmente?",
+        "question_text_short": "Prácticas espirituales",
+        "help_text": "Esto nos ayuda a contextualizar las recomendaciones cabalísticas.",
+        "choices": [
+          {"value": "meditation", "label": "Meditación"},
+          {"value": "prayer", "label": "Oración"},
+          {"value": "yoga", "label": "Yoga"},
+          {"value": "journaling", "label": "Escritura/Diario personal"},
+          {"value": "tarot_oracle", "label": "Tarot u Oráculos"},
+          {"value": "energy_work", "label": "Trabajo energético (Reiki, etc.)"},
+          {"value": "breathwork", "label": "Trabajo de respiración"},
+          {"value": "contemplation", "label": "Contemplación/Estudio espiritual"},
+          {"value": "ritual", "label": "Rituales personales"},
+          {"value": "none", "label": "No practico ninguna actualmente"}
+        ],
+        "valid_for_days": 180
+      },
+      {
+        "code": "cabala_life_cycle_experience",
+        "source_module": "cabala",
+        "priority": "important",
+        "category": "ciclos_vida",
+        "question_type": "text_long",
+        "question_text": "¿Cómo describirías el momento vital en el que te encuentras actualmente?",
+        "question_text_short": "Momento vital actual",
+        "help_text": "Piensa en términos de fase de vida: ¿inicio, expansión, consolidación, transición, cierre?",
+        "trigger_condition": {
+          "analysis_exists": "kabbalah",
+          "calculation_includes": "life_cycles"
+        },
+        "valid_for_days": 90
+      }
+    ],
+    "transgenerational": [
+      {
+        "code": "trans_ancestor_emotional_charge",
+        "source_module": "transgenerational",
+        "priority": "critical",
+        "category": "genealogia_emocional",
+        "question_type": "scale_1_10",
+        "question_text": "Para {ancestor_name} ({relationship}), indica la carga emocional que sientes hacia esta persona:",
+        "question_text_short": "Carga emocional hacia {ancestor_name}",
+        "help_text": "1 = Neutral, sin carga emocional particular. 10 = Muy cargado emocionalmente (puede ser positivo o negativo).",
+        "scale_labels": {
+          "1": "Neutral",
+          "5": "Moderadamente cargado",
+          "10": "Muy intenso"
+        },
+        "trigger_condition": {
+          "genealogy_person_exists": true,
+          "missing_field": "emotional_charge"
+        },
+        "dynamic": true,
+        "applies_per": "GenealogyPerson",
+        "follow_up": {
+          "if_score": {"min": 7},
+          "then_ask": "trans_ancestor_charge_detail"
+        }
+      },
+      {
+        "code": "trans_ancestor_charge_detail",
+        "source_module": "transgenerational",
+        "priority": "important",
+        "category": "genealogia_emocional",
+        "question_type": "text_long",
+        "question_text": "¿Puedes describir qué sentimientos o memorias están asociados a {ancestor_name}?",
+        "question_text_short": "Detalle emocional {ancestor_name}",
+        "help_text": "Pueden ser experiencias directas, historias que te contaron, o simplemente sensaciones que tienes.",
+        "trigger_condition": {
+          "response_exists": "trans_ancestor_emotional_charge",
+          "response_value": {"min": 7}
+        },
+        "dynamic": true
+      },
+      {
+        "code": "trans_family_secrets",
+        "source_module": "transgenerational",
+        "priority": "important",
+        "category": "dinamicas_familiares",
+        "question_type": "choice_single",
+        "question_text": "¿Hay temas que se evitan hablar en tu familia o secretos familiares que conozcas o sospeches?",
+        "question_text_short": "Secretos o temas evitados",
+        "help_text": "Los secretos familiares pueden tener impacto transgeneracional incluso si no se hablan explícitamente.",
+        "choices": [
+          {"value": "no_known", "label": "No que yo sepa, mi familia es bastante abierta"},
+          {"value": "suspect_avoided", "label": "Sospecho que hay temas que se evitan pero no sé cuáles"},
+          {"value": "know_specific", "label": "Sí, conozco secretos o temas específicos que se evitan"},
+          {"value": "prefer_not_say", "label": "Prefiero no responder a esta pregunta"}
+        ],
+        "follow_up": {
+          "if_value": "know_specific",
+          "then_ask": "trans_family_secrets_detail"
+        }
+      },
+      {
+        "code": "trans_family_secrets_detail",
+        "source_module": "transgenerational",
+        "priority": "important",
+        "category": "dinamicas_familiares",
+        "question_type": "text_long",
+        "question_text": "Si te sientes cómodo/a compartiendo, ¿cuáles son esos temas o secretos?",
+        "question_text_short": "Detalle de secretos familiares",
+        "help_text": "Esta información es confidencial y solo será vista por tu terapeuta. Puedes omitir detalles si lo prefieres.",
+        "sensitive": true,
+        "opt_out_visible": true,
+        "trigger_condition": {
+          "response_exists": "trans_family_secrets",
+          "response_value": "know_specific"
+        }
+      },
+      {
+        "code": "trans_repetition_patterns",
+        "source_module": "transgenerational",
+        "priority": "important",
+        "category": "patrones_familiares",
+        "question_type": "text_long",
+        "question_text": "¿Identificas patrones que se repiten en tu familia a través de generaciones? Por ejemplo: divorcios, enfermedades específicas, profesiones, conflictos similares, pérdidas tempranas, etc.",
+        "question_text_short": "Patrones familiares repetitivos",
+        "help_text": "Los patrones transgeneracionales son conductas, eventos o dinámicas que se repiten en diferentes generaciones.",
+        "placeholder": "Ej: 'En mi familia, varias mujeres han sido viudas jóvenes', 'Hay conflictos recurrentes con hermanos', 'Profesiones médicas en 3 generaciones'...",
+        "validation": {
+          "min_length": 20,
+          "max_length": 1000
+        },
+        "valid_for_days": 180
+      },
+      {
+        "code": "trans_invisible_loyalties",
+        "source_module": "transgenerational",
+        "priority": "optional",
+        "category": "dinamicas_sistemicas",
+        "question_type": "text_long",
+        "question_text": "¿Sientes que hay alguna 'deuda' o 'lealtad' inconsciente hacia algún miembro de tu familia? ¿Algo que sientes que 'debes' hacer o ser por ellos?",
+        "question_text_short": "Lealtades invisibles",
+        "help_text": "Las lealtades invisibles son compromisos inconscientes que pueden limitar nuestra vida.",
+        "validation": {
+          "max_length": 500
+        },
+        "valid_for_days": 180
+      }
+    ],
+    "bioemotional": [
+      {
+        "code": "bio_current_physical_symptoms",
+        "source_module": "bioemotional",
+        "priority": "critical",
+        "category": "sintomas_somaticos",
+        "question_type": "choice_multi",
+        "question_text": "¿Qué síntomas físicos o molestias corporales has experimentado en las últimas 2 semanas? (Selecciona todos los que apliquen)",
+        "question_text_short": "Síntomas físicos actuales",
+        "help_text": "Incluye molestias recurrentes, agudas o crónicas. No importa si ya tienes diagnóstico médico.",
+        "choices": [
+          {"value": "headache", "label": "Dolor de cabeza / Migrañas", "body_region": "cabeza"},
+          {"value": "neck_tension", "label": "Tensión en cuello", "body_region": "cuello"},
+          {"value": "shoulder_tension", "label": "Tensión en hombros", "body_region": "hombros"},
+          {"value": "back_pain", "label": "Dolor de espalda", "body_region": "espalda"},
+          {"value": "digestive", "label": "Problemas digestivos (gastritis, acidez, etc.)", "body_region": "abdomen"},
+          {"value": "intestinal", "label": "Problemas intestinales (colon irritable, estreñimiento, etc.)", "body_region": "abdomen"},
+          {"value": "chest_pressure", "label": "Presión en el pecho / Palpitaciones", "body_region": "pecho"},
+          {"value": "respiratory", "label": "Dificultad respiratoria / Asma", "body_region": "pecho"},
+          {"value": "fatigue", "label": "Fatiga / Cansancio crónico", "body_region": "general"},
+          {"value": "insomnia", "label": "Insomnio / Problemas de sueño", "body_region": "general"},
+          {"value": "skin", "label": "Problemas de piel (eccema, psoriasis, erupciones)", "body_region": "piel"},
+          {"value": "joint_pain", "label": "Dolor articular", "body_region": "articulaciones"},
+          {"value": "throat", "label": "Problemas de garganta / Tiroides", "body_region": "cuello"},
+          {"value": "gynecological", "label": "Problemas ginecológicos", "body_region": "reproductivo"},
+          {"value": "urinary", "label": "Problemas urinarios", "body_region": "urinario"},
+          {"value": "vision", "label": "Problemas de visión", "body_region": "ojos"},
+          {"value": "hearing", "label": "Problemas de audición / Oídos", "body_region": "oidos"},
+          {"value": "dental", "label": "Problemas dentales / Mandíbula", "body_region": "boca"},
+          {"value": "other", "label": "Otro (especificar en texto)", "requires_detail": true}
+        ],
+        "trigger_condition": {
+          "refresh_after_days": 14
+        },
+        "valid_for_days": 14,
+        "follow_up": {
+          "if_any_selected": true,
+          "then_ask": "bio_symptom_onset_context"
+        }
+      },
+      {
+        "code": "bio_symptom_onset_context",
+        "source_module": "bioemotional",
+        "priority": "important",
+        "category": "sintomas_somaticos",
+        "question_type": "text_long",
+        "question_text": "¿Recuerdas qué estaba pasando en tu vida cuando comenzaron estos síntomas? (eventos, conversaciones, decisiones, cambios...)",
+        "question_text_short": "Contexto de inicio",
+        "help_text": "En biodecodificación, el contexto emocional del inicio del síntoma es clave. Si no recuerdas el momento exacto, describe el período general.",
+        "placeholder": "Ej: 'Comencé con migrañas justo después de aceptar un nuevo trabajo que no me convencía', 'El dolor de espalda empezó cuando cuidaba a mi madre enferma'...",
+        "trigger_condition": {
+          "response_exists": "bio_current_physical_symptoms",
+          "response_not_empty": true
+        },
+        "validation": {
+          "min_length": 20,
+          "max_length": 1000
+        }
+      },
+      {
+        "code": "bio_hypothesis_validation",
+        "source_module": "bioemotional",
+        "priority": "important",
+        "category": "validacion_terapeutica",
+        "question_type": "scale_1_10",
+        "question_text": "Después de explorar la hipótesis bio-emocional propuesta ('{hypothesis_summary}'), ¿sientes que resuena contigo?",
+        "question_text_short": "Resonancia con hipótesis",
+        "help_text": "1 = No resuena en absoluto, no veo la conexión. 10 = Resuena completamente, tiene sentido profundo para mí.",
+        "scale_labels": {
+          "1": "No resuena",
+          "5": "Resuena parcialmente",
+          "10": "Resuena completamente"
+        },
+        "trigger_condition": {
+          "hypothesis_exists": true,
+          "hypothesis_presented_to_patient": true
+        },
+        "dynamic": true,
+        "applies_per": "BioTransgenerationalHypothesis",
+        "follow_up": {
+          "if_score": {"max": 4},
+          "then_ask": "bio_hypothesis_non_resonance_detail"
+        }
+      },
+      {
+        "code": "bio_hypothesis_non_resonance_detail",
+        "source_module": "bioemotional",
+        "priority": "important",
+        "category": "validacion_terapeutica",
+        "question_type": "text_short",
+        "question_text": "¿Qué parte de la hipótesis no resuena o te parece forzada?",
+        "question_text_short": "Detalle de no resonancia",
+        "help_text": "Tu feedback honesto nos ayuda a ajustar o replantear la exploración.",
+        "trigger_condition": {
+          "response_exists": "bio_hypothesis_validation",
+          "response_value": {"max": 4}
+        },
+        "validation": {
+          "max_length": 300
+        }
+      },
+      {
+        "code": "bio_body_map_location",
+        "source_module": "bioemotional",
+        "priority": "optional",
+        "category": "sintomas_somaticos",
+        "question_type": "body_map",
+        "question_text": "Marca en el mapa corporal dónde sientes con más intensidad tus síntomas o molestias.",
+        "question_text_short": "Mapa corporal de síntomas",
+        "help_text": "Haz clic en las zonas del cuerpo donde experimentas molestias. Puedes marcar múltiples zonas.",
+        "body_map_regions": [
+          "head_front", "head_back", "neck_front", "neck_back",
+          "chest", "upper_back", "shoulders_left", "shoulders_right",
+          "arms_left", "arms_right", "hands_left", "hands_right",
+          "abdomen", "lower_back", "pelvis",
+          "legs_left", "legs_right", "feet_left", "feet_right"
+        ],
+        "trigger_condition": {
+          "response_exists": "bio_current_physical_symptoms"
+        }
+      },
+      {
+        "code": "bio_emotional_intensity",
+        "source_module": "bioemotional",
+        "priority": "optional",
+        "category": "conexion_mente_cuerpo",
+        "question_type": "choice_single",
+        "question_text": "Cuando piensas en tus síntomas físicos, ¿qué intensidad emocional sientes?",
+        "question_text_short": "Intensidad emocional del síntoma",
+        "help_text": "A veces el cuerpo habla de emociones que la mente no puede procesar.",
+        "choices": [
+          {"value": "none", "label": "Ninguna, es solo físico"},
+          {"value": "mild", "label": "Leve conexión emocional"},
+          {"value": "moderate", "label": "Conexión emocional moderada"},
+          {"value": "strong", "label": "Fuerte carga emocional"},
+          {"value": "overwhelming", "label": "Emoción abrumadora"}
+        ],
+        "trigger_condition": {
+          "response_exists": "bio_current_physical_symptoms"
+        }
+      }
+    ],
+    "mshe": [
+      {
+        "code": "mshe_vital_timeline_30d",
+        "source_module": "mshe",
+        "priority": "critical",
+        "category": "contexto_temporal",
+        "question_type": "text_long",
+        "question_text": "Resume los eventos más significativos de los últimos 30 días en tu vida. Incluye tanto eventos positivos como negativos, internos (decisiones, realizaciones) y externos (acontecimientos).",
+        "question_text_short": "Timeline vital últimos 30 días",
+        "help_text": "Esta información permite al Motor de Síntesis Holística contextualizar todas las lecturas simbólicas con tu momento actual.",
+        "placeholder": "Ej: 'Semana 1: Entrevista de trabajo estresante. Semana 2: Conflicto con mi pareja, decidí mudarme. Semana 3: Comencé terapia. Semana 4: Reconciliación, nueva perspectiva sobre mi trabajo...'",
+        "validation": {
+          "min_length": 50,
+          "max_length": 2000
+        },
+        "trigger_condition": {
+          "refresh_after_days": 30,
+          "on_synthesis_request": true
+        },
+        "valid_for_days": 30
+      },
+      {
+        "code": "mshe_axis1_identity_purpose",
+        "source_module": "mshe",
+        "priority": "important",
+        "category": "autoevaluacion_ejes",
+        "question_type": "scale_1_10",
+        "question_text": "Eje 1 - IDENTIDAD Y PROPÓSITO: ¿Cómo te sientes respecto a tu sentido de identidad y claridad de propósito en la vida?",
+        "question_text_short": "Autoevaluación Identidad",
+        "help_text": "1 = Confundido/a, sin dirección. 10 = Claridad total, viviendo mi propósito.",
+        "scale_labels": {
+          "1": "Muy bajo",
+          "5": "Moderado",
+          "10": "Muy alto"
+        },
+        "axis_reference": "identity_purpose",
+        "valid_for_days": 90
+      },
+      {
+        "code": "mshe_axis2_emotion_regulation",
+        "source_module": "mshe",
+        "priority": "important",
+        "category": "autoevaluacion_ejes",
+        "question_type": "scale_1_10",
+        "question_text": "Eje 2 - REGULACIÓN EMOCIONAL: ¿Cómo te sientes respecto a tu capacidad de gestionar tus emociones?",
+        "question_text_short": "Autoevaluación Emociones",
+        "help_text": "1 = Desbordado/a, sin control. 10 = Equilibrio emocional, buena gestión.",
+        "scale_labels": {
+          "1": "Muy bajo",
+          "5": "Moderado",
+          "10": "Muy alto"
+        },
+        "axis_reference": "emotion_regulation",
+        "valid_for_days": 90
+      },
+      {
+        "code": "mshe_axis3_relationships_bonds",
+        "source_module": "mshe",
+        "priority": "important",
+        "category": "autoevaluacion_ejes",
+        "question_type": "scale_1_10",
+        "question_text": "Eje 3 - RELACIONES Y VÍNCULOS: ¿Cómo te sientes respecto a tus relaciones personales y capacidad de conexión?",
+        "question_text_short": "Autoevaluación Relaciones",
+        "help_text": "1 = Aislado/a, relaciones conflictivas. 10 = Vínculos sanos, conexión profunda.",
+        "scale_labels": {
+          "1": "Muy bajo",
+          "5": "Moderado",
+          "10": "Muy alto"
+        },
+        "axis_reference": "relationships_bonds",
+        "valid_for_days": 90
+      },
+      {
+        "code": "mshe_axis4_vital_energy",
+        "source_module": "mshe",
+        "priority": "important",
+        "category": "autoevaluacion_ejes",
+        "question_type": "scale_1_10",
+        "question_text": "Eje 4 - ENERGÍA VITAL Y CUERPO: ¿Cómo te sientes respecto a tu vitalidad física y conexión con tu cuerpo?",
+        "question_text_short": "Autoevaluación Vitalidad",
+        "help_text": "1 = Agotado/a, desconectado/a del cuerpo. 10 = Vital, en sintonía corporal.",
+        "scale_labels": {
+          "1": "Muy bajo",
+          "5": "Moderado",
+          "10": "Muy alto"
+        },
+        "axis_reference": "vital_energy",
+        "valid_for_days": 90
+      },
+      {
+        "code": "mshe_axis5_cycles_change",
+        "source_module": "mshe",
+        "priority": "important",
+        "category": "autoevaluacion_ejes",
+        "question_type": "scale_1_10",
+        "question_text": "Eje 5 - CICLOS Y PROCESOS DE CAMBIO: ¿Cómo te sientes respecto a tu capacidad de adaptarte a los cambios y ciclos de vida?",
+        "question_text_short": "Autoevaluación Cambio",
+        "help_text": "1 = Resistente, aferrado/a al pasado. 10 = Fluido/a, adaptación natural.",
+        "scale_labels": {
+          "1": "Muy bajo",
+          "5": "Moderado",
+          "10": "Muy alto"
+        },
+        "axis_reference": "cycles_change",
+        "valid_for_days": 90
+      }
+    ]
+  }
+}

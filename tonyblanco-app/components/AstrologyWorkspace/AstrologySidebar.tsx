@@ -45,7 +45,11 @@ interface AstrologySidebarProps {
     transits?: boolean;
     progressions?: boolean;
     solarReturn?: boolean;
+    solarArc?: boolean;
+    lunarReturn?: boolean;
   };
+  lunarReturnMonth?: string;
+  setLunarReturnMonth?: (m: string) => void;
 }
 
 const HOUSE_OPTIONS: Array<{ code: string; name: string; desc?: string }> = [
@@ -102,6 +106,8 @@ export default function AstrologySidebar({
   setVisualStyle,
   mode = 'symbolic',
   layerAvailability,
+  lunarReturnMonth,
+  setLunarReturnMonth,
 }: AstrologySidebarProps) {
   const isRealMode = mode === 'real';
   const canUseForecast = Boolean(hasIdentity);
@@ -138,20 +144,17 @@ export default function AstrologySidebar({
     label: string;
     tooltip: string;
   }) => {
-    const isSupportedInReal = layer === 'transits' || layer === 'progressions';
+    const isSupportedInReal = layer === 'transits' || layer === 'progressions' || layer === 'solarArc';
     const layerAvailable = isRealMode ? (isSupportedInReal && Boolean((available as any)[layer])) : true;
     const disabled =
       !canUseForecast ||
       !onToggleLayer ||
-      (isRealMode && !layerAvailable) ||
-      (isRealMode && layer === 'solarArc');
+      (isRealMode && !layerAvailable);
 
     const stateLabel = isRealMode ? 'cálculo real' : 'lectura simbólica';
     const title = !canUseForecast
       ? 'Requiere identidad válida (fecha de nacimiento)'
-      : isRealMode && layer === 'solarArc'
-        ? 'Arco Solar requiere configuración adicional en backend.'
-        : isRealMode && !layerAvailable
+      : isRealMode && !layerAvailable
           ? 'Disponible tras recalcular la carta natal (si el backend devuelve esta capa).'
           : tooltip;
 
@@ -334,9 +337,9 @@ export default function AstrologySidebar({
               <div className="flex items-center justify-between">
                 <div
                   className="text-[13px]"
-                  title="Retorno Lunar · capa mensual simbólica. Requiere configuración backend adicional para cálculo real."
+                  title={isRealMode ? "Retorno Lunar (Swiss Ephemeris) · momento exacto cuando la Luna regresa a su posición natal." : "Retorno Lunar · capa mensual simbólica."}
                 >
-                  Lunar · <span className="text-gray-500">{isRealMode ? 'próximamente' : 'capa mensual simbólica'}</span>
+                  Lunar · <span className="text-gray-500">{isRealMode ? 'cálculo real' : 'capa mensual simbólica'}</span>
                 </div>
                 <label className="inline-flex items-center gap-2 text-sm">
                   <input
@@ -348,19 +351,29 @@ export default function AstrologySidebar({
                       if (!isRealMode && setSymbolicLunarReturnDate) setSymbolicLunarReturnDate(next ? (symbolicLunarReturnDate ?? new Date().toISOString().slice(0, 10)) : null);
                     }}
                     disabled={!canUseReturns || !onToggleLayer}
-                    title={!canUseReturns ? 'Requiere identidad válida (fecha de nacimiento)' : 'Activar capa mensual simbólica'}
+                    title={!canUseReturns ? 'Requiere identidad válida (fecha de nacimiento)' : (isRealMode ? 'Activar Retorno Lunar (cálculo Swiss Ephemeris)' : 'Activar capa mensual simbólica')}
                   />
                 </label>
               </div>
               <div className="mt-1 flex items-center justify-between gap-2">
-                <div className="text-[11px] text-gray-500">Fecha</div>
-                <input
-                  type="date"
-                  className="rounded border border-gray-200 px-2 py-1 text-[12px]"
-                  value={symbolicLunarReturnDate ?? new Date().toISOString().slice(0, 10)}
-                  onChange={(e) => setSymbolicLunarReturnDate && setSymbolicLunarReturnDate(e.target.value || null)}
-                  disabled={!canUseReturns}
-                />
+                <div className="text-[11px] text-gray-500">{isRealMode ? 'Mes' : 'Fecha'}</div>
+                {isRealMode ? (
+                  <input
+                    type="month"
+                    className="rounded border border-gray-200 px-2 py-1 text-[12px]"
+                    value={lunarReturnMonth ?? new Date().toISOString().slice(0, 7)}
+                    onChange={(e) => setLunarReturnMonth && setLunarReturnMonth(e.target.value)}
+                    disabled={!canUseReturns}
+                  />
+                ) : (
+                  <input
+                    type="date"
+                    className="rounded border border-gray-200 px-2 py-1 text-[12px]"
+                    value={symbolicLunarReturnDate ?? new Date().toISOString().slice(0, 10)}
+                    onChange={(e) => setSymbolicLunarReturnDate && setSymbolicLunarReturnDate(e.target.value || null)}
+                    disabled={!canUseReturns}
+                  />
+                )}
               </div>
             </div>
 

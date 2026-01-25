@@ -105,9 +105,6 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
   const [visibleAspects, setVisibleAspects] = useState<Record<string, boolean>>(() => ({}));
   const [showAsteroids, setShowAsteroids] = useState<boolean>(false);
   const [compositeChart, setCompositeChart] = useState<any | null>(null);
-  const [davisonChart, setDavisonChart] = useState<any | null>(null);
-  const [davisonGenerating, setDavisonGenerating] = useState<boolean>(false);
-  const [davisonError, setDavisonError] = useState<string | null>(null);
 
   // Advanced Transits (A16.3)
   const [showAdvancedTransits, setShowAdvancedTransits] = useState<boolean>(false);
@@ -133,6 +130,87 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
   const [solarReturnSnapshot, setSolarReturnSnapshot] = useState<any | null>(null);
   const [solarReturnLoading, setSolarReturnLoading] = useState<boolean>(false);
   const [solarReturnError, setSolarReturnError] = useState<string | null>(null);
+
+  // Solar Arc Directions state
+  interface SolarArcPlanet {
+    longitude: number;
+    natal_longitude: number;
+    arc_applied: number;
+    sign: string;
+    sign_degree: number;
+  }
+  interface SolarArcData {
+    arc_degrees: number;
+    target_date: string;
+    method: string;
+    planets: Record<string, SolarArcPlanet>;
+  }
+  const [solarArcData, setSolarArcData] = useState<SolarArcData | null>(null);
+  const [solarArcDate, setSolarArcDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [solarArcLoading, setSolarArcLoading] = useState<boolean>(false);
+  const [solarArcError, setSolarArcError] = useState<string | null>(null);
+
+  // Lunar Return state
+  interface LunarReturnData {
+    return_datetime: string;
+    lunar_position: number;
+    return_lunar_position: number;
+    precision: number;
+    chart: any;
+    target_month: string;
+  }
+  const [lunarReturnData, setLunarReturnData] = useState<LunarReturnData | null>(null);
+  const [lunarReturnMonth, setLunarReturnMonth] = useState<string>(new Date().toISOString().slice(0, 7));
+  const [lunarReturnLoading, setLunarReturnLoading] = useState<boolean>(false);
+  const [lunarReturnError, setLunarReturnError] = useState<string | null>(null);
+
+  // Composite Chart state
+  interface Person2Data {
+    birth_date: string;
+    birth_time: string;
+    latitude: number;
+    longitude: number;
+    name: string;
+  }
+  interface CompositeChartData {
+    composite_datetime: string;
+    composite_location: { latitude: number; longitude: number };
+    person1: { name: string; birth_datetime: string };
+    person2: { name: string; birth_datetime: string };
+    planets: Record<string, { longitude: number; sign: string; sign_degree: number; retrograde: boolean }>;
+    houses: { cusps: number[]; system: string };
+    angles: { asc: number; mc: number; ic: number; dsc: number };
+  }
+  const [compositeEnabled, setCompositeEnabled] = useState<boolean>(false);
+  const [compositeData, setCompositeData] = useState<CompositeChartData | null>(null);
+  const [compositeLoading, setCompositeLoading] = useState<boolean>(false);
+  const [compositeError, setCompositeError] = useState<string | null>(null);
+
+  // Davison Chart state
+  interface DavisonChartData {
+    davison_datetime: string;
+    davison_location: { latitude: number; longitude: number };
+    person1_datetime: string;
+    person2_datetime: string;
+    planets: Record<string, { longitude: number; sign: string; sign_degree: number }>;
+    houses: Array<{ number: number; cusp_longitude: number; sign: string; sign_degree: number }>;
+    ascendant: number;
+    midheaven: number;
+    method: string;
+  }
+  const [davisonEnabled, setDavisonEnabled] = useState<boolean>(false);
+  const [davisonData, setDavisonData] = useState<DavisonChartData | null>(null);
+  const [davisonLoading, setDavisonLoading] = useState<boolean>(false);
+  const [davisonError, setDavisonError] = useState<string | null>(null);
+
+  const [person2Data, setPerson2Data] = useState<Person2Data>({
+    birth_date: '',
+    birth_time: '12:00',
+    latitude: 0,
+    longitude: 0,
+    name: 'Persona 2'
+  });
+  const [showPerson2Modal, setShowPerson2Modal] = useState<boolean>(false);
 
   const togglePlanet = (key: string) => setVisiblePlanets((p) => ({ ...p, [key]: !p[key] }));
   const toggleAspect = (key: string) => setVisibleAspects((a) => ({ ...a, [key]: !a[key] }));
@@ -186,6 +264,226 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
     if (harmonicMode === 'h16') return 16 as const;
     return undefined;
   }, [harmonicMode]);
+
+  // Fetch Solar Arc data when layer is active
+  useEffect(() => {
+    const isSolarArcActive = activeLayers.has('solarArc');
+    
+    if (!isSolarArcActive || !consultante?.id || !hasChart) {
+      // Clear data when layer is deactivated
+      if (!isSolarArcActive && solarArcData) {
+        setSolarArcData(null);
+        setSolarArcError(null);
+      }
+      return;
+    }
+    
+    const fetchSolarArcData = async () => {
+      setSolarArcLoading(true);
+      setSolarArcError(null);
+      
+      try {
+        const token = getAuthToken();
+        if (!token) throw new Error('No auth token');
+        
+        const apiUrl = getApiBaseUrl();
+        const response = await fetch(
+          `${apiUrl}/therapist/patients/${consultante.id}/solar-arc/?target_date=${solarArcDate}`,
+          {
+            headers: {
+              'Authorization': `Token ${token}`,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ error: 'Error desconocido' }));
+          throw new Error(errorData.error || `Error ${response.status}`);
+        }
+        
+        const data = await response.json();
+        setSolarArcData(data.solar_arc);
+      } catch (error: any) {
+        console.error('Solar Arc fetch error:', error);
+        setSolarArcError(error?.message || 'Error al obtener datos de Arco Solar');
+        setSolarArcData(null);
+      } finally {
+        setSolarArcLoading(false);
+      }
+    };
+    
+    fetchSolarArcData();
+  }, [activeLayers, consultante?.id, hasChart, solarArcDate]);
+
+  // Fetch Lunar Return data when layer is active (Real mode only)
+  useEffect(() => {
+    const isLunarReturnActive = activeLayers.has('return_lunar');
+    
+    if (!isLunarReturnActive || !consultante?.id || !hasChart) {
+      // Clear data when layer is deactivated
+      if (!isLunarReturnActive) {
+        setLunarReturnData(null);
+        setLunarReturnError(null);
+      }
+      return;
+    }
+    
+    const fetchLunarReturnData = async () => {
+      setLunarReturnLoading(true);
+      setLunarReturnError(null);
+      
+      try {
+        const token = getAuthToken();
+        if (!token) throw new Error('No auth token');
+        
+        const apiUrl = getApiBaseUrl();
+        const response = await fetch(
+          `${apiUrl}/therapist/patients/${consultante.id}/lunar-return/?target_month=${lunarReturnMonth}`,
+          {
+            headers: {
+              'Authorization': `Token ${token}`,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ error: 'Error desconocido' }));
+          throw new Error(errorData.error || `Error ${response.status}`);
+        }
+        
+        const data = await response.json();
+        setLunarReturnData(data.lunar_return);
+      } catch (error: any) {
+        console.error('Lunar Return fetch error:', error);
+        setLunarReturnError(error?.message || 'Error al obtener Retorno Lunar');
+        setLunarReturnData(null);
+      } finally {
+        setLunarReturnLoading(false);
+      }
+    };
+    
+    fetchLunarReturnData();
+  }, [activeLayers, consultante?.id, hasChart, lunarReturnMonth]);
+
+  // Fetch Composite Chart when enabled and person2 data is provided
+  const fetchCompositeChart = async () => {
+    if (!compositeEnabled || !consultante?.id || !hasChart) {
+      return;
+    }
+    
+    if (!person2Data.birth_date || !person2Data.latitude || !person2Data.longitude) {
+      setCompositeError('Se requieren datos completos de la segunda persona');
+      return;
+    }
+    
+    setCompositeLoading(true);
+    setCompositeError(null);
+    
+    try {
+      const token = getAuthToken();
+      if (!token) throw new Error('No auth token');
+      
+      const apiUrl = getApiBaseUrl();
+      const response = await fetch(
+        `${apiUrl}/therapist/patients/${consultante.id}/composite-chart/`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Token ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            person2_birth_date: person2Data.birth_date,
+            person2_birth_time: person2Data.birth_time,
+            person2_latitude: person2Data.latitude,
+            person2_longitude: person2Data.longitude,
+            person2_name: person2Data.name,
+          }),
+        }
+      );
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Error desconocido' }));
+        throw new Error(errorData.error || `Error ${response.status}`);
+      }
+      
+      const data = await response.json();
+      setCompositeData(data.composite_chart);
+      setShowPerson2Modal(false);
+    } catch (error: any) {
+      console.error('Composite Chart fetch error:', error);
+      setCompositeError(error?.message || 'Error al calcular Carta Compuesta');
+      setCompositeData(null);
+    } finally {
+      setCompositeLoading(false);
+    }
+  };
+
+  // Clear composite data when disabled
+  useEffect(() => {
+    if (!compositeEnabled) {
+      setCompositeData(null);
+      setCompositeError(null);
+    }
+  }, [compositeEnabled]);
+
+  // Fetch Davison Chart data when enabled
+  const fetchDavisonChart = async () => {
+    if (!consultante?.id || !person2Data.birth_date || !person2Data.latitude || !person2Data.longitude) {
+      return;
+    }
+    
+    setDavisonLoading(true);
+    setDavisonError(null);
+    
+    try {
+      const token = getAuthToken();
+      if (!token) throw new Error('No auth token');
+      
+      const apiUrl = getApiBaseUrl();
+      const response = await fetch(
+        `${apiUrl}/therapist/patients/${consultante.id}/davison-chart/`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Token ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            person2_birth_date: person2Data.birth_date,
+            person2_birth_time: person2Data.birth_time,
+            person2_latitude: person2Data.latitude,
+            person2_longitude: person2Data.longitude,
+            person2_name: person2Data.name,
+          }),
+        }
+      );
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Error desconocido' }));
+        throw new Error(errorData.error || `Error ${response.status}`);
+      }
+      
+      const data = await response.json();
+      setDavisonData(data.davison_chart);
+    } catch (error: any) {
+      console.error('Davison Chart fetch error:', error);
+      setDavisonError(error?.message || 'Error al calcular Carta Davison');
+      setDavisonData(null);
+    } finally {
+      setDavisonLoading(false);
+    }
+  };
+
+  // Clear davison data when disabled
+  useEffect(() => {
+    if (!davisonEnabled) {
+      setDavisonData(null);
+      setDavisonError(null);
+    }
+  }, [davisonEnabled]);
 
   useEffect(() => {
     // Harmonics are symbolic-only and require identity; keep activeLayers in sync
@@ -399,10 +697,11 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
     return JSON.stringify(snapshot).slice(0, 16);
   };
 
-  const renderLayerStateBadge = (state: 'pendiente' | 'no_calculado' | 'solo_lectura') => {
+  const renderLayerStateBadge = (state: 'pendiente' | 'no_calculado' | 'solo_lectura' | 'calculando') => {
     const base = 'inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium border';
     if (state === 'pendiente') return <span className={`${base} bg-amber-50 text-amber-800 border-amber-200`}>pendiente</span>;
     if (state === 'no_calculado') return <span className={`${base} bg-gray-50 text-gray-700 border-gray-200`}>no calculado</span>;
+    if (state === 'calculando') return <span className={`${base} bg-blue-50 text-blue-800 border-blue-200 animate-pulse`}>calculando...</span>;
     return <span className={`${base} bg-slate-50 text-slate-700 border-slate-200`}>solo lectura</span>;
   };
 
@@ -416,8 +715,11 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
       const ref = analysis_result?.progressions?.reference_date;
       layers.push({ key: 'progressions', label: ref ? `Progresiones · ${String(ref).slice(0, 10)}` : 'Progresiones' });
     }
+    if (activeLayers.has('solarArc') && solarArcData) {
+      layers.push({ key: 'solarArc', label: `Arco Solar · ${solarArcData.arc_degrees.toFixed(2)}° (${solarArcData.target_date})` });
+    }
     return layers;
-  }, [activeLayers, analysis_result]);
+  }, [activeLayers, analysis_result, solarArcData]);
 
   const annualLayers = useMemo(() => {
     const layers: Array<{ key: 'solarReturn'; label?: string }> = [];
@@ -742,7 +1044,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
           zodiacType={zodiacType}
           setZodiacType={setZodiacType}
           mode="real"
-          layerAvailability={{ transits: overlays.transits, progressions: overlays.progressions, solarReturn: overlays.solarReturn }}
+          layerAvailability={{ transits: overlays.transits, progressions: overlays.progressions, solarReturn: overlays.solarReturn, solarArc: hasChart, lunarReturn: hasChart, compositeChart: hasChart, davisonChart: hasChart }}
           showAsteroids={showAsteroids}
           setShowAsteroids={setShowAsteroids}
           synastryEnabled={hasChart ? synastryEnabled : false}
@@ -779,6 +1081,27 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
           setDevelopmentStage={setDevelopmentStage}
           visualStyle={visualStyle}
           setVisualStyle={setVisualStyle}
+          lunarReturnMonth={lunarReturnMonth}
+          setLunarReturnMonth={(m) => {
+            setLunarReturnMonth(m);
+            setLunarReturnData(null); // Force refetch
+          }}
+          compositeEnabled={compositeEnabled}
+          setCompositeEnabled={(enabled) => {
+            setCompositeEnabled(enabled);
+            if (enabled && !compositeData) {
+              setShowPerson2Modal(true);
+            }
+          }}
+          davisonEnabled={davisonEnabled}
+          setDavisonEnabled={(enabled) => {
+            setDavisonEnabled(enabled);
+            if (enabled && !davisonData && person2Data.birth_date) {
+              fetchDavisonChart();
+            } else if (enabled && !person2Data.birth_date) {
+              setShowPerson2Modal(true);
+            }
+          }}
         />
       </aside>
 
@@ -961,14 +1284,14 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                   </div>
                 </div>
 
-                {/* Arco Solar (lectura simbólica, sin predicción) */}
-                <div className="p-2 bg-white border rounded">
+                {/* Arco Solar (cálculo real) */}
+                <div className={`p-2 border rounded ${solarArcData ? 'bg-blue-50 border-blue-200' : 'bg-white border-gray-200'}`}>
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="text-sm font-medium">Arco Solar</div>
                       <div className="text-xs text-gray-500 flex items-center gap-2">
                         <span>Estado:</span>
-                        renderLayerStateBadge('no_calculado')
+                        {!hasChart ? renderLayerStateBadge('pendiente') : (solarArcData ? renderLayerStateBadge('solo_lectura') : (solarArcLoading ? renderLayerStateBadge('calculando') : renderLayerStateBadge('no_calculado')))}
                       </div>
                     </div>
                     <div>
@@ -976,13 +1299,109 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                         type="checkbox"
                         checked={activeLayers.has('solarArc')}
                         onChange={() => handleLayerToggle('solarArc')}
-                        disabled={true}
-                        title="Disponible en fase posterior (requiere soporte de cálculo backend)."
+                        disabled={!hasChart}
+                        title={!hasChart ? 'Carta pendiente: completa datos de nacimiento para habilitar acciones' : 'Arco Solar (cálculo real): desplazamiento uniforme basado en el movimiento del Sol.'}
                       />
                     </div>
                   </div>
                   <div className="mt-2 text-xs">
-                    <div className="text-[11px] text-gray-600">Disponible en fase posterior (cálculo real no habilitado).</div>
+                    {solarArcLoading ? (
+                      <div className="text-[11px] text-blue-600 flex items-center gap-2">
+                        <span className="animate-spin">⏳</span> Calculando Arco Solar...
+                      </div>
+                    ) : solarArcError ? (
+                      <div className="text-[11px] text-red-600">{solarArcError}</div>
+                    ) : solarArcData ? (
+                      <div className="space-y-2">
+                        <div className="text-[11px] text-blue-800 font-semibold">
+                          Arco: {solarArcData.arc_degrees.toFixed(2)}° 
+                          ({Math.floor(solarArcData.arc_degrees / 30)} signos, {(solarArcData.arc_degrees % 30).toFixed(2)}°)
+                        </div>
+                        <div className="text-[11px] text-blue-700">
+                          Fecha objetivo: {solarArcData.target_date}
+                        </div>
+                        <div className="mt-2">
+                          <label className="text-[11px] text-gray-600 block mb-1">Cambiar fecha:</label>
+                          <input
+                            type="date"
+                            value={solarArcDate}
+                            onChange={(e) => {
+                              setSolarArcDate(e.target.value);
+                              setSolarArcData(null); // Force refetch
+                            }}
+                            className="text-[11px] border border-blue-300 rounded px-2 py-1 w-full"
+                          />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-[11px] text-gray-600">Activa la capa para calcular el Arco Solar.</div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Lunar Return Panel */}
+                <div className="mt-4 border-t border-gray-100 pt-4">
+                  <div className="flex items-center justify-between">
+                    <div className="text-[13px] font-medium text-purple-900 flex items-center gap-2">
+                      🌙 Retorno Lunar
+                      <span className="text-[10px] text-purple-600 font-normal">(Swiss Ephemeris)</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={activeLayers.has('return_lunar')}
+                        onChange={() => handleLayerToggle('return_lunar')}
+                        disabled={!hasChart}
+                        title={!hasChart ? 'Carta pendiente: completa datos de nacimiento para habilitar acciones' : 'Retorno Lunar: momento exacto cuando la Luna regresa a su posición natal.'}
+                      />
+                    </div>
+                  </div>
+                  <div className="mt-2 text-xs">
+                    {lunarReturnLoading ? (
+                      <div className="text-[11px] text-purple-600 flex items-center gap-2">
+                        <span className="animate-spin">⏳</span> Calculando Retorno Lunar...
+                      </div>
+                    ) : lunarReturnError ? (
+                      <div className="text-[11px] text-red-600">{lunarReturnError}</div>
+                    ) : lunarReturnData ? (
+                      <div className="space-y-2 bg-purple-50 border border-purple-200 rounded p-3">
+                        <div className="text-[11px] text-purple-900 font-semibold">
+                          Momento exacto: {new Date(lunarReturnData.return_datetime).toLocaleString('es-ES', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </div>
+                        <div className="text-[11px] text-purple-700">
+                          Posición lunar natal: {lunarReturnData.lunar_position.toFixed(4)}°
+                        </div>
+                        <div className="text-[11px] text-purple-600">
+                          Posición retorno: {lunarReturnData.return_lunar_position.toFixed(4)}°
+                        </div>
+                        <div className="text-[11px] text-purple-500">
+                          Precisión: {(lunarReturnData.precision * 3600).toFixed(1)} arcosegundos
+                        </div>
+                        <div className="mt-2">
+                          <label className="text-[11px] text-gray-600 block mb-1">Mes objetivo:</label>
+                          <input
+                            type="month"
+                            value={lunarReturnMonth}
+                            onChange={(e) => {
+                              setLunarReturnMonth(e.target.value);
+                              setLunarReturnData(null); // Force refetch
+                            }}
+                            className="text-[11px] border border-purple-300 rounded px-2 py-1 w-full"
+                          />
+                        </div>
+                        <div className="mt-2 text-[10px] text-purple-600 bg-purple-100 rounded p-2">
+                          ℹ️ El Retorno Lunar ocurre cada ~27.3 días cuando la Luna regresa a su posición natal exacta.
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-[11px] text-gray-600">Activa la capa para calcular el Retorno Lunar.</div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -2059,6 +2478,249 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
           </div>
         </div>
       </div>
+
+      {/* Modal para datos de Persona 2 (Carta Compuesta) */}
+      {showPerson2Modal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black opacity-30" onClick={() => { setShowPerson2Modal(false); setCompositeEnabled(false); }} />
+          <div className="bg-white rounded-lg shadow-lg p-6 z-10 w-full max-w-lg">
+            <h3 className="text-lg font-semibold">Datos de la Segunda Persona</h3>
+            <p className="mt-2 text-sm text-gray-600">
+              Ingresa los datos de nacimiento de la segunda persona para calcular la Carta Compuesta (puntos medios entre ambas cartas natales).
+            </p>
+            
+            <div className="mt-4 space-y-4">
+              <div>
+                <label className="block text-xs text-gray-600 font-medium">Nombre</label>
+                <input
+                  type="text"
+                  value={person2Data.name}
+                  onChange={(e) => setPerson2Data(prev => ({ ...prev, name: e.target.value }))}
+                  className="mt-1 w-full rounded border px-3 py-2 text-sm"
+                  placeholder="Nombre de la persona"
+                />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs text-gray-600 font-medium">Fecha de nacimiento</label>
+                  <input
+                    type="date"
+                    value={person2Data.birth_date}
+                    onChange={(e) => setPerson2Data(prev => ({ ...prev, birth_date: e.target.value }))}
+                    className="mt-1 w-full rounded border px-3 py-2 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-600 font-medium">Hora de nacimiento</label>
+                  <input
+                    type="time"
+                    value={person2Data.birth_time}
+                    onChange={(e) => setPerson2Data(prev => ({ ...prev, birth_time: e.target.value }))}
+                    className="mt-1 w-full rounded border px-3 py-2 text-sm"
+                  />
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs text-gray-600 font-medium">Latitud</label>
+                  <input
+                    type="number"
+                    step="0.0001"
+                    value={person2Data.latitude || ''}
+                    onChange={(e) => setPerson2Data(prev => ({ ...prev, latitude: parseFloat(e.target.value) || 0 }))}
+                    className="mt-1 w-full rounded border px-3 py-2 text-sm"
+                    placeholder="ej: 40.4168"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-600 font-medium">Longitud</label>
+                  <input
+                    type="number"
+                    step="0.0001"
+                    value={person2Data.longitude || ''}
+                    onChange={(e) => setPerson2Data(prev => ({ ...prev, longitude: parseFloat(e.target.value) || 0 }))}
+                    className="mt-1 w-full rounded border px-3 py-2 text-sm"
+                    placeholder="ej: -3.7038"
+                  />
+                </div>
+              </div>
+              
+              {compositeError && (
+                <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded p-2">
+                  {compositeError}
+                </div>
+              )}
+              {davisonError && !compositeError && (
+                <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded p-2">
+                  {davisonError}
+                </div>
+              )}
+            </div>
+            
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                className="px-4 py-2 rounded border text-sm"
+                onClick={() => { setShowPerson2Modal(false); setCompositeEnabled(false); setDavisonEnabled(false); }}
+              >
+                Cancelar
+              </button>
+              {compositeEnabled && (
+                <button
+                  className="px-4 py-2 rounded bg-indigo-600 text-white text-sm disabled:opacity-50"
+                  onClick={fetchCompositeChart}
+                  disabled={compositeLoading || !person2Data.birth_date || !person2Data.latitude || !person2Data.longitude}
+                >
+                  {compositeLoading ? 'Calculando...' : 'Calcular Carta Compuesta'}
+                </button>
+              )}
+              {davisonEnabled && (
+                <button
+                  className="px-4 py-2 rounded bg-teal-600 text-white text-sm disabled:opacity-50"
+                  onClick={fetchDavisonChart}
+                  disabled={davisonLoading || !person2Data.birth_date || !person2Data.latitude || !person2Data.longitude}
+                >
+                  {davisonLoading ? 'Calculando...' : 'Calcular Carta Davison'}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Panel de Carta Compuesta (si está habilitada y hay datos) */}
+      {compositeEnabled && compositeData && (
+        <div className="fixed bottom-4 right-4 z-40 bg-white border border-indigo-200 rounded-lg shadow-lg p-4 w-96 max-h-[60vh] overflow-y-auto">
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="text-sm font-semibold text-indigo-900">Carta Compuesta</h4>
+            <button
+              className="text-gray-400 hover:text-gray-600"
+              onClick={() => { setCompositeEnabled(false); setCompositeData(null); }}
+            >
+              ✕
+            </button>
+          </div>
+          
+          <div className="text-xs space-y-2">
+            <div className="bg-indigo-50 rounded p-2">
+              <div><strong>{compositeData.person1.name}</strong> + <strong>{compositeData.person2.name}</strong></div>
+              <div className="text-gray-600 mt-1">
+                Punto medio calculado: {compositeData.composite_datetime ? new Date(compositeData.composite_datetime).toLocaleDateString('es-ES') : '-'}
+              </div>
+            </div>
+            
+            <div className="border-t pt-2">
+              <div className="font-medium mb-1">Planetas Compuestos:</div>
+              <div className="grid grid-cols-2 gap-1">
+                {Object.entries(compositeData.planets || {}).map(([planet, data]: [string, any]) => (
+                  <div key={planet} className="flex justify-between">
+                    <span className="capitalize">{planet}:</span>
+                    <span className="text-gray-700">{data.sign} {data.sign_degree?.toFixed(1)}°</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            <div className="border-t pt-2">
+              <div className="font-medium mb-1">Ángulos:</div>
+              <div className="grid grid-cols-2 gap-1">
+                <div>ASC: {compositeData.angles?.asc?.toFixed(2)}°</div>
+                <div>MC: {compositeData.angles?.mc?.toFixed(2)}°</div>
+                <div>DSC: {compositeData.angles?.dsc?.toFixed(2)}°</div>
+                <div>IC: {compositeData.angles?.ic?.toFixed(2)}°</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Panel de Carta Davison (si está habilitada y hay datos) */}
+      {davisonEnabled && davisonData && (
+        <div className="fixed bottom-4 left-4 z-40 bg-white border border-teal-200 rounded-lg shadow-lg p-4 w-96 max-h-[60vh] overflow-y-auto">
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="text-sm font-semibold text-teal-900">Carta Davison</h4>
+            <button
+              className="text-gray-400 hover:text-gray-600"
+              onClick={() => { setDavisonEnabled(false); setDavisonData(null); }}
+            >
+              ✕
+            </button>
+          </div>
+          
+          <div className="text-xs space-y-2">
+            <div className="bg-teal-50 border border-teal-200 rounded p-2">
+              <div className="text-teal-900 font-medium">Momento medio</div>
+              <div className="text-teal-700 mt-1">
+                {davisonData.davison_datetime ? new Date(davisonData.davison_datetime).toLocaleString('es-ES', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                }) : '-'}
+              </div>
+            </div>
+
+            <div className="bg-teal-50 border border-teal-200 rounded p-2">
+              <div className="text-teal-900 font-medium">Lugar medio</div>
+              <div className="text-teal-700 mt-1">
+                Lat: {davisonData.davison_location?.latitude?.toFixed(4)}° · 
+                Lon: {davisonData.davison_location?.longitude?.toFixed(4)}°
+              </div>
+            </div>
+
+            <div className="border-t pt-2">
+              <div className="font-medium mb-1">Planetas Davison:</div>
+              <div className="grid grid-cols-2 gap-1">
+                {Object.entries(davisonData.planets || {}).map(([planet, data]: [string, any]) => (
+                  <div key={planet} className="flex justify-between">
+                    <span className="capitalize">{planet}:</span>
+                    <span className="text-gray-700">{data.sign} {data.sign_degree?.toFixed(1)}°</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            <div className="border-t pt-2">
+              <div className="font-medium mb-1">Ángulos:</div>
+              <div className="grid grid-cols-2 gap-1">
+                <div>ASC: {davisonData.ascendant?.toFixed(2)}°</div>
+                <div>MC: {davisonData.midheaven?.toFixed(2)}°</div>
+              </div>
+            </div>
+
+            <div className="mt-2 text-[10px] text-teal-600 bg-teal-100 rounded p-2">
+              ℹ️ La Carta Davison representa la relación como una entidad única, 
+              calculada para el momento y lugar medio entre ambas personas. 
+              Diferente de la Compuesta que usa puntos medios de planetas individuales.
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Loading state for Davison */}
+      {davisonEnabled && davisonLoading && (
+        <div className="fixed bottom-4 left-4 z-40 bg-white border border-teal-200 rounded-lg shadow-lg p-4 w-96">
+          <div className="flex items-center gap-2 text-teal-700">
+            <span className="animate-spin">⏳</span>
+            <span>Calculando Carta Davison...</span>
+          </div>
+        </div>
+      )}
+
+      {/* Error state for Davison */}
+      {davisonEnabled && davisonError && !davisonLoading && (
+        <div className="fixed bottom-4 left-4 z-40 bg-white border border-red-200 rounded-lg shadow-lg p-4 w-96">
+          <div className="text-red-700 text-sm">{davisonError}</div>
+          <button
+            className="mt-2 text-xs text-teal-600 underline"
+            onClick={() => setShowPerson2Modal(true)}
+          >
+            Configurar datos de Persona 2
+          </button>
+        </div>
+      )}
     </div>
   );
 }

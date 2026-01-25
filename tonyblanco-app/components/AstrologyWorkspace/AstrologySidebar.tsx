@@ -36,13 +36,54 @@ const HELP_SECTIONS = [
     items: [
       { term: 'Retorno Solar', desc: 'Carta anual cuando el Sol vuelve a su posición natal. Temas del año.' },
       { term: 'Retorno Lunar', desc: 'Carta mensual (~28 días). Indica el clima emocional del ciclo.' },
+      { term: 'Planetarios', desc: 'Capa simbólica basada en planetas visibles, sin efemérides.' },
+    ],
+  },
+  {
+    title: 'Técnicas Especiales',
+    items: [
+      { term: 'Armónicos', desc: 'Patrones de resonancia psicológica (h5, h7, h9...). No astronómicos.' },
+      { term: 'Persona Chart', desc: 'Identidad visible/adaptativa según contexto (social, profesional, íntimo).' },
+      { term: 'Relocación', desc: 'Cómo el entorno influye en la experiencia vital (hogar, trabajo, viaje).' },
     ],
   },
   {
     title: 'Configuración',
     items: [
-      { term: 'Sistema de Casas', desc: 'Placidus (estándar), Koch, Equal, Whole Sign, etc.' },
+      { term: 'Sistema de Casas', desc: 'Placidus (estándar), Koch, Equal, Whole Sign, Regiomontanus.' },
       { term: 'Zodiaco', desc: 'Tropical (occidental), Sideral (védico), Dracónico (simbólico).' },
+    ],
+  },
+  {
+    title: 'Objetos Celestes',
+    items: [
+      { term: 'Planetas', desc: 'Sol, Luna y planetas tradicionales + modernos (Urano, Neptuno, Plutón).' },
+      { term: 'Nodo Norte/Sur', desc: 'Eje kármico: dirección evolutiva y patrones pasados.' },
+      { term: 'Parte de la Fortuna', desc: 'Punto árabe de bienestar y flujo vital.' },
+      { term: 'Puntos Simbólicos', desc: 'Marcadores sin cálculo astronómico real.' },
+      { term: 'Asteroides', desc: 'Quirón, Ceres, Palas, Juno, Vesta y otros cuerpos menores.' },
+    ],
+  },
+  {
+    title: 'Estrellas Fijas',
+    items: [
+      { term: 'Estrellas Principales', desc: 'Regulus, Spica, Algol, Fomalhaut... arquetipos mayores.' },
+      { term: 'Estrellas Secundarias', desc: 'Constelaciones menores con significado simbólico.' },
+      { term: 'Uso', desc: 'Educativo y arquetípico, no fatalista ni predictivo.' },
+    ],
+  },
+  {
+    title: 'Relaciones',
+    items: [
+      { term: 'Modo Relacional', desc: 'Pareja, familia, trabajo, social - contexto de la lectura.' },
+      { term: 'Rol', desc: 'Activo (iniciador) o Reactivo (responde) en la dinámica.' },
+    ],
+  },
+  {
+    title: 'Desarrollo',
+    items: [
+      { term: 'Etapas Vitales', desc: 'Primera infancia, niñez, adolescencia, joven adulto.' },
+      { term: 'Uso', desc: 'Lectura simbólica del desarrollo psicológico por edades.' },
     ],
   },
 ];

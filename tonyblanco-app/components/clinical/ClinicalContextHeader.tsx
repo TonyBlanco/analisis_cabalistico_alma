@@ -132,10 +132,12 @@ export default function ClinicalContextHeader() {
 
   const router = useRouter();
 
-  const workspaceLabel = useMemo(
-    () => formatWorkspaceLabel(pathname),
-    [pathname]
-  );
+  // Fix hydration mismatch: calculate workspace label only on client
+  const [workspaceLabel, setWorkspaceLabel] = useState<string>('Workspace consultivo');
+  
+  useEffect(() => {
+    setWorkspaceLabel(formatWorkspaceLabel(pathname));
+  }, [pathname]);
 
   const birthDateLabel = useMemo(() => {
     const birthDate = profile?.birth_date;
@@ -152,7 +154,7 @@ export default function ClinicalContextHeader() {
           <span className="rounded-full bg-gray-100 px-2 py-1 text-[11px] uppercase tracking-wide text-gray-500">
             CONTEXTO PROFESIONAL
           </span>
-          <span className="font-medium text-gray-900">{workspaceLabel}</span>
+          <span suppressHydrationWarning className="font-medium text-gray-900">{workspaceLabel}</span>
         </div>
         <div className="flex flex-wrap items-center gap-3 text-xs text-gray-600">
           <span className="font-medium text-gray-900">

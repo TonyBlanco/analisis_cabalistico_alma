@@ -139,18 +139,28 @@ AstrologyNatalChart EXISTS for patient_id=4: True
 | `/api/astrology/interpret/transits/` | POST | Interpretación tránsitos |
 | `/api/astrology/interpret/progressions/` | POST | Interpretación progresiones |
 | `/api/astrology/interpret/solar-return/` | POST | Interpretación retorno solar |
-| `/api/astrology/interpret/situation/` | POST | Consulta situacional |
+| `/api/astrology/interpret/situation/` | POST | Consulta situacional (chat) |
 
-### Nuevo Componente Frontend
+### Nuevos Componentes Frontend
 
-`tonyblanco-app/components/AstrologyWorkspace/AIInterpretationPanel.tsx`
+| Componente | Descripción |
+|------------|-------------|
+| `AIInterpretationPanel.tsx` | Panel de interpretación por capas (Fase 1) |
+| `AISituationChat.tsx` | Chat interactivo para consultas situacionales (Fase 2) |
 
-Integrado en `AstrologyProfessionalView.tsx` después de la sección de capas profesionales.
+Ambos integrados en `AstrologyProfessionalView.tsx` después de la sección de capas profesionales.
 
 ### Verificación
 
-Para probar:
+Para probar Fase 1 (Interpretaciones por capa):
 1. Navegar a `/dashboard/therapist/astrologia`
 2. Seleccionar un consultante con carta calculada
 3. Usar los botones del panel "Interpretación AI"
+
+Para probar Fase 2 (Chat situacional):
+1. Expandir el panel "Consultas Situacionales"
+2. Escribir una pregunta o usar las sugeridas
+3. Recibir respuesta contextualizada del AI
+
 - Módulos no implementados: bloqueados y documentados.
+

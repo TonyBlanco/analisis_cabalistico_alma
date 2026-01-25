@@ -481,7 +481,7 @@ const CabalaAnalyzer = () => {
                         <p><strong>🌍 Planeta:</strong> Plutón</p>
                         <p><strong>🎴 Tarot:</strong> Los Ases (potencial puro)</p>
                         <p><strong>🔮 Chakra:</strong> 7º - Corona (Sahasrara)</p>
-                        <p><strong>✨ Frase:</strong> "YO VENZO - YO SOY UNO"</p>
+                        <p><strong>✨ Frase:</strong> &quot;YO VENZO - YO SOY UNO&quot;</p>
                       </div>
                       <div className="bg-white p-3 rounded-lg">
                         <p><strong>💡 Luminoso:</strong> Unión con Dios, conexión divina, fe absoluta, conciencia pura.</p>
@@ -489,8 +489,8 @@ const CabalaAnalyzer = () => {
                       </div>
                     </div>
                     <p className="text-purple-800 italic bg-purple-50 p-3 rounded">
-                      "Keter es la Corona de la Vida. Representa la conexión directa con la fuente divina, 
-                      el Padre celestial, la conciencia cósmica. Es el retorno al origen."
+                      &quot;Keter es la Corona de la Vida. Representa la conexión directa con la fuente divina, 
+                      el Padre celestial, la conciencia cósmica. Es el retorno al origen.&quot;
                     </p>
                   </div>
                 </details>
@@ -506,7 +506,7 @@ const CabalaAnalyzer = () => {
                         <p><strong>🌍 Planeta:</strong> Urano (Neptuno)</p>
                         <p><strong>🎴 Tarot:</strong> Los Doses</p>
                         <p><strong>🔮 Chakra:</strong> 6º - Tercer Ojo posterior</p>
-                        <p><strong>✨ Frase:</strong> "YO SÉ - YO CONFÍO"</p>
+                        <p><strong>✨ Frase:</strong> &quot;YO SÉ - YO CONFÍO&quot;</p>
                       </div>
                       <div className="bg-white p-3 rounded-lg">
                         <p><strong>💡 Luminoso:</strong> Sabiduría infinita, intuición superior, revelación, certeza.</p>
@@ -514,8 +514,8 @@ const CabalaAnalyzer = () => {
                       </div>
                     </div>
                     <p className="text-blue-800 italic bg-blue-50 p-3 rounded">
-                      "Jokhmah es el Búho de la sabiduría. La biblioteca cósmica, el conocimiento intuitivo, 
-                      las epifanías y los chispazos de conciencia."
+                      &quot;Jokhmah es el Búho de la sabiduría. La biblioteca cósmica, el conocimiento intuitivo, 
+                      las epifanías y los chispazos de conciencia.&quot;
                     </p>
                   </div>
                 </details>
@@ -531,7 +531,7 @@ const CabalaAnalyzer = () => {
                         <p><strong>🌍 Planeta:</strong> Neptuno (Saturno)</p>
                         <p><strong>🎴 Tarot:</strong> Los Treses</p>
                         <p><strong>🔮 Chakra:</strong> 6º - Tercer Ojo anterior</p>
-                        <p><strong>✨ Frase:</strong> "YO ENTIENDO - YO DOY"</p>
+                        <p><strong>✨ Frase:</strong> &quot;YO ENTIENDO - YO DOY&quot;</p>
                       </div>
                       <div className="bg-white p-3 rounded-lg">
                         <p><strong>💡 Luminoso:</strong> Fertilidad activa, creatividad, compartir dones, positividad.</p>
@@ -539,8 +539,8 @@ const CabalaAnalyzer = () => {
                       </div>
                     </div>
                     <p className="text-indigo-800 italic bg-indigo-50 p-3 rounded">
-                      "Binah es el Espejo que da forma. La Gran Madre Cósmica que convierte la sabiduría 
-                      en acción creativa y fértil."
+                      &quot;Binah es el Espejo que da forma. La Gran Madre Cósmica que convierte la sabiduría 
+                      en acción creativa y fértil.&quot;
                     </p>
                   </div>
                 </details>
@@ -556,7 +556,7 @@ const CabalaAnalyzer = () => {
                         <p><strong>🌍 Planeta:</strong> Júpiter</p>
                         <p><strong>🎴 Tarot:</strong> Los Cuatros</p>
                         <p><strong>🔮 Chakra:</strong> 5º - Laríngeo posterior</p>
-                        <p><strong>✨ Frase:</strong> "YO AMO - YO SIRVO"</p>
+                        <p><strong>✨ Frase:</strong> &quot;YO AMO - YO SIRVO&quot;</p>
                       </div>
                       <div className="bg-white p-3 rounded-lg">
                         <p><strong>💡 Luminoso:</strong> Amor incondicional, vocación, servicio, misericordia.</p>
@@ -564,8 +564,8 @@ const CabalaAnalyzer = () => {
                       </div>
                     </div>
                     <p className="text-cyan-800 italic bg-cyan-50 p-3 rounded">
-                      "Jesed es el Corazón divino. Representa entregar tu vida a tu vocación verdadera, 
-                      ser co-creador con Dios y servir a la humanidad."
+                      &quot;Jesed es el Corazón divino. Representa entregar tu vida a tu vocación verdadera, 
+                      ser co-creador con Dios y servir a la humanidad.&quot;
                     </p>
                   </div>
                 </details>
@@ -581,7 +581,7 @@ const CabalaAnalyzer = () => {
                         <p><strong>🌍 Planeta:</strong> Marte</p>
                         <p><strong>🎴 Tarot:</strong> Los Cincos</p>
                         <p><strong>🔮 Chakra:</strong> 5º - Laríngeo anterior</p>
-                        <p><strong>✨ Frase:</strong> "YO PUEDO - YO REALIZO"</p>
+                        <p><strong>✨ Frase:</strong> &quot;YO PUEDO - YO REALIZO&quot;</p>
                       </div>
                       <div className="bg-white p-3 rounded-lg">
                         <p><strong>💡 Luminoso:</strong> Poder consciente, valentía, compromiso, rigor ético.</p>
@@ -589,8 +589,8 @@ const CabalaAnalyzer = () => {
                       </div>
                     </div>
                     <p className="text-red-800 italic bg-red-50 p-3 rounded">
-                      "Guevurah es la Espada de la verdad. El poder espiritual ejercido con impecabilidad, 
-                      la fuerza para vivir tu verdad con valentía."
+                      &quot;Guevurah es la Espada de la verdad. El poder espiritual ejercido con impecabilidad, 
+                      la fuerza para vivir tu verdad con valentía.&quot;
                     </p>
                   </div>
                 </details>
@@ -606,7 +606,7 @@ const CabalaAnalyzer = () => {
                         <p><strong>🌍 Planeta:</strong> Sol</p>
                         <p><strong>🎴 Tarot:</strong> Los Seises</p>
                         <p><strong>🔮 Chakra:</strong> 4º - Corazón (Anahata)</p>
-                        <p><strong>✨ Frase:</strong> "YO ME AMO - YO SOY"</p>
+                        <p><strong>✨ Frase:</strong> &quot;YO ME AMO - YO SOY&quot;</p>
                       </div>
                       <div className="bg-white p-3 rounded-lg">
                         <p><strong>💡 Luminoso:</strong> Autoestima suprema, autorreconocimiento, identidad verdadera.</p>
@@ -614,8 +614,8 @@ const CabalaAnalyzer = () => {
                       </div>
                     </div>
                     <p className="text-yellow-800 italic bg-yellow-50 p-3 rounded">
-                      "Tiferet es el Sol radiante, el centro del Árbol. Tu identidad verdadera, el Cristo 
-                      interno, el Alma reconociéndose a sí misma."
+                      &quot;Tiferet es el Sol radiante, el centro del Árbol. Tu identidad verdadera, el Cristo 
+                      interno, el Alma reconociéndose a sí misma.&quot;
                     </p>
                   </div>
                 </details>
@@ -631,7 +631,7 @@ const CabalaAnalyzer = () => {
                         <p><strong>🌍 Planeta:</strong> Venus</p>
                         <p><strong>🎴 Tarot:</strong> Los Sietes</p>
                         <p><strong>🔮 Chakra:</strong> 3º - Plexo Solar posterior</p>
-                        <p><strong>✨ Frase:</strong> "YO ME SANO - YO ME ARMONIZO"</p>
+                        <p><strong>✨ Frase:</strong> &quot;YO ME SANO - YO ME ARMONIZO&quot;</p>
                       </div>
                       <div className="bg-white p-3 rounded-lg">
                         <p><strong>💡 Luminoso:</strong> Paz interior, armonía, salud emocional, propósito.</p>
@@ -639,8 +639,8 @@ const CabalaAnalyzer = () => {
                       </div>
                     </div>
                     <p className="text-green-800 italic bg-green-50 p-3 rounded">
-                      "Netsaj es la Rosa de la armonía. Santificar las emociones, vivir en coherencia 
-                      con tu propósito para alcanzar la paz interior."
+                      &quot;Netsaj es la Rosa de la armonía. Santificar las emociones, vivir en coherencia 
+                      con tu propósito para alcanzar la paz interior.&quot;
                     </p>
                   </div>
                 </details>
@@ -656,7 +656,7 @@ const CabalaAnalyzer = () => {
                         <p><strong>🌍 Planeta:</strong> Mercurio</p>
                         <p><strong>🎴 Tarot:</strong> Los Ochos</p>
                         <p><strong>🔮 Chakra:</strong> 3º - Plexo Solar anterior</p>
-                        <p><strong>✨ Frase:</strong> "YO ME MUESTRO"</p>
+                        <p><strong>✨ Frase:</strong> &quot;YO ME MUESTRO&quot;</p>
                       </div>
                       <div className="bg-white p-3 rounded-lg">
                         <p><strong>💡 Luminoso:</strong> Inteligencia iluminada, servicio humanitario, ética.</p>
@@ -664,8 +664,8 @@ const CabalaAnalyzer = () => {
                       </div>
                     </div>
                     <p className="text-orange-800 italic bg-orange-50 p-3 rounded">
-                      "Hod son los Pies Alados de Hermes. La inteligencia al servicio del bien común, 
-                      trabajar por la humanidad con ética e impecabilidad."
+                      &quot;Hod son los Pies Alados de Hermes. La inteligencia al servicio del bien común, 
+                      trabajar por la humanidad con ética e impecabilidad.&quot;
                     </p>
                   </div>
                 </details>
@@ -681,7 +681,7 @@ const CabalaAnalyzer = () => {
                         <p><strong>🌍 Planeta:</strong> Luna</p>
                         <p><strong>🎴 Tarot:</strong> Los Nueves</p>
                         <p><strong>🔮 Chakra:</strong> 2º - Sacro (Svadhisthana)</p>
-                        <p><strong>✨ Frase:</strong> "YO ME FERTILIZO"</p>
+                        <p><strong>✨ Frase:</strong> &quot;YO ME FERTILIZO&quot;</p>
                       </div>
                       <div className="bg-white p-3 rounded-lg">
                         <p><strong>💡 Luminoso:</strong> Ego santificado, subconsciente limpio, personalidad iluminada.</p>
@@ -689,8 +689,8 @@ const CabalaAnalyzer = () => {
                       </div>
                     </div>
                     <p className="text-pink-800 italic bg-pink-50 p-3 rounded">
-                      "Yesod es la Luna del subconsciente. El ego como maestro, las creencias del 
-                      inconsciente que deben ser sanadas y purificadas."
+                      &quot;Yesod es la Luna del subconsciente. El ego como maestro, las creencias del 
+                      inconsciente que deben ser sanadas y purificadas.&quot;
                     </p>
                   </div>
                 </details>
@@ -706,7 +706,7 @@ const CabalaAnalyzer = () => {
                         <p><strong>🌍 Planeta:</strong> Tierra</p>
                         <p><strong>🎴 Tarot:</strong> Los Dieces y Cartas de Corte</p>
                         <p><strong>🔮 Chakra:</strong> 1º - Raíz (Muladhara)</p>
-                        <p><strong>✨ Frase:</strong> "YO EVOLUCIONO - YO ME REALIZO"</p>
+                        <p><strong>✨ Frase:</strong> &quot;YO EVOLUCIONO - YO ME REALIZO&quot;</p>
                       </div>
                       <div className="bg-white p-3 rounded-lg">
                         <p><strong>💡 Luminoso:</strong> Evolución consciente, materia como medio, enraizamiento.</p>
@@ -714,8 +714,8 @@ const CabalaAnalyzer = () => {
                       </div>
                     </div>
                     <p className="text-amber-800 italic bg-amber-50 p-3 rounded">
-                      "Malkuth es la Tierra, el Reino manifestado. La materia como escuela de evolución, 
-                      donde el espíritu se hace carne para crecer."
+                      &quot;Malkuth es la Tierra, el Reino manifestado. La materia como escuela de evolución, 
+                      donde el espíritu se hace carne para crecer.&quot;
                     </p>
                   </div>
                 </details>
@@ -1266,37 +1266,37 @@ const CabalaAnalyzer = () => {
               <div className="space-y-4">
                 <div className="p-4 bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg border-l-4 border-purple-500">
                   <div className="font-bold text-purple-900 mb-1">1. Mentalismo</div>
-                  <div className="text-sm text-purple-700 italic">"El TODO es Mente; el Universo es mental"</div>
+                  <div className="text-sm text-purple-700 italic">&quot;El TODO es Mente; el Universo es mental&quot;</div>
                 </div>
 
                 <div className="p-4 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg border-l-4 border-blue-500">
                   <div className="font-bold text-blue-900 mb-1">2. Correspondencia</div>
-                  <div className="text-sm text-blue-700 italic">"Como arriba es abajo, como abajo es arriba"</div>
+                  <div className="text-sm text-blue-700 italic">&quot;Como arriba es abajo, como abajo es arriba&quot;</div>
                 </div>
 
                 <div className="p-4 bg-gradient-to-r from-cyan-50 to-cyan-100 rounded-lg border-l-4 border-cyan-500">
                   <div className="font-bold text-cyan-900 mb-1">3. Vibración</div>
-                  <div className="text-sm text-cyan-700 italic">"Nada está inmóvil, todo se mueve, todo vibra"</div>
+                  <div className="text-sm text-cyan-700 italic">&quot;Nada está inmóvil, todo se mueve, todo vibra&quot;</div>
                 </div>
 
                 <div className="p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-lg border-l-4 border-green-500">
                   <div className="font-bold text-green-900 mb-1">4. Polaridad</div>
-                  <div className="text-sm text-green-700 italic">"Todo es doble; todo tiene dos polos"</div>
+                  <div className="text-sm text-green-700 italic">&quot;Todo es doble; todo tiene dos polos&quot;</div>
                 </div>
 
                 <div className="p-4 bg-gradient-to-r from-yellow-50 to-yellow-100 rounded-lg border-l-4 border-yellow-500">
                   <div className="font-bold text-yellow-900 mb-1">5. Ritmo</div>
-                  <div className="text-sm text-yellow-700 italic">"Todo fluye y refluye; todo tiene períodos de avance y retroceso"</div>
+                  <div className="text-sm text-yellow-700 italic">&quot;Todo fluye y refluye; todo tiene períodos de avance y retroceso&quot;</div>
                 </div>
 
                 <div className="p-4 bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg border-l-4 border-orange-500">
                   <div className="font-bold text-orange-900 mb-1">6. Causa y Efecto</div>
-                  <div className="text-sm text-orange-700 italic">"Toda causa tiene su efecto, todo efecto tiene su causa"</div>
+                  <div className="text-sm text-orange-700 italic">&quot;Toda causa tiene su efecto, todo efecto tiene su causa&quot;</div>
                 </div>
 
                 <div className="p-4 bg-gradient-to-r from-pink-50 to-pink-100 rounded-lg border-l-4 border-pink-500">
                   <div className="font-bold text-pink-900 mb-1">7. Generación</div>
-                  <div className="text-sm text-pink-700 italic">"Todo tiene principios masculino y femenino"</div>
+                  <div className="text-sm text-pink-700 italic">&quot;Todo tiene principios masculino y femenino&quot;</div>
                 </div>
               </div>
             </div>

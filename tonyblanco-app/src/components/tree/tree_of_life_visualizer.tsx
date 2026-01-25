@@ -53,23 +53,25 @@ type UserNumbers = {
 
 const TreeOfLife: React.FC<{ initial?: Partial<UserNumbers> }> = ({ initial = {} }) => {
   const [selectedSephirah, setSelectedSephirah] = useState<string | null>(null);
-  const [userNumbers, setUserNumbers] = useState<UserNumbers>({
+  const [userNumbers, setUserNumbers] = useState(() => ({
     esencia: initial?.esencia || '',
     expresion: initial?.expresion || '',
     herencia: initial?.herencia || '',
     destino: initial?.destino || '',
     caminoVida: initial?.caminoVida || ''
-  });
+  }));
   const [highlightedNumbers, setHighlightedNumbers] = useState(new Set());
   const [showDaat, setShowDaat] = useState(false);
 
+  // Update userNumbers when initial changes
   useEffect(() => {
+    if (!initial) return;
     setUserNumbers({
-        esencia: initial?.esencia || '',
-        expresion: initial?.expresion || '',
-        herencia: initial?.herencia || '',
-        destino: initial?.destino || '',
-        caminoVida: initial?.caminoVida || ''
+      esencia: initial.esencia || '',
+      expresion: initial.expresion || '',
+      herencia: initial.herencia || '',
+      destino: initial.destino || '',
+      caminoVida: initial.caminoVida || ''
     });
   }, [initial]);
 
@@ -82,6 +84,7 @@ const TreeOfLife: React.FC<{ initial?: Partial<UserNumbers> }> = ({ initial = {}
         numbers.add(num);
       }
     });
+    // Using effect for state update is acceptable here as it's derived from form input
     setHighlightedNumbers(numbers);
   }, [userNumbers]);
 
@@ -209,7 +212,7 @@ const TreeOfLife: React.FC<{ initial?: Partial<UserNumbers> }> = ({ initial = {}
                     onChange={(e) => setShowDaat(e.target.checked)}
                     className="w-4 h-4"
                   />
-                  Mostrar Da'at (Sefirá Oculta)
+                  Mostrar Da&apos;at (Sefirá Oculta)
                 </label>
               </div>
             </div>

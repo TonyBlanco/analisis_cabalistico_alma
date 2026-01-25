@@ -10,4 +10,5 @@ export function listPlanets(): Planet[] {
 	return Object.values(planets);
 }
 
-export default { getPlanet, listPlanets };
+const AstrologyService = { getPlanet, listPlanets };
+export default AstrologyService;

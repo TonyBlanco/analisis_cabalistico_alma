@@ -79,7 +79,7 @@ export default function TherapeuticConsentModal({
                 <div className="flex-1">
                   <span className="text-slate-200 font-medium">Honro mi verdad</span>
                   <p className="text-sm text-slate-400 mt-1">
-                    Me comprometo a responder con sinceridad, entendiendo que no hay respuestas "correctas" o "incorrectas", solo mi realidad actual.
+                    Me comprometo a responder con sinceridad, entendiendo que no hay respuestas &quot;correctas&quot; o &quot;incorrectas&quot;, solo mi realidad actual.
                   </p>
                 </div>
               </label>

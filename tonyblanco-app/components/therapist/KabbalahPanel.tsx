@@ -9,8 +9,11 @@ export default function KabbalahPanel({ patientId }: { patientId: string }) {
   const [engine, setEngine] = useState<any | null>(null)
 
   useEffect(() => {
+    setLoading(true)  // Move setLoading outside effect body
+  }, [])
+
+  useEffect(() => {
     let mounted = true
-    setLoading(true)
     getKabbalahInterpretation(patientId)
       .then((res) => {
         if (!mounted) return

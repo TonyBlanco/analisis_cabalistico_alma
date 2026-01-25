@@ -74,8 +74,7 @@ export default function TherapistClinicalDashboard({
 
   useEffect(() => {
     if (!resolvedPatientId) {
-      setIntegrativeNotes([]);
-      setNotesError(null);
+      // Clear state when no patient - state updates handled in separate effect
       return;
     }
 

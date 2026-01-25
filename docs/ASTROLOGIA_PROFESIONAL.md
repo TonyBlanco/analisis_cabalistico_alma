@@ -73,3 +73,84 @@ Se mantienen visibles con tooltip de “fase posterior”, sin permitir cálculo
 - Capas reales disponibles: natal + (tránsitos/progresiones/retorno solar) si el backend las entrega.
 - Doble rueda real disponible vía selección de pareja (sin compuesta/Davison).
 - Módulos no implementados: bloqueados y documentados.
+
+---
+
+## Fixes Aplicados (2026-01-25)
+
+### 1. Bug crítico: Botón "Recalcular carta" deshabilitado sin carta
+
+**Archivo**: `tonyblanco-app/components/AstrologyWorkspace/AstrologyProfessionalView.tsx`
+
+**Problema**: El botón tenía `disabled={!hasChart}` que impedía calcular la primera carta (deadlock UX).
+
+**Fix**: Se removió `!hasChart` de la condición disabled. Ahora solo requiere `consultante?.id && calculateChart`.
+
+### 2. UX mejorada: Banner informativo cuando no hay carta
+
+**Archivo**: `tonyblanco-app/components/AstrologyWorkspace/AstrologyProfessionalView.tsx`
+
+**Antes**: Mensaje genérico "Completa datos de nacimiento".
+
+**Después**: Banner azul con botón prominente "✨ Calcular carta natal" cuando `hasIdentity=true`.
+
+### 3. Bug de timezone en multitech_payload
+
+**Archivo**: `backend/api/astrology_kerykeion/multi_tech.py`
+
+**Problema**: `TypeError: can't subtract offset-naive and offset-aware datetimes` al calcular progresiones.
+
+**Fix**: Consistencia de timezone entre `birth_dt` y `ref_dt`:
+- Si `ref_dt` es timezone-aware, se convierte `birth_dt` a aware usando la zona del input
+- Fallback: si falla, ambos se convierten a naive
+
+### Verificación (2026-01-25 17:54 UTC)
+
+```
+AstrologyNatalChart EXISTS for patient_id=4: True
+  - ID: 1
+  - calculated_at: 2026-01-25 17:54:05.074129+00:00
+  - house_system: placidus
+  - source: kerykeion
+  - chart_payload keys: ['planetas', 'casas', 'aspectos', 'metadatos', 'cabalistic_data']
+  - planetas count: 10
+```
+
+✅ Capas multitech (tránsitos, progresiones, retorno solar) funcionan correctamente.
+
+---
+
+## AI Interpretación (2026-01-25)
+
+### Nuevos Archivos Backend
+
+| Archivo | Descripción |
+|---------|-------------|
+| `backend/api/astrology_ai_prompts.py` | Catálogo de prompts para natal, tránsitos, progresiones, retorno solar |
+| `backend/api/astrology_ai_service.py` | Servicio AI con integración Gemini |
+| `backend/api/astrology_ai_views.py` | Endpoints REST para interpretación AI |
+
+### Nuevos Endpoints
+
+| Endpoint | Método | Descripción |
+|----------|--------|-------------|
+| `/api/astrology/ai-status/` | GET | Estado del servicio AI |
+| `/api/astrology/interpret/natal/` | POST | Interpretación carta natal |
+| `/api/astrology/interpret/transits/` | POST | Interpretación tránsitos |
+| `/api/astrology/interpret/progressions/` | POST | Interpretación progresiones |
+| `/api/astrology/interpret/solar-return/` | POST | Interpretación retorno solar |
+| `/api/astrology/interpret/situation/` | POST | Consulta situacional |
+
+### Nuevo Componente Frontend
+
+`tonyblanco-app/components/AstrologyWorkspace/AIInterpretationPanel.tsx`
+
+Integrado en `AstrologyProfessionalView.tsx` después de la sección de capas profesionales.
+
+### Verificación
+
+Para probar:
+1. Navegar a `/dashboard/therapist/astrologia`
+2. Seleccionar un consultante con carta calculada
+3. Usar los botones del panel "Interpretación AI"
+- Módulos no implementados: bloqueados y documentados.

@@ -1,7 +1,51 @@
 'use client';
 
+import { useState } from 'react';
+import { HelpCircle, ChevronDown, ChevronUp, X } from 'lucide-react';
 import ASTRO_METHODS from '@/lib/astrologyMethods';
-import InfoTooltip from '@/components/common/InfoTooltip';
+
+// Help panel content organized by sections
+const HELP_SECTIONS = [
+  {
+    title: 'Tipo de Carta',
+    items: [
+      { term: 'Carta Natal', desc: 'Posiciones de Sol, Luna y planetas al momento del nacimiento.' },
+      { term: 'Natal + Asteroides', desc: 'Incluye Quirón, Juno, Ceres y otros cuerpos menores.' },
+      { term: 'Estilo Huber', desc: 'Lectura psicológica simbólica, no astronómica.' },
+    ],
+  },
+  {
+    title: 'Sinastría',
+    items: [
+      { term: 'Doble Rueda', desc: 'Superpone dos cartas para ver aspectos cruzados entre dos personas.' },
+      { term: 'Compuesta', desc: 'Carta de puntos medios que representa la energía de la relación.' },
+      { term: 'Davison', desc: 'Carta del momento/lugar medio entre dos nacimientos.' },
+    ],
+  },
+  {
+    title: 'Pronóstico',
+    items: [
+      { term: 'Tránsitos', desc: 'Planetas actuales sobre la carta natal. Muestran activaciones externas.' },
+      { term: 'Progresiones', desc: 'Evolución interna (día-por-año). Desarrollo psicológico.' },
+      { term: 'Arco Solar', desc: 'Desplazamiento uniforme. Activaciones de potencial natal.' },
+      { term: 'Aspectos Cruzados', desc: 'Conexiones entre carta natal y capas activas.' },
+    ],
+  },
+  {
+    title: 'Retornos',
+    items: [
+      { term: 'Retorno Solar', desc: 'Carta anual cuando el Sol vuelve a su posición natal. Temas del año.' },
+      { term: 'Retorno Lunar', desc: 'Carta mensual (~28 días). Indica el clima emocional del ciclo.' },
+    ],
+  },
+  {
+    title: 'Configuración',
+    items: [
+      { term: 'Sistema de Casas', desc: 'Placidus (estándar), Koch, Equal, Whole Sign, etc.' },
+      { term: 'Zodiaco', desc: 'Tropical (occidental), Sideral (védico), Dracónico (simbólico).' },
+    ],
+  },
+];
 
 interface AstrologySidebarProps {
   houseSystem: string;
@@ -186,30 +230,80 @@ export default function AstrologySidebar({
       </div>
     );
   };
+
+  // Help panel state
+  const [showHelp, setShowHelp] = useState(false);
+  const [expandedSection, setExpandedSection] = useState<string | null>(null);
+
   return (
     <aside className="w-72 border-r border-gray-200 bg-white flex flex-col">
       <div className="px-4 py-4 border-b border-gray-200">
-        <p className="text-xs uppercase tracking-wide text-gray-500">Workspace simbólico</p>
-        <h2 className="text-lg font-semibold text-gray-900">Astrología Profesional</h2>
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-wide text-gray-500">Workspace simbólico</p>
+            <h2 className="text-lg font-semibold text-gray-900">Astrología Profesional</h2>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowHelp(!showHelp)}
+            className={`p-2 rounded-full transition-colors ${showHelp ? 'bg-purple-100 text-purple-700' : 'hover:bg-gray-100 text-gray-500 hover:text-gray-700'}`}
+            aria-label="Mostrar ayuda"
+            title="Guía de conceptos astrológicos"
+          >
+            {showHelp ? <X className="w-5 h-5" /> : <HelpCircle className="w-5 h-5" />}
+          </button>
+        </div>
         <p className="text-xs text-gray-500 mt-1">Motor Swiss Ephemeris — Solo lectura</p>
       </div>
+
+      {/* Collapsible Help Panel */}
+      {showHelp && (
+        <div className="border-b border-gray-200 bg-gradient-to-b from-purple-50 to-white max-h-80 overflow-y-auto">
+          <div className="px-3 py-3">
+            <div className="text-xs font-semibold text-purple-800 mb-2 flex items-center gap-1">
+              📚 Guía Rápida de Conceptos
+            </div>
+            <div className="space-y-1">
+              {HELP_SECTIONS.map((section) => (
+                <div key={section.title} className="border border-purple-100 rounded bg-white">
+                  <button
+                    type="button"
+                    onClick={() => setExpandedSection(expandedSection === section.title ? null : section.title)}
+                    className="w-full px-2 py-1.5 flex items-center justify-between text-left hover:bg-purple-50 transition-colors rounded"
+                  >
+                    <span className="text-xs font-medium text-gray-800">{section.title}</span>
+                    {expandedSection === section.title ? (
+                      <ChevronUp className="w-3 h-3 text-purple-600" />
+                    ) : (
+                      <ChevronDown className="w-3 h-3 text-gray-400" />
+                    )}
+                  </button>
+                  {expandedSection === section.title && (
+                    <div className="px-2 pb-2 space-y-1">
+                      {section.items.map((item) => (
+                        <div key={item.term} className="text-[11px] leading-relaxed">
+                          <span className="font-semibold text-purple-700">{item.term}:</span>{' '}
+                          <span className="text-gray-600">{item.desc}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+            <div className="mt-2 pt-2 border-t border-purple-100">
+              <p className="text-[10px] text-purple-600 italic">
+                💡 Este workspace es de solo lectura. Los cálculos no predicen eventos.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="flex-1 px-3 py-3 space-y-4 overflow-y-auto">
         {/* Tipo de Carta */}
         <div className="pt-2 border-t border-gray-100">
-          <label className="flex items-center gap-1 text-xs font-semibold text-gray-600 mb-2">
-            Tipo de Carta
-            <InfoTooltip
-              title="Tipo de Carta"
-              description="Define la estructura base de la carta astrológica. La Carta Natal muestra las posiciones planetarias al momento del nacimiento. Asteroides añade cuerpos menores para análisis más profundo. Estilo Huber aplica una lectura psicológica simbólica."
-              examples={[
-                "Carta Natal: posiciones de Sol, Luna, planetas al nacer",
-                "Natal + Asteroides: incluye Quirón, Juno, Ceres, etc.",
-                "Estilo Huber: interpretación psicológica profunda"
-              ]}
-              position="bottom"
-            />
-          </label>
+          <label className="block text-xs font-semibold text-gray-600 mb-2">Tipo de Carta</label>
           <div className="space-y-1 text-xs">
             {ASTRO_METHODS.filter(m => m.category === 'natal').map((m) => (
               m.id === 'huber' ? (
@@ -241,49 +335,17 @@ export default function AstrologySidebar({
 
         {/* Sinastría y Parejas */}
         <div className="pt-2 border-t border-gray-100">
-          <label className="flex items-center gap-1 text-xs font-semibold text-gray-600 mb-2">
-            Sinastría
-            <InfoTooltip
-              title="Sinastría"
-              description="Técnicas de comparación entre dos cartas natales para analizar dinámicas de relación. Permite ver cómo interactúan las energías de dos personas."
-              examples={[
-                "Doble Rueda: superpone dos cartas para ver aspectos cruzados",
-                "Compuesta: carta media entre dos personas",
-                "Davison: carta del momento/lugar medio de la relación"
-              ]}
-              position="bottom"
-            />
-          </label>
+          <label className="block text-xs font-semibold text-gray-600 mb-2">Sinastría</label>
           <div className="space-y-1 text-[11px]">
             <div className="flex items-center justify-between px-2 py-1 border rounded bg-white">
-              <div className="flex items-center gap-1 text-[13px]">
-                Doble Rueda
-                <InfoTooltip
-                  title="Doble Rueda"
-                  description="Superpone la carta natal de una segunda persona sobre la carta del consultante principal. Permite visualizar aspectos cruzados entre planetas de ambas cartas."
-                  examples={[
-                    "Venus de persona A en conjunción con Marte de persona B",
-                    "Luna de uno tocando el Sol del otro"
-                  ]}
-                  position="bottom"
-                />
-              </div>
+              <div className="text-[13px]">Doble Rueda</div>
               <label className="inline-flex items-center gap-2 text-sm">
                 <input type="checkbox" checked={Boolean(synastryEnabled)} onChange={(e) => setSynastryEnabled && setSynastryEnabled(e.target.checked)} />
               </label>
             </div>
             <div className={`flex items-center justify-between px-2 py-1 border rounded ${canUseForecast ? 'bg-white border-gray-200' : 'bg-gray-50 border-gray-200 opacity-60'}`}>
-              <div className="flex items-center gap-1 text-[13px]" title="Carta Compuesta: puntos medios entre dos cartas natales">
+              <div className="text-[13px]" title="Carta Compuesta: puntos medios entre dos cartas natales">
                 Compuesta
-                <InfoTooltip
-                  title="Carta Compuesta"
-                  description="Crea una carta única calculando los puntos medios entre las posiciones planetarias de dos personas. Representa la energía de la relación como entidad."
-                  examples={[
-                    "El Sol compuesto muestra el propósito de la relación",
-                    "Venus compuesto indica cómo se expresa el amor mutuo"
-                  ]}
-                  position="bottom"
-                />
               </div>
               <label className="inline-flex items-center gap-2 text-sm">
                 <input 
@@ -296,17 +358,8 @@ export default function AstrologySidebar({
               </label>
             </div>
             <div className={`flex items-center justify-between px-2 py-1 border rounded ${canUseForecast ? 'bg-white border-gray-200' : 'bg-gray-50 border-gray-200 opacity-60'}`}>
-              <div className="flex items-center gap-1 text-[13px]" title="Carta Davison: representa la relación como una entidad única, calculada para el momento y lugar medio entre ambas personas.">
+              <div className="text-[13px]" title="Carta Davison: momento/lugar medio entre dos cartas natales">
                 Davison
-                <InfoTooltip
-                  title="Carta Davison"
-                  description="Calcula el momento y lugar medio exacto entre dos nacimientos, creando una carta para ese instante. Representa el 'nacimiento' de la relación."
-                  examples={[
-                    "Muestra el potencial energético inherente de la pareja",
-                    "Usado para timing de eventos relacionales"
-                  ]}
-                  position="bottom"
-                />
               </div>
               <label className="inline-flex items-center gap-2 text-sm">
                 <input
@@ -323,19 +376,7 @@ export default function AstrologySidebar({
 
         {/* Pronóstico */}
         <div className="pt-2 border-t border-gray-100">
-          <label className="flex items-center gap-1 text-xs font-semibold text-gray-600 mb-2">
-            Pronóstico
-            <InfoTooltip
-              title="Técnicas de Pronóstico"
-              description="Herramientas para analizar ciclos temporales y tendencias. No predicen eventos específicos, sino que muestran patrones energéticos activos en diferentes momentos."
-              examples={[
-                "Tránsitos: planetas actuales vs. carta natal",
-                "Progresiones: desarrollo interno a lo largo del tiempo",
-                "Arco Solar: avance simbólico uniforme"
-              ]}
-              position="bottom"
-            />
-          </label>
+          <label className="block text-xs font-semibold text-gray-600 mb-2">Pronóstico</label>
           <div className="space-y-1 text-[11px]">
             <div className={`flex items-center justify-between px-2 py-1 border rounded ${canUseSymbolicDoubleWheel ? 'bg-white border-gray-200' : 'bg-gray-50 border-gray-200 opacity-60'}`}>
               <div
@@ -391,35 +432,15 @@ export default function AstrologySidebar({
 
         {/* Retornos */}
         <div className="pt-2 border-t border-gray-100">
-          <label className="flex items-center gap-1 text-xs font-semibold text-gray-600 mb-2">
-            Retornos
-            <InfoTooltip
-              title="Retornos Planetarios"
-              description="Cartas calculadas para el momento exacto en que un planeta vuelve a su posición natal. Los más usados son el Retorno Solar (anual) y el Retorno Lunar (mensual)."
-              examples={[
-                "Retorno Solar: el 'cumpleaños astrológico', marca temas del año",
-                "Retorno Lunar: marca temas del mes emocional"
-              ]}
-              position="bottom"
-            />
-          </label>
+          <label className="block text-xs font-semibold text-gray-600 mb-2">Retornos</label>
           <div className="space-y-1 text-[11px]">
             <div className={`px-2 py-2 border rounded ${canUseReturns ? 'bg-white border-gray-200' : 'bg-gray-50 border-gray-200 opacity-60'}`}>
               <div className="flex items-center justify-between">
                 <div
-                  className="flex items-center gap-1 text-[13px]"
+                  className="text-[13px]"
                   title={isRealMode ? 'Retorno Solar (cálculo real): calculado por el motor Swiss Ephemeris al recalcular la carta base.' : 'Retorno Solar · capa anual simbólica. No corresponde a un cálculo astronómico real.'}
                 >
                   Solar · <span className="text-gray-500">{isRealMode ? 'cálculo real' : 'capa anual simbólica'}</span>
-                  <InfoTooltip
-                    title="Retorno Solar"
-                    description="Carta calculada para el momento exacto en que el Sol regresa a su posición natal cada año. Indica los temas y energías principales para ese año de vida."
-                    examples={[
-                      "El Ascendente del Retorno Solar marca el enfoque del año",
-                      "Planetas en casa 1 indican áreas de protagonismo"
-                    ]}
-                    position="bottom"
-                  />
                 </div>
                 <label className="inline-flex items-center gap-2 text-sm">
                   <input
@@ -458,19 +479,10 @@ export default function AstrologySidebar({
             <div className={`px-2 py-2 border rounded ${canUseReturns ? 'bg-white border-gray-200' : 'bg-gray-50 border-gray-200 opacity-60'}`}>
               <div className="flex items-center justify-between">
                 <div
-                  className="flex items-center gap-1 text-[13px]"
+                  className="text-[13px]"
                   title={isRealMode ? "Retorno Lunar (Swiss Ephemeris) · momento exacto cuando la Luna regresa a su posición natal." : "Retorno Lunar · capa mensual simbólica."}
                 >
                   Lunar · <span className="text-gray-500">{isRealMode ? 'cálculo real' : 'capa mensual simbólica'}</span>
-                  <InfoTooltip
-                    title="Retorno Lunar"
-                    description="Carta calculada para el momento exacto en que la Luna regresa a su posición natal, aproximadamente cada 28 días. Indica los temas emocionales del mes."
-                    examples={[
-                      "Indica el clima emocional del ciclo lunar personal",
-                      "Útil para planificar actividades según la energía disponible"
-                    ]}
-                    position="bottom"
-                  />
                 </div>
                 <label className="inline-flex items-center gap-2 text-sm">
                   <input

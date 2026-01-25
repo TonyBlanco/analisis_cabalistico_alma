@@ -207,7 +207,7 @@ export default function AstrologySidebar({
                 "Natal + Asteroides: incluye Quirón, Juno, Ceres, etc.",
                 "Estilo Huber: interpretación psicológica profunda"
               ]}
-              position="right"
+              position="bottom"
             />
           </label>
           <div className="space-y-1 text-xs">
@@ -251,7 +251,7 @@ export default function AstrologySidebar({
                 "Compuesta: carta media entre dos personas",
                 "Davison: carta del momento/lugar medio de la relación"
               ]}
-              position="right"
+              position="bottom"
             />
           </label>
           <div className="space-y-1 text-[11px]">
@@ -265,7 +265,7 @@ export default function AstrologySidebar({
                     "Venus de persona A en conjunción con Marte de persona B",
                     "Luna de uno tocando el Sol del otro"
                   ]}
-                  position="right"
+                  position="bottom"
                 />
               </div>
               <label className="inline-flex items-center gap-2 text-sm">
@@ -282,7 +282,7 @@ export default function AstrologySidebar({
                     "El Sol compuesto muestra el propósito de la relación",
                     "Venus compuesto indica cómo se expresa el amor mutuo"
                   ]}
-                  position="right"
+                  position="bottom"
                 />
               </div>
               <label className="inline-flex items-center gap-2 text-sm">
@@ -305,7 +305,7 @@ export default function AstrologySidebar({
                     "Muestra el potencial energético inherente de la pareja",
                     "Usado para timing de eventos relacionales"
                   ]}
-                  position="right"
+                  position="bottom"
                 />
               </div>
               <label className="inline-flex items-center gap-2 text-sm">
@@ -333,7 +333,7 @@ export default function AstrologySidebar({
                 "Progresiones: desarrollo interno a lo largo del tiempo",
                 "Arco Solar: avance simbólico uniforme"
               ]}
-              position="right"
+              position="bottom"
             />
           </label>
           <div className="space-y-1 text-[11px]">
@@ -400,7 +400,7 @@ export default function AstrologySidebar({
                 "Retorno Solar: el 'cumpleaños astrológico', marca temas del año",
                 "Retorno Lunar: marca temas del mes emocional"
               ]}
-              position="right"
+              position="bottom"
             />
           </label>
           <div className="space-y-1 text-[11px]">
@@ -418,7 +418,7 @@ export default function AstrologySidebar({
                       "El Ascendente del Retorno Solar marca el enfoque del año",
                       "Planetas en casa 1 indican áreas de protagonismo"
                     ]}
-                    position="right"
+                    position="bottom"
                   />
                 </div>
                 <label className="inline-flex items-center gap-2 text-sm">
@@ -469,7 +469,7 @@ export default function AstrologySidebar({
                       "Indica el clima emocional del ciclo lunar personal",
                       "Útil para planificar actividades según la energía disponible"
                     ]}
-                    position="right"
+                    position="bottom"
                   />
                 </div>
                 <label className="inline-flex items-center gap-2 text-sm">

@@ -51,6 +51,8 @@ from .astrology_ai_views import (
     AstrologyInterpretSolarReturnView,
     AstrologyQuerySituationView,
     AstrologyAIStatusView,
+    AstrologyAIInterpretationListView,
+    AstrologyAIInterpretationDetailView,
 )
 from .payment_views import (
     CreateCheckoutSessionView,
@@ -261,6 +263,10 @@ urlpatterns = [
     path('astrology/interpret/progressions/', AstrologyInterpretProgressionsView.as_view(), name='astrology_interpret_progressions'),
     path('astrology/interpret/solar-return/', AstrologyInterpretSolarReturnView.as_view(), name='astrology_interpret_solar_return'),
     path('astrology/interpret/situation/', AstrologyQuerySituationView.as_view(), name='astrology_interpret_situation'),
+    
+    # Astrology AI Interpretation Management
+    path('astrology/interpretations/', AstrologyAIInterpretationListView.as_view(), name='astrology_interpretations_list'),
+    path('astrology/interpretations/<int:interpretation_id>/', AstrologyAIInterpretationDetailView.as_view(), name='astrology_interpretation_detail'),
     
     # Tests modulares (orden importante: rutas específicas primero)
     path('tests/', AvailableTestsView.as_view(), name='available_tests'),

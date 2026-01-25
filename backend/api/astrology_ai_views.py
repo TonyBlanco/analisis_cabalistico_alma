@@ -397,8 +397,9 @@ class AstrologyAIStatusView(APIView):
     GET /api/astrology/ai-status/
     
     Verifica el estado del servicio AI de astrología.
+    No requiere autenticación - solo devuelve estado del servicio.
     """
-    permission_classes = [IsAuthenticated]
+    permission_classes = []  # Public endpoint
     
     def get(self, request):
         return Response({

@@ -43,6 +43,15 @@ from .views import (
     BlockedDatesView,
     service_stats,
 )
+from .ai_views import AIHolisticQueryView
+from .astrology_ai_views import (
+    AstrologyInterpretNatalView,
+    AstrologyInterpretTransitsView,
+    AstrologyInterpretProgressionsView,
+    AstrologyInterpretSolarReturnView,
+    AstrologyQuerySituationView,
+    AstrologyAIStatusView,
+)
 from .payment_views import (
     CreateCheckoutSessionView,
     StripeWebhookView,
@@ -168,6 +177,9 @@ urlpatterns = [
     # Cálculos
     path('calcular/', CalculoCabalisticoView.as_view(), name='calcular_cabala'),
     
+    # AI Assistant
+    path('ai/holistic-query/', AIHolisticQueryView.as_view(), name='ai_holistic_query'),
+    
     # Fichas
     path('fichas/', FichaListCreateView.as_view(), name='ficha_list_create'),
     path('fichas/<int:pk>/', FichaRetrieveView.as_view(), name='ficha_retrieve'),
@@ -241,6 +253,14 @@ urlpatterns = [
     
     # Gematria AI
     path('gematria/interpret/', GematriaInterpretationView.as_view(), name='gematria_interpret'),
+    
+    # Astrology AI Interpretation
+    path('astrology/ai-status/', AstrologyAIStatusView.as_view(), name='astrology_ai_status'),
+    path('astrology/interpret/natal/', AstrologyInterpretNatalView.as_view(), name='astrology_interpret_natal'),
+    path('astrology/interpret/transits/', AstrologyInterpretTransitsView.as_view(), name='astrology_interpret_transits'),
+    path('astrology/interpret/progressions/', AstrologyInterpretProgressionsView.as_view(), name='astrology_interpret_progressions'),
+    path('astrology/interpret/solar-return/', AstrologyInterpretSolarReturnView.as_view(), name='astrology_interpret_solar_return'),
+    path('astrology/interpret/situation/', AstrologyQuerySituationView.as_view(), name='astrology_interpret_situation'),
     
     # Tests modulares (orden importante: rutas específicas primero)
     path('tests/', AvailableTestsView.as_view(), name='available_tests'),

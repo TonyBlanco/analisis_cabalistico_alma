@@ -542,7 +542,7 @@ export default function AstrologySidebar({
                     type="checkbox"
                     checked={Boolean(advancedObjects.nodes)}
                     onChange={(e) => setAdvancedObjects && setAdvancedObjects({ ...advancedObjects, nodes: e.target.checked })}
-                    disabled={!canUseForecast || isRealMode}
+                    disabled={!canUseForecast}
                     title={!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : 'Dirección simbólica de desarrollo y aprendizaje.'}
                   />
                 </label>
@@ -552,7 +552,7 @@ export default function AstrologySidebar({
                     type="checkbox"
                     checked={Boolean(advancedObjects.fortune)}
                     onChange={(e) => setAdvancedObjects && setAdvancedObjects({ ...advancedObjects, fortune: e.target.checked })}
-                    disabled={!canUseForecast || isRealMode}
+                    disabled={!canUseForecast}
                     title={!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : 'Área de fluidez y facilidad experiencial.'}
                   />
                 </label>
@@ -562,7 +562,7 @@ export default function AstrologySidebar({
                     type="checkbox"
                     checked={Boolean(advancedObjects.symbolicPoints)}
                     onChange={(e) => setAdvancedObjects && setAdvancedObjects({ ...advancedObjects, symbolicPoints: e.target.checked })}
-                    disabled={!canUseForecast || isRealMode}
+                    disabled={!canUseForecast}
                     title={!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : 'Marcadores de enfoque psicológico (no astronómicos).'}
                   />
                 </label>
@@ -620,7 +620,7 @@ export default function AstrologySidebar({
                     type="checkbox"
                     checked={Boolean(isRelationshipsActive)}
                     onChange={() => setRelationshipMode && setRelationshipMode(isRelationshipsActive ? 'off' : 'couple')}
-                    disabled={!canUseForecast || isRealMode}
+                    disabled={!canUseForecast}
                     title={!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : 'Relaciones (modo simbólico): dinámicas psicológicas del vínculo. No compatibilidad ni predicción.'}
                   />
                 </label>
@@ -631,7 +631,7 @@ export default function AstrologySidebar({
                   className="rounded border border-gray-200 bg-white px-2 py-1 text-[12px]"
                   value={relationshipMode}
                   onChange={(e) => setRelationshipMode && setRelationshipMode(e.target.value as any)}
-                  disabled={!canUseForecast || isRealMode || relationshipMode === 'off'}
+                  disabled={!canUseForecast || relationshipMode === 'off'}
                   title={!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : 'Selecciona el enfoque vincular (simbólico). No predice resultados.'}
                 >
                   <option value="off">Off</option>
@@ -647,7 +647,7 @@ export default function AstrologySidebar({
                   className="rounded border border-gray-200 bg-white px-2 py-1 text-[12px]"
                   value={relationshipRole}
                   onChange={(e) => setRelationshipRole && setRelationshipRole(e.target.value as any)}
-                  disabled={!canUseForecast || isRealMode || relationshipMode === 'off'}
+                  disabled={!canUseForecast || relationshipMode === 'off'}
                   title={!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : 'Rol simbólico del consultante: activo o reactivo.'}
                 >
                   <option value="active">Activo</option>
@@ -670,7 +670,7 @@ export default function AstrologySidebar({
                     type="checkbox"
                     checked={Boolean(isDevelopmentActive)}
                     onChange={() => setDevelopmentStage && setDevelopmentStage(isDevelopmentActive ? 'off' : 'early_childhood')}
-                    disabled={!canUseForecast || isRealMode}
+                    disabled={!canUseForecast}
                     title={!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : 'Desarrollo (modo simbólico): acompaña ritmos de crecimiento. No clínico, no determinista.'}
                   />
                 </label>
@@ -681,7 +681,7 @@ export default function AstrologySidebar({
                   className="rounded border border-gray-200 bg-white px-2 py-1 text-[12px]"
                   value={developmentStage}
                   onChange={(e) => setDevelopmentStage && setDevelopmentStage(e.target.value as any)}
-                  disabled={!canUseForecast || isRealMode || developmentStage === 'off'}
+                  disabled={!canUseForecast || developmentStage === 'off'}
                   title={!canUseForecast ? 'Requiere identidad válida (fecha de nacimiento)' : 'Selecciona una etapa evolutiva (lectura educativa y acompañante). No diagnostica ni predice.'}
                 >
                   <option value="off">Off</option>

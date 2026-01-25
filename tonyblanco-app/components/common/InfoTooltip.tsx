@@ -36,17 +36,28 @@ export default function InfoTooltip({
   };
 
   return (
-    <div className={`relative inline-block ${className}`}>
-      <button
-        type="button"
+    <span className={`relative inline-block ${className}`}>
+      <span
+        role="button"
+        tabIndex={0}
         onMouseEnter={() => setIsOpen(true)}
         onMouseLeave={() => setIsOpen(false)}
-        onClick={() => setIsOpen(!isOpen)}
-        className="inline-flex items-center justify-center w-5 h-5 text-purple-400 hover:text-purple-300 transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-transparent rounded-full"
+        onClick={(e) => {
+          e.stopPropagation();
+          setIsOpen(!isOpen);
+        }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            e.stopPropagation();
+            setIsOpen(!isOpen);
+          }
+        }}
+        className="inline-flex items-center justify-center w-5 h-5 text-purple-400 hover:text-purple-300 transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-transparent rounded-full cursor-pointer"
         aria-label="Más información"
       >
         <HelpCircle className="w-full h-full" />
-      </button>
+      </span>
 
       <AnimatePresence>
         {isOpen && (
@@ -100,6 +111,6 @@ export default function InfoTooltip({
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </span>
   );
 }

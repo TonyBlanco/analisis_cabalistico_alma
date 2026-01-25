@@ -402,6 +402,9 @@ class AstrologyAIStatusView(APIView):
     permission_classes = []  # Public endpoint
     
     def get(self, request):
+        # Trigger lazy initialization
+        astrology_ai_service._ensure_initialized()
+        
         return Response({
             'enabled': astrology_ai_service.enabled,
             'model': astrology_ai_service.model_name if astrology_ai_service.enabled else None,

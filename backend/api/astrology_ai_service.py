@@ -29,14 +29,6 @@ from .astrology_ai_prompts import (
 )
 from .utils.genai_response import extract_text
 
-# Import Gemini
-genai = None
-try:
-    from google import genai as genai_module
-    genai = genai_module
-except ImportError:
-    genai = None
-
 logger = logging.getLogger(__name__)
 
 
@@ -60,29 +52,58 @@ class AstrologyAIService:
     - Progresiones Secundarias
     - Retorno Solar
     - Consultas situacionales
+    
+    Usa lazy initialization para evitar problemas de orden de importación.
     """
     
+    _instance = None
+    _initialized = False
+    
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+    
     def __init__(self):
-        """Inicializa el cliente de Gemini."""
-        self.api_key = getattr(settings, 'GEMINI_API_KEY', None)
-        self.model_name = getattr(settings, 'GEMINI_MODEL', 'gemini-1.5-flash')
-        
+        """Inicializa el cliente de Gemini (lazy)."""
+        if AstrologyAIService._initialized:
+            return
+            
+        self.api_key = None
+        self.model_name = 'gemini-1.5-flash'
         self.enabled = False
         self.client = None
         self.error_message = None
+        self._genai = None
+        
+        # Defer actual initialization
+        AstrologyAIService._initialized = True
+    
+    def _ensure_initialized(self):
+        """Lazy initialization of Gemini client."""
+        if self.client is not None or self.error_message:
+            return  # Already initialized
+            
+        # Import genai lazily
+        try:
+            from google import genai
+            self._genai = genai
+        except ImportError:
+            self.error_message = "Módulo google.genai no instalado"
+            logger.warning(f"AstrologyAIService: {self.error_message}")
+            return
+        
+        # Get settings
+        self.api_key = getattr(settings, 'GEMINI_API_KEY', None)
+        self.model_name = getattr(settings, 'GEMINI_MODEL', 'gemini-1.5-flash')
         
         if not self.api_key:
             self.error_message = "GEMINI_API_KEY no configurada"
             logger.warning(f"AstrologyAIService: {self.error_message}")
             return
         
-        if not genai:
-            self.error_message = "Módulo google.genai no instalado"
-            logger.warning(f"AstrologyAIService: {self.error_message}")
-            return
-        
         try:
-            self.client = genai.Client(api_key=self.api_key)
+            self.client = self._genai.Client(api_key=self.api_key)
             self.enabled = True
             logger.info(f"AstrologyAIService configurado con modelo: {self.model_name}")
         except Exception as e:
@@ -109,6 +130,9 @@ class AstrologyAIService:
         Returns:
             Texto generado o mensaje de error
         """
+        # Ensure client is initialized
+        self._ensure_initialized()
+        
         if not self.enabled:
             return f"Error: {self.error_message or 'Servicio AI no disponible'}"
         

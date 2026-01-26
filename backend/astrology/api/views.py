@@ -21,6 +21,7 @@ from ..engine.synastry import SynastryEngine
 from ..engine.harmonics import HarmonicsEngine
 from ..engine.fixed_stars import FixedStarsEngine
 from ..engine.relocation import RelocationEngine
+from ..engine.arabic_parts import ArabicPartsEngine
 from ..api.serializers import (
     NatalChartSerializer,
     NatalChartRequestSerializer,
@@ -1502,5 +1503,139 @@ class RelocationView(APIView):
         except Exception as e:
             return Response(
                 {"error": f"Error calculating Relocation: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class ArabicPartsView(APIView):
+    """
+    API endpoint for Arabic Parts (Lots) calculations
+    
+    GET /api/therapist/patients/{patient_id}/astrology/arabic-parts/
+        - Get Arabic Parts for patient's natal chart
+        - Query params:
+            - include_minor: bool (include minor parts, default true)
+            - part_name: str (optional, to get single part)
+    
+    Arabic Parts are mathematical sensitive points from Hellenistic astrology.
+    Includes Part of Fortune, Part of Spirit, and 20+ traditional parts.
+    """
+    permission_classes = [IsAuthenticated, IsTherapist, CanAccessPatient]
+
+    def get(self, request, patient_id):
+        """Calculate Arabic Parts for patient"""
+        try:
+            # Verify patient exists
+            patient = Patient.objects.get(id=patient_id)
+            self.check_object_permissions(request, patient)
+
+            # Get natal chart
+            chart_service = ChartService()
+            natal_chart = chart_service.get_natal_chart(patient_id)
+
+            if not natal_chart:
+                return Response(
+                    {"error": "No natal chart found. Calculate natal chart first."},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+
+            # Extract natal planets
+            natal_planets = [
+                {
+                    'planet_name': p.planet_name,
+                    'longitude': float(p.longitude),
+                    'sign': p.sign
+                }
+                for p in natal_chart.planets
+            ]
+
+            # Extract natal houses
+            natal_houses = [
+                {
+                    'house': h.house_number,
+                    'cusp_longitude': float(h.cusp_longitude)
+                }
+                for h in natal_chart.houses
+            ]
+
+            # Get key positions
+            sun_planet = next((p for p in natal_planets if p['planet_name'].lower() == 'sun'), None)
+            moon_planet = next((p for p in natal_planets if p['planet_name'].lower() == 'moon'), None)
+
+            if not sun_planet or not moon_planet:
+                return Response(
+                    {"error": "Sun and Moon positions required for Arabic Parts"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Get ASC and MC from houses
+            asc_house = next((h for h in natal_houses if h['house'] == 1), None)
+            mc_house = next((h for h in natal_houses if h['house'] == 10), None)
+
+            if not asc_house or not mc_house:
+                return Response(
+                    {"error": "House cusps required for Arabic Parts"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            asc_longitude = asc_house['cusp_longitude']
+            mc_longitude = mc_house['cusp_longitude']
+            sun_longitude = sun_planet['longitude']
+            moon_longitude = moon_planet['longitude']
+
+            # Get query params
+            include_minor = request.query_params.get('include_minor', 'true').lower() == 'true'
+            single_part = request.query_params.get('part_name', None)
+
+            # Calculate Arabic Parts
+            arabic_parts_engine = ArabicPartsEngine()
+
+            if single_part:
+                # Calculate single part
+                parts_data = arabic_parts_engine.calculate_single_part(
+                    part_name=single_part,
+                    natal_planets=natal_planets,
+                    natal_houses=natal_houses,
+                    asc_longitude=asc_longitude,
+                    mc_longitude=mc_longitude,
+                    sun_longitude=sun_longitude,
+                    is_nocturnal=None  # Auto-detect
+                )
+                if not parts_data:
+                    return Response(
+                        {"error": f"Part '{single_part}' not found"},
+                        status=status.HTTP_404_NOT_FOUND
+                    )
+            else:
+                # Calculate all parts
+                parts_data = arabic_parts_engine.calculate_arabic_parts(
+                    natal_planets=natal_planets,
+                    natal_houses=natal_houses,
+                    asc_longitude=asc_longitude,
+                    mc_longitude=mc_longitude,
+                    sun_longitude=sun_longitude,
+                    moon_longitude=moon_longitude,
+                    is_nocturnal=None,  # Auto-detect
+                    include_minor_parts=include_minor
+                )
+
+            response_data = {
+                'patient_id': patient_id,
+                'data': parts_data,
+                'layer_availability': {
+                    'arabic_parts': True
+                }
+            }
+
+            return Response(response_data, status=status.HTTP_200_OK)
+
+        except ObjectDoesNotExist:
+            return Response(
+                {"error": "Patient not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {"error": f"Error calculating Arabic Parts: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )

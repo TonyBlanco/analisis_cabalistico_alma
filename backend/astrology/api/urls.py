@@ -14,7 +14,8 @@ from .views import (
     SynastryView,
     HarmonicsView,
     FixedStarsView,
-    RelocationView
+    RelocationView,
+    ArabicPartsView
 )
 
 app_name = 'astrology'
@@ -91,5 +92,11 @@ urlpatterns = [
         'patients/<int:patient_id>/relocation/',
         RelocationView.as_view(),
         name='relocation'
+    ),
+    # Arabic Parts (Lots) for a specific patient
+    path(
+        'patients/<int:patient_id>/arabic-parts/',
+        ArabicPartsView.as_view(),
+        name='arabic-parts'
     ),
 ]

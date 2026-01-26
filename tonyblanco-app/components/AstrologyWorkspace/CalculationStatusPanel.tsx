@@ -382,11 +382,20 @@ export default function CalculationStatusPanel({ overlays, activeLayers, mode, s
               <button
                 onClick={() => handleClickSymbolicInfo('Estrellas fijas (modo simbólico): arquetipos culturales utilizados como referencias psicológicas. No son predicciones.')}
                 className="flex items-center w-full text-left"
-                title={fixedStars.primary ? 'Estrellas fijas (modo simbólico): arquetipos culturales utilizados como referencias psicológicas. No son predicciones.' : undefined}
+                title={fixedStars.primary || fixedStars.secondary ? 'Estrellas fijas (modo simbólico): arquetipos culturales utilizados como referencias psicológicas. No son predicciones.' : undefined}
               >
-                <Dot type={fixedStars.primary ? 'symbolic' : 'available'} />
+                <Dot type={fixedStars.primary || fixedStars.secondary ? 'symbolic' : 'available'} />
                 <span className="flex-1">Estrellas fijas</span>
-                <span className="text-xs text-gray-400">{fixedStars.primary ? 'Activo (lectura simbólica)' : 'pendiente'}</span>
+                <span className="text-xs text-gray-400">
+                  {fixedStars.primary || fixedStars.secondary 
+                    ? (() => {
+                        const parts: string[] = [];
+                        if (fixedStars.primary) parts.push('Principales');
+                        if (fixedStars.secondary) parts.push('Secundarias');
+                        return `Activo (lectura simbólica) · ${parts.join(' + ')}`;
+                      })()
+                    : 'pendiente'}
+                </span>
               </button>
             </li>
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { ChevronDown, ChevronUp, BookOpen, Hash, Sparkles } from 'lucide-react';
+import { ChevronDown, ChevronUp, BookOpen, Hash, Sparkles, Activity, Sun, Scale } from 'lucide-react';
 import type { CabalSectionId } from './types';
 import { getActivePatientId } from '@/lib/active-patient';
 import { getPatientProfileSummary, type PatientProfileSummary } from '@/lib/patient-api';
@@ -12,6 +12,165 @@ import TreeVisualPlaceholder from './TreeVisualPlaceholder';
 import { ejecutarMetodoPitagorico } from '@holistica/symbolic/methods/pitagoras';
 import type { PitagorasSymbolicState, PitagorasNumberMeaning } from '@holistica/symbolic/methods/pitagoras/pitagoras.types';
 import { adaptPitagorasToTree, type TreeStructuralState } from '@holistica/symbolic/tree';
+
+// ============================================================================
+// CLINICAL CONTEXT TYPES (from Ghost Tests pipeline)
+// ============================================================================
+
+interface RitmoAlmico {
+  ritmo_esencial: 'fluido' | 'latente' | 'forzado' | 'fragmentado';
+  mundo_predominante: string;
+  nivel_del_alma: string;
+  indice_coherencia?: number;
+  lectura?: string;
+  foco_de_trabajo?: string;
+}
+
+interface SefirahScore {
+  name: string;
+  intensity: number;
+  aq_score?: number;
+}
+
+interface ClinicalContextSummary {
+  has_ritmo_almico: boolean;
+  has_aq_kabbalah: boolean;
+  has_sha_harmony: boolean;
+  illuminated_sefirot: SefirahScore[];
+  ritmo_state: string | null;
+  mundo_predominante?: string;
+  harmony_index?: number;
+}
+
+// ============================================================================
+// CLINICAL CONTEXT BADGE COMPONENT
+// ============================================================================
+
+const RITMO_COLORS: Record<string, { bg: string; text: string; border: string }> = {
+  fluido: { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
+  latente: { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' },
+  forzado: { bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-200' },
+  fragmentado: { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200' },
+};
+
+const MUNDO_LABELS: Record<string, string> = {
+  Atzilut: '🌟 Atzilut (Emanación)',
+  Beria: '💭 Beria (Creación)',
+  Yetzirah: '💫 Yetzirah (Formación)',
+  Assiah: '🌍 Assiah (Acción)',
+};
+
+function ClinicalContextBadges({ context }: { context: ClinicalContextSummary | null }) {
+  if (!context) return null;
+  
+  const { has_ritmo_almico, has_aq_kabbalah, has_sha_harmony, ritmo_state, mundo_predominante, illuminated_sefirot, harmony_index } = context;
+  
+  if (!has_ritmo_almico && !has_aq_kabbalah && !has_sha_harmony) {
+    return null;
+  }
+  
+  const ritmoColors = ritmo_state ? RITMO_COLORS[ritmo_state] || RITMO_COLORS.latente : null;
+  
+  return (
+    <div className="mb-4 rounded-xl border border-indigo-100 bg-gradient-to-r from-indigo-50/50 to-purple-50/50 p-4 shadow-sm">
+      <div className="flex items-center gap-2 mb-3">
+        <Sparkles className="h-4 w-4 text-indigo-500" />
+        <span className="text-sm font-semibold text-indigo-900">Contexto Clínico Integrado</span>
+      </div>
+      
+      <div className="flex flex-wrap gap-2">
+        {/* Ritmo Almico Badge */}
+        {has_ritmo_almico && ritmo_state && ritmoColors && (
+          <div 
+            className={`flex items-center gap-2 rounded-lg border px-3 py-1.5 ${ritmoColors.bg} ${ritmoColors.border}`}
+            title={`Ritmo del Alma: ${ritmo_state}${mundo_predominante ? ` (${mundo_predominante})` : ''}`}
+          >
+            <Activity className={`h-3.5 w-3.5 ${ritmoColors.text}`} />
+            <span className={`text-xs font-medium ${ritmoColors.text}`}>
+              Ritmo: <span className="capitalize">{ritmo_state}</span>
+            </span>
+            {mundo_predominante && (
+              <span className={`text-[10px] ${ritmoColors.text} opacity-75`}>
+                {MUNDO_LABELS[mundo_predominante] || mundo_predominante}
+              </span>
+            )}
+          </div>
+        )}
+        
+        {/* AQ-Kabbalah / Sefirot Iluminadas Badge */}
+        {has_aq_kabbalah && illuminated_sefirot.length > 0 && (
+          <div 
+            className="flex items-center gap-2 rounded-lg border border-yellow-200 bg-yellow-50 px-3 py-1.5"
+            title={`Sefirot iluminadas: ${illuminated_sefirot.map(s => s.name).join(', ')}`}
+          >
+            <Sun className="h-3.5 w-3.5 text-yellow-600" />
+            <span className="text-xs font-medium text-yellow-700">
+              {illuminated_sefirot.length} Sefirot Activas
+            </span>
+            <div className="flex -space-x-1">
+              {illuminated_sefirot.slice(0, 4).map((sefira) => (
+                <span 
+                  key={sefira.name}
+                  className="inline-flex items-center justify-center h-4 w-4 rounded-full bg-yellow-200 text-[8px] font-bold text-yellow-800 border border-yellow-300"
+                  title={`${sefira.name}: ${sefira.aq_score ?? sefira.intensity * 10}/10`}
+                  style={{ opacity: 0.5 + sefira.intensity * 0.5 }}
+                >
+                  {sefira.name.charAt(0).toUpperCase()}
+                </span>
+              ))}
+              {illuminated_sefirot.length > 4 && (
+                <span className="inline-flex items-center justify-center h-4 w-4 rounded-full bg-yellow-300 text-[8px] font-bold text-yellow-800 border border-yellow-400">
+                  +{illuminated_sefirot.length - 4}
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+        
+        {/* SHA Harmony Badge */}
+        {has_sha_harmony && (
+          <div 
+            className={`flex items-center gap-2 rounded-lg border px-3 py-1.5 ${
+              harmony_index && harmony_index >= 3.5 
+                ? 'border-teal-200 bg-teal-50' 
+                : 'border-slate-200 bg-slate-50'
+            }`}
+            title={`Índice de Armonía Sefirótica: ${harmony_index?.toFixed(1) ?? 'N/A'}/5`}
+          >
+            <Scale className={`h-3.5 w-3.5 ${harmony_index && harmony_index >= 3.5 ? 'text-teal-600' : 'text-slate-500'}`} />
+            <span className={`text-xs font-medium ${harmony_index && harmony_index >= 3.5 ? 'text-teal-700' : 'text-slate-600'}`}>
+              Armonía: {harmony_index?.toFixed(1) ?? '—'}/5
+            </span>
+          </div>
+        )}
+      </div>
+      
+      {/* Illuminated Sefirot Detail (expandable) */}
+      {has_aq_kabbalah && illuminated_sefirot.length > 0 && (
+        <div className="mt-3 pt-3 border-t border-indigo-100">
+          <p className="text-[10px] text-indigo-600 font-medium mb-1.5">Sefirot iluminadas por AQ-Kabbalah:</p>
+          <div className="flex flex-wrap gap-1">
+            {illuminated_sefirot.map((sefira) => (
+              <span 
+                key={sefira.name}
+                className="inline-flex items-center gap-1 rounded-md bg-white/80 border border-indigo-100 px-2 py-0.5 text-[10px] text-indigo-700"
+              >
+                <span 
+                  className="h-2 w-2 rounded-full bg-yellow-400"
+                  style={{ opacity: 0.4 + sefira.intensity * 0.6 }}
+                />
+                <span className="capitalize font-medium">{sefira.name}</span>
+                {sefira.aq_score && (
+                  <span className="text-indigo-400">({sefira.aq_score}/10)</span>
+                )}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 // Additional symbolic methods (FASE 1)
 import { ejecutarMetodoGematriaStandard, adaptGematriaStandardToTree } from '@holistica/symbolic/methods/gematria-standard';
@@ -398,6 +557,7 @@ export default function CabalAppliedVisualCore({
   const [pitagorasState, setPitagorasState] = useState<PitagorasSymbolicState | null>(null);
   const [treeStructuralState, setTreeStructuralState] = useState<TreeStructuralState | null>(null);
   const [selectedMethod, setSelectedMethod] = useState<string>('pitagoras');
+  const [clinicalContext, setClinicalContext] = useState<ClinicalContextSummary | null>(null);
 
   const METHODS = useMemo(() => [
     { id: 'pitagoras', name: 'Pitágoras', run: (input: any) => ejecutarMetodoPitagorico(input as any) },
@@ -497,6 +657,7 @@ export default function CabalAppliedVisualCore({
       setActivePatientId(patientId ?? null);
       if (!patientId) {
         setPatientProfile(null);
+        setClinicalContext(null);
         return;
       }
       try {
@@ -518,6 +679,48 @@ export default function CabalAppliedVisualCore({
       window.removeEventListener('activePatientChanged', loadPatient);
     };
   }, []);
+
+  // Fetch clinical context from active CabalaSession (if any)
+  useEffect(() => {
+    let isMounted = true;
+    
+    const fetchClinicalContext = async () => {
+      if (!activePatientId) {
+        setClinicalContext(null);
+        return;
+      }
+      
+      try {
+        // Fetch clinical context summary from backend
+        // This endpoint should be implemented in swm/cabala/views.py
+        const response = await fetch(`/api/swm/cabala/clinical-summary/${activePatientId}/`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        if (response.ok && isMounted) {
+          const data = await response.json();
+          setClinicalContext(data);
+        } else if (isMounted) {
+          // If endpoint doesn't exist yet, try to construct from patient test results
+          setClinicalContext(null);
+        }
+      } catch (error) {
+        console.warn('Could not fetch clinical context (endpoint may not exist yet):', error);
+        if (isMounted) {
+          setClinicalContext(null);
+        }
+      }
+    };
+    
+    fetchClinicalContext();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [activePatientId]);
 
   const emptyTarotCards = useMemo(() => [], []);
   const treeInput = useMemo(
@@ -677,6 +880,9 @@ export default function CabalAppliedVisualCore({
         </div>
       ) : (
         <>
+          {/* Clinical Context Integration Badges */}
+          <ClinicalContextBadges context={clinicalContext} />
+          
           <div id="cabala-aplicada-export-visual" className="mt-6 space-y-4">
             <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
               <div id="cabala-aplicada-export-tree" className="relative w-full h-72">

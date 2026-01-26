@@ -13,7 +13,7 @@ export function middleware(request: NextRequest) {
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
     img-src 'self' blob: data: https:;
     font-src 'self' https://fonts.gstatic.com;
-    connect-src 'self' http://localhost:8000 http://localhost:5000 https://api.openai.com https://generativelanguage.googleapis.com;
+    connect-src 'self' http://localhost:8000 http://127.0.0.1:8000 http://localhost:5000 https://api.openai.com https://generativelanguage.googleapis.com;
     frame-src 'self';
     object-src 'none';
     base-uri 'self';

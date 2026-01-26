@@ -89,10 +89,10 @@ class Command(BaseCommand):
                 
                 if created:
                     created_count += 1
-                    self.stdout.write(f'  ✓ Created: {code}')
+                    self.stdout.write(f'  [CREATED]: {code}')
                 else:
                     updated_count += 1
-                    self.stdout.write(f'  ↻ Updated: {code}')
+                    self.stdout.write(f'  [UPDATED]: {code}')
                     
             except Exception as e:
                 error_count += 1

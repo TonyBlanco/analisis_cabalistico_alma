@@ -22,15 +22,24 @@ export default function ProfileMenu() {
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    fetchSession().then((session) => {
-      if (session.user) {
-        setUser(session.user);
-      }
-    });
+    fetchSession()
+      .then((session) => {
+        if (session.user) {
+          setUser(session.user);
+        }
+      })
+      .catch((error) => {
+        console.error('Failed to fetch session:', error);
+        // Gracefully handle backend connection errors
+      });
 
-    getUserRole().then((userRole) => {
-      setRole(userRole);
-    });
+    getUserRole()
+      .then((userRole) => {
+        setRole(userRole);
+      })
+      .catch((error) => {
+        console.error('Failed to fetch user role:', error);
+      });
   }, []);
 
   // Close menu when clicking outside

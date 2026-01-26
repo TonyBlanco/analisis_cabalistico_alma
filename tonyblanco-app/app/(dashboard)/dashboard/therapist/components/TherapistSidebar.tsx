@@ -11,12 +11,19 @@ import {
   History,
   Layers,
   LayoutGrid,
+  LayoutDashboard,
   NotebookPen,
   Sparkles,
   Stethoscope,
   Telescope,
   ChevronRight,
   ChevronLeft,
+  Users,
+  Stars,
+  Flower2,
+  Microscope,
+  BarChart3,
+  Settings,
 } from 'lucide-react';
 import { usePanelManager } from '@/components/TherapistWorkspace/PanelManagerContext';
 import { toolRegistry } from '@/components/TherapistWorkspace/panelRegistry';
@@ -44,6 +51,52 @@ const groupOrder: ToolGroupId[] = [
   'symbolic',
   'history',
   'resources',
+];
+
+// Main navigation links for therapist dashboard
+const mainNavLinks = [
+  {
+    id: 'dashboard',
+    label: 'Dashboard',
+    href: '/dashboard/therapist',
+    icon: LayoutDashboard,
+  },
+  {
+    id: 'patients',
+    label: 'Pacientes',
+    href: '/dashboard/therapist/patients',
+    icon: Users,
+  },
+  {
+    id: 'astrology',
+    label: 'Astrología',
+    href: '/dashboard/therapist/astrologia',
+    icon: Stars,
+  },
+  {
+    id: 'cabala',
+    label: 'Cábala Fénix',
+    href: '/dashboard/therapist/holistica-aplicada',
+    icon: Flower2,
+  },
+  {
+    id: 'tests',
+    label: 'Tests Modulares',
+    href: '/dashboard/therapist/tests',
+    icon: Microscope,
+  },
+  {
+    id: 'reports',
+    label: 'Reportes',
+    href: '/dashboard/therapist/reports',
+    icon: BarChart3,
+  },
+  {
+    id: 'settings',
+    label: 'Configuración',
+    href: '/settings',
+    icon: Settings,
+  },
 ];
 
 const swmToolRoutes: Partial<Record<ToolId, string>> = {
@@ -165,6 +218,32 @@ export default function TherapistSidebar() {
       </div>
 
       <nav className="flex-1 overflow-y-auto p-2 space-y-3">
+        {/* Main Navigation */}
+        <div className="space-y-2">
+          {expanded && (
+            <div className="px-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400">
+              Navegación
+            </div>
+          )}
+          <div className="space-y-1">
+            {mainNavLinks.map((link) => {
+              const Icon = link.icon;
+              return (
+                <Link key={link.id} href={link.href} className="block">
+                  <div className="flex items-center gap-3 w-full rounded-md px-2 py-2 text-sm transition-colors border border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900">
+                    <Icon className="h-5 w-5 text-gray-500" />
+                    {expanded && (
+                      <div className="text-sm font-medium">{link.label}</div>
+                    )}
+                    {!expanded && <span className="sr-only">{link.label}</span>}
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Tool Groups */}
         {groupedTools.map((group) => (
           <div key={group.id} className="space-y-2">
             {expanded && (

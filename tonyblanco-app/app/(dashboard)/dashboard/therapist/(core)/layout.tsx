@@ -3,6 +3,7 @@
 import TherapistSidebar from '../components/TherapistSidebar';
 import { PanelManagerProvider } from '@/components/TherapistWorkspace/PanelManagerContext';
 import PanelDock from '@/components/TherapistWorkspace/PanelDock';
+import AIAssistantWidget from '@/src/components/therapist/AIAssistantWidget';
 
 /**
  * Therapist Layout
@@ -31,6 +32,7 @@ export default function TherapistLayout({
           <PanelDock />
         </div>
       </div>
+      <AIAssistantWidget />
     </PanelManagerProvider>
   );
 }

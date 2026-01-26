@@ -139,7 +139,7 @@ export default function AdvancedTechniquesPanel({ patientId, hasNatalChart }: Ad
         throw new Error('No hay sesión activa');
       }
 
-      let url = `${apiURL}/therapist/patients/${patientId}/astrology${technique.endpoint}`;
+      let url = `${apiURL}/therapist/patients/${patientId}${technique.endpoint}`;
       
       // Add query params
       const params = new URLSearchParams();

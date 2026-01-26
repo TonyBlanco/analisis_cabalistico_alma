@@ -160,8 +160,9 @@ def normalize_kerykeion_output(
     }
     
     for aspect in kerykeion_aspects:
-        from_planet = aspect.get('from', '')
-        to_planet = aspect.get('to', '')
+        # Kerykeion returns 'from_planet' and 'to_planet' (fallback to 'from'/'to' for compatibility)
+        from_planet = aspect.get('from_planet', aspect.get('from', ''))
+        to_planet = aspect.get('to_planet', aspect.get('to', ''))
         aspect_type = aspect.get('type', '')
         orbe = aspect.get('orb', 0)
         

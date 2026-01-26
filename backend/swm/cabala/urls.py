@@ -21,6 +21,8 @@ from swm.cabala.views import (
     SessionSnapshotListView,
     SessionSnapshotCreateView,
     CabalaChoicesView,
+    ClinicalContextSummaryView,
+    ComprehensiveReportView,  # Phoenix Backend Bridge
 )
 
 app_name = 'swm_cabala'
@@ -49,6 +51,12 @@ urlpatterns = [
     # Snapshots
     path('sessions/<uuid:session_id>/snapshots/', SessionSnapshotListView.as_view(), name='snapshots_list'),
     path('sessions/<uuid:session_id>/snapshots/create/', SessionSnapshotCreateView.as_view(), name='snapshots_create'),
+    
+    # Clinical Context (Ghost Tests Pipeline Integration)
+    path('clinical-summary/<int:patient_id>/', ClinicalContextSummaryView.as_view(), name='clinical_summary'),
+    
+    # Comprehensive Report (Phoenix Backend Bridge)
+    path('comprehensive-report/', ComprehensiveReportView.as_view(), name='comprehensive_report'),
     
     # Metadata
     path('choices/', CabalaChoicesView.as_view(), name='choices'),

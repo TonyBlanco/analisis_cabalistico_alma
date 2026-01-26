@@ -204,10 +204,25 @@ def build_multitech_payload(
     """
     ref_dt = _resolve_reference_datetime(input_data, reference_dt)
 
-    birth_dt = datetime.strptime(
+    # Parse birth datetime and ensure timezone consistency with ref_dt
+    birth_dt_naive = datetime.strptime(
         f"{input_data.get('birth_date')} {input_data.get('birth_time')}",
         "%Y-%m-%d %H:%M",
     )
+    
+    # If ref_dt is timezone-aware, make birth_dt aware too
+    if ref_dt.tzinfo is not None:
+        tz_name = (input_data.get("location") or {}).get("timezone") or "UTC"
+        try:
+            from zoneinfo import ZoneInfo
+            birth_tz = ZoneInfo(tz_name)
+            birth_dt = birth_dt_naive.replace(tzinfo=birth_tz)
+        except Exception:
+            # Fallback: make ref_dt naive for comparison
+            ref_dt = ref_dt.replace(tzinfo=None)
+            birth_dt = birth_dt_naive
+    else:
+        birth_dt = birth_dt_naive
 
     # Transits chart (same schema, reference = now)
     transits_chart = _run_chart_at_datetime(input_data, ref_dt)

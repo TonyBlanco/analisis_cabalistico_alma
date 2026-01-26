@@ -1070,7 +1070,7 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
   };
 
   const renderFixedStars = () => {
-    if (!stars.primary) return null;
+    if (!stars.primary && !stars.secondary) return null;
 
     const tooltipGeneral = 'Estrellas fijas (modo simbólico): arquetipos culturales utilizados como referencias psicológicas. No son predicciones.';
 
@@ -1083,17 +1083,43 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
 
     const baseRef = sun ? normalizeDeg(sun.degree) : asc;
 
-    const defs: Array<{ key: string; name: string; angle: number; tooltip: string }> = [
-      { key: 'regulus', name: 'Regulus', angle: normalizeDeg(mc - 8), tooltip: 'Regulus: arquetipo de liderazgo y responsabilidad del corazón.' },
-      { key: 'spica', name: 'Spica', angle: normalizeDeg(baseRef + 150), tooltip: 'Spica: arquetipo de talento y protección simbólica.' },
-      { key: 'aldebaran', name: 'Aldebarán', angle: normalizeDeg(baseRef + 60), tooltip: 'Aldebarán: arquetipo de visión y desafío ético.' },
-      { key: 'antares', name: 'Antares', angle: normalizeDeg(baseRef + 210), tooltip: 'Antares: arquetipo de intensidad y confrontación consciente.' },
-      { key: 'fomalhaut', name: 'Fomalhaut', angle: normalizeDeg(baseRef + 300), tooltip: 'Fomalhaut: arquetipo de ideal e inspiración.' },
+    // Estrellas primarias (tradicionales)
+    const primaryDefs: Array<{ key: string; name: string; angle: number; tooltip: string; isPrimary: true }> = [
+      { key: 'regulus', name: 'Regulus', angle: normalizeDeg(mc - 8), tooltip: 'Regulus: arquetipo de liderazgo y responsabilidad del corazón.', isPrimary: true },
+      { key: 'spica', name: 'Spica', angle: normalizeDeg(baseRef + 150), tooltip: 'Spica: arquetipo de talento y protección simbólica.', isPrimary: true },
+      { key: 'aldebaran', name: 'Aldebarán', angle: normalizeDeg(baseRef + 60), tooltip: 'Aldebarán: arquetipo de visión y desafío ético.', isPrimary: true },
+      { key: 'antares', name: 'Antares', angle: normalizeDeg(baseRef + 210), tooltip: 'Antares: arquetipo de intensidad y confrontación consciente.', isPrimary: true },
+      { key: 'fomalhaut', name: 'Fomalhaut', angle: normalizeDeg(baseRef + 300), tooltip: 'Fomalhaut: arquetipo de ideal e inspiración.', isPrimary: true },
     ];
 
-    const rStar = Math.min(cx - 10, rings.outer + 22);
-    const starColor = "#fbbf24"; // dorado suave
-    const starOpacity = isHuber ? 0.22 : 0.28;
+    // Estrellas secundarias (magnitud 0-2, complementarias)
+    const secondaryDefs: Array<{ key: string; name: string; angle: number; tooltip: string; isPrimary: false }> = [
+      { key: 'achernar', name: 'Achernar', angle: normalizeDeg(baseRef + 345), tooltip: 'Achernar: transformación, flujo, adaptación (final del río).', isPrimary: false },
+      { key: 'hamal', name: 'Hamal', angle: normalizeDeg(baseRef + 37), tooltip: 'Hamal: iniciativa, impulso, liderazgo (carnero).', isPrimary: false },
+      { key: 'polaris', name: 'Polaris', angle: normalizeDeg(mc + 28), tooltip: 'Polaris: guía, dirección, propósito (Estrella del Norte).', isPrimary: false },
+      { key: 'deneb', name: 'Deneb', angle: normalizeDeg(baseRef + 335), tooltip: 'Deneb: transformación, elevación espiritual (cola del cisne).', isPrimary: false },
+      { key: 'betelgeuse', name: 'Betelgeuse', angle: normalizeDeg(baseRef + 88), tooltip: 'Betelgeuse: fuerza, acción, valentía (hombro del cazador).', isPrimary: false },
+      { key: 'rigel', name: 'Rigel', angle: normalizeDeg(baseRef + 76), tooltip: 'Rigel: fundamento, estabilidad, base (pie del cazador).', isPrimary: false },
+      { key: 'procyon', name: 'Procyon', angle: normalizeDeg(baseRef + 115), tooltip: 'Procyon: anticipación, alerta, intuición (antes del perro).', isPrimary: false },
+      { key: 'capella', name: 'Capella', angle: normalizeDeg(baseRef + 81), tooltip: 'Capella: nutrición, cuidado, protección materna (cabra).', isPrimary: false },
+      { key: 'vega', name: 'Vega', angle: normalizeDeg(baseRef + 285), tooltip: 'Vega: armonía, música, belleza, creatividad artística (lira).', isPrimary: false },
+      { key: 'arcturus', name: 'Arcturus', angle: normalizeDeg(baseRef + 204), tooltip: 'Arcturus: protección, vigilancia, guía (guardián de la osa).', isPrimary: false },
+    ];
+
+    // Combinar según configuración
+    const allStars: Array<{ key: string; name: string; angle: number; tooltip: string; isPrimary: boolean }> = [];
+    if (stars.primary) allStars.push(...primaryDefs);
+    if (stars.secondary) allStars.push(...secondaryDefs);
+
+    const rStarPrimary = Math.min(cx - 10, rings.outer + 22);
+    const rStarSecondary = Math.min(cx - 10, rings.outer + 36); // Un poco más afuera para secundarias
+    
+    // Colores diferenciados
+    const primaryStarColor = "#fbbf24"; // Dorado brillante
+    const secondaryStarColor = "#d4a574"; // Dorado tenue/ambar
+    
+    const primaryStarOpacity = isHuber ? 0.22 : 0.28;
+    const secondaryStarOpacity = isHuber ? 0.16 : 0.22;
 
     const planetDeg = (p: PlanetPoint) => {
       if (Number.isFinite(p.degree)) return normalizeDeg(p.degree);
@@ -1114,11 +1140,21 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
     return (
       <g>
         <title>{tooltipGeneral}</title>
-        {defs.map((s) => {
+        {allStars.map((s) => {
+          const rStar = s.isPrimary ? rStarPrimary : rStarSecondary;
+          const starColor = s.isPrimary ? primaryStarColor : secondaryStarColor;
+          const starOpacity = s.isPrimary ? primaryStarOpacity : secondaryStarOpacity;
+          const starSize = s.isPrimary ? 8 : 6; // Primarias más grandes
+          const fontSize = s.isPrimary ? 12 : 10;
+          const starGlyph = s.isPrimary ? '✶' : '☆'; // Diferente glifo
+
           const pt = degToPoint(s.angle, rStar, cx);
           const near = nearestPlanet(s.angle);
           const planetPt = near ? degToPoint(planetDeg(near.p), rings.planetRing, cx) : null;
-          const lineTooltip = near ? `${s.name} — ${s.tooltip} Activado a través de ${String(near.p.key)} (simbólico).` : `${s.name} — ${s.tooltip}`;
+          const typeLabel = s.isPrimary ? 'Principal' : 'Secundaria';
+          const lineTooltip = near 
+            ? `${s.name} (${typeLabel}) — ${s.tooltip} Activado a través de ${String(near.p.key)} (simbólico).` 
+            : `${s.name} (${typeLabel}) — ${s.tooltip}`;
 
           return (
             <g key={`fs-${s.key}`} opacity={starOpacity}>
@@ -1130,14 +1166,30 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
                   x2={planetPt.x}
                   y2={planetPt.y}
                   stroke={starColor}
-                  strokeWidth={1}
-                  opacity={0.12}
-                  strokeDasharray="2 10"
+                  strokeWidth={s.isPrimary ? 1 : 0.75}
+                  opacity={s.isPrimary ? 0.12 : 0.08}
+                  strokeDasharray={s.isPrimary ? "2 10" : "1 8"}
                 />
               ) : null}
-              <circle cx={pt.x} cy={pt.y} r={8} fill="rgba(251,191,36,0.06)" stroke="none" opacity={0.55} />
-              <text x={pt.x} y={pt.y} textAnchor="middle" dominantBaseline="middle" fontSize={12} fill={starColor} opacity={0.45} style={{ fontFamily: 'Inter, ui-sans-serif, system-ui' }}>
-                ✶
+              <circle 
+                cx={pt.x} 
+                cy={pt.y} 
+                r={starSize} 
+                fill={s.isPrimary ? "rgba(251,191,36,0.06)" : "rgba(212,165,116,0.04)"} 
+                stroke="none" 
+                opacity={0.55} 
+              />
+              <text 
+                x={pt.x} 
+                y={pt.y} 
+                textAnchor="middle" 
+                dominantBaseline="middle" 
+                fontSize={fontSize} 
+                fill={starColor} 
+                opacity={s.isPrimary ? 0.45 : 0.35} 
+                style={{ fontFamily: 'Inter, ui-sans-serif, system-ui' }}
+              >
+                {starGlyph}
               </text>
             </g>
           );

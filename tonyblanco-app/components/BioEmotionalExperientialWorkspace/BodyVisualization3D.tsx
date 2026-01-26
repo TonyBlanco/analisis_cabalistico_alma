@@ -2,7 +2,7 @@
 
 import { useRef, useMemo, useState, useCallback } from 'react';
 import { Canvas, useFrame, useThree, type ThreeEvent } from '@react-three/fiber';
-import { OrbitControls, Environment, Html } from '@react-three/drei';
+import { OrbitControls, Html } from '@react-three/drei';
 import * as THREE from 'three';
 import type { BodyAnatomy, RegionIntensity, HeatmapConfig, EmotionType } from './types';
 import { anatomicalRegions } from './data/anatomicalRegions';
@@ -296,7 +296,7 @@ function SceneContent({
       <directionalLight position={[-5, 3, -5]} intensity={0.4} />
 
       {/* Environment */}
-      <Environment preset="studio" />
+      {/* <Environment preset="studio" /> */}
 
       {/* Body wireframe */}
       <BodyWireframe />

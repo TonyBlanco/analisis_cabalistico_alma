@@ -1,8 +1,10 @@
 'use client';
 
-import { useState } from 'react';
-import { HelpCircle, ChevronDown, ChevronUp, X } from 'lucide-react';
+import { useState, useCallback } from 'react';
+import { HelpCircle, ChevronDown, ChevronUp, X, Orbit, Sparkles, Sun, Music, Star, Moon, Loader2 } from 'lucide-react';
 import ASTRO_METHODS from '@/lib/astrologyMethods';
+import { getAuthToken } from '@/lib/auth';
+import { getApiBaseUrl } from '@/lib/api-base';
 
 // Help panel content organized by sections
 const HELP_SECTIONS = [
@@ -142,6 +144,8 @@ interface AstrologySidebarProps {
   };
   lunarReturnMonth?: string;
   setLunarReturnMonth?: (m: string) => void;
+  patientId?: string | number;
+  hasNatalChart?: boolean;
 }
 
 const HOUSE_OPTIONS: Array<{ code: string; name: string; desc?: string }> = [
@@ -204,6 +208,8 @@ export default function AstrologySidebar({
   layerAvailability,
   lunarReturnMonth,
   setLunarReturnMonth,
+  patientId,
+  hasNatalChart = false,
 }: AstrologySidebarProps) {
   const isRealMode = mode === 'real';
   const canUseForecast = Boolean(hasIdentity);
@@ -905,6 +911,15 @@ export default function AstrologySidebar({
       <div className="px-4 py-3 border-t border-gray-200 text-[11px] text-gray-500">
         Visualización profesional del consultante con datos reales. Próximas fases activarán cálculos avanzados.
       </div>
+
+      {/* Técnicas Avanzadas (API Calls) */}
+      {patientId && (
+        <AdvancedTechniquesSidebarSection
+          patientId={patientId}
+          hasNatalChart={hasNatalChart}
+        />
+      )}
+
       {/* Recalcular control (UI only triggers modal in parent) */}
       <div className="px-4 py-3 border-t border-gray-200">
         <button
@@ -917,5 +932,191 @@ export default function AstrologySidebar({
         <p className="text-xs text-gray-400 mt-2">Recalcular solo con confirmación explícita. La carta base se conservará.</p>
       </div>
     </aside>
+  );
+}
+
+// =====================================
+// Advanced Techniques Section Component
+// =====================================
+
+interface TechniqueState {
+  loading: boolean;
+  error: string | null;
+  data: any | null;
+}
+
+const ADVANCED_TECHNIQUES = [
+  { key: 'transits', name: 'Tránsitos', icon: Orbit, endpoint: '/transits/', color: 'blue' },
+  { key: 'progressions', name: 'Progresiones', icon: Sparkles, endpoint: '/progressions/', color: 'purple' },
+  { key: 'solarReturn', name: 'Retorno Solar', icon: Sun, endpoint: '/solar-return/', color: 'amber' },
+  { key: 'harmonics', name: 'Armónicos', icon: Music, endpoint: '/harmonics/?all=true', color: 'indigo' },
+  { key: 'fixedStars', name: 'Estrellas Fijas', icon: Star, endpoint: '/fixed-stars/', color: 'yellow' },
+  { key: 'arabicParts', name: 'Partes Árabes', icon: Moon, endpoint: '/arabic-parts/', color: 'emerald' },
+] as const;
+
+type TechniqueKey = typeof ADVANCED_TECHNIQUES[number]['key'];
+
+function AdvancedTechniquesSidebarSection({ 
+  patientId, 
+  hasNatalChart 
+}: { 
+  patientId: string | number; 
+  hasNatalChart: boolean;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const [results, setResults] = useState<Record<TechniqueKey, TechniqueState>>({
+    transits: { loading: false, error: null, data: null },
+    progressions: { loading: false, error: null, data: null },
+    solarReturn: { loading: false, error: null, data: null },
+    harmonics: { loading: false, error: null, data: null },
+    fixedStars: { loading: false, error: null, data: null },
+    arabicParts: { loading: false, error: null, data: null },
+  });
+  const [activeResult, setActiveResult] = useState<TechniqueKey | null>(null);
+
+  const apiURL = getApiBaseUrl();
+
+  const fetchTechnique = useCallback(async (key: TechniqueKey, endpoint: string) => {
+    if (!hasNatalChart) {
+      setResults(prev => ({
+        ...prev,
+        [key]: { loading: false, error: 'Primero calcule la carta natal', data: null }
+      }));
+      return;
+    }
+
+    setResults(prev => ({
+      ...prev,
+      [key]: { loading: true, error: null, data: null }
+    }));
+
+    try {
+      const token = getAuthToken();
+      if (!token) throw new Error('No hay sesión activa');
+
+      // URL pattern: /api/therapist/patients/{id}/{technique}/
+      const url = `${apiURL}/therapist/patients/${patientId}${endpoint}`;
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Token ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: `Error ${response.status}` }));
+        throw new Error(errorData.error || errorData.detail || `Error ${response.status}`);
+      }
+
+      const data = await response.json();
+      setResults(prev => ({
+        ...prev,
+        [key]: { loading: false, error: null, data }
+      }));
+      setActiveResult(key);
+    } catch (err) {
+      setResults(prev => ({
+        ...prev,
+        [key]: { 
+          loading: false, 
+          error: err instanceof Error ? err.message : 'Error desconocido', 
+          data: null 
+        }
+      }));
+    }
+  }, [patientId, apiURL, hasNatalChart]);
+
+  const colorClasses: Record<string, string> = {
+    blue: 'bg-blue-500 hover:bg-blue-600',
+    purple: 'bg-purple-500 hover:bg-purple-600',
+    amber: 'bg-amber-500 hover:bg-amber-600',
+    indigo: 'bg-indigo-500 hover:bg-indigo-600',
+    yellow: 'bg-yellow-500 hover:bg-yellow-600',
+    emerald: 'bg-emerald-500 hover:bg-emerald-600',
+  };
+
+  return (
+    <div className="border-t border-gray-200">
+      <button
+        type="button"
+        onClick={() => setExpanded(!expanded)}
+        className="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-gray-50"
+      >
+        <span className="text-sm font-medium text-gray-900">🚀 Técnicas Avanzadas (API)</span>
+        {expanded ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />}
+      </button>
+
+      {expanded && (
+        <div className="px-4 pb-4 space-y-2">
+          <p className="text-[11px] text-gray-500 mb-2">
+            Cálculos reales con Swiss Ephemeris
+          </p>
+          
+          <div className="grid grid-cols-2 gap-2">
+            {ADVANCED_TECHNIQUES.map((tech) => {
+              const Icon = tech.icon;
+              const state = results[tech.key];
+              const isLoading = state.loading;
+              const hasData = state.data !== null;
+              const hasError = state.error !== null;
+              
+              return (
+                <button
+                  key={tech.key}
+                  type="button"
+                  onClick={() => fetchTechnique(tech.key, tech.endpoint)}
+                  disabled={isLoading || !hasNatalChart}
+                  className={`${colorClasses[tech.color]} text-white text-[11px] px-2 py-2 rounded-md flex items-center justify-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed transition-colors`}
+                  title={!hasNatalChart ? 'Requiere carta natal' : `Calcular ${tech.name}`}
+                >
+                  {isLoading ? (
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                  ) : (
+                    <Icon className="w-3 h-3" />
+                  )}
+                  <span className="truncate">{tech.name}</span>
+                  {hasData && <span className="text-[9px]">✓</span>}
+                  {hasError && <span className="text-[9px]">⚠</span>}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Results Display */}
+          {activeResult && results[activeResult].data && (
+            <div className="mt-3 p-2 bg-gray-50 rounded-md border border-gray-200 max-h-48 overflow-auto">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-medium text-gray-700">
+                  {ADVANCED_TECHNIQUES.find(t => t.key === activeResult)?.name}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setActiveResult(null)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+              <pre className="text-[10px] text-gray-600 whitespace-pre-wrap">
+                {JSON.stringify(results[activeResult].data, null, 2).slice(0, 500)}
+                {JSON.stringify(results[activeResult].data, null, 2).length > 500 && '...'}
+              </pre>
+            </div>
+          )}
+
+          {/* Error Display */}
+          {ADVANCED_TECHNIQUES.map((tech) => {
+            const state = results[tech.key];
+            if (!state.error) return null;
+            return (
+              <div key={`err-${tech.key}`} className="text-[10px] text-red-600 bg-red-50 p-1 rounded">
+                {tech.name}: {state.error}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
   );
 }

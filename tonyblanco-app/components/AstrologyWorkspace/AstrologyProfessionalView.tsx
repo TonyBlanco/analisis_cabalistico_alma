@@ -1116,6 +1116,8 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
               setShowPerson2Modal(true);
             }
           }}
+          patientId={consultante?.id}
+          hasNatalChart={hasChart}
         />
       </aside>
 

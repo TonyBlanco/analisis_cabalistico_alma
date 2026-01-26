@@ -226,6 +226,17 @@ FRONTEND_URL = config('FRONTEND_URL', default='http://localhost:3000')
 GEMINI_API_KEY = config('GEMINI_API_KEY', default='')
 GEMINI_MODEL = config('GEMINI_MODEL', default='gemini-1.5-flash')
 
+# Groq AI Configuration (alternative to Gemini - higher rate limits)
+GROQ_API_KEY = config('GROQ_API_KEY', default='')
+GROQ_MODEL = config('GROQ_MODEL', default='llama-3.3-70b-versatile')
+
+# Ollama Configuration (local AI - no limits)
+OLLAMA_BASE_URL = config('OLLAMA_BASE_URL', default='http://localhost:11434')
+OLLAMA_MODEL = config('OLLAMA_MODEL', default='llama3.2')
+
+# AI Provider Priority: gemini, groq, ollama (first available with API key wins)
+AI_PROVIDER = config('AI_PROVIDER', default='auto')  # auto, gemini, groq, ollama
+
 # Astrology Kerykeion - AI snippets (therapist in-session guidance)
 # When enabled, the backend may generate short AI-written (non-verbatim) summaries
 # for curated Sefaria references.

@@ -15,6 +15,14 @@ try {
     Write-Host "⚠️  No se pudo ejecutar 'nvm use 20.9.0'. Asegúrate de tener Node 20.9 activo antes de usar este script." -ForegroundColor Red
 }
 
+# Force the Next.js dev server to point at the local Django API unless already specified.
+if (-not $env:NEXT_PUBLIC_LOCAL_API_URL) {
+    $env:NEXT_PUBLIC_LOCAL_API_URL = 'http://127.0.0.1:8000/api'
+    Write-Host "ℹ️  NEXT_PUBLIC_LOCAL_API_URL set to $env:NEXT_PUBLIC_LOCAL_API_URL for this session" -ForegroundColor Yellow
+} else {
+    Write-Host "ℹ️  NEXT_PUBLIC_LOCAL_API_URL already defined as $env:NEXT_PUBLIC_LOCAL_API_URL; respecting existing override" -ForegroundColor Cyan
+}
+
 # Navigate to frontend directory
 Set-Location "$PSScriptRoot\tonyblanco-app"
 

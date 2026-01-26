@@ -8,6 +8,9 @@
 |---|---|---:|---|---|---|
 | `00_SOURCE_OF_TRUTH.md` | `docs/00_SOURCE_OF_TRUTH.md` | **Draft (Pending approval)** | Gobernanza | TBD | Documento maestro para revisión final. No mover aún. |
 | `DOCUMENT_INDEX.md` | `docs/DOCUMENT_INDEX.md` | **Draft (Pending approval)** | Gobernanza | TBD | Índice maestro (este archivo). |
+| `AI_INTEGRATION_GUIDE.md` | `docs/AI_INTEGRATION_GUIDE.md` | **Active** | AI / Technical | Arquitectura | Guía de integración AI multi-proveedor (Groq, Ollama, Gemini). Actualizado 2026-01-26. |
+| `ASTROLOGIA_AI_PROJECT.md` | `docs/ASTROLOGIA_AI_PROJECT.md` | **Active (Completed)** | AI / Astrology | Arquitectura | Proyecto AI Astrología - Fase 1 completada con multi-proveedor. |
+| `PSYCHOLOGICAL_AI_IMPLEMENTATION.md` | `docs/PSYCHOLOGICAL_AI_IMPLEMENTATION.md` | **Active** | AI / Astrology | Arquitectura | Implementación del panel psicológico junguiano con AI. Actualizado 2026-01-26. |
 | `symbolic_contradictions_matrix.csv` | `docs/00_SOURCE_OF_TRUTH/symbolic_contradictions_matrix.csv` | Proposed | Tests / Docs | TBD | Matriz de contradicciones detectadas. |
 | `symbolic_contradictions_governance.md` | `docs/00_SOURCE_OF_TRUTH/symbolic_contradictions_governance.md` | Proposed | Governance | TBD | Propuestas de acción por ítem. |
 | `symbolic_contradictions_jira.csv` | `docs/00_SOURCE_OF_TRUTH/symbolic_contradictions_jira.csv` | Proposed | Governance | TBD | CSV listo para import a Jira con issues. |

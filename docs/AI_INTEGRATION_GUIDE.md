@@ -1,14 +1,92 @@
-# Guía de Integración de AI (Gemini)
+# Guía de Integración de AI (Multi-Proveedor)
 
 **Documento:** Guía técnica para configuración de servicios AI
-**Fecha:** 25 de enero de 2026
+**Fecha:** 26 de enero de 2026
+**Última actualización:** Soporte multi-proveedor (Groq, Ollama, Gemini)
 **Propósito:** Evitar problemas comunes de configuración al integrar AI en nuevos módulos
 
 ---
 
 ## 📋 Resumen Ejecutivo
 
-Este documento documenta los aprendizajes críticos de la implementación del servicio de Astrología AI, específicamente relacionados con la configuración correcta de **token limits** y **prompts** para el modelo `gemini-2.5-flash`.
+Este documento documenta los aprendizajes críticos de la implementación del servicio de Astrología AI con **arquitectura multi-proveedor**, que soporta:
+
+- **Groq** (principal): `llama-3.3-70b-versatile` - 30 req/min gratis
+- **Ollama** (local): `llama3.2` - Sin límites, requiere instalación local
+- **Gemini** (fallback): `gemini-2.5-flash` - 20 req/día tier gratuito
+
+Incluye configuración correcta de **token limits** y **prompts** para cada proveedor.
+
+---
+
+## 🏗️ Arquitectura Multi-Proveedor
+
+### Sistema de Fallback Automático
+
+El servicio `AstrologyAIService` intenta proveedores en orden:
+
+```python
+# Orden de prioridad (modo AUTO)
+1. Groq     → llama-3.3-70b-versatile (30 req/min)
+2. Ollama   → llama3.2 local (sin límites)
+3. Gemini   → gemini-2.5-flash (20 req/día)
+```
+
+### Configuración en .env
+
+```env
+# Groq (Principal - 30 req/min gratis)
+GROQ_API_KEY=gsk_xxx...
+GROQ_MODEL=llama-3.3-70b-versatile
+
+# Gemini (Fallback)
+GEMINI_API_KEY=AIzaSy...
+GEMINI_MODEL=gemini-2.5-flash
+
+# Ollama (Local - sin límites, requiere instalación)
+OLLAMA_BASE_URL=http://localhost:11434
+OLLAMA_MODEL=llama3.2
+
+# Forzar proveedor específico (opcional)
+AI_PROVIDER=auto  # auto | groq | gemini | ollama
+```
+
+### Instalación de Proveedores
+
+#### Groq
+```bash
+pip install groq
+# Obtener API key gratis en: https://console.groq.com/keys
+```
+
+#### Ollama (Local)
+```bash
+# Windows: Descargar instalador
+# https://ollama.com/download/windows
+
+# Después de instalar:
+ollama pull llama3.2
+```
+
+#### Gemini
+```bash
+pip install google-generativeai
+# Obtener API key en: https://aistudio.google.com/app/apikey
+```
+
+### Uso en Código
+
+```python
+from api.astrology_ai_service import astrology_ai_service
+
+# Auto-inicializa con el primer proveedor disponible
+result = astrology_ai_service._generate_content(
+    system_prompt="Eres un astrólogo experto...",
+    user_prompt="Analiza esta carta natal...",
+    max_tokens=4096,
+    temperature=0.7
+)
+```
 
 ---
 

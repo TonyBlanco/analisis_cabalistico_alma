@@ -9,7 +9,8 @@ from .views import (
     CompositeChartView, 
     DavisonChartView,
     TransitsView,
-    ProgressionsView
+    ProgressionsView,
+    SolarReturnView
 )
 
 app_name = 'astrology'
@@ -56,5 +57,11 @@ urlpatterns = [
         'patients/<int:patient_id>/progressions/',
         ProgressionsView.as_view(),
         name='progressions'
+    ),
+    # Solar Return for a specific patient
+    path(
+        'patients/<int:patient_id>/solar-return/',
+        SolarReturnView.as_view(),
+        name='solar-return'
     ),
 ]

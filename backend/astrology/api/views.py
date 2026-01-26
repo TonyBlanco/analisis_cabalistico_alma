@@ -16,6 +16,7 @@ from ..engine.composite_chart import CompositeChartEngine
 from ..engine.davison_chart import DavisonChartEngine
 from ..engine.transits import TransitsEngine
 from ..engine.progressions import ProgressionsEngine
+from ..engine.solar_return import SolarReturnEngine
 from ..api.serializers import (
     NatalChartSerializer,
     NatalChartRequestSerializer,
@@ -895,5 +896,137 @@ class ProgressionsView(APIView):
         except Exception as e:
             return Response(
                 {"error": f"Error calculating progressions: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class SolarReturnView(APIView):
+    """
+    API endpoint for Solar Return calculations
+    
+    GET /api/therapist/patients/{patient_id}/astrology/solar-return/
+        - Calculate Solar Return for a specific year
+        - Query parameters:
+            - target_year: YYYY (default: current year)
+            - location: "natal" or "current" (default: natal)
+            - current_latitude: float (required if location=current)
+            - current_longitude: float (required if location=current)
+    
+    The Solar Return is the moment when the Sun returns to its exact natal position.
+    This occurs approximately once per year, around the birthday.
+    The chart for this moment reveals themes for the coming year.
+    """
+    permission_classes = [IsAuthenticated, IsTherapist, CanAccessPatient]
+    
+    def get(self, request, patient_id):
+        """Calculate Solar Return for patient"""
+        try:
+            # Verify patient exists and user has access
+            patient = Patient.objects.get(id=patient_id)
+            self.check_object_permissions(request, patient)
+            
+            # Get target year from query params
+            target_year_str = request.query_params.get('target_year')
+            if target_year_str:
+                try:
+                    target_year = int(target_year_str)
+                except ValueError:
+                    return Response(
+                        {"error": "Invalid year format. Use YYYY"},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            else:
+                target_year = datetime.now().year
+            
+            # Get location preference
+            location = request.query_params.get('location', 'natal')
+            current_latitude = request.query_params.get('current_latitude')
+            current_longitude = request.query_params.get('current_longitude')
+            
+            if location == 'current':
+                if not current_latitude or not current_longitude:
+                    return Response(
+                        {"error": "current_latitude and current_longitude required when location=current"},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                try:
+                    current_latitude = float(current_latitude)
+                    current_longitude = float(current_longitude)
+                except ValueError:
+                    return Response(
+                        {"error": "Invalid latitude/longitude format"},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            
+            # Get natal chart
+            chart_service = ChartService()
+            natal_chart = chart_service.get_natal_chart(patient_id)
+            
+            if not natal_chart:
+                return Response(
+                    {"error": "No natal chart found. Please create natal chart first."},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+            # Convert house system name to code
+            house_system_name = natal_chart.house_system or 'P'
+            house_system_map = {
+                'placidus': 'P',
+                'koch': 'K',
+                'equal': 'E',
+                'whole_sign': 'W',
+                'campanus': 'C',
+                'regiomontanus': 'R',
+                'porphyry': 'O',
+            }
+            house_system = house_system_map.get(house_system_name.lower(), house_system_name)
+            
+            # Calculate Solar Return
+            solar_return_engine = SolarReturnEngine()
+            solar_return_data = solar_return_engine.calculate_solar_return(
+                patient_id=patient_id,
+                birth_datetime=natal_chart.birth_datetime,
+                natal_latitude=natal_chart.latitude,
+                natal_longitude=natal_chart.longitude,
+                target_year=target_year,
+                location=location,
+                current_latitude=current_latitude,
+                current_longitude=current_longitude,
+                timezone=natal_chart.timezone or 'UTC',
+                house_system=house_system,
+                zodiac_type=natal_chart.zodiac_type or 'T'
+            )
+            
+            # Build response
+            response_data = {
+                'patient_id': patient_id,
+                'birth_date': natal_chart.birth_datetime.strftime('%Y-%m-%d %H:%M'),
+                'target_year': target_year,
+                'solar_return': solar_return_data,
+                'layer_availability': {
+                    'solarReturn': True
+                }
+            }
+            
+            return Response(response_data, status=status.HTTP_200_OK)
+            
+        except ObjectDoesNotExist:
+            return Response(
+                {"error": "Patient not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except ValueError as e:
+            return Response(
+                {"error": f"Solar Return calculation error: {str(e)}"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except ImportError as e:
+            return Response(
+                {"error": f"Solar Return calculation not available: {str(e)}"},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE
+            )
+        except Exception as e:
+            return Response(
+                {"error": f"Error calculating Solar Return: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )

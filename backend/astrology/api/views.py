@@ -20,6 +20,7 @@ from ..engine.solar_return import SolarReturnEngine
 from ..engine.synastry import SynastryEngine
 from ..engine.harmonics import HarmonicsEngine
 from ..engine.fixed_stars import FixedStarsEngine
+from ..engine.relocation import RelocationEngine
 from ..api.serializers import (
     NatalChartSerializer,
     NatalChartRequestSerializer,
@@ -1383,5 +1384,123 @@ class FixedStarsView(APIView):
         except Exception as e:
             return Response(
                 {"error": f"Error calculating Fixed Stars: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class RelocationView(APIView):
+    """
+    API endpoint for Relocation (Astrocartography) calculations
+    
+    POST /api/therapist/patients/{patient_id}/astrology/relocation/
+        - Calculate relocated chart for patient
+        - Body: {
+            "latitude": float,
+            "longitude": float,
+            "location_name": str (optional)
+          }
+    
+    Relocation keeps natal planets but recalculates houses for a new location.
+    Shows how life energies would express in different geographic locations.
+    """
+    permission_classes = [IsAuthenticated, IsTherapist, CanAccessPatient]
+
+    def post(self, request, patient_id):
+        """Calculate Relocated Chart for patient"""
+        try:
+            # Verify patient exists
+            patient = Patient.objects.get(id=patient_id)
+            self.check_object_permissions(request, patient)
+
+            # Get natal chart
+            chart_service = ChartService()
+            natal_chart = chart_service.get_natal_chart(patient_id)
+
+            if not natal_chart:
+                return Response(
+                    {"error": "No natal chart found. Calculate natal chart first."},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+
+            # Extract natal planets
+            natal_planets = [
+                {
+                    'planet_name': p.planet_name,
+                    'longitude': float(p.longitude),
+                    'sign': p.sign
+                }
+                for p in natal_chart.planets
+            ]
+
+            # Get birth data
+            birth_datetime = natal_chart.birth_datetime
+            natal_latitude = float(natal_chart.latitude)
+            natal_longitude = float(natal_chart.longitude)
+
+            # Get relocation coordinates from request
+            reloc_latitude = request.data.get('latitude')
+            reloc_longitude = request.data.get('longitude')
+            location_name = request.data.get('location_name', 'Unknown Location')
+
+            if reloc_latitude is None or reloc_longitude is None:
+                return Response(
+                    {"error": "latitude and longitude are required"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            try:
+                reloc_latitude = float(reloc_latitude)
+                reloc_longitude = float(reloc_longitude)
+            except (ValueError, TypeError):
+                return Response(
+                    {"error": "latitude and longitude must be valid numbers"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Get house system
+            house_system = natal_chart.house_system or 'P'
+            if len(house_system) > 1:
+                house_system_map = {
+                    'placidus': 'P', 'koch': 'K', 'equal': 'E',
+                    'whole_sign': 'W', 'campanus': 'C', 'regiomontanus': 'R',
+                }
+                house_system = house_system_map.get(house_system.lower(), 'P')
+
+            # Calculate relocation
+            relocation_engine = RelocationEngine()
+            relocation_data = relocation_engine.calculate_relocation(
+                natal_planets=natal_planets,
+                birth_datetime=birth_datetime,
+                natal_latitude=natal_latitude,
+                natal_longitude=natal_longitude,
+                relocation_latitude=reloc_latitude,
+                relocation_longitude=reloc_longitude,
+                location_name=location_name,
+                house_system=house_system
+            )
+
+            response_data = {
+                'patient_id': patient_id,
+                'data': relocation_data,
+                'layer_availability': {
+                    'relocation': True
+                }
+            }
+
+            return Response(response_data, status=status.HTTP_200_OK)
+
+        except ObjectDoesNotExist:
+            return Response(
+                {"error": "Patient not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except ImportError as e:
+            return Response(
+                {"error": f"Relocation calculation not available: {str(e)}"},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE
+            )
+        except Exception as e:
+            return Response(
+                {"error": f"Error calculating Relocation: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )

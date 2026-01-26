@@ -13,7 +13,8 @@ from .views import (
     SolarReturnView,
     SynastryView,
     HarmonicsView,
-    FixedStarsView
+    FixedStarsView,
+    RelocationView
 )
 
 app_name = 'astrology'
@@ -84,5 +85,11 @@ urlpatterns = [
         'patients/<int:patient_id>/fixed-stars/',
         FixedStarsView.as_view(),
         name='fixed-stars'
+    ),
+    # Relocation (Astrocartography) for a specific patient
+    path(
+        'patients/<int:patient_id>/relocation/',
+        RelocationView.as_view(),
+        name='relocation'
     ),
 ]

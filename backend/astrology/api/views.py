@@ -14,6 +14,7 @@ from ..engine.solar_arc import SolarArcEngine
 from ..engine.lunar_return import LunarReturnEngine
 from ..engine.composite_chart import CompositeChartEngine
 from ..engine.davison_chart import DavisonChartEngine
+from ..engine.transits import TransitsEngine
 from ..api.serializers import (
     NatalChartSerializer,
     NatalChartRequestSerializer,
@@ -656,5 +657,117 @@ class DavisonChartView(APIView):
         except Exception as e:
             return Response(
                 {"error": f"Error calculating Davison Chart: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class TransitsView(APIView):
+    """
+    API endpoint for Planetary Transits calculations
+    
+    GET /api/therapist/patients/{patient_id}/astrology/transits/
+        - Calculate current planetary transits for a patient
+        - Query parameters:
+            - target_date: YYYY-MM-DD (default: today)
+            - outer_only: bool (default: false) - only show outer planet transits
+    
+    Transits show where planets are NOW compared to where they were at birth.
+    This is the most fundamental predictive technique in astrology.
+    """
+    permission_classes = [IsAuthenticated, IsTherapist, CanAccessPatient]
+    
+    def get(self, request, patient_id):
+        """Calculate planetary transits for patient"""
+        try:
+            # Verify patient exists and user has access
+            patient = Patient.objects.get(id=patient_id)
+            self.check_object_permissions(request, patient)
+            
+            # Get target date from query params
+            target_date = request.query_params.get('target_date')
+            if not target_date:
+                # Default to current date
+                target_date = datetime.now().strftime('%Y-%m-%d')
+            
+            # Validate date format
+            try:
+                datetime.strptime(target_date, '%Y-%m-%d')
+            except ValueError:
+                return Response(
+                    {"error": "Invalid date format. Use YYYY-MM-DD"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Check for outer_only parameter
+            outer_only = request.query_params.get('outer_only', 'false').lower() == 'true'
+            
+            # Get natal chart to extract planet and house positions
+            chart_service = ChartService()
+            natal_chart = chart_service.get_natal_chart(patient_id)
+            
+            if not natal_chart:
+                return Response(
+                    {"error": "No natal chart found. Please create natal chart first."},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+            # Convert natal planets and houses to dict format for transit engine
+            natal_planets = []
+            for planet in natal_chart.planets:
+                natal_planets.append({
+                    'planet_name': planet.planet_name,
+                    'longitude': float(planet.longitude)
+                })
+            
+            natal_houses = []
+            for house in natal_chart.houses:
+                natal_houses.append({
+                    'number': house.house_number,
+                    'cusp_longitude': float(house.cusp_longitude)
+                })
+            
+            # Calculate transits
+            transits_engine = TransitsEngine()
+            transits_data = transits_engine.calculate_transits(
+                natal_planets=natal_planets,
+                natal_houses=natal_houses,
+                target_date=target_date,
+                include_outer_only=outer_only
+            )
+            
+            # Get summary for AI interpretation
+            transit_summary = transits_engine.get_transit_summary(
+                natal_planets=natal_planets,
+                natal_houses=natal_houses,
+                target_date=target_date
+            )
+            
+            # Build response
+            response_data = {
+                'patient_id': patient_id,
+                'birth_date': natal_chart.birth_datetime.strftime('%Y-%m-%d %H:%M'),
+                'target_date': target_date,
+                'transits': transits_data,
+                'summary': transit_summary,
+                'layer_availability': {
+                    'transits': True
+                }
+            }
+            
+            return Response(response_data, status=status.HTTP_200_OK)
+            
+        except ObjectDoesNotExist:
+            return Response(
+                {"error": "Patient not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except ImportError as e:
+            return Response(
+                {"error": f"Transits calculation not available: {str(e)}"},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE
+            )
+        except Exception as e:
+            return Response(
+                {"error": f"Error calculating transits: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )

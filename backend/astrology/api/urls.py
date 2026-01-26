@@ -2,7 +2,14 @@
 # URL patterns for astrology API endpoints
 
 from django.urls import path
-from .views import NatalChartView, SolarArcView, LunarReturnView
+from .views import (
+    NatalChartView, 
+    SolarArcView, 
+    LunarReturnView, 
+    CompositeChartView, 
+    DavisonChartView,
+    TransitsView
+)
 
 app_name = 'astrology'
 
@@ -24,5 +31,23 @@ urlpatterns = [
         'patients/<int:patient_id>/lunar-return/',
         LunarReturnView.as_view(),
         name='lunar-return'
+    ),
+    # Composite Chart for a specific patient
+    path(
+        'patients/<int:patient_id>/composite-chart/',
+        CompositeChartView.as_view(),
+        name='composite-chart'
+    ),
+    # Davison Relationship Chart for a specific patient
+    path(
+        'patients/<int:patient_id>/davison-chart/',
+        DavisonChartView.as_view(),
+        name='davison-chart'
+    ),
+    # Planetary Transits for a specific patient
+    path(
+        'patients/<int:patient_id>/transits/',
+        TransitsView.as_view(),
+        name='transits'
     ),
 ]

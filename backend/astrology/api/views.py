@@ -17,6 +17,7 @@ from ..engine.davison_chart import DavisonChartEngine
 from ..engine.transits import TransitsEngine
 from ..engine.progressions import ProgressionsEngine
 from ..engine.solar_return import SolarReturnEngine
+from ..engine.synastry import SynastryEngine
 from ..api.serializers import (
     NatalChartSerializer,
     NatalChartRequestSerializer,
@@ -1028,5 +1029,163 @@ class SolarReturnView(APIView):
         except Exception as e:
             return Response(
                 {"error": f"Error calculating Solar Return: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class SynastryView(APIView):
+    """
+    API endpoint for Synastry (relationship comparison) calculations
+    
+    POST /api/therapist/patients/{patient_id}/astrology/synastry/
+        - Calculate Synastry between patient and another person
+        - Body: {
+            "person2_birth_date": "YYYY-MM-DD",
+            "person2_birth_time": "HH:MM",
+            "person2_latitude": float,
+            "person2_longitude": float,
+            "person2_name": str (optional)
+        }
+    
+    Synastry compares two natal charts to analyze:
+    - Inter-chart aspects (how planets interact)
+    - House overlays (where person A's planets fall in B's houses)
+    - Compatibility scoring
+    """
+    permission_classes = [IsAuthenticated, IsTherapist, CanAccessPatient]
+    
+    def post(self, request, patient_id):
+        """Calculate Synastry for patient and another person"""
+        try:
+            # Verify patient exists and user has access
+            patient = Patient.objects.get(id=patient_id)
+            self.check_object_permissions(request, patient)
+            
+            # Get natal chart for patient (person 1)
+            chart_service = ChartService()
+            natal_chart = chart_service.get_natal_chart(patient_id)
+            
+            if not natal_chart:
+                return Response(
+                    {"error": "No natal chart found. Please create natal chart first."},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+            # Validate person2 data from request
+            person2_birth_date = request.data.get('person2_birth_date')
+            person2_birth_time = request.data.get('person2_birth_time', '12:00')
+            person2_latitude = request.data.get('person2_latitude')
+            person2_longitude = request.data.get('person2_longitude')
+            person2_name = request.data.get('person2_name', 'Persona 2')
+            
+            if not all([person2_birth_date, person2_latitude, person2_longitude]):
+                return Response(
+                    {"error": "Missing required fields: person2_birth_date, person2_latitude, person2_longitude"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Parse person2 birth data
+            try:
+                p2_date = datetime.strptime(person2_birth_date, '%Y-%m-%d')
+                p2_time_parts = person2_birth_time.split(':')
+                p2_hour = int(p2_time_parts[0])
+                p2_minute = int(p2_time_parts[1]) if len(p2_time_parts) > 1 else 0
+            except ValueError as e:
+                return Response(
+                    {"error": f"Invalid date/time format: {str(e)}"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Calculate person 2's natal chart
+            from decimal import Decimal
+            from ..engine.natal_chart_engine import NatalChartEngine
+            
+            engine = NatalChartEngine()
+            p2_birth_datetime = datetime(
+                p2_date.year, p2_date.month, p2_date.day, p2_hour, p2_minute
+            )
+            
+            # Get house system
+            house_system_name = natal_chart.house_system or 'P'
+            house_system_map = {
+                'placidus': 'P', 'koch': 'K', 'equal': 'E',
+                'whole_sign': 'W', 'campanus': 'C', 'regiomontanus': 'R',
+            }
+            house_system = house_system_map.get(house_system_name.lower(), house_system_name)
+            
+            person2_chart = engine.calculate_natal_chart(
+                patient_id=0,  # Temp ID for person 2
+                birth_datetime=p2_birth_datetime,
+                latitude=Decimal(str(person2_latitude)),
+                longitude=Decimal(str(person2_longitude)),
+                timezone='UTC',
+                house_system=house_system
+            )
+            
+            # Convert planets and houses to list format
+            person1_planets = [
+                {'planet_name': p.planet_name, 'longitude': float(p.longitude), 'sign': p.sign}
+                for p in natal_chart.planets
+            ]
+            person1_houses = [
+                {'number': h.house_number, 'cusp_longitude': float(h.cusp_longitude)}
+                for h in natal_chart.houses
+            ]
+            
+            person2_planets = [
+                {'planet_name': p.planet_name, 'longitude': float(p.longitude), 'sign': p.sign}
+                for p in person2_chart.planets
+            ]
+            person2_houses = [
+                {'number': h.house_number, 'cusp_longitude': float(h.cusp_longitude)}
+                for h in person2_chart.houses
+            ]
+            
+            # Get person 1 name
+            person1_name = patient.user.get_full_name() if hasattr(patient, 'user') else f'Paciente {patient_id}'
+            
+            # Calculate Synastry
+            synastry_engine = SynastryEngine()
+            synastry_data = synastry_engine.calculate_synastry(
+                person1_planets=person1_planets,
+                person1_houses=person1_houses,
+                person2_planets=person2_planets,
+                person2_houses=person2_houses,
+                person1_name=person1_name,
+                person2_name=person2_name
+            )
+            
+            # Build response
+            response_data = {
+                'patient_id': patient_id,
+                'person1': {
+                    'name': person1_name,
+                    'birth_date': natal_chart.birth_datetime.strftime('%Y-%m-%d'),
+                },
+                'person2': {
+                    'name': person2_name,
+                    'birth_date': person2_birth_date,
+                },
+                'synastry': synastry_data,
+                'layer_availability': {
+                    'synastry': True
+                }
+            }
+            
+            return Response(response_data, status=status.HTTP_200_OK)
+            
+        except ObjectDoesNotExist:
+            return Response(
+                {"error": "Patient not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except ImportError as e:
+            return Response(
+                {"error": f"Synastry calculation not available: {str(e)}"},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE
+            )
+        except Exception as e:
+            return Response(
+                {"error": f"Error calculating Synastry: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )

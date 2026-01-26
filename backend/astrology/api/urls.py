@@ -10,7 +10,8 @@ from .views import (
     DavisonChartView,
     TransitsView,
     ProgressionsView,
-    SolarReturnView
+    SolarReturnView,
+    SynastryView
 )
 
 app_name = 'astrology'
@@ -63,5 +64,11 @@ urlpatterns = [
         'patients/<int:patient_id>/solar-return/',
         SolarReturnView.as_view(),
         name='solar-return'
+    ),
+    # Synastry (relationship comparison) for a specific patient
+    path(
+        'patients/<int:patient_id>/synastry/',
+        SynastryView.as_view(),
+        name='synastry'
     ),
 ]

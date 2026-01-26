@@ -18,6 +18,7 @@ from ..engine.transits import TransitsEngine
 from ..engine.progressions import ProgressionsEngine
 from ..engine.solar_return import SolarReturnEngine
 from ..engine.synastry import SynastryEngine
+from ..engine.harmonics import HarmonicsEngine
 from ..api.serializers import (
     NatalChartSerializer,
     NatalChartRequestSerializer,
@@ -1187,5 +1188,111 @@ class SynastryView(APIView):
         except Exception as e:
             return Response(
                 {"error": f"Error calculating Synastry: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class HarmonicsView(APIView):
+    """
+    API endpoint for Harmonic Chart calculations
+    
+    GET /api/therapist/patients/{patient_id}/astrology/harmonics/
+        - Get harmonic chart for patient
+        - Query params:
+            - harmonic: int (4, 5, 7, 8, 9, 12 - default: 5)
+            - all: bool (if true, calculate H4, H5, H7, H9 together)
+    
+    Harmonics reveal hidden patterns by multiplying planetary positions.
+    H4 = tension patterns, H5 = creativity, H7 = spirituality, H9 = soul purpose
+    """
+    permission_classes = [IsAuthenticated, IsTherapist, CanAccessPatient]
+
+    def get(self, request, patient_id):
+        """Calculate Harmonic Chart for patient"""
+        try:
+            # Verify patient exists
+            patient = Patient.objects.get(id=patient_id)
+            self.check_object_permissions(request, patient)
+
+            # Get natal chart
+            chart_service = ChartService()
+            natal_chart = chart_service.get_natal_chart(patient_id)
+
+            if not natal_chart:
+                return Response(
+                    {"error": "No natal chart found. Calculate natal chart first."},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+
+            # Extract natal planets
+            natal_planets = [
+                {
+                    'planet_name': p.planet_name,
+                    'longitude': float(p.longitude),
+                    'sign': p.sign
+                }
+                for p in natal_chart.planets
+            ]
+
+            # Get query params
+            calculate_all = request.query_params.get('all', 'false').lower() == 'true'
+            harmonic_str = request.query_params.get('harmonic', '5')
+
+            # Validate harmonic number
+            try:
+                harmonic = int(harmonic_str)
+                if harmonic < 1 or harmonic > 360:
+                    raise ValueError
+            except ValueError:
+                return Response(
+                    {"error": "Harmonic must be an integer between 1 and 360"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Calculate harmonics
+            harmonics_engine = HarmonicsEngine()
+
+            if calculate_all:
+                # Calculate multiple standard harmonics
+                harmonics_data = harmonics_engine.calculate_multiple_harmonics(
+                    natal_planets=natal_planets,
+                    harmonics=[4, 5, 7, 9]
+                )
+                response_data = {
+                    'patient_id': patient_id,
+                    'calculation_mode': 'multiple',
+                    'harmonics_calculated': [4, 5, 7, 9],
+                    'data': harmonics_data,
+                    'layer_availability': {
+                        'harmonics': True
+                    }
+                }
+            else:
+                # Calculate single harmonic
+                harmonic_data = harmonics_engine.calculate_harmonic_chart(
+                    natal_planets=natal_planets,
+                    harmonic_number=harmonic,
+                    include_aspects=True
+                )
+                response_data = {
+                    'patient_id': patient_id,
+                    'calculation_mode': 'single',
+                    'harmonic': harmonic,
+                    'data': harmonic_data,
+                    'layer_availability': {
+                        'harmonics': True
+                    }
+                }
+
+            return Response(response_data, status=status.HTTP_200_OK)
+
+        except ObjectDoesNotExist:
+            return Response(
+                {"error": "Patient not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {"error": f"Error calculating Harmonics: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )

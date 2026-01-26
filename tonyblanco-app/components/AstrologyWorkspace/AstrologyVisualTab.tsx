@@ -11,6 +11,7 @@ import AspectsTable from './AspectsTable';
 import { AlertCircle, Loader2, CheckCircle } from 'lucide-react';
 import { getHebrewLetterForSign } from '@/lib/kabbalah-sign-letters';
 import AstrologyVisualProReal from './AstrologyVisualProReal';
+import AdvancedTechniquesPanel from './AdvancedTechniquesPanel';
 
 interface AstrologyVisualTabProps {
   patientId: string | undefined;
@@ -555,6 +556,12 @@ export default function AstrologyVisualTab({ patientId, houseSystem, zodiacType 
             </aside>
           </div>
         </div>
+
+        {/* Panel de Técnicas Avanzadas (Fases 1-8 del Motor Astrológico) */}
+        <AdvancedTechniquesPanel
+          patientId={patientId || ''}
+          hasNatalChart={Boolean(chart.planetas?.length)}
+        />
 
         {/* Tabla de planetas */}
         <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">

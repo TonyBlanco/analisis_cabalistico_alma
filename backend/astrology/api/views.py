@@ -12,6 +12,8 @@ from api.models import Patient
 from ..services.chart_service import ChartService
 from ..engine.solar_arc import SolarArcEngine
 from ..engine.lunar_return import LunarReturnEngine
+from ..engine.composite_chart import CompositeChartEngine
+from ..engine.davison_chart import DavisonChartEngine
 from ..api.serializers import (
     NatalChartSerializer,
     NatalChartRequestSerializer,
@@ -303,7 +305,20 @@ class LunarReturnView(APIView):
             latitude = natal_chart.latitude
             longitude = natal_chart.longitude
             timezone = natal_chart.timezone or 'UTC'
-            house_system = natal_chart.house_system or 'P'
+            
+            # Convert house system name to code (placidus → P, koch → K, etc.)
+            house_system_name = natal_chart.house_system or 'P'
+            house_system_map = {
+                'placidus': 'P',
+                'koch': 'K',
+                'equal': 'E',
+                'whole_sign': 'W',
+                'campanus': 'C',
+                'regiomontanus': 'R',
+                'porphyry': 'O',
+            }
+            house_system = house_system_map.get(house_system_name.lower(), house_system_name)
+            
             zodiac_type = natal_chart.zodiac_type or 'T'
             
             # Calculate Lunar Return
@@ -384,5 +399,262 @@ class LunarReturnView(APIView):
         except Exception as e:
             return Response(
                 {"error": f"Error deleting natal chart: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class CompositeChartView(APIView):
+    """
+    API endpoint for Composite Chart calculations
+    
+    POST /api/therapist/patients/{patient_id}/astrology/composite-chart/
+        - Calculate Composite Chart between patient and another person
+        - Body: {
+            "person2_birth_date": "YYYY-MM-DD",
+            "person2_birth_time": "HH:MM",
+            "person2_latitude": float,
+            "person2_longitude": float,
+            "person2_name": str (optional)
+        }
+    """
+    permission_classes = [IsAuthenticated, IsTherapist, CanAccessPatient]
+    
+    def post(self, request, patient_id):
+        """Calculate Composite Chart for patient and another person"""
+        try:
+            # Verify patient exists and user has access
+            patient = Patient.objects.get(id=patient_id)
+            self.check_object_permissions(request, patient)
+            
+            # Get natal chart to extract birth data
+            chart_service = ChartService()
+            natal_chart = chart_service.get_natal_chart(patient_id)
+            
+            if not natal_chart:
+                return Response(
+                    {"error": "No natal chart found. Please create natal chart first."},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+            # Validate person2 data from request
+            person2_birth_date = request.data.get('person2_birth_date')
+            person2_birth_time = request.data.get('person2_birth_time', '12:00')
+            person2_latitude = request.data.get('person2_latitude')
+            person2_longitude = request.data.get('person2_longitude')
+            person2_name = request.data.get('person2_name', 'Persona 2')
+            
+            if not all([person2_birth_date, person2_latitude, person2_longitude]):
+                return Response(
+                    {"error": "Missing required fields: person2_birth_date, person2_latitude, person2_longitude"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Parse person2 birth data
+            try:
+                p2_date = datetime.strptime(person2_birth_date, '%Y-%m-%d')
+                p2_time_parts = person2_birth_time.split(':')
+                p2_hour = int(p2_time_parts[0])
+                p2_minute = int(p2_time_parts[1]) if len(p2_time_parts) > 1 else 0
+            except ValueError as e:
+                return Response(
+                    {"error": f"Invalid date/time format: {str(e)}"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            person2_data = {
+                'year': p2_date.year,
+                'month': p2_date.month,
+                'day': p2_date.day,
+                'hour': p2_hour,
+                'minute': p2_minute,
+                'latitude': float(person2_latitude),
+                'longitude': float(person2_longitude)
+            }
+            
+            # Extract person1 (patient) birth data from natal chart
+            birth_datetime = natal_chart.birth_datetime
+            person1_data = {
+                'year': birth_datetime.year,
+                'month': birth_datetime.month,
+                'day': birth_datetime.day,
+                'hour': birth_datetime.hour,
+                'minute': birth_datetime.minute,
+                'latitude': float(natal_chart.latitude),
+                'longitude': float(natal_chart.longitude)
+            }
+            
+            # Calculate Composite Chart
+            composite_engine = CompositeChartEngine()
+            composite_data = composite_engine.calculate_composite_chart(
+                person1_data=person1_data,
+                person2_data=person2_data
+            )
+            
+            # Build response
+            response_data = {
+                'patient_id': patient_id,
+                'person1': {
+                    'name': patient.user.get_full_name() if hasattr(patient, 'user') else f'Paciente {patient_id}',
+                    'birth_date': birth_datetime.strftime('%Y-%m-%d'),
+                    'birth_time': birth_datetime.strftime('%H:%M')
+                },
+                'person2': {
+                    'name': person2_name,
+                    'birth_date': person2_birth_date,
+                    'birth_time': person2_birth_time
+                },
+                'composite_chart': composite_data,
+                'layer_availability': {
+                    'compositeChart': True
+                }
+            }
+            
+            return Response(response_data, status=status.HTTP_200_OK)
+            
+        except ObjectDoesNotExist:
+            return Response(
+                {"error": "Patient not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except ImportError as e:
+            return Response(
+                {"error": f"Composite Chart calculation not available: {str(e)}"},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE
+            )
+        except Exception as e:
+            return Response(
+                {"error": f"Error calculating Composite Chart: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class DavisonChartView(APIView):
+    """
+    API endpoint for Davison Relationship Chart calculations
+    
+    POST /api/therapist/patients/{patient_id}/astrology/davison-chart/
+        - Calculate Davison Chart between patient and another person
+        - Body: {
+            "person2_birth_date": "YYYY-MM-DD",
+            "person2_birth_time": "HH:MM",
+            "person2_latitude": float,
+            "person2_longitude": float,
+            "person2_name": str (optional)
+        }
+    
+    The Davison Chart differs from Composite Charts:
+    - Composite: Calculates midpoints of individual planetary positions
+    - Davison: Calculates ONE chart for the midpoint moment/location
+    
+    The Davison Chart represents the relationship as a single entity 
+    with its own "birth" moment and location.
+    """
+    permission_classes = [IsAuthenticated, IsTherapist, CanAccessPatient]
+    
+    def post(self, request, patient_id):
+        """Calculate Davison Relationship Chart for patient and another person"""
+        try:
+            # Verify patient exists and user has access
+            patient = Patient.objects.get(id=patient_id)
+            self.check_object_permissions(request, patient)
+            
+            # Get natal chart to extract birth data
+            chart_service = ChartService()
+            natal_chart = chart_service.get_natal_chart(patient_id)
+            
+            if not natal_chart:
+                return Response(
+                    {"error": "No natal chart found. Please create natal chart first."},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+            # Validate person2 data from request
+            person2_birth_date = request.data.get('person2_birth_date')
+            person2_birth_time = request.data.get('person2_birth_time', '12:00')
+            person2_latitude = request.data.get('person2_latitude')
+            person2_longitude = request.data.get('person2_longitude')
+            person2_name = request.data.get('person2_name', 'Persona 2')
+            
+            if not all([person2_birth_date, person2_latitude, person2_longitude]):
+                return Response(
+                    {"error": "Missing required fields: person2_birth_date, person2_latitude, person2_longitude"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Parse person2 birth data
+            try:
+                p2_date = datetime.strptime(person2_birth_date, '%Y-%m-%d')
+                p2_time_parts = person2_birth_time.split(':')
+                p2_hour = int(p2_time_parts[0])
+                p2_minute = int(p2_time_parts[1]) if len(p2_time_parts) > 1 else 0
+            except ValueError as e:
+                return Response(
+                    {"error": f"Invalid date/time format: {str(e)}"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            person2_data = {
+                'year': p2_date.year,
+                'month': p2_date.month,
+                'day': p2_date.day,
+                'hour': p2_hour,
+                'minute': p2_minute,
+                'latitude': float(person2_latitude),
+                'longitude': float(person2_longitude)
+            }
+            
+            # Extract person1 (patient) birth data from natal chart
+            birth_datetime = natal_chart.birth_datetime
+            person1_data = {
+                'year': birth_datetime.year,
+                'month': birth_datetime.month,
+                'day': birth_datetime.day,
+                'hour': birth_datetime.hour,
+                'minute': birth_datetime.minute,
+                'latitude': float(natal_chart.latitude),
+                'longitude': float(natal_chart.longitude)
+            }
+            
+            # Calculate Davison Chart
+            davison_engine = DavisonChartEngine()
+            davison_data = davison_engine.calculate_davison_chart(
+                person1_data=person1_data,
+                person2_data=person2_data
+            )
+            
+            # Build response
+            response_data = {
+                'patient_id': patient_id,
+                'person1': {
+                    'name': patient.user.get_full_name() if hasattr(patient, 'user') else f'Paciente {patient_id}',
+                    'birth_date': birth_datetime.strftime('%Y-%m-%d'),
+                    'birth_time': birth_datetime.strftime('%H:%M')
+                },
+                'person2': {
+                    'name': person2_name,
+                    'birth_date': person2_birth_date,
+                    'birth_time': person2_birth_time
+                },
+                'davison_chart': davison_data,
+                'layer_availability': {
+                    'davisonChart': True
+                }
+            }
+            
+            return Response(response_data, status=status.HTTP_200_OK)
+            
+        except ObjectDoesNotExist:
+            return Response(
+                {"error": "Patient not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except ImportError as e:
+            return Response(
+                {"error": f"Davison Chart calculation not available: {str(e)}"},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE
+            )
+        except Exception as e:
+            return Response(
+                {"error": f"Error calculating Davison Chart: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )

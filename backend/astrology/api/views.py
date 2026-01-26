@@ -15,6 +15,7 @@ from ..engine.lunar_return import LunarReturnEngine
 from ..engine.composite_chart import CompositeChartEngine
 from ..engine.davison_chart import DavisonChartEngine
 from ..engine.transits import TransitsEngine
+from ..engine.progressions import ProgressionsEngine
 from ..api.serializers import (
     NatalChartSerializer,
     NatalChartRequestSerializer,
@@ -769,5 +770,130 @@ class TransitsView(APIView):
         except Exception as e:
             return Response(
                 {"error": f"Error calculating transits: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class ProgressionsView(APIView):
+    """
+    API endpoint for Secondary Progressions calculations
+    
+    GET /api/therapist/patients/{patient_id}/astrology/progressions/
+        - Calculate secondary progressions for a patient
+        - Query parameters:
+            - target_date: YYYY-MM-DD (default: today)
+    
+    Secondary Progressions use the "day for a year" technique:
+    - 1 day of planetary movement = 1 year of life
+    - To find progressions for age 30, calculate positions 30 days after birth
+    
+    The Progressed Moon is especially important, taking ~27 years to circle the zodiac.
+    """
+    permission_classes = [IsAuthenticated, IsTherapist, CanAccessPatient]
+    
+    def get(self, request, patient_id):
+        """Calculate secondary progressions for patient"""
+        try:
+            # Verify patient exists and user has access
+            patient = Patient.objects.get(id=patient_id)
+            self.check_object_permissions(request, patient)
+            
+            # Get target date from query params
+            target_date = request.query_params.get('target_date')
+            if not target_date:
+                target_date = datetime.now().strftime('%Y-%m-%d')
+            
+            # Validate date format
+            try:
+                datetime.strptime(target_date, '%Y-%m-%d')
+            except ValueError:
+                return Response(
+                    {"error": "Invalid date format. Use YYYY-MM-DD"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Get natal chart
+            chart_service = ChartService()
+            natal_chart = chart_service.get_natal_chart(patient_id)
+            
+            if not natal_chart:
+                return Response(
+                    {"error": "No natal chart found. Please create natal chart first."},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+            # Build birth data dict
+            birth_datetime = natal_chart.birth_datetime
+            birth_data = {
+                'year': birth_datetime.year,
+                'month': birth_datetime.month,
+                'day': birth_datetime.day,
+                'hour': birth_datetime.hour,
+                'minute': birth_datetime.minute
+            }
+            
+            # Convert natal planets and houses to dict format
+            natal_planets = []
+            for planet in natal_chart.planets:
+                natal_planets.append({
+                    'planet_name': planet.planet_name,
+                    'longitude': float(planet.longitude)
+                })
+            
+            natal_houses = []
+            for house in natal_chart.houses:
+                natal_houses.append({
+                    'number': house.house_number,
+                    'cusp_longitude': float(house.cusp_longitude)
+                })
+            
+            # Calculate progressions
+            progressions_engine = ProgressionsEngine()
+            progressions_data = progressions_engine.calculate_progressions(
+                birth_data=birth_data,
+                natal_planets=natal_planets,
+                natal_houses=natal_houses,
+                target_date=target_date,
+                latitude=float(natal_chart.latitude),
+                longitude=float(natal_chart.longitude)
+            )
+            
+            # Get summary
+            progression_summary = progressions_engine.get_progression_summary(
+                birth_data=birth_data,
+                natal_planets=natal_planets,
+                natal_houses=natal_houses,
+                target_date=target_date,
+                latitude=float(natal_chart.latitude),
+                longitude=float(natal_chart.longitude)
+            )
+            
+            # Build response
+            response_data = {
+                'patient_id': patient_id,
+                'birth_date': birth_datetime.strftime('%Y-%m-%d %H:%M'),
+                'target_date': target_date,
+                'progressions': progressions_data,
+                'summary': progression_summary,
+                'layer_availability': {
+                    'progressions': True
+                }
+            }
+            
+            return Response(response_data, status=status.HTTP_200_OK)
+            
+        except ObjectDoesNotExist:
+            return Response(
+                {"error": "Patient not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except ImportError as e:
+            return Response(
+                {"error": f"Progressions calculation not available: {str(e)}"},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE
+            )
+        except Exception as e:
+            return Response(
+                {"error": f"Error calculating progressions: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )

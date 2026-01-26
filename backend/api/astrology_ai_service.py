@@ -99,17 +99,30 @@ class AstrologyAIService:
         
         self._init_attempted = True
         
+        # Detectar si estamos en producción
+        is_production = getattr(settings, 'RENDER', False) or getattr(settings, 'RAILWAY', False) or not getattr(settings, 'DEBUG', True)
+        
         ai_provider = getattr(settings, 'AI_PROVIDER', 'auto')
         
         if ai_provider == 'auto':
-            # Try providers in order: groq first (more reliable limits), then gemini, then ollama
-            if self._try_init_groq():
-                return
-            if self._try_init_gemini():
-                return
-            if self._try_init_ollama():
-                return
-            self.error_message = "No hay proveedor AI configurado. Configura GROQ_API_KEY, GEMINI_API_KEY, o instala Ollama."
+            if is_production:
+                # Producción: Solo Groq y Gemini (sin Ollama)
+                logger.info("[AI] Modo producción: usando Groq + Gemini (sin Ollama)")
+                if self._try_init_groq():
+                    return
+                if self._try_init_gemini():
+                    return
+                self.error_message = "No hay proveedor AI configurado en producción. Configura GROQ_API_KEY o GEMINI_API_KEY."
+            else:
+                # Local: Groq → Ollama → Gemini (desarrollo sin límites)
+                logger.info("[AI] Modo local: usando Groq → Ollama → Gemini")
+                if self._try_init_groq():
+                    return
+                if self._try_init_ollama():
+                    return
+                if self._try_init_gemini():
+                    return
+                self.error_message = "No hay proveedor AI configurado. Configura GROQ_API_KEY, GEMINI_API_KEY, o instala Ollama."
         elif ai_provider == 'gemini':
             self._try_init_gemini()
         elif ai_provider == 'groq':

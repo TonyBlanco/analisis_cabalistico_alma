@@ -115,11 +115,18 @@ class LunarReturnEngine:
             zodiac_type=zodiac_type
         )
 
+        # Serialize chart to dictionary (NatalChart object is not JSON serializable)
+        chart_dict = {
+            'planets': return_chart.planets,
+            'houses': return_chart.houses,
+            'aspects': return_chart.aspects,
+        }
+
         return {
             'return_datetime': refined_datetime.isoformat(),
             'lunar_position': natal_moon_longitude,
             'return_lunar_position': return_moon_longitude,
-            'chart': return_chart,
+            'chart': chart_dict,
             'precision': final_diff,
             'target_month': target_month
         }

@@ -19,6 +19,7 @@ from ..engine.progressions import ProgressionsEngine
 from ..engine.solar_return import SolarReturnEngine
 from ..engine.synastry import SynastryEngine
 from ..engine.harmonics import HarmonicsEngine
+from ..engine.fixed_stars import FixedStarsEngine
 from ..api.serializers import (
     NatalChartSerializer,
     NatalChartRequestSerializer,
@@ -1294,5 +1295,93 @@ class HarmonicsView(APIView):
         except Exception as e:
             return Response(
                 {"error": f"Error calculating Harmonics: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class FixedStarsView(APIView):
+    """
+    API endpoint for Fixed Star conjunction calculations
+    
+    GET /api/therapist/patients/{patient_id}/astrology/fixed-stars/
+        - Get fixed star conjunctions for patient's natal chart
+        - Query params:
+            - orb: float (default 1.0°, max 2.0°)
+            - include_minor: bool (include stars with magnitude > 2.5)
+    
+    Fixed stars add archetypal layers when conjunct natal planets (orb ≤1°).
+    Includes 55 stars: 4 Royal Stars, Behenian Stars, and notable fixed stars.
+    """
+    permission_classes = [IsAuthenticated, IsTherapist, CanAccessPatient]
+
+    def get(self, request, patient_id):
+        """Calculate Fixed Star conjunctions for patient"""
+        try:
+            # Verify patient exists
+            patient = Patient.objects.get(id=patient_id)
+            self.check_object_permissions(request, patient)
+
+            # Get natal chart
+            chart_service = ChartService()
+            natal_chart = chart_service.get_natal_chart(patient_id)
+
+            if not natal_chart:
+                return Response(
+                    {"error": "No natal chart found. Calculate natal chart first."},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+
+            # Extract natal planets
+            natal_planets = [
+                {
+                    'planet_name': p.planet_name,
+                    'longitude': float(p.longitude),
+                    'sign': p.sign
+                }
+                for p in natal_chart.planets
+            ]
+
+            # Get birth datetime
+            birth_datetime = natal_chart.birth_datetime
+
+            # Get query params
+            orb_str = request.query_params.get('orb', '1.0')
+            include_minor = request.query_params.get('include_minor', 'true').lower() == 'true'
+
+            # Validate orb
+            try:
+                orb = float(orb_str)
+                if orb < 0.5 or orb > 2.0:
+                    orb = 1.0  # Default
+            except ValueError:
+                orb = 1.0
+
+            # Calculate fixed star conjunctions
+            fixed_stars_engine = FixedStarsEngine()
+            stars_data = fixed_stars_engine.calculate_fixed_star_conjunctions(
+                natal_planets=natal_planets,
+                birth_datetime=birth_datetime,
+                orb=orb,
+                include_minor_stars=include_minor
+            )
+
+            response_data = {
+                'patient_id': patient_id,
+                'data': stars_data,
+                'layer_availability': {
+                    'fixed_stars': True
+                }
+            }
+
+            return Response(response_data, status=status.HTTP_200_OK)
+
+        except ObjectDoesNotExist:
+            return Response(
+                {"error": "Patient not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {"error": f"Error calculating Fixed Stars: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )

@@ -12,7 +12,8 @@ from .views import (
     ProgressionsView,
     SolarReturnView,
     SynastryView,
-    HarmonicsView
+    HarmonicsView,
+    FixedStarsView
 )
 
 app_name = 'astrology'
@@ -77,5 +78,11 @@ urlpatterns = [
         'patients/<int:patient_id>/harmonics/',
         HarmonicsView.as_view(),
         name='harmonics'
+    ),
+    # Fixed Stars conjunctions for a specific patient
+    path(
+        'patients/<int:patient_id>/fixed-stars/',
+        FixedStarsView.as_view(),
+        name='fixed-stars'
     ),
 ]

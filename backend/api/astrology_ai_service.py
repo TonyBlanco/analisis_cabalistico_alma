@@ -73,55 +73,109 @@ class AstrologyAIService:
         return cls._instance
     
     def __init__(self):
-        """Inicializa el cliente de Gemini (lazy)."""
+        """Inicializa el servicio AI (lazy)."""
         if AstrologyAIService._initialized:
             return
             
-        self.api_key = None
-        self.model_name = 'gemini-1.5-flash'
+        self.provider = None  # 'gemini', 'groq', or 'ollama'
+        self.model_name = None
         self.enabled = False
         self.client = None
         self.error_message = None
-        self._genai = None
         self._init_attempted = False
+        
+        # Provider-specific clients
+        self._gemini_client = None
+        self._groq_client = None
+        self._ollama_base_url = None
         
         # Defer actual initialization
         AstrologyAIService._initialized = True
     
     def _ensure_initialized(self):
-        """Lazy initialization of Gemini client."""
+        """Lazy initialization - tries providers in order of preference."""
         if self._init_attempted:
-            return  # Already attempted (success or failure)
+            return
         
         self._init_attempted = True
-            
-        # Import genai lazily
+        
+        ai_provider = getattr(settings, 'AI_PROVIDER', 'auto')
+        
+        if ai_provider == 'auto':
+            # Try providers in order: groq first (more reliable limits), then gemini, then ollama
+            if self._try_init_groq():
+                return
+            if self._try_init_gemini():
+                return
+            if self._try_init_ollama():
+                return
+            self.error_message = "No hay proveedor AI configurado. Configura GROQ_API_KEY, GEMINI_API_KEY, o instala Ollama."
+        elif ai_provider == 'gemini':
+            self._try_init_gemini()
+        elif ai_provider == 'groq':
+            self._try_init_groq()
+        elif ai_provider == 'ollama':
+            self._try_init_ollama()
+    
+    def _try_init_gemini(self) -> bool:
+        """Try to initialize Gemini client."""
+        api_key = getattr(settings, 'GEMINI_API_KEY', None)
+        if not api_key:
+            return False
+        
         try:
             from google import genai
-            self._genai = genai
-            logger.info("google.genai imported successfully")
-        except ImportError as e:
-            self.error_message = f"Módulo google.genai no instalado: {e}"
-            logger.warning(f"AstrologyAIService: {self.error_message}")
-            return
-        
-        # Get settings
-        self.api_key = getattr(settings, 'GEMINI_API_KEY', None)
-        self.model_name = getattr(settings, 'GEMINI_MODEL', 'gemini-1.5-flash')
-        
-        if not self.api_key:
-            self.error_message = "GEMINI_API_KEY no configurada"
-            logger.warning(f"AstrologyAIService: {self.error_message}")
-            return
+            self._gemini_client = genai.Client(api_key=api_key)
+            self.provider = 'gemini'
+            self.model_name = getattr(settings, 'GEMINI_MODEL', 'gemini-2.5-flash')
+            self.enabled = True
+            logger.info(f"[AI] Usando Gemini con modelo: {self.model_name}")
+            return True
+        except Exception as e:
+            logger.warning(f"[AI] Gemini no disponible: {e}")
+            return False
+    
+    def _try_init_groq(self) -> bool:
+        """Try to initialize Groq client."""
+        api_key = getattr(settings, 'GROQ_API_KEY', None)
+        if not api_key:
+            return False
         
         try:
-            self.client = self._genai.Client(api_key=self.api_key)
+            from groq import Groq
+            self._groq_client = Groq(api_key=api_key)
+            self.provider = 'groq'
+            self.model_name = getattr(settings, 'GROQ_MODEL', 'llama-3.3-70b-versatile')
             self.enabled = True
-            logger.info(f"AstrologyAIService configurado con modelo: {self.model_name}")
+            logger.info(f"[AI] Usando Groq con modelo: {self.model_name}")
+            return True
+        except ImportError:
+            logger.warning("[AI] Groq SDK no instalado. Instala con: pip install groq")
+            return False
         except Exception as e:
-            self.error_message = f"Error configurando Gemini: {str(e)}"
-            logger.error(f"AstrologyAIService: {self.error_message}")
-            self.enabled = False
+            logger.warning(f"[AI] Groq no disponible: {e}")
+            return False
+    
+    def _try_init_ollama(self) -> bool:
+        """Try to initialize Ollama (local)."""
+        import requests
+        
+        base_url = getattr(settings, 'OLLAMA_BASE_URL', 'http://localhost:11434')
+        model = getattr(settings, 'OLLAMA_MODEL', 'llama3.2')
+        
+        try:
+            # Check if Ollama is running
+            response = requests.get(f"{base_url}/api/tags", timeout=2)
+            if response.status_code == 200:
+                self._ollama_base_url = base_url
+                self.provider = 'ollama'
+                self.model_name = model
+                self.enabled = True
+                logger.info(f"[AI] Usando Ollama local con modelo: {self.model_name}")
+                return True
+        except Exception as e:
+            logger.warning(f"[AI] Ollama no disponible: {e}")
+        return False
     
     def _generate_content(
         self,
@@ -131,70 +185,88 @@ class AstrologyAIService:
         temperature: float = 0.7,
     ) -> str:
         """
-        Genera contenido usando Gemini API.
-        
-        Args:
-            system_prompt: Instrucciones del sistema
-            user_prompt: Prompt del usuario
-            max_tokens: Límite de tokens de salida
-            temperature: Creatividad (0.0-1.0)
-            
-        Returns:
-            Texto generado o mensaje de error
+        Genera contenido usando el proveedor AI configurado.
+        Soporta: Gemini, Groq, Ollama
         """
-        # Ensure client is initialized
         self._ensure_initialized()
         
         if not self.enabled:
             return f"Error: {self.error_message or 'Servicio AI no disponible'}"
         
+        print(f"[AI DEBUG] Provider: {self.provider}, Model: {self.model_name}, max_tokens={max_tokens}")
+        
         try:
-            # Import types for proper configuration
-            from google.genai import types
-            
-            print(f"[AI DEBUG] Generating content with max_tokens={max_tokens}, model={self.model_name}")
-            
-            # Create proper configuration with GenerateContentConfig
-            config = types.GenerateContentConfig(
-                temperature=temperature,
-                maxOutputTokens=max_tokens,
-                systemInstruction=system_prompt,
-            )
-            
-            response = self.client.models.generate_content(
-                model=self.model_name,
-                contents=user_prompt,
-                config=config,
-            )
-            
-            # Log response metadata for debugging
-            if hasattr(response, 'candidates') and response.candidates:
-                candidate = response.candidates[0]
-                finish_reason = getattr(candidate, 'finish_reason', 'unknown')
-                print(f"[AI DEBUG] Response finish_reason: {finish_reason}")
-                
-                # Check if response was cut short
-                if hasattr(candidate, 'safety_ratings'):
-                    print(f"[AI DEBUG] Safety ratings: {candidate.safety_ratings}")
-            
-            # Extraer texto de la respuesta
-            text = None
-            if hasattr(response, 'text'):
-                text = response.text
-            elif hasattr(response, 'candidates') and response.candidates:
-                candidate = response.candidates[0]
-                if hasattr(candidate, 'content') and hasattr(candidate.content, 'parts'):
-                    text = ''.join(part.text for part in candidate.content.parts if hasattr(part, 'text'))
-            
-            if text:
-                logger.info(f"Generated text length: {len(text)} characters")
-                return text
-            
-            return extract_text(response) if response else "Sin respuesta del modelo"
-            
+            if self.provider == 'gemini':
+                return self._generate_gemini(system_prompt, user_prompt, max_tokens, temperature)
+            elif self.provider == 'groq':
+                return self._generate_groq(system_prompt, user_prompt, max_tokens, temperature)
+            elif self.provider == 'ollama':
+                return self._generate_ollama(system_prompt, user_prompt, max_tokens, temperature)
+            else:
+                return "Error: Proveedor AI no configurado"
         except Exception as e:
             logger.error(f"Error generando contenido AI: {str(e)}", exc_info=True)
             return f"Error al generar interpretación: {str(e)}"
+    
+    def _generate_gemini(self, system_prompt: str, user_prompt: str, max_tokens: int, temperature: float) -> str:
+        """Generate content using Gemini API."""
+        from google.genai import types
+        
+        config = types.GenerateContentConfig(
+            temperature=temperature,
+            maxOutputTokens=max_tokens,
+            systemInstruction=system_prompt,
+        )
+        
+        response = self._gemini_client.models.generate_content(
+            model=self.model_name,
+            contents=user_prompt,
+            config=config,
+        )
+        
+        # Extract text from response
+        if hasattr(response, 'text'):
+            return response.text
+        elif hasattr(response, 'candidates') and response.candidates:
+            candidate = response.candidates[0]
+            if hasattr(candidate, 'content') and hasattr(candidate.content, 'parts'):
+                return ''.join(part.text for part in candidate.content.parts if hasattr(part, 'text'))
+        
+        return extract_text(response) if response else "Sin respuesta del modelo"
+    
+    def _generate_groq(self, system_prompt: str, user_prompt: str, max_tokens: int, temperature: float) -> str:
+        """Generate content using Groq API."""
+        response = self._groq_client.chat.completions.create(
+            model=self.model_name,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ],
+            max_tokens=max_tokens,
+            temperature=temperature,
+        )
+        return response.choices[0].message.content
+    
+    def _generate_ollama(self, system_prompt: str, user_prompt: str, max_tokens: int, temperature: float) -> str:
+        """Generate content using local Ollama."""
+        import requests
+        
+        response = requests.post(
+            f"{self._ollama_base_url}/api/generate",
+            json={
+                "model": self.model_name,
+                "prompt": user_prompt,
+                "system": system_prompt,
+                "stream": False,
+                "options": {
+                    "temperature": temperature,
+                    "num_predict": max_tokens,
+                }
+            },
+            timeout=120,  # Ollama can be slow
+        )
+        response.raise_for_status()
+        return response.json().get('response', '')
     
     def interpret_natal(self, chart_data: Dict[str, Any]) -> AIInterpretationResult:
         """

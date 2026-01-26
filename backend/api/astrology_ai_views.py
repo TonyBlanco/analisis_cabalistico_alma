@@ -747,11 +747,7 @@ El objetivo es comprensión, no juicio. Explica cómo trabajar con estas energí
             profile_summary=json.dumps(profile_summary, indent=2, ensure_ascii=False)
         )
         
-        # Generate interpretation using the AI service
-        try:
-            result = astrology_ai_service._call_gemini(
-                prompt=prompt,
-                system_instruction="""Eres un astrólogo psicológico experto en el enfoque junguiano, 
+        system_instruction = """Eres un astrólogo psicológico experto en el enfoque junguiano, 
 especializado en la obra de Liz Greene y el análisis arquetípico profundo.
 
 Tu objetivo es proporcionar interpretaciones que:
@@ -762,9 +758,17 @@ Tu objetivo es proporcionar interpretaciones que:
 5. Sean compasivas y no enjuiciadoras
 
 Escribe en español, con un tono profesional pero cálido."""
+
+        # Generate interpretation using the AI service
+        try:
+            result = astrology_ai_service._generate_content(
+                system_prompt=system_instruction,
+                user_prompt=prompt,
+                max_tokens=4096,
+                temperature=0.7,
             )
             
-            if result:
+            if result and not result.startswith('Error'):
                 # Save to database
                 interpretation = AstrologyAIInterpretation.objects.create(
                     patient=patient,
@@ -789,13 +793,23 @@ Escribe en español, con un tono profesional pero cálido."""
                     'interpretation_id': interpretation.id,
                 })
             else:
+                error_msg = result if result and result.startswith('Error') else 'No se pudo generar la interpretación'
                 return Response(
-                    {'error': 'No se pudo generar la interpretación'},
+                    {'error': error_msg},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR
                 )
         except Exception as e:
+            error_msg = str(e)
             logger.error(f"Error generating psychological interpretation: {e}")
+            
+            # Check for rate limit error
+            if '429' in error_msg or 'RESOURCE_EXHAUSTED' in error_msg or 'quota' in error_msg.lower():
+                return Response(
+                    {'error': 'Límite de solicitudes alcanzado. Por favor espera unos segundos e intenta de nuevo.'},
+                    status=status.HTTP_429_TOO_MANY_REQUESTS
+                )
+            
             return Response(
-                {'error': str(e)},
+                {'error': error_msg},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )

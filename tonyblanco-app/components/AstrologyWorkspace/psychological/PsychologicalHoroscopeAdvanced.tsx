@@ -70,7 +70,11 @@ export default function PsychologicalHoroscopeAdvanced({ advanced, patientId }: 
       });
 
       if (!response.ok) {
-        throw new Error(`Error ${response.status}`);
+        const errorData = await response.json().catch(() => ({}));
+        const errorMsg = response.status === 429 
+          ? 'Límite de solicitudes alcanzado. Espera unos segundos e intenta de nuevo.'
+          : errorData.error || `Error ${response.status}`;
+        throw new Error(errorMsg);
       }
 
       const result = await response.json();
@@ -200,13 +204,16 @@ export default function PsychologicalHoroscopeAdvanced({ advanced, patientId }: 
             </div>
             <div className="flex items-center gap-2">
               {!aiInterpretations['archetypes']?.content && patientId && (
-                <button
+                <span
+                  role="button"
+                  tabIndex={0}
                   onClick={(e) => { e.stopPropagation(); generateInterpretation('archetypes', profile.dominantArchetypes); }}
-                  className="p-1 hover:bg-purple-100 rounded text-purple-600"
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation(); generateInterpretation('archetypes', profile.dominantArchetypes); } }}
+                  className="p-1 hover:bg-purple-100 rounded text-purple-600 cursor-pointer"
                   title="Generar interpretación AI"
                 >
                   <Sparkles className="w-4 h-4" />
-                </button>
+                </span>
               )}
               {expandedSections['archetypes'] ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
             </div>
@@ -241,13 +248,16 @@ export default function PsychologicalHoroscopeAdvanced({ advanced, patientId }: 
             </div>
             <div className="flex items-center gap-2">
               {profile.shadowConflicts.length > 0 && !aiInterpretations['shadow']?.content && patientId && (
-                <button
+                <span
+                  role="button"
+                  tabIndex={0}
                   onClick={(e) => { e.stopPropagation(); generateInterpretation('shadow', profile.shadowConflicts); }}
-                  className="p-1 hover:bg-purple-100 rounded text-purple-600"
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation(); generateInterpretation('shadow', profile.shadowConflicts); } }}
+                  className="p-1 hover:bg-purple-100 rounded text-purple-600 cursor-pointer"
                   title="Generar interpretación AI"
                 >
                   <Sparkles className="w-4 h-4" />
-                </button>
+                </span>
               )}
               {expandedSections['shadow'] ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
             </div>
@@ -283,13 +293,16 @@ export default function PsychologicalHoroscopeAdvanced({ advanced, patientId }: 
             </div>
             <div className="flex items-center gap-2">
               {profile.individuationKeys.length > 0 && !aiInterpretations['individuation']?.content && patientId && (
-                <button
+                <span
+                  role="button"
+                  tabIndex={0}
                   onClick={(e) => { e.stopPropagation(); generateInterpretation('individuation', profile.individuationKeys); }}
-                  className="p-1 hover:bg-purple-100 rounded text-purple-600"
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation(); generateInterpretation('individuation', profile.individuationKeys); } }}
+                  className="p-1 hover:bg-purple-100 rounded text-purple-600 cursor-pointer"
                   title="Generar interpretación AI"
                 >
                   <Sparkles className="w-4 h-4" />
-                </button>
+                </span>
               )}
               {expandedSections['individuation'] ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
             </div>
@@ -325,13 +338,16 @@ export default function PsychologicalHoroscopeAdvanced({ advanced, patientId }: 
             </div>
             <div className="flex items-center gap-2">
               {profile.sevenSinsArchetypes.length > 0 && !aiInterpretations['sins']?.content && patientId && (
-                <button
+                <span
+                  role="button"
+                  tabIndex={0}
                   onClick={(e) => { e.stopPropagation(); generateInterpretation('sins', profile.sevenSinsArchetypes); }}
-                  className="p-1 hover:bg-purple-100 rounded text-purple-600"
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation(); generateInterpretation('sins', profile.sevenSinsArchetypes); } }}
+                  className="p-1 hover:bg-purple-100 rounded text-purple-600 cursor-pointer"
                   title="Generar interpretación AI"
                 >
                   <Sparkles className="w-4 h-4" />
-                </button>
+                </span>
               )}
               {expandedSections['sins'] ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
             </div>

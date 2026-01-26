@@ -115,11 +115,11 @@ class LunarReturnEngine:
             zodiac_type=zodiac_type
         )
 
-        # Serialize chart to dictionary (NatalChart object is not JSON serializable)
+        # Serialize chart to dictionary (domain objects are not JSON serializable)
         chart_dict = {
-            'planets': return_chart.planets,
-            'houses': return_chart.houses,
-            'aspects': return_chart.aspects,
+            'planets': [p.to_dict() for p in return_chart.planets],
+            'houses': [h.to_dict() for h in return_chart.houses],
+            'aspects': [a.to_dict() for a in return_chart.aspects],
         }
 
         return {

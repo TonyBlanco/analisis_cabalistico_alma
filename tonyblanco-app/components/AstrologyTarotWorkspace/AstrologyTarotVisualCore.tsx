@@ -43,14 +43,16 @@ type SwmV3PayloadCard = {
   name: string;
   arcana?: string;
   tags?: string[];
-  symbols?: {
+  kabbalistic_details?: {
     hebrew_letter?: string | null;
     letter_name?: string | null;
     gematria?: number | null;
     path?: string | null;
     sefirot?: string[];
-    system?: string;
-    source?: string;
+    letter_meaning?: string | null;
+    intelligence?: string | null;
+    cube_of_space?: string | null;
+    tags?: string[];
     [key: string]: unknown;
   };
 };
@@ -197,7 +199,7 @@ export default function AstrologyTarotVisualCore({
   const lastSessionKey = useRef<string | null>(null);
 
   const activeSwmCard = swmPayload?.cards?.[0] ?? null;
-  const activeSymbols = activeSwmCard?.symbols ?? null;
+  const activeKabbalisticDetails = activeSwmCard?.kabbalistic_details ?? null;
   const structured = swmPayload?.symbolic_reading?.symbolic_reading ?? null;
   const structuredKeywords = swmPayload?.symbolic_reading?.card?.keywords ?? null;
 
@@ -801,29 +803,29 @@ export default function AstrologyTarotVisualCore({
                 </div>
                 <div>
                   <span className="font-medium">Letra hebrea:</span>{' '}
-                  <span>{activeSymbols?.hebrew_letter ?? '-'}</span>
+                  <span>{activeKabbalisticDetails?.hebrew_letter ?? '-'}</span>
                 </div>
                 <div>
                   <span className="font-medium">Nombre:</span>{' '}
-                  <span>{activeSymbols?.letter_name ?? '-'}</span>
+                  <span>{activeKabbalisticDetails?.letter_name ?? '-'}</span>
                 </div>
                 <div>
                   <span className="font-medium">Valor gemátrico:</span>{' '}
                   <span>
-                    {typeof activeSymbols?.gematria === 'number'
-                      ? String(activeSymbols.gematria)
+                    {typeof activeKabbalisticDetails?.gematria === 'number'
+                      ? String(activeKabbalisticDetails.gematria)
                       : '-'}
                   </span>
                 </div>
                 <div>
                   <span className="font-medium">Sendero:</span>{' '}
-                  <span>{activeSymbols?.path ?? '-'}</span>
+                  <span>{activeKabbalisticDetails?.path ?? '-'}</span>
                 </div>
                 <div>
                   <span className="font-medium">Sefirot relacionadas:</span>{' '}
                   <span>
-                    {Array.isArray(activeSymbols?.sefirot) && activeSymbols.sefirot.length
-                      ? activeSymbols.sefirot.join(' - ')
+                    {Array.isArray(activeKabbalisticDetails?.sefirot) && activeKabbalisticDetails.sefirot.length
+                      ? activeKabbalisticDetails.sefirot.join(' - ')
                       : '-'}
                   </span>
                 </div>

@@ -247,7 +247,7 @@ def generate_educational_reading(
                 "reversed": random.choice([True, False]) if i > 0 else False,  # First card upright
                 "position": position,
                 "kabbalistic": kabbalistic,
-                "symbols": symbols,  # Frontend-compatible symbols
+                "kabbalistic_details": symbols,  # Renamed from 'symbols' to avoid frontend conflict
                 "correspondences": correspondences,
                 "keywords": keywords,
                 "consciousness": card_data.get("consciousness", {}),

@@ -228,46 +228,56 @@ User (Django Auth)
 
 ## 🔄 **FUNCIONES DE CROSS-OVER (Cruce de Datos)**
 
-### **1. Tarot Terapéutico Cruzado** 🎴
+### **1. Tarot Holístico Evolutivo (Exploración Simbólica)** 🎴
 
-**Función**: Cruza el Arcano de Vida (calculado por fecha de nacimiento) con tests holísticos del consultante.
+**Función**: Cruza el Arcano de Vida (calculado por fecha de nacimiento) con contexto actual del consultante para exploración simbólica educativa (NO terapéutica).
 
-**Archivo**: `backend/api/utils/tarot_service.py`
+**Archivo**: `backend/api/utils/tarot_service.py` (legacy - en migración a multi-provider)
 
-**Función Principal**: `analyze_archetype_vs_clinical(patient, birth_date)`
+**Servicio Multi-Provider**: `backend/api/astrology_ai_service.py` (Groq → Ollama → Gemini)
 
-**Proceso de Cross-Over:**
+**Función Principal**: `analyze_archetype_holistic(consultant, birth_date)` (NO "analyze_archetype_vs_clinical")
+
+**Proceso de Exploración Simbólica:**
 ```python
 1. Calcula Arcano de Vida:
-   - Toma birth_date del Patient
+   - Toma birth_date del Consultant (NO "Patient")
    - Suma todos los dígitos: day + month + year
    - Reduce a 1-22 → Arcano (0-21)
 
-2. Busca Tests Holísticos:
-   - TestResult.objects.filter(patient=patient)
-   - O si no hay: TestResult.objects.filter(user=patient.user)
-   - Ordena por created_at DESC (más reciente primero)
+2. Recopila Contexto Holístico (opcional):
+   - Contexto actual del consultante
+   - Temas de interés o exploración
+   - NO usar terminología clínica ("síntomas", "diagnóstico")
 
-3. Toma el Test Más Reciente:
-   - Extrae: test_name, clinical_severity, score
-
-4. Genera Análisis con IA:
-   - TarotTherapeuticAI.analyze_archetype_vs_clinical()
-   - Input: Arcano + Test Holístico
+3. Genera Análisis Holístico con Multi-Provider IA:
+   - HolisticAI() desde astrology_ai_service.py
+   - Auto-selección: Groq (prioritario) → Ollama → Gemini
+   - Input: Arcano + Contexto Holístico
    - Output: 
-     * analisis_sombra (cómo el arquetipo agrava el síntoma)
-     * acciones_sanadoras (prescripciones terapéuticas)
+     * exploracion_simbolica (patrones arquetípicos)
+     * reflexiones_educativas (insights no clínicos)
      * mensaje_integrador (síntesis)
+     * provider_used (groq/ollama/gemini)
+     * holistic_disclaimer
 
-5. Guarda en CabalisticAnalysis:
+4. Guarda en CabalisticAnalysis:
    - analysis_type: 'tarot'
-   - input_data: { birth_date, patient_name }
-   - result_data: { arcana, test, análisis, acciones }
+   - input_data: { birth_date, consultant_name }
+   - result_data: { arcana, contexto, análisis, reflexiones, provider }
 ```
 
+**Terminología Correcta:**
+- "Consultante" (NO "paciente")
+- "Lectura simbólica" (NO "diagnóstico")
+- "Exploración holística" (NO "terapia")
+- "Reflexiones educativas" (NO "tratamiento" o "prescripciones")
+
 **Archivos Relacionados:**
-- `backend/api/utils/tarot_service.py` (lógica de cruce)
-- `backend/api/tarot_views.py` (API endpoint)
+- `backend/api/utils/tarot_service.py` (legacy - en proceso de migración)
+- `backend/api/astrology_ai_service.py` (multi-provider Groq/Ollama/Gemini - ACTUAL)
+- `backend/api/tarot_holistic_views.py` (nuevo - API endpoints holísticos)
+- `backend/swm/tarot/` (SWM v3 - arquitectura workspace)
 - `backend/api/cabalistic_views.py` (guardado)
 - `tonyblanco-app/app/therapist/patients/[id]/page.tsx` (visualización)
 

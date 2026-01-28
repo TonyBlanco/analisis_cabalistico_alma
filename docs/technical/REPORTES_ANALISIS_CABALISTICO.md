@@ -76,17 +76,17 @@ Documentación completa de los reportes de análisis cabalístico: cuáles está
 
 ---
 
-### 3. **Visualización de Tarot (Inline)** ⚠️
+### 3. **Visualización de Tarot Holístico (Inline)** ⚠️
 - **Componente**: Inline en página del consultante
 - **Ubicación**: `tonyblanco-app/app/therapist/patients/[id]/page.tsx`
-- **Método**: Tarot Terapéutico Cruzado
+- **Método**: Tarot Simbólico Holístico (NO terapéutico)
 - **Estado**: ⚠️ **Parcial - Falta Componente Dedicado**
 
 #### **Contenido Actual:**
 - ✅ Arcano de Vida (número, nombre, letra hebrea, sendero)
-- ✅ Test Holístico Cruzado (nombre, severidad, fecha)
-- ✅ Análisis de Sombra
-- ✅ Acciones Sanadoras (lista)
+- ✅ Exploración Simbólica (contexto holístico, fecha)
+- ✅ Análisis Evolutivo Simbólico
+- ✅ Reflexiones Educativas (lista)
 - ✅ Mensaje Integrador
 
 #### **Limitaciones:**
@@ -163,31 +163,36 @@ interface GematriaReportProps {
 
 ---
 
-### 6. **Reporte de Tarot Terapéutico** ❌
-- **Método**: Tarot Terapéutico Cruzado
+### 6. **Reporte de Tarot Holístico Evolutivo** ❌
+- **Método**: Tarot Simbólico Holístico (NO terapéutico)
 - **Prioridad**: 🔴 **Alta**
 - **Estado**: ❌ **No Implementado**
+- **Enfoque**: Educativo y exploratorio
 
 #### **Contenido Propuesto:**
-- [ ] Encabezado con información del consultante
+- [ ] Encabezado con información del consultante (NO "paciente")
+- [ ] Disclaimer holístico: "Interpretación educativa, NO clínica"
 - [ ] Sección 1: Arcano de Vida
   - Carta del Tarot (imagen)
   - Número, nombre, letra hebrea
   - Sendero en el Árbol de la Vida
-  - Significado terapéutico
-  - Meditación asociada
-- [ ] Sección 2: Diagnóstico Cruzado
-  - Test holístico utilizado
-  - Severidad y fecha
-  - Síntomas identificados
-- [ ] Sección 3: Análisis de Sombra
-  - Cómo el arquetipo contribuye al desequilibrio
-  - Fricción entre energía nativa y síntoma
-- [ ] Sección 4: Acciones Sanadoras
-  - Lista estructurada de prescripciones
-  - Elementos complementarios
-  - Prácticas recomendadas
+  - Significado simbólico holístico
+  - Meditación/reflexión asociada
+- [ ] Sección 2: Exploración Contextual Holística
+  - Contexto actual del consultante
+  - Temas simbólicos identificados
+- [ ] Sección 3: Análisis Evolutivo Simbólico
+  - Patrones arquetípicos y oportunidades de crecimiento
+  - Conexión entre energía nativa y situación actual
+- [ ] Sección 4: Reflexiones Educativas
+  - Lista estructurada de insights
+  - Elementos simbólicos complementarios
+  - Sugerencias de exploración personal
 - [ ] Sección 5: Mensaje Integrador
+- [ ] Sección 6: Metadata IA
+  - Provider usado (Groq/Ollama/Gemini)
+  - Modelo utilizado
+  - Fecha de generación
   - Síntesis del análisis
   - Guía para el terapeuta
 - [ ] Visualización del Árbol de la Vida

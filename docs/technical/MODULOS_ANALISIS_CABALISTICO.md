@@ -355,7 +355,7 @@ Identifica el Tikún (corrección) específico del alma del usuario:
 
 ### ✅ **Módulos Activos (4)**
 1. Gematria
-2. Tarot Terapéutico
+2. Tarot Holístico (NO terapéutico)
 3. Numerología Completa
 4. Astrología Cabalística
 
@@ -372,11 +372,11 @@ Identifica el Tikún (corrección) específico del alma del usuario:
 ```python
 ANALYSIS_TYPE_CHOICES = [
     ('gematria', 'Gematria'),
-    ('tarot', 'Tarot Terapéutico'),
+    ('tarot', 'Tarot Holístico'),  # NO "Terapéutico"
     ('soul-map', 'Mapa del Alma'),
     ('astrology', 'Carta Astral Cabalística'),
     ('tikun', 'Análisis de Tikún'),
-    ('numerology', 'Numerología Completa'),  # Agregado recientemente
+    ('numerology', 'Numerología Completa'),
 ]
 ```
 
@@ -417,27 +417,33 @@ ANALYSIS_TYPE_CHOICES = [
 
 ## 🎯 **Casos de Uso**
 
-### **Para Terapeutas:**
-1. **Diagnóstico Cruzado**: Usar Tarot + Tests Clínicos
+### **Para Profesionales Holísticos:**
+1. **Exploración Simbólica**: Usar Tarot + Contexto del consultante (NO "Tests Clínicos")
 2. **Análisis Profundo**: Numerología Completa para entender patrones
-3. **Gematría**: Analizar nombres, síntomas, palabras clave
+3. **Gematría**: Analizar nombres, temas, palabras clave
 4. **Astrología**: Carta natal con perspectiva cabalística
-5. **Historial**: Seguimiento de análisis a lo largo del tiempo
+5. **Historial**: Seguimiento de exploraciones a lo largo del tiempo
 
-### **Para Pacientes/Usuarios Personales:**
+### **Para Consultantes/Usuarios Personales:**
 1. **Autoconocimiento**: Numerología Completa
 2. **Exploración Espiritual**: Astrología Cabalística
 3. **Meditación**: Gematría de palabras sagradas
-4. **Guía**: Tarot del Alma para entender su sendero
+4. **Guía**: Tarot Holístico para entender su sendero
 
 ---
 
 ## 📝 **Notas Técnicas**
 
-1. **Integración con IA**: Todos los módulos activos usan Google Gemini para interpretaciones
-2. **Guardado Automático**: Los análisis se guardan en `CabalisticAnalysis` cuando se ejecutan desde la ficha del paciente
-3. **Modo Terapeuta vs Personal**: Algunos módulos tienen estilos diferentes según el contexto
-4. **Validación**: Todos los módulos validan datos de entrada (fechas, nombres, etc.)
+1. **Integración Multi-Provider IA**: 
+   - **Groq AI** (prioritario): `llama-3.3-70b-versatile`
+   - **Ollama** (local/Vercel): `llama3.2`
+   - **Gemini** (fallback): `gemini-2.5-flash`
+   - Auto-selección desde `astrology_ai_service.py`
+2. **Enfoque Holístico**: Todos los módulos usan lenguaje educativo NO clínico
+3. **Guardado Automático**: Los análisis se guardan en `CabalisticAnalysis` cuando se ejecutan desde la ficha del consultante
+4. **Modo Profesional vs Personal**: Algunos módulos tienen estilos diferentes según el contexto
+5. **Validación**: Todos los módulos validan datos de entrada (fechas, nombres, etc.)
+6. **Provider Tracking**: Todas las respuestas incluyen `provider_used` para auditoría
 5. **Exportación**: Algunos módulos permiten descargar JSON de resultados
 
 ---

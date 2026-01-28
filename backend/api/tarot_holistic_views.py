@@ -357,12 +357,19 @@ def get_numerology_message(karmic_number: int) -> str:
 
 # =============================================================================
 # MAPEO DE TODOS LOS TESTS → INTERPRETACIÓN HOLÍSTICA
+# 
+# IMPORTANTE: Los nombres holísticos provienen de /docs/audit_tests_catalog.md
+# Las sefirot provienen de /docs/HOLISTIC_CATEGORY_TAXONOMY.md
 # =============================================================================
 
 TEST_HOLISTIC_MAP = {
     # --- TESTS DE ANSIEDAD ---
     "gad-7": {
-        "categoria": "ansiedad",
+        "nombre_holistico": "Calm Alignment Gauge",  # public_name oficial
+        "nombre_exploracion": "Exploración de Activación y Contención",  # HOLISTIC_CATEGORY_TAXONOMY
+        "categoria": "mental",  # categoría holística oficial
+        "sefira_principal": "Netzach",
+        "sefirot_secundarias": ["Hod", "Yesod"],
         "chakra_principal": "Manipura + Anahata",
         "umbral_alto": 10,  # score >= 10 = ansiedad moderada-severa
         "interpretacion_alta": "Sistema nervioso en estado de alerta sostenida",
@@ -371,7 +378,11 @@ TEST_HOLISTIC_MAP = {
         "arcanos_relacionados": ["La Luna", "La Torre", "El Ermitaño"],
     },
     "bai": {
-        "categoria": "ansiedad",
+        "nombre_holistico": "Stillness Resonance Inventory",  # public_name oficial
+        "nombre_exploracion": "Exploración de Respuesta Energética al Entorno",
+        "categoria": "corporal",
+        "sefira_principal": "Yesod",
+        "sefirot_secundarias": ["Gevurah", "Hod"],
         "chakra_principal": "Manipura + Anahata",
         "umbral_alto": 16,
         "interpretacion_alta": "Cuerpo manifestando tensión emocional no procesada",
@@ -380,7 +391,11 @@ TEST_HOLISTIC_MAP = {
         "arcanos_relacionados": ["La Luna", "El Colgado"],
     },
     "anxiety-state-trait": {
-        "categoria": "ansiedad",
+        "nombre_holistico": "Ansiedad — Estado y rasgo",
+        "nombre_exploracion": "Exploración de Ansiedad - Estado/Rasgo",
+        "categoria": "emocional",
+        "sefira_principal": "Netzach",
+        "sefirot_secundarias": ["Tiferet"],
         "chakra_principal": "Manipura",
         "umbral_alto": 40,
         "interpretacion_alta": "Patrón de ansiedad integrado en la personalidad",
@@ -391,7 +406,11 @@ TEST_HOLISTIC_MAP = {
     
     # --- TESTS DE DEPRESIÓN ---
     "phq-9": {
-        "categoria": "depresion",
+        "nombre_holistico": "Pulse Resonance Mirror",  # public_name oficial
+        "nombre_exploracion": "Exploración de Vitalidad Emocional",
+        "categoria": "emocional",
+        "sefira_principal": "Tiferet",
+        "sefirot_secundarias": ["Gevurah", "Chesed"],
         "chakra_principal": "Manipura (Plexo Solar)",
         "umbral_alto": 10,
         "interpretacion_alta": "Fuego interior apagado, pérdida de vitalidad",
@@ -400,7 +419,11 @@ TEST_HOLISTIC_MAP = {
         "arcanos_relacionados": ["El Sol", "La Estrella", "La Fuerza"],
     },
     "bdi-ii": {
-        "categoria": "depresion",
+        "nombre_holistico": "Dawn Reflection Index",  # public_name oficial
+        "nombre_exploracion": "Exploración de Flujo de Voluntad y Sentido",
+        "categoria": "energia",
+        "sefira_principal": "Tiferet",
+        "sefirot_secundarias": ["Chesed", "Gevurah"],
         "chakra_principal": "Manipura",
         "umbral_alto": 14,
         "interpretacion_alta": "Energía vital deprimida, necesita reactivación",
@@ -411,7 +434,11 @@ TEST_HOLISTIC_MAP = {
     
     # --- TESTS DE TRAUMA ---
     "ptsd-check": {
-        "categoria": "trauma",
+        "nombre_holistico": "Exploración de Huellas del Alma",
+        "nombre_exploracion": "Exploración de Memorias Traumáticas",
+        "categoria": "memoria",
+        "sefira_principal": "Malkhut",
+        "sefirot_secundarias": ["Yesod", "Gevurah"],
         "chakra_principal": "Muladhara (Raíz)",
         "umbral_alto": 31,
         "interpretacion_alta": "Huellas de trauma no integradas en el sistema nervioso",
@@ -422,7 +449,11 @@ TEST_HOLISTIC_MAP = {
     
     # --- TESTS DE ALIMENTACIÓN ---
     "eat26_spirit": {
-        "categoria": "alimentacion",
+        "nombre_holistico": "Eternal Abundance Threshold (EAT-26-Spirit)",
+        "nombre_exploracion": "Exploración de Relación con el Sustento",
+        "categoria": "somatico",
+        "sefira_principal": "Malkhut",
+        "sefirot_secundarias": ["Yesod", "Netzach"],
         "chakra_principal": "Manipura + Svadhisthana",
         "umbral_alto": 20,
         "interpretacion_alta": "Relación conflictiva con el alimento y el placer",
@@ -431,7 +462,11 @@ TEST_HOLISTIC_MAP = {
         "arcanos_relacionados": ["La Emperatriz", "La Templanza", "La Luna"],
     },
     "eating-disorder": {
-        "categoria": "alimentacion",
+        "nombre_holistico": "Alimentación — Relación y hábitos",
+        "nombre_exploracion": "Exploración de Alimentación y Hábitos",
+        "categoria": "somatico",
+        "sefira_principal": "Malkhut",
+        "sefirot_secundarias": ["Yesod"],
         "chakra_principal": "Svadhisthana (Sacro)",
         "umbral_alto": 15,
         "interpretacion_alta": "Desconexión con las necesidades del cuerpo físico",
@@ -439,10 +474,27 @@ TEST_HOLISTIC_MAP = {
         "hierba": "Diente de león, alcachofa",
         "arcanos_relacionados": ["La Emperatriz", "La Luna"],
     },
+    "nutrition": {
+        "nombre_holistico": "Alimentación — Relación y hábitos",
+        "nombre_exploracion": "Exploración de Alimentación y Hábitos",
+        "categoria": "somatico",
+        "sefira_principal": "Malkhut",
+        "sefirot_secundarias": ["Yesod"],
+        "chakra_principal": "Svadhisthana",
+        "umbral_alto": 15,
+        "interpretacion_alta": "Oportunidad de mejorar la relación con la alimentación",
+        "sanacion": "Alimentación intuitiva, conexión cuerpo-mente",
+        "hierba": "Jengibre, menta, diente de león",
+        "arcanos_relacionados": ["La Emperatriz", "La Templanza"],
+    },
     
     # --- TESTS DE SUSTANCIAS ---
     "audit": {
-        "categoria": "sustancias",
+        "nombre_holistico": "Sephirotic Harmony Audit (SHA)",  # Basado en sha_harmony
+        "nombre_exploracion": "Exploración de Equilibrio de Pasiones",
+        "categoria": "emocional",
+        "sefira_principal": "Netzach",
+        "sefirot_secundarias": ["Hod", "Yesod"],
         "chakra_principal": "Muladhara + Svadhisthana",
         "umbral_alto": 8,
         "interpretacion_alta": "Búsqueda de escape o adormecimiento emocional",
@@ -450,8 +502,25 @@ TEST_HOLISTIC_MAP = {
         "hierba": "Kudzu, cardo mariano, NAC",
         "arcanos_relacionados": ["El Diablo", "La Torre", "El Ermitaño"],
     },
+    "sha_harmony": {
+        "nombre_holistico": "Sephirotic Harmony Audit (SHA)",
+        "nombre_exploracion": "Exploración de Equilibrio de Pasiones",
+        "categoria": "emocional",
+        "sefira_principal": "Netzach",
+        "sefirot_secundarias": ["Hod", "Yesod"],
+        "chakra_principal": "Svadhisthana",
+        "umbral_alto": 8,
+        "interpretacion_alta": "Patrón de uso como regulador emocional",
+        "sanacion": "Círculos de apoyo, reconexión espiritual",
+        "hierba": "Kudzu, cardo mariano",
+        "arcanos_relacionados": ["El Diablo", "La Torre", "La Templanza"],
+    },
     "dudit_spirit": {
-        "categoria": "sustancias",
+        "nombre_holistico": "Divine Unity Drug Introspection (DUDIT-Spirit)",
+        "nombre_exploracion": "Exploración de Interferencias Áuricas",
+        "categoria": "corporal",
+        "sefira_principal": "Hod",
+        "sefirot_secundarias": ["Yesod"],
         "chakra_principal": "Muladhara",
         "umbral_alto": 6,
         "interpretacion_alta": "Patrón de evasión ante el dolor emocional",
@@ -460,7 +529,11 @@ TEST_HOLISTIC_MAP = {
         "arcanos_relacionados": ["El Diablo", "La Luna", "El Ermitaño"],
     },
     "substance-use": {
-        "categoria": "sustancias",
+        "nombre_holistico": "Exploración de Patrones de Sustancias",
+        "nombre_exploracion": "Exploración de Uso de Sustancias",
+        "categoria": "corporal",
+        "sefira_principal": "Hod",
+        "sefirot_secundarias": ["Yesod", "Malkhut"],
         "chakra_principal": "Muladhara",
         "umbral_alto": 10,
         "interpretacion_alta": "Uso de sustancias como mecanismo de afrontamiento",
@@ -471,7 +544,11 @@ TEST_HOLISTIC_MAP = {
     
     # --- TESTS DE TOC ---
     "ocd-screen": {
-        "categoria": "obsesion",
+        "nombre_holistico": "Exploración de Patrones Repetitivos",
+        "nombre_exploracion": "Exploración de Rituales y Control",
+        "categoria": "regulacion",
+        "sefira_principal": "Gevurah",
+        "sefirot_secundarias": ["Hod", "Binah"],
         "chakra_principal": "Ajna (Tercer Ojo)",
         "umbral_alto": 12,
         "interpretacion_alta": "Mente atrapada en patrones repetitivos de control",
@@ -480,7 +557,11 @@ TEST_HOLISTIC_MAP = {
         "arcanos_relacionados": ["La Sacerdotisa", "El Ermitaño", "La Rueda"],
     },
     "ybocs_soul": {
-        "categoria": "obsesion",
+        "nombre_holistico": "Yetziratic Balance Sanctuary (Y-BOCS-Soul)",
+        "nombre_exploracion": "Exploración de Equilibrio y Purificación",
+        "categoria": "regulacion",
+        "sefira_principal": "Gevurah",
+        "sefirot_secundarias": ["Hod"],
         "chakra_principal": "Ajna",
         "umbral_alto": 16,
         "interpretacion_alta": "Pensamientos intrusivos dominando la conciencia",
@@ -491,7 +572,11 @@ TEST_HOLISTIC_MAP = {
     
     # --- TESTS DE SUEÑO ---
     "insomnia-index": {
-        "categoria": "sueno",
+        "nombre_holistico": "Exploración de Sueño y Descanso",
+        "nombre_exploracion": "Exploración de Sueño y Recuperación",
+        "categoria": "sueño",
+        "sefira_principal": "Yesod",
+        "sefirot_secundarias": ["Malkhut"],
         "chakra_principal": "Ajna + Sahasrara",
         "umbral_alto": 15,
         "interpretacion_alta": "Mente que no descansa, procesamiento nocturno",
@@ -500,7 +585,11 @@ TEST_HOLISTIC_MAP = {
         "arcanos_relacionados": ["La Luna", "La Estrella", "El Ermitaño"],
     },
     "insomnia": {
-        "categoria": "sueno",
+        "nombre_holistico": "Insomnia — Descanso y hábitos",
+        "nombre_exploracion": "Exploración de Sueño y Descanso",
+        "categoria": "sueño",
+        "sefira_principal": "Yesod",
+        "sefirot_secundarias": ["Malkhut"],
         "chakra_principal": "Ajna",
         "umbral_alto": 10,
         "interpretacion_alta": "Dificultad para soltar el control y rendirse al descanso",
@@ -511,7 +600,11 @@ TEST_HOLISTIC_MAP = {
     
     # --- TESTS DE TDAH ---
     "adhd-adult": {
-        "categoria": "atencion",
+        "nombre_holistico": "Exploración de Ritmo Arquetípico",
+        "nombre_exploracion": "Exploración de Atención y Enfoque",
+        "categoria": "mental",
+        "sefira_principal": "Tiferet",
+        "sefirot_secundarias": ["Malkhut", "Hod"],
         "chakra_principal": "Ajna + Manipura",
         "umbral_alto": 14,
         "interpretacion_alta": "Energía mental dispersa, dificultad para anclar",
@@ -520,7 +613,11 @@ TEST_HOLISTIC_MAP = {
         "arcanos_relacionados": ["El Mago", "El Loco", "La Rueda"],
     },
     "asrs_essence": {
-        "categoria": "atencion",
+        "nombre_holistico": "Archetypal Soul Rhythm Scale (ASRS-Essence)",
+        "nombre_exploracion": "Exploración de Ritmo del Alma",
+        "categoria": "mental",
+        "sefira_principal": "Tiferet",
+        "sefirot_secundarias": ["Malkhut"],
         "chakra_principal": "Ajna",
         "umbral_alto": 4,
         "interpretacion_alta": "Ritmo interno acelerado, mente en múltiples canales",
@@ -531,7 +628,11 @@ TEST_HOLISTIC_MAP = {
     
     # --- TESTS MULTIAXIALES ---
     "scl90": {
+        "nombre_holistico": "Soul Symmetry Lens",  # public_name oficial
+        "nombre_exploracion": "Mapa Global de Tensiones del Alma",
         "categoria": "multidimensional",
+        "sefira_principal": "Tiferet",
+        "sefirot_secundarias": ["Chesed", "Gevurah", "Netzach", "Hod"],
         "chakra_principal": "Múltiples",
         "umbral_alto": 1.5,  # GSI
         "interpretacion_alta": "Múltiples áreas del ser requieren atención",
@@ -540,7 +641,11 @@ TEST_HOLISTIC_MAP = {
         "arcanos_relacionados": ["El Mundo", "La Rueda", "El Juicio"],
     },
     "mcmi-iv": {
-        "categoria": "personalidad",
+        "nombre_holistico": "Multiaxial Cosmic Matrix (MCMI-4-Mystic)",
+        "nombre_exploracion": "Exploración de Matriz Cósmica Multiaxial",
+        "categoria": "multidimensional",
+        "sefira_principal": "Kether",
+        "sefirot_secundarias": ["Chokmah", "Binah"],
         "chakra_principal": "Múltiples",
         "umbral_alto": 75,  # BR score
         "interpretacion_alta": "Patrones de personalidad arraigados requieren trabajo",
@@ -548,8 +653,25 @@ TEST_HOLISTIC_MAP = {
         "hierba": "Reishi, ashwagandha",
         "arcanos_relacionados": ["El Ermitaño", "La Muerte", "El Juicio"],
     },
+    "mcmi4_mystic": {
+        "nombre_holistico": "Multiaxial Cosmic Matrix (MCMI-4-Mystic)",
+        "nombre_exploracion": "Exploración de Matriz Cósmica Multiaxial",
+        "categoria": "multidimensional",
+        "sefira_principal": "Kether",
+        "sefirot_secundarias": ["Chokmah", "Binah"],
+        "chakra_principal": "Múltiples",
+        "umbral_alto": 75,
+        "interpretacion_alta": "Mapa multiaxial de estilos de personalidad",
+        "sanacion": "Trabajo de profundización, correspondencias sefiróticas",
+        "hierba": "Reishi, ashwagandha, lion's mane",
+        "arcanos_relacionados": ["El Ermitaño", "La Muerte", "El Juicio"],
+    },
     "mcmi4-signal": {
-        "categoria": "personalidad",
+        "nombre_holistico": "Exploración de Señales de Personalidad",
+        "nombre_exploracion": "Exploración de Señales MCMI",
+        "categoria": "multidimensional",
+        "sefira_principal": "Tiferet",
+        "sefirot_secundarias": ["Da'at"],
         "chakra_principal": "Múltiples",
         "umbral_alto": 3,
         "interpretacion_alta": "Señales de patrones que merecen exploración profunda",
@@ -560,7 +682,11 @@ TEST_HOLISTIC_MAP = {
     
     # --- TESTS DE ESTRÉS ---
     "stress": {
-        "categoria": "estres",
+        "nombre_holistico": "Estrés — Carga y regulación",
+        "nombre_exploracion": "Exploración de Estrés y Regulación",
+        "categoria": "regulacion",
+        "sefira_principal": "Gevurah",
+        "sefirot_secundarias": ["Chesed"],
         "chakra_principal": "Manipura + Muladhara",
         "umbral_alto": 20,
         "interpretacion_alta": "Sistema sobrecargado, necesita descarga",
@@ -569,7 +695,11 @@ TEST_HOLISTIC_MAP = {
         "arcanos_relacionados": ["La Torre", "La Templanza", "El Ermitaño"],
     },
     "stress-regulation": {
-        "categoria": "estres",
+        "nombre_holistico": "Estrés — Carga y regulación",
+        "nombre_exploracion": "Exploración de Estrés y Regulación",
+        "categoria": "regulacion",
+        "sefira_principal": "Gevurah",
+        "sefirot_secundarias": ["Chesed", "Tiferet"],
         "chakra_principal": "Manipura",
         "umbral_alto": 15,
         "interpretacion_alta": "Capacidad de regulación comprometida",
@@ -580,7 +710,11 @@ TEST_HOLISTIC_MAP = {
     
     # --- TESTS HOLÍSTICOS/CABALÍSTICOS ---
     "basic-analysis": {
-        "categoria": "cabalistico",
+        "nombre_holistico": "Análisis Cabalístico Básico",
+        "nombre_exploracion": "Exploración del Mapa del Alma",
+        "categoria": "multidimensional",
+        "sefira_principal": "Kether",
+        "sefirot_secundarias": ["Chokmah", "Binah", "Tiferet"],
         "chakra_principal": "Sahasrara",
         "umbral_alto": None,  # No tiene umbral - es mapa natal
         "interpretacion_alta": "Mapa del alma disponible para integrar",
@@ -588,8 +722,25 @@ TEST_HOLISTIC_MAP = {
         "hierba": "Incienso, mirra, sándalo",
         "arcanos_relacionados": ["El Mago", "La Sacerdotisa", "El Mundo"],
     },
+    "past-lives": {
+        "nombre_holistico": "Vidas Pasadas – Exploración de Memorias del Alma",
+        "nombre_exploracion": "Exploración de Memorias del Alma",
+        "categoria": "memoria",
+        "sefira_principal": "Binah",
+        "sefirot_secundarias": ["Chokmah", "Da'at"],
+        "chakra_principal": "Sahasrara + Ajna",
+        "umbral_alto": None,  # Cualitativo
+        "interpretacion_alta": "Hilos narrativos de otras vidas emergiendo",
+        "sanacion": "Regresión consciente, journaling de sueños",
+        "hierba": "Mugwort, blue lotus, damiana",
+        "arcanos_relacionados": ["La Rueda", "El Juicio", "El Mundo"],
+    },
     "spiritual-path": {
-        "categoria": "espiritual",
+        "nombre_holistico": "Exploración del Camino Espiritual",
+        "nombre_exploracion": "Exploración del Sendero del Alma",
+        "categoria": "multidimensional",
+        "sefira_principal": "Kether",
+        "sefirot_secundarias": ["Tiferet"],
         "chakra_principal": "Sahasrara",
         "umbral_alto": None,
         "interpretacion_alta": "Camino espiritual revelado",
@@ -598,7 +749,11 @@ TEST_HOLISTIC_MAP = {
         "arcanos_relacionados": ["El Ermitaño", "La Estrella", "El Mundo"],
     },
     "belief-system": {
-        "categoria": "cognitivo",
+        "nombre_holistico": "Exploración de Sistema de Creencias",
+        "nombre_exploracion": "Exploración de Creencias Limitantes",
+        "categoria": "mental",
+        "sefira_principal": "Binah",
+        "sefirot_secundarias": ["Hod"],
         "chakra_principal": "Ajna",
         "umbral_alto": 30,
         "interpretacion_alta": "Creencias limitantes activas en el sistema",
@@ -607,7 +762,11 @@ TEST_HOLISTIC_MAP = {
         "arcanos_relacionados": ["El Mago", "La Sacerdotisa"],
     },
     "emotional-literacy": {
+        "nombre_holistico": "Exploración de Alfabetización Emocional",
+        "nombre_exploracion": "Exploración de Vocabulario Emocional",
         "categoria": "emocional",
+        "sefira_principal": "Tiferet",
+        "sefirot_secundarias": ["Netzach", "Chesed"],
         "chakra_principal": "Anahata",
         "umbral_alto": 25,  # bajo = poca alfabetización
         "interpretacion_alta": "Oportunidad de desarrollar vocabulario emocional",
@@ -616,7 +775,11 @@ TEST_HOLISTIC_MAP = {
         "arcanos_relacionados": ["Los Enamorados", "La Emperatriz"],
     },
     "attachment-style": {
-        "categoria": "vincular",
+        "nombre_holistico": "Exploración de Estilo de Apego",
+        "nombre_exploracion": "Exploración de Patrones Vinculares",
+        "categoria": "emocional",
+        "sefira_principal": "Chesed",
+        "sefirot_secundarias": ["Netzach", "Yesod"],
         "chakra_principal": "Anahata + Svadhisthana",
         "umbral_alto": None,  # Categórico
         "interpretacion_alta": "Patrón de apego identificado para trabajar",
@@ -625,13 +788,58 @@ TEST_HOLISTIC_MAP = {
         "arcanos_relacionados": ["Los Enamorados", "La Emperatriz", "La Luna"],
     },
     "somatic-awareness": {
-        "categoria": "somatico",
+        "nombre_holistico": "Exploración de Conciencia Somática",
+        "nombre_exploracion": "Exploración del Cuerpo como Sensor",
+        "categoria": "corporal",
+        "sefira_principal": "Malkhut",
+        "sefirot_secundarias": ["Yesod"],
         "chakra_principal": "Muladhara + Svadhisthana",
         "umbral_alto": 20,  # bajo = poca conciencia
         "interpretacion_alta": "Desconexión del cuerpo como sensor",
         "sanacion": "Body scan, yoga, danza consciente",
         "hierba": "Jengibre, canela",
         "arcanos_relacionados": ["La Fuerza", "El Mundo"],
+    },
+    
+    # --- TESTS GENERALES ---
+    "wellness": {
+        "nombre_holistico": "Wellness Assessment",
+        "nombre_exploracion": "Exploración de Bienestar Integral",
+        "categoria": "bienestar",
+        "sefira_principal": "Tiferet",
+        "sefirot_secundarias": ["Malkhut", "Yesod"],
+        "chakra_principal": "Anahata",
+        "umbral_alto": None,
+        "interpretacion_alta": "Panorama de bienestar disponible",
+        "sanacion": "Equilibrio en las áreas detectadas",
+        "hierba": "Adaptógenos generales",
+        "arcanos_relacionados": ["La Templanza", "La Estrella", "El Sol"],
+    },
+    "screening-general": {
+        "nombre_holistico": "Screening Psicologico General",
+        "nombre_exploracion": "Exploración de Tamizaje General",
+        "categoria": "tamizaje",
+        "sefira_principal": "Tiferet",
+        "sefirot_secundarias": ["Chesed", "Gevurah"],
+        "chakra_principal": "Múltiples",
+        "umbral_alto": None,
+        "interpretacion_alta": "Áreas prioritarias identificadas",
+        "sanacion": "Profundizar en las áreas señaladas",
+        "hierba": "Según área predominante",
+        "arcanos_relacionados": ["La Rueda", "El Juicio"],
+    },
+    "aq_kabbalah": {
+        "nombre_holistico": "Aura Quotient for Kabbalistic Alignment (AQ-K)",
+        "nombre_exploracion": "Exploración de Alineamiento Cabalístico del Aura",
+        "categoria": "multidimensional",
+        "sefira_principal": "Da'at",
+        "sefirot_secundarias": ["Kether", "Tiferet"],
+        "chakra_principal": "Sahasrara + Ajna",
+        "umbral_alto": None,  # Cuantitativo diferente
+        "interpretacion_alta": "Cociente áurico disponible para lectura",
+        "sanacion": "Meditación en el Árbol de la Vida",
+        "hierba": "Incienso, mirra, sándalo",
+        "arcanos_relacionados": ["El Mago", "La Sacerdotisa", "El Mundo"],
     },
 }
 
@@ -802,7 +1010,11 @@ def get_psychological_profile(user_id: int) -> Dict[str, Any]:
 
 
 def format_profile_for_prompt(profile: Dict[str, Any]) -> str:
-    """Formatea el perfil holístico completo para incluir en el prompt."""
+    """Formatea el perfil holístico completo para incluir en el prompt.
+    
+    Utiliza nomenclatura holística del sistema (Sefirot + chakras).
+    NUNCA incluye terminología clínica.
+    """
     if not profile.get("available"):
         return "No hay perfil previo disponible. Ofrece una interpretación general pero igualmente profunda y personalizada."
     
@@ -811,14 +1023,39 @@ def format_profile_for_prompt(profile: Dict[str, Any]) -> str:
     # Tests analizados
     tests_count = profile.get("tests_found", 0)
     if tests_count > 0:
-        parts.append(f"\n📊 **Tests analizados**: {tests_count} evaluaciones recientes")
+        parts.append(f"\n📊 **Exploraciones analizadas**: {tests_count} lecturas recientes")
     
     # Áreas de atención elevadas
     if profile.get("areas_atencion"):
         parts.append("\n⚠️ **Áreas que requieren atención**:")
         for area in profile["areas_atencion"][:3]:
-            parts.append(f"- **{area['categoria'].title()}** → Chakra: {area['chakra']}")
+            categoria = area['categoria'].title()
+            # Obtener info de sefirot si disponible
+            test_info = None
+            for key, info in TEST_HOLISTIC_MAP.items():
+                if info.get("categoria") == area['categoria']:
+                    test_info = info
+                    break
+            
+            sefira = test_info.get("sefira_principal", "") if test_info else ""
+            nombre_exploracion = test_info.get("nombre_exploracion", categoria) if test_info else categoria
+            
+            if sefira:
+                parts.append(f"- **{nombre_exploracion}** → Sefirá: {sefira} | Chakra: {area['chakra']}")
+            else:
+                parts.append(f"- **{nombre_exploracion}** → Chakra: {area['chakra']}")
             parts.append(f"  Interpretación: {area['interpretacion']}")
+    
+    # Sefirot prioritarias (extraer de áreas de atención)
+    sefirot_set = set()
+    for area in profile.get("areas_atencion", []):
+        for key, info in TEST_HOLISTIC_MAP.items():
+            if info.get("categoria") == area['categoria']:
+                sefirot_set.add(info.get("sefira_principal", ""))
+                break
+    sefirot = [s for s in sefirot_set if s][:3]
+    if sefirot:
+        parts.append(f"\n🌳 **Sefirot del Árbol de la Vida prioritarias**: {', '.join(sefirot)}")
     
     # Chakras a trabajar
     if profile.get("chakras_afectados"):
@@ -847,6 +1084,8 @@ def format_profile_for_prompt(profile: Dict[str, Any]) -> str:
             parts.append(f"- {dim.get('chakra', 'N/A')}: {dim.get('desequilibrio', 'N/A')}")
             if dim.get('sanacion'):
                 parts.append(f"  → Práctica: {dim['sanacion']}")
+    
+    return "\n".join(parts)
     
     return "\n".join(parts)
 

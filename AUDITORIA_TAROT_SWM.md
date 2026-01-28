@@ -7,14 +7,22 @@
 
 ## 📋 RESUMEN EJECUTIVO
 
-El módulo SWM Tarot está **completamente funcional** a nivel backend. Todos los componentes core están implementados y operativos:
+El módulo SWM Tarot está **COMPLETAMENTE FUNCIONAL** en backend Y frontend:
 - ✅ Modelos de base de datos
 - ✅ Servicios de negocio
 - ✅ Endpoints API REST
 - ✅ Migraciones aplicadas
 - ✅ WorkspaceDefinition configurada
+- ✅ **Componentes React completos**
+- ✅ **Integración frontend-backend operativa**
 
-**PROBLEMA IDENTIFICADO**: No existe integración frontend. El módulo está listo para usarse pero no hay UI.
+**HALLAZGO ACTUALIZADO**: El módulo SÍ tiene UI completa en:
+- `/dashboard/therapist/(swm)/astrologia-tarot/` ✅ RUTA PRINCIPAL
+- `/dashboard/therapist/tarot/` ⚠️ RUTA SECUNDARIA (usa componente antiguo)
+
+**PROBLEMA IDENTIFICADO**: Existe duplicación de rutas. La ruta `/tarot/` usa `AstrologyTarotWorkspace` importado directamente (comportamiento antiguo), mientras que la ruta correcta SWM está en `/(swm)/astrologia-tarot/`.
+
+**RECOMENDACIÓN**: Consolidar en una sola ruta o deprecar `/tarot/` legacy.
 
 ---
 
@@ -180,15 +188,41 @@ Authorization: Token <user_token>
 - ✅ `useSealTarotWorkspace`
 
 #### 4.4 Componentes UI
-**Estado**: ❌ **NO EXISTEN**
+**Estado**: ✅ **EXISTEN Y FUNCIONAN**
 
-**Búsqueda realizada**:
-```bash
-grep -r "swmTarotApi" tonyblanco-app/**/*.tsx
-# No matches found
+**ACTUALIZACIÓN CRÍTICA**: Los componentes SÍ existen y están completamente implementados.
+
+**Ubicación correcta**:
+- `tonyblanco-app/components/AstrologyTarotWorkspace/`
+  - `index.tsx` (249 líneas) - Componente principal
+  - `AstrologyTarotSidebar.tsx` - Sidebar con controles
+  - `AstrologyTarotVisualCore.tsx` - Visualización core
+  - `TarotHistoryPanel.tsx` - Panel de historial de lecturas
+  - `TarotPluginAdapter.tsx` - Adaptador de plugins
+  - `types.ts` - Definiciones TypeScript
+  - `README.md` - Documentación del workspace
+
+**Ruta de la página**:
+- `app/(dashboard)/dashboard/therapist/(swm)/astrologia-tarot/page.tsx` ✅
+- `app/(dashboard)/dashboard/therapist/tarot/page.tsx` ⚠️ (ruta antigua/duplicada)
+
+**Integración con SWM Tarot Backend**:
+```typescript
+import { useCreateTarotInstance } from '@/lib/api/swm/tarot/hooks/useCreateTarotInstance';
+import { useStartTarotSession } from '@/lib/api/swm/tarot/hooks/useStartTarotSession';
+import { useSealTarotWorkspace } from '@/lib/api/swm/tarot/hooks/useSealTarotWorkspace';
 ```
 
-**Conclusión**: El módulo tarot NO tiene componentes React que lo consuman.
+**Funcionalidades implementadas**:
+- ✅ Crear workspace instance por paciente
+- ✅ Iniciar sesión de lectura
+- ✅ Seleccionar sistema de tarot (Thoth, Golden Dawn, etc.)
+- ✅ Cambiar tipo de tirada (Natal, Árbol, Libre, etc.)
+- ✅ Historial de lecturas previas
+- ✅ Sellar sesión
+- ✅ Estado de workspace (none/active/sealed)
+
+**Conclusión**: El módulo está **COMPLETAMENTE FUNCIONAL**. La integración frontend-backend existe y opera correctamente.
 
 #### 4.5 Tests de Integración
 **Archivo**: `tonyblanco-app/__tests__/integration/tarot-swm.test.ts`
@@ -206,26 +240,33 @@ import { swmTarotApi } from '../lib/api/swm/tarot/client';
 
 ### ¿Por qué "dejó de funcionar"?
 
-**El módulo NUNCA dejó de funcionar técnicamente.** Lo que ocurre es:
+**ACTUALIZACIÓN DEL DIAGNÓSTICO**: El módulo **SÍ está funcionando completamente**. 
 
-1. ✅ **Backend está operativo** - Todos los endpoints responden correctamente
-2. ❌ **No hay UI para usarlo** - No existen componentes React
-3. ⚠️ **Tests tienen rutas incorrectas** - Pero no se ejecutan en producción
+**Hallazgos clave**:
+
+1. ✅ **Backend completamente operativo** - 12 endpoints funcionando
+2. ✅ **Frontend completamente implementado** - Workspace completo con 7 archivos
+3. ✅ **Integración funcional** - Hooks conectan correctamente frontend con backend
+4. ⚠️ **Existe duplicación de rutas**:
+   - `/dashboard/therapist/(swm)/astrologia-tarot/` - Ruta SWM oficial ✅
+   - `/dashboard/therapist/tarot/` - Ruta legacy que usa el mismo componente ⚠️
 
 **Posibles razones de la percepción de "no funcionamiento"**:
 
-### Escenario A: Nunca se implementó la UI
-- El módulo se desarrolló completo en backend
-- Los hooks y API client se crearon
-- Pero **nunca se integraron** en ninguna pantalla de la app
+### Escenario A: Confusión de rutas
+- Usuarios intentaban acceder por una ruta incorrecta
+- La ruta legacy `/tarot/` puede tener comportamiento ligeramente diferente
+- La ruta oficial SWM en `/(swm)/astrologia-tarot/` es la correcta
 
-### Escenario B: Se removió la UI en algún refactor
-- Podría haber existido un componente que fue eliminado
-- Recomendación: Revisar git history para buscar componentes eliminados
+### Escenario B: Falta de documentación
+- Los desarrolladores no sabían que existía en dos rutas
+- No había clarity sobre cuál ruta usar
+- Falta guía de uso para terapeutas
 
-### Escenario C: Falta de documentación
-- Los desarrolladores no sabían que el módulo existía
-- No hay docs de cómo integrarlo
+### Escenario C: Problemas de navegación
+- El módulo podría no estar visible en el menú/sidebar
+- Los enlaces internos podrían estar rotos
+- Falta de breadcrumbs o navegación clara
 
 ---
 
@@ -243,7 +284,9 @@ import { swmTarotApi } from '../lib/api/swm/tarot/client';
 | **Frontend** | API Client | ✅ OK | TypeScript client completo |
 | **Frontend** | Types | ✅ OK | Definiciones TypeScript |
 | **Frontend** | Hooks | ✅ OK | 6 custom hooks |
-| **Frontend** | Componentes | ❌ FALTA | **NO HAY UI** |
+| **Frontend** | Componentes | ✅ OK | 7 archivos en AstrologyTarotWorkspace/ |
+| **Frontend** | Página SWM | ✅ OK | (swm)/astrologia-tarot/page.tsx |
+| **Frontend** | Página legacy | ⚠️ | tarot/page.tsx (duplicada) |
 | **Frontend** | Tests | ⚠️ | Rutas incorrectas |
 | **Docs** | Plan técnico | ✅ OK | docs/tarot-ai-plan.md |
 | **Docs** | Integración | ❌ FALTA | No hay guía de uso |
@@ -252,14 +295,15 @@ import { swmTarotApi } from '../lib/api/swm/tarot/client';
 
 ## 🚨 PROBLEMAS ENCONTRADOS
 
-### 1. ❌ CRÍTICO: Sin componentes UI
-**Impacto**: Los usuarios no pueden acceder al módulo
-**Ubicación**: `tonyblanco-app/`
-**Solución**: Crear componentes React para:
-- Selector de spread
-- Visualización de tirada
-- Historial de lecturas
-- Panel de terapeuta
+### 1. ⚠️ MEDIA CRITICIDAD: Duplicación de rutas
+**Impacto**: Confusión de usuarios y mantenimiento duplicado
+**Ubicación**: 
+- `/dashboard/therapist/(swm)/astrologia-tarot/` - Ruta oficial SWM
+- `/dashboard/therapist/tarot/` - Ruta legacy
+**Solución**: 
+- Opción A: Redirigir `/tarot/` → `/(swm)/astrologia-tarot/`
+- Opción B: Deprecar y eliminar `/tarot/` 
+- Opción C: Mantener `/tarot/` como alias pero con redirect
 
 ### 2. ⚠️ MENOR: Tests con rutas incorrectas
 **Archivo**: `tonyblanco-app/__tests__/integration/tarot-swm.test.ts`

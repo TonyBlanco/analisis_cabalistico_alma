@@ -355,93 +355,498 @@ def get_numerology_message(karmic_number: int) -> str:
     return messages.get(karmic_number, messages.get(reduce_to_single_digit(karmic_number), ""))
 
 
-def get_psychological_profile(user_id: int) -> Dict[str, Any]:
+# =============================================================================
+# MAPEO DE TODOS LOS TESTS → INTERPRETACIÓN HOLÍSTICA
+# =============================================================================
+
+TEST_HOLISTIC_MAP = {
+    # --- TESTS DE ANSIEDAD ---
+    "gad-7": {
+        "categoria": "ansiedad",
+        "chakra_principal": "Manipura + Anahata",
+        "umbral_alto": 10,  # score >= 10 = ansiedad moderada-severa
+        "interpretacion_alta": "Sistema nervioso en estado de alerta sostenida",
+        "sanacion": "Respiración diafragmática, grounding con la tierra",
+        "hierba": "Manzanilla, valeriana, pasiflora",
+        "arcanos_relacionados": ["La Luna", "La Torre", "El Ermitaño"],
+    },
+    "bai": {
+        "categoria": "ansiedad",
+        "chakra_principal": "Manipura + Anahata",
+        "umbral_alto": 16,
+        "interpretacion_alta": "Cuerpo manifestando tensión emocional no procesada",
+        "sanacion": "Body scan, yoga restaurativo, baños de sal",
+        "hierba": "Lavanda, melisa, ashwagandha",
+        "arcanos_relacionados": ["La Luna", "El Colgado"],
+    },
+    "anxiety-state-trait": {
+        "categoria": "ansiedad",
+        "chakra_principal": "Manipura",
+        "umbral_alto": 40,
+        "interpretacion_alta": "Patrón de ansiedad integrado en la personalidad",
+        "sanacion": "Terapia somática, meditación diaria, journaling",
+        "hierba": "Kava, rhodiola, hierba de San Juan",
+        "arcanos_relacionados": ["La Torre", "La Rueda de la Fortuna"],
+    },
+    
+    # --- TESTS DE DEPRESIÓN ---
+    "phq-9": {
+        "categoria": "depresion",
+        "chakra_principal": "Manipura (Plexo Solar)",
+        "umbral_alto": 10,
+        "interpretacion_alta": "Fuego interior apagado, pérdida de vitalidad",
+        "sanacion": "Luz solar matutina, movimiento suave, conexión social",
+        "hierba": "Hierba de San Juan, azafrán, rhodiola",
+        "arcanos_relacionados": ["El Sol", "La Estrella", "La Fuerza"],
+    },
+    "bdi-ii": {
+        "categoria": "depresion",
+        "chakra_principal": "Manipura",
+        "umbral_alto": 14,
+        "interpretacion_alta": "Energía vital deprimida, necesita reactivación",
+        "sanacion": "Exposición al sol, ejercicio aeróbico, nutrición",
+        "hierba": "Ginkgo, cúrcuma, omega-3",
+        "arcanos_relacionados": ["El Sol", "El Mundo", "La Templanza"],
+    },
+    
+    # --- TESTS DE TRAUMA ---
+    "ptsd-check": {
+        "categoria": "trauma",
+        "chakra_principal": "Muladhara (Raíz)",
+        "umbral_alto": 31,
+        "interpretacion_alta": "Huellas de trauma no integradas en el sistema nervioso",
+        "sanacion": "EMDR, terapia somática, trabajo con el cuerpo",
+        "hierba": "Valeriana, CBD, ashwagandha",
+        "arcanos_relacionados": ["La Torre", "La Muerte", "El Juicio"],
+    },
+    
+    # --- TESTS DE ALIMENTACIÓN ---
+    "eat26_spirit": {
+        "categoria": "alimentacion",
+        "chakra_principal": "Manipura + Svadhisthana",
+        "umbral_alto": 20,
+        "interpretacion_alta": "Relación conflictiva con el alimento y el placer",
+        "sanacion": "Alimentación consciente, reconexión con el placer",
+        "hierba": "Jengibre, menta, hinojo",
+        "arcanos_relacionados": ["La Emperatriz", "La Templanza", "La Luna"],
+    },
+    "eating-disorder": {
+        "categoria": "alimentacion",
+        "chakra_principal": "Svadhisthana (Sacro)",
+        "umbral_alto": 15,
+        "interpretacion_alta": "Desconexión con las necesidades del cuerpo físico",
+        "sanacion": "Mindful eating, trabajo con imagen corporal",
+        "hierba": "Diente de león, alcachofa",
+        "arcanos_relacionados": ["La Emperatriz", "La Luna"],
+    },
+    
+    # --- TESTS DE SUSTANCIAS ---
+    "audit": {
+        "categoria": "sustancias",
+        "chakra_principal": "Muladhara + Svadhisthana",
+        "umbral_alto": 8,
+        "interpretacion_alta": "Búsqueda de escape o adormecimiento emocional",
+        "sanacion": "Trabajo de sombra, círculos de apoyo, reconexión con el cuerpo",
+        "hierba": "Kudzu, cardo mariano, NAC",
+        "arcanos_relacionados": ["El Diablo", "La Torre", "El Ermitaño"],
+    },
+    "dudit_spirit": {
+        "categoria": "sustancias",
+        "chakra_principal": "Muladhara",
+        "umbral_alto": 6,
+        "interpretacion_alta": "Patrón de evasión ante el dolor emocional",
+        "sanacion": "Grupos de apoyo, trabajo con el vacío interno",
+        "hierba": "Ashwagandha, rhodiola",
+        "arcanos_relacionados": ["El Diablo", "La Luna", "El Ermitaño"],
+    },
+    "substance-use": {
+        "categoria": "sustancias",
+        "chakra_principal": "Muladhara",
+        "umbral_alto": 10,
+        "interpretacion_alta": "Uso de sustancias como mecanismo de afrontamiento",
+        "sanacion": "Terapia de grupo, reconexión espiritual",
+        "hierba": "Cardo mariano, diente de león",
+        "arcanos_relacionados": ["El Diablo", "La Torre"],
+    },
+    
+    # --- TESTS DE TOC ---
+    "ocd-screen": {
+        "categoria": "obsesion",
+        "chakra_principal": "Ajna (Tercer Ojo)",
+        "umbral_alto": 12,
+        "interpretacion_alta": "Mente atrapada en patrones repetitivos de control",
+        "sanacion": "Meditación de aceptación, exposición gradual",
+        "hierba": "Lavanda, valeriana, inositol",
+        "arcanos_relacionados": ["La Sacerdotisa", "El Ermitaño", "La Rueda"],
+    },
+    "ybocs_soul": {
+        "categoria": "obsesion",
+        "chakra_principal": "Ajna",
+        "umbral_alto": 16,
+        "interpretacion_alta": "Pensamientos intrusivos dominando la conciencia",
+        "sanacion": "ACT (Terapia de Aceptación), mindfulness",
+        "hierba": "Pasiflora, NAC, magnesio",
+        "arcanos_relacionados": ["La Sacerdotisa", "La Rueda de la Fortuna"],
+    },
+    
+    # --- TESTS DE SUEÑO ---
+    "insomnia-index": {
+        "categoria": "sueno",
+        "chakra_principal": "Ajna + Sahasrara",
+        "umbral_alto": 15,
+        "interpretacion_alta": "Mente que no descansa, procesamiento nocturno",
+        "sanacion": "Higiene del sueño, rutina nocturna, meditación",
+        "hierba": "Valeriana, melatonina, lúpulo",
+        "arcanos_relacionados": ["La Luna", "La Estrella", "El Ermitaño"],
+    },
+    "insomnia": {
+        "categoria": "sueno",
+        "chakra_principal": "Ajna",
+        "umbral_alto": 10,
+        "interpretacion_alta": "Dificultad para soltar el control y rendirse al descanso",
+        "sanacion": "Yoga nidra, reducción de pantallas",
+        "hierba": "Manzanilla, lavanda, CBD",
+        "arcanos_relacionados": ["La Luna", "La Estrella"],
+    },
+    
+    # --- TESTS DE TDAH ---
+    "adhd-adult": {
+        "categoria": "atencion",
+        "chakra_principal": "Ajna + Manipura",
+        "umbral_alto": 14,
+        "interpretacion_alta": "Energía mental dispersa, dificultad para anclar",
+        "sanacion": "Técnicas de focus, ambiente estructurado, ejercicio",
+        "hierba": "Ginkgo, bacopa, Lion's mane",
+        "arcanos_relacionados": ["El Mago", "El Loco", "La Rueda"],
+    },
+    "asrs_essence": {
+        "categoria": "atencion",
+        "chakra_principal": "Ajna",
+        "umbral_alto": 4,
+        "interpretacion_alta": "Ritmo interno acelerado, mente en múltiples canales",
+        "sanacion": "Mindfulness, pomodoro, movimiento físico",
+        "hierba": "L-teanina, rhodiola",
+        "arcanos_relacionados": ["El Mago", "El Loco"],
+    },
+    
+    # --- TESTS MULTIAXIALES ---
+    "scl90": {
+        "categoria": "multidimensional",
+        "chakra_principal": "Múltiples",
+        "umbral_alto": 1.5,  # GSI
+        "interpretacion_alta": "Múltiples áreas del ser requieren atención",
+        "sanacion": "Evaluación integral, priorizar área más urgente",
+        "hierba": "Adaptógenos: ashwagandha, rhodiola, reishi",
+        "arcanos_relacionados": ["El Mundo", "La Rueda", "El Juicio"],
+    },
+    "mcmi-iv": {
+        "categoria": "personalidad",
+        "chakra_principal": "Múltiples",
+        "umbral_alto": 75,  # BR score
+        "interpretacion_alta": "Patrones de personalidad arraigados requieren trabajo",
+        "sanacion": "Terapia profunda, trabajo de sombra, autoconocimiento",
+        "hierba": "Reishi, ashwagandha",
+        "arcanos_relacionados": ["El Ermitaño", "La Muerte", "El Juicio"],
+    },
+    "mcmi4-signal": {
+        "categoria": "personalidad",
+        "chakra_principal": "Múltiples",
+        "umbral_alto": 3,
+        "interpretacion_alta": "Señales de patrones que merecen exploración profunda",
+        "sanacion": "Autoindagación, trabajo terapéutico",
+        "hierba": "Adaptógenos generales",
+        "arcanos_relacionados": ["El Ermitaño", "El Colgado"],
+    },
+    
+    # --- TESTS DE ESTRÉS ---
+    "stress": {
+        "categoria": "estres",
+        "chakra_principal": "Manipura + Muladhara",
+        "umbral_alto": 20,
+        "interpretacion_alta": "Sistema sobrecargado, necesita descarga",
+        "sanacion": "Técnicas de relajación, límites, naturaleza",
+        "hierba": "Ashwagandha, rhodiola, reishi",
+        "arcanos_relacionados": ["La Torre", "La Templanza", "El Ermitaño"],
+    },
+    "stress-regulation": {
+        "categoria": "estres",
+        "chakra_principal": "Manipura",
+        "umbral_alto": 15,
+        "interpretacion_alta": "Capacidad de regulación comprometida",
+        "sanacion": "Coherencia cardíaca, HRV training",
+        "hierba": "Magnesio, L-teanina, GABA",
+        "arcanos_relacionados": ["La Templanza", "La Fuerza"],
+    },
+    
+    # --- TESTS HOLÍSTICOS/CABALÍSTICOS ---
+    "basic-analysis": {
+        "categoria": "cabalistico",
+        "chakra_principal": "Sahasrara",
+        "umbral_alto": None,  # No tiene umbral - es mapa natal
+        "interpretacion_alta": "Mapa del alma disponible para integrar",
+        "sanacion": "Meditación en los números personales",
+        "hierba": "Incienso, mirra, sándalo",
+        "arcanos_relacionados": ["El Mago", "La Sacerdotisa", "El Mundo"],
+    },
+    "spiritual-path": {
+        "categoria": "espiritual",
+        "chakra_principal": "Sahasrara",
+        "umbral_alto": None,
+        "interpretacion_alta": "Camino espiritual revelado",
+        "sanacion": "Práctica contemplativa según tradición afín",
+        "hierba": "Frankincienso, salvia blanca",
+        "arcanos_relacionados": ["El Ermitaño", "La Estrella", "El Mundo"],
+    },
+    "belief-system": {
+        "categoria": "cognitivo",
+        "chakra_principal": "Ajna",
+        "umbral_alto": 30,
+        "interpretacion_alta": "Creencias limitantes activas en el sistema",
+        "sanacion": "Reestructuración cognitiva, afirmaciones",
+        "hierba": "Gotu kola, brahmi",
+        "arcanos_relacionados": ["El Mago", "La Sacerdotisa"],
+    },
+    "emotional-literacy": {
+        "categoria": "emocional",
+        "chakra_principal": "Anahata",
+        "umbral_alto": 25,  # bajo = poca alfabetización
+        "interpretacion_alta": "Oportunidad de desarrollar vocabulario emocional",
+        "sanacion": "Journaling emocional, terapia expresiva",
+        "hierba": "Rosa, espino blanco",
+        "arcanos_relacionados": ["Los Enamorados", "La Emperatriz"],
+    },
+    "attachment-style": {
+        "categoria": "vincular",
+        "chakra_principal": "Anahata + Svadhisthana",
+        "umbral_alto": None,  # Categórico
+        "interpretacion_alta": "Patrón de apego identificado para trabajar",
+        "sanacion": "Terapia relacional, trabajo con el niño interior",
+        "hierba": "Rosa, cacao ceremonial",
+        "arcanos_relacionados": ["Los Enamorados", "La Emperatriz", "La Luna"],
+    },
+    "somatic-awareness": {
+        "categoria": "somatico",
+        "chakra_principal": "Muladhara + Svadhisthana",
+        "umbral_alto": 20,  # bajo = poca conciencia
+        "interpretacion_alta": "Desconexión del cuerpo como sensor",
+        "sanacion": "Body scan, yoga, danza consciente",
+        "hierba": "Jengibre, canela",
+        "arcanos_relacionados": ["La Fuerza", "El Mundo"],
+    },
+}
+
+
+def get_holistic_profile(user_id: int) -> Dict[str, Any]:
     """
-    Obtiene el perfil psicológico del consultante basado en sus tests SCL-90.
-    Retorna un diccionario con dimensiones elevadas y chakras afectados.
+    Obtiene el perfil holístico COMPLETO del consultante basado en TODOS sus tests.
+    Integra múltiples fuentes de información para una lectura profunda.
     """
     try:
         from .test_models import TestResult
         
-        # Buscar el último SCL-90 del usuario
-        scl_results = TestResult.objects.filter(
+        # Buscar TODOS los tests del usuario (últimos 30 días o los 10 más recientes)
+        from datetime import timedelta
+        from django.utils import timezone
+        
+        cutoff_date = timezone.now() - timedelta(days=90)
+        
+        all_tests = TestResult.objects.filter(
             user_id=user_id,
-            test_id__icontains='scl'
-        ).order_by('-created_at').first()
+            created_at__gte=cutoff_date
+        ).order_by('-created_at')[:15]  # Máximo 15 tests recientes
         
-        if not scl_results:
-            # Buscar cualquier test reciente
-            any_test = TestResult.objects.filter(
-                user_id=user_id
-            ).order_by('-created_at').first()
-            
-            if any_test and any_test.result_data:
-                return {
-                    "available": True,
-                    "source": any_test.test_id or "test_general",
-                    "summary": f"Test reciente: {any_test.test_id}",
-                    "elevated_dimensions": [],
-                    "chakras_affected": [],
-                    "birth_date": any_test.client_birth_date,
-                }
-            
-            return {"available": False, "summary": "Sin perfil disponible - interpretación general"}
+        if not all_tests.exists():
+            return {
+                "available": False, 
+                "summary": "Sin tests realizados - interpretación general",
+                "tests_found": 0,
+            }
         
-        # Parsear resultados del SCL-90
-        result_data = scl_results.result_data or {}
-        elevated = []
-        chakras = []
-        
-        # Buscar dimensiones elevadas (score > 1.5 en escala 0-4)
-        for dimension, chakra_info in SCL90_CHAKRA_MAP.items():
-            score = result_data.get(dimension, result_data.get(f"score_{dimension}", 0))
-            if isinstance(score, (int, float)) and score > 1.5:
-                elevated.append({
-                    "dimension": dimension,
-                    "score": score,
-                    "chakra": chakra_info["chakra"],
-                    "desequilibrio": chakra_info["desequilibrio"],
-                    "sanacion": chakra_info["sanacion"],
-                    "hierba": chakra_info["hierba"],
-                })
-                if chakra_info["chakra"] not in chakras:
-                    chakras.append(chakra_info["chakra"])
-        
-        # Construir resumen para el prompt
-        if elevated:
-            summary_parts = [f"**{e['dimension'].replace('_', ' ').title()}** elevada → {e['chakra']}" for e in elevated[:3]]
-            summary = "Áreas de atención: " + " | ".join(summary_parts)
-        else:
-            summary = "Perfil equilibrado - sin áreas críticas detectadas"
-        
-        return {
+        # Estructuras para acumular información
+        profile = {
             "available": True,
-            "source": "SCL-90",
-            "summary": summary,
-            "elevated_dimensions": elevated,
-            "chakras_affected": chakras,
-            "birth_date": scl_results.client_birth_date,
-            "raw_data": result_data,
+            "tests_found": all_tests.count(),
+            "tests_analyzed": [],
+            "areas_atencion": [],
+            "chakras_afectados": [],
+            "practicas_recomendadas": [],
+            "hierbas_sugeridas": [],
+            "arcanos_resonantes": [],
+            "birth_date": None,
+            "summary": "",
         }
         
+        chakras_set = set()
+        arcanos_set = set()
+        hierbas_set = set()
+        practicas_set = set()
+        
+        for test_result in all_tests:
+            test_id = test_result.test_id or ""
+            test_module = test_result.test_module
+            
+            # Buscar el código del test
+            test_code = test_id.lower().replace("-", "_").replace(" ", "_")
+            if test_module:
+                test_code = test_module.code.lower().replace("-", "_")
+            
+            # Buscar en nuestro mapa holístico
+            test_info = None
+            for key, info in TEST_HOLISTIC_MAP.items():
+                if key.replace("-", "_") in test_code or test_code in key.replace("-", "_"):
+                    test_info = info
+                    break
+            
+            if not test_info:
+                continue  # Test no mapeado
+            
+            # Extraer score del test
+            score = test_result.score
+            if score is None and test_result.result_data:
+                # Intentar extraer score de result_data
+                score = (
+                    test_result.result_data.get('total') or
+                    test_result.result_data.get('score') or
+                    test_result.result_data.get('total_score') or
+                    test_result.result_data.get('GSI')  # Para SCL-90
+                )
+            
+            # Determinar si está elevado
+            umbral = test_info.get("umbral_alto")
+            is_elevated = False
+            if umbral is not None and score is not None:
+                try:
+                    is_elevated = float(score) >= float(umbral)
+                except:
+                    pass
+            
+            # Registrar el test analizado
+            profile["tests_analyzed"].append({
+                "test_id": test_id or (test_module.code if test_module else "unknown"),
+                "categoria": test_info["categoria"],
+                "score": score,
+                "elevated": is_elevated,
+                "date": test_result.created_at.isoformat() if test_result.created_at else None,
+            })
+            
+            # Si está elevado, agregar a áreas de atención
+            if is_elevated:
+                profile["areas_atencion"].append({
+                    "categoria": test_info["categoria"],
+                    "chakra": test_info["chakra_principal"],
+                    "interpretacion": test_info["interpretacion_alta"],
+                    "sanacion": test_info["sanacion"],
+                    "score": score,
+                })
+                
+                chakras_set.add(test_info["chakra_principal"])
+                practicas_set.add(test_info["sanacion"])
+                hierbas_set.add(test_info["hierba"])
+                for arcano in test_info.get("arcanos_relacionados", []):
+                    arcanos_set.add(arcano)
+            
+            # Capturar fecha de nacimiento si existe
+            if not profile["birth_date"] and test_result.client_birth_date:
+                profile["birth_date"] = test_result.client_birth_date
+        
+        # Consolidar sets en listas
+        profile["chakras_afectados"] = list(chakras_set)[:4]
+        profile["arcanos_resonantes"] = list(arcanos_set)[:6]
+        profile["hierbas_sugeridas"] = list(hierbas_set)[:4]
+        profile["practicas_recomendadas"] = list(practicas_set)[:4]
+        
+        # Construir resumen
+        if profile["areas_atencion"]:
+            areas = [a["categoria"].title() for a in profile["areas_atencion"][:3]]
+            chakras = profile["chakras_afectados"][:2]
+            profile["summary"] = (
+                f"Áreas de atención detectadas: {', '.join(areas)}. "
+                f"Chakras prioritarios: {', '.join(chakras)}."
+            )
+        else:
+            profile["summary"] = (
+                f"Se analizaron {len(profile['tests_analyzed'])} tests. "
+                "Perfil en equilibrio general - sin alertas críticas."
+            )
+        
+        return profile
+        
     except Exception as e:
-        logger.warning(f"Error obteniendo perfil psicológico: {e}")
-        return {"available": False, "summary": "Sin perfil disponible - interpretación general"}
+        logger.warning(f"Error obteniendo perfil holístico: {e}")
+        return {"available": False, "summary": "Error al obtener perfil - interpretación general"}
+
+
+def get_psychological_profile(user_id: int) -> Dict[str, Any]:
+    """
+    Wrapper para compatibilidad - ahora usa get_holistic_profile.
+    Obtiene el perfil completo del consultante basado en TODOS sus tests.
+    """
+    profile = get_holistic_profile(user_id)
+    
+    # Adaptar formato para compatibilidad con código existente
+    if profile.get("available"):
+        elevated_dimensions = []
+        for area in profile.get("areas_atencion", []):
+            elevated_dimensions.append({
+                "dimension": area["categoria"],
+                "score": area.get("score"),
+                "chakra": area["chakra"],
+                "desequilibrio": area["interpretacion"],
+                "sanacion": area["sanacion"],
+                "hierba": ", ".join(profile.get("hierbas_sugeridas", [])[:2]),
+            })
+        
+        profile["elevated_dimensions"] = elevated_dimensions
+    
+    return profile
 
 
 def format_profile_for_prompt(profile: Dict[str, Any]) -> str:
-    """Formatea el perfil psicológico para incluir en el prompt."""
+    """Formatea el perfil holístico completo para incluir en el prompt."""
     if not profile.get("available"):
         return "No hay perfil previo disponible. Ofrece una interpretación general pero igualmente profunda y personalizada."
     
-    parts = [profile["summary"]]
+    parts = [profile.get("summary", "Perfil disponible")]
     
-    if profile.get("elevated_dimensions"):
-        parts.append("\n**Chakras a priorizar:**")
-        for dim in profile["elevated_dimensions"][:2]:  # Máximo 2 para no saturar
-            parts.append(f"- {dim['chakra']}: {dim['desequilibrio']}")
-            parts.append(f"  → Práctica recomendada: {dim['sanacion']}")
-            parts.append(f"  → Hierba aliada: {dim['hierba']}")
+    # Tests analizados
+    tests_count = profile.get("tests_found", 0)
+    if tests_count > 0:
+        parts.append(f"\n📊 **Tests analizados**: {tests_count} evaluaciones recientes")
+    
+    # Áreas de atención elevadas
+    if profile.get("areas_atencion"):
+        parts.append("\n⚠️ **Áreas que requieren atención**:")
+        for area in profile["areas_atencion"][:3]:
+            parts.append(f"- **{area['categoria'].title()}** → Chakra: {area['chakra']}")
+            parts.append(f"  Interpretación: {area['interpretacion']}")
+    
+    # Chakras a trabajar
+    if profile.get("chakras_afectados"):
+        chakras = profile["chakras_afectados"][:3]
+        parts.append(f"\n🔴 **Chakras prioritarios**: {', '.join(chakras)}")
+    
+    # Prácticas recomendadas
+    if profile.get("practicas_recomendadas"):
+        practicas = profile["practicas_recomendadas"][:2]
+        parts.append(f"\n✨ **Prácticas sugeridas**: {'; '.join(practicas)}")
+    
+    # Hierbas aliadas
+    if profile.get("hierbas_sugeridas"):
+        hierbas = profile["hierbas_sugeridas"][:2]
+        parts.append(f"\n🌿 **Hierbas aliadas**: {', '.join(hierbas)}")
+    
+    # Arcanos que resuenan con el perfil
+    if profile.get("arcanos_resonantes"):
+        arcanos = profile["arcanos_resonantes"][:4]
+        parts.append(f"\n🃏 **Arcanos resonantes con el perfil**: {', '.join(arcanos)}")
+    
+    # Compatibilidad con formato antiguo (elevated_dimensions)
+    elif profile.get("elevated_dimensions"):
+        parts.append("\n**Dimensiones elevadas:**")
+        for dim in profile["elevated_dimensions"][:2]:
+            parts.append(f"- {dim.get('chakra', 'N/A')}: {dim.get('desequilibrio', 'N/A')}")
+            if dim.get('sanacion'):
+                parts.append(f"  → Práctica: {dim['sanacion']}")
     
     return "\n".join(parts)
 

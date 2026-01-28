@@ -60,10 +60,8 @@ INSTALLED_APPS = [
     'swm.cabala',       # SWM Cábala Aplicada (Tree of Life Workspace)
     'swm.transgenerational',  # SWM Transgeneracional Profundo (Psychogenealogy Workspace)
     'api.inquiry',            # Active Inquiry Engine (Patient context collection)
-    # The `symbolic` package is not a Python package in this repo (it's JS/TS).
-    # Comment out invalid references so Django can start locally.
-    # 'symbolic.72_angels',  # SWM 72 Ángeles Engine
-    # 'symbolic.swm_v3',  # SWM v3 governed symbolic readings (Phase 3)
+    # Symbolic systems (Python implementations)
+    'symbolic.swm_v3',  # SWM v3 governed symbolic readings (Phase 3)
 ]
 
 MIDDLEWARE = [

@@ -348,6 +348,13 @@ export default function AstrologySidebar({
       )}
 
       <div className="flex-1 px-3 py-3 space-y-4 overflow-y-auto">
+        {patientId && (
+          <AdvancedTechniquesSidebarSection
+            patientId={patientId}
+            hasNatalChart={hasNatalChart}
+          />
+        )}
+
         {/* Tipo de Carta */}
         <div className="pt-2 border-t border-gray-100">
           <label className="block text-xs font-semibold text-gray-600 mb-2">Tipo de Carta</label>
@@ -912,14 +919,6 @@ export default function AstrologySidebar({
         Visualización profesional del consultante con datos reales. Próximas fases activarán cálculos avanzados.
       </div>
 
-      {/* Técnicas Avanzadas (API Calls) */}
-      {patientId && (
-        <AdvancedTechniquesSidebarSection
-          patientId={patientId}
-          hasNatalChart={hasNatalChart}
-        />
-      )}
-
       {/* Recalcular control (UI only triggers modal in parent) */}
       <div className="px-4 py-3 border-t border-gray-200">
         <button
@@ -964,6 +963,7 @@ function AdvancedTechniquesSidebarSection({
   hasNatalChart: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const [showGuide, setShowGuide] = useState(false);
   const [results, setResults] = useState<Record<TechniqueKey, TechniqueState>>({
     transits: { loading: false, error: null, data: null },
     progressions: { loading: false, error: null, data: null },
@@ -1038,14 +1038,35 @@ function AdvancedTechniquesSidebarSection({
 
   return (
     <div className="border-t border-gray-200">
-      <button
-        type="button"
+      <div
+        role="button"
+        tabIndex={0}
         onClick={() => setExpanded(!expanded)}
-        className="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-gray-50"
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            setExpanded(!expanded);
+          }
+        }}
+        className="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-gray-50 cursor-pointer"
+        aria-expanded={expanded}
       >
         <span className="text-sm font-medium text-gray-900">🚀 Técnicas Avanzadas (API)</span>
-        {expanded ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />}
-      </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowGuide(true);
+            }}
+            className="p-1 rounded-full hover:bg-gray-200 text-gray-500"
+            title="Cómo usar"
+          >
+            <HelpCircle className="w-4 h-4" />
+          </button>
+          {expanded ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />}
+        </div>
+      </div>
 
       {expanded && (
         <div className="px-4 pb-4 space-y-2">
@@ -1083,9 +1104,9 @@ function AdvancedTechniquesSidebarSection({
             })}
           </div>
 
-          {/* Results Display */}
+          {/* Results Display - Professional Format */}
           {activeResult && results[activeResult].data && (
-            <div className="mt-3 p-2 bg-gray-50 rounded-md border border-gray-200 max-h-48 overflow-auto">
+            <div className="mt-3 p-2 bg-gray-50 rounded-md border border-gray-200 max-h-64 overflow-auto">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-medium text-gray-700">
                   {ADVANCED_TECHNIQUES.find(t => t.key === activeResult)?.name}
@@ -1098,10 +1119,10 @@ function AdvancedTechniquesSidebarSection({
                   <X className="w-3 h-3" />
                 </button>
               </div>
-              <pre className="text-[10px] text-gray-600 whitespace-pre-wrap">
-                {JSON.stringify(results[activeResult].data, null, 2).slice(0, 500)}
-                {JSON.stringify(results[activeResult].data, null, 2).length > 500 && '...'}
-              </pre>
+              <TechniqueResultDisplay 
+                techniqueKey={activeResult} 
+                data={results[activeResult].data} 
+              />
             </div>
           )}
 
@@ -1116,6 +1137,344 @@ function AdvancedTechniquesSidebarSection({
             );
           })}
         </div>
+      )}
+
+      {showGuide && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-md rounded-lg bg-white p-4 shadow-xl">
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-semibold text-gray-900">Guía rápida — Técnicas Avanzadas</h4>
+              <button
+                type="button"
+                onClick={() => setShowGuide(false)}
+                className="text-gray-400 hover:text-gray-600"
+                title="Cerrar"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="mt-3 space-y-2 text-[12px] text-gray-700">
+              <p>Antes de usar estas técnicas:</p>
+              <ul className="list-disc pl-4 space-y-1">
+                <li>Debe existir una <strong>carta natal calculada</strong>.</li>
+                <li>Completa <strong>fecha, hora y coordenadas</strong> del consultante.</li>
+                <li>Si aparece error, pulsa <strong>Recalcular carta</strong> y vuelve a intentar.</li>
+                <li>Algunas técnicas usan la hora exacta de nacimiento.</li>
+              </ul>
+              <p className="text-[11px] text-gray-500">
+                Los cálculos son reales (Swiss Ephemeris) y se muestran en formato profesional.
+              </p>
+            </div>
+            <div className="mt-4 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setShowGuide(false)}
+                className="rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700"
+              >
+                Entendido
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// =====================================
+// Technique Result Display Component
+// =====================================
+
+const SIGN_SYMBOLS: Record<string, string> = {
+  aries: '♈', taurus: '♉', gemini: '♊', cancer: '♋', leo: '♌', virgo: '♍',
+  libra: '♎', scorpio: '♏', sagittarius: '♐', capricorn: '♑', aquarius: '♒', pisces: '♓'
+};
+
+const PLANET_SYMBOLS: Record<string, string> = {
+  sun: '☉', moon: '☽', mercury: '☿', venus: '♀', mars: '♂', 
+  jupiter: '♃', saturn: '♄', uranus: '♅', neptune: '♆', pluto: '♇',
+  north_node: '☊', south_node: '☋', chiron: '⚷'
+};
+
+const PLANET_NAMES_ES: Record<string, string> = {
+  sun: 'Sol', moon: 'Luna', mercury: 'Mercurio', venus: 'Venus', mars: 'Marte',
+  jupiter: 'Júpiter', saturn: 'Saturno', uranus: 'Urano', neptune: 'Neptuno', pluto: 'Plutón',
+  north_node: 'Nodo N', south_node: 'Nodo S', chiron: 'Quirón', asc: 'ASC', mc: 'MC'
+};
+
+function formatDegree(deg: number): string {
+  const d = Math.floor(deg % 30);
+  const m = Math.floor((deg % 1) * 60);
+  return `${d}°${m.toString().padStart(2, '0')}'`;
+}
+
+function getSignSymbol(sign: string): string {
+  return SIGN_SYMBOLS[sign?.toLowerCase()] || sign?.slice(0, 3) || '?';
+}
+
+function TechniqueResultDisplay({ techniqueKey, data }: { techniqueKey: TechniqueKey; data: any }) {
+  switch (techniqueKey) {
+    case 'progressions':
+      return <ProgressionsDisplay data={data} />;
+    case 'transits':
+      return <TransitsDisplay data={data} />;
+    case 'solarReturn':
+      return <SolarReturnDisplay data={data} />;
+    case 'harmonics':
+      return <HarmonicsDisplay data={data} />;
+    case 'fixedStars':
+      return <FixedStarsDisplay data={data} />;
+    case 'arabicParts':
+      return <ArabicPartsDisplay data={data} />;
+    default:
+      return <pre className="text-[10px]">{JSON.stringify(data, null, 2)}</pre>;
+  }
+}
+
+function ProgressionsDisplay({ data }: { data: any }) {
+  const planets = data?.progressed_planets || data?.planets || {};
+  const entries = Object.entries(planets);
+  
+  if (entries.length === 0) {
+    return <p className="text-[10px] text-gray-500">Sin datos de progresiones</p>;
+  }
+
+  return (
+    <div className="space-y-1">
+      <p className="text-[10px] text-gray-500 mb-1">
+        Fecha: {data?.target_date || data?.progressed_date || '—'}
+      </p>
+      <table className="w-full text-[10px]">
+        <thead>
+          <tr className="text-gray-500 border-b">
+            <th className="text-left py-1">Planeta</th>
+            <th className="text-center">Signo</th>
+            <th className="text-right">Grado</th>
+          </tr>
+        </thead>
+        <tbody>
+          {entries.slice(0, 10).map(([planet, info]: [string, any]) => (
+            <tr key={planet} className="border-b border-gray-100">
+              <td className="py-1">
+                <span className="mr-1">{PLANET_SYMBOLS[planet] || ''}</span>
+                {PLANET_NAMES_ES[planet] || planet}
+              </td>
+              <td className="text-center">
+                {getSignSymbol(info?.progressed_sign || info?.sign)}
+              </td>
+              <td className="text-right font-mono">
+                {formatDegree(info?.progressed_degree || info?.progressed_longitude || info?.longitude || 0)}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {data?.total_motion && (
+        <p className="text-[9px] text-gray-400 mt-1">
+          Movimiento total: {data.total_motion.toFixed(2)}°
+        </p>
+      )}
+    </div>
+  );
+}
+
+function TransitsDisplay({ data }: { data: any }) {
+  const transitPayload = data?.transits || data || {};
+  const transits = transitPayload?.transit_planets || transitPayload?.planets || {};
+  const aspects = transitPayload?.transit_aspects || transitPayload?.aspects || [];
+  const entries = Object.entries(transits);
+
+  return (
+    <div className="space-y-2">
+      <p className="text-[10px] text-gray-500">
+        {transitPayload?.target_date || data?.target_date || data?.transit_date || data?.date || new Date().toLocaleDateString()}
+      </p>
+      
+      {entries.length > 0 && (
+        <table className="w-full text-[10px]">
+          <thead>
+            <tr className="text-gray-500 border-b">
+              <th className="text-left py-1">Tránsito</th>
+              <th className="text-center">Signo</th>
+              <th className="text-right">Grado</th>
+            </tr>
+          </thead>
+          <tbody>
+            {entries.slice(0, 8).map(([planet, info]: [string, any]) => (
+              <tr key={planet} className="border-b border-gray-100">
+                <td className="py-1">
+                  <span className="mr-1">{PLANET_SYMBOLS[planet] || ''}</span>
+                  {PLANET_NAMES_ES[planet] || planet}
+                </td>
+                <td className="text-center">{getSignSymbol(info?.sign)}</td>
+                <td className="text-right font-mono">
+                  {formatDegree(info?.longitude || 0)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+
+      {aspects.length > 0 && (
+        <div className="mt-2">
+          <p className="text-[10px] font-medium text-gray-600 mb-1">Aspectos activos:</p>
+          <div className="space-y-0.5">
+            {aspects.slice(0, 5).map((asp: any, i: number) => (
+              <div key={i} className="text-[9px] text-gray-600">
+                {PLANET_NAMES_ES[asp.transit_planet] || asp.transit_planet} {asp.aspect_type || asp.type} {PLANET_NAMES_ES[asp.natal_planet] || asp.natal_planet}
+                <span className="text-gray-400 ml-1">({asp.orb?.toFixed(1) || '?'}°)</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SolarReturnDisplay({ data }: { data: any }) {
+  const srPayload = data?.solar_return || data || {};
+  const planets = srPayload?.chart?.planets || data?.planets || data?.solar_return_planets || [];
+  const entries = Array.isArray(planets) ? planets : Object.entries(planets);
+
+  return (
+    <div className="space-y-1">
+      <div className="text-[10px] text-gray-500 mb-1">
+        <p>Retorno Solar {srPayload?.target_year || data?.target_year || data?.year || data?.return_year || '—'}</p>
+        <p className="text-[9px]">{srPayload?.return_datetime || data?.return_datetime || data?.exact_time || '—'}</p>
+      </div>
+      
+      {entries.length > 0 ? (
+        <table className="w-full text-[10px]">
+          <thead>
+            <tr className="text-gray-500 border-b">
+              <th className="text-left py-1">Planeta</th>
+              <th className="text-center">Signo</th>
+              <th className="text-right">Casa</th>
+            </tr>
+          </thead>
+          <tbody>
+            {entries.slice(0, 10).map((entry: any) => {
+              const planet = Array.isArray(entry) ? entry[0] : entry?.planet_name || entry?.name;
+              const info = Array.isArray(entry) ? entry[1] : entry;
+              return (
+                <tr key={planet || info?.planet_name || Math.random()} className="border-b border-gray-100">
+                  <td className="py-1">
+                    <span className="mr-1">{PLANET_SYMBOLS[planet] || ''}</span>
+                    {PLANET_NAMES_ES[planet] || planet}
+                  </td>
+                  <td className="text-center">{getSignSymbol(info?.sign)}</td>
+                  <td className="text-right">{info?.house || '—'}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      ) : (
+        <p className="text-[10px] text-gray-500">Sin datos de planetas</p>
+      )}
+    </div>
+  );
+}
+
+function HarmonicsDisplay({ data }: { data: any }) {
+  const harmonics = data?.harmonics || {};
+  const entries = Object.entries(harmonics);
+
+  if (entries.length === 0) {
+    return <p className="text-[10px] text-gray-500">Sin datos armónicos</p>;
+  }
+
+  return (
+    <div className="space-y-2">
+      {entries.map(([harmonic, hData]: [string, any]) => (
+        <div key={harmonic} className="border-b border-gray-200 pb-2">
+          <p className="text-[10px] font-medium text-indigo-700 mb-1">
+            Armónico {harmonic} (H{harmonic})
+          </p>
+          <div className="grid grid-cols-2 gap-1 text-[9px]">
+            {Object.entries(hData?.planets || {}).slice(0, 6).map(([planet, info]: [string, any]) => (
+              <div key={planet} className="flex justify-between">
+                <span>{PLANET_SYMBOLS[planet] || ''} {PLANET_NAMES_ES[planet]?.slice(0, 3) || planet}</span>
+                <span className="font-mono">{getSignSymbol(info?.sign)} {formatDegree(info?.longitude || 0)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function FixedStarsDisplay({ data }: { data: any }) {
+  const conjunctions = data?.conjunctions || data?.star_conjunctions || [];
+
+  if (conjunctions.length === 0) {
+    return <p className="text-[10px] text-gray-500">Sin conjunciones con estrellas fijas (orbe 1°)</p>;
+  }
+
+  return (
+    <div className="space-y-1">
+      <p className="text-[10px] text-gray-500 mb-1">
+        {conjunctions.length} conjunción{conjunctions.length !== 1 ? 'es' : ''} encontrada{conjunctions.length !== 1 ? 's' : ''}
+      </p>
+      <div className="space-y-1">
+        {conjunctions.slice(0, 8).map((conj: any, i: number) => (
+          <div key={i} className="flex items-start gap-2 text-[10px] border-b border-gray-100 pb-1">
+            <span className="text-yellow-600">⭐</span>
+            <div>
+              <p className="font-medium text-gray-700">{conj.star_name || conj.star}</p>
+              <p className="text-[9px] text-gray-500">
+                {PLANET_SYMBOLS[conj.planet] || ''} {PLANET_NAMES_ES[conj.planet] || conj.planet}
+                <span className="ml-1">orbe: {conj.orb?.toFixed(2) || '?'}°</span>
+              </p>
+              {conj.nature && (
+                <p className="text-[9px] text-gray-400 italic">{conj.nature}</p>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ArabicPartsDisplay({ data }: { data: any }) {
+  const parts = data?.parts || data?.arabic_parts || {};
+  const entries = Object.entries(parts);
+
+  if (entries.length === 0) {
+    return <p className="text-[10px] text-gray-500">Sin partes árabes calculadas</p>;
+  }
+
+  return (
+    <div className="space-y-1">
+      <p className="text-[10px] text-gray-500 mb-1">{entries.length} partes calculadas</p>
+      <table className="w-full text-[10px]">
+        <thead>
+          <tr className="text-gray-500 border-b">
+            <th className="text-left py-1">Parte</th>
+            <th className="text-center">Signo</th>
+            <th className="text-right">Grado</th>
+          </tr>
+        </thead>
+        <tbody>
+          {entries.slice(0, 10).map(([name, info]: [string, any]) => (
+            <tr key={name} className="border-b border-gray-100">
+              <td className="py-1 truncate max-w-[80px]" title={name}>
+                {name.replace(/_/g, ' ').replace(/part of /i, '')}
+              </td>
+              <td className="text-center">{getSignSymbol(info?.sign)}</td>
+              <td className="text-right font-mono">
+                {formatDegree(info?.longitude || info?.degree || 0)}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {entries.length > 10 && (
+        <p className="text-[9px] text-gray-400">+{entries.length - 10} más...</p>
       )}
     </div>
   );

@@ -21,7 +21,7 @@ La precesión avanza las estrellas ~50.3"/año = ~1° cada 72 años.
 Este módulo calcula la posición actual con corrección de precesión.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from decimal import Decimal
 from typing import Dict, List, Optional, Tuple
 
@@ -561,8 +561,14 @@ class FixedStarsEngine:
                 - interpretation: Overall fixed stars interpretation
         """
         # Calculate years since J2000.0 for precession
+        # Normalize timezone (avoid naive/aware datetime subtraction)
+        if birth_datetime.tzinfo is not None and birth_datetime.tzinfo.utcoffset(birth_datetime) is not None:
+            birth_dt = birth_datetime.astimezone(timezone.utc).replace(tzinfo=None)
+        else:
+            birth_dt = birth_datetime
+
         j2000_date = datetime(2000, 1, 1, 12, 0, 0)
-        delta_years = (birth_datetime - j2000_date).days / 365.25
+        delta_years = (birth_dt - j2000_date).days / 365.25
 
         # Apply precession to all stars
         stars_with_current_position = []
@@ -662,12 +668,16 @@ class FixedStarsEngine:
         """
         if target_date is None:
             target_date = datetime.now()
+        if target_date.tzinfo is not None and target_date.tzinfo.utcoffset(target_date) is not None:
+            target_dt = target_date.astimezone(timezone.utc).replace(tzinfo=None)
+        else:
+            target_dt = target_date
 
         for star in FIXED_STARS_CATALOG:
             if star['name'].lower() == star_name.lower():
                 # Calculate precession
                 j2000_date = datetime(2000, 1, 1, 12, 0, 0)
-                delta_years = (target_date - j2000_date).days / 365.25
+                delta_years = (target_dt - j2000_date).days / 365.25
                 current_longitude = star['longitude_j2000'] + (PRECESSION_RATE * delta_years)
                 current_longitude = current_longitude % 360
 

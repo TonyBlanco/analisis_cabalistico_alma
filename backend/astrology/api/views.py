@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from django.core.exceptions import ObjectDoesNotExist
-from datetime import datetime
+from datetime import datetime, time
 
 from api.models import Patient
 from ..services.chart_service import ChartService
@@ -726,12 +726,10 @@ class TransitsView(APIView):
                     'longitude': float(planet.longitude)
                 })
             
-            natal_houses = []
-            for house in natal_chart.houses:
-                natal_houses.append({
-                    'number': house.house_number,
-                    'cusp_longitude': float(house.cusp_longitude)
-                })
+            natal_houses = [
+                {'number': h.house_number, 'cusp_longitude': float(getattr(h, 'cusp_longitude', h.longitude))}
+                for h in natal_chart.houses
+            ]
             
             # Calculate transits
             transits_engine = TransitsEngine()
@@ -846,12 +844,10 @@ class ProgressionsView(APIView):
                     'longitude': float(planet.longitude)
                 })
             
-            natal_houses = []
-            for house in natal_chart.houses:
-                natal_houses.append({
-                    'number': house.house_number,
-                    'cusp_longitude': float(house.cusp_longitude)
-                })
+            natal_houses = [
+                {'number': h.house_number, 'cusp_longitude': float(getattr(h, 'cusp_longitude', h.longitude))}
+                for h in natal_chart.houses
+            ]
             
             # Calculate progressions
             progressions_engine = ProgressionsEngine()
@@ -1132,7 +1128,7 @@ class SynastryView(APIView):
                 for p in natal_chart.planets
             ]
             person1_houses = [
-                {'number': h.house_number, 'cusp_longitude': float(h.cusp_longitude)}
+                {'number': h.house_number, 'cusp_longitude': float(getattr(h, 'cusp_longitude', h.longitude))}
                 for h in natal_chart.houses
             ]
             
@@ -1141,7 +1137,7 @@ class SynastryView(APIView):
                 for p in person2_chart.planets
             ]
             person2_houses = [
-                {'number': h.house_number, 'cusp_longitude': float(h.cusp_longitude)}
+                {'number': h.house_number, 'cusp_longitude': float(getattr(h, 'cusp_longitude', h.longitude))}
                 for h in person2_chart.houses
             ]
             
@@ -1553,18 +1549,66 @@ class ArabicPartsView(APIView):
             natal_houses = [
                 {
                     'house': h.house_number,
-                    'cusp_longitude': float(h.cusp_longitude)
+                    'cusp_longitude': float(getattr(h, 'cusp_longitude', h.longitude))
                 }
                 for h in natal_chart.houses
             ]
 
             # Get key positions
-            sun_planet = next((p for p in natal_planets if p['planet_name'].lower() == 'sun'), None)
-            moon_planet = next((p for p in natal_planets if p['planet_name'].lower() == 'moon'), None)
+            def _norm_planet_name(val: str) -> str:
+                return (val or '').strip().lower()
+
+            def _find_planet(planets, names):
+                for p in planets:
+                    name = _norm_planet_name(p.get('planet_name') or p.get('name'))
+                    if name in names:
+                        return p
+                return None
+
+            sun_planet = _find_planet(natal_planets, {'sun', 'sol'})
+            moon_planet = _find_planet(natal_planets, {'moon', 'luna'})
+
+            # Fallback: recalculate chart if Sun/Moon missing
+            if (not sun_planet or not moon_planet) and patient.birth_date and patient.birth_latitude is not None and patient.birth_longitude is not None:
+                birth_time = patient.birth_time or time(12, 0)
+                birth_dt = datetime.combine(patient.birth_date, birth_time)
+                house_system = natal_chart.house_system or 'P'
+                if len(str(house_system)) > 1:
+                    house_system_map = {
+                        'placidus': 'P', 'koch': 'K', 'equal': 'E',
+                        'whole_sign': 'W', 'campanus': 'C', 'regiomontanus': 'R',
+                    }
+                    house_system = house_system_map.get(str(house_system).lower(), 'P')
+                natal_chart = chart_service.get_or_create_natal_chart(
+                    patient_id=patient_id,
+                    birth_datetime=birth_dt,
+                    latitude=patient.birth_latitude,
+                    longitude=patient.birth_longitude,
+                    timezone=patient.birth_timezone or 'UTC',
+                    house_system=house_system,
+                    zodiac_type=natal_chart.zodiac_type,
+                )
+                natal_planets = [
+                    {
+                        'planet_name': p.planet_name,
+                        'longitude': float(p.longitude),
+                        'sign': p.sign
+                    }
+                    for p in natal_chart.planets
+                ]
+                natal_houses = [
+                    {
+                        'house': h.house_number,
+                        'cusp_longitude': float(getattr(h, 'cusp_longitude', h.longitude))
+                    }
+                    for h in natal_chart.houses
+                ]
+                sun_planet = _find_planet(natal_planets, {'sun', 'sol'})
+                moon_planet = _find_planet(natal_planets, {'moon', 'luna'})
 
             if not sun_planet or not moon_planet:
                 return Response(
-                    {"error": "Sun and Moon positions required for Arabic Parts"},
+                    {"error": "Sun and Moon positions required for Arabic Parts. Recalculate natal chart and verify birth time/coordinates."},
                     status=status.HTTP_400_BAD_REQUEST
                 )
 

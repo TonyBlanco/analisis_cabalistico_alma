@@ -237,6 +237,15 @@ OLLAMA_MODEL = config('OLLAMA_MODEL', default='llama3.2')
 # AI Provider Priority: gemini, groq, ollama (first available with API key wins)
 AI_PROVIDER = config('AI_PROVIDER', default='auto')  # auto, gemini, groq, ollama
 
+# =============================================================================
+# FEATURE FLAGS - AI MODULES
+# =============================================================================
+
+# Tarot Holístico AI - Interpretaciones simbólicas educativas (NO clínicas)
+# Habilita los endpoints /api/ai/tarot/* para interpretaciones holísticas
+# Default: False (activar cuando el sistema esté listo para producción)
+AI_TAROT_ENABLED = config('AI_TAROT_ENABLED', default=True, cast=bool)
+
 # Astrology Kerykeion - AI snippets (therapist in-session guidance)
 # When enabled, the backend may generate short AI-written (non-verbatim) summaries
 # for curated Sefaria references.

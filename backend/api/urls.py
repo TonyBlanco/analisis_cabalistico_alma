@@ -95,6 +95,13 @@ from .assignments import (
 )
 from .gematria_views import GematriaInterpretationView
 from .tarot_views import TarotAnalysisView, TarotCabalisticCorrespondenceView
+from .tarot_holistic_views import (
+    TarotHolisticSchemaView,
+    TarotHolisticProviderStatusView,
+    TarotInterpretCardView,
+    TarotInterpretSpreadView,
+    TarotHolisticConsentCheckView,
+)
 from .cabalistic_views import (
     SaveCabalisticAnalysisView,
     ListCabalisticAnalysesView,
@@ -269,6 +276,14 @@ urlpatterns = [
     # Astrology AI Interpretation Management
     path('astrology/interpretations/', AstrologyAIInterpretationListView.as_view(), name='astrology_interpretations_list'),
     path('astrology/interpretations/<int:interpretation_id>/', AstrologyAIInterpretationDetailView.as_view(), name='astrology_interpretation_detail'),
+    
+    # ========== TAROT HOLÍSTICO AI (Multi-Provider) ==========
+    # Endpoints de interpretación simbólica educativa (NO clínica)
+    path('ai/tarot/schema/', TarotHolisticSchemaView.as_view(), name='tarot_holistic_schema'),
+    path('ai/tarot/provider-status/', TarotHolisticProviderStatusView.as_view(), name='tarot_holistic_provider_status'),
+    path('ai/tarot/interpretCard/', TarotInterpretCardView.as_view(), name='tarot_interpret_card'),
+    path('ai/tarot/interpretSpread/', TarotInterpretSpreadView.as_view(), name='tarot_interpret_spread'),
+    path('ai/tarot/consent-check/', TarotHolisticConsentCheckView.as_view(), name='tarot_holistic_consent_check'),
     
     # Tests modulares (orden importante: rutas específicas primero)
     path('tests/', AvailableTestsView.as_view(), name='available_tests'),

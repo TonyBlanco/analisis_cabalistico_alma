@@ -1,7 +1,7 @@
 'use client';
 
 import type { AstrologyTarotSectionId, TarotSystemId } from './types';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { TarotDeck } from '@/components/TarotCard';
 import { API_BASE_URL, getAuthToken } from '@/lib/api';
 import type { TarotCardData } from '@/components/TarotCard/TarotCard.types';
@@ -17,6 +17,10 @@ import { SEPHIROTH_MAJOR_ARCANA } from '@holistica/symbolic/tarot/decks/sephirot
 import { addSymbolicTimelineEvent } from '@/components/SymbolicTimeline';
 import { useSaveTarotSpread } from '@/lib/api/swm/tarot/hooks/useSaveTarotSpread';
 import type { TarotCard as SwmTarotCard } from '@/lib/api/swm/tarot/types';
+// Tarot Holístico AI Integration
+import { useTarotHolistic } from '@/lib/api/swm/tarot/hooks/useTarotHolistic';
+import { TarotHolisticConsentBanner } from '@/components/tarot/TarotHolisticConsentBanner';
+import { Sparkles, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
 
 interface AstrologyTarotVisualCoreProps {
   activeSection: AstrologyTarotSectionId;
@@ -100,6 +104,24 @@ export default function AstrologyTarotVisualCore({
   // SWM Hook for saving spreads
   const { saveSpread, isLoading: isSavingSpread, error: saveSpreadError } = useSaveTarotSpread();
   const [therapistNotes, setTherapistNotes] = useState('');
+  
+  // Tarot Holístico AI Hook
+  const {
+    isLoading: isAiLoading,
+    error: aiError,
+    hasConsent,
+    acceptConsent,
+    interpretCard,
+    providerUsed,
+    modelUsed,
+    lastCardInterpretation,
+    schema: aiSchema,
+  } = useTarotHolistic();
+  
+  // AI Interpretation state
+  const [showConsentBanner, setShowConsentBanner] = useState(false);
+  const [aiInterpretation, setAiInterpretation] = useState<string | null>(null);
+  const [aiThemes, setAiThemes] = useState<string[]>([]);
   
   const deckCards = useMemo<TarotCardData[]>(
     () =>
@@ -640,13 +662,114 @@ export default function AstrologyTarotVisualCore({
               <span className="text-[11px] text-gray-500">
                 Preparacion de analisis simbolico (fase 0)
               </span>
-              <button
-                type="submit"
-                className="rounded-md border border-gray-200 bg-gray-100 px-3 py-2 text-xs text-gray-700 hover:bg-gray-200"
-              >
-                Guardar borrador
-              </button>
+              <div className="flex gap-2">
+                <button
+                  type="submit"
+                  className="rounded-md border border-gray-200 bg-gray-100 px-3 py-2 text-xs text-gray-700 hover:bg-gray-200"
+                >
+                  Guardar borrador
+                </button>
+                {/* Botón de Interpretación AI Holística */}
+                {selectedCard && hasConsent && (
+                  <button
+                    type="button"
+                    disabled={isAiLoading || !selectedCard}
+                    onClick={async (e) => {
+                      e.preventDefault();
+                      if (!selectedCard) return;
+                      try {
+                        const result = await interpretCard({
+                          arcanaId: selectedCard.id,
+                          arcanaName: selectedCard.name,
+                          position: 'general',
+                          reversed: false,
+                          tarotSystem: systemKey,
+                          context: {
+                            question: intention || undefined,
+                            consultantId: patientId,
+                          },
+                        });
+                        setAiInterpretation(result.text);
+                        setAiThemes(result.themes);
+                      } catch (err) {
+                        console.error('Error en interpretación AI:', err);
+                      }
+                    }}
+                    className="rounded-md border border-indigo-300 bg-indigo-50 px-3 py-2 text-xs text-indigo-700 hover:bg-indigo-100 flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isAiLoading ? (
+                      <>
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                        Interpretando...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="h-3 w-3" />
+                        Interpretar con IA
+                      </>
+                    )}
+                  </button>
+                )}
+                {selectedCard && !hasConsent && (
+                  <button
+                    type="button"
+                    onClick={() => setShowConsentBanner(true)}
+                    className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-700 hover:bg-amber-100 flex items-center gap-1"
+                  >
+                    <Sparkles className="h-3 w-3" />
+                    Activar IA Holística
+                  </button>
+                )}
+              </div>
             </div>
+
+            {/* Banner de consentimiento holístico */}
+            {showConsentBanner && !hasConsent && (
+              <TarotHolisticConsentBanner
+                onAccept={() => {
+                  acceptConsent();
+                  setShowConsentBanner(false);
+                }}
+                onDecline={() => setShowConsentBanner(false)}
+                className="mt-4"
+              />
+            )}
+
+            {/* Resultado de interpretación AI */}
+            {aiInterpretation && (
+              <div className="mt-4 rounded-lg border border-indigo-200 bg-indigo-50/50 p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Sparkles className="h-4 w-4 text-indigo-600" />
+                  <span className="text-sm font-medium text-indigo-900">Interpretación Simbólica Holística</span>
+                  {providerUsed && (
+                    <span className="text-[10px] bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-full">
+                      {providerUsed.toUpperCase()}
+                    </span>
+                  )}
+                </div>
+                <div className="text-sm text-gray-700 whitespace-pre-wrap">{aiInterpretation}</div>
+                {aiThemes.length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-1">
+                    {aiThemes.map((theme, idx) => (
+                      <span key={idx} className="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full">
+                        {theme}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                <div className="mt-3 text-[10px] text-gray-500 italic">
+                  Interpretación educativa y exploratoria. No constituye consejo profesional.
+                </div>
+              </div>
+            )}
+
+            {/* Error de AI */}
+            {aiError && (
+              <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 flex items-center gap-2">
+                <AlertCircle className="h-4 w-4" />
+                {aiError}
+              </div>
+            )}
 
             {draft && (
               <div className="rounded-md border border-dashed border-gray-200 bg-gray-50 p-3 text-[11px] text-gray-500">

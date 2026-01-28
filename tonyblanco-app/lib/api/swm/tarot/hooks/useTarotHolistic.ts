@@ -79,7 +79,8 @@ export function useTarotHolistic(): UseTarotHolisticReturn {
   const [error, setError] = useState<string | null>(null);
   const [providerUsed, setProviderUsed] = useState<'groq' | 'ollama' | 'gemini' | null>(null);
   const [modelUsed, setModelUsed] = useState<string | null>(null);
-  const [hasConsent, setHasConsent] = useState(false);
+  // LEGACY: Consent now granted at consultant registration - always true for educational readings
+  const [hasConsent, setHasConsent] = useState(true);
   const [consentDisclaimer, setConsentDisclaimer] = useState<string | null>(null);
   const [schema, setSchema] = useState<TarotHolisticSchema | null>(null);
   const [providerStatus, setProviderStatus] = useState<ProviderStatus | null>(null);
@@ -126,11 +127,7 @@ export function useTarotHolistic(): UseTarotHolisticReturn {
   }, []);
 
   const interpretCard = useCallback(async (request: InterpretCardRequest): Promise<InterpretCardResponse> => {
-    // Verificar consentimiento
-    if (!hasConsent) {
-      throw new Error('Se requiere consentimiento holístico antes de usar interpretaciones IA');
-    }
-
+    // LEGACY: Consent check removed - consultant consent granted at registration
     setIsLoading(true);
     setError(null);
     try {
@@ -158,11 +155,7 @@ export function useTarotHolistic(): UseTarotHolisticReturn {
   }, [hasConsent]);
 
   const interpretSpread = useCallback(async (request: InterpretSpreadRequest): Promise<InterpretSpreadResponse> => {
-    // Verificar consentimiento
-    if (!hasConsent) {
-      throw new Error('Se requiere consentimiento holístico antes de usar interpretaciones IA');
-    }
-
+    // LEGACY: Consent check removed - consultant consent granted at registration
     setIsLoading(true);
     setError(null);
     try {
@@ -202,8 +195,9 @@ export function useTarotHolistic(): UseTarotHolisticReturn {
   }, []);
 
   const acceptConsent = useCallback(() => {
+    // LEGACY: This function is kept for backward compatibility
+    // Consent is now automatically granted via consultant registration
     setHasConsent(true);
-    // En v2: persistir en localStorage o backend
     if (typeof window !== 'undefined') {
       sessionStorage.setItem('tarot_holistic_consent', 'true');
     }

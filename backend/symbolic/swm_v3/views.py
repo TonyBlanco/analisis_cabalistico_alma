@@ -25,6 +25,62 @@ from rest_framework.views import APIView
 
 logger = logging.getLogger(__name__)
 
+# Hebrew letter glyphs mapping (from cabala_py.arbol_vida)
+HEBREW_LETTER_GLYPHS = {
+    "Aleph": "א", "Alef": "א",
+    "Beth": "ב", "Bet": "ב",
+    "Gimel": "ג",
+    "Daleth": "ד", "Dalet": "ד",
+    "Heh": "ה", "He": "ה",
+    "Vav": "ו", "Vau": "ו",
+    "Zayin": "ז", "Zain": "ז",
+    "Cheth": "ח", "Chet": "ח", "Het": "ח",
+    "Teth": "ט", "Tet": "ט",
+    "Yod": "י", "Yodh": "י",
+    "Kaph": "כ", "Kaf": "כ", "Caph": "כ",
+    "Lamed": "ל",
+    "Mem": "מ",
+    "Nun": "נ",
+    "Samekh": "ס", "Samech": "ס",
+    "Ayin": "ע",
+    "Peh": "פ", "Pe": "פ",
+    "Tzaddi": "צ", "Tzadi": "צ",
+    "Qoph": "ק", "Qof": "ק",
+    "Resh": "ר",
+    "Shin": "ש",
+    "Tau": "ת", "Tav": "ת",
+}
+
+
+def build_symbols_from_kabbalistic(kabbalistic: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """
+    Build frontend-compatible symbols object from kabbalistic data.
+    
+    Frontend expects:
+      - hebrew_letter: glyph (ה)
+      - letter_name: name (Aleph)
+      - gematria: numeric value (1)
+      - path: path number (11)
+      - sefirot: array of sefirot names
+      - tags: extracted from keywords/correspondences
+    """
+    if not kabbalistic:
+        return None
+    
+    letter_name = kabbalistic.get("hebrewLetter", "")
+    hebrew_glyph = HEBREW_LETTER_GLYPHS.get(letter_name, "")
+    
+    return {
+        "hebrew_letter": hebrew_glyph,
+        "letter_name": letter_name,
+        "gematria": kabbalistic.get("letterValue"),
+        "path": kabbalistic.get("path"),
+        "sefirot": kabbalistic.get("sefirot", []),
+        "letter_meaning": kabbalistic.get("letterMeaning", ""),
+        "intelligence": kabbalistic.get("intelligence", ""),
+        "cube_of_space": kabbalistic.get("cubeOfSpace", ""),
+    }
+
 # Path to symbolic data
 SYMBOLIC_DATA_PATH = Path(settings.BASE_DIR).parent / "packages" / "symbolic"
 
@@ -167,6 +223,21 @@ def generate_educational_reading(
         
         if card_data:
             position = positions[i] if i < len(positions) else {"id": f"pos_{i+1}", "name": f"Posición {i+1}"}
+            kabbalistic = card_data.get("kabbalistic", {})
+            correspondences = card_data.get("correspondences", {})
+            keywords = card_data.get("keywords", [])
+            
+            # Build symbols for frontend compatibility
+            symbols = build_symbols_from_kabbalistic(kabbalistic)
+            if symbols:
+                # Add tags from keywords and correspondences
+                tags = list(keywords)
+                if correspondences.get("astrology"):
+                    tags.append(correspondences["astrology"])
+                if correspondences.get("element"):
+                    tags.append(correspondences["element"])
+                symbols["tags"] = tags
+            
             cards.append({
                 "draw_id": f"draw-{i+1}",
                 "id": card_data["id"],
@@ -175,9 +246,10 @@ def generate_educational_reading(
                 "keyNumber": card_data.get("keyNumber"),
                 "reversed": random.choice([True, False]) if i > 0 else False,  # First card upright
                 "position": position,
-                "kabbalistic": card_data.get("kabbalistic", {}),
-                "correspondences": card_data.get("correspondences", {}),
-                "keywords": card_data.get("keywords", []),
+                "kabbalistic": kabbalistic,
+                "symbols": symbols,  # Frontend-compatible symbols
+                "correspondences": correspondences,
+                "keywords": keywords,
                 "consciousness": card_data.get("consciousness", {}),
             })
         else:

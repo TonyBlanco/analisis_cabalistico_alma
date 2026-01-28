@@ -19,7 +19,6 @@ import { useSaveTarotSpread } from '@/lib/api/swm/tarot/hooks/useSaveTarotSpread
 import type { TarotCard as SwmTarotCard } from '@/lib/api/swm/tarot/types';
 // Tarot Holístico AI Integration
 import { useTarotHolistic } from '@/lib/api/swm/tarot/hooks/useTarotHolistic';
-import { TarotHolisticConsentBanner } from '@/components/tarot/TarotHolisticConsentBanner';
 import { Sparkles, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
 
 interface AstrologyTarotVisualCoreProps {
@@ -119,7 +118,6 @@ export default function AstrologyTarotVisualCore({
   } = useTarotHolistic();
   
   // AI Interpretation state
-  const [showConsentBanner, setShowConsentBanner] = useState(false);
   const [aiInterpretation, setAiInterpretation] = useState<string | null>(null);
   const [aiThemes, setAiThemes] = useState<string[]>([]);
   
@@ -670,7 +668,7 @@ export default function AstrologyTarotVisualCore({
                   Guardar borrador
                 </button>
                 {/* Botón de Interpretación AI Holística */}
-                {selectedCard && hasConsent && (
+                {selectedCard && (
                   <button
                     type="button"
                     disabled={isAiLoading || !selectedCard}
@@ -710,30 +708,8 @@ export default function AstrologyTarotVisualCore({
                     )}
                   </button>
                 )}
-                {selectedCard && !hasConsent && (
-                  <button
-                    type="button"
-                    onClick={() => setShowConsentBanner(true)}
-                    className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-700 hover:bg-amber-100 flex items-center gap-1"
-                  >
-                    <Sparkles className="h-3 w-3" />
-                    Activar IA Holística
-                  </button>
-                )}
               </div>
             </div>
-
-            {/* Banner de consentimiento holístico */}
-            {showConsentBanner && !hasConsent && (
-              <TarotHolisticConsentBanner
-                onAccept={() => {
-                  acceptConsent();
-                  setShowConsentBanner(false);
-                }}
-                onDecline={() => setShowConsentBanner(false)}
-                className="mt-4"
-              />
-            )}
 
             {/* Resultado de interpretación AI */}
             {aiInterpretation && (

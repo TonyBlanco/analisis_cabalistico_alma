@@ -35,8 +35,12 @@ Persistencia gobernada
 - Ownership: las lecturas persistidas pertenecen al terapeuta que las genera; acceso del consultante regulado por permisos y acuerdo.
 
 Consentimiento
-- Opt-in explícito requerido antes de usar SWM v3 para un consultante.
-- Registro auditable del consentimiento (timestamp, usuario, scope y opción de revocabilidad).
+- **[LEGACY MODE - 2026-01-28]**: El flujo de consentimiento explícito per-lectura ha sido deprecado.
+- **ACTUAL**: El consentimiento se otorga al crear la cuenta del consultante y acepta "Almacenar con consentimiento (asociado al terapeuta)".
+- El modal de consentimiento fue requerido durante el proceso clínico inicial pero ya no es necesario en el modo educativo (tirada libre).
+- La función `acceptConsent()` y el banner `TarotHolisticConsentBanner` se mantienen solo para compatibilidad legacy.
+- **Nuevo comportamiento**: `hasConsent = true` por defecto en `useTarotHolistic()` hook.
+- Registro auditable del consentimiento inicial (timestamp durante registro de cuenta).
 - Revocabilidad: el consultante/terapeuta puede solicitar eliminación o anonimización conforme a políticas del proyecto.
 
 Auditoría y trazabilidad

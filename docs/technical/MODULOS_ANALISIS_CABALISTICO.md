@@ -8,7 +8,7 @@ Lista completa de todas las aplicaciones/módulos de análisis cabalístico disp
 
 ### **Módulos Activos (Implementados)**
 1. ✅ **Gematria** - Calculadora de Gematría
-2. ✅ **Tarot Terapéutico** - Diagnóstico Cruzado con Tarot
+2. ✅ **Tarot Holístico** - Exploración Simbólica con Tarot (NO clínico)
 3. ✅ **Numerología Completa** - Análisis Numerológico Cabalístico
 4. ✅ **Astrología Cabalística** - Carta Astral con Perspectiva Cabalística
 
@@ -58,46 +58,57 @@ Calcula los valores numéricos de palabras o textos en hebreo usando diferentes 
 
 ---
 
-### 2. **Tarot Terapéutico** 🎴
-- **Nombre Completo**: Tarot Terapéutico Cruzado / Tarot del Alma
+### 2. **Tarot Holístico Evolutivo** 🎴
+- **Nombre Completo**: Tarot Simbólico Holístico / Tarot del Alma (NO terapéutico)
 - **Ruta**: `/dashboard/tools/tarot`
 - **Icono**: `BookOpen` (📖)
 - **Estado**: ✅ **Activo y Funcional**
+- **Enfoque**: **Educativo y exploratorio** (NO clínico)
 
 #### **¿Qué hace?**
-Realiza una lectura cruzada entre el Arcano de Vida (calculado por fecha de nacimiento) y la sintomatología holística del consultante:
+Realiza una exploración simbólica holística entre el Arcano de Vida (calculado por fecha de nacimiento) y el estado actual del consultante:
 
 1. **Calcula el Arcano de Vida**: Suma la fecha completa de nacimiento → Reduce a 1-22 → Muestra el Arcano Mayor correspondiente
-2. **Lectura Cruzada**: Compara el arquetipo nativo con los síntomas de tests holísticos (GAD-7, PHQ-9, etc.)
-3. **Análisis de Sombra**: Identifica cómo el arquetipo está contribuyendo al desequilibrio
-4. **Orientación Terapéutica**: Sugiere acciones sanadoras basadas en el elemento complementario
+2. **Lectura Simbólica**: Compara el arquetipo nativo con temas holísticos del consultante
+3. **Análisis Evolutivo**: Identifica patrones simbólicos y oportunidades de crecimiento
+4. **Orientación Holística**: Sugiere reflexiones basadas en el elemento complementario
 
 #### **Funcionalidades:**
 - ✅ Calculadora de Sendero Personal (fecha de nacimiento → Arcano)
 - ✅ Visualizador Interactivo del Árbol de la Vida
 - ✅ Muestra la carta del Tarot correspondiente al sendero
 - ✅ Hover sobre senderos muestra información del Arcano
-- ✅ Integración con tests holísticos del consultante
-- ✅ Análisis con IA (Google Gemini) para:
-  - Análisis de Sombra
-  - Acciones Sanadoras
+- ✅ **Integración Multi-Provider IA**:
+  - **Groq AI** (prioritario): `llama-3.3-70b-versatile`
+  - **Ollama** (local/Vercel): `llama3.2`
+  - **Gemini** (fallback): `gemini-2.5-flash`
+- ✅ Análisis IA holístico para:
+  - Exploración Simbólica
+  - Reflexiones Educativas
   - Mensaje Integrador
-- ✅ Guardado de análisis en ficha del consultante
-- ✅ Protocolo Holístico educativo
+- ✅ Guardado de lecturas en ficha del consultante
+- ✅ Disclaimer holístico educativo
 
 #### **Datos de Entrada:**
 - Fecha de nacimiento (YYYY-MM-DD)
-- Tests holísticos recientes del consultante (opcional, para lectura cruzada)
+- Contexto actual del consultante (opcional, para lectura contextual)
 
 #### **Datos de Salida:**
 - Número del Arcano de Vida (0-21)
 - Nombre del Arcano
 - Letra hebrea correspondiente
 - Sendero en el Árbol de la Vida
-- Significado terapéutico
-- Análisis de sombra (si hay tests holísticos)
-- Acciones sanadoras
+- Significado simbólico holístico
+- Exploración simbólica (si hay contexto)
+- Reflexiones educativas
 - Mensaje integrador
+- **Provider usado** (Groq/Ollama/Gemini)
+
+#### **Terminología:**
+- **"Consultante"** (NO "paciente")
+- **"Lectura simbólica"** (NO "diagnóstico")
+- **"Exploración holística"** (NO "terapia")
+- **"Reflexiones educativas"** (NO "tratamiento")
 
 #### **Uso en Backend:**
 - Tipo de análisis: `'tarot'`

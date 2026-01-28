@@ -1,7 +1,12 @@
-# Plan técnico: Integración de interpretaciones holísticas con IA
+# Plan técnico: Integración de interpretaciones holísticas con IA Multi-Provider
 
 **Objetivo**
-- Integrar interpretaciones holísticas generadas por IA para `tarot` sin modificar la lógica clínica existente; agregar contrato API, esquema de datos, wireframes y checklist de despliegue.
+- Integrar interpretaciones holísticas generadas por IA (Groq → Ollama → Gemini) para `tarot` sin tocar módulos clínicos; agregar contrato API, esquema de datos, wireframes y checklist de despliegue.
+
+**Providers AI**:
+- **Groq AI** (prioritario): `llama-3.3-70b-versatile` - rate limits altos (30 req/min)
+- **Ollama** (local/Vercel): `llama3.2` - sin límites, flexible
+- **Gemini** (fallback): `gemini-2.5-flash` - respaldo final (15 req/min)
 
 **Alcance**
 - Solo documentación y especificación: no se modifica código fuente en este paso.
@@ -29,19 +34,22 @@ interface TarotArcanaAI {
 
 **Contrato API (propuesta)**
 - `POST /api/ai/tarot/interpretCard`
-  - Request: `{ "arcanaId": "the_fool", "position": "center", "reversed": false, "context": {"question":"..."}, "options": {"temperature":0.7} }`
-  - Response: `{ "text": "Interpretación holística...", "themes": ["renacimiento","curiosidad"], "confidence": 0.72, "explanationTrace": [{"prompt":"...","modelResponse":"..."}] }`
+  - Request: `{ "arcanaId": "the_fool", "position": "center", "reversed": false, "context": {"question":"...", "consultantId": 123}, "options": {"temperature":0.7, "provider": "auto"} }`
+  - Response: `{ "text": "Interpretación simbólica holística...", "themes": ["renacimiento","curiosidad"], "confidence": 0.72, "provider_used": "groq", "model_used": "llama-3.3-70b-versatile", "holistic_disclaimer": "Interpretación educativa no clínica", "explanationTrace": [{"prompt":"...","modelResponse":"..."}] }`
 
 - `POST /api/ai/tarot/interpretSpread`
-  - Request: `{ "spreadType":"three_card","cards":[{"arcanaId":"the_fool","reversed":false,"position":"past"}, ...], "context": {...}, "options": {...} }`
-  - Response: `{ "cardInterpretations": [{"arcanaId":"the_fool","text":"...","themes":[...]}], "summary":"...", "recommendations":["..."], "confidence":0.84 }`
+  - Request: `{ "spreadType":"three_card","cards":[{"arcanaId":"the_fool","reversed":false,"position":"past"}, ...], "context": {...}, "options": {"provider": "auto"} }`
+  - Response: `{ "cardInterpretations": [{"arcanaId":"the_fool","text":"...","themes":[...]}], "summary":"Lectura simbólica holística...", "symbolic_insights":["..."], "confidence":0.84, "provider_used":"groq", "holistic_disclaimer":"Para fines educativos únicamente" }`
 
-- `GET /api/ai/tarot/schema` — devuelve el esquema y metadatos de decks disponibles.
+- `GET /api/ai/tarot/schema` — devuelve el esquema, metadatos de decks disponibles y providers AI activos.
+  - Response: `{ "decks": [...], "spreadTypes": [...], "providers": [{"id":"groq", "name":"Groq AI", "model":"llama-3.3-70b-versatile", "available":true, "priority":1}, {...}], "version":"1.0.0", "mode":"holistic" }`
 
 Notas API:
 - Incluir `seed` opcional para reproducibilidad.
+- `provider` puede ser `"auto"` (selección automática), `"groq"`, `"ollama"`, o `"gemini"`.
 - Limitar tokens y exponer `temperature` para control de creatividad.
 - Todas las respuestas deben incluir `explanationTrace` opcional para auditoría.
+- Multi-provider con fallback automático: Groq → Ollama → Gemini.
 
 **Spreads soportados (mínimo)**
 - `three_card` (pasado/presente/futuro)
@@ -56,9 +64,9 @@ Notas API:
 **UI / UX (wireframes textuales)**
 - Pantalla principal `TarotReading`:
   - Panel izquierdo: selector de `Deck` y `Spread`.
-  - Panel central: cartas (interactivas) con botón `Interpretación AI`.
-  - Panel derecho: interpretación AI (resumen + botón "Ver detalle").
-  - Banner de consentimiento: checkbox `Acepto interpretaciones holísticas generadas por IA` con enlace a políticas.
+  - Panel central: cartas (interactivas) con botón `Interpretación Holística IA`.
+  - Panel derecho: interpretación AI (resumen + botón "Ver detalle") + badge indicando provider usado (Groq/Ollama/Gemini).
+  - Banner de consentimiento holístico: checkbox `Acepto interpretaciones simbólicas educativas generadas por IA` con enlace a políticas + lista de providers disponibles.
 
 - Modal de detalle:
   - Texto completo de la interpretación.
@@ -75,16 +83,19 @@ Notas API:
 **Fixtures de ejemplo**
 - `fixtures/three_card_example.json` con 3 cartas y respuestas esperadas (para tests).
 
-**Privacidad, consentimiento y ética**
-- Mostrar disclaimer claro: interpretaciones holísticas no reemplazan servicios profesionales.
+**Privacidad, consentimiento y ética (enfoque holístico)**
+- Mostrar disclaimer claro: interpretaciones simbólicas educativas, NO reemplazan acompañamiento profesional en salud integral.
+- Terminología correcta: "consultante" (NO "paciente"), "lectura simbólica" (NO "diagnóstico").
 - Opciones de almacenamiento: `no_store`, `store_anonymized`, `store_with_consent`.
-- Si `themes` o `riskFlags` indican riesgo (ej. "ideación"), UI debe mostrar recomendación de derivación y recursos.
+- Si `themes` indican temas sensibles, UI debe mostrar recursos educativos (sin carácter clínico).
 
 **Checklist de despliegue**
-- Configurar claves y límites de uso del proveedor IA en `env`.
-- Añadir feature flag `AI_TAROT_ENABLED`.
-- Tests automáticos y revisión humana aprobada.
-- Monitorización: tasa de errores, latencia, y métricas de uso.
+- Configurar claves multi-provider en `env`: `GROQ_API_KEY`, `OLLAMA_BASE_URL`, `GEMINI_API_KEY`.
+- Configurar `AI_PROVIDER=auto` para fallback automático.
+- Añadir feature flag `AI_TAROT_ENABLED=false` por defecto.
+- Tests automáticos y revisión humana aprobada (50+ interpretaciones).
+- Monitorización: tasa de errores por provider, latencia, métricas de uso, health checks.
+- Verificar despliegue de Ollama en Vercel (o servidor externo).
 
 **Riesgos y mitigaciones**
 - Interpretaciones erróneas o sesgadas → mitigación: revisión humana, control de temperatura, logging de prompts.
@@ -110,20 +121,20 @@ Phase 1 — Datos y esquema (2–3 días)
 - Criterios de aceptación: `src/symbolic/tarot/decks/example-ai.ts` con 5 arcanos ampliados; tests que validan esquema contra types.
 - Entregables: archivo de deck ejemplo y fixtures en `tests/fixtures`.
 
-Phase 2 — API core y mocks (3–4 días)
-- Tareas: implementar endpoints mock (`/api/ai/tarot/interpretCard`, `/interpretSpread`, `/schema`); implementar util `drawSpread(seed?)` en server-side; tests unitarios.
-- Criterios de aceptación: endpoints consumibles con respuestas deterministas usando `seed`; cobertura básica de tests (unit).
-- Entregables: endpoints mock y tests en `backend/tests`.
+Phase 2 — API core y multi-provider (3–4 días)
+- Tareas: **REUTILIZAR** `backend/api/astrology_ai_service.py` (multi-provider ya implementado); crear endpoints nuevos (`/api/ai/tarot/interpretCard`, `/interpretSpread`, `/schema`); implementar util `drawSpread(seed?)` en server-side; tests unitarios.
+- Criterios de aceptación: endpoints consumibles con respuestas deterministas usando `seed`; auto-selección de provider (Groq → Ollama → Gemini); cobertura básica de tests (unit).
+- Entregables: endpoints con multi-provider integrado y tests en `backend/tests`.
 
 Phase 3 — UI mínimo y consentimiento (3–5 días)
 - Tareas: componente `TarotReading` con selector `Deck`/`Spread`, visor de cartas, panel AI; banner consentimiento y modal de detalle con opciones de guardado.
 - Criterios de aceptación: flujo completo en staging (tirar cartas → interpretar → ver trazabilidad); consentimiento requerido antes de interpretar.
 - Entregables: componentes en `src/components/TarotReading`, estilos y storybook / snapshots.
 
-Phase 4 — Integración con proveedor IA y trazabilidad (2–4 días)
-- Tareas: sustituir mocks por llamadas al proveedor IA (con límite de tokens y `temperature` configurable); añadir `explanationTrace` logging; manejo de `seed` y reproducibilidad.
-- Criterios de aceptación: interpretaciones reales en staging con trazabilidad guardada en logs; rate-limits y retries implementados.
-- Entregables: integración con provider, pruebas end-to-end en staging.
+Phase 4 — Multi-provider y trazabilidad (2–3 días)
+- Tareas: integrar `astrology_ai_service.py` existente con endpoints tarot; configurar fallback automático (Groq → Ollama → Gemini); añadir `explanationTrace` logging; manejo de `seed` y reproducibilidad.
+- Criterios de aceptación: interpretaciones reales en staging con trazabilidad guardada en logs; rate-limits y retries por provider implementados; health checks activos.
+- Entregables: integración multi-provider completa, pruebas end-to-end en staging con los 3 providers.
 
 Phase 5 — Validación y revisión humana (3–7 días)
 - Tareas: preparar conjunto de revisiones humanas (15–30 lecturas); iterar prompts y parámetros hasta aceptación UX; ajustar `riskFlags` mapping.
@@ -144,20 +155,23 @@ Notas para el agente
 
 Antes de implementar, el agente debe revisar y cumplir las políticas y contratos del repositorio. He leído los documentos principales en `docs/` y destaco las restricciones y requisitos relevantes que deben aplicarse a esta integración:
 
-- `AI_SYMBOLIC_CONTRACT.md`: la forma canónica es *no-clínica* y los tipos/contratos deben usarse para la entrada/salida. No diagnosis ni interpretación clínica.
-- `ARCHITECTURE_SYMBOLIC_SYSTEM.md`: la capa de interpretación IA es una capa futura separada; requiere opt-in, disclaimers, y 5-layer safety validation. Mantener `src/symbolic/` como fuente de verdad.
+- `AI_SYMBOLIC_CONTRACT.md`: la forma canónica es **holística NO clínica** y los tipos/contratos deben usarse para la entrada/salida. Prohibido: diagnosis, interpretación clínica, terminología médica.
+- `ARCHITECTURE_SYMBOLIC_SYSTEM.md`: la capa de interpretación IA es holística y educativa; requiere opt-in, disclaimers holísticos, y 5-layer safety validation. Mantener `src/symbolic/` como fuente de verdad.
 - `DOCUMENTATION_GOVERNANCE.md`: cualquier agente que cree documentos debe colocar archivos en `/docs` y registrar su creación en `PROJECT_STATE_CURRENT.md` (o carpeta `01_PROJECT_STATE`).
-- `ASTROLOGIA_PROFESIONAL.md` y archivos de Astrología: la terminología correcta es `consultante` y `lectura simbólica` (prohibido usar `paciente` o `diagnóstico`). Las operaciones reales (cálculos) deben ser disparadas por acción explícita y deben mantenerse aisladas.
+- `ASTROLOGIA_PROFESIONAL.md` y archivos de Astrología: la terminología correcta es **`consultante`** (NO `paciente`) y **`lectura simbólica holística`** (NO `diagnóstico` ni `terapéutico`). Las operaciones reales (cálculos) deben ser disparadas por acción explícita y deben mantenerse aisladas.
 - `ASTRO_ENGINE_*` y `ASTRO_RESEARCH_LAB_SCOPE.md`: separación clara entre entornos reales, sandbox y research; no usar datos reales en modos research/sandbox; fail-fast si falta dependencia crítica.
 
-Implicaciones concretas para la integración `tarot-ai`:
+Implicaciones concretas para la integración `tarot-ai` holística:
 
-- Mantener las interpretaciones dentro del marco no-clínico: usar lenguaje holístico y evitar términos diagnósticos. Usar `consultante` y `lectura simbólica` en UI y docs.
-- Implementar opt-in obligatorio y banner de consentimiento (UI) antes de permitir interpretaciones IA; por defecto `AI_TAROT_ENABLED=false`.
-- Integrar la misma validación de seguridad y filtrado de salida (por ejemplo: 5-layer validation) descrita en `ARCHITECTURE_SYMBOLIC_SYSTEM.md`.
+- **Enfoque 100% holístico**: Lenguaje simbólico-educativo, evitar CUALQUIER término clínico. Usar `consultante` (NO `paciente`) y `lectura simbólica` (NO `diagnóstico` ni `terapéutico`) en UI y docs.
+- **Multi-provider AI**: Groq (prioritario) → Ollama (local/Vercel) → Gemini (fallback). Config: `AI_PROVIDER=auto`.
+- Implementar opt-in obligatorio y banner de consentimiento holístico (UI) antes de permitir interpretaciones IA; por defecto `AI_TAROT_ENABLED=false`.
+- Integrar la misma validación de seguridad y filtrado de salida (5-layer validation + lista negra de términos clínicos) descrita en `ARCHITECTURE_SYMBOLIC_SYSTEM.md`.
+- **Provider tracking**: Todas las respuestas deben incluir `provider_used` y `model_used` para auditoría.
 - Registrar cualquier nuevo documento creado por el agente en `01_PROJECT_STATE/PROJECT_STATE_CURRENT.md` como exige `DOCUMENTATION_GOVERNANCE.md`.
-- Mantener los datos simbólicos en `src/symbolic/` y no importar componentes clínicos desde `tonyblanco-app/components/TherapistClinicalDashboard`.
+- Mantener los datos simbólicos en `src/symbolic/` y NO importar componentes clínicos desde `tonyblanco-app/components/TherapistClinicalDashboard`.
 - Las pruebas y fixtures deben indicar claramente si usan datos simulados (`research`/`sandbox`) o datos reales; seguir las reglas de `ASTRO_SANDBOX_LIMITS.md` y `ASTRO_STUDY_LAB_SCOPE.md`.
+- **Lista negra de términos**: "diagnóstico", "terapia", "tratamiento", "paciente", "síntoma", "clínico", "patología".
 
 **Requisito operativo para agentes que implementen código**
 

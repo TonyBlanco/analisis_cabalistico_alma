@@ -1,7 +1,8 @@
-# AUDITORÍA - Módulo SWM Tarot
+# AUDITORÍA - Módulo SWM Tarot (Holístico)
 **Fecha**: 28 de enero de 2026
 **Auditor**: GitHub Copilot
 **Estado**: ✅ **FUNCIONANDO CORRECTAMENTE**
+**Enfoque**: **Holístico NO Clínico**
 
 ---
 
@@ -15,6 +16,11 @@ El módulo SWM Tarot está **COMPLETAMENTE FUNCIONAL** en backend Y frontend:
 - ✅ WorkspaceDefinition configurada
 - ✅ **Componentes React completos**
 - ✅ **Integración frontend-backend operativa**
+- ✅ **Multi-provider AI**: Groq (prioritario) → Ollama (local/Vercel) → Gemini (fallback)
+
+**ENFOQUE HOLÍSTICO**: 
+- Terminología: "consultante" (NO "paciente"), "lectura simbólica" (NO "diagnóstico")
+- Interpretaciones educativas, NO clínicas ni terapéuticas
 
 **HALLAZGO ACTUALIZADO**: El módulo SÍ tiene UI completa en:
 - `/dashboard/therapist/(swm)/astrologia-tarot/` ✅ RUTA PRINCIPAL

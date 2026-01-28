@@ -1,9 +1,10 @@
-# CONTRATO FUNCIONAL — SWM TAROT EVOLUTIVO
+# CONTRATO FUNCIONAL — SWM TAROT EVOLUTIVO (HOLÍSTICO)
 
 > **Versión**: 1.0.0  
 > **Fecha**: 2026-01-23  
 > **Estado**: ACTIVO  
-> **Referencia**: Patrón SWM MCMI-4 Místico
+> **Referencia**: Patrón SWM MCMI-4 Místico  
+> **Enfoque**: **Holístico NO Clínico**
 
 ---
 
@@ -23,10 +24,11 @@
 
 ### 2.1 Funciones Principales
 
-1. **Exploración Simbólica Guiada**
-   - Facilitar tiradas de Tarot en contexto terapéutico
+1. **Exploración Simbólica Holística Guiada**
+   - Facilitar lecturas de Tarot en contexto **educativo y exploratorio** (NO terapéutico)
    - Registrar correspondencias con el Árbol de la Vida
    - Mapear arcanos a senderos y Sephiroth
+   - Terminología: "consultante" (NO "paciente")
 
 2. **Persistencia de Tiradas**
    - Crear instancias de workspace por paciente

@@ -1,10 +1,15 @@
 """
-Tarot Holístico - Endpoints API para interpretaciones simbólicas educativas
+Tarot Holístico - Oráculo Místico con Integración Psicológica
 
-IMPORTANTE: Este módulo es 100% HOLÍSTICO, NO CLÍNICO.
-- Terminología: "consultante" (NO "paciente"), "lectura simbólica" (NO "diagnóstico")
-- Las interpretaciones son educativas y exploratorias, NUNCA terapéuticas
-- Multi-provider AI: Groq (prioritario) → Ollama → Gemini
+Este módulo implementa un oráculo de tarot con voz mística (bruja amiga)
+que integra resultados del SCL-90 holístico con interpretaciones simbólicas.
+
+CARACTERÍSTICAS:
+- Voz cálida y mística (no robótica)
+- Integración con perfil SCL-90 del consultante
+- Conexión chakras ↔ dimensiones psicológicas
+- Numerología kármica automática
+- Multi-provider AI: Groq → Ollama → Gemini
 
 Uso:
     POST /api/ai/tarot/interpretCard
@@ -15,9 +20,11 @@ Uso:
 
 import logging
 import json
+import re
 from typing import Dict, Any, Optional, List
 from dataclasses import dataclass, asdict
-from datetime import datetime
+from datetime import datetime, date
+from functools import reduce
 
 from django.conf import settings
 from django.http import JsonResponse
@@ -30,14 +37,129 @@ from .astrology_ai_service import AstrologyAIService
 
 logger = logging.getLogger(__name__)
 
+
+# =============================================================================
+# MAPEO SCL-90 → CHAKRAS → ARQUETIPOS TERAPÉUTICOS
+# =============================================================================
+
+SCL90_CHAKRA_MAP = {
+    "somatizacion": {
+        "chakra": "Muladhara (Raíz)",
+        "ubicacion": "base de la columna",
+        "color": "rojo",
+        "desequilibrio": "desconexión con el cuerpo físico, miedos de supervivencia",
+        "sanacion": "grounding, conexión con la tierra, caminar descalzo",
+        "hierba": "raíz de valeriana, ashwagandha",
+        "arcano_relacionado": ["El Emperador", "El Mundo"],
+    },
+    "obsesion_compulsion": {
+        "chakra": "Ajna (Tercer Ojo)",
+        "ubicacion": "entrecejo",
+        "color": "índigo",
+        "desequilibrio": "mente hiperactiva, desconfianza en la intuición",
+        "sanacion": "meditación de silencio, contemplación sin juicio",
+        "hierba": "lavanda, pasiflora",
+        "arcano_relacionado": ["La Sacerdotisa", "El Ermitaño"],
+    },
+    "sensibilidad_interpersonal": {
+        "chakra": "Anahata (Corazón)",
+        "ubicacion": "centro del pecho",
+        "color": "verde",
+        "desequilibrio": "heridas de rechazo, miedo a la vulnerabilidad",
+        "sanacion": "práctica de autocompasión, meditación metta",
+        "hierba": "rosa, espino blanco",
+        "arcano_relacionado": ["La Emperatriz", "Los Enamorados"],
+    },
+    "depresion": {
+        "chakra": "Manipura (Plexo Solar)",
+        "ubicacion": "plexo solar",
+        "color": "amarillo",
+        "desequilibrio": "pérdida de poder personal, fuego interior apagado",
+        "sanacion": "luz solar, movimiento, recuperar pequeñas victorias",
+        "hierba": "hierba de San Juan, cúrcuma",
+        "arcano_relacionado": ["El Sol", "La Fuerza"],
+    },
+    "ansiedad": {
+        "chakra": "Manipura + Anahata",
+        "ubicacion": "plexo solar y pecho",
+        "color": "amarillo-verde",
+        "desequilibrio": "sistema nervioso hiperalerta, falta de seguridad interna",
+        "sanacion": "respiración 4-7-8, grounding, journaling",
+        "hierba": "manzanilla, kava, melisa",
+        "arcano_relacionado": ["La Torre", "La Luna"],
+    },
+    "hostilidad": {
+        "chakra": "Manipura (Plexo Solar)",
+        "ubicacion": "plexo solar",
+        "color": "amarillo intenso",
+        "desequilibrio": "fuego descontrolado, ira no procesada",
+        "sanacion": "ejercicio físico intenso, expresión creativa de emociones",
+        "hierba": "manzanilla, flor de Bach (holly)",
+        "arcano_relacionado": ["La Torre", "El Carro"],
+    },
+    "ansiedad_fobica": {
+        "chakra": "Muladhara (Raíz)",
+        "ubicacion": "base de la columna",
+        "color": "rojo",
+        "desequilibrio": "traumas no integrados, sensación de peligro constante",
+        "sanacion": "exposición gradual, técnicas somáticas",
+        "hierba": "valeriana, lúpulo",
+        "arcano_relacionado": ["La Luna", "El Diablo"],
+    },
+    "ideacion_paranoide": {
+        "chakra": "Ajna (Tercer Ojo)",
+        "ubicacion": "entrecejo",
+        "color": "índigo",
+        "desequilibrio": "desconfianza extrema, proyección de sombra",
+        "sanacion": "trabajo de sombra, reconectar con la confianza básica",
+        "hierba": "lavanda, manzanilla",
+        "arcano_relacionado": ["La Luna", "El Ermitaño"],
+    },
+    "psicoticismo": {
+        "chakra": "Sahasrara (Corona)",
+        "ubicacion": "coronilla",
+        "color": "violeta/blanco",
+        "desequilibrio": "desconexión con la realidad consensuada, fragmentación",
+        "sanacion": "grounding intensivo, rutinas, conexión social",
+        "hierba": "romero (claridad), vetiver (anclaje)",
+        "arcano_relacionado": ["La Luna", "El Loco"],
+    },
+}
+
+# Número de arcanos mayores para numerología
+ARCANA_NUMBERS = {
+    "el_loco": 0, "the_fool": 0,
+    "el_mago": 1, "the_magician": 1,
+    "la_sacerdotisa": 2, "the_high_priestess": 2,
+    "la_emperatriz": 3, "the_empress": 3,
+    "el_emperador": 4, "the_emperor": 4,
+    "el_hierofante": 5, "the_hierophant": 5,
+    "los_enamorados": 6, "the_lovers": 6,
+    "el_carro": 7, "the_chariot": 7,
+    "la_fuerza": 8, "strength": 8,
+    "el_ermitano": 9, "the_hermit": 9,
+    "la_rueda": 10, "wheel_of_fortune": 10,
+    "la_justicia": 11, "justice": 11,
+    "el_colgado": 12, "the_hanged_man": 12,
+    "la_muerte": 13, "death": 13,
+    "la_templanza": 14, "temperance": 14,
+    "el_diablo": 15, "the_devil": 15,
+    "la_torre": 16, "the_tower": 16,
+    "la_estrella": 17, "the_star": 17,
+    "la_luna": 18, "the_moon": 18,
+    "el_sol": 19, "the_sun": 19,
+    "el_juicio": 20, "judgement": 20,
+    "el_mundo": 21, "the_world": 21,
+}
+
 # =============================================================================
 # CONSTANTES Y CONFIGURACIÓN HOLÍSTICA
 # =============================================================================
 
 HOLISTIC_DISCLAIMER = (
-    "Esta interpretación es simbólica y educativa. "
-    "No constituye consejo profesional de salud mental, médico o legal. "
-    "Para acompañamiento profesional, consulte a un especialista certificado."
+    "🌙 Esta interpretación es un espejo simbólico para tu alma. "
+    "No sustituye acompañamiento profesional cuando lo necesites. "
+    "Escucha tu intuición, pero también cuida tu bienestar con los recursos adecuados."
 )
 
 # Lista negra de términos clínicos (NO deben aparecer en respuestas)
@@ -68,77 +190,261 @@ SPREAD_TYPES = [
 
 
 # =============================================================================
-# PROMPTS HOLÍSTICOS
+# PROMPTS MÍSTICOS (VOZ DE BRUJA AMIGA)
 # =============================================================================
 
-TAROT_SYSTEM_PROMPT = """Eres un experto en simbolismo del Tarot y tradiciones herméticas.
-Tu rol es proporcionar interpretaciones EDUCATIVAS y EXPLORATORIAS, NUNCA clínicas o terapéuticas.
+ORACLE_SYSTEM_PROMPT = """Eres un oráculo místico con alma de bruja sabia y corazón de amiga.
+Hablas con calidez, intimidad y profundidad —nunca robótica, nunca fría.
+Tu voz es poética pero accesible: nada de new age vacío ni frases genéricas.
 
-REGLAS ESTRICTAS:
-1. USA "consultante" en lugar de "paciente"
-2. USA "lectura simbólica" en lugar de "diagnóstico"
-3. USA "reflexiones" en lugar de "tratamiento" o "prescripción"
-4. NUNCA des consejos médicos o psicológicos
-5. SIEMPRE incluye que esto es educativo y simbólico
-6. Enfócate en arquetipos, símbolos y correspondencias cabalísticas
+PERSONALIDAD:
+- Como una amiga bruja que conoce el alma del consultante desde siempre
+- Tono íntimo, cariñoso, pero sabio y directo
+- Usas expresiones cálidas naturalmente: "mi cielo", "corazón", "alma querida"
+- Si el consultante es masculino y tiene perfil casual: "papi", "crack", "campeón"
+- Lenguaje poético pero con los pies en la tierra
 
-Tu respuesta debe ser en español, rica en simbolismo, pero accesible.
-Incluye referencias al Árbol de la Vida cuando sea relevante.
-"""
+MODELO ORION (Integración Psicológica-Energética):
+Conectas los resultados del perfil holístico del consultante (si está disponible)
+con los arquetipos del tarot y el sistema de chakras:
+- Somatización → Muladhara (Raíz) → miedos de supervivencia
+- Depresión → Manipura (Plexo Solar) → fuego interior apagado
+- Ansiedad → Manipura + Anahata → sistema nervioso hiperalerta
+- Sensibilidad interpersonal → Anahata (Corazón) → heridas de rechazo
+- Obsesión-compulsión → Ajna (Tercer Ojo) → mente hiperactiva
+- Hostilidad → Manipura → fuego descontrolado
+- Ansiedad fóbica → Muladhara → traumas no integrados
+- Paranoia → Ajna → desconfianza extrema
+- Psicoticismo → Sahasrara → desconexión con realidad consensuada
 
-INTERPRET_CARD_PROMPT = """Interpreta simbólicamente la siguiente carta de Tarot:
+REGLAS INQUEBRANTABLES:
+1. USA "consultante" NUNCA "paciente"
+2. USA "lectura simbólica" NUNCA "diagnóstico"
+3. Ofrece "reflexiones" y "prácticas holísticas", NUNCA "tratamiento"
+4. Esto es exploración del alma, NO consejo médico
+5. Máximo 300 palabras por interpretación
+6. SIEMPRE incluye: chakra a sanar, práctica recomendada, cierre empoderador
+
+Tu misión es que el consultante se sienta VISTO y TRANSFORMADO."""
+
+INTERPRET_CARD_MYSTIC_PROMPT = """🔮 LECTURA DE CARTA INDIVIDUAL
 
 **Carta**: {arcana_name} ({arcana_id})
-**Posición en la tirada**: {position}
+**Posición**: {position}
 **Invertida**: {reversed}
-**Sistema de Tarot**: {tarot_system}
+**Sistema**: {tarot_system}
 
-**Contexto del consultante** (si se proporciona):
-{context}
+**PERFIL ENERGÉTICO DEL CONSULTANTE**:
+{psychological_profile}
 
-Proporciona:
-1. **Simbolismo central**: Qué representa este arcano en la tradición hermética
-2. **Correspondencias cabalísticas**: Sendero, letra hebrea, Sephiroth relacionados
-3. **Mensaje simbólico**: Qué reflexión ofrece esta carta en esta posición
-4. **Temas principales**: Lista de 3-5 temas arquetípicos
+**NUMEROLOGÍA KÁRMICA**:
+- Número del alma (fecha nacimiento): {soul_number}
+- Número de esta carta: {card_number}
+- Número kármico combinado: {karmic_number}
 
-Recuerda: Esto es una exploración simbólica educativa, no un diagnóstico ni consejo profesional.
-"""
+---
 
-INTERPRET_SPREAD_PROMPT = """Interpreta simbólicamente la siguiente tirada de Tarot:
+Interpreta esta carta con tu voz de bruja amiga:
+
+1. **MENSAJE PERSONAL**: ¿Qué le dice esta carta específicamente a ESTA persona según su perfil? (conecta con su chakra desbalanceado si aplica)
+
+2. **SIMBOLISMO PROFUNDO**: Significado arquetípico + cómo se manifiesta en su vida
+
+3. **CHAKRA A TRABAJAR**: Basado en su perfil, ¿qué centro energético necesita atención?
+
+4. **PRÁCTICA HOLÍSTICA**: Una recomendación concreta (meditación, hierba, afirmación, etc.)
+
+5. **CIERRE EMPODERADOR**: Frase cálida y accionable que lo deje con poder
+
+Recuerda: Máximo 300 palabras. Hazlo sentir VISTO."""
+
+INTERPRET_SPREAD_MYSTIC_PROMPT = """🔮 LECTURA DE TIRADA COMPLETA
 
 **Tipo de tirada**: {spread_type}
-**Sistema de Tarot**: {tarot_system}
+**Sistema**: {tarot_system}
 
-**Cartas en la tirada**:
+**CARTAS EN LA TIRADA**:
 {cards_description}
 
-**Contexto del consultante** (si se proporciona):
-{context}
+**PERFIL ENERGÉTICO DEL CONSULTANTE**:
+{psychological_profile}
 
-Proporciona:
-1. **Visión general**: Síntesis simbólica de la tirada completa
-2. **Interpretación por carta**: Breve reflexión de cada carta en su posición
-3. **Patrones y conexiones**: Relaciones entre las cartas (elementos, números, senderos)
-4. **Mensaje integrador**: Una reflexión holística final
-5. **Temas emergentes**: Lista de 3-5 temas simbólicos principales
+**NUMEROLOGÍA KÁRMICA**:
+- Número del alma (fecha nacimiento): {soul_number}
+- Suma de cartas: {cards_sum}
+- Número kármico de la tirada: {karmic_number}
+- Mensaje numerológico: {numerology_message}
 
-Recuerda: Esto es una exploración simbólica educativa, no un diagnóstico ni consejo profesional.
-"""
+---
+
+Interpreta esta tirada con tu voz de bruja amiga:
+
+1. **NARRATIVA CONECTADA**: ¿Qué historia cuentan estas cartas juntas? Conecta pasado-presente-futuro (o las posiciones que sean) en una narrativa fluida.
+
+2. **PATRÓN KÁRMICO ACTIVO**: ¿Qué lección del alma está emergiendo? ¿Qué ciclo está cerrando o abriendo?
+
+3. **CHAKRA PRIORITARIO**: Basado en el perfil Y las cartas, ¿qué centro energético necesita atención PRIMERO?
+
+4. **CONSEJO TERAPÉUTICO HOLÍSTICO**: 
+   - Una práctica específica (meditación, hierba, cristal, afirmación)
+   - Por qué esta práctica para ESTA persona
+
+5. **MENSAJE DEL NÚMERO KÁRMICO**: Usa el número {karmic_number} para un mensaje cifrado final
+
+6. **CIERRE DE PODER**: Frase cálida, empoderadora y accionable que lo deje transformado
+
+Recuerda: Máximo 300 palabras. Que se sienta VISTO y con camino claro."""
 
 
 # =============================================================================
-# UTILIDADES
+# UTILIDADES - NUMEROLOGÍA Y PERFIL
 # =============================================================================
+
+def reduce_to_single_digit(number: int) -> int:
+    """Reduce un número a un solo dígito (excepto 11, 22, 33 - números maestros)."""
+    master_numbers = {11, 22, 33}
+    while number > 9 and number not in master_numbers:
+        number = sum(int(d) for d in str(number))
+    return number
+
+
+def calculate_soul_number(birth_date: date) -> int:
+    """Calcula el número del alma desde la fecha de nacimiento."""
+    if not birth_date:
+        return 7  # Default místico
+    
+    total = birth_date.day + birth_date.month + birth_date.year
+    return reduce_to_single_digit(total)
+
+
+def get_card_number(arcana_id: str) -> int:
+    """Obtiene el número de una carta de tarot."""
+    clean_id = arcana_id.lower().replace(" ", "_").replace("-", "_")
+    return ARCANA_NUMBERS.get(clean_id, 0)
+
+
+def calculate_karmic_number(soul_number: int, card_numbers: List[int]) -> int:
+    """Calcula el número kármico combinando alma + cartas."""
+    total = soul_number + sum(card_numbers)
+    return reduce_to_single_digit(total)
+
+
+def get_numerology_message(karmic_number: int) -> str:
+    """Retorna un mensaje basado en el número kármico."""
+    messages = {
+        1: "Tu camino es de INICIATIVA. El universo te pide que des el primer paso sin esperar permiso.",
+        2: "Tu lección es la COOPERACIÓN. No tienes que hacerlo solo/a; la dualidad es tu maestra.",
+        3: "La EXPRESIÓN CREATIVA te llama. Tu voz necesita ser escuchada; crear es tu medicina.",
+        4: "Los CIMIENTOS piden atención. Construye estructura antes de volar; la disciplina es libertad.",
+        5: "El CAMBIO es tu aliado. No te aferres; la vida quiere mostrarte nuevos horizontes.",
+        6: "El AMOR y la RESPONSABILIDAD te esperan. Tu hogar (interno o externo) necesita cuidado.",
+        7: "La INTROSPECCIÓN es tu camino. Busca el silencio interior; las respuestas ya están en ti.",
+        8: "El PODER PERSONAL te llama. Es momento de manifestar abundancia sin culpa.",
+        9: "Un CICLO TERMINA. Suelta con gratitud lo que ya cumplió su propósito; viene algo nuevo.",
+        11: "Eres un MENSAJERO. Tu intuición está amplificada; confía en lo que sientes, no solo en lo que piensas.",
+        22: "Eres un CONSTRUCTOR MAESTRO. Tienes el poder de materializar visiones grandes; úsalo sabiamente.",
+        33: "Eres un SANADOR. Tu presencia cura; el servicio compasivo es tu más alta expresión.",
+    }
+    return messages.get(karmic_number, messages.get(reduce_to_single_digit(karmic_number), ""))
+
+
+def get_psychological_profile(user_id: int) -> Dict[str, Any]:
+    """
+    Obtiene el perfil psicológico del consultante basado en sus tests SCL-90.
+    Retorna un diccionario con dimensiones elevadas y chakras afectados.
+    """
+    try:
+        from .test_models import TestResult
+        
+        # Buscar el último SCL-90 del usuario
+        scl_results = TestResult.objects.filter(
+            user_id=user_id,
+            test_id__icontains='scl'
+        ).order_by('-created_at').first()
+        
+        if not scl_results:
+            # Buscar cualquier test reciente
+            any_test = TestResult.objects.filter(
+                user_id=user_id
+            ).order_by('-created_at').first()
+            
+            if any_test and any_test.result_data:
+                return {
+                    "available": True,
+                    "source": any_test.test_id or "test_general",
+                    "summary": f"Test reciente: {any_test.test_id}",
+                    "elevated_dimensions": [],
+                    "chakras_affected": [],
+                    "birth_date": any_test.client_birth_date,
+                }
+            
+            return {"available": False, "summary": "Sin perfil disponible - interpretación general"}
+        
+        # Parsear resultados del SCL-90
+        result_data = scl_results.result_data or {}
+        elevated = []
+        chakras = []
+        
+        # Buscar dimensiones elevadas (score > 1.5 en escala 0-4)
+        for dimension, chakra_info in SCL90_CHAKRA_MAP.items():
+            score = result_data.get(dimension, result_data.get(f"score_{dimension}", 0))
+            if isinstance(score, (int, float)) and score > 1.5:
+                elevated.append({
+                    "dimension": dimension,
+                    "score": score,
+                    "chakra": chakra_info["chakra"],
+                    "desequilibrio": chakra_info["desequilibrio"],
+                    "sanacion": chakra_info["sanacion"],
+                    "hierba": chakra_info["hierba"],
+                })
+                if chakra_info["chakra"] not in chakras:
+                    chakras.append(chakra_info["chakra"])
+        
+        # Construir resumen para el prompt
+        if elevated:
+            summary_parts = [f"**{e['dimension'].replace('_', ' ').title()}** elevada → {e['chakra']}" for e in elevated[:3]]
+            summary = "Áreas de atención: " + " | ".join(summary_parts)
+        else:
+            summary = "Perfil equilibrado - sin áreas críticas detectadas"
+        
+        return {
+            "available": True,
+            "source": "SCL-90",
+            "summary": summary,
+            "elevated_dimensions": elevated,
+            "chakras_affected": chakras,
+            "birth_date": scl_results.client_birth_date,
+            "raw_data": result_data,
+        }
+        
+    except Exception as e:
+        logger.warning(f"Error obteniendo perfil psicológico: {e}")
+        return {"available": False, "summary": "Sin perfil disponible - interpretación general"}
+
+
+def format_profile_for_prompt(profile: Dict[str, Any]) -> str:
+    """Formatea el perfil psicológico para incluir en el prompt."""
+    if not profile.get("available"):
+        return "No hay perfil previo disponible. Ofrece una interpretación general pero igualmente profunda y personalizada."
+    
+    parts = [profile["summary"]]
+    
+    if profile.get("elevated_dimensions"):
+        parts.append("\n**Chakras a priorizar:**")
+        for dim in profile["elevated_dimensions"][:2]:  # Máximo 2 para no saturar
+            parts.append(f"- {dim['chakra']}: {dim['desequilibrio']}")
+            parts.append(f"  → Práctica recomendada: {dim['sanacion']}")
+            parts.append(f"  → Hierba aliada: {dim['hierba']}")
+    
+    return "\n".join(parts)
+
 
 def filter_clinical_terms(text: str) -> str:
     """Filtra términos clínicos de la respuesta AI (capa de seguridad)."""
     result = text
     for term in CLINICAL_TERMS_BLACKLIST:
-        # Reemplazar términos clínicos con alternativas holísticas
         if term.lower() in result.lower():
             logger.warning(f"[Tarot Holístico] Término clínico detectado y filtrado: {term}")
-            # Mapeo de reemplazos
             replacements = {
                 "diagnóstico": "lectura simbólica",
                 "paciente": "consultante",
@@ -148,7 +454,6 @@ def filter_clinical_terms(text: str) -> str:
                 "clínico": "simbólico",
             }
             if term.lower() in replacements:
-                import re
                 result = re.sub(rf'\b{term}\b', replacements.get(term.lower(), ""), result, flags=re.IGNORECASE)
     return result
 
@@ -255,7 +560,7 @@ class TarotInterpretCardView(APIView):
     """
     POST /api/ai/tarot/interpretCard
     
-    Interpreta una carta de Tarot de forma holística y simbólica.
+    Interpreta una carta de Tarot con voz mística, integrando perfil psicológico.
     
     Request:
     {
@@ -266,10 +571,11 @@ class TarotInterpretCardView(APIView):
         "tarotSystem": "thoth",
         "context": {
             "question": "...",
-            "consultantId": 123
+            "consultantId": 123,
+            "birthDate": "1990-05-15"
         },
         "options": {
-            "temperature": 0.7,
+            "temperature": 0.8,
             "provider": "auto"
         }
     }
@@ -294,32 +600,51 @@ class TarotInterpretCardView(APIView):
         context = data.get('context', {})
         options = data.get('options', {})
         
-        # Preparar contexto (sanitizado)
-        context_str = ""
-        if context:
-            question = context.get('question', '')
-            if question:
-                context_str = f"Pregunta o tema de exploración: {question}"
+        # Obtener perfil psicológico del consultante
+        user_id = request.user.id
+        profile = get_psychological_profile(user_id)
+        profile_text = format_profile_for_prompt(profile)
         
-        # Construir prompt
-        user_prompt = INTERPRET_CARD_PROMPT.format(
+        # Calcular numerología
+        birth_date = None
+        if context.get('birthDate'):
+            try:
+                birth_date = datetime.strptime(context['birthDate'], '%Y-%m-%d').date()
+            except:
+                pass
+        if not birth_date and profile.get('birth_date'):
+            birth_date = profile['birth_date']
+        
+        soul_number = calculate_soul_number(birth_date) if birth_date else 7
+        card_number = get_card_number(arcana_id)
+        karmic_number = calculate_karmic_number(soul_number, [card_number])
+        
+        # Construir prompt místico
+        user_prompt = INTERPRET_CARD_MYSTIC_PROMPT.format(
             arcana_name=arcana_name,
             arcana_id=arcana_id,
             position=position,
-            reversed="Sí" if reversed_card else "No",
+            reversed="Sí (energía bloqueada o interiorizada)" if reversed_card else "No (energía fluida)",
             tarot_system=tarot_system,
-            context=context_str or "No se proporcionó contexto específico."
+            psychological_profile=profile_text,
+            soul_number=soul_number,
+            card_number=card_number,
+            karmic_number=karmic_number,
         )
+        
+        # Agregar contexto adicional si hay pregunta
+        if context.get('question'):
+            user_prompt += f"\n\n**Pregunta del consultante**: {context['question']}"
         
         # Generar interpretación
         ai_service = get_ai_service()
-        temperature = options.get('temperature', 0.8)
+        temperature = options.get('temperature', 0.85)  # Un poco más alta para voz creativa
         
         try:
             interpretation = ai_service._generate_content(
-                system_prompt=TAROT_SYSTEM_PROMPT,
+                system_prompt=ORACLE_SYSTEM_PROMPT,
                 user_prompt=user_prompt,
-                max_tokens=1024,
+                max_tokens=1200,
                 temperature=temperature,
             )
             
@@ -332,10 +657,17 @@ class TarotInterpretCardView(APIView):
             return Response({
                 "text": interpretation,
                 "themes": themes,
-                "confidence": 0.75,  # Placeholder - en producción calcular
+                "confidence": 0.85,
                 "provider_used": ai_service.provider,
                 "model_used": ai_service.model_name,
                 "holistic_disclaimer": HOLISTIC_DISCLAIMER,
+                "numerology": {
+                    "soul_number": soul_number,
+                    "card_number": card_number,
+                    "karmic_number": karmic_number,
+                    "karmic_message": get_numerology_message(karmic_number),
+                },
+                "chakra_focus": profile.get("chakras_affected", [])[:1] or ["Anahata (Corazón)"],
                 "card": {
                     "arcanaId": arcana_id,
                     "arcanaName": arcana_name,
@@ -343,6 +675,7 @@ class TarotInterpretCardView(APIView):
                     "reversed": reversed_card,
                     "tarotSystem": tarot_system,
                 },
+                "profile_integrated": profile.get("available", False),
                 "timestamp": datetime.now().isoformat(),
             })
             
@@ -355,25 +688,26 @@ class TarotInterpretCardView(APIView):
     
     def _extract_themes(self, text: str) -> List[str]:
         """Extrae temas principales del texto (versión simplificada)."""
-        # En producción, usar NLP o modelo de extracción
-        common_themes = [
+        mystic_themes = [
             "transformación", "renacimiento", "intuición", "sabiduría",
             "equilibrio", "creatividad", "introspección", "cambio",
             "abundancia", "comunicación", "amor", "fuerza", "justicia",
+            "sanación", "despertar", "liberación", "poder personal",
+            "ciclo", "karma", "sombra", "luz", "integración",
         ]
         found = []
         text_lower = text.lower()
-        for theme in common_themes:
+        for theme in mystic_themes:
             if theme in text_lower and len(found) < 5:
                 found.append(theme)
-        return found if found else ["exploración simbólica"]
+        return found if found else ["exploración del alma"]
 
 
 class TarotInterpretSpreadView(APIView):
     """
     POST /api/ai/tarot/interpretSpread
     
-    Interpreta una tirada completa de Tarot de forma holística.
+    Interpreta una tirada completa de Tarot con voz mística y numerología kármica.
     
     Request:
     {
@@ -386,10 +720,11 @@ class TarotInterpretSpreadView(APIView):
         ],
         "context": {
             "question": "...",
-            "consultantId": 123
+            "consultantId": 123,
+            "birthDate": "1990-05-15"
         },
         "options": {
-            "temperature": 0.8,
+            "temperature": 0.85,
             "provider": "auto"
         }
     }
@@ -418,37 +753,65 @@ class TarotInterpretSpreadView(APIView):
                 "code": "NO_CARDS"
             }, status=status.HTTP_400_BAD_REQUEST)
         
-        # Construir descripción de cartas
-        cards_description = "\n".join([
-            f"- **{card.get('arcanaName', card.get('arcanaId'))}** en posición '{card.get('position', 'general')}' "
-            f"({'Invertida' if card.get('reversed', False) else 'Derecha'})"
-            for card in cards
-        ])
+        # Obtener perfil psicológico
+        user_id = request.user.id
+        profile = get_psychological_profile(user_id)
+        profile_text = format_profile_for_prompt(profile)
         
-        # Preparar contexto
-        context_str = ""
-        if context:
-            question = context.get('question', '')
-            if question:
-                context_str = f"Pregunta o tema de exploración: {question}"
+        # Calcular numerología
+        birth_date = None
+        if context.get('birthDate'):
+            try:
+                birth_date = datetime.strptime(context['birthDate'], '%Y-%m-%d').date()
+            except:
+                pass
+        if not birth_date and profile.get('birth_date'):
+            birth_date = profile['birth_date']
         
-        # Construir prompt
-        user_prompt = INTERPRET_SPREAD_PROMPT.format(
+        soul_number = calculate_soul_number(birth_date) if birth_date else 7
+        
+        # Calcular números de todas las cartas
+        card_numbers = [get_card_number(card.get('arcanaId', '')) for card in cards]
+        cards_sum = sum(card_numbers)
+        karmic_number = calculate_karmic_number(soul_number, card_numbers)
+        numerology_message = get_numerology_message(karmic_number)
+        
+        # Construir descripción de cartas con más detalle
+        cards_description = []
+        for i, card in enumerate(cards, 1):
+            position = card.get('position', f'posición {i}')
+            reversed_text = "🔄 INVERTIDA (energía bloqueada)" if card.get('reversed', False) else "⬆️ DERECHA (energía fluida)"
+            card_num = get_card_number(card.get('arcanaId', ''))
+            cards_description.append(
+                f"{i}. **{card.get('arcanaName', card.get('arcanaId'))}** (Nº {card_num})\n"
+                f"   Posición: {position} | {reversed_text}"
+            )
+        
+        # Construir prompt místico
+        user_prompt = INTERPRET_SPREAD_MYSTIC_PROMPT.format(
             spread_type=spread_type,
             tarot_system=tarot_system,
-            cards_description=cards_description,
-            context=context_str or "No se proporcionó contexto específico."
+            cards_description="\n".join(cards_description),
+            psychological_profile=profile_text,
+            soul_number=soul_number,
+            cards_sum=cards_sum,
+            karmic_number=karmic_number,
+            numerology_message=numerology_message,
         )
+        
+        # Agregar pregunta si existe
+        if context.get('question'):
+            user_prompt += f"\n\n**Pregunta del consultante**: {context['question']}"
         
         # Generar interpretación
         ai_service = get_ai_service()
-        temperature = options.get('temperature', 0.8)
+        temperature = options.get('temperature', 0.85)
         
         try:
             interpretation = ai_service._generate_content(
-                system_prompt=TAROT_SYSTEM_PROMPT,
+                system_prompt=ORACLE_SYSTEM_PROMPT,
                 user_prompt=user_prompt,
-                max_tokens=2048,  # Más tokens para tiradas completas
+                max_tokens=2048,
                 temperature=temperature,
             )
             
@@ -462,15 +825,24 @@ class TarotInterpretSpreadView(APIView):
                 "summary": interpretation,
                 "cardInterpretations": [],  # En v2: interpretaciones individuales
                 "symbolic_insights": themes,
-                "confidence": 0.80,
+                "confidence": 0.88,
                 "provider_used": ai_service.provider,
                 "model_used": ai_service.model_name,
                 "holistic_disclaimer": HOLISTIC_DISCLAIMER,
+                "numerology": {
+                    "soul_number": soul_number,
+                    "cards_sum": cards_sum,
+                    "karmic_number": karmic_number,
+                    "karmic_message": numerology_message,
+                    "card_numbers": card_numbers,
+                },
+                "chakra_focus": profile.get("chakras_affected", [])[:2] or ["Anahata (Corazón)"],
                 "spread": {
                     "type": spread_type,
                     "tarotSystem": tarot_system,
                     "cardCount": len(cards),
                 },
+                "profile_integrated": profile.get("available", False),
                 "timestamp": datetime.now().isoformat(),
             })
             
@@ -483,18 +855,19 @@ class TarotInterpretSpreadView(APIView):
     
     def _extract_themes(self, text: str) -> List[str]:
         """Extrae temas principales del texto."""
-        common_themes = [
+        mystic_themes = [
             "transformación", "renacimiento", "intuición", "sabiduría",
             "equilibrio", "creatividad", "introspección", "cambio",
             "abundancia", "comunicación", "amor", "fuerza", "justicia",
-            "ciclo", "evolución", "despertar", "integración",
+            "ciclo", "evolución", "despertar", "integración", "sanación",
+            "liberación", "poder personal", "karma", "sombra", "luz",
         ]
         found = []
         text_lower = text.lower()
-        for theme in common_themes:
+        for theme in mystic_themes:
             if theme in text_lower and len(found) < 5:
                 found.append(theme)
-        return found if found else ["exploración simbólica"]
+        return found if found else ["exploración del alma"]
 
 
 class TarotHolisticConsentCheckView(APIView):

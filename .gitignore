@@ -61,6 +61,9 @@ dist/
 *.swo
 *~
 .DS_Store
+# Agent tooling
+/.agent/
+**/.agent/**
 
 # Environment
 .env

@@ -280,6 +280,13 @@ class WorkspaceService:
             instance.started_at = timezone.now()
             
         elif new_status == WorkspaceStatus.SEALED:
+            # Validate workspace has content before sealing
+            if instance.total_cards == 0:
+                raise ValidationError(
+                    "No se puede sellar un workspace sin cartas. "
+                    "Debe agregar al menos una carta a la tirada."
+                )
+            
             if not WorkspaceService.check_permission(
                 instance, user, PermissionLevel.EXECUTOR
             ):
@@ -342,7 +349,8 @@ class WorkspaceService:
         user: User,
         status_filter: Optional[str] = None,
         as_creator: bool = True,
-        as_subject: bool = False
+        as_subject: bool = False,
+        include_cancelled: bool = False
     ) -> List[WorkspaceInstance]:
         """
         List workspaces accessible to a user.
@@ -352,6 +360,7 @@ class WorkspaceService:
             status_filter: Filter by status (optional)
             as_creator: Include workspaces created by user
             as_subject: Include workspaces where user is subject
+            include_cancelled: Include cancelled workspaces (default: False)
             
         Returns:
             List of accessible WorkspaceInstance objects
@@ -377,6 +386,10 @@ class WorkspaceService:
         queryset = WorkspaceInstance.objects.filter(filters).select_related(
             'definition', 'subject_user', 'creator_user'
         ).distinct()
+        
+        # Exclude cancelled by default (unless explicitly included)
+        if not include_cancelled:
+            queryset = queryset.exclude(status=WorkspaceStatus.CANCELLED)
         
         if status_filter:
             queryset = queryset.filter(status=status_filter)

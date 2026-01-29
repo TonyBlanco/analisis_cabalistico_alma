@@ -121,22 +121,28 @@ TEST_EXECUTION_MODE_MAP: Record<string, TestExecutionMode>
 
 ### Caso especial: Auditoría de Armonía Sefirótica (SHA)
 
-- Tipo de flujo: híbrido `patient_self` + revisión terapéutica. El paciente completa, el terapeuta valida y sella.
-- Asignación: se asigna como tarea al paciente (aparece en su portal con guía breve y campos simples). No se sella automáticamente.
-- Estados propuestos:
    - `assigned` → `in_progress` (paciente edita) → `submitted` (pendiente de revisión) → `sealed` (solo terapeuta) → `reviewed`.
-- Artefactos:
    - Principal (obligatorio): balance Misericordia/Severidad + integración emocional + recomendación breve.
    - Notas del terapeuta (histórico de entradas).
    - Guía consultante (opcional, reducida) si `share_with_consultant=true`.
-- Visibilidad:
    - Por defecto solo terapeuta. El paciente ve la tarea y, tras enviar, el acuse “En revisión”.
    - La guía consultante solo se expone si el terapeuta la activa en el sellado.
-- Validaciones:
    - Sellado requiere artefacto principal con contenido > 0.
    - Se excluyen `cancelled` de listados por defecto.
 
-### Dashboard del Terapeuta
+## 🆕 Flujo SWM SHA (Auditoría de Armonía Sefirótica)
+
+- Workspace especializado (SWM) con estados: created → in_progress → sealed → reviewed → archived.
+- Roles: terapeuta (crea/asigna, edita, sella), paciente (envía "patient_submission"), consultante solo ve guía si el terapeuta la comparte.
+- Artefactos:
+   - `balance_map` (principal, obligatorio para sellar)
+   - `therapist_notes` (opcional, histórico)
+   - `patient_submission` (entrada del paciente, no sella)
+   - `consultant_guide` (versión reducida si `share_with_consultant`)
+- Permisos mínimos:
+   - Terapeuta: executor/reviewer. Paciente: solo enviar `patient_submission`.
+   - Listados excluyen `CANCELLED` por defecto.
+- Validación de sellado: requiere al menos un artefacto principal (`balance_map` o `patient_submission`) con contenido.
 
 **Sidebar Separado:**
 

@@ -60,6 +60,7 @@ function getAuthHeaders(token?: string): HeadersInit {
 async function handleResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
     const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+    console.error('[SWM Tarot API] Response error:', error);
     throw new Error(error.error || error.detail || `HTTP ${response.status}`);
   }
   return response.json();
@@ -90,6 +91,7 @@ export const swmTarotApi = {
     data: CreateInstanceRequest,
     token?: string
   ): Promise<WorkspaceInstance> {
+    console.log('[SWM Tarot API] Creating instance with data:', data);
     const response = await fetch(`${SWM_TAROT_BASE}/create`, {
       method: 'POST',
       headers: getAuthHeaders(token),

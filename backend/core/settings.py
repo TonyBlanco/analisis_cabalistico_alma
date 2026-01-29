@@ -224,6 +224,10 @@ FRONTEND_URL = config('FRONTEND_URL', default='http://localhost:3000')
 GEMINI_API_KEY = config('GEMINI_API_KEY', default='')
 GEMINI_MODEL = config('GEMINI_MODEL', default='gemini-1.5-flash')
 
+# OpenAI Configuration (GPT-4o-mini for fallback)
+OPENAI_API_KEY = config('OPENAI_API_KEY', default='')
+OPENAI_MODEL = config('OPENAI_MODEL', default='gpt-4o-mini')
+
 # Groq AI Configuration (alternative to Gemini - higher rate limits)
 GROQ_API_KEY = config('GROQ_API_KEY', default='')
 GROQ_MODEL = config('GROQ_MODEL', default='llama-3.3-70b-versatile')

@@ -1,17 +1,20 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Star, Play, Lock } from 'lucide-react';
 import AstrologyTarotSidebar from './AstrologyTarotSidebar';
 import AstrologyTarotVisualCore from './AstrologyTarotVisualCore';
 import TarotHistoryPanel from './TarotHistoryPanel';
 import type { AstrologyTarotSectionId, TarotSystemId } from './types';
+import { getActivePatientId, getActivePatientName } from '@/lib/active-patient';
+import { API_BASE_URL, getAuthToken } from '@/lib/api';
 
 // SWM Tarot hooks
 import { useCreateTarotInstance } from '@/lib/api/swm/tarot/hooks/useCreateTarotInstance';
 import { useStartTarotSession } from '@/lib/api/swm/tarot/hooks/useStartTarotSession';
 import { useSealTarotWorkspace } from '@/lib/api/swm/tarot/hooks/useSealTarotWorkspace';
+import { swmTarotApi } from '@/lib/api/swm/tarot/client';
 import type { SpreadType, TarotSystem, WorkspaceInstanceList } from '@/lib/api/swm/tarot/types';
 
 interface AstrologyTarotWorkspaceProps {
@@ -20,54 +23,149 @@ interface AstrologyTarotWorkspaceProps {
 }
 
 // Map frontend TarotSystemId to backend TarotSystem
+// Backend Django model expects: 'rider-waite' | 'thoth' | 'marseille' | 'golden-dawn' | 'bota'
 const systemIdToBackend: Record<TarotSystemId, TarotSystem> = {
   thoth: 'thoth',
-  'golden-dawn': 'golden_dawn',
-  rota: 'hermetic',
-  marsella: 'rider_waite',
-  'rider-waite': 'rider_waite',
-  'tarot-cabalistico': 'sephiroth',
-  'oracle-symbolic': 'hermetic',
+  'golden-dawn': 'golden-dawn',
+  rota: 'bota', // ROTA maps to BOTA system
+  marsella: 'marseille',
+  'rider-waite': 'rider-waite',
+  'tarot-cabalistico': 'bota', // Kabbalistic tarot uses BOTA
+  'oracle-symbolic': 'rider-waite', // Generic oracle uses Rider-Waite as base
   bota: 'bota',
-  hermetic: 'hermetic',
-  sephiroth: 'sephiroth',
+  hermetic: 'golden-dawn', // Hermetic uses Golden Dawn
+  sephiroth: 'bota', // Sephiroth uses BOTA
 };
 
 // Map frontend section to backend spread type
+// Backend SpreadType choices: 'free', 'tree_of_life', 'cross', 'three_cards', 'horseshoe', 'sephiroth_path'
 const sectionToSpreadType: Partial<Record<AstrologyTarotSectionId, SpreadType>> = {
-  'tarot-natal': 'natal_chart',
+  'tarot-natal': 'free',           // Carta natal uses free spread
   'tarot-tree-spread': 'tree_of_life',
   'tarot-free-spread': 'free',
-  'tarot-correspondences': 'correspondences',
+  'tarot-correspondences': 'free', // Correspondences uses free spread
 };
 
 export default function AstrologyTarotWorkspace({
-  patientId,
-  patientBirthDate,
+  patientId: patientIdProp,
+  patientBirthDate: patientBirthDateProp,
 }: AstrologyTarotWorkspaceProps) {
   const [activeSection, setActiveSection] =
     useState<AstrologyTarotSectionId>('tarot-natal');
   const [selectedSystem, setSelectedSystem] = useState<TarotSystemId>('thoth');
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   
+  // Load active patient from global context
+  const [patientId, setPatientId] = useState<string | undefined>(patientIdProp);
+  const [patientName, setPatientName] = useState<string | undefined>(undefined);
+  const [patientUserId, setPatientUserId] = useState<number | undefined>(undefined);
+  const [isLoadingPatient, setIsLoadingPatient] = useState(false);
+  const [patientBirthDate, setPatientBirthDate] = useState<Date | undefined>(patientBirthDateProp);
+  
+  useEffect(() => {
+    const activeId = getActivePatientId();
+    const activeName = getActivePatientName();
+    
+    if (activeId) {
+      setPatientId(activeId.toString());
+      setPatientName(activeName ?? undefined);
+      
+      // Fetch patient details to get user_id
+      const fetchPatientUserId = async () => {
+        setIsLoadingPatient(true);
+        try {
+          const token = getAuthToken();
+          const response = await fetch(`${API_BASE_URL}/therapist/patients/${activeId}/profile/`, {
+            headers: {
+              'Authorization': `Token ${token}`,
+            },
+          });
+          if (response.ok) {
+            const profile = await response.json();
+            console.log('👤 Patient profile loaded:', profile);
+            setPatientUserId(profile.user_id || profile.user);
+          }
+        } catch (error) {
+          console.error('Error fetching patient user_id:', error);
+        } finally {
+          setIsLoadingPatient(false);
+        }
+      };
+      fetchPatientUserId();
+    }
+    
+    // Listen for active patient changes
+    const handlePatientChange = () => {
+      const newId = getActivePatientId();
+      const newName = getActivePatientName();
+      setPatientId(newId?.toString() ?? undefined);
+      setPatientName(newName ?? undefined);
+      setPatientUserId(undefined);
+    };
+    
+    window.addEventListener('activePatientChanged', handlePatientChange);
+    return () => window.removeEventListener('activePatientChanged', handlePatientChange);
+  }, []);
+  
   // SWM State
   const [currentInstanceId, setCurrentInstanceId] = useState<string | null>(null);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [workspaceStatus, setWorkspaceStatus] = useState<'none' | 'active' | 'sealed'>('none');
+  const [isLoadingWorkspace, setIsLoadingWorkspace] = useState(false);
   
   // SWM Hooks
   const { createInstance, isLoading: isCreating } = useCreateTarotInstance();
   const { startSession, isLoading: isStarting } = useStartTarotSession();
   const { sealWorkspace, isLoading: isSealing } = useSealTarotWorkspace();
 
+  // Auto-load active workspace when patientUserId is available
+  useEffect(() => {
+    if (!patientUserId) return;
+    
+    const loadActiveWorkspace = async () => {
+      setIsLoadingWorkspace(true);
+      try {
+        // Check for existing active workspace (created or in_progress)
+        const workspaces = await swmTarotApi.listWorkspaces({
+          subject_user_id: patientUserId,
+        });
+        
+        // Find active workspace (not sealed, not reviewed)
+        const activeWorkspace = workspaces.find(
+          w => w.status === 'created' || w.status === 'in_progress'
+        );
+        
+        if (activeWorkspace) {
+          console.log('📂 Auto-loading active workspace:', activeWorkspace.id);
+          setCurrentInstanceId(activeWorkspace.id);
+          setWorkspaceStatus('active');
+        } else {
+          console.log('ℹ️ No active workspace found for patient');
+          setCurrentInstanceId(null);
+          setWorkspaceStatus('none');
+        }
+      } catch (error) {
+        console.error('Error loading active workspace:', error);
+      } finally {
+        setIsLoadingWorkspace(false);
+      }
+    };
+    
+    loadActiveWorkspace();
+  }, [patientUserId]);
+
   // Start a new workspace
   const handleStartWorkspace = useCallback(async () => {
-    if (!patientId) return;
+    if (!patientId || !patientUserId) {
+      console.warn('Cannot start workspace: patientId or patientUserId missing');
+      return;
+    }
     
     try {
-      // Create instance
+      // Create instance using User ID (not Patient ID)
+      console.log('🚀 Creating workspace instance with user_id:', patientUserId);
       const instance = await createInstance({
-        subject_user_id: parseInt(patientId, 10),
+        subject_user_id: patientUserId,
         spread_type: sectionToSpreadType[activeSection] || 'free',
         tarot_system: systemIdToBackend[selectedSystem],
         has_reversed: true,
@@ -84,7 +182,7 @@ export default function AstrologyTarotWorkspace({
     } catch (error) {
       console.error('❌ Error al iniciar workspace:', error);
     }
-  }, [patientId, activeSection, selectedSystem, createInstance, startSession]);
+  }, [patientId, patientUserId, activeSection, selectedSystem, createInstance, startSession]);
 
   // Seal current workspace
   const handleSealWorkspace = useCallback(async () => {
@@ -163,14 +261,36 @@ export default function AstrologyTarotWorkspace({
           </div>
           
           {/* Start Workspace Button */}
+          {workspaceStatus === 'none' && !patientId && (
+            <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-amber-600" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-amber-900">Consultante no seleccionado</h3>
+                  <p className="mt-1 text-xs text-amber-700">
+                    Seleccione un consultante en el encabezado superior para iniciar una lectura de Tarot.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
           {workspaceStatus === 'none' && patientId && (
             <div className="mb-4">
               <button
                 onClick={handleStartWorkspace}
-                disabled={isCreating || isStarting}
+                disabled={isCreating || isStarting || isLoadingPatient || isLoadingWorkspace || !patientUserId}
                 className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {(isCreating || isStarting) ? (
+                {isLoadingPatient || isLoadingWorkspace ? (
+                  <>
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    {isLoadingWorkspace ? 'Verificando workspace...' : 'Cargando consultante...'}
+                  </>
+                ) : (isCreating || isStarting) ? (
                   <>
                     <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
                     Iniciando...
@@ -185,17 +305,21 @@ export default function AstrologyTarotWorkspace({
             </div>
           )}
           
-          {/* Seal Workspace Button */}
+          {/* Active Workspace Indicator */}
           {workspaceStatus === 'active' && currentInstanceId && (
-            <div className="mb-4">
+            <div className="mb-4 flex items-center gap-3">
+              <div className="flex items-center gap-2 rounded-lg bg-green-50 border border-green-200 px-3 py-2">
+                <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+                <span className="text-sm font-medium text-green-700">Workspace activo</span>
+              </div>
               <button
                 onClick={handleSealWorkspace}
                 disabled={isSealing}
-                className="flex items-center gap-2 rounded-lg border border-green-600 bg-white px-4 py-2 text-sm font-medium text-green-700 shadow-sm hover:bg-green-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 rounded-lg border border-amber-600 bg-white px-4 py-2 text-sm font-medium text-amber-700 shadow-sm hover:bg-amber-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSealing ? (
                   <>
-                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-green-600 border-t-transparent" />
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-amber-600 border-t-transparent" />
                     Sellando...
                   </>
                 ) : (
@@ -212,6 +336,7 @@ export default function AstrologyTarotWorkspace({
             <AstrologyTarotVisualCore
               activeSection={activeSection}
               patientId={patientId}
+              patientName={patientName}
               patientBirthDate={patientBirthDate}
               selectedSystem={selectedSystem}
               onSystemChange={setSelectedSystem}

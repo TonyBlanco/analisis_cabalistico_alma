@@ -145,7 +145,7 @@ const swmLaunchers = [
     description: 'Workspace combinado — Proximamente. Usa Astrología o Tarot por separado.',
     href: '/dashboard/therapist/astrologia-tarot',
     icon: Compass,
-    enabled: false, // Proximamente: mantener combinado deshabilitado, usar workspaces separados
+    enabled: true, // ACTIVADO para testing - workspace experimental
   },
   {
     id: 'astrologia',

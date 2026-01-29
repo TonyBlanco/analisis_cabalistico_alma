@@ -1482,6 +1482,7 @@ class TherapistPatientProfileView(APIView):
 
         profile_data = {
             "patient_id": patient.id,
+            "user_id": patient.user.id if patient.user else None,  # For SWM workspace creation
             "full_name": patient.full_name,
             "birth_date": getattr(patient, "birth_date", None),
             "birth_time": str(patient.birth_time) if patient.birth_time else None,

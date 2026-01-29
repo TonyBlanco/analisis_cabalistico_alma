@@ -1,0 +1,782 @@
+{
+  "deck": {
+    "name": "Golden Dawn Tarot",
+    "system": "Hermetic Order of the Golden Dawn",
+    "tradition": "Hermetic Qabalah",
+    "totalCards": 22,
+    "source": "Book T - Tarot Correspondences (1888)"
+  },
+  "majorArcana": [
+    {
+      "id": "the-fool",
+      "keyNumber": 0,
+      "name": "The Fool",
+      "nameSpanish": "El Loco",
+      "hebrewTitle": "Ruach Elohim (רוח אלהים)",
+      "transliteration": "Ruach Elohim - Spirit of the Living Gods",
+      "kabbalistic": {
+        "hebrewLetter": "Aleph (א)",
+        "letterName": "Aleph",
+        "letterValue": 1,
+        "path": 11,
+        "sefirot": ["Kether", "Chokmah"],
+        "element": "Air",
+        "kingScaleColor": "Bright pale yellow"
+      },
+      "astrology": {
+        "planet": null,
+        "zodiacSign": null,
+        "element": "Air"
+      },
+      "keywords": ["beginning", "potential", "divine breath", "superconsciousness", "folly as wisdom"],
+      "keywordsSpanish": ["comienzo", "potencial", "aliento divino", "supraconciencia", "locura como sabiduría"],
+      "divinatory": {
+        "upright": "Idea, thought, spirituality, that which endeavours to transcend earth. The Fool represents the highest and most spiritual of ideas. Folly, expiation, wavering.",
+        "reversed": "Eccentricity, mania, delirium, carelessness, negligence, unwise action"
+      },
+      "symbolism": [
+        "Mountaintop represents spiritual heights and Kether",
+        "White sun symbolizes superconsciousness and divine light",
+        "Dog or wolf represents animal nature under control",
+        "Precipice shows leap of faith into the unknown",
+        "Staff and wallet contain unmanifested potential",
+        "Path 11 connects Crown to Wisdom"
+      ]
+    },
+    {
+      "id": "the-magician",
+      "keyNumber": 1,
+      "name": "The Magician",
+      "nameSpanish": "El Mago",
+      "hebrewTitle": "Beth - House",
+      "transliteration": "Beth - The House of Man",
+      "kabbalistic": {
+        "hebrewLetter": "Beth (ב)",
+        "letterName": "Beth",
+        "letterValue": 2,
+        "path": 12,
+        "sefirot": ["Kether", "Binah"],
+        "element": null,
+        "kingScaleColor": "Yellow"
+      },
+      "astrology": {
+        "planet": "Mercury",
+        "zodiacSign": null,
+        "element": null
+      },
+      "keywords": ["skill", "wisdom", "self-consciousness", "manifestation", "concentration"],
+      "keywordsSpanish": ["habilidad", "sabiduría", "autoconciencia", "manifestación", "concentración"],
+      "divinatory": {
+        "upright": "Skill, wisdom, adaptation, craft, cunning (sometimes in a bad sense). May indicate the Querent himself. Self-consciousness, will directed towards a purpose.",
+        "reversed": "Weakness of will, ineptitude, sickness, lack of imagination, mental disease"
+      },
+      "symbolism": [
+        "Mercury rules communication and mental agility",
+        "Path 12 connects Crown to Understanding",
+        "Four elemental tools represent mastery",
+        "Yellow color represents intellect and consciousness",
+        "House (Beth) symbolizes vessel for consciousness"
+      ]
+    },
+    {
+      "id": "the-high-priestess",
+      "keyNumber": 2,
+      "name": "The High Priestess",
+      "nameSpanish": "La Sacerdotisa",
+      "hebrewTitle": "Gimel - Camel",
+      "transliteration": "Gimel - The Camel, Bearer of Burdens",
+      "kabbalistic": {
+        "hebrewLetter": "Gimel (ג)",
+        "letterName": "Gimel",
+        "letterValue": 3,
+        "path": 13,
+        "sefirot": ["Kether", "Tiphareth"],
+        "element": null,
+        "kingScaleColor": "Blue"
+      },
+      "astrology": {
+        "planet": "Moon",
+        "zodiacSign": null,
+        "element": null
+      },
+      "keywords": ["intuition", "mystery", "lunar consciousness", "hidden knowledge", "virgin mother"],
+      "keywordsSpanish": ["intuición", "misterio", "conciencia lunar", "conocimiento oculto", "virgen madre"],
+      "divinatory": {
+        "upright": "Secrets, mystery, the future as yet unrevealed. Wisdom, science, learning. The Moon as reflector of solar light. Change and alteration. Fluctuation between action and passion.",
+        "reversed": "Surface knowledge, conceit, moral or physical ardor without depth, passion ruling over reason"
+      },
+      "symbolism": [
+        "Moon represents reflection and subconscious mind",
+        "Blue is color of Water and lunar influence",
+        "Path 13 connects Crown directly to Beauty/Heart",
+        "Veil conceals the mysteries of the inner temple",
+        "Camel carries wisdom across the desert of experience"
+      ]
+    },
+    {
+      "id": "the-empress",
+      "keyNumber": 3,
+      "name": "The Empress",
+      "nameSpanish": "La Emperatriz",
+      "hebrewTitle": "Daleth - Door",
+      "transliteration": "Daleth - The Door or Gateway",
+      "kabbalistic": {
+        "hebrewLetter": "Daleth (ד)",
+        "letterName": "Daleth",
+        "letterValue": 4,
+        "path": 14,
+        "sefirot": ["Chokmah", "Binah"],
+        "element": null,
+        "kingScaleColor": "Emerald green"
+      },
+      "astrology": {
+        "planet": "Venus",
+        "zodiacSign": null,
+        "element": null
+      },
+      "keywords": ["fertility", "abundance", "mother", "love", "beauty", "nature"],
+      "keywordsSpanish": ["fertilidad", "abundancia", "madre", "amor", "belleza", "naturaleza"],
+      "divinatory": {
+        "upright": "Fruitfulness, action, initiative. Door of Heaven, the Gateway of Life. Beauty, happiness, pleasure, success, luxury. Fertility and generation on all planes.",
+        "reversed": "Light uncertain, vacillation, inaction, lack of concentration, doubt, hesitation"
+      },
+      "symbolism": [
+        "Venus governs love, beauty, and creative force",
+        "Emerald green represents growth and natural abundance",
+        "Path 14 unites Wisdom (Chokmah) with Understanding (Binah)",
+        "Door (Daleth) is gateway between spiritual and material",
+        "Crown of twelve stars represents zodiac and yearly cycles"
+      ]
+    },
+    {
+      "id": "the-emperor",
+      "keyNumber": 4,
+      "name": "The Emperor",
+      "nameSpanish": "El Emperador",
+      "hebrewTitle": "Heh - Window",
+      "transliteration": "Heh - The Window, Sight",
+      "kabbalistic": {
+        "hebrewLetter": "Heh (ה)",
+        "letterName": "Heh",
+        "letterValue": 5,
+        "path": 15,
+        "sefirot": ["Chokmah", "Tiphareth"],
+        "element": null,
+        "kingScaleColor": "Scarlet red"
+      },
+      "astrology": {
+        "planet": null,
+        "zodiacSign": "Aries",
+        "element": "Fire"
+      },
+      "keywords": ["authority", "structure", "domination", "masculine power", "war", "conquest"],
+      "keywordsSpanish": ["autoridad", "estructura", "dominación", "poder masculino", "guerra", "conquista"],
+      "divinatory": {
+        "upright": "War, conquest, victory, strife, ambition, originality. Realization, the Will in action. Male power and authority. Stability through force.",
+        "reversed": "Immaturity, ineffectiveness, weakness, loss of control, being overthrown, tyranny"
+      },
+      "symbolism": [
+        "Aries is cardinal fire - initiating masculine force",
+        "Scarlet red represents blood, war, and vital energy",
+        "Path 15 channels Wisdom's force toward Beauty",
+        "Window (Heh) allows sight and vision of conquest",
+        "Ram symbolizes battering force and leadership"
+      ]
+    },
+    {
+      "id": "the-hierophant",
+      "keyNumber": 5,
+      "name": "The Hierophant",
+      "nameSpanish": "El Hierofante",
+      "hebrewTitle": "Vav - Nail",
+      "transliteration": "Vav - The Nail or Hook",
+      "kabbalistic": {
+        "hebrewLetter": "Vav (ו)",
+        "letterName": "Vav",
+        "letterValue": 6,
+        "path": 16,
+        "sefirot": ["Chokmah", "Chesed"],
+        "element": null,
+        "kingScaleColor": "Red orange"
+      },
+      "astrology": {
+        "planet": null,
+        "zodiacSign": "Taurus",
+        "element": "Earth"
+      },
+      "keywords": ["tradition", "teaching", "divine wisdom", "inner voice", "intuition", "manifestation"],
+      "keywordsSpanish": ["tradición", "enseñanza", "sabiduría divina", "voz interior", "intuición", "manifestación"],
+      "divinatory": {
+        "upright": "Divine wisdom, manifestation, explanation, teaching. Occult force voluntarily invoked. The Inner Voice, intuition as teacher. Marriage, alliance.",
+        "reversed": "Over-kindness, weakness, foolish generosity, unorthodoxy, unconventionality taken too far"
+      },
+      "symbolism": [
+        "Taurus is fixed earth - stability and material wisdom",
+        "Red orange combines fire and earth energies",
+        "Path 16 links Wisdom to Mercy and loving instruction",
+        "Nail (Vav) connects heaven and earth, fixing teaching",
+        "Bull represents steadfast endurance and fertility"
+      ]
+    },
+    {
+      "id": "the-lovers",
+      "keyNumber": 6,
+      "name": "The Lovers",
+      "nameSpanish": "Los Enamorados",
+      "hebrewTitle": "Zain - Sword",
+      "transliteration": "Zain - The Sword, Weapon",
+      "kabbalistic": {
+        "hebrewLetter": "Zain (ז)",
+        "letterName": "Zain",
+        "letterValue": 7,
+        "path": 17,
+        "sefirot": ["Binah", "Tiphareth"],
+        "element": null,
+        "kingScaleColor": "Orange"
+      },
+      "astrology": {
+        "planet": null,
+        "zodiacSign": "Gemini",
+        "element": "Air"
+      },
+      "keywords": ["choice", "duality", "union of opposites", "discrimination", "love", "analysis"],
+      "keywordsSpanish": ["elección", "dualidad", "unión de opuestos", "discriminación", "amor", "análisis"],
+      "divinatory": {
+        "upright": "Inspiration (passive), motive power and action arising from inspiration. Love, beauty, trials overcome. Equilibrium of opposites united. The power of analysis and discrimination.",
+        "reversed": "Unwise plans, failure to analyze, poor choices, temptation leading to trouble"
+      },
+      "symbolism": [
+        "Gemini represents duality, twins, choice between paths",
+        "Orange blends red passion with yellow intellect",
+        "Path 17 descends from Understanding to Beauty through choice",
+        "Sword (Zain) cuts through illusion to discriminate truth",
+        "Union of masculine and feminine creates wholeness"
+      ]
+    },
+    {
+      "id": "the-chariot",
+      "keyNumber": 7,
+      "name": "The Chariot",
+      "nameSpanish": "El Carro",
+      "hebrewTitle": "Cheth - Fence",
+      "transliteration": "Cheth - The Fence or Enclosure",
+      "kabbalistic": {
+        "hebrewLetter": "Cheth (ח)",
+        "letterName": "Cheth",
+        "letterValue": 8,
+        "path": 18,
+        "sefirot": ["Binah", "Geburah"],
+        "element": null,
+        "kingScaleColor": "Amber"
+      },
+      "astrology": {
+        "planet": null,
+        "zodiacSign": "Cancer",
+        "element": "Water"
+      },
+      "keywords": ["triumph", "victory", "receptivity", "enclosure", "protection", "will triumphant"],
+      "keywordsSpanish": ["triunfo", "victoria", "receptividad", "recinto", "protección", "voluntad triunfante"],
+      "divinatory": {
+        "upright": "Triumph, victory, overcoming opposition through control. The chariot of the spirit driving the body. Receptivity to higher forces. Protection through boundaries.",
+        "reversed": "Overthrow, loss of control, conquered by circumstances, defeat, vengeance miscarrying"
+      },
+      "symbolism": [
+        "Cancer represents protective shell and emotional receptivity",
+        "Amber combines gold of sun with protection",
+        "Path 18 channels Understanding's force into Severity",
+        "Fence (Cheth) provides boundaries and sacred enclosure",
+        "Chariot represents controlled movement forward"
+      ]
+    },
+    {
+      "id": "strength",
+      "keyNumber": 8,
+      "name": "Strength",
+      "nameSpanish": "La Fuerza",
+      "hebrewTitle": "Teth - Serpent",
+      "transliteration": "Teth - The Serpent",
+      "kabbalistic": {
+        "hebrewLetter": "Teth (ט)",
+        "letterName": "Teth",
+        "letterValue": 9,
+        "path": 19,
+        "sefirot": ["Chesed", "Geburah"],
+        "element": null,
+        "kingScaleColor": "Greenish yellow"
+      },
+      "astrology": {
+        "planet": null,
+        "zodiacSign": "Leo",
+        "element": "Fire"
+      },
+      "keywords": ["strength", "power", "courage", "serpent power", "kundalini", "spiritual force"],
+      "keywordsSpanish": ["fuerza", "poder", "coraje", "poder serpentino", "kundalini", "fuerza espiritual"],
+      "divinatory": {
+        "upright": "Courage, strength, fortitude, power not arrested by matter. The serpent power (kundalini). Spiritual force overcoming material obstacles. Mastery through inner fire.",
+        "reversed": "Abuse of power, weakness, pettiness, sickness, disgrace, defeat through lack of courage"
+      },
+      "symbolism": [
+        "Leo represents solar force, courage, and royal power",
+        "Greenish yellow shows living serpent energy",
+        "Path 19 balances Mercy and Severity through strength",
+        "Serpent (Teth) is kundalini force rising through chakras",
+        "Lion tamed by higher consciousness"
+      ]
+    },
+    {
+      "id": "the-hermit",
+      "keyNumber": 9,
+      "name": "The Hermit",
+      "nameSpanish": "El Ermitaño",
+      "hebrewTitle": "Yod - Hand",
+      "transliteration": "Yod - The Hand of God",
+      "kabbalistic": {
+        "hebrewLetter": "Yod (י)",
+        "letterName": "Yod",
+        "letterValue": 10,
+        "path": 20,
+        "sefirot": ["Chesed", "Tiphareth"],
+        "element": null,
+        "kingScaleColor": "Yellowish green"
+      },
+      "astrology": {
+        "planet": null,
+        "zodiacSign": "Virgo",
+        "element": "Earth"
+      },
+      "keywords": ["wisdom", "solitude", "prudence", "discretion", "divine hand", "seeker"],
+      "keywordsSpanish": ["sabiduría", "soledad", "prudencia", "discreción", "mano divina", "buscador"],
+      "divinatory": {
+        "upright": "Wisdom sought in solitude, the Hermit's lamp lights the way. Prudence, discretion, caution. Divine guidance. The Hand of God directing the seeker. Virginal purity of purpose.",
+        "reversed": "Over-caution, fear, concealment carried too far, lack of guidance, excessive isolation"
+      },
+      "symbolism": [
+        "Virgo represents analysis, perfection, and purity",
+        "Yellowish green shows harvest wisdom and growth",
+        "Path 20 brings Mercy's grace to Beauty's heart",
+        "Yod is smallest letter, seed of creation, divine spark",
+        "Lamp illuminates the path for those below"
+      ]
+    },
+    {
+      "id": "wheel-of-fortune",
+      "keyNumber": 10,
+      "name": "Wheel of Fortune",
+      "nameSpanish": "La Rueda de la Fortuna",
+      "hebrewTitle": "Kaph - Palm of Hand",
+      "transliteration": "Kaph - The Grasping Hand",
+      "kabbalistic": {
+        "hebrewLetter": "Kaph (כ)",
+        "letterName": "Kaph",
+        "letterValue": 20,
+        "path": 21,
+        "sefirot": ["Chesed", "Netzach"],
+        "element": null,
+        "kingScaleColor": "Violet"
+      },
+      "astrology": {
+        "planet": "Jupiter",
+        "zodiacSign": null,
+        "element": null
+      },
+      "keywords": ["fortune", "destiny", "cycles", "expansion", "Jupiter's bounty", "rotation"],
+      "keywordsSpanish": ["fortuna", "destino", "ciclos", "expansión", "dádiva de Júpiter", "rotación"],
+      "divinatory": {
+        "upright": "Good fortune, success, elevation, luck, felicity. The cycles of manifestation. Jupiter's expansion and benevolence. The grasping of opportunity. Rotation of fate.",
+        "reversed": "Ill fortune, failure, unexpected bad luck, broken sequences, outside forces against you"
+      },
+      "symbolism": [
+        "Jupiter brings expansion, luck, and beneficence",
+        "Violet combines red and blue - material and spiritual",
+        "Path 21 extends Mercy toward Victory",
+        "Palm (Kaph) grasps fortune or lets it slip away",
+        "Wheel represents eternal cycles and karma"
+      ]
+    },
+    {
+      "id": "justice",
+      "keyNumber": 11,
+      "name": "Justice",
+      "nameSpanish": "La Justicia",
+      "hebrewTitle": "Lamed - Ox Goad",
+      "transliteration": "Lamed - The Ox Goad, Teaching",
+      "kabbalistic": {
+        "hebrewLetter": "Lamed (ל)",
+        "letterName": "Lamed",
+        "letterValue": 30,
+        "path": 22,
+        "sefirot": ["Geburah", "Tiphareth"],
+        "element": null,
+        "kingScaleColor": "Emerald green"
+      },
+      "astrology": {
+        "planet": null,
+        "zodiacSign": "Libra",
+        "element": "Air"
+      },
+      "keywords": ["balance", "justice", "equilibrium", "karma", "adjustment", "judgment"],
+      "keywordsSpanish": ["equilibrio", "justicia", "equilibrio", "karma", "ajuste", "juicio"],
+      "divinatory": {
+        "upright": "Equilibrium, balance, justice. The eternal balance of positive and negative. Karma and karmic adjustment. The sword of severity tempered by the scales of mercy. Fair judgment.",
+        "reversed": "Injustice, false accusation, bigotry, bias, excessive severity or excessive mercy, imbalance"
+      },
+      "symbolism": [
+        "Libra is the scales of perfect equilibrium",
+        "Emerald green represents Venus exalted in Libra",
+        "Path 22 brings Severity's judgment to Beauty's heart",
+        "Ox Goad (Lamed) teaches through discipline",
+        "Sword and scales balance mercy with severity"
+      ]
+    },
+    {
+      "id": "the-hanged-man",
+      "keyNumber": 12,
+      "name": "The Hanged Man",
+      "nameSpanish": "El Colgado",
+      "hebrewTitle": "Mem - Water",
+      "transliteration": "Mem - The Water, Sea",
+      "kabbalistic": {
+        "hebrewLetter": "Mem (מ)",
+        "letterName": "Mem",
+        "letterValue": 40,
+        "path": 23,
+        "sefirot": ["Geburah", "Hod"],
+        "element": "Water",
+        "kingScaleColor": "Deep blue"
+      },
+      "astrology": {
+        "planet": null,
+        "zodiacSign": null,
+        "element": "Water"
+      },
+      "keywords": ["sacrifice", "surrender", "reversal", "suspension", "baptism", "drowning in spirit"],
+      "keywordsSpanish": ["sacrificio", "rendición", "inversión", "suspensión", "bautismo", "ahogarse en espíritu"],
+      "divinatory": {
+        "upright": "Enforced sacrifice, punishment, loss, suffering. The Dying God. Wisdom through sacrifice. Suspended between heaven and earth. Baptism by water, redemption through surrender.",
+        "reversed": "Selfishness, resistance to sacrifice, unwillingness to learn through suffering, false prophecy"
+      },
+      "symbolism": [
+        "Water element represents emotions, intuition, flow",
+        "Deep blue is color of vast ocean depths",
+        "Path 23 descends from Severity to Intellect through sacrifice",
+        "Mem (Water) is the sea that drowns and baptizes",
+        "Inverted position shows reversal of normal perspective"
+      ]
+    },
+    {
+      "id": "death",
+      "keyNumber": 13,
+      "name": "Death",
+      "nameSpanish": "La Muerte",
+      "hebrewTitle": "Nun - Fish",
+      "transliteration": "Nun - The Fish",
+      "kabbalistic": {
+        "hebrewLetter": "Nun (נ)",
+        "letterName": "Nun",
+        "letterValue": 50,
+        "path": 24,
+        "sefirot": ["Tiphareth", "Netzach"],
+        "element": null,
+        "kingScaleColor": "Green-blue"
+      },
+      "astrology": {
+        "planet": null,
+        "zodiacSign": "Scorpio",
+        "element": "Water"
+      },
+      "keywords": ["transformation", "death", "rebirth", "putrefaction", "regeneration", "phoenix"],
+      "keywordsSpanish": ["transformación", "muerte", "renacimiento", "putrefacción", "regeneración", "fénix"],
+      "divinatory": {
+        "upright": "Transformation through death, time, age, destruction followed by renewal. The phoenix rising. Death of the old self. Putrefaction before regeneration. Scorpio's sting brings transformation.",
+        "reversed": "Fear of change, stagnation, partial change, slow transformation, resisting necessary endings"
+      },
+      "symbolism": [
+        "Scorpio governs death, sex, transformation, occult",
+        "Green-blue represents deep waters of transformation",
+        "Path 24 transforms Beauty's light into Victory",
+        "Fish (Nun) swims in waters of unconscious",
+        "Skeleton represents what remains after dissolution"
+      ]
+    },
+    {
+      "id": "temperance",
+      "keyNumber": 14,
+      "name": "Temperance",
+      "nameSpanish": "La Templanza",
+      "hebrewTitle": "Samekh - Prop",
+      "transliteration": "Samekh - The Prop or Support",
+      "kabbalistic": {
+        "hebrewLetter": "Samekh (ס)",
+        "letterName": "Samekh",
+        "letterValue": 60,
+        "path": 25,
+        "sefirot": ["Tiphareth", "Yesod"],
+        "element": null,
+        "kingScaleColor": "Blue"
+      },
+      "astrology": {
+        "planet": null,
+        "zodiacSign": "Sagittarius",
+        "element": "Fire"
+      },
+      "keywords": ["art", "alchemy", "combination", "tempering", "trial", "adaptation"],
+      "keywordsSpanish": ["arte", "alquimia", "combinación", "templado", "prueba", "adaptación"],
+      "divinatory": {
+        "upright": "Combination, mixing, coordination. The alchemical work. Tempering of opposites. The prop that supports the Great Work. Sagittarius aims the arrow of purpose. Art and management.",
+        "reversed": "Disunion, unfortunate combinations, competing interests, lack of coordination, failed experiments"
+      },
+      "symbolism": [
+        "Sagittarius is the archer aiming toward higher truth",
+        "Blue represents Water ruling Sagittarius traditionally",
+        "Path 25 unites Beauty of heart with Foundation",
+        "Prop (Samekh) supports the alchemical vessel",
+        "Angel mixes fire and water in alchemical marriage"
+      ]
+    },
+    {
+      "id": "the-devil",
+      "keyNumber": 15,
+      "name": "The Devil",
+      "nameSpanish": "El Diablo",
+      "hebrewTitle": "Ayin - Eye",
+      "transliteration": "Ayin - The Eye",
+      "kabbalistic": {
+        "hebrewLetter": "Ayin (ע)",
+        "letterName": "Ayin",
+        "letterValue": 70,
+        "path": 26,
+        "sefirot": ["Tiphareth", "Hod"],
+        "element": null,
+        "kingScaleColor": "Indigo"
+      },
+      "astrology": {
+        "planet": null,
+        "zodiacSign": "Capricorn",
+        "element": "Earth"
+      },
+      "keywords": ["materialism", "bondage", "earth", "Pan", "nature force", "temptation"],
+      "keywordsSpanish": ["materialismo", "esclavitud", "tierra", "Pan", "fuerza natural", "tentación"],
+      "divinatory": {
+        "upright": "Ravage, violence, force, fatality. The material binding spirit. Pan, the god of nature. The Eye that sees only matter. Capricorn's ambition for earthly power. Black magic and obsession.",
+        "reversed": "Release from bondage, overcoming materialism, spiritual awakening, seeing beyond illusion"
+      },
+      "symbolism": [
+        "Capricorn represents earthly ambition and materialism",
+        "Indigo is deep darkness before spiritual sight",
+        "Path 26 tests Beauty through material temptation",
+        "Eye (Ayin) sees surface but may miss depths",
+        "Goat represents lusty animal nature and earthiness"
+      ]
+    },
+    {
+      "id": "the-tower",
+      "keyNumber": 16,
+      "name": "The Tower",
+      "nameSpanish": "La Torre",
+      "hebrewTitle": "Peh - Mouth",
+      "transliteration": "Peh - The Mouth",
+      "kabbalistic": {
+        "hebrewLetter": "Peh (פ)",
+        "letterName": "Peh",
+        "letterValue": 80,
+        "path": 27,
+        "sefirot": ["Netzach", "Hod"],
+        "element": null,
+        "kingScaleColor": "Scarlet"
+      },
+      "astrology": {
+        "planet": "Mars",
+        "zodiacSign": null,
+        "element": null
+      },
+      "keywords": ["destruction", "Mars energy", "war", "catastrophe", "breaking down", "revelation"],
+      "keywordsSpanish": ["destrucción", "energía de Marte", "guerra", "catástrofe", "demolición", "revelación"],
+      "divinatory": {
+        "upright": "Catastrophe, sudden downfall, ruin. The Mouth of God speaking destruction. Mars energy breaking down false structures. The Tower of Babel. War, conflict, overthrow.",
+        "reversed": "Same in lesser degree, continued oppression, imprisonment in the ruins, tyranny"
+      },
+      "symbolism": [
+        "Mars is god of war, destruction, violent force",
+        "Scarlet red represents blood and martial energy",
+        "Path 27 connects Victory to Glory through trial",
+        "Mouth (Peh) speaks the Word that destroys",
+        "Lightning strikes tower built on false foundations"
+      ]
+    },
+    {
+      "id": "the-star",
+      "keyNumber": 17,
+      "name": "The Star",
+      "nameSpanish": "La Estrella",
+      "hebrewTitle": "Tzaddi - Fish Hook",
+      "transliteration": "Tzaddi - The Fish Hook",
+      "kabbalistic": {
+        "hebrewLetter": "Tzaddi (צ)",
+        "letterName": "Tzaddi",
+        "letterValue": 90,
+        "path": 28,
+        "sefirot": ["Netzach", "Yesod"],
+        "element": null,
+        "kingScaleColor": "Violet"
+      },
+      "astrology": {
+        "planet": null,
+        "zodiacSign": "Aquarius",
+        "element": "Air"
+      },
+      "keywords": ["hope", "meditation", "revelation", "star wisdom", "cosmic waters", "inspiration"],
+      "keywordsSpanish": ["esperanza", "meditación", "revelación", "sabiduría estelar", "aguas cósmicas", "inspiración"],
+      "divinatory": {
+        "upright": "Hope, faith, inspiration from above. The waters of cosmic consciousness poured forth. Aquarius the water-bearer. The hook that catches the star. Meditation and spiritual insight.",
+        "reversed": "Unfulfilled hope, pessimism, lack of vision, disconnection from higher source"
+      },
+      "symbolism": [
+        "Aquarius pours living waters from the heavens",
+        "Violet combines red passion with blue spirit",
+        "Path 28 flows from Victory to Foundation",
+        "Fish Hook (Tzaddi) catches celestial wisdom",
+        "Naked figure represents spiritual transparency"
+      ]
+    },
+    {
+      "id": "the-moon",
+      "keyNumber": 18,
+      "name": "The Moon",
+      "nameSpanish": "La Luna",
+      "hebrewTitle": "Qoph - Back of Head",
+      "transliteration": "Qoph - The Back of the Head",
+      "kabbalistic": {
+        "hebrewLetter": "Qoph (ק)",
+        "letterName": "Qoph",
+        "letterValue": 100,
+        "path": 29,
+        "sefirot": ["Netzach", "Malkuth"],
+        "element": null,
+        "kingScaleColor": "Crimson"
+      },
+      "astrology": {
+        "planet": null,
+        "zodiacSign": "Pisces",
+        "element": "Water"
+      },
+      "keywords": ["illusion", "dreams", "deception", "twilight", "subconscious", "psychic"],
+      "keywordsSpanish": ["ilusión", "sueños", "engaño", "crepúsculo", "subconsciente", "psíquico"],
+      "divinatory": {
+        "upright": "Deception, twilight, illusion, error. The back of the head - subconscious and hindbrain. Pisces swimming in opposite directions. Dreams, psychic impressions. Terror and nightmare. Evolution from water.",
+        "reversed": "Trifling deceptions, minor fears, imagination run wild, small mistakes"
+      },
+      "symbolism": [
+        "Pisces represents dreams, dissolution, mysticism",
+        "Crimson suggests blood and primal waters",
+        "Path 29 descends from Victory to Kingdom through water",
+        "Back of Head (Qoph) is cerebellum and unconscious",
+        "Crustacean emerging from pool is early evolution"
+      ]
+    },
+    {
+      "id": "the-sun",
+      "keyNumber": 19,
+      "name": "The Sun",
+      "nameSpanish": "El Sol",
+      "hebrewTitle": "Resh - Head",
+      "transliteration": "Resh - The Head",
+      "kabbalistic": {
+        "hebrewLetter": "Resh (ר)",
+        "letterName": "Resh",
+        "letterValue": 200,
+        "path": 30,
+        "sefirot": ["Hod", "Yesod"],
+        "element": null,
+        "kingScaleColor": "Orange"
+      },
+      "astrology": {
+        "planet": "Sun",
+        "zodiacSign": null,
+        "element": null
+      },
+      "keywords": ["illumination", "glory", "consciousness", "solar force", "success", "clarity"],
+      "keywordsSpanish": ["iluminación", "gloria", "conciencia", "fuerza solar", "éxito", "claridad"],
+      "divinatory": {
+        "upright": "Glory, gain, riches, triumph, pleasure, frankness, truth. The Head (Resh) crowned with solar consciousness. The Sun at zenith. Clarity, enlightenment. Success and happiness.",
+        "reversed": "Same qualities but in lesser degree, clouded success, future plans may fail"
+      },
+      "symbolism": [
+        "Sun is source of life, light, and consciousness",
+        "Orange combines red vitality with yellow intellect",
+        "Path 30 illuminates the way from Glory to Foundation",
+        "Head (Resh) represents consciousness and reason",
+        "Solar force brings growth and manifestation"
+      ]
+    },
+    {
+      "id": "judgement",
+      "keyNumber": 20,
+      "name": "Judgement",
+      "nameSpanish": "El Juicio",
+      "hebrewTitle": "Shin - Tooth",
+      "transliteration": "Shin - The Tooth, Fire",
+      "kabbalistic": {
+        "hebrewLetter": "Shin (ש)",
+        "letterName": "Shin",
+        "letterValue": 300,
+        "path": 31,
+        "sefirot": ["Hod", "Malkuth"],
+        "element": "Fire",
+        "kingScaleColor": "Glowing orange-scarlet"
+      },
+      "astrology": {
+        "planet": null,
+        "zodiacSign": null,
+        "element": "Fire"
+      },
+      "keywords": ["resurrection", "awakening", "final judgment", "fire of spirit", "renewal", "decision"],
+      "keywordsSpanish": ["resurrección", "despertar", "juicio final", "fuego del espíritu", "renovación", "decisión"],
+      "divinatory": {
+        "upright": "Final decision, judgment, sentence. Renewal, resurrection. The Fire of Spirit awakening the dead. The Tooth that devours time. Aeon ending and new Aeon beginning. Awakening to higher consciousness.",
+        "reversed": "Weakness, indecision, delay of judgment, failure to awaken, resisting the call"
+      },
+      "symbolism": [
+        "Fire element represents spirit and transformation",
+        "Orange-scarlet is flame of spiritual awakening",
+        "Path 31 brings fire from Intellect to Earth",
+        "Shin is triple flame of divine fire",
+        "Tooth (Shin) devours the old to birth the new"
+      ]
+    },
+    {
+      "id": "the-world",
+      "keyNumber": 21,
+      "name": "The World",
+      "nameSpanish": "El Mundo",
+      "hebrewTitle": "Tav - Cross",
+      "transliteration": "Tav - The Cross or Mark",
+      "kabbalistic": {
+        "hebrewLetter": "Tav (ת)",
+        "letterName": "Tav",
+        "letterValue": 400,
+        "path": 32,
+        "sefirot": ["Yesod", "Malkuth"],
+        "element": null,
+        "kingScaleColor": "Indigo"
+      },
+      "astrology": {
+        "planet": "Saturn",
+        "zodiacSign": null,
+        "element": null
+      },
+      "keywords": ["completion", "cosmos", "perfection", "administrative", "limitation", "manifestation"],
+      "keywordsSpanish": ["completitud", "cosmos", "perfección", "administrativo", "limitación", "manifestación"],
+      "divinatory": {
+        "upright": "Completion, perfection, the end matter. The World as complete manifestation. Saturn's administrative completion. The Cross as union of opposites. Cosmic consciousness embodied. Success, assurance.",
+        "reversed": "Imperfection, failure to complete, stagnation, inertia, refusal of cosmic consciousness"
+      },
+      "symbolism": [
+        "Saturn represents time, limits, completion, manifestation",
+        "Indigo is deep cosmic darkness containing all",
+        "Path 32 grounds Foundation into Kingdom/Earth",
+        "Tav (Cross) marks completion of alphabet and creation",
+        "Wreath encircles the dancer at center of cosmos"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,320 @@
+{
+  "deck": {
+    "name": "Oráculo Simbólico Genérico",
+    "system": "Generic Symbolic Oracle",
+    "tradition": "Universal Symbolic",
+    "totalCards": 22,
+    "focus": "Interpretación simbólica intuitiva y educativa",
+    "description": "Sistema genérico sin correspondencias herméticas específicas, basado en arquetipos universales"
+  },
+  "majorArcana": [
+    {
+      "id": "the-fool",
+      "keyNumber": 0,
+      "name": "The Fool",
+      "nameSpanish": "El Loco",
+      "symbolism": ["Viajero inocente con mochila", "Perro como instinto y compañía fiel", "Precipicio como salto de fe", "Sol radiante como optimismo", "Rosa blanca de pureza", "Montañas del futuro desconocido"],
+      "keywords": ["nuevo comienzo", "inocencia", "espontaneidad", "riesgo calculado", "aventura", "confianza"],
+      "keywordsSpanish": ["nuevo comienzo", "inocencia", "espontaneidad", "riesgo calculado", "aventura", "confianza"],
+      "divinatory": {
+        "upright": "Oportunidad de empezar de cero, confianza en el universo, aventura esperando ser vivida. El Loco nos invita a soltar el control y confiar en el camino. Inocencia que ve posibilidades donde otros ven peligros.",
+        "reversed": "Imprudencia sin visión, estancamiento por miedo al cambio, negativa a crecer, comportamiento infantil destructivo"
+      },
+      "notes": "Interpretación simbólica universal, sin sistema hermético fijo"
+    },
+    {
+      "id": "the-magician",
+      "keyNumber": 1,
+      "name": "The Magician",
+      "nameSpanish": "El Mago",
+      "symbolism": ["Mesa de trabajo con herramientas", "Copa, espada, bastón y moneda", "Símbolo de infinito sobre la cabeza", "Jardín de rosas y lirios", "Una mano hacia el cielo, otra hacia la tierra", "Serpiente mordiéndose la cola"],
+      "keywords": ["manifestación", "habilidad", "recursos disponibles", "concentración", "poder personal", "acción consciente"],
+      "keywordsSpanish": ["manifestación", "habilidad", "recursos disponibles", "concentración", "poder personal", "acción consciente"],
+      "divinatory": {
+        "upright": "Tienes todos los recursos necesarios para manifestar tus deseos. Momento de actuar con intención clara. El poder de transformar ideas en realidad está en tus manos. Habilidad y talento reconocidos.",
+        "reversed": "Recursos desperdiciados, falta de dirección clara, manipulación, potencial sin desarrollar, promesas vacías"
+      },
+      "notes": "Representa el poder de la voluntad enfocada sin connotaciones místicas complejas"
+    },
+    {
+      "id": "the-high-priestess",
+      "keyNumber": 2,
+      "name": "The High Priestess",
+      "nameSpanish": "La Sacerdotisa",
+      "symbolism": ["Figura sentada entre dos pilares", "Velo decorado detrás", "Luna a sus pies", "Libro de sabiduría en el regazo", "Corona lunar", "Vestido azul fluido"],
+      "keywords": ["intuición", "misterio", "conocimiento interno", "sabiduría silenciosa", "secretos", "subconsciente"],
+      "keywordsSpanish": ["intuición", "misterio", "conocimiento interno", "sabiduría silenciosa", "secretos", "subconsciente"],
+      "divinatory": {
+        "upright": "Confía en tu intuición, hay información que aún no se ha revelado completamente. La respuesta está dentro de ti. Momento de escuchar la voz interior antes de actuar. Sabiduría que viene del silencio.",
+        "reversed": "Intuición bloqueada, secretos revelados inapropiadamente, conocimiento superficial, desconexión interior"
+      },
+      "notes": "Arquetipo de la sabiduría intuitiva femenina, accesible sin conocimiento esotérico"
+    },
+    {
+      "id": "the-empress",
+      "keyNumber": 3,
+      "name": "The Empress",
+      "nameSpanish": "La Emperatriz",
+      "symbolism": ["Figura maternal en jardín exuberante", "Corona de estrellas", "Campo de trigo maduro", "Río fluyendo", "Cojines lujosos", "Cetro de poder creativo", "Corazón grabado en el trono"],
+      "keywords": ["abundancia", "fertilidad", "creatividad", "nutrición", "naturaleza", "belleza", "amor maternal"],
+      "keywordsSpanish": ["abundancia", "fertilidad", "creatividad", "nutrición", "naturaleza", "belleza", "amor maternal"],
+      "divinatory": {
+        "upright": "Período de abundancia y crecimiento en tu vida. Creatividad fluyendo libremente. Momento de nutrir proyectos y relaciones. La naturaleza te apoya. Conexión con la belleza y el placer.",
+        "reversed": "Bloqueo creativo, dependencia excesiva, descuido personal, abundancia desequilibrada, belleza superficial"
+      },
+      "notes": "Representa el principio creativo y nutridor universal"
+    },
+    {
+      "id": "the-emperor",
+      "keyNumber": 4,
+      "name": "The Emperor",
+      "nameSpanish": "El Emperador",
+      "symbolism": ["Figura autoritaria en trono de piedra", "Corona de oro", "Cetro y orbe de poder", "Armadura bajo vestiduras rojas", "Montañas áridas detrás", "Cabezas de carnero en el trono", "Expresión seria y firme"],
+      "keywords": ["autoridad", "estructura", "disciplina", "liderazgo", "estabilidad", "protección", "orden"],
+      "keywordsSpanish": ["autoridad", "estructura", "disciplina", "liderazgo", "estabilidad", "protección", "orden"],
+      "divinatory": {
+        "upright": "Momento de establecer estructura y disciplina. Liderazgo responsable necesario. Autoridad ganada por experiencia. Protección y estabilidad. Construir sobre fundamentos sólidos.",
+        "reversed": "Autoridad rígida o tiránica, falta de disciplina, estructura opresiva, dominio excesivo, control sin sabiduría"
+      },
+      "notes": "Arquetipo del padre, líder y organizador sin connotaciones esotéricas"
+    },
+    {
+      "id": "the-hierophant",
+      "keyNumber": 5,
+      "name": "The Hierophant",
+      "nameSpanish": "El Hierofante",
+      "symbolism": ["Figura religiosa o maestro", "Corona triple", "Dos discípulos ante él", "Llaves cruzadas a sus pies", "Pilares del templo", "Mano levantada en bendición", "Bastón ceremonial"],
+      "keywords": ["tradición", "enseñanza", "creencias", "educación formal", "conformidad", "guía espiritual", "valores compartidos"],
+      "keywordsSpanish": ["tradición", "enseñanza", "creencias", "educación formal", "conformidad", "guía espiritual", "valores compartidos"],
+      "divinatory": {
+        "upright": "Buscar consejo de alguien con experiencia. Aprender de la tradición antes de innovar. Valores compartidos crean comunidad. Enseñanza y guía disponibles. Conformidad útil en este momento.",
+        "reversed": "Dogma rígido, rebeldía contra la autoridad, rechazo de enseñanzas valiosas, conformidad excesiva"
+      },
+      "notes": "Representa instituciones, educación y tradición sin simbolismo hermético complejo"
+    },
+    {
+      "id": "the-lovers",
+      "keyNumber": 6,
+      "name": "The Lovers",
+      "nameSpanish": "Los Enamorados",
+      "symbolism": ["Pareja en jardín", "Ángel o figura celestial bendiciendo", "Árbol con frutos", "Serpiente en árbol", "Montaña sagrada", "Sol radiante", "Desnudez como vulnerabilidad"],
+      "keywords": ["amor", "elección", "relaciones", "valores personales", "armonía", "unión", "decisión importante"],
+      "keywordsSpanish": ["amor", "elección", "relaciones", "valores personales", "armonía", "unión", "decisión importante"],
+      "divinatory": {
+        "upright": "Relación significativa o decisión basada en valores personales. Amor verdadero y conexión auténtica. Elección entre dos caminos igualmente válidos. Armonía entre opuestos. Compromiso consciente.",
+        "reversed": "Desarmonía en relaciones, elección incorrecta, valores en conflicto, tentación destructiva, falta de compromiso"
+      },
+      "notes": "Enfoque en relaciones humanas y elecciones personales sin complejidad esotérica"
+    },
+    {
+      "id": "the-chariot",
+      "keyNumber": 7,
+      "name": "The Chariot",
+      "nameSpanish": "El Carro",
+      "symbolism": ["Guerrero en carro victorioso", "Dos esfinges o caballos (uno blanco, uno negro)", "Dosel estrellado", "Armadura protectora", "Ciudad conquistada detrás", "Cetro de victoria", "Corona de logros"],
+      "keywords": ["victoria", "determinación", "control", "voluntad", "éxito", "superación", "progreso"],
+      "keywordsSpanish": ["victoria", "determinación", "control", "voluntad", "éxito", "superación", "progreso"],
+      "divinatory": {
+        "upright": "Victoria ganada por determinación y control de fuerzas opuestas. Éxito a través de la voluntad enfocada. Superación de obstáculos. Avanzar con confianza. Logro de metas importantes.",
+        "reversed": "Falta de dirección, fuerzas en conflicto, pérdida de control, ambición desmedida, victoria pírrica"
+      },
+      "notes": "Representa triunfo personal y determinación sin simbolismo cabalístico"
+    },
+    {
+      "id": "strength",
+      "keyNumber": 8,
+      "name": "Strength",
+      "nameSpanish": "La Fuerza",
+      "symbolism": ["Mujer domando león", "Corona de flores", "Símbolo de infinito sobre la cabeza", "Montañas azules al fondo", "Guirnalda de rosas", "Expresión serena", "León como pasiones"],
+      "keywords": ["coraje", "paciencia", "compasión", "fuerza interna", "control suave", "confianza", "dominio emocional"],
+      "keywordsSpanish": ["coraje", "paciencia", "compasión", "fuerza interna", "control suave", "confianza", "dominio emocional"],
+      "divinatory": {
+        "upright": "Fuerza interior supera la fuerza bruta. Paciencia y compasión más efectivas que la agresión. Coraje para enfrentar miedos. Dominio emocional con amor. Confianza tranquila en uno mismo.",
+        "reversed": "Debilidad interior, falta de coraje, agresión no controlada, miedo dominante, crueldad"
+      },
+      "notes": "Arquetipo de fuerza emocional y espiritual sin elementos místicos complejos"
+    },
+    {
+      "id": "the-hermit",
+      "keyNumber": 9,
+      "name": "The Hermit",
+      "nameSpanish": "El Ermitaño",
+      "symbolism": ["Anciano con lámpara", "Bastón de caminante", "Manto gris o capucha", "Montaña nevada", "Lámpara ilumina el camino", "Postura de búsqueda", "Estrella en la lámpara"],
+      "keywords": ["introspección", "soledad productiva", "búsqueda interna", "sabiduría", "guía interior", "retiro", "reflexión"],
+      "keywordsSpanish": ["introspección", "soledad productiva", "búsqueda interna", "sabiduría", "guía interior", "retiro", "reflexión"],
+      "divinatory": {
+        "upright": "Tiempo de retiro e introspección necesario. Buscar respuestas en tu interior. Sabiduría ganada por experiencia. Soledad productiva. Iluminar el camino para otros después de encontrar el propio.",
+        "reversed": "Aislamiento destructivo, exceso de introversión, rechazo de ayuda, sabiduría no compartida, soledad dolorosa"
+      },
+      "notes": "Representa búsqueda interna y sabiduría personal sin marco hermético"
+    },
+    {
+      "id": "wheel-of-fortune",
+      "keyNumber": 10,
+      "name": "Wheel of Fortune",
+      "nameSpanish": "La Rueda de la Fortuna",
+      "symbolism": ["Rueda girando", "Criaturas subiendo y bajando", "Símbolos en la rueda", "Figuras aladas en las esquinas", "Serpiente descendiendo", "Anubis o figura ascendiendo", "Esfinge en la cima", "Nubes y cielo"],
+      "keywords": ["cambio", "ciclos", "destino", "suerte", "oportunidad", "giro inesperado", "karma"],
+      "keywordsSpanish": ["cambio", "ciclos", "destino", "suerte", "oportunidad", "giro inesperado", "karma"],
+      "divinatory": {
+        "upright": "Cambio significativo en camino, ciclos naturales de la vida. Buena fortuna o giro positivo del destino. Oportunidades inesperadas. Lo que va arriba debe bajar, y viceversa. Aceptar los ciclos.",
+        "reversed": "Mala suerte temporal, resistencia al cambio, ciclo negativo, pérdida de oportunidades, caída desde la cima"
+      },
+      "notes": "Representa ciclos de vida y cambio sin elementos cabalísticos"
+    },
+    {
+      "id": "justice",
+      "keyNumber": 11,
+      "name": "Justice",
+      "nameSpanish": "La Justicia",
+      "symbolism": ["Figura con espada y balanza", "Corona o diadema", "Velo o cortina púrpura", "Pilares de balance", "Espada apuntando hacia arriba", "Balanza equilibrada", "Expresión imparcial"],
+      "keywords": ["justicia", "equilibrio", "verdad", "consecuencias", "imparcialidad", "decisión justa", "karma"],
+      "keywordsSpanish": ["justicia", "equilibrio", "verdad", "consecuencias", "imparcialidad", "decisión justa", "karma"],
+      "divinatory": {
+        "upright": "Decisiones justas y equilibradas necesarias. Verdad revelada. Consecuencias de acciones pasadas. Karma balanceándose. Juicio imparcial. Responsabilidad por nuestras elecciones.",
+        "reversed": "Injusticia, falta de responsabilidad, decisiones sesgadas, desequilibrio, evitar consecuencias"
+      },
+      "notes": "Representa justicia y equilibrio universal sin marco hermético complejo"
+    },
+    {
+      "id": "the-hanged-man",
+      "keyNumber": 12,
+      "name": "The Hanged Man",
+      "nameSpanish": "El Colgado",
+      "symbolism": ["Figura suspendida de un pie", "Halo o luz alrededor de la cabeza", "Brazos formando triángulo", "Pierna cruzada forma cruz", "Expresión serena", "Árbol vivo", "Suspensión voluntaria"],
+      "keywords": ["pausa", "rendición", "perspectiva nueva", "sacrificio", "espera", "soltar el control", "inversión de visión"],
+      "keywordsSpanish": ["pausa", "rendición", "perspectiva nueva", "sacrificio", "espera", "soltar el control", "inversión de visión"],
+      "divinatory": {
+        "upright": "Momento de pausa y reflexión antes de actuar. Cambio de perspectiva necesario. Rendirse al proceso. Sacrificio que trae sabiduría. Ver las cosas desde ángulo diferente. Espera productiva.",
+        "reversed": "Resistencia al cambio de perspectiva, sacrificio inútil, estancamiento sin propósito, control excesivo"
+      },
+      "notes": "Arquetipo de rendición y nueva perspectiva sin elementos místicos complejos"
+    },
+    {
+      "id": "death",
+      "keyNumber": 13,
+      "name": "Death",
+      "nameSpanish": "La Muerte",
+      "symbolism": ["Esqueleto con armadura", "Bandera blanca con rosa", "Sol naciente entre torres", "Río fluyendo", "Figuras de diferentes clases sociales", "Caballo blanco", "Guadaña"],
+      "keywords": ["transformación", "final", "nuevo comienzo", "cambio profundo", "soltar lo viejo", "renacimiento", "transición"],
+      "keywordsSpanish": ["transformación", "final", "nuevo comienzo", "cambio profundo", "soltar lo viejo", "renacimiento", "transición"],
+      "divinatory": {
+        "upright": "Fin necesario que permite nuevo comienzo. Transformación profunda en curso. Soltar lo que ya no sirve. Muerte metafórica de viejas formas. Renacimiento esperando del otro lado. Cambio inevitable.",
+        "reversed": "Resistencia al cambio necesario, estancamiento, miedo a soltar, transformación incompleta"
+      },
+      "notes": "Representa transformación y cambio profundo sin simbolismo esotérico complejo"
+    },
+    {
+      "id": "temperance",
+      "keyNumber": 14,
+      "name": "Temperance",
+      "nameSpanish": "La Templanza",
+      "symbolism": ["Ángel mezclando líquidos entre copas", "Un pie en agua, otro en tierra", "Sendero hacia montañas", "Sol o luz brillante", "Iris sobre montaña", "Triángulo en el pecho", "Alas angelicales"],
+      "keywords": ["moderación", "equilibrio", "paciencia", "armonía", "sanación", "mezcla correcta", "alquimia personal"],
+      "keywordsSpanish": ["moderación", "paciencia", "equilibrio", "armonía", "sanación", "mezcla correcta", "alquimia personal"],
+      "divinatory": {
+        "upright": "Balance y moderación necesarios. Paciencia trae recompensas. Mezclar elementos opuestos crea algo nuevo. Sanación a través del equilibrio. Evitar extremos. Armonía entre lo físico y lo espiritual.",
+        "reversed": "Desequilibrio, impaciencia, excesos, falta de moderación, elementos mal mezclados"
+      },
+      "notes": "Representa balance y moderación sin alquimia hermética compleja"
+    },
+    {
+      "id": "the-devil",
+      "keyNumber": 15,
+      "name": "The Devil",
+      "nameSpanish": "El Diablo",
+      "symbolism": ["Figura diabólica con cuernos", "Pareja encadenada", "Cadenas sueltas", "Antorcha invertida", "Pentagrama invertido", "Alas de murciélago", "Expresión de las figuras"],
+      "keywords": ["atadura", "adicción", "materialismo", "sombra", "tentación", "ilusión de esclavitud", "apegos"],
+      "keywordsSpanish": ["atadura", "adicción", "materialismo", "sombra", "tentación", "ilusión de esclavitud", "apegos"],
+      "divinatory": {
+        "upright": "Reconocer ataduras autoimpuestas. Adicciones o apegos poco saludables. Materialismo excesivo. Confrontar la sombra personal. Las cadenas son más flojas de lo que parecen. Tentación que esclaviza.",
+        "reversed": "Liberación de ataduras, superación de adicciones, reconocimiento de la ilusión, libertad recuperada"
+      },
+      "notes": "Representa sombra y ataduras psicológicas sin demonología compleja"
+    },
+    {
+      "id": "the-tower",
+      "keyNumber": 16,
+      "name": "The Tower",
+      "nameSpanish": "La Torre",
+      "symbolism": ["Torre siendo destruida", "Rayo cayendo del cielo", "Figuras cayendo", "Corona cayendo de la cima", "Fuego o llamas", "Rocas desmoronándose", "Cielo oscuro"],
+      "keywords": ["destrucción súbita", "revelación", "cambio dramático", "liberación forzada", "colapso", "verdad dolorosa", "despertar"],
+      "keywordsSpanish": ["destrucción súbita", "revelación", "cambio dramático", "liberación forzada", "colapso", "verdad dolorosa", "despertar"],
+      "divinatory": {
+        "upright": "Cambio súbito y dramático inevitable. Estructuras falsas colapsando. Revelación dolorosa pero necesaria. Liberación forzada de situación insostenible. Despertar abrupto. Destrucción que permite reconstrucción.",
+        "reversed": "Evitar el colapso necesario, cambio dramático retrasado, resistencia a la verdad, destrucción parcial"
+      },
+      "notes": "Representa cambio dramático y revelación sin elementos místicos complejos"
+    },
+    {
+      "id": "the-star",
+      "keyNumber": 17,
+      "name": "The Star",
+      "nameSpanish": "La Estrella",
+      "symbolism": ["Mujer vertiendo agua", "Estrella grande brillante", "Siete estrellas pequeñas", "Agua fluyendo a tierra y estanque", "Pájaro en árbol", "Desnudez como vulnerabilidad", "Paisaje nocturno sereno"],
+      "keywords": ["esperanza", "inspiración", "renovación", "fe", "serenidad", "guía", "optimismo"],
+      "keywordsSpanish": ["esperanza", "inspiración", "renovación", "fe", "serenidad", "guía", "optimismo"],
+      "divinatory": {
+        "upright": "Renovación después de la tormenta. Esperanza restaurada. Inspiración divina o claridad mental. Fe en el futuro. Guía celestial. Serenidad y paz interior. Optimismo justificado.",
+        "reversed": "Pérdida de esperanza, pesimismo, desconexión de la inspiración, falta de fe, desesperanza"
+      },
+      "notes": "Representa esperanza y renovación sin correspondencias astrológicas complejas"
+    },
+    {
+      "id": "the-moon",
+      "keyNumber": 18,
+      "name": "The Moon",
+      "nameSpanish": "La Luna",
+      "symbolism": ["Luna llena con rostro", "Torres a ambos lados", "Camino entre torres", "Perro y lobo aullando", "Cangrejo saliendo del agua", "Gotas cayendo", "Paisaje misterioso"],
+      "keywords": ["ilusión", "miedo", "subconsciente", "intuición confusa", "ansiedad", "sueños", "misterio"],
+      "keywordsSpanish": ["ilusión", "miedo", "subconsciente", "intuición confusa", "ansiedad", "sueños", "misterio"],
+      "divinatory": {
+        "upright": "Ilusiones y miedos nublan la visión. Ansiedad o confusión. No todo es lo que parece. Explorar el subconsciente. Prestar atención a sueños. Misterio sin resolver. Intuición mezclada con miedo.",
+        "reversed": "Claridad emergiendo, miedos superados, ilusiones disipándose, verdad revelada"
+      },
+      "notes": "Representa ilusión y subconsciente sin elementos místicos complejos"
+    },
+    {
+      "id": "the-sun",
+      "keyNumber": 19,
+      "name": "The Sun",
+      "nameSpanish": "El Sol",
+      "symbolism": ["Sol radiante con rostro", "Niño en caballo blanco", "Girasoles", "Bandera roja", "Muro bajo", "Expresión alegre", "Luz brillante iluminando todo"],
+      "keywords": ["alegría", "éxito", "claridad", "vitalidad", "inocencia", "celebración", "iluminación"],
+      "keywordsSpanish": ["alegría", "éxito", "claridad", "vitalidad", "inocencia", "celebración", "iluminación"],
+      "divinatory": {
+        "upright": "Éxito y alegría plenos. Claridad total después de confusión. Vitalidad y energía abundantes. Inocencia y autenticidad celebradas. Todo iluminado por la luz de la verdad. Momento de felicidad genuina.",
+        "reversed": "Éxito retrasado, alegría temporal, falta de claridad, energía baja, optimismo excesivo"
+      },
+      "notes": "Representa éxito y alegría sin simbolismo solar esotérico"
+    },
+    {
+      "id": "judgement",
+      "keyNumber": 20,
+      "name": "Judgement",
+      "nameSpanish": "El Juicio",
+      "symbolism": ["Ángel con trompeta", "Figuras levantándose", "Tumbas abiertas", "Montañas al fondo", "Cruz en bandera", "Rayos de luz", "Familia reunida"],
+      "keywords": ["renacimiento", "llamado", "perdón", "juicio final", "redención", "despertar", "evaluación"],
+      "keywordsSpanish": ["renacimiento", "llamado", "perdón", "juicio final", "redención", "despertar", "evaluación"],
+      "divinatory": {
+        "upright": "Momento de renacimiento y renovación total. Llamado a un propósito superior. Perdón de errores pasados. Evaluación honesta de la vida. Redención posible. Despertar a nueva realidad. Juicio justo.",
+        "reversed": "Juicio severo, falta de perdón, llamado ignorado, resistencia a renovarse, culpa persistente"
+      },
+      "notes": "Representa renacimiento y juicio sin apocalipsis místico complejo"
+    },
+    {
+      "id": "the-world",
+      "keyNumber": 21,
+      "name": "The World",
+      "nameSpanish": "El Mundo",
+      "symbolism": ["Figura danzante en guirnalda oval", "Cuatro criaturas en esquinas", "Varitas en las manos", "Expresión de triunfo", "Guirnalda de laurel", "Telas púrpuras", "Completitud circular"],
+      "keywords": ["completitud", "éxito total", "realización", "viaje completo", "integración", "logro", "plenitud"],
+      "keywordsSpanish": ["completitud", "éxito total", "realización", "viaje completo", "integración", "logro", "plenitud"],
+      "divinatory": {
+        "upright": "Ciclo completado con éxito. Logro de objetivos mayores. Viaje llegando a su conclusión feliz. Integración de todas las lecciones aprendidas. Plenitud y satisfacción. Éxito total y merecido.",
+        "reversed": "Meta incompleta, falta de cierre, éxito parcial, viaje sin terminar, algo pendiente"
+      },
+      "notes": "Representa completitud y éxito sin simbolismo cósmico hermético"
+    }
+  ]
+}

@@ -1,0 +1,1048 @@
+{
+  "deck": {
+    "name": "Oráculo Simbólico Universal Holístico",
+    "system": "Universal Holistic Oracle",
+    "tradition": "Synthesis of All Traditions",
+    "totalCards": 22,
+    "focus": "Multi-layer symbolic interpretation: Basic → Jungian → Transpersonal/Energetic → Personalized Holistic",
+    "description": "GOD of Tarot: Accesible para todos, profundo para expertos, integra perfil psicológico real del consultante",
+    "features": ["multi-layer", "holistic-integration", "universal", "transpersonal", "quantum-symbolic"],
+    "sources": ["Carl Jung", "Stanislav Grof", "Ken Wilber", "Joseph Campbell", "Fritjof Capra", "David Bohm"]
+  },
+  "majorArcana": [
+    {
+      "id": "the-fool",
+      "keyNumber": 0,
+      "name": "The Fool",
+      "nameSpanish": "El Loco",
+      "layers": {
+        "basic": {
+          "symbolism": ["Viajero inocente con mochila ligera", "Perro como instinto y compañía fiel", "Precipicio como salto de fe", "Sol radiante como optimismo infinito", "Rosa blanca de pureza", "Montañas del futuro desconocido"],
+          "keywords": ["nuevo comienzo", "inocencia", "espontaneidad", "confianza", "aventura", "libertad"],
+          "keywordsSpanish": ["nuevo comienzo", "inocencia", "espontaneidad", "confianza", "aventura", "libertad"],
+          "divinatory": {
+            "upright": "Oportunidad de empezar de cero, confía en el universo. El momento perfecto para dar ese salto que has estado posponiendo. La vida te invita a una aventura sin mapa.",
+            "reversed": "Imprudencia sin visión, estancamiento por miedo al cambio, resistencia a soltar el pasado"
+          }
+        },
+        "jungian": {
+          "archetype": "The Innocent / The Divine Child (Puer Aeternus)",
+          "shadowAspect": "El Trickster irresponsable, negación de consecuencias",
+          "individuationRole": "Inicio del viaje de individuación, antes de la diferenciación ego-Self",
+          "collectiveUnconscious": "Conecta con el arquetipo primordial del héroe antes de su llamada",
+          "synchronicity": "Sincronicidades iniciales que marcan el comienzo de un nuevo ciclo vital",
+          "interpretation": "El Loco representa el estado de consciencia pre-egoica donde todas las posibilidades existen simultáneamente. En términos junguianos, es el momento antes de que el ego se separe del Self, la inocencia primordial que precede al viaje de individuación."
+        },
+        "transpersonal": {
+          "energy": "Campo cuántico de posibilidades infinitas, estado de superposición",
+          "chakra": "Sahasrara (Corona) - Conexión con la consciencia cósmica",
+          "chakraSecondary": "Ajna (Tercer Ojo) - Visión más allá de lo aparente",
+          "quantumSymbolic": "Colapso de la función de onda: el acto de saltar cristaliza una realidad entre infinitas posibles",
+          "grofMatrix": "BPM I - Estado oceánico prenatal, unidad indiferenciada",
+          "wilberLevel": "Transpersonal temprano - Sutil inferior, apertura a dimensiones no-ordinarias",
+          "fieldResonance": "Resonancia con el campo morfogenético de nuevos comienzos",
+          "interpretation": "El Loco simboliza el estado de no-dualidad cuántica donde el observador y lo observado aún no se han separado. Es la consciencia pura antes de colapsar en una experiencia definida."
+        },
+        "holisticIntegration": {
+          "scl90Mapping": ["Ansiedad fóbica (inversión del miedo al salto)", "Somatización (cuerpo como vehículo del viaje)"],
+          "numerology": "0 - El vacío fértil, potencial infinito, el huevo cósmico",
+          "colorTherapy": "Amarillo brillante (optimismo), Blanco (pureza)",
+          "soundFrequency": "963 Hz - Frecuencia de la glándula pineal",
+          "crystalResonance": "Cuarzo transparente, Selenita",
+          "essenceFloral": "Wild Oat (Bach) - Encontrar el camino"
+        },
+        "personalizedPlaceholder": {
+          "instructions": "Se completa dinámicamente con perfil holístico del consultante",
+          "integrationPoints": ["Resultados SCL-90", "Perfil chakras", "Carta natal", "Numerología personal", "Historial de lecturas"]
+        }
+      }
+    },
+    {
+      "id": "the-magician",
+      "keyNumber": 1,
+      "name": "The Magician",
+      "nameSpanish": "El Mago",
+      "layers": {
+        "basic": {
+          "symbolism": ["Mesa con cuatro herramientas elementales", "Símbolo de infinito sobre la cabeza", "Una mano hacia el cielo, otra hacia la tierra", "Jardín de rosas y lirios", "Vestimenta roja de acción y blanca de pureza"],
+          "keywords": ["manifestación", "habilidad", "recursos", "concentración", "poder personal", "acción consciente"],
+          "keywordsSpanish": ["manifestación", "habilidad", "recursos", "concentración", "poder personal", "acción consciente"],
+          "divinatory": {
+            "upright": "Tienes todos los recursos necesarios. Es momento de actuar con intención clara. Tu poder de manifestación está en su punto máximo.",
+            "reversed": "Recursos desperdiciados, manipulación, potencial sin desarrollar, promesas vacías"
+          }
+        },
+        "jungian": {
+          "archetype": "The Magician / The Creator",
+          "shadowAspect": "El Manipulador, uso del poder para fines egoístas",
+          "individuationRole": "Primera diferenciación del ego, descubrimiento del poder personal",
+          "collectiveUnconscious": "Acceso al arquetipo del demiurgo, el creador de realidades",
+          "synchronicity": "Sincronicidades que confirman el poder de la intención enfocada",
+          "interpretation": "El Mago representa la función trascendente de Jung: la capacidad de unir opuestos (cielo/tierra, consciente/inconsciente) para crear algo nuevo. Es el ego en su función positiva de mediador."
+        },
+        "transpersonal": {
+          "energy": "Canalización de energía cósmica hacia manifestación material",
+          "chakra": "Manipura (Plexo Solar) - Voluntad y poder personal",
+          "chakraSecondary": "Vishuddha (Garganta) - Verbo creador",
+          "quantumSymbolic": "Efecto observador: la consciencia enfocada colapsa posibilidades en realidad específica",
+          "grofMatrix": "Transición BPM I-II - Paso de unidad a diferenciación activa",
+          "wilberLevel": "Visión-lógica - Integración de múltiples perspectivas en acción unificada",
+          "fieldResonance": "Resonancia con campos de intención colectiva y manifestación",
+          "interpretation": "El Mago es el punto donde la consciencia aprende que es co-creadora de la realidad. Representa el principio cuántico de que la observación consciente influye en el resultado."
+        },
+        "holisticIntegration": {
+          "scl90Mapping": ["Obsesión-compulsión (enfoque excesivo)", "Ideación paranoide (manipulación percibida)"],
+          "numerology": "1 - Unidad, iniciativa, liderazgo, el punto de origen",
+          "colorTherapy": "Rojo (acción), Amarillo (intelecto), Blanco (pureza de intención)",
+          "soundFrequency": "528 Hz - Frecuencia de transformación y milagros",
+          "crystalResonance": "Citrino, Pirita, Cuarzo con rutilo",
+          "essenceFloral": "Cerato (Bach) - Confianza en la propia sabiduría"
+        },
+        "personalizedPlaceholder": {
+          "instructions": "Se completa dinámicamente con perfil holístico del consultante",
+          "integrationPoints": ["Resultados SCL-90", "Perfil chakras", "Carta natal", "Numerología personal", "Historial de lecturas"]
+        }
+      }
+    },
+    {
+      "id": "the-high-priestess",
+      "keyNumber": 2,
+      "name": "The High Priestess",
+      "nameSpanish": "La Sacerdotisa",
+      "layers": {
+        "basic": {
+          "symbolism": ["Sentada entre dos pilares (B y J)", "Velo con granadas y palmeras", "Luna creciente a sus pies", "Libro o pergamino de sabiduría oculta", "Corona lunar", "Vestido azul fluido como agua"],
+          "keywords": ["intuición", "misterio", "sabiduría interna", "secretos", "subconsciente", "receptividad"],
+          "keywordsSpanish": ["intuición", "misterio", "sabiduría interna", "secretos", "subconsciente", "receptividad"],
+          "divinatory": {
+            "upright": "Confía en tu intuición, hay información que aún no se ha revelado. La respuesta está dentro de ti. Momento de escuchar antes de actuar.",
+            "reversed": "Intuición bloqueada, secretos dañinos, conocimiento superficial, desconexión interior"
+          }
+        },
+        "jungian": {
+          "archetype": "The Anima / The Wise Woman / Sophia",
+          "shadowAspect": "La Bruja, sabiduría usada para manipular o excluir",
+          "individuationRole": "Encuentro con el Anima, integración de lo femenino interior",
+          "collectiveUnconscious": "Guardiana del umbral al inconsciente colectivo",
+          "synchronicity": "Sincronicidades a través de sueños, intuiciones y 'corazonadas'",
+          "interpretation": "La Sacerdotisa representa el Anima en su aspecto positivo: la sabiduría intuitiva que conecta al ego con las profundidades del inconsciente. Es la voz interior que guía cuando la razón no alcanza."
+        },
+        "transpersonal": {
+          "energy": "Receptividad al campo de información akáshico",
+          "chakra": "Ajna (Tercer Ojo) - Visión interior y clarividencia",
+          "chakraSecondary": "Svadhisthana (Sacro) - Flujo emocional e intuición corporal",
+          "quantumSymbolic": "No-localidad cuántica: información que trasciende espacio-tiempo",
+          "grofMatrix": "BPM I - Acceso al registro oceánico de toda experiencia",
+          "wilberLevel": "Psíquico - Estados meditativos y acceso a información sutil",
+          "fieldResonance": "Resonancia con el campo morfogenético de sabiduría ancestral",
+          "interpretation": "La Sacerdotisa simboliza la consciencia que accede a información no-local, el fenómeno cuántico de entrelazamiento donde toda información está conectada más allá del espacio-tiempo."
+        },
+        "holisticIntegration": {
+          "scl90Mapping": ["Depresión (sabiduría de la oscuridad)", "Ansiedad (intuición bloqueada)"],
+          "numerology": "2 - Dualidad, receptividad, polaridad, equilibrio de opuestos",
+          "colorTherapy": "Azul índigo (intuición), Plateado (luna), Blanco (pureza)",
+          "soundFrequency": "852 Hz - Frecuencia del despertar intuitivo",
+          "crystalResonance": "Lapislázuli, Piedra luna, Amatista",
+          "essenceFloral": "Clematis (Bach) - Conexión con la realidad interior"
+        },
+        "personalizedPlaceholder": {
+          "instructions": "Se completa dinámicamente con perfil holístico del consultante",
+          "integrationPoints": ["Resultados SCL-90", "Perfil chakras", "Carta natal", "Numerología personal", "Historial de lecturas"]
+        }
+      }
+    },
+    {
+      "id": "the-empress",
+      "keyNumber": 3,
+      "name": "The Empress",
+      "nameSpanish": "La Emperatriz",
+      "layers": {
+        "basic": {
+          "symbolism": ["Figura maternal en jardín exuberante", "Corona de doce estrellas", "Campo de trigo maduro", "Río fluyendo", "Cojines lujosos", "Cetro y escudo con Venus"],
+          "keywords": ["abundancia", "fertilidad", "creatividad", "nutrición", "naturaleza", "belleza", "sensualidad"],
+          "keywordsSpanish": ["abundancia", "fertilidad", "creatividad", "nutrición", "naturaleza", "belleza", "sensualidad"],
+          "divinatory": {
+            "upright": "Período de abundancia y crecimiento. Creatividad fluyendo. Momento de nutrir proyectos y relaciones. Conexión con la belleza y el placer.",
+            "reversed": "Bloqueo creativo, dependencia excesiva, descuido personal, abundancia vacía"
+          }
+        },
+        "jungian": {
+          "archetype": "The Great Mother / The Earth Mother / Demeter",
+          "shadowAspect": "La Madre Devoradora, sobreprotección que asfixia",
+          "individuationRole": "Integración del principio nutritivo y creativo",
+          "collectiveUnconscious": "Arquetipo de la fertilidad y la abundancia universal",
+          "synchronicity": "Sincronicidades a través de la naturaleza, coincidencias fértiles",
+          "interpretation": "La Emperatriz representa la Gran Madre en su aspecto nutritivo: el principio creativo que da vida y sustenta. Es la conexión con Eros, el principio de relación y amor."
+        },
+        "transpersonal": {
+          "energy": "Campo de abundancia y co-creación con la naturaleza",
+          "chakra": "Anahata (Corazón) - Amor incondicional",
+          "chakraSecondary": "Svadhisthana (Sacro) - Creatividad y fertilidad",
+          "quantumSymbolic": "Entropía negativa: la vida como fuerza que organiza y crea orden del caos",
+          "grofMatrix": "BPM I - Estado de unión nutritiva, 'buena matriz'",
+          "wilberLevel": "Centáurico - Integración mente-cuerpo-naturaleza",
+          "fieldResonance": "Resonancia con el campo morfogenético de Gaia",
+          "interpretation": "La Emperatriz simboliza el principio de negentropía cósmica: la tendencia de la vida a crear orden, belleza y abundancia. Es la consciencia en su modo creativo y nutritivo."
+        },
+        "holisticIntegration": {
+          "scl90Mapping": ["Somatización (cuerpo como templo creativo)", "Sensibilidad interpersonal (nutrición relacional)"],
+          "numerology": "3 - Creatividad, expresión, síntesis, trinidad creadora",
+          "colorTherapy": "Verde esmeralda (crecimiento), Rosa (amor), Dorado (abundancia)",
+          "soundFrequency": "639 Hz - Frecuencia de conexión y relaciones",
+          "crystalResonance": "Esmeralda, Cuarzo rosa, Jade",
+          "essenceFloral": "Red Chestnut (Bach) - Amor sin apego"
+        },
+        "personalizedPlaceholder": {
+          "instructions": "Se completa dinámicamente con perfil holístico del consultante",
+          "integrationPoints": ["Resultados SCL-90", "Perfil chakras", "Carta natal", "Numerología personal", "Historial de lecturas"]
+        }
+      }
+    },
+    {
+      "id": "the-emperor",
+      "keyNumber": 4,
+      "name": "The Emperor",
+      "nameSpanish": "El Emperador",
+      "layers": {
+        "basic": {
+          "symbolism": ["Figura autoritaria en trono de piedra", "Corona de oro sólida", "Cetro y orbe de poder", "Armadura bajo vestiduras rojas", "Montañas áridas detrás", "Cabezas de carnero en el trono"],
+          "keywords": ["autoridad", "estructura", "disciplina", "liderazgo", "estabilidad", "protección", "orden"],
+          "keywordsSpanish": ["autoridad", "estructura", "disciplina", "liderazgo", "estabilidad", "protección", "orden"],
+          "divinatory": {
+            "upright": "Momento de establecer estructura y disciplina. Liderazgo responsable. Autoridad ganada por experiencia. Construir sobre fundamentos sólidos.",
+            "reversed": "Autoridad tiránica, rigidez excesiva, dominio sin sabiduría, estructura opresiva"
+          }
+        },
+        "jungian": {
+          "archetype": "The Father / The King / The Ruler",
+          "shadowAspect": "El Tirano, poder sin compasión ni sabiduría",
+          "individuationRole": "Desarrollo del Logos, principio de orden y razón",
+          "collectiveUnconscious": "Arquetipo del orden cósmico y la ley natural",
+          "synchronicity": "Sincronicidades que establecen estructura y dirección",
+          "interpretation": "El Emperador representa el Logos junguiano: el principio de orden, razón y estructura. Es el aspecto del Self que organiza y da forma a la experiencia caótica."
+        },
+        "transpersonal": {
+          "energy": "Campo de coherencia y estructura organizativa",
+          "chakra": "Manipura (Plexo Solar) - Voluntad y poder personal",
+          "chakraSecondary": "Muladhara (Raíz) - Estabilidad y fundamentos",
+          "quantumSymbolic": "Atractor extraño: patrones de orden emergente del caos",
+          "grofMatrix": "BPM III - Fase de lucha activa, voluntad dirigida",
+          "wilberLevel": "Racional-egoico - Estructuración de la identidad",
+          "fieldResonance": "Resonancia con campos de orden social y cósmico",
+          "interpretation": "El Emperador simboliza el principio de orden implícito de Bohm: la estructura invisible que organiza la manifestación. Es la consciencia en su modo estructurante."
+        },
+        "holisticIntegration": {
+          "scl90Mapping": ["Hostilidad (poder mal canalizado)", "Ideación paranoide (control excesivo)"],
+          "numerology": "4 - Estabilidad, fundamentos, cuatro elementos, estructura",
+          "colorTherapy": "Rojo (acción), Naranja (vitalidad), Marrón (tierra)",
+          "soundFrequency": "396 Hz - Frecuencia de liberación de culpa y miedo",
+          "crystalResonance": "Rubí, Granate, Hematita",
+          "essenceFloral": "Vine (Bach) - Liderazgo sabio"
+        },
+        "personalizedPlaceholder": {
+          "instructions": "Se completa dinámicamente con perfil holístico del consultante",
+          "integrationPoints": ["Resultados SCL-90", "Perfil chakras", "Carta natal", "Numerología personal", "Historial de lecturas"]
+        }
+      }
+    },
+    {
+      "id": "the-hierophant",
+      "keyNumber": 5,
+      "name": "The Hierophant",
+      "nameSpanish": "El Hierofante",
+      "layers": {
+        "basic": {
+          "symbolism": ["Figura religiosa o maestro espiritual", "Corona triple", "Dos discípulos ante él", "Llaves cruzadas a sus pies", "Pilares del templo", "Mano en bendición"],
+          "keywords": ["tradición", "enseñanza", "creencias", "guía espiritual", "conformidad", "valores compartidos", "sabiduría transmitida"],
+          "keywordsSpanish": ["tradición", "enseñanza", "creencias", "guía espiritual", "conformidad", "valores compartidos", "sabiduría transmitida"],
+          "divinatory": {
+            "upright": "Buscar consejo de alguien con experiencia. Aprender de la tradición. Valores compartidos crean comunidad. Enseñanza disponible.",
+            "reversed": "Dogma rígido, rebeldía sin causa, rechazo de enseñanzas valiosas, conformidad excesiva"
+          }
+        },
+        "jungian": {
+          "archetype": "The Sage / The Wise Old Man / Senex",
+          "shadowAspect": "El Dogmático, tradición que oprime en vez de liberar",
+          "individuationRole": "Encuentro con el Viejo Sabio interior, guía del inconsciente",
+          "collectiveUnconscious": "Arquetipo del maestro y guardián de la sabiduría",
+          "synchronicity": "Sincronicidades a través de maestros, libros, enseñanzas",
+          "interpretation": "El Hierofante representa el arquetipo del Viejo Sabio: la voz interior que transmite sabiduría ancestral. Es el puente entre la tradición colectiva y la experiencia individual."
+        },
+        "transpersonal": {
+          "energy": "Campo de transmisión de sabiduría perenne",
+          "chakra": "Vishuddha (Garganta) - Comunicación de verdad",
+          "chakraSecondary": "Ajna (Tercer Ojo) - Sabiduría interior",
+          "quantumSymbolic": "Información holográfica: cada parte contiene el todo de la tradición",
+          "grofMatrix": "Transición - Acceso a registros transpersonales colectivos",
+          "wilberLevel": "Sutil - Acceso a formas arquetípicas de sabiduría",
+          "fieldResonance": "Resonancia con el campo morfogenético de linajes de sabiduría",
+          "interpretation": "El Hierofante simboliza la transmisión no-local de información: cómo la sabiduría se preserva y transmite a través del campo de consciencia colectiva más allá del tiempo."
+        },
+        "holisticIntegration": {
+          "scl90Mapping": ["Sensibilidad interpersonal (necesidad de pertenencia)", "Psicoticismo (cuestionamiento de creencias)"],
+          "numerology": "5 - Cambio, libertad dentro de estructura, mediación",
+          "colorTherapy": "Azul real (autoridad), Púrpura (espiritualidad), Blanco (pureza)",
+          "soundFrequency": "741 Hz - Frecuencia de expresión y soluciones",
+          "crystalResonance": "Sodalita, Zafiro azul, Turquesa",
+          "essenceFloral": "Water Violet (Bach) - Sabiduría humilde"
+        },
+        "personalizedPlaceholder": {
+          "instructions": "Se completa dinámicamente con perfil holístico del consultante",
+          "integrationPoints": ["Resultados SCL-90", "Perfil chakras", "Carta natal", "Numerología personal", "Historial de lecturas"]
+        }
+      }
+    },
+    {
+      "id": "the-lovers",
+      "keyNumber": 6,
+      "name": "The Lovers",
+      "nameSpanish": "Los Enamorados",
+      "layers": {
+        "basic": {
+          "symbolism": ["Pareja desnuda en jardín", "Ángel bendiciendo desde arriba", "Árbol del conocimiento con serpiente", "Árbol de la vida con llamas", "Montaña sagrada al fondo", "Sol radiante"],
+          "keywords": ["amor", "elección", "relaciones", "valores", "armonía", "unión", "decisión del corazón"],
+          "keywordsSpanish": ["amor", "elección", "relaciones", "valores", "armonía", "unión", "decisión del corazón"],
+          "divinatory": {
+            "upright": "Relación significativa o decisión basada en valores. Amor verdadero y conexión auténtica. Elección entre caminos. Compromiso consciente.",
+            "reversed": "Desarmonía, elección incorrecta, valores en conflicto, tentación, falta de compromiso"
+          }
+        },
+        "jungian": {
+          "archetype": "The Syzygy (Conjunctio) / The Divine Couple",
+          "shadowAspect": "La Codependencia, fusión que destruye la individualidad",
+          "individuationRole": "Coniunctio - unión de Anima/Animus, integración de opuestos",
+          "collectiveUnconscious": "Arquetipo del matrimonio sagrado, hieros gamos",
+          "synchronicity": "Sincronicidades que unen almas afines",
+          "interpretation": "Los Enamorados representan la coniunctio junguiana: la unión de opuestos que crea totalidad. Es el matrimonio interno entre Anima y Animus, consciente e inconsciente."
+        },
+        "transpersonal": {
+          "energy": "Campo de resonancia entre consciencias, entrelazamiento",
+          "chakra": "Anahata (Corazón) - Amor incondicional y unión",
+          "chakraSecondary": "Svadhisthana (Sacro) - Atracción y creatividad relacional",
+          "quantumSymbolic": "Entrelazamiento cuántico: dos partículas conectadas más allá del espacio",
+          "grofMatrix": "BPM I/IV - Experiencia de unión extática",
+          "wilberLevel": "Centáurico-Sutil - Relación transpersonal",
+          "fieldResonance": "Resonancia con el campo de amor universal (morfogenético relacional)",
+          "interpretation": "Los Enamorados simbolizan el entrelazamiento cuántico a nivel de consciencia: cómo dos seres pueden estar conectados instantáneamente más allá de la separación aparente."
+        },
+        "holisticIntegration": {
+          "scl90Mapping": ["Sensibilidad interpersonal (vulnerabilidad relacional)", "Depresión (pérdida de conexión)"],
+          "numerology": "6 - Armonía, responsabilidad, belleza, equilibrio relacional",
+          "colorTherapy": "Rosa (amor), Verde (corazón), Dorado (unión divina)",
+          "soundFrequency": "639 Hz - Frecuencia de conexión y relaciones armoniosas",
+          "crystalResonance": "Cuarzo rosa, Rodocrosita, Kunzita",
+          "essenceFloral": "Holly (Bach) - Amor incondicional"
+        },
+        "personalizedPlaceholder": {
+          "instructions": "Se completa dinámicamente con perfil holístico del consultante",
+          "integrationPoints": ["Resultados SCL-90", "Perfil chakras", "Carta natal", "Numerología personal", "Historial de lecturas"]
+        }
+      }
+    },
+    {
+      "id": "the-chariot",
+      "keyNumber": 7,
+      "name": "The Chariot",
+      "nameSpanish": "El Carro",
+      "layers": {
+        "basic": {
+          "symbolism": ["Guerrero victorioso en carro", "Dos esfinges (blanca y negra)", "Dosel estrellado", "Ciudad conquistada detrás", "Cetro de victoria", "Armadura protectora", "Corona de laureles"],
+          "keywords": ["victoria", "determinación", "control", "voluntad", "éxito", "superación", "dirección clara"],
+          "keywordsSpanish": ["victoria", "determinación", "control", "voluntad", "éxito", "superación", "dirección clara"],
+          "divinatory": {
+            "upright": "Victoria por determinación y control de fuerzas opuestas. Éxito a través de voluntad enfocada. Superación de obstáculos. Avanzar con confianza.",
+            "reversed": "Falta de dirección, fuerzas en conflicto, pérdida de control, victoria pírrica"
+          }
+        },
+        "jungian": {
+          "archetype": "The Hero / The Warrior",
+          "shadowAspect": "El Conquistador despiadado, voluntad sin compasión",
+          "individuationRole": "Fase heroica del viaje, dominio del ego sobre las fuerzas inconscientes",
+          "collectiveUnconscious": "Arquetipo del héroe solar triunfante",
+          "synchronicity": "Sincronicidades que confirman dirección correcta",
+          "interpretation": "El Carro representa la fase heroica del viaje de individuación: el ego fortalecido que aprende a dirigir las fuerzas opuestas del inconsciente hacia una meta consciente."
+        },
+        "transpersonal": {
+          "energy": "Campo de voluntad coherente y manifestación dirigida",
+          "chakra": "Manipura (Plexo Solar) - Voluntad y poder personal",
+          "chakraSecondary": "Ajna (Tercer Ojo) - Visión clara del objetivo",
+          "quantumSymbolic": "Coherencia cuántica: múltiples posibilidades alineadas en una dirección",
+          "grofMatrix": "BPM III - Victoria tras la lucha, emergencia triunfante",
+          "wilberLevel": "Racional-egoico maduro - Voluntad integrada y dirigida",
+          "fieldResonance": "Resonancia con campos de logro y manifestación colectiva",
+          "interpretation": "El Carro simboliza la coherencia cuántica: cuando múltiples posibilidades se alinean en una dirección unificada, creando manifestación poderosa."
+        },
+        "holisticIntegration": {
+          "scl90Mapping": ["Hostilidad (fuerza canalizada)", "Ansiedad (control de fuerzas opuestas)"],
+          "numerology": "7 - Introspección, victoria espiritual, perfección",
+          "colorTherapy": "Azul (determinación), Dorado (victoria), Negro/Blanco (dualidad integrada)",
+          "soundFrequency": "417 Hz - Frecuencia de cambio y transmutación",
+          "crystalResonance": "Ojo de tigre, Ónix, Obsidiana dorada",
+          "essenceFloral": "Oak (Bach) - Fuerza sostenida"
+        },
+        "personalizedPlaceholder": {
+          "instructions": "Se completa dinámicamente con perfil holístico del consultante",
+          "integrationPoints": ["Resultados SCL-90", "Perfil chakras", "Carta natal", "Numerología personal", "Historial de lecturas"]
+        }
+      }
+    },
+    {
+      "id": "strength",
+      "keyNumber": 8,
+      "name": "Strength",
+      "nameSpanish": "La Fuerza",
+      "layers": {
+        "basic": {
+          "symbolism": ["Mujer abriendo suavemente las fauces del león", "Símbolo de infinito sobre la cabeza", "Guirnalda de rosas", "Montañas azules al fondo", "Expresión serena y amorosa", "León como pasiones"],
+          "keywords": ["coraje", "paciencia", "compasión", "fuerza interior", "dominio suave", "confianza", "amor que conquista"],
+          "keywordsSpanish": ["coraje", "paciencia", "compasión", "fuerza interior", "dominio suave", "confianza", "amor que conquista"],
+          "divinatory": {
+            "upright": "Fuerza interior supera la fuerza bruta. Paciencia y compasión más efectivas que agresión. Coraje para enfrentar miedos. Dominio emocional con amor.",
+            "reversed": "Debilidad interior, agresión descontrolada, miedo dominante, crueldad"
+          }
+        },
+        "jungian": {
+          "archetype": "The Anima in her strength aspect / Sophia as gentle power",
+          "shadowAspect": "La Bestia interior reprimida que explota violentamente",
+          "individuationRole": "Integración de la sombra a través del amor, no de la represión",
+          "collectiveUnconscious": "Arquetipo de la fuerza femenina que doma lo salvaje",
+          "synchronicity": "Sincronicidades que muestran el poder de la gentileza",
+          "interpretation": "La Fuerza representa la integración de la sombra a través del amor: no reprimir las fuerzas instintivas sino transformarlas con compasión consciente."
+        },
+        "transpersonal": {
+          "energy": "Campo de transformación a través del amor incondicional",
+          "chakra": "Anahata (Corazón) - Amor que transforma",
+          "chakraSecondary": "Manipura (Plexo Solar) - Poder personal integrado con amor",
+          "quantumSymbolic": "Efecto Zeno cuántico: observación amorosa estabiliza y transforma",
+          "grofMatrix": "Transición BPM III-IV - Rendición que trae liberación",
+          "wilberLevel": "Centáurico - Integración de instinto y consciencia superior",
+          "fieldResonance": "Resonancia con campos de transformación compasiva",
+          "interpretation": "La Fuerza simboliza cómo la consciencia amorosa puede transformar energías 'negativas' en positivas, similar a cómo la observación cuántica influye en el comportamiento de partículas."
+        },
+        "holisticIntegration": {
+          "scl90Mapping": ["Hostilidad (fuerza transformada)", "Ansiedad (miedo domesticado)"],
+          "numerology": "8 - Poder, karma, equilibrio de fuerzas, infinito",
+          "colorTherapy": "Dorado (león), Verde (corazón), Blanco (pureza)",
+          "soundFrequency": "528 Hz - Frecuencia de transformación y amor",
+          "crystalResonance": "Cuarzo rosa, Crisocola, Malaquita",
+          "essenceFloral": "Mimulus (Bach) - Coraje ante miedos conocidos"
+        },
+        "personalizedPlaceholder": {
+          "instructions": "Se completa dinámicamente con perfil holístico del consultante",
+          "integrationPoints": ["Resultados SCL-90", "Perfil chakras", "Carta natal", "Numerología personal", "Historial de lecturas"]
+        }
+      }
+    },
+    {
+      "id": "the-hermit",
+      "keyNumber": 9,
+      "name": "The Hermit",
+      "nameSpanish": "El Ermitaño",
+      "layers": {
+        "basic": {
+          "symbolism": ["Anciano con lámpara y bastón", "Montaña nevada", "Manto gris de humildad", "Estrella de seis puntas en lámpara", "Postura contemplativa", "Paisaje desolado"],
+          "keywords": ["introspección", "soledad sabia", "búsqueda interior", "guía", "retiro", "reflexión", "iluminación interior"],
+          "keywordsSpanish": ["introspección", "soledad sabia", "búsqueda interior", "guía", "retiro", "reflexión", "iluminación interior"],
+          "divinatory": {
+            "upright": "Tiempo de retiro e introspección. Buscar respuestas en tu interior. Sabiduría ganada por experiencia. Soledad productiva. Ser luz para otros.",
+            "reversed": "Aislamiento destructivo, rechazo de ayuda, sabiduría no compartida, soledad dolorosa"
+          }
+        },
+        "jungian": {
+          "archetype": "The Wise Old Man / The Sage / The Hermit",
+          "shadowAspect": "El Ermitaño amargado que rechaza toda conexión",
+          "individuationRole": "Encuentro profundo con el Self en soledad",
+          "collectiveUnconscious": "Arquetipo del buscador solitario de verdad",
+          "synchronicity": "Sincronicidades en la soledad que revelan verdades",
+          "interpretation": "El Ermitaño representa la necesidad de soledad para el encuentro con el Self. Es el Viejo Sabio interior que solo se manifiesta cuando nos apartamos del ruido externo."
+        },
+        "transpersonal": {
+          "energy": "Campo de consciencia introspectiva y revelación interior",
+          "chakra": "Ajna (Tercer Ojo) - Visión interior",
+          "chakraSecondary": "Sahasrara (Corona) - Conexión con sabiduría superior",
+          "quantumSymbolic": "Decoherencia selectiva: aislarse del ruido para mantener estados cuánticos puros",
+          "grofMatrix": "Experiencias transpersonales en soledad contemplativa",
+          "wilberLevel": "Sutil-Causal - Estados meditativos profundos",
+          "fieldResonance": "Resonancia con el campo de sabiduría perenne",
+          "interpretation": "El Ermitaño simboliza la necesidad de 'aislamiento cuántico': apartarse del ruido para mantener la coherencia de estados de consciencia elevados."
+        },
+        "holisticIntegration": {
+          "scl90Mapping": ["Depresión (soledad como sanación)", "Ansiedad fóbica (retiro protector)"],
+          "numerology": "9 - Completitud, sabiduría, humanitarismo, culminación",
+          "colorTherapy": "Gris (humildad), Índigo (sabiduría), Dorado (luz interior)",
+          "soundFrequency": "852 Hz - Frecuencia del despertar espiritual",
+          "crystalResonance": "Amatista, Cuarzo ahumado, Fluorita púrpura",
+          "essenceFloral": "Water Violet (Bach) - Soledad digna"
+        },
+        "personalizedPlaceholder": {
+          "instructions": "Se completa dinámicamente con perfil holístico del consultante",
+          "integrationPoints": ["Resultados SCL-90", "Perfil chakras", "Carta natal", "Numerología personal", "Historial de lecturas"]
+        }
+      }
+    },
+    {
+      "id": "wheel-of-fortune",
+      "keyNumber": 10,
+      "name": "Wheel of Fortune",
+      "nameSpanish": "La Rueda de la Fortuna",
+      "layers": {
+        "basic": {
+          "symbolism": ["Rueda giratoria con símbolos", "Criaturas subiendo y bajando", "Esfinge en la cima con espada", "Serpiente descendiendo", "Anubis ascendiendo", "Cuatro criaturas aladas en esquinas"],
+          "keywords": ["cambio", "ciclos", "destino", "suerte", "oportunidad", "giro inesperado", "karma"],
+          "keywordsSpanish": ["cambio", "ciclos", "destino", "suerte", "oportunidad", "giro inesperado", "karma"],
+          "divinatory": {
+            "upright": "Cambio significativo en camino. Ciclos naturales de la vida. Buena fortuna. Giro positivo del destino. Oportunidades inesperadas.",
+            "reversed": "Mala suerte temporal, resistencia al cambio, ciclo negativo, pérdida de oportunidades"
+          }
+        },
+        "jungian": {
+          "archetype": "The Self as center of cycles / Moira (Fate)",
+          "shadowAspect": "Victimismo ante el destino, negación de responsabilidad",
+          "individuationRole": "Reconocimiento de los ciclos del proceso de individuación",
+          "collectiveUnconscious": "Arquetipo del destino y los ciclos cósmicos",
+          "synchronicity": "La sincronicidad misma como manifestación de la rueda",
+          "interpretation": "La Rueda representa la naturaleza cíclica del proceso de individuación. Jung veía en los ciclos la manifestación del Self organizando la experiencia hacia la totalidad."
+        },
+        "transpersonal": {
+          "energy": "Campo de probabilidades y manifestación kármica",
+          "chakra": "Manipura (Plexo Solar) - Centro de manifestación",
+          "chakraSecondary": "Todos los chakras (ciclo completo)",
+          "quantumSymbolic": "Probabilidades cuánticas: campos de posibilidades colapsando en eventos",
+          "grofMatrix": "Ciclo completo BPM I-IV - Rueda de muerte y renacimiento",
+          "wilberLevel": "Todos los niveles en rotación cíclica",
+          "fieldResonance": "Resonancia con campos kármicos y probabilísticos",
+          "interpretation": "La Rueda simboliza el campo de probabilidades cuánticas: todas las posibilidades existen simultáneamente hasta que colapsan en eventos específicos según patrones kármicos."
+        },
+        "holisticIntegration": {
+          "scl90Mapping": ["Ansiedad (incertidumbre del cambio)", "Depresión (ciclos bajos)"],
+          "numerology": "10 = 1+0 = 1 - Nuevo ciclo, retorno al origen, completitud",
+          "colorTherapy": "Azul (cielo), Naranja (movimiento), Multicolor (totalidad)",
+          "soundFrequency": "432 Hz - Frecuencia del universo, armonía cósmica",
+          "crystalResonance": "Labradorita, Piedra sol, Peridoto",
+          "essenceFloral": "Scleranthus (Bach) - Equilibrio en el cambio"
+        },
+        "personalizedPlaceholder": {
+          "instructions": "Se completa dinámicamente con perfil holístico del consultante",
+          "integrationPoints": ["Resultados SCL-90", "Perfil chakras", "Carta natal", "Numerología personal", "Historial de lecturas"]
+        }
+      }
+    },
+    {
+      "id": "justice",
+      "keyNumber": 11,
+      "name": "Justice",
+      "nameSpanish": "La Justicia",
+      "layers": {
+        "basic": {
+          "symbolism": ["Figura con espada y balanza", "Corona de autoridad", "Velo púrpura detrás", "Pilares del equilibrio", "Expresión imparcial", "Trono de juicio"],
+          "keywords": ["justicia", "equilibrio", "verdad", "consecuencias", "imparcialidad", "decisión justa", "karma"],
+          "keywordsSpanish": ["justicia", "equilibrio", "verdad", "consecuencias", "imparcialidad", "decisión justa", "karma"],
+          "divinatory": {
+            "upright": "Decisiones justas necesarias. Verdad revelada. Consecuencias de acciones pasadas. Karma en equilibrio. Juicio imparcial.",
+            "reversed": "Injusticia, falta de responsabilidad, decisiones sesgadas, desequilibrio"
+          }
+        },
+        "jungian": {
+          "archetype": "The Judge / Themis / Ma'at",
+          "shadowAspect": "El Juez cruel, justicia sin compasión",
+          "individuationRole": "Integración de la función pensamiento (juicio objetivo)",
+          "collectiveUnconscious": "Arquetipo de la justicia cósmica y el orden moral",
+          "synchronicity": "Sincronicidades que restauran el equilibrio kármico",
+          "interpretation": "La Justicia representa la función de pensamiento diferenciada: la capacidad de evaluar objetivamente, separar verdad de ilusión, y actuar según principios universales."
+        },
+        "transpersonal": {
+          "energy": "Campo de equilibrio kármico y causa-efecto cósmico",
+          "chakra": "Ajna (Tercer Ojo) - Visión de la verdad",
+          "chakraSecondary": "Vishuddha (Garganta) - Expresión de la verdad",
+          "quantumSymbolic": "Simetría CPT: las leyes físicas conservan equilibrio cósmico",
+          "grofMatrix": "Fase de integración - Balance tras la experiencia",
+          "wilberLevel": "Visión-lógica - Perspectiva integradora y justa",
+          "fieldResonance": "Resonancia con el campo de justicia cósmica (dharma)",
+          "interpretation": "La Justicia simboliza las leyes de conservación cuánticas: cada acción tiene una reacción igual, manteniendo el equilibrio del sistema cósmico."
+        },
+        "holisticIntegration": {
+          "scl90Mapping": ["Ideación paranoide (juicio distorsionado)", "Hostilidad (injusticia percibida)"],
+          "numerology": "11 - Número maestro, intuición superior, equilibrio dual",
+          "colorTherapy": "Púrpura (sabiduría), Dorado (justicia divina), Rojo (decisión)",
+          "soundFrequency": "741 Hz - Frecuencia de expresión y verdad",
+          "crystalResonance": "Aguamarina, Cianita, Celestita",
+          "essenceFloral": "Beech (Bach) - Tolerancia y comprensión"
+        },
+        "personalizedPlaceholder": {
+          "instructions": "Se completa dinámicamente con perfil holístico del consultante",
+          "integrationPoints": ["Resultados SCL-90", "Perfil chakras", "Carta natal", "Numerología personal", "Historial de lecturas"]
+        }
+      }
+    },
+    {
+      "id": "the-hanged-man",
+      "keyNumber": 12,
+      "name": "The Hanged Man",
+      "nameSpanish": "El Colgado",
+      "layers": {
+        "basic": {
+          "symbolism": ["Figura suspendida de un pie", "Halo de iluminación", "Brazos formando triángulo invertido", "Pierna cruzada forma número 4", "Árbol vivo (no cruz)", "Expresión serena"],
+          "keywords": ["pausa", "rendición", "perspectiva nueva", "sacrificio", "espera", "soltar control", "inversión"],
+          "keywordsSpanish": ["pausa", "rendición", "perspectiva nueva", "sacrificio", "espera", "soltar control", "inversión"],
+          "divinatory": {
+            "upright": "Momento de pausa antes de actuar. Cambio de perspectiva necesario. Rendirse al proceso. Sacrificio que trae sabiduría. Ver desde ángulo diferente.",
+            "reversed": "Resistencia al cambio, sacrificio inútil, estancamiento, control excesivo"
+          }
+        },
+        "jungian": {
+          "archetype": "The Suspended One / Odin on Yggdrasil",
+          "shadowAspect": "El Mártir, sacrificio como manipulación",
+          "individuationRole": "Enantiodromia - inversión que precede transformación profunda",
+          "collectiveUnconscious": "Arquetipo del sacrificio redentor y la iniciación",
+          "synchronicity": "Sincronicidades que fuerzan pausa y reconsideración",
+          "interpretation": "El Colgado representa la enantiodromía junguiana: cuando algo llega a su extremo, se invierte. Es la suspensión necesaria para que emerja una perspectiva radicalmente nueva."
+        },
+        "transpersonal": {
+          "energy": "Campo de transformación por rendición consciente",
+          "chakra": "Ajna (Tercer Ojo) - Nueva visión desde inversión",
+          "chakraSecondary": "Sahasrara (Corona) - Conexión a través de la entrega",
+          "quantumSymbolic": "Superposición cuántica: estar en múltiples estados hasta rendirse a uno",
+          "grofMatrix": "BPM II - Suspensión sin salida aparente antes de la transición",
+          "wilberLevel": "Transición causal - Muerte del ego que precede renacimiento",
+          "fieldResonance": "Resonancia con campos de transformación iniciática",
+          "interpretation": "El Colgado simboliza el estado de superposición cuántica sostenido: permanecer en la incertidumbre sin forzar un colapso prematuro, permitiendo que emerja la solución óptima."
+        },
+        "holisticIntegration": {
+          "scl90Mapping": ["Depresión (rendición vs. desesperanza)", "Ansiedad (soltar control)"],
+          "numerology": "12 = 1+2 = 3 - Sacrificio que crea, trinidad invertida",
+          "colorTherapy": "Azul (agua), Amarillo (halo), Rojo (acción suspendida)",
+          "soundFrequency": "396 Hz - Frecuencia de liberación",
+          "crystalResonance": "Lepidolita, Howlita, Aquamarino",
+          "essenceFloral": "Rock Rose (Bach) - Coraje en la rendición"
+        },
+        "personalizedPlaceholder": {
+          "instructions": "Se completa dinámicamente con perfil holístico del consultante",
+          "integrationPoints": ["Resultados SCL-90", "Perfil chakras", "Carta natal", "Numerología personal", "Historial de lecturas"]
+        }
+      }
+    },
+    {
+      "id": "death",
+      "keyNumber": 13,
+      "name": "Death",
+      "nameSpanish": "La Muerte",
+      "layers": {
+        "basic": {
+          "symbolism": ["Esqueleto con armadura sobre caballo", "Bandera con rosa mística", "Sol naciente entre torres", "Río de transición", "Figuras de todas clases sociales", "Guadaña"],
+          "keywords": ["transformación", "fin de ciclo", "renacimiento", "cambio profundo", "soltar lo viejo", "transición"],
+          "keywordsSpanish": ["transformación", "fin de ciclo", "renacimiento", "cambio profundo", "soltar lo viejo", "transición"],
+          "divinatory": {
+            "upright": "Fin necesario que permite nuevo comienzo. Transformación profunda. Soltar lo que ya no sirve. Muerte metafórica de viejas formas. Renacimiento.",
+            "reversed": "Resistencia al cambio, estancamiento, miedo a soltar, transformación incompleta"
+          }
+        },
+        "jungian": {
+          "archetype": "The Destroyer / Thanatos / Kali",
+          "shadowAspect": "Negación de la muerte, inmortalidad del ego",
+          "individuationRole": "Muerte del ego (ego death) - necesaria para renacimiento del Self",
+          "collectiveUnconscious": "Arquetipo de muerte y renacimiento, el eterno retorno",
+          "synchronicity": "Sincronicidades que marcan finales y nuevos comienzos",
+          "interpretation": "La Muerte representa la muerte del ego que Jung consideraba necesaria para la individuación. No es destrucción sino transformación: lo viejo muere para que nazca lo nuevo."
+        },
+        "transpersonal": {
+          "energy": "Campo de transformación radical y renacimiento",
+          "chakra": "Muladhara (Raíz) - Supervivencia transformada",
+          "chakraSecondary": "Sahasrara (Corona) - Muerte como portal",
+          "quantumSymbolic": "Túnel cuántico: atravesar la barrera imposible hacia nuevo estado",
+          "grofMatrix": "BPM II-III - Muerte del ego, experiencia de aniquilación",
+          "wilberLevel": "Transición causal - Muerte antes del renacimiento no-dual",
+          "fieldResonance": "Resonancia con el campo de transformación universal",
+          "interpretation": "La Muerte simboliza el túnel cuántico: la capacidad de atravesar barreras aparentemente imposibles para emerger en un estado completamente nuevo de existencia."
+        },
+        "holisticIntegration": {
+          "scl90Mapping": ["Ansiedad (miedo a la muerte)", "Depresión (duelo transformador)"],
+          "numerology": "13 = 1+3 = 4 - Destrucción que crea nuevas estructuras",
+          "colorTherapy": "Negro (muerte), Blanco (renacimiento), Rojo (vida nueva)",
+          "soundFrequency": "174 Hz - Frecuencia de sanación profunda",
+          "crystalResonance": "Obsidiana, Ónix negro, Moldavita",
+          "essenceFloral": "Walnut (Bach) - Protección en transiciones"
+        },
+        "personalizedPlaceholder": {
+          "instructions": "Se completa dinámicamente con perfil holístico del consultante",
+          "integrationPoints": ["Resultados SCL-90", "Perfil chakras", "Carta natal", "Numerología personal", "Historial de lecturas"]
+        }
+      }
+    },
+    {
+      "id": "temperance",
+      "keyNumber": 14,
+      "name": "Temperance",
+      "nameSpanish": "La Templanza",
+      "layers": {
+        "basic": {
+          "symbolism": ["Ángel mezclando líquidos entre copas", "Un pie en agua, otro en tierra", "Sendero hacia montañas", "Iris sobre pico", "Triángulo en el pecho", "Sol o corona de luz", "Alas angelicales"],
+          "keywords": ["moderación", "equilibrio", "paciencia", "armonía", "sanación", "alquimia personal", "integración"],
+          "keywordsSpanish": ["moderación", "equilibrio", "paciencia", "armonía", "sanación", "alquimia personal", "integración"],
+          "divinatory": {
+            "upright": "Balance y moderación necesarios. Paciencia trae recompensas. Mezclar elementos crea algo nuevo. Sanación a través del equilibrio.",
+            "reversed": "Desequilibrio, impaciencia, excesos, elementos mal mezclados"
+          }
+        },
+        "jungian": {
+          "archetype": "The Alchemist / The Healer",
+          "shadowAspect": "El Mezclador caótico, combinaciones destructivas",
+          "individuationRole": "Opus alquímico - unión de opuestos en la vasija del Self",
+          "collectiveUnconscious": "Arquetipo de la sanación y la integración",
+          "synchronicity": "Sincronicidades que traen los elementos correctos juntos",
+          "interpretation": "La Templanza representa el opus alquímico de Jung: la paciente integración de opuestos (consciente/inconsciente, masculino/femenino) en la vasija transformadora del Self."
+        },
+        "transpersonal": {
+          "energy": "Campo de integración y sanación holística",
+          "chakra": "Anahata (Corazón) - Centro de integración",
+          "chakraSecondary": "Todos los chakras en equilibrio",
+          "quantumSymbolic": "Superposición armónica: estados que se combinan constructivamente",
+          "grofMatrix": "Integración post-experiencial - Sanación y síntesis",
+          "wilberLevel": "Centáurico-Integral - Integración de todas las dimensiones",
+          "fieldResonance": "Resonancia con campos de sanación y coherencia",
+          "interpretation": "La Templanza simboliza la superposición cuántica constructiva: cuando diferentes estados se combinan de manera que se refuerzan mutuamente, creando coherencia y sanación."
+        },
+        "holisticIntegration": {
+          "scl90Mapping": ["Somatización (sanación cuerpo-mente)", "Ansiedad (equilibrio restaurado)"],
+          "numerology": "14 = 1+4 = 5 - Cambio a través de la integración",
+          "colorTherapy": "Azul (agua), Rojo (fuego), Dorado (sol), Blanco (pureza)",
+          "soundFrequency": "528 Hz - Frecuencia de sanación y ADN",
+          "crystalResonance": "Turquesa, Amazonita, Cuarzo arcoíris",
+          "essenceFloral": "Agrimony (Bach) - Paz interior genuina"
+        },
+        "personalizedPlaceholder": {
+          "instructions": "Se completa dinámicamente con perfil holístico del consultante",
+          "integrationPoints": ["Resultados SCL-90", "Perfil chakras", "Carta natal", "Numerología personal", "Historial de lecturas"]
+        }
+      }
+    },
+    {
+      "id": "the-devil",
+      "keyNumber": 15,
+      "name": "The Devil",
+      "nameSpanish": "El Diablo",
+      "layers": {
+        "basic": {
+          "symbolism": ["Figura con cuernos y alas", "Pareja encadenada (cadenas flojas)", "Pentagrama invertido", "Antorcha invertida", "Pedestal de piedra", "Cola con uvas y llamas"],
+          "keywords": ["sombra", "atadura", "adicción", "materialismo", "tentación", "ilusión de esclavitud", "instinto"],
+          "keywordsSpanish": ["sombra", "atadura", "adicción", "materialismo", "tentación", "ilusión de esclavitud", "instinto"],
+          "divinatory": {
+            "upright": "Reconocer ataduras autoimpuestas. Confrontar la sombra. Las cadenas son más flojas de lo que parecen. Tentación y materialismo.",
+            "reversed": "Liberación de ataduras, superación de adicciones, reconocimiento de ilusiones"
+          }
+        },
+        "jungian": {
+          "archetype": "The Shadow / Pan / The Trickster oscuro",
+          "shadowAspect": "La Sombra no integrada que posee y controla",
+          "individuationRole": "Encuentro con la Sombra - paso crucial en individuación",
+          "collectiveUnconscious": "Arquetipo del instinto reprimido y la naturaleza negada",
+          "synchronicity": "Sincronicidades que revelan la sombra proyectada",
+          "interpretation": "El Diablo representa la Sombra junguiana: todo lo que hemos reprimido y negado. La individuación requiere confrontar y integrar esta energía, no suprimirla."
+        },
+        "transpersonal": {
+          "energy": "Campo de transformación de energías instintivas",
+          "chakra": "Muladhara (Raíz) - Instintos de supervivencia",
+          "chakraSecondary": "Svadhisthana (Sacro) - Deseos y adicciones",
+          "quantumSymbolic": "Estados ligados (bound states): energía atrapada que puede liberarse",
+          "grofMatrix": "BPM II - Experiencia de atrapamiento y victimismo",
+          "wilberLevel": "Pre-personal resurgiendo - Material reprimido emergiendo",
+          "fieldResonance": "Resonancia con campos de energía instintiva colectiva",
+          "interpretation": "El Diablo simboliza los estados cuánticos ligados: energía que parece atrapada pero que, con la consciencia correcta, puede liberarse y transformarse."
+        },
+        "holisticIntegration": {
+          "scl90Mapping": ["Todas las escalas pueden reflejar sombra no integrada", "Hostilidad (proyección de sombra)"],
+          "numerology": "15 = 1+5 = 6 - Desequilibrio en relaciones y valores",
+          "colorTherapy": "Negro (sombra), Rojo (pasión), Naranja (deseo)",
+          "soundFrequency": "285 Hz - Frecuencia de sanación de campos energéticos",
+          "crystalResonance": "Obsidiana negra, Turmalina negra, Onix",
+          "essenceFloral": "Cherry Plum (Bach) - Control de impulsos"
+        },
+        "personalizedPlaceholder": {
+          "instructions": "Se completa dinámicamente con perfil holístico del consultante",
+          "integrationPoints": ["Resultados SCL-90", "Perfil chakras", "Carta natal", "Numerología personal", "Historial de lecturas"]
+        }
+      }
+    },
+    {
+      "id": "the-tower",
+      "keyNumber": 16,
+      "name": "The Tower",
+      "nameSpanish": "La Torre",
+      "layers": {
+        "basic": {
+          "symbolism": ["Torre destruida por rayo", "Figuras cayendo", "Corona cayendo de la cima", "Fuego y llamas", "Rocas desmoronándose", "Cielo oscuro tormentoso", "Relámpago divino"],
+          "keywords": ["destrucción súbita", "revelación", "colapso", "liberación forzada", "verdad dolorosa", "despertar abrupto"],
+          "keywordsSpanish": ["destrucción súbita", "revelación", "colapso", "liberación forzada", "verdad dolorosa", "despertar abrupto"],
+          "divinatory": {
+            "upright": "Cambio súbito inevitable. Estructuras falsas colapsando. Revelación dolorosa pero necesaria. Liberación forzada. Despertar abrupto.",
+            "reversed": "Evitar colapso necesario, destrucción parcial, resistencia a la verdad"
+          }
+        },
+        "jungian": {
+          "archetype": "The Destroyer / Shiva / The Lightning",
+          "shadowAspect": "Destrucción nihilista sin propósito redentor",
+          "individuationRole": "Crisis de individuación - destrucción de falso yo",
+          "collectiveUnconscious": "Arquetipo del cataclismo y la renovación",
+          "synchronicity": "Sincronicidades explosivas que destruyen ilusiones",
+          "interpretation": "La Torre representa la crisis necesaria del proceso de individuación: cuando el ego construido sobre falsas premisas es destruido por la verdad del Self emergiendo."
+        },
+        "transpersonal": {
+          "energy": "Campo de transformación por ruptura de estructuras",
+          "chakra": "Ajna (Tercer Ojo) - Revelación que destruye ilusión",
+          "chakraSecondary": "Muladhara (Raíz) - Fundamentos destruidos/reconstruidos",
+          "quantumSymbolic": "Colapso de función de onda forzado: fin de superposiciones insostenibles",
+          "grofMatrix": "BPM III climax - Explosión antes del renacimiento",
+          "wilberLevel": "Crisis de transformación - Destrucción de estructuras obsoletas",
+          "fieldResonance": "Resonancia con campos de transformación radical colectiva",
+          "interpretation": "La Torre simboliza el colapso cuántico forzado: cuando las superposiciones insostenibles se desmoronan, dejando solo la realidad que puede sostenerse."
+        },
+        "holisticIntegration": {
+          "scl90Mapping": ["Psicoticismo (ruptura con realidad)", "Ansiedad (crisis aguda)"],
+          "numerology": "16 = 1+6 = 7 - Destrucción espiritual que purifica",
+          "colorTherapy": "Rojo (fuego), Negro (destrucción), Amarillo (rayo)", 
+          "soundFrequency": "174 Hz - Frecuencia de fundamentos",
+          "crystalResonance": "Moldavita, Tectita, Obsidiana relámpago",
+          "essenceFloral": "Star of Bethlehem (Bach) - Trauma y shock"
+        },
+        "personalizedPlaceholder": {
+          "instructions": "Se completa dinámicamente con perfil holístico del consultante",
+          "integrationPoints": ["Resultados SCL-90", "Perfil chakras", "Carta natal", "Numerología personal", "Historial de lecturas"]
+        }
+      }
+    },
+    {
+      "id": "the-star",
+      "keyNumber": 17,
+      "name": "The Star",
+      "nameSpanish": "La Estrella",
+      "layers": {
+        "basic": {
+          "symbolism": ["Mujer desnuda vertiendo agua", "Gran estrella de ocho puntas", "Siete estrellas pequeñas", "Agua fluyendo a tierra y estanque", "Ave en árbol", "Paisaje sereno nocturno", "Vulnerabilidad sin vergüenza"],
+          "keywords": ["esperanza", "inspiración", "renovación", "fe", "serenidad", "guía celestial", "optimismo"],
+          "keywordsSpanish": ["esperanza", "inspiración", "renovación", "fe", "serenidad", "guía celestial", "optimismo"],
+          "divinatory": {
+            "upright": "Renovación después de la tormenta. Esperanza restaurada. Inspiración divina. Fe en el futuro. Serenidad y paz interior.",
+            "reversed": "Pérdida de esperanza, pesimismo, desconexión de inspiración, falta de fe"
+          }
+        },
+        "jungian": {
+          "archetype": "The Star Goddess / Sophia / Hope",
+          "shadowAspect": "Esperanza ingenua que niega realidad, ilusión",
+          "individuationRole": "Después de la noche oscura - primera luz del Self",
+          "collectiveUnconscious": "Arquetipo de la guía celestial y la esperanza eterna",
+          "synchronicity": "Sincronicidades que restauran la fe después de la crisis",
+          "interpretation": "La Estrella representa la primera manifestación del Self después de la crisis de la Torre. Es Sophia, la sabiduría divina que guía con esperanza hacia la individuación."
+        },
+        "transpersonal": {
+          "energy": "Campo de renovación cósmica y conexión celestial",
+          "chakra": "Sahasrara (Corona) - Conexión con lo divino",
+          "chakraSecondary": "Anahata (Corazón) - Esperanza y sanación emocional",
+          "quantumSymbolic": "Radiación de cuerpo negro: después de la absorción total, nueva emisión",
+          "grofMatrix": "BPM IV - Renacimiento, primera respiración libre",
+          "wilberLevel": "Sutil superior - Estados de gracia y guía espiritual",
+          "fieldResonance": "Resonancia con campos de esperanza y renovación colectiva",
+          "interpretation": "La Estrella simboliza la radiación cuántica después del colapso: nueva energía que emerge después de que las estructuras antiguas han sido absorbidas y transformadas."
+        },
+        "holisticIntegration": {
+          "scl90Mapping": ["Depresión (esperanza restaurada)", "Ansiedad (serenidad encontrada)"],
+          "numerology": "17 = 1+7 = 8 - Renovación infinita, equilibrio restaurado",
+          "colorTherapy": "Azul (noche), Amarillo (estrellas), Blanco (pureza)",
+          "soundFrequency": "963 Hz - Frecuencia de conexión espiritual",
+          "crystalResonance": "Cuarzo estrella, Selenita, Danburita",
+          "essenceFloral": "Gorse (Bach) - Esperanza renovada"
+        },
+        "personalizedPlaceholder": {
+          "instructions": "Se completa dinámicamente con perfil holístico del consultante",
+          "integrationPoints": ["Resultados SCL-90", "Perfil chakras", "Carta natal", "Numerología personal", "Historial de lecturas"]
+        }
+      }
+    },
+    {
+      "id": "the-moon",
+      "keyNumber": 18,
+      "name": "The Moon",
+      "nameSpanish": "La Luna",
+      "layers": {
+        "basic": {
+          "symbolism": ["Luna llena con rostro", "Torres gemelas", "Camino serpenteante", "Perro y lobo aullando", "Cangrejo saliendo del agua", "Gotas de rocío cayendo", "Paisaje misterioso y brumoso"],
+          "keywords": ["ilusión", "miedo", "subconsciente", "intuición confusa", "sueños", "misterio", "lo desconocido"],
+          "keywordsSpanish": ["ilusión", "miedo", "subconsciente", "intuición confusa", "sueños", "misterio", "lo desconocido"],
+          "divinatory": {
+            "upright": "Ilusiones nublan la visión. Ansiedad o confusión. No todo es lo que parece. Explorar el subconsciente. Prestar atención a sueños.",
+            "reversed": "Claridad emergiendo, miedos superados, ilusiones disipándose"
+          }
+        },
+        "jungian": {
+          "archetype": "The Anima oscura / Hecate / The Unknown",
+          "shadowAspect": "El Inconsciente que abruma y confunde",
+          "individuationRole": "Travesía nocturna del alma - confrontar lo desconocido",
+          "collectiveUnconscious": "Arquetipo del inconsciente profundo y sus terrores",
+          "synchronicity": "Sincronicidades a través de sueños, intuiciones confusas",
+          "interpretation": "La Luna representa la inmersión en el inconsciente colectivo con todos sus terrores y maravillas. Es la 'noche oscura del alma' donde perdemos certezas pero ganamos profundidad."
+        },
+        "transpersonal": {
+          "energy": "Campo de consciencia subconsciente y onírica",
+          "chakra": "Svadhisthana (Sacro) - Emociones profundas, sueños",
+          "chakraSecondary": "Ajna (Tercer Ojo) - Visión distorsionada/profunda",
+          "quantumSymbolic": "Incertidumbre de Heisenberg: cuanto más miramos, menos certeza",
+          "grofMatrix": "BPM II - Inmersión en aguas primordiales, confusión",
+          "wilberLevel": "Estados oníricos y visionarios - Realidades alternativas",
+          "fieldResonance": "Resonancia con campos del inconsciente colectivo",
+          "interpretation": "La Luna simboliza el principio de incertidumbre: en ciertos dominios de consciencia, mayor escrutinio no trae claridad sino profundización del misterio."
+        },
+        "holisticIntegration": {
+          "scl90Mapping": ["Ansiedad (miedos subconscientes)", "Psicoticismo (realidad fluida)", "Fobias (terrores del inconsciente)"],
+          "numerology": "18 = 1+8 = 9 - Completitud oscura antes del amanecer",
+          "colorTherapy": "Plateado (luna), Azul oscuro (noche), Amarillo pálido (reflejos)",
+          "soundFrequency": "417 Hz - Frecuencia de transmutación",
+          "crystalResonance": "Piedra luna, Labradorita, Ópalo",
+          "essenceFloral": "Aspen (Bach) - Miedos desconocidos"
+        },
+        "personalizedPlaceholder": {
+          "instructions": "Se completa dinámicamente con perfil holístico del consultante",
+          "integrationPoints": ["Resultados SCL-90", "Perfil chakras", "Carta natal", "Numerología personal", "Historial de lecturas"]
+        }
+      }
+    },
+    {
+      "id": "the-sun",
+      "keyNumber": 19,
+      "name": "The Sun",
+      "nameSpanish": "El Sol",
+      "layers": {
+        "basic": {
+          "symbolism": ["Sol radiante con rostro", "Niño desnudo sobre caballo blanco", "Girasoles mirando al sol", "Bandera roja de victoria", "Muro bajo del jardín", "Luz brillante que ilumina todo"],
+          "keywords": ["alegría", "éxito", "claridad", "vitalidad", "inocencia", "celebración", "iluminación"],
+          "keywordsSpanish": ["alegría", "éxito", "claridad", "vitalidad", "inocencia", "celebración", "iluminación"],
+          "divinatory": {
+            "upright": "Éxito y alegría plenos. Claridad total. Vitalidad abundante. Inocencia celebrada. Felicidad genuina. Todo iluminado.",
+            "reversed": "Éxito retrasado, alegría temporal, falta de claridad, energía baja"
+          }
+        },
+        "jungian": {
+          "archetype": "The Divine Child / The Solar Hero / Apollo",
+          "shadowAspect": "Inflación del ego, grandiosidad solar",
+          "individuationRole": "Renacimiento del Self - el niño divino interior",
+          "collectiveUnconscious": "Arquetipo del héroe solar y la consciencia iluminada",
+          "synchronicity": "Sincronicidades que confirman el camino correcto",
+          "interpretation": "El Sol representa el renacimiento del Self como el niño divino: consciencia iluminada que integra inocencia y sabiduría, alegría y profundidad."
+        },
+        "transpersonal": {
+          "energy": "Campo de consciencia iluminada y vitalidad radiante",
+          "chakra": "Manipura (Plexo Solar) - Centro de vitalidad",
+          "chakraSecondary": "Sahasrara (Corona) - Iluminación completa",
+          "quantumSymbolic": "Fotones: partículas de luz que viajan sin masa, pura energía",
+          "grofMatrix": "BPM IV completo - Renacimiento en la luz",
+          "wilberLevel": "Causal/No-dual - Consciencia iluminada estable",
+          "fieldResonance": "Resonancia con campos de consciencia iluminada colectiva",
+          "interpretation": "El Sol simboliza el estado de consciencia fotónico: pura energía-información sin las limitaciones de la materia, irradiando claridad y vitalidad."
+        },
+        "holisticIntegration": {
+          "scl90Mapping": ["Todas las escalas en equilibrio óptimo", "Vitalidad y bienestar general"],
+          "numerology": "19 = 1+9 = 10 = 1 - Nuevo ciclo desde la luz",
+          "colorTherapy": "Dorado (sol), Amarillo (alegría), Naranja (vitalidad)",
+          "soundFrequency": "528 Hz - Frecuencia del amor y los milagros",
+          "crystalResonance": "Citrino, Ámbar, Piedra sol",
+          "essenceFloral": "Vervain (Bach) - Entusiasmo equilibrado"
+        },
+        "personalizedPlaceholder": {
+          "instructions": "Se completa dinámicamente con perfil holístico del consultante",
+          "integrationPoints": ["Resultados SCL-90", "Perfil chakras", "Carta natal", "Numerología personal", "Historial de lecturas"]
+        }
+      }
+    },
+    {
+      "id": "judgement",
+      "keyNumber": 20,
+      "name": "Judgement",
+      "nameSpanish": "El Juicio",
+      "layers": {
+        "basic": {
+          "symbolism": ["Ángel con trompeta desde las nubes", "Figuras levantándose de tumbas", "Montañas al fondo", "Cruz en bandera", "Familia reunida (hombre, mujer, niño)", "Brazos abiertos hacia el cielo"],
+          "keywords": ["renacimiento", "llamado", "juicio", "perdón", "redención", "despertar", "evaluación", "propósito"],
+          "keywordsSpanish": ["renacimiento", "llamado", "juicio", "perdón", "redención", "despertar", "evaluación", "propósito"],
+          "divinatory": {
+            "upright": "Momento de renacimiento total. Llamado a propósito superior. Perdón y redención. Evaluación honesta de la vida. Despertar a nueva realidad.",
+            "reversed": "Juicio severo, falta de perdón, llamado ignorado, resistencia a renovarse"
+          }
+        },
+        "jungian": {
+          "archetype": "The Call / The Rebirth / Gabriel",
+          "shadowAspect": "El Juez interior cruel, auto-condena",
+          "individuationRole": "Vocación - el llamado del Self a realizar el destino",
+          "collectiveUnconscious": "Arquetipo de la resurrección y el propósito",
+          "synchronicity": "Sincronicidades como llamados del destino",
+          "interpretation": "El Juicio representa la vocación junguiana: el llamado del Self al ego para realizar su destino único. Es el momento de responder al propósito superior de la vida."
+        },
+        "transpersonal": {
+          "energy": "Campo de resurrección de consciencia y propósito",
+          "chakra": "Vishuddha (Garganta) - Responder al llamado",
+          "chakraSecondary": "Sahasrara (Corona) - Conexión con propósito divino",
+          "quantumSymbolic": "Resonancia cuántica: cuando frecuencias se alinean, amplificación total",
+          "grofMatrix": "Integración final - Muerte y renacimiento completados",
+          "wilberLevel": "No-dual emergente - Despertar a la totalidad",
+          "fieldResonance": "Resonancia con campos de propósito colectivo",
+          "interpretation": "El Juicio simboliza la resonancia cuántica perfecta: cuando la frecuencia individual se alinea con la frecuencia del campo universal, ocurre amplificación y despertar."
+        },
+        "holisticIntegration": {
+          "scl90Mapping": ["Integración de todas las dimensiones", "Resolución de conflictos internos"],
+          "numerology": "20 = 2+0 = 2 - Dualidad trascendida en renacimiento",
+          "colorTherapy": "Blanco (resurrección), Dorado (gloria), Azul (cielo)",
+          "soundFrequency": "852 Hz - Frecuencia del despertar",
+          "crystalResonance": "Cuarzo claro, Angelita, Celestita",
+          "essenceFloral": "Sweet Chestnut (Bach) - Renacimiento desde la desesperación"
+        },
+        "personalizedPlaceholder": {
+          "instructions": "Se completa dinámicamente con perfil holístico del consultante",
+          "integrationPoints": ["Resultados SCL-90", "Perfil chakras", "Carta natal", "Numerología personal", "Historial de lecturas"]
+        }
+      }
+    },
+    {
+      "id": "the-world",
+      "keyNumber": 21,
+      "name": "The World",
+      "nameSpanish": "El Mundo",
+      "layers": {
+        "basic": {
+          "symbolism": ["Figura danzante en guirnalda oval", "Cuatro criaturas en esquinas (león, toro, águila, ángel)", "Varitas de poder en las manos", "Tela púrpura envolvente", "Guirnalda de laureles (victoria)", "Expresión de plenitud"],
+          "keywords": ["completitud", "éxito total", "integración", "viaje completado", "plenitud", "logro máximo", "danza cósmica"],
+          "keywordsSpanish": ["completitud", "éxito total", "integración", "viaje completado", "plenitud", "logro máximo", "danza cósmica"],
+          "divinatory": {
+            "upright": "Ciclo completado con éxito. Logro de objetivos mayores. Integración de todas las lecciones. Plenitud y satisfacción total. Éxito merecido.",
+            "reversed": "Meta incompleta, falta de cierre, éxito parcial, algo pendiente"
+          }
+        },
+        "jungian": {
+          "archetype": "The Self realizado / The Cosmic Dancer / Anima Mundi",
+          "shadowAspect": "Complacencia, creer que no hay más que aprender",
+          "individuationRole": "Individuación completada - totalidad del Self manifestada",
+          "collectiveUnconscious": "Arquetipo del mandala, la totalidad cósmica",
+          "synchronicity": "El estado de sincronicidad continua - vivir en flujo",
+          "interpretation": "El Mundo representa la individuación completada: el Self plenamente realizado danzando en armonía con el cosmos. Es el mandala viviente de la totalidad."
+        },
+        "transpersonal": {
+          "energy": "Campo de consciencia cósmica integrada",
+          "chakra": "Todos los chakras alineados y activos",
+          "chakraSecondary": "Sistema energético completo en coherencia",
+          "quantumSymbolic": "Estado fundamental del vacío cuántico: totalidad de la que emerge todo",
+          "grofMatrix": "Más allá de las matrices - Consciencia cósmica",
+          "wilberLevel": "No-dual estable - Unión de forma y vacío",
+          "fieldResonance": "Resonancia con el campo unificado de consciencia",
+          "interpretation": "El Mundo simboliza el estado fundamental cuántico: el vacío fértil del que emerge toda manifestación, donde la consciencia individual reconoce su identidad con el todo."
+        },
+        "holisticIntegration": {
+          "scl90Mapping": ["Salud mental óptima", "Integración total de todas las dimensiones"],
+          "numerology": "21 = 2+1 = 3 - Trinidad creativa en manifestación perfecta",
+          "colorTherapy": "Todos los colores integrados", "Púrpura (espiritualidad)", "Verde (corazón)", "Dorado (logro)",
+          "soundFrequency": "432 Hz - Frecuencia del universo armonizado",
+          "crystalResonance": "Cuarzo fantasma, Súper Seven, Fenaquita",
+          "essenceFloral": "Wild Rose (Bach) - Entusiasmo por la vida"
+        },
+        "personalizedPlaceholder": {
+          "instructions": "Se completa dinámicamente con perfil holístico del consultante",
+          "integrationPoints": ["Resultados SCL-90", "Perfil chakras", "Carta natal", "Numerología personal", "Historial de lecturas"]
+        }
+      }
+    }
+  ]
+}

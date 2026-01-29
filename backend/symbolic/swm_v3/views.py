@@ -23,6 +23,16 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+# Multi-Provider AI Service with automatic fallback (Gemini -> OpenAI -> Groq -> Ollama)
+try:
+    from api.utils.multi_ai_service import generate_with_fallback, multi_ai
+    AI_ENABLED = len(multi_ai.available_providers) > 1  # At least one real provider besides ollama
+except ImportError:
+    generate_with_fallback = None
+    multi_ai = None
+    AI_ENABLED = False
+    logging.warning("[SWM-v3] multi_ai_service not available")
+
 logger = logging.getLogger(__name__)
 
 # Hebrew letter glyphs mapping (from cabala_py.arbol_vida)
@@ -65,13 +75,30 @@ def build_symbols_from_kabbalistic(kabbalistic: Dict[str, Any]) -> Optional[Dict
       - tags: extracted from keywords/correspondences
     """
     if not kabbalistic:
+        logger.warning("[SWM-v3] build_symbols_from_kabbalistic: kabbalistic data is empty")
         return None
     
+    # Log the raw incoming data for debugging
+    logger.info(f"[SWM-v3] build_symbols_from_kabbalistic RAW DATA: {kabbalistic}")
+    
     letter_name = kabbalistic.get("hebrewLetter", "")
+    if not letter_name:
+        logger.warning(f"[SWM-v3] build_symbols_from_kabbalistic: no hebrewLetter in {kabbalistic}")
+        logger.warning(f"[SWM-v3] Available keys in kabbalistic: {list(kabbalistic.keys())}")
+        return None
+    
+    # Try to find the glyph with case-insensitive matching
     hebrew_glyph = HEBREW_LETTER_GLYPHS.get(letter_name, "")
+    if not hebrew_glyph:
+        # Try with first letter uppercase (e.g., "aleph" -> "Aleph")
+        hebrew_glyph = HEBREW_LETTER_GLYPHS.get(letter_name.capitalize(), "")
+    
+    if not hebrew_glyph:
+        logger.warning(f"[SWM-v3] No Hebrew glyph found for letter: '{letter_name}'")
+        logger.info(f"[SWM-v3] Available keys: {list(HEBREW_LETTER_GLYPHS.keys())[:5]}...")
     
     return {
-        "hebrew_letter": hebrew_glyph,
+        "hebrew_letter": hebrew_glyph or letter_name,  # Fallback to letter name if no glyph
         "letter_name": letter_name,
         "gematria": kabbalistic.get("letterValue"),
         "path": kabbalistic.get("path"),
@@ -165,18 +192,312 @@ def get_system_metadata(system_id: str) -> Dict[str, Any]:
     })
 
 
+def normalize_card_id(card_id: str) -> str:
+    """
+    Normalize card ID to match BOTA deck format.
+    
+    Frontend uses: 'fool', 'magician', 'high_priestess'
+    Backend uses: 'the-fool', 'the-magician', 'the-high-priestess'
+    
+    This function converts various formats to the expected BOTA format.
+    """
+    # Already in BOTA format (check for known BOTA IDs)
+    bota_ids = {
+        "the-fool", "the-magician", "the-high-priestess", "the-empress",
+        "the-emperor", "the-hierophant", "the-lovers", "the-chariot",
+        "strength", "the-hermit", "wheel-of-fortune", "justice",
+        "the-hanged-man", "death", "temperance", "the-devil", "the-tower",
+        "the-star", "the-moon", "the-sun", "judgement", "the-world"
+    }
+    
+    if card_id in bota_ids:
+        return card_id
+    
+    # Mapping from frontend IDs (snake_case) to BOTA IDs (kebab-case)
+    id_mappings = {
+        "fool": "the-fool",
+        "magician": "the-magician",
+        "high_priestess": "the-high-priestess",
+        "empress": "the-empress",
+        "emperor": "the-emperor",
+        "hierophant": "the-hierophant",
+        "lovers": "the-lovers",
+        "chariot": "the-chariot",
+        "strength": "strength",
+        "hermit": "the-hermit",
+        "wheel_of_fortune": "wheel-of-fortune",
+        "fortune": "wheel-of-fortune",
+        "wheel": "wheel-of-fortune",
+        "justice": "justice",
+        "hanged_man": "the-hanged-man",
+        "death": "death",
+        "temperance": "temperance",
+        "devil": "the-devil",
+        "tower": "the-tower",
+        "star": "the-star",
+        "moon": "the-moon",
+        "sun": "the-sun",
+        "judgement": "judgement",
+        "judgment": "judgement",
+        "world": "the-world",
+    }
+    
+    # Try direct lookup
+    if card_id in id_mappings:
+        return id_mappings[card_id]
+    
+    # Try lowercase
+    card_id_lower = card_id.lower()
+    if card_id_lower in id_mappings:
+        return id_mappings[card_id_lower]
+    
+    # Log unmapped ID for debugging
+    logger.warning(f"[SWM-v3] Unmapped card ID: '{card_id}' - trying best-effort normalization")
+    
+    # Best-effort: convert underscore to hyphen, try adding 'the-' prefix
+    normalized = card_id.replace("_", "-").lower()
+    if normalized in bota_ids:
+        return normalized
+    
+    the_normalized = f"the-{normalized}"
+    if the_normalized in bota_ids:
+        return the_normalized
+    
+    return card_id  # Return original if no mapping found
+
+
+def generate_ai_symbolic_reading(
+    cards: List[Dict[str, Any]],
+    system_id: str,
+    system_meta: Dict[str, Any],
+    context_focus: Optional[str] = None,
+    intention: Optional[str] = None,
+) -> Dict[str, Any]:
+    """
+    Generate symbolic reading using AI (Gemini).
+    
+    Returns structured interpretation with:
+    - system_frame: Marco del sistema simbólico
+    - core_meaning: Significado central de la(s) carta(s)
+    - contextual_meaning: Interpretación contextual
+    """
+    if not cards:
+        return None
+    
+    card = cards[0]  # Primary card for interpretation
+    card_name = card.get("nameSpanish", card.get("name", "Unknown"))
+    kabbalistic = card.get("kabbalistic", {})
+    correspondences = card.get("correspondences", {})
+    keywords = card.get("keywords", [])
+    consciousness = card.get("consciousness", {})
+    
+    # Simplified prompt for reliable JSON output
+    system_name = system_meta.get('name', system_id)
+    sefirot_str = ', '.join(kabbalistic.get('sefirot', [])) or 'N/A'
+    keywords_str = ', '.join(keywords[:4]) if keywords else 'N/A'
+    
+    prompt = f"""Interpreta la carta "{card_name}" del {system_name}.
+Letra: {kabbalistic.get('hebrewLetter', 'N/A')}, Sendero: {kabbalistic.get('path', 'N/A')}, Sefirot: {sefirot_str}.
+Keywords: {keywords_str}.
+
+Responde SOLO este JSON (sin markdown):
+{{"system_frame": "El {system_name} [1 oración sobre el sistema]", "core_meaning": "[2 oraciones sobre {card_name}]", "contextual_meaning": "[2 oraciones de reflexión]", "position_meaning": ""}}"""
+
+    try:
+        # Use multi-provider AI service with automatic fallback
+        ai_result = generate_with_fallback(prompt, temperature=0.7, max_tokens=512)
+        
+        if not ai_result.get("success"):
+            raise ValueError(ai_result.get("error", "AI generation failed"))
+        
+        response_text = ai_result.get("text", "").strip()
+        ai_provider = ai_result.get("provider", "unknown")
+        
+        if not response_text:
+            raise ValueError("Empty AI response")
+        
+        logger.info(f"[SWM-v3] AI response from provider: {ai_provider}")
+        
+        # Handle markdown code blocks
+        if "```json" in response_text:
+            response_text = response_text.split("```json")[1].split("```")[0].strip()
+        elif "```" in response_text:
+            parts = response_text.split("```")
+            if len(parts) >= 2:
+                response_text = parts[1].strip()
+        
+        # Fix common JSON issues
+        response_text = response_text.replace('\n', ' ').replace('\r', '').strip()
+        
+        # Try to extract individual fields if JSON is malformed
+        import re
+        
+        # First try to parse as complete JSON
+        parsed = None
+        try:
+            # Try to find a complete JSON object
+            if response_text.startswith('{'):
+                # Count braces to find complete JSON
+                brace_count = 0
+                end_idx = 0
+                for i, c in enumerate(response_text):
+                    if c == '{':
+                        brace_count += 1
+                    elif c == '}':
+                        brace_count -= 1
+                        if brace_count == 0:
+                            end_idx = i + 1
+                            break
+                if end_idx > 0:
+                    response_text = response_text[:end_idx]
+            
+            parsed = json.loads(response_text)
+        except json.JSONDecodeError:
+            # Extract fields manually using regex - more lenient patterns
+            parsed = {}
+            
+            # Extract system_frame - match until next key or end
+            match = re.search(r'"system_frame"\s*:\s*"((?:[^"\\]|\\.)*)(?:"|$)', response_text)
+            if match:
+                parsed['system_frame'] = match.group(1).replace('\\"', '"').replace('\\n', ' ')
+            
+            # Extract core_meaning
+            match = re.search(r'"core_meaning"\s*:\s*"((?:[^"\\]|\\.)*)(?:"|$)', response_text)
+            if match:
+                parsed['core_meaning'] = match.group(1).replace('\\"', '"').replace('\\n', ' ')
+            
+            # Extract contextual_meaning
+            match = re.search(r'"contextual_meaning"\s*:\s*"((?:[^"\\]|\\.)*)(?:"|$)', response_text)
+            if match:
+                parsed['contextual_meaning'] = match.group(1).replace('\\"', '"').replace('\\n', ' ')
+            
+            if parsed:
+                logger.info(f"[SWM-v3] Recovered {len(parsed)} fields from malformed JSON")
+            else:
+                # If no fields extracted, raise error
+                raise ValueError(f"Could not parse AI response: {response_text[:200]}")
+        
+        return {
+            "system": {"id": system_id, "label": system_meta.get("name", system_id)},
+            "card": {
+                "name": card_name,
+                "arcana": card.get("arcana", "major"),
+                "keywords": keywords[:10] if keywords else [],
+            },
+            "symbolic_reading": {
+                "system_frame": parsed.get("system_frame", "Marco simbólico no disponible."),
+                "core_meaning": parsed.get("core_meaning", "Significado en proceso de interpretación."),
+                "contextual_meaning": parsed.get("contextual_meaning", "Contexto en desarrollo."),
+                "position_meaning": parsed.get("position_meaning", ""),
+            },
+            "ai_generated": True,
+            "ai_provider": ai_provider,
+            "notes": f"Generado por IA via {ai_provider.upper()} ({system_meta.get('source', 'Tradición Hermética')})",
+        }
+    except json.JSONDecodeError as e:
+        logger.error(f"[SWM-v3] JSON parse error from AI response: {e}")
+        logger.debug(f"[SWM-v3] Raw AI response: {response_text[:500] if response_text else 'Empty'}")
+        raise
+    except Exception as e:
+        logger.error(f"[SWM-v3] AI generation error: {e}")
+        raise
+
+
+def generate_fallback_symbolic_reading(
+    cards: List[Dict[str, Any]],
+    system_meta: Dict[str, Any],
+) -> Dict[str, Any]:
+    """
+    Generate fallback symbolic reading when AI is not available.
+    Uses pre-defined interpretations from card data.
+    """
+    if not cards:
+        return None
+    
+    card = cards[0]
+    card_name = card.get("nameSpanish", card.get("name", "Unknown"))
+    kabbalistic = card.get("kabbalistic", {})
+    correspondences = card.get("correspondences", {})
+    keywords = card.get("keywords", [])
+    consciousness = card.get("consciousness", {})
+    
+    # Build meaningful fallback from card data
+    sefirot = kabbalistic.get("sefirot", [])
+    hebrew_letter = kabbalistic.get("hebrewLetter", "")
+    letter_meaning = kabbalistic.get("letterMeaning", "")
+    path = kabbalistic.get("path", "")
+    power = consciousness.get("power", "")
+    aspect = consciousness.get("aspect", "")
+    
+    system_frame = f"El sistema {system_meta.get('name', 'Tarot')} explora la consciencia a través de arquetipos universales conectados con la tradición cabalística."
+    
+    core_meaning_parts = []
+    if card_name:
+        core_meaning_parts.append(f"{card_name} representa")
+    if keywords:
+        core_meaning_parts.append(f"los principios de {', '.join(keywords[:3])}")
+    if power:
+        core_meaning_parts.append(f"y el poder de {power}")
+    core_meaning = " ".join(core_meaning_parts) + "." if core_meaning_parts else "Significado en exploración."
+    
+    contextual_parts = []
+    if hebrew_letter and letter_meaning:
+        contextual_parts.append(f"La letra {hebrew_letter} ({letter_meaning}) invita a reflexionar sobre")
+    if sefirot:
+        contextual_parts.append(f"el sendero entre {' y '.join(sefirot)}")
+    if aspect:
+        contextual_parts.append(f"desde la perspectiva del {aspect}")
+    contextual_meaning = " ".join(contextual_parts) + "." if contextual_parts else "Contexto simbólico en desarrollo."
+    
+    return {
+        "system": {"id": system_meta.get("id", "unknown"), "label": system_meta.get("name", "Tarot")},
+        "card": {
+            "name": card_name,
+            "arcana": card.get("arcana", "major"),
+            "keywords": keywords[:10] if keywords else [],
+        },
+        "symbolic_reading": {
+            "system_frame": system_frame,
+            "core_meaning": core_meaning,
+            "contextual_meaning": contextual_meaning,
+            "position_meaning": "",
+        },
+        "ai_generated": False,
+        "notes": "Lectura basada en correspondencias tradicionales.",
+    }
+
+
 def generate_educational_reading(
     system_id: str,
     selected_cards: List[str],
     spread_type: str = "simple",
     context_focus: Optional[str] = None,
     intention: Optional[str] = None,
+    astrology_enrichment: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """
     Generate an educational symbolic reading.
     
     This is NOT a clinical interpretation - purely educational/symbolic exploration.
+    
+    Args:
+        system_id: Tarot system identifier (thoth, bota, etc.)
+        selected_cards: List of card IDs to include
+        spread_type: Type of spread (simple, three_cards, celtic_cross, etc.)
+        context_focus: Optional focus area for reading
+        intention: Optional intention/question for reading
+        astrology_enrichment: Optional astrology context from AstrologyContextBuilder:
+            {
+                'enabled': bool,
+                'context': {...},  # Raw astrology data
+                'symbolic_text': str,  # Text for AI prompts
+                'options': {...}  # include_transits, etc.
+            }
     """
+    # Normalize card IDs to match BOTA deck format
+    selected_cards = [normalize_card_id(cid) for cid in selected_cards]
+    logger.info(f"[SWM-v3] Normalized card IDs: {selected_cards}")
+    
     system_meta = get_system_metadata(system_id)
     
     # Load deck data
@@ -238,6 +559,11 @@ def generate_educational_reading(
                     tags.append(correspondences["element"])
                 symbols["tags"] = tags
             
+            # DEBUG log
+            logger.info(f"[SWM-v3] Card {card_data['id']}: kabbalistic={bool(kabbalistic)}, symbols={bool(symbols)}")
+            if symbols:
+                logger.info(f"[SWM-v3] symbols keys: {list(symbols.keys())}")
+            
             cards.append({
                 "draw_id": f"draw-{i+1}",
                 "id": card_data["id"],
@@ -277,13 +603,49 @@ def generate_educational_reading(
         "positions": len(cards),
     }
     
+    # Generate AI symbolic reading if available
+    symbolic_reading = None
+    
+    # Enrich context with astrology if provided
+    enriched_context = context_focus
+    astrology_context_data = None
+    if astrology_enrichment and astrology_enrichment.get('enabled'):
+        astrology_context_data = astrology_enrichment.get('context')
+        symbolic_text = astrology_enrichment.get('symbolic_text', '')
+        if symbolic_text:
+            enriched_context = f"{context_focus or ''} [Contexto astrológico: {symbolic_text}]".strip()
+            logger.info(f"[SWM-v3] Astrology enrichment applied: {len(symbolic_text)} chars")
+    
+    if cards and AI_ENABLED and generate_with_fallback:
+        try:
+            symbolic_reading = generate_ai_symbolic_reading(
+                cards=cards,
+                system_id=system_id,
+                system_meta=system_meta,
+                context_focus=enriched_context,
+                intention=intention,
+            )
+            logger.info(f"[SWM-v3] AI symbolic reading generated successfully")
+        except Exception as e:
+            logger.error(f"[SWM-v3] Error generating AI reading: {e}")
+            symbolic_reading = generate_fallback_symbolic_reading(cards, system_meta)
+    elif cards:
+        # Fallback when AI not available
+        symbolic_reading = generate_fallback_symbolic_reading(cards, system_meta)
+    
     return {
         "reading_id": f"swm3-{datetime.now().strftime('%Y%m%d%H%M%S')}-{random.randint(1000, 9999)}",
         "system": system_meta,
         "spread": spread_info,
         "cards": cards,
+        "symbolic_reading": symbolic_reading,
         "context": context_focus,
         "intention": intention,
+        "astrology_enrichment": {
+            "enabled": bool(astrology_enrichment and astrology_enrichment.get('enabled')),
+            "summary": astrology_context_data.get('natal_summary') if astrology_context_data else None,
+            "transits_count": len(astrology_context_data.get('current_transits', [])) if astrology_context_data else 0,
+        } if astrology_enrichment else None,
         "generated_at": datetime.now().isoformat(),
         "educational_disclaimer": (
             "Esta lectura es de carácter educativo y simbólico. "

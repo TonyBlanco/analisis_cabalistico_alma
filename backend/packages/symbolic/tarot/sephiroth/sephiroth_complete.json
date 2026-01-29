@@ -1,0 +1,539 @@
+{
+  "deck": {
+    "name": "Tarot of the Sephiroth",
+    "system": "Sephirotic Path Working",
+    "tradition": "Modern Qabalistic",
+    "totalCards": 22,
+    "focus": "Meditation and Spiritual Ascent"
+  },
+  "majorArcana": [
+    {
+      "id": "the-fool",
+      "keyNumber": 0,
+      "name": "The Fool",
+      "nameSpanish": "El Loco",
+      "kabbalistic": {
+        "hebrewLetter": "Aleph (א)",
+        "letterName": "Aleph",
+        "letterValue": 1,
+        "path": 11,
+        "sefirot": ["Kether", "Chokmah"],
+        "pathDescription": "From Crown (Unity) to Wisdom (Pattern)",
+        "pathJourney": "Descent from Divine Unity into first differentiation"
+      },
+      "pathWorking": {
+        "entering": "Enter through Kether, the Crown of infinite light. Stand at the threshold of non-being.",
+        "traversing": "Experience the breath of Aleph - Ruach Elohim, the Spirit of the Living Gods. Feel the divine breath moving from perfect unity toward first manifestation.",
+        "exiting": "Exit through Chokmah, where the point becomes the line, unity becomes duality, and wisdom emerges from void.",
+        "visualization": "White light descending into prismatic patterns. The Fool leaps from the cliff of pure being into the abyss of manifestation.",
+        "meditation": "Contemplate the divine fool's leap from unity to multiplicity. What is lost in the fall? What is gained? Breathe the Air element - spirit made mobile."
+      },
+      "keywords": ["supernal breath", "divine folly", "cosmic consciousness", "path of air", "leap of faith"],
+      "keywordsSpanish": ["aliento supernal", "locura divina", "conciencia cósmica", "sendero del aire", "salto de fe"]
+    },
+    {
+      "id": "the-magician",
+      "keyNumber": 1,
+      "name": "The Magician",
+      "nameSpanish": "El Mago",
+      "kabbalistic": {
+        "hebrewLetter": "Beth (ב)",
+        "letterName": "Beth",
+        "letterValue": 2,
+        "path": 12,
+        "sefirot": ["Kether", "Binah"],
+        "pathDescription": "From Crown to Understanding - the container of consciousness",
+        "pathJourney": "Building the house of manifestation from pure consciousness"
+      },
+      "pathWorking": {
+        "entering": "Enter through Kether with focused will and intention. You carry the tools of manifestation.",
+        "traversing": "Walk the path of Beth - the House. Mercury's swift intelligence channels divine light into form. As above, so below - your consciousness becomes the vessel.",
+        "exiting": "Exit into Binah, the Great Sea, Understanding. Form crystallizes. The house is built to contain consciousness.",
+        "visualization": "Golden light of Mercury flowing between infinite white (Kether) and deep indigo (Binah). See yourself as the channel, hands pointing up and down.",
+        "meditation": "Meditate on the magician as conduit. You are the house (Beth) that consciousness inhabits. What structures do you build to contain spirit?"
+      },
+      "keywords": ["conscious will", "manifestation channel", "house of spirit", "mercurial bridge", "intentional creation"],
+      "keywordsSpanish": ["voluntad consciente", "canal de manifestación", "casa del espíritu", "puente mercurial", "creación intencional"]
+    },
+    {
+      "id": "the-high-priestess",
+      "keyNumber": 2,
+      "name": "The High Priestess",
+      "nameSpanish": "La Sacerdotisa",
+      "kabbalistic": {
+        "hebrewLetter": "Gimel (ג)",
+        "letterName": "Gimel",
+        "letterValue": 3,
+        "path": 13,
+        "sefirot": ["Kether", "Tiphareth"],
+        "pathDescription": "From Crown to Beauty - the direct path to the heart",
+        "pathJourney": "The Moon's reflecting light carries consciousness to the center"
+      },
+      "pathWorking": {
+        "entering": "Enter through Kether bearing the scroll of hidden knowledge. The veil awaits.",
+        "traversing": "Journey on the path of Gimel - the Camel that carries wisdom across the desert. The Moon reflects the Sun's light downward. Memory and intuition guide you through the veil between worlds.",
+        "exiting": "Exit into Tiphareth, the heart center, Beauty and Harmony. Solar consciousness receives lunar wisdom. The hidden becomes known.",
+        "visualization": "Silver-blue moonlight descending from brilliant white crown to golden-yellow solar heart. Pass through the veil between pillars.",
+        "meditation": "Contemplate the High Priestess as bridge between infinite and individual. The camel (Gimel) bears the burden of bringing supernal wisdom to human consciousness. What secrets does your heart hold?"
+      },
+      "keywords": ["lunar descent", "hidden wisdom path", "veil crossing", "memory keeper", "intuitive bridge"],
+      "keywordsSpanish": ["descenso lunar", "sendero de sabiduría oculta", "cruce del velo", "guardiana de memoria", "puente intuitivo"]
+    },
+    {
+      "id": "the-empress",
+      "keyNumber": 3,
+      "name": "The Empress",
+      "nameSpanish": "La Emperatriz",
+      "kabbalistic": {
+        "hebrewLetter": "Daleth (ד)",
+        "letterName": "Daleth",
+        "letterValue": 4,
+        "path": 14,
+        "sefirot": ["Chokmah", "Binah"],
+        "pathDescription": "From Wisdom to Understanding - union of Father and Mother",
+        "pathJourney": "The door through which all creation passes"
+      },
+      "pathWorking": {
+        "entering": "Enter through Chokmah, the explosive force of Wisdom, the Father. You carry the seed of creation.",
+        "traversing": "Cross the path of Daleth - the Door. Venus governs this sacred gateway where masculine force meets feminine form. This is the cosmic marriage, the hieros gamos. Creation pours through this door.",
+        "exiting": "Exit into Binah, Understanding, the Great Mother. Seed meets womb. Form receives force. The Door opens to infinite fertility.",
+        "visualization": "Emerald green light forming a doorway between brilliant white-grey (Chokmah) and deep indigo-black (Binah). See the cosmic lovers unite.",
+        "meditation": "Meditate on the door (Daleth) through which spirit becomes matter, force becomes form, seed becomes fruit. You are both sides of this door. What are you birthing?"
+      },
+      "keywords": ["gateway of life", "sacred marriage", "creative door", "venusian fertility", "supernal mother"],
+      "keywordsSpanish": ["puerta de vida", "matrimonio sagrado", "puerta creativa", "fertilidad venusina", "madre supernal"]
+    },
+    {
+      "id": "the-emperor",
+      "keyNumber": 4,
+      "name": "The Emperor",
+      "nameSpanish": "El Emperador",
+      "kabbalistic": {
+        "hebrewLetter": "Heh (ה)",
+        "letterName": "Heh",
+        "letterValue": 5,
+        "path": 15,
+        "sefirot": ["Chokmah", "Tiphareth"],
+        "pathDescription": "From Wisdom to Beauty - constituting intelligence",
+        "pathJourney": "The window through which divine force illuminates the heart"
+      },
+      "pathWorking": {
+        "entering": "Enter through Chokmah with the ram's conquering force. You carry the scepter of authority.",
+        "traversing": "Journey the path of Heh - the Window. Aries fire initiates and conquers. This window (Heh) allows vision and sight - Wisdom gazes through to illuminate Beauty. The Emperor establishes order and structure.",
+        "exiting": "Exit into Tiphareth, the heart of the Tree. Solar consciousness receives paternal authority. The king enthroned in the heart.",
+        "visualization": "Scarlet red fire flowing from grey-white wisdom to golden-yellow beauty. See the window opening, sight establishing, authority crystallizing.",
+        "meditation": "Contemplate the window (Heh) - sight, vision, revelation. The Emperor sees through this window to establish divine order in the human heart. What kingdom do you rule?"
+      },
+      "keywords": ["sight window", "conquering fire", "established order", "paternal authority", "constituting force"],
+      "keywordsSpanish": ["ventana de visión", "fuego conquistador", "orden establecido", "autoridad paterna", "fuerza constituyente"]
+    },
+    {
+      "id": "the-hierophant",
+      "keyNumber": 5,
+      "name": "The Hierophant",
+      "nameSpanish": "El Hierofante",
+      "kabbalistic": {
+        "hebrewLetter": "Vav (ו)",
+        "letterName": "Vav",
+        "letterValue": 6,
+        "path": 16,
+        "sefirot": ["Chokmah", "Chesed"],
+        "pathDescription": "From Wisdom to Mercy - the nail that fixes teaching",
+        "pathJourney": "Divine wisdom flows into loving instruction"
+      },
+      "pathWorking": {
+        "entering": "Enter through Chokmah bearing the keys to the mysteries. Wisdom seeks expression through teaching.",
+        "traversing": "Walk the path of Vav - the Nail or Hook that connects heaven to earth. Taurus grounds wisdom into stable form. The Hierophant is the mediator, fixing divine truth into transmissible teaching.",
+        "exiting": "Exit into Chesed, Mercy and Loving-kindness. Wisdom becomes compassionate instruction. The stern father becomes the loving teacher.",
+        "visualization": "Red-orange light flowing from explosive wisdom to deep blue mercy. See the nail (Vav) fixing the teaching, the hook connecting worlds.",
+        "meditation": "Meditate on the nail (Vav) that fixes spirit to matter, teaching to student, wisdom to mercy. The Hierophant speaks the inner voice. What tradition do you carry?"
+      },
+      "keywords": ["fixing nail", "teaching bridge", "inner voice", "tradition bearer", "wisdom grounded"],
+      "keywordsSpanish": ["clavo fijador", "puente de enseñanza", "voz interior", "portador de tradición", "sabiduría fundamentada"]
+    },
+    {
+      "id": "the-lovers",
+      "keyNumber": 6,
+      "name": "The Lovers",
+      "nameSpanish": "Los Enamorados",
+      "kabbalistic": {
+        "hebrewLetter": "Zain (ז)",
+        "letterName": "Zain",
+        "letterValue": 7,
+        "path": 17,
+        "sefirot": ["Binah", "Tiphareth"],
+        "pathDescription": "From Understanding to Beauty - disposing intelligence",
+        "pathJourney": "The sword of discrimination descends from Mother to Heart"
+      },
+      "pathWorking": {
+        "entering": "Enter through Binah with the burden of choice. The Great Mother presents you with duality.",
+        "traversing": "Traverse the path of Zain - the Sword. Gemini offers choice, analysis, discrimination. The sword cuts through illusion to reveal truth. Understanding disposes options before the heart for conscious choice.",
+        "exiting": "Exit into Tiphareth having made the sacred choice. Beauty emerges from proper discrimination. The opposites unite in the heart.",
+        "visualization": "Orange air flowing from indigo mother to golden heart. See the sword dividing, then the lovers uniting. Raphael oversees the choice.",
+        "meditation": "Contemplate the sword (Zain) of discrimination. Every choice creates your reality. The mother offers wisdom - the heart must choose. What unites in your center?"
+      },
+      "keywords": ["discriminating sword", "conscious choice", "holy analysis", "opposites united", "disposing intelligence"],
+      "keywordsSpanish": ["espada discriminadora", "elección consciente", "análisis sagrado", "opuestos unidos", "inteligencia disponente"]
+    },
+    {
+      "id": "the-chariot",
+      "keyNumber": 7,
+      "name": "The Chariot",
+      "nameSpanish": "El Carro",
+      "kabbalistic": {
+        "hebrewLetter": "Cheth (ח)",
+        "letterName": "Cheth",
+        "letterValue": 8,
+        "path": 18,
+        "sefirot": ["Binah", "Geburah"],
+        "pathDescription": "From Understanding to Severity - house of influence",
+        "pathJourney": "Receptive understanding creates protective boundaries"
+      },
+      "pathWorking": {
+        "entering": "Enter through Binah, the cosmic womb, with receptive awareness. You carry the cup of form.",
+        "traversing": "Journey the path of Cheth - the Fence or Enclosure. Cancer's protective shell receives and contains. The chariot is the vessel that carries consciousness while maintaining sacred boundaries. Understanding protects what it births.",
+        "exiting": "Exit into Geburah, Severity and Strength. Boundaries create the container for power. The fence becomes fortress.",
+        "visualization": "Amber-yellow water flowing from deep indigo to scarlet red. See the chariot enclosed by fence, sphinx standing guard, warrior controlling opposing forces.",
+        "meditation": "Contemplate the fence (Cheth) - sacred enclosure, protective boundary, the shell that allows the soul to travel. What boundaries serve your spiritual vehicle?"
+      },
+      "keywords": ["sacred enclosure", "protective vessel", "bounded receptivity", "controlled motion", "fenced power"],
+      "keywordsSpanish": ["recinto sagrado", "vaso protector", "receptividad acotada", "movimiento controlado", "poder cercado"]
+    },
+    {
+      "id": "strength",
+      "keyNumber": 8,
+      "name": "Strength",
+      "nameSpanish": "La Fuerza",
+      "kabbalistic": {
+        "hebrewLetter": "Teth (ט)",
+        "letterName": "Teth",
+        "letterValue": 9,
+        "path": 19,
+        "sefirot": ["Chesed", "Geburah"],
+        "pathDescription": "From Mercy to Severity - balancing the pillars",
+        "pathJourney": "Serpent power rises to balance compassion and force"
+      },
+      "pathWorking": {
+        "entering": "Enter through Chesed with compassion and mercy. The loving father meets the stern judge.",
+        "traversing": "Walk the path of Teth - the Serpent. Leo's solar courage flows between the pillars. This is kundalini, serpent fire, the power that rises when mercy and severity balance. Gentle strength tames the lion.",
+        "exiting": "Exit into Geburah having balanced love with power. True strength emerges when force serves love.",
+        "visualization": "Greenish-yellow serpentine energy coiling between blue mercy and red severity. See woman opening lion's mouth with infinite gentleness.",
+        "meditation": "Meditate on the serpent (Teth) rising between the pillars. Kundalini awakens when opposites balance. Strength is love empowering discipline. Where in you do mercy and severity meet?"
+      },
+      "keywords": ["serpent power", "balanced force", "kundalini path", "gentle mastery", "pillar union"],
+      "keywordsSpanish": ["poder serpentino", "fuerza equilibrada", "sendero kundalini", "maestría gentil", "unión de pilares"]
+    },
+    {
+      "id": "the-hermit",
+      "keyNumber": 9,
+      "name": "The Hermit",
+      "nameSpanish": "El Ermitaño",
+      "kabbalistic": {
+        "hebrewLetter": "Yod (י)",
+        "letterName": "Yod",
+        "letterValue": 10,
+        "path": 20,
+        "sefirot": ["Chesed", "Tiphareth"],
+        "pathDescription": "From Mercy to Beauty - intelligence of will",
+        "pathJourney": "The hand of God guides the seeking heart"
+      },
+      "pathWorking": {
+        "entering": "Enter through Chesed with open hand to receive wisdom. Mercy offers the lamp of guidance.",
+        "traversing": "Journey the path of Yod - the Hand, smallest letter, seed of creation. Virgo purifies and perfects. The Hermit carries the lamp of Chesed (mercy) to illuminate Tiphareth (beauty). The divine hand guides the seeker.",
+        "exiting": "Exit into Tiphareth having found the light within. Beauty recognizes itself through merciful introspection.",
+        "visualization": "Yellowish-green light flowing from blue mercy to golden beauty. See the hermit's lamp containing the six-pointed star descending from hand of God.",
+        "meditation": "Contemplate Yod - the divine hand, smallest letter containing all others, seed of manifestation. The Hermit follows the hand of God inward to find the kingdom. What does your inner lamp reveal?"
+      },
+      "keywords": ["divine hand", "seed light", "merciful guidance", "inward illumination", "perfecting solitude"],
+      "keywordsSpanish": ["mano divina", "luz semilla", "guía misericordiosa", "iluminación interior", "soledad perfeccionante"]
+    },
+    {
+      "id": "wheel-of-fortune",
+      "keyNumber": 10,
+      "name": "Wheel of Fortune",
+      "nameSpanish": "La Rueda de la Fortuna",
+      "kabbalistic": {
+        "hebrewLetter": "Kaph (כ)",
+        "letterName": "Kaph",
+        "letterValue": 20,
+        "path": 21,
+        "sefirot": ["Chesed", "Netzach"],
+        "pathDescription": "From Mercy to Victory - rewarding intelligence",
+        "pathJourney": "Jupiter's bounty flows from grace to manifestation"
+      },
+      "pathWorking": {
+        "entering": "Enter through Chesed, where Jupiter rules with benevolent abundance. Grace prepares to manifest.",
+        "traversing": "Turn the path of Kaph - the Grasping Hand or Palm. Jupiter expands and blesses. The wheel turns by divine mercy, bringing cycles of fortune and growth. What the palm grasps in Chesed manifests in Netzach.",
+        "exiting": "Exit into Netzach, Victory and Desire. The wheel has turned - fortune materializes. Mercy's grace becomes concrete blessing.",
+        "visualization": "Violet light spiraling from blue mercy to green victory. See the wheel turning, sphinx at top, serpent and Anubis rising and falling. YHVH turns the wheel.",
+        "meditation": "Contemplate the palm (Kaph) that grasps opportunity. Jupiter rewards those aligned with divine mercy. The wheel turns - are you rising or falling? Grasp grace with open hand."
+      },
+      "keywords": ["grasping grace", "merciful cycles", "Jupiter's expansion", "fortune turning", "rewarding path"],
+      "keywordsSpanish": ["asir la gracia", "ciclos misericordiosos", "expansión jupiteriana", "fortuna girando", "sendero recompensador"]
+    },
+    {
+      "id": "justice",
+      "keyNumber": 11,
+      "name": "Justice",
+      "nameSpanish": "La Justicia",
+      "kabbalistic": {
+        "hebrewLetter": "Lamed (ל)",
+        "letterName": "Lamed",
+        "letterValue": 30,
+        "path": 22,
+        "sefirot": ["Geburah", "Tiphareth"],
+        "pathDescription": "From Severity to Beauty - faithful intelligence",
+        "pathJourney": "The ox-goad of karma teaches the heart through discipline"
+      },
+      "pathWorking": {
+        "entering": "Enter through Geburah bearing the sword of justice. Severity demands balance and truth.",
+        "traversing": "Walk the path of Lamed - the Ox-Goad, the teaching implement. Libra weighs and balances. The goad teaches through discipline - karma adjusts through this path. Justice is severity tempered by beauty, force guided by harmony.",
+        "exiting": "Exit into Tiphareth with heart balanced between mercy and severity. Beauty emerges from perfect equilibrium. The scales find center.",
+        "visualization": "Emerald green light flowing from scarlet severity to golden beauty. See Justice with sword and scales, seated between pillars, measuring heart against feather.",
+        "meditation": "Meditate on the ox-goad (Lamed) - the teaching tool, karmic adjustment. The universe teaches through balance. Every action seeks equilibrium. What are you learning through consequence?"
+      },
+      "keywords": ["karmic teaching", "balanced severity", "ox-goad path", "equilibrium lesson", "faithful adjustment"],
+      "keywordsSpanish": ["enseñanza kármica", "severidad balanceada", "sendero de aguijón", "lección de equilibrio", "ajuste fiel"]
+    },
+    {
+      "id": "the-hanged-man",
+      "keyNumber": 12,
+      "name": "The Hanged Man",
+      "nameSpanish": "El Colgado",
+      "kabbalistic": {
+        "hebrewLetter": "Mem (מ)",
+        "letterName": "Mem",
+        "letterValue": 40,
+        "path": 23,
+        "sefirot": ["Geburah", "Hod"],
+        "pathDescription": "From Severity to Glory - stable intelligence",
+        "pathJourney": "Drowning in the waters of reversed perspective"
+      },
+      "pathWorking": {
+        "entering": "Enter through Geburah willing to sacrifice ego. Severity demands surrender of false self.",
+        "traversing": "Hang suspended on the path of Mem - Water, the Great Sea. This is baptism by drowning, death of ego, inversion of perspective. Water (Mem) dissolves rigid structures from Geburah, preparing consciousness for glory's reflection in Hod.",
+        "exiting": "Exit into Hod, Glory and Intellect, having been purified by water. The reversed man sees truth - as below, so above. Wisdom through surrender.",
+        "visualization": "Deep blue waters flowing from red severity to orange glory. See yourself hanging inverted, serene, halo glowing, ego dissolving in cosmic sea.",
+        "meditation": "Meditate on Mem - water that drowns the old self and births the new. The Hanged Man voluntarily inverts to see truth. What perspective shift comes through surrender? What ego dies in these waters?"
+      },
+      "keywords": ["water baptism", "ego dissolution", "reversed seeing", "voluntary sacrifice", "stability through surrender"],
+      "keywordsSpanish": ["bautismo acuático", "disolución del ego", "visión invertida", "sacrificio voluntario", "estabilidad mediante rendición"]
+    },
+    {
+      "id": "death",
+      "keyNumber": 13,
+      "name": "Death",
+      "nameSpanish": "La Muerte",
+      "kabbalistic": {
+        "hebrewLetter": "Nun (נ)",
+        "letterName": "Nun",
+        "letterValue": 50,
+        "path": 24,
+        "sefirot": ["Tiphareth", "Netzach"],
+        "pathDescription": "From Beauty to Victory - imaginative intelligence",
+        "pathJourney": "Transformation through Scorpio's sting"
+      },
+      "pathWorking": {
+        "entering": "Enter through Tiphareth knowing beauty is impermanent. The heart center faces transformation.",
+        "traversing": "Die on the path of Nun - the Fish swimming in waters of transformation. Scorpio stings, putrefies, regenerates. This is alchemical death - solve et coagula. Beauty must die to be reborn in victory. The fish swims through deep unconscious waters.",
+        "exiting": "Exit into Netzach transformed. Victory over death. The phoenix rises. Desire is purified through transformation.",
+        "visualization": "Green-blue waters flowing from golden heart to emerald desire. See the skeleton reaping, crowned heads falling, new life sprouting from decay.",
+        "meditation": "Meditate on Nun - the fish of transformation swimming in dark waters. Death is not ending but metamorphosis. What in you must die for victory to emerge? The phoenix requires ashes."
+      },
+      "keywords": ["transformative death", "phoenix path", "scorpionic regeneration", "necessary decay", "imaginative rebirth"],
+      "keywordsSpanish": ["muerte transformadora", "sendero del fénix", "regeneración escorpiana", "descomposición necesaria", "renacimiento imaginativo"]
+    },
+    {
+      "id": "temperance",
+      "keyNumber": 14,
+      "name": "Temperance",
+      "nameSpanish": "La Templanza",
+      "kabbalistic": {
+        "hebrewLetter": "Samekh (ס)",
+        "letterName": "Samekh",
+        "letterValue": 60,
+        "path": 25,
+        "sefirot": ["Tiphareth", "Yesod"],
+        "pathDescription": "From Beauty to Foundation - testing intelligence",
+        "pathJourney": "The arrow of aspiration seeks the center"
+      },
+      "pathWorking": {
+        "entering": "Enter through Tiphareth with balanced heart. Beauty seeks to establish itself in foundation.",
+        "traversing": "Journey the path of Samekh - the Prop or Support. Sagittarius aims the arrow toward truth. This path is the Royal Road, the direct descent from heart to foundation. The angel mixes fire and water - tempering, testing, alchemizing.",
+        "exiting": "Exit into Yesod, Foundation, having been tested and tempered. The prop supports the Great Work. Personality reflects soul.",
+        "visualization": "Blue light flowing straight from golden heart to violet foundation. See the angel with one foot on land, one in water, pouring between cups, rainbow bridge forming.",
+        "meditation": "Meditate on Samekh - the prop supporting the sacred work, the tent pole holding up heaven. Sagittarius shoots the arrow of aspiration. What mixture are you tempering? How is your heart tested?"
+      },
+      "keywords": ["testing path", "alchemical tempering", "prop of work", "sagittal arrow", "mixing intelligence"],
+      "keywordsSpanish": ["sendero de prueba", "templado alquímico", "sostén de la obra", "flecha sagital", "inteligencia mezcladora"]
+    },
+    {
+      "id": "the-devil",
+      "keyNumber": 15,
+      "name": "The Devil",
+      "nameSpanish": "El Diablo",
+      "kabbalistic": {
+        "hebrewLetter": "Ayin (ע)",
+        "letterName": "Ayin",
+        "letterValue": 70,
+        "path": 26,
+        "sefirot": ["Tiphareth", "Hod"],
+        "pathDescription": "From Beauty to Glory - renovating intelligence",
+        "pathJourney": "The eye learns to see beyond material illusion"
+      },
+      "pathWorking": {
+        "entering": "Enter through Tiphareth with solar consciousness. Beauty faces the shadow of matter.",
+        "traversing": "Traverse the path of Ayin - the Eye. Capricorn binds spirit to matter through ambition. The Devil is Pan, natural force, the eye that sees only surface. This path tests: do you worship matter or see through it to spirit? Chains are loose - bondage is voluntary.",
+        "exiting": "Exit into Hod, Glory, having learned to see clearly. The eye (Ayin) now perceives truth behind appearance. The Devil becomes teacher of discernment.",
+        "visualization": "Indigo darkness flowing from golden beauty to orange glory. See Baphomet chained figures, material obsession, then chains falling away as eye opens.",
+        "meditation": "Meditate on Ayin - the eye that can be deceived by surface or penetrate to depth. What binds you is your perception. The Devil is the test of matter. Where do you see truly?"
+      },
+      "keywords": ["eye opening", "matter's test", "shadow teacher", "Pan's wisdom", "renovating sight"],
+      "keywordsSpanish": ["apertura del ojo", "prueba de materia", "maestro sombra", "sabiduría de Pan", "visión renovadora"]
+    },
+    {
+      "id": "the-tower",
+      "keyNumber": 16,
+      "name": "The Tower",
+      "nameSpanish": "La Torre",
+      "kabbalistic": {
+        "hebrewLetter": "Peh (פ)",
+        "letterName": "Peh",
+        "letterValue": 80,
+        "path": 27,
+        "sefirot": ["Netzach", "Hod"],
+        "pathDescription": "From Victory to Glory - exciting intelligence",
+        "pathJourney": "Mars destroys false structures between desire and intellect"
+      },
+      "pathWorking": {
+        "entering": "Enter through Netzach carrying the structures of desire and ego. Victory has built a tower.",
+        "traversing": "Be struck on the path of Peh - the Mouth speaking destruction. Mars demolishes with sudden force. The Mouth of God speaks the Word that shatters false constructs. This lightning clears the path between instinct (Netzach) and intellect (Hod).",
+        "exiting": "Exit into Hod having been stripped bare. Glory emerges from ruins. True thinking arises when false structures fall.",
+        "visualization": "Scarlet lightning flowing from green victory to orange glory. See tower struck, crown falling, figures plummeting, foundation revealed beneath rubble.",
+        "meditation": "Meditate on Peh - the mouth that speaks truth that destroys lies. Mars energy excites by destroying what no longer serves. What tower in you must fall? What foundation lies beneath?"
+      },
+      "keywords": ["destructive word", "Mars breakthrough", "exciting demolition", "false structure fall", "liberating catastrophe"],
+      "keywordsSpanish": ["palabra destructora", "irrupción marcial", "demolición excitante", "caída de estructura falsa", "catástrofe liberadora"]
+    },
+    {
+      "id": "the-star",
+      "keyNumber": 17,
+      "name": "The Star",
+      "nameSpanish": "La Estrella",
+      "kabbalistic": {
+        "hebrewLetter": "Tzaddi (צ)",
+        "letterName": "Tzaddi",
+        "letterValue": 90,
+        "path": 28,
+        "sefirot": ["Netzach", "Yesod"],
+        "pathDescription": "From Victory to Foundation - natural intelligence",
+        "pathJourney": "Aquarian waters pour from heaven to establish hope"
+      },
+      "pathWorking": {
+        "entering": "Enter through Netzach with purified desire. Victory seeks to ground itself in foundation.",
+        "traversing": "Bathe on the path of Tzaddi - the Fish Hook. Aquarius pours cosmic waters onto earth. The Star is hope incarnate, meditation made manifest. Natural intelligence flows from desire to personality, establishing the Self.",
+        "exiting": "Exit into Yesod renewed and cleansed. Foundation receives the star-waters. The hook catches celestial wisdom and grounds it in psyche.",
+        "visualization": "Violet light flowing from emerald victory to purple foundation. See the naked Star maiden pouring water on land and sea, eight-pointed star shining above, bird in tree.",
+        "meditation": "Meditate on Tzaddi - the fish hook that catches stars and brings them to earth. After the tower's destruction comes hope's restoration. What celestial truth are you grounding?"
+      },
+      "keywords": ["star catcher", "hope established", "cosmic pouring", "natural grounding", "meditation manifest"],
+      "keywordsSpanish": ["pescador de estrellas", "esperanza establecida", "vertido cósmico", "fundamentación natural", "meditación manifiesta"]
+    },
+    {
+      "id": "the-moon",
+      "keyNumber": 18,
+      "name": "The Moon",
+      "nameSpanish": "La Luna",
+      "kabbalistic": {
+        "hebrewLetter": "Qoph (ק)",
+        "letterName": "Qoph",
+        "letterValue": 100,
+        "path": 29,
+        "sefirot": ["Netzach", "Malkuth"],
+        "pathDescription": "From Victory to Kingdom - corporeal intelligence",
+        "pathJourney": "Descent through illusion to reach manifestation"
+      },
+      "pathWorking": {
+        "entering": "Enter through Netzach into the twilight realm. Desire descends toward manifestation through shadow.",
+        "traversing": "Navigate the path of Qoph - the Back of the Head, the hindbrain, instinct. Pisces swims in both directions. The Moon reflects distorted light - illusion, dreams, fears. The path to earth passes through the unconscious. Trust the dog and wolf guides.",
+        "exiting": "Exit into Malkuth having traversed the underworld. The crayfish emerges from pool onto land. Kingdom receives the dream made flesh.",
+        "visualization": "Crimson moonlight flowing from green victory to mixed-color kingdom. See path between towers, dog and wolf howling, crayfish climbing from depths.",
+        "meditation": "Meditate on Qoph - back of head, cerebellum, primal brain. To manifest (Malkuth) desire (Netzach) must pass through the unconscious. What shadows must you traverse? What illusions guard the gate to earth?"
+      },
+      "keywords": ["unconscious passage", "illusion gate", "primal descent", "shadow crossing", "corporeal dreaming"],
+      "keywordsSpanish": ["pasaje inconsciente", "puerta de ilusión", "descenso primal", "cruce de sombra", "sueño corpóreo"]
+    },
+    {
+      "id": "the-sun",
+      "keyNumber": 19,
+      "name": "The Sun",
+      "nameSpanish": "El Sol",
+      "kabbalistic": {
+        "hebrewLetter": "Resh (ר)",
+        "letterName": "Resh",
+        "letterValue": 200,
+        "path": 30,
+        "sefirot": ["Hod", "Yesod"],
+        "pathDescription": "From Glory to Foundation - collecting intelligence",
+        "pathJourney": "Solar consciousness illuminates the personality"
+      },
+      "pathWorking": {
+        "entering": "Enter through Hod with clarified intellect. Glory seeks to illuminate foundation.",
+        "traversing": "Shine on the path of Resh - the Head, consciousness, reason. The Sun rules with joy, clarity, success. This path gathers (collecting intelligence) all the light of consciousness (Hod) and establishes it in personality (Yesod). The child rides the white horse of purified instinct.",
+        "exiting": "Exit into Yesod with ego established in light. Foundation becomes solar. The face (Resh) shows truth. Success is assured.",
+        "visualization": "Orange sunlight flowing from orange glory to violet foundation. See the child on white horse, sunflowers turning toward light, wall protecting garden of consciousness.",
+        "meditation": "Meditate on Resh - the Head, face, persona. The Sun collects all mental light and establishes self-consciousness. Your face (Resh) is what you show the world. Is your personality illuminated by truth?"
+      },
+      "keywords": ["solar establishment", "collecting light", "conscious face", "illuminated personality", "successful grounding"],
+      "keywordsSpanish": ["establecimiento solar", "recolección de luz", "rostro consciente", "personalidad iluminada", "fundamentación exitosa"]
+    },
+    {
+      "id": "judgement",
+      "keyNumber": 20,
+      "name": "Judgement",
+      "nameSpanish": "El Juicio",
+      "kabbalistic": {
+        "hebrewLetter": "Shin (ש)",
+        "letterName": "Shin",
+        "letterValue": 300,
+        "path": 31,
+        "sefirot": ["Hod", "Malkuth"],
+        "pathDescription": "From Glory to Kingdom - perpetual intelligence",
+        "pathJourney": "The fire of spirit awakens consciousness in matter"
+      },
+      "pathWorking": {
+        "entering": "Enter through Hod hearing the trumpet call. Glory summons earth to awaken.",
+        "traversing": "Rise on the path of Shin - the Tooth, the triple flame of spirit. Fire element descends to resurrect what was dead. The trumpet sounds - consciousness awakens in matter. This is the Great Work completing - spirit and matter united. The graves open.",
+        "exiting": "Exit into Malkuth resurrected. Kingdom becomes conscious. Matter awakens to spirit. The new Aeon begins.",
+        "visualization": "Glowing orange-scarlet fire flowing from orange glory to rainbow kingdom. See angel Gabriel with trumpet, figures rising from tombs, arms raised in reception, cross banner flying.",
+        "meditation": "Meditate on Shin - the tooth that chews time, the triple flame (father-mother-child), the spirit-fire. Judgement is consciousness awakening in matter. What in you is being called to arise? The perpetual intelligence never sleeps."
+      },
+      "keywords": ["awakening fire", "resurrection path", "trumpet call", "matter conscious", "perpetual arising"],
+      "keywordsSpanish": ["fuego despertador", "sendero de resurrección", "llamado de trompeta", "materia consciente", "surgimiento perpetuo"]
+    },
+    {
+      "id": "the-world",
+      "keyNumber": 21,
+      "name": "The World",
+      "nameSpanish": "El Mundo",
+      "kabbalistic": {
+        "hebrewLetter": "Tav (ת)",
+        "letterName": "Tav",
+        "letterValue": 400,
+        "path": 32,
+        "sefirot": ["Yesod", "Malkuth"],
+        "pathDescription": "From Foundation to Kingdom - administrative intelligence",
+        "pathJourney": "The final path grounds soul in body"
+      },
+      "pathWorking": {
+        "entering": "Enter through Yesod carrying the soul's foundation. The personality is ready to incarnate fully.",
+        "traversing": "Dance on the path of Tav - the Cross, the Mark, the final letter. Saturn administers completion. This shortest path connects soul to body, personality to manifestation. The dancer in the wreath is the soul fully embodied. The four fixed signs guard the cosmos. Completion.",
+        "exiting": "Exit into Malkuth - the Kingdom, Earth, full manifestation. The cross (Tav) is planted. The circle is complete. You stand on earth fully conscious.",
+        "visualization": "Indigo completion flowing from violet foundation to rainbow kingdom. See the dancer in laurel wreath, four holy creatures at corners, cosmic completion, the World made whole.",
+        "meditation": "Meditate on Tav - the cross, the mark, the seal of completion. The World is the Great Work fulfilled - spirit fully incarnate in matter, heaven married to earth. You are both dancer and wreath. The journey completes to begin again."
+      },
+      "keywords": ["final grounding", "cosmic completion", "cross planted", "soul embodied", "administrative fulfillment"],
+      "keywordsSpanish": ["fundamentación final", "completitud cósmica", "cruz plantada", "alma encarnada", "cumplimiento administrativo"]
+    }
+  ]
+}

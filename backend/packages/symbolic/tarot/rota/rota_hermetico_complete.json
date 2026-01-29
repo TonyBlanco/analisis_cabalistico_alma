@@ -1,0 +1,694 @@
+{
+  "deck": {
+    "name": "R.O.T.A. Tarot Hermético",
+    "system": "R.O.T.A. (Rosae Rubeae et Aureae Crucis)",
+    "tradition": "Hermetic-Rosicrucian",
+    "totalCards": 22,
+    "source": "Enseñanzas Golden Dawn y Rosacruz (Book T, Regardie)",
+    "focus": "Correspondencias herméticas profundas e iniciación espiritual"
+  },
+  "majorArcana": [
+    {
+      "id": "the-fool",
+      "keyNumber": 0,
+      "name": "The Fool",
+      "nameSpanish": "El Loco",
+      "kabbalistic": {
+        "hebrewLetter": "Aleph (א)",
+        "letterName": "Aleph",
+        "letterValue": 1,
+        "path": 11,
+        "sefirot": ["Kether", "Chokmah"],
+        "element": "Air"
+      },
+      "astrology": {
+        "planet": null,
+        "zodiacSign": null,
+        "element": "Air"
+      },
+      "rosicrucian": {
+        "symbol": "Aliento divino del Espíritu Santo",
+        "grade": "Neophyte 0=0",
+        "ritual": "Portal del Umbral"
+      },
+      "symbolism": ["Ruach Elohim - aliento de los dioses vivientes", "Corona de rosas blancas como pureza espiritual", "Cruz rosacruz en el pecho", "Precipicio como salto al vacío iniciático", "Perro blanco como fiel natura inferior", "Sol superno de Kether", "Bastón del peregrino iniciado"],
+      "keywords": ["iniciación", "potencial puro", "locura divina", "salto al vacío", "confianza absoluta", "supraconciencia"],
+      "keywordsSpanish": ["iniciación", "potencial puro", "locura divina", "salto al vacío", "confianza absoluta", "supraconciencia"],
+      "divinatory": {
+        "upright": "Inicio del camino espiritual, confianza en lo desconocido, entrega al proceso iniciático. El neófito que cruza el umbral del templo. Potencial sin límites esperando manifestarse.",
+        "reversed": "Resistencia al cambio espiritual, imprudencia sin discernimiento, miedo a la iniciación, ego bloqueando el progreso"
+      }
+    },
+    {
+      "id": "the-magician",
+      "keyNumber": 1,
+      "name": "The Magician",
+      "nameSpanish": "El Mago",
+      "kabbalistic": {
+        "hebrewLetter": "Beth (ב)",
+        "letterName": "Beth",
+        "letterValue": 2,
+        "path": 12,
+        "sefirot": ["Kether", "Binah"],
+        "element": null
+      },
+      "astrology": {
+        "planet": "Mercury",
+        "zodiacSign": null,
+        "element": null
+      },
+      "rosicrucian": {
+        "symbol": "Mercurio filosófico",
+        "grade": "Zelator 1=10",
+        "ritual": "Consagración de herramientas"
+      },
+      "symbolism": ["Casa (Beth) del Magus", "Cuatro herramientas elementales en el altar", "Lemniscata sobre la cabeza", "Vara de poder levantada", "Cruz rosacruz de oro", "Serpiente doble del caduceo", "Rosas rojas y blancas en el jardín"],
+      "keywords": ["voluntad", "concentración", "autoconciencia", "manifestación", "maestría elemental", "transmutación"],
+      "keywordsSpanish": ["voluntad", "concentración", "autoconciencia", "manifestación", "maestría elemental", "transmutación"],
+      "divinatory": {
+        "upright": "Habilidad para manifestar la voluntad divina, maestría sobre los elementos, poder de concentración. El iniciado que aprende a usar sus herramientas espirituales. Acción consciente y dirigida.",
+        "reversed": "Voluntad débil, manipulación egocéntrica, mal uso del poder mágico, falta de concentración, dispersión de energías"
+      }
+    },
+    {
+      "id": "the-high-priestess",
+      "keyNumber": 2,
+      "name": "The High Priestess",
+      "nameSpanish": "La Sacerdotisa",
+      "kabbalistic": {
+        "hebrewLetter": "Gimel (ג)",
+        "letterName": "Gimel",
+        "letterValue": 3,
+        "path": 13,
+        "sefirot": ["Kether", "Tiphareth"],
+        "element": null
+      },
+      "astrology": {
+        "planet": "Moon",
+        "zodiacSign": null,
+        "element": null
+      },
+      "rosicrucian": {
+        "symbol": "Luna de Yesod, espejo del Sol",
+        "grade": "Theoricus 2=9",
+        "ritual": "Velo del Santuario Interior"
+      },
+      "symbolism": ["Camello (Gimel) que cruza el desierto de la experiencia", "Velo del templo oculta los misterios", "Luna creciente a sus pies", "Tora o libro de sabiduría oculta", "Pilares Jachin y Boaz", "Cruz rosacruz sobre el corazón", "Corona de la Reina del Cielo"],
+      "keywords": ["intuición", "misterios ocultos", "conocimiento lunar", "receptividad", "sabiduría virgen", "reflejo divino"],
+      "keywordsSpanish": ["intuición", "misterios ocultos", "conocimiento lunar", "receptividad", "sabiduría virgen", "reflejo divino"],
+      "divinatory": {
+        "upright": "Acceso a los misterios profundos, intuición como guía, la sabiduría que viene del silencio. La Sacerdotisa guarda los secretos del templo. Conocimiento oculto esperando ser revelado.",
+        "reversed": "Secretos no revelados en su momento, intuición bloqueada, superficialidad, conocimiento sin comprensión profunda"
+      }
+    },
+    {
+      "id": "the-empress",
+      "keyNumber": 3,
+      "name": "The Empress",
+      "nameSpanish": "La Emperatriz",
+      "kabbalistic": {
+        "hebrewLetter": "Daleth (ד)",
+        "letterName": "Daleth",
+        "letterValue": 4,
+        "path": 14,
+        "sefirot": ["Chokmah", "Binah"],
+        "element": null
+      },
+      "astrology": {
+        "planet": "Venus",
+        "zodiacSign": null,
+        "element": null
+      },
+      "rosicrucian": {
+        "symbol": "Puerta del Jardín de Venus",
+        "grade": "Practicus 3=8",
+        "ritual": "Unión de Sabiduría y Entendimiento"
+      },
+      "symbolism": ["Puerta (Daleth) entre Chokmah y Binah", "Jardín de rosas rojas y blancas", "Corona de doce estrellas zodiacales", "Venus como estrella de la mañana", "Cetro con cruz rosacruz en la punta", "Escudo con águila de Venus", "Trigo maduro como abundancia"],
+      "keywords": ["fertilidad", "amor divino", "abundancia", "naturaleza creativa", "madre universal", "belleza sagrada"],
+      "keywordsSpanish": ["fertilidad", "amor divino", "abundancia", "naturaleza creativa", "madre universal", "belleza sagrada"],
+      "divinatory": {
+        "upright": "Poder creativo manifestándose, amor que nutre el alma, abundancia en todos los planos. La Madre Divina como fuente de toda vida. Belleza y armonía en la creación.",
+        "reversed": "Bloqueo creativo, dependencia emocional, abundancia material sin propósito espiritual, belleza superficial"
+      }
+    },
+    {
+      "id": "the-emperor",
+      "keyNumber": 4,
+      "name": "The Emperor",
+      "nameSpanish": "El Emperador",
+      "kabbalistic": {
+        "hebrewLetter": "Heh (ה)",
+        "letterName": "Heh",
+        "letterValue": 5,
+        "path": 15,
+        "sefirot": ["Chokmah", "Tiphareth"],
+        "element": null
+      },
+      "astrology": {
+        "planet": null,
+        "zodiacSign": "Aries",
+        "element": "Fire"
+      },
+      "rosicrucian": {
+        "symbol": "Ventana de visión y conquista",
+        "grade": "Philosophus 4=7",
+        "ritual": "Trono del Señor del Fuego"
+      },
+      "symbolism": ["Ventana (Heh) que permite ver y conquistar", "Carnero de Aries como fuerza iniciadora", "Trono cúbico de piedra filosofal", "Armadura con cruz rosacruz", "Cetro del fuego de Chokmah", "Corona de oro solar", "Montañas como logros conquistados"],
+      "keywords": ["autoridad espiritual", "voluntad dirigida", "estructura", "conquista del ego", "liderazgo iniciático", "fuego de Aries"],
+      "keywordsSpanish": ["autoridad espiritual", "voluntad dirigida", "estructura", "conquista del ego", "liderazgo iniciático", "fuego de Aries"],
+      "divinatory": {
+        "upright": "Autoridad espiritual ganada por mérito, estructura que permite el crecimiento, poder usado con sabiduría. El Padre Divino establece orden en el caos. Liderazgo consciente.",
+        "reversed": "Tiranía del ego, autoridad sin sabiduría, rigidez excesiva, poder destructivo, conquista sin propósito superior"
+      }
+    },
+    {
+      "id": "the-hierophant",
+      "keyNumber": 5,
+      "name": "The Hierophant",
+      "nameSpanish": "El Hierofante",
+      "kabbalistic": {
+        "hebrewLetter": "Vav (ו)",
+        "letterName": "Vav",
+        "letterValue": 6,
+        "path": 16,
+        "sefirot": ["Chokmah", "Chesed"],
+        "element": null
+      },
+      "astrology": {
+        "planet": null,
+        "zodiacSign": "Taurus",
+        "element": "Earth"
+      },
+      "rosicrucian": {
+        "symbol": "Clavo que une cielo y tierra",
+        "grade": "Adeptus Minor 5=6",
+        "ritual": "Revelación de los Misterios Internos"
+      },
+      "symbolism": ["Clavo (Vav) conecta lo divino con lo material", "Toro de Taurus como fuerza de manifestación", "Triple corona papal rosacruz", "Llaves cruzadas de los misterios", "Dos discípulos o iniciados ante él", "Cruz rosacruz de oro en el pecho", "Pilares del templo interior"],
+      "keywords": ["enseñanza sagrada", "tradición hermética", "voz interior", "maestro espiritual", "iniciación formal", "sabiduría de Taurus"],
+      "keywordsSpanish": ["enseñanza sagrada", "tradición hermética", "voz interior", "maestro espiritual", "iniciación formal", "sabiduría de Taurus"],
+      "divinatory": {
+        "upright": "Enseñanzas recibidas de fuente genuina, guía espiritual auténtica, tradición viva que transmite luz. El Hierofante revela los misterios internos al discípulo preparado. Sabiduría manifestada en la tierra.",
+        "reversed": "Dogma sin espíritu, tradición muerta, maestro falso, rechazo de la guía legítima, rebelión sin sabiduría"
+      }
+    },
+    {
+      "id": "the-lovers",
+      "keyNumber": 6,
+      "name": "The Lovers",
+      "nameSpanish": "Los Enamorados",
+      "kabbalistic": {
+        "hebrewLetter": "Zain (ז)",
+        "letterName": "Zain",
+        "letterValue": 7,
+        "path": 17,
+        "sefirot": ["Binah", "Tiphareth"],
+        "element": null
+      },
+      "astrology": {
+        "planet": null,
+        "zodiacSign": "Gemini",
+        "element": "Air"
+      },
+      "rosicrucian": {
+        "symbol": "Espada de discriminación hermética",
+        "grade": "Adeptus Major 6=5",
+        "ritual": "Matrimonio Alquímico"
+      },
+      "symbolism": ["Espada (Zain) de discriminación corta ilusiones", "Géminis como dualidad unificada", "Ángel Rafael bendice la unión", "Árbol del conocimiento con serpiente", "Árbol de la vida con llamas", "Pareja desnuda en jardín edénico", "Montaña sagrada al fondo"],
+      "keywords": ["elección consciente", "unión de opuestos", "amor divino", "discriminación espiritual", "matrimonio sagrado", "análisis de Géminis"],
+      "keywordsSpanish": ["elección consciente", "unión de opuestos", "amor divino", "discriminación espiritual", "matrimonio sagrado", "análisis de Géminis"],
+      "divinatory": {
+        "upright": "Elección entre dos caminos hecha con conciencia plena, unión de masculino y femenino interno, amor que trasciende lo personal. El matrimonio alquímico del Rey y la Reina. Discernimiento verdadero.",
+        "reversed": "Elección errónea por falta de discernimiento, dualidad sin resolver, amor posesivo, tentación destructiva"
+      }
+    },
+    {
+      "id": "the-chariot",
+      "keyNumber": 7,
+      "name": "The Chariot",
+      "nameSpanish": "El Carro",
+      "kabbalistic": {
+        "hebrewLetter": "Cheth (ח)",
+        "letterName": "Cheth",
+        "letterValue": 8,
+        "path": 18,
+        "sefirot": ["Binah", "Geburah"],
+        "element": null
+      },
+      "astrology": {
+        "planet": null,
+        "zodiacSign": "Cancer",
+        "element": "Water"
+      },
+      "rosicrucian": {
+        "symbol": "Cerca sagrada del sanctum",
+        "grade": "Adeptus Exemptus 7=4",
+        "ritual": "Triunfo sobre las fuerzas duales"
+      },
+      "symbolism": ["Cerca (Cheth) protege el espacio sagrado", "Cangrejo de Cáncer como vehículo del alma", "Esfinge blanca y negra controladas", "Dosel estrellado del firmamento", "Copa del Grial en el pecho", "Corona de estrellas", "Ciudad conquistada al fondo"],
+      "keywords": ["victoria espiritual", "control de fuerzas duales", "voluntad triunfante", "protección sagrada", "receptividad de Cáncer", "merkabah"],
+      "keywordsSpanish": ["victoria espiritual", "control de fuerzas duales", "voluntad triunfante", "protección sagrada", "receptividad de Cáncer", "merkabah"],
+      "divinatory": {
+        "upright": "Victoria ganada por el control de las fuerzas opuestas, el guerrero espiritual triunfa sobre los obstáculos. El carro como merkabah del alma ascendente. Protección en el avance.",
+        "reversed": "Pérdida de control, fuerzas duales en conflicto, derrota por falta de dirección, protección perdida"
+      }
+    },
+    {
+      "id": "strength",
+      "keyNumber": 8,
+      "name": "Strength",
+      "nameSpanish": "La Fuerza",
+      "kabbalistic": {
+        "hebrewLetter": "Teth (ט)",
+        "letterName": "Teth",
+        "letterValue": 9,
+        "path": 19,
+        "sefirot": ["Chesed", "Geburah"],
+        "element": null
+      },
+      "astrology": {
+        "planet": null,
+        "zodiacSign": "Leo",
+        "element": "Fire"
+      },
+      "rosicrucian": {
+        "symbol": "Serpiente de poder kundalini",
+        "grade": "Magister Templi 8=3",
+        "ritual": "Dominio del León Solar"
+      },
+      "symbolism": ["Serpiente (Teth) del poder vital ascendente", "León de Leo como fuerza solar", "Mujer con símbolo infinito en la cabeza", "Guirnalda de rosas como logro espiritual", "Cadena de rosas domina al león", "Montañas azules de realización", "Cruz rosacruz en el vestido"],
+      "keywords": ["fortaleza espiritual", "kundalini despierto", "dominio del león interno", "fuerza suave", "poder solar de Leo", "coraje del corazón"],
+      "keywordsSpanish": ["fortaleza espiritual", "kundalini despierto", "dominio del león interno", "fuerza suave", "poder solar de Leo", "coraje del corazón"],
+      "divinatory": {
+        "upright": "Fuerza espiritual que domina la naturaleza inferior con amor, poder del corazón sobre la fuerza bruta. La serpiente kundalini asciende por la columna. Coraje del Maestro del Templo.",
+        "reversed": "Debilidad de voluntad, poder animal sin control, miedo que paraliza, fuerza bruta sin amor"
+      }
+    },
+    {
+      "id": "the-hermit",
+      "keyNumber": 9,
+      "name": "The Hermit",
+      "nameSpanish": "El Ermitaño",
+      "kabbalistic": {
+        "hebrewLetter": "Yod (י)",
+        "letterName": "Yod",
+        "letterValue": 10,
+        "path": 20,
+        "sefirot": ["Chesed", "Tiphareth"],
+        "element": null
+      },
+      "astrology": {
+        "planet": null,
+        "zodiacSign": "Virgo",
+        "element": "Earth"
+      },
+      "rosicrucian": {
+        "symbol": "Mano divina que señala el camino",
+        "grade": "Magus 9=2",
+        "ritual": "Luz del Maestro Interno"
+      },
+      "symbolism": ["Yod - la mano de Dios que guía", "Virgen de Virgo como pureza del buscador", "Lámpara de seis puntas (hexagrama)", "Bastón del Maestro Interior", "Manto gris de sabiduría oculta", "Montaña nevada de ascensión", "Estrella hermética en la lámpara"],
+      "keywords": ["sabiduría interna", "maestro solitario", "luz del alma", "búsqueda silenciosa", "perfección de Virgo", "yod divino"],
+      "keywordsSpanish": ["sabiduría interna", "maestro solitario", "luz del alma", "búsqueda silenciosa", "perfección de Virgo", "yod divino"],
+      "divinatory": {
+        "upright": "Sabiduría encontrada en la soledad contemplativa, el Maestro Interno ilumina el camino. La lámpara del ermitaño guía a los que vienen detrás. Búsqueda de perfección espiritual.",
+        "reversed": "Aislamiento destructivo, sabiduría que no se comparte, exceso de cautela, miedo a la conexión"
+      }
+    },
+    {
+      "id": "wheel-of-fortune",
+      "keyNumber": 10,
+      "name": "Wheel of Fortune",
+      "nameSpanish": "La Rueda de la Fortuna",
+      "kabbalistic": {
+        "hebrewLetter": "Kaph (כ)",
+        "letterName": "Kaph",
+        "letterValue": 20,
+        "path": 21,
+        "sefirot": ["Chesed", "Netzach"],
+        "element": null
+      },
+      "astrology": {
+        "planet": "Jupiter",
+        "zodiacSign": null,
+        "element": null
+      },
+      "rosicrucian": {
+        "symbol": "Palma que recibe la fortuna divina",
+        "grade": "Ipsissimus 10=1",
+        "ritual": "Rueda de la Manifestación"
+      },
+      "symbolism": ["Palma (Kaph) que recibe o rechaza la fortuna", "Júpiter como expansión y gracia", "YHVH en el centro de la rueda", "TARO/ROTA en los cuadrantes", "Esfinge en la cima con espada", "Anubis ascendiendo", "Serpiente Tifón descendiendo", "Cuatro criaturas vivientes en esquinas"],
+      "keywords": ["ciclos del destino", "gracia jupiteriana", "rueda hermética", "karma cósmico", "expansión divina", "fortuna iniciática"],
+      "keywordsSpanish": ["ciclos del destino", "gracia jupiteriana", "rueda hermética", "karma cósmico", "expansión divina", "fortuna iniciática"],
+      "divinatory": {
+        "upright": "Ciclos del destino girando hacia la expansión, gracia de Júpiter manifestándose. La Rueda como R.O.T.A. (Rota Taro Orat Tora Ator). Karma positivo en manifestación.",
+        "reversed": "Mala fortuna temporal, ciclo descendente, resistencia al cambio kármico, caída desde la cima"
+      }
+    },
+    {
+      "id": "justice",
+      "keyNumber": 11,
+      "name": "Justice",
+      "nameSpanish": "La Justicia",
+      "kabbalistic": {
+        "hebrewLetter": "Lamed (ל)",
+        "letterName": "Lamed",
+        "letterValue": 30,
+        "path": 22,
+        "sefirot": ["Geburah", "Tiphareth"],
+        "element": null
+      },
+      "astrology": {
+        "planet": null,
+        "zodiacSign": "Libra",
+        "element": "Air"
+      },
+      "rosicrucian": {
+        "symbol": "Aguijón que enseña por el equilibrio",
+        "grade": "Corresponde a Tiphareth - Centro del Ser",
+        "ritual": "Equilibrio del Pilar Central"
+      },
+      "symbolism": ["Aguijón (Lamed) que estimula al buey del aprendizaje", "Balanza de Libra como equilibrio perfecto", "Espada de Geburah - justicia severa", "Corona de cubo como estabilidad", "Velo entre pilares del templo", "Cruz rosacruz en el pecho", "Trono de piedra filosofal"],
+      "keywords": ["equilibrio kármico", "justicia divina", "ajuste", "verdad sin velo", "balanza de Libra", "ley hermética"],
+      "keywordsSpanish": ["equilibrio kármico", "justicia divina", "ajuste", "verdad sin velo", "balanza de Libra", "ley hermética"],
+      "divinatory": {
+        "upright": "Justicia perfecta basada en la ley cósmica, equilibrio entre Misericordia y Severidad. El karma se manifiesta con precisión. Verdad revelada sin distorsión.",
+        "reversed": "Injusticia, desequilibrio, juicio erróneo, severidad o misericordia excesiva, verdad distorsionada"
+      }
+    },
+    {
+      "id": "the-hanged-man",
+      "keyNumber": 12,
+      "name": "The Hanged Man",
+      "nameSpanish": "El Colgado",
+      "kabbalistic": {
+        "hebrewLetter": "Mem (מ)",
+        "letterName": "Mem",
+        "letterValue": 40,
+        "path": 23,
+        "sefirot": ["Geburah", "Hod"],
+        "element": "Water"
+      },
+      "astrology": {
+        "planet": null,
+        "zodiacSign": null,
+        "element": "Water"
+      },
+      "rosicrucian": {
+        "symbol": "Aguas bautismales de sacrificio",
+        "grade": "Prueba del Neófito - muerte del ego",
+        "ritual": "Inversión de la Perspectiva"
+      },
+      "symbolism": ["Mem - aguas que bautizan y ahogan", "Suspensión en forma de Tau rosacruz", "Halo dorado de iluminación", "Pierna cruzada forma cruz", "Doce botones en chaqueta (zodiaco)", "Rosas rojas caen de los bolsillos", "Inversión completa de perspectiva"],
+      "keywords": ["sacrificio voluntario", "muerte del ego", "bautismo por agua", "inversión iniciática", "suspensión en el abismo", "entrega total"],
+      "keywordsSpanish": ["sacrificio voluntario", "muerte del ego", "bautismo por agua", "inversión iniciática", "suspensión en el abismo", "entrega total"],
+      "divinatory": {
+        "upright": "Sacrificio del ego como ofrenda al Divino, muerte mística antes del renacimiento. El Colgado ve el mundo desde la perspectiva del espíritu. Entrega total al proceso.",
+        "reversed": "Sacrificio forzado sin comprensión, sufrimiento sin propósito, resistencia a la entrega, egoísmo"
+      }
+    },
+    {
+      "id": "death",
+      "keyNumber": 13,
+      "name": "Death",
+      "nameSpanish": "La Muerte",
+      "kabbalistic": {
+        "hebrewLetter": "Nun (נ)",
+        "letterName": "Nun",
+        "letterValue": 50,
+        "path": 24,
+        "sefirot": ["Tiphareth", "Netzach"],
+        "element": null
+      },
+      "astrology": {
+        "planet": null,
+        "zodiacSign": "Scorpio",
+        "element": "Water"
+      },
+      "rosicrucian": {
+        "symbol": "Pez que nada en aguas de transformación",
+        "grade": "Muerte del Yo Inferior",
+        "ritual": "Putrefacción Alquímica"
+      },
+      "symbolism": ["Pez (Nun) nadando en aguas de transformación", "Escorpión de Scorpio como agente de muerte", "Esqueleto como lo que permanece", "Rosa rosacruz en la bandera negra", "Guadaña que siega lo caduco", "Sol naciente entre pilares", "Río de aguas profundas"],
+      "keywords": ["transformación radical", "muerte del ego", "renacimiento", "putrefacción alquímica", "poder de Scorpio", "phoenix"],
+      "keywordsSpanish": ["transformación radical", "muerte del ego", "renacimiento", "putrefacción alquímica", "poder de Scorpio", "fénix"],
+      "divinatory": {
+        "upright": "Transformación profunda a través de la muerte del yo inferior, putrefacción necesaria antes de la resurrección. El fénix renace de las cenizas. Fin de un ciclo completo.",
+        "reversed": "Resistencia a la transformación, muerte parcial sin renacimiento, estancamiento, miedo al cambio"
+      }
+    },
+    {
+      "id": "temperance",
+      "keyNumber": 14,
+      "name": "Temperance",
+      "nameSpanish": "La Templanza",
+      "kabbalistic": {
+        "hebrewLetter": "Samekh (ס)",
+        "letterName": "Samekh",
+        "letterValue": 60,
+        "path": 25,
+        "sefirot": ["Tiphareth", "Yesod"],
+        "element": null
+      },
+      "astrology": {
+        "planet": null,
+        "zodiacSign": "Sagittarius",
+        "element": "Fire"
+      },
+      "rosicrucian": {
+        "symbol": "Sostén de la Gran Obra",
+        "grade": "Adeptus Minor - trabajo alquímico",
+        "ritual": "Matrimonio del Rey y la Reina"
+      },
+      "symbolism": ["Sostén (Samekh) que apoya el vaso alquímico", "Arquero de Sagitario apuntando a diana espiritual", "Ángel Miguel mezclando fuego y agua", "Copa de oro y copa de plata", "Triángulo de fuego en el pecho", "Cuadrado de tierra abajo", "Iris sobre montaña de ascensión", "Sol naciente detrás"],
+      "keywords": ["arte alquímico", "templanza perfecta", "mezcla de opuestos", "flecha de propósito", "Gran Obra", "fuego de Sagitario"],
+      "keywordsSpanish": ["arte alquímico", "templanza perfecta", "mezcla de opuestos", "flecha de propósito", "Gran Obra", "fuego de Sagitario"],
+      "divinatory": {
+        "upright": "Alquimia perfecta de fuego y agua, arte hermético en acción. La flecha de Sagitario apunta al objetivo espiritual. Temperancia como sostén de la Gran Obra.",
+        "reversed": "Mezcla inapropiada, falta de moderación, propósito desviado, arte alquímico fallido"
+      }
+    },
+    {
+      "id": "the-devil",
+      "keyNumber": 15,
+      "name": "The Devil",
+      "nameSpanish": "El Diablo",
+      "kabbalistic": {
+        "hebrewLetter": "Ayin (ע)",
+        "letterName": "Ayin",
+        "letterValue": 70,
+        "path": 26,
+        "sefirot": ["Tiphareth", "Hod"],
+        "element": null
+      },
+      "astrology": {
+        "planet": null,
+        "zodiacSign": "Capricorn",
+        "element": "Earth"
+      },
+      "rosicrucian": {
+        "symbol": "Ojo que ve solo la materia",
+        "grade": "Prueba de Tiphareth - tentación material",
+        "ritual": "Confrontación con la Sombra"
+      },
+      "symbolism": ["Ojo (Ayin) limitado a la percepción material", "Cabra de Capricornio como Pan", "Pentagrama invertido en la frente", "Cadenas que parecen sujetar", "Antorcha invertida como luz falsa", "Figuras encadenadas por elección", "Cuernos y alas de Baphomet"],
+      "keywords": ["ilusión material", "tentación", "esclavitud autoimpuesta", "sombra reconocida", "Pan como naturaleza", "prueba de Capricornio"],
+      "keywordsSpanish": ["ilusión material", "tentación", "esclavitud autoimpuesta", "sombra reconocida", "Pan como naturaleza", "prueba de Capricornio"],
+      "divinatory": {
+        "upright": "Reconocimiento de la esclavitud al mundo material, confrontación necesaria con la sombra. El Ojo debe aprender a ver más allá de la forma. La prueba de Tiphareth.",
+        "reversed": "Liberación de ataduras materiales, superación de la tentación, trascendencia de la ilusión"
+      }
+    },
+    {
+      "id": "the-tower",
+      "keyNumber": 16,
+      "name": "The Tower",
+      "nameSpanish": "La Torre",
+      "kabbalistic": {
+        "hebrewLetter": "Peh (פ)",
+        "letterName": "Peh",
+        "letterValue": 80,
+        "path": 27,
+        "sefirot": ["Netzach", "Hod"],
+        "element": null
+      },
+      "astrology": {
+        "planet": "Mars",
+        "zodiacSign": null,
+        "element": null
+      },
+      "rosicrucian": {
+        "symbol": "Boca de Dios que destruye lo falso",
+        "grade": "Destrucción de estructuras egóicas",
+        "ritual": "Caída de la Torre de Babel"
+      },
+      "symbolism": ["Boca (Peh) del Verbo Divino que destruye", "Marte como fuerza destructora necesaria", "Rayo que ilumina y destruye", "Torre construida sobre falsos cimientos", "Corona cayendo - ego destronado", "Figuras cayendo en despertar forzado", "Llamas purificadoras"],
+      "keywords": ["destrucción divina", "revelación súbita", "caída del ego", "verbo destructor", "Marte como purificador", "despertar forzado"],
+      "keywordsSpanish": ["destrucción divina", "revelación súbita", "caída del ego", "verbo destructor", "Marte como purificador", "despertar forzado"],
+      "divinatory": {
+        "upright": "Destrucción necesaria de estructuras falsas, la Boca de Dios habla y derriba la torre del ego. El rayo de iluminación forzada. Despertar dramático.",
+        "reversed": "Misma energía pero resistida, caída evitada temporalmente, destrucción parcial, opresión continuada"
+      }
+    },
+    {
+      "id": "the-star",
+      "keyNumber": 17,
+      "name": "The Star",
+      "nameSpanish": "La Estrella",
+      "kabbalistic": {
+        "hebrewLetter": "Tzaddi (צ)",
+        "letterName": "Tzaddi",
+        "letterValue": 90,
+        "path": 28,
+        "sefirot": ["Netzach", "Yesod"],
+        "element": null
+      },
+      "astrology": {
+        "planet": null,
+        "zodiacSign": "Aquarius",
+        "element": "Air"
+      },
+      "rosicrucian": {
+        "symbol": "Anzuelo que captura la luz estelar",
+        "grade": "Estrella del Adeptado",
+        "ritual": "Baño en Aguas Cósmicas"
+      },
+      "symbolism": ["Anzuelo (Tzaddi) que captura sabiduría celestial", "Aguador de Acuario vertiendo aguas cósmicas", "Estrella de ocho puntas central (Venus)", "Siete estrellas menores (chakras)", "Mujer desnuda como verdad sin velos", "Agua fluyendo a tierra y estanque", "Ave Fénix en árbol", "Cruz rosacruz formada por las aguas"],
+      "keywords": ["esperanza divina", "aguas celestiales", "inspiración cósmica", "verdad desnuda", "gracia de Acuario", "estrella guía"],
+      "keywordsSpanish": ["esperanza divina", "aguas celestiales", "inspiración cósmica", "verdad desnuda", "gracia de Acuario", "estrella guía"],
+      "divinatory": {
+        "upright": "Esperanza renovada después de la destrucción, aguas celestiales que nutren el alma. La Estrella guía al peregrino. Inspiración directa del cosmos. Renovación espiritual.",
+        "reversed": "Esperanza perdida, desconexión de la fuente cósmica, pesimismo, falta de inspiración"
+      }
+    },
+    {
+      "id": "the-moon",
+      "keyNumber": 18,
+      "name": "The Moon",
+      "nameSpanish": "La Luna",
+      "kabbalistic": {
+        "hebrewLetter": "Qoph (ק)",
+        "letterName": "Qoph",
+        "letterValue": 100,
+        "path": 29,
+        "sefirot": ["Netzach", "Malkuth"],
+        "element": null
+      },
+      "astrology": {
+        "planet": null,
+        "zodiacSign": "Pisces",
+        "element": "Water"
+      },
+      "rosicrucian": {
+        "symbol": "Nuca - cerebro reptiliano, instinto",
+        "grade": "Prueba del Sendero Lunar",
+        "ritual": "Travesía del Camino Oscuro"
+      },
+      "symbolism": ["Nuca (Qoph) - cerebro ancestral y subconsciente", "Peces de Pisces nadando en direcciones opuestas", "Cangrejo emergiendo de aguas primordiales", "Perro y lobo aullando a la luna", "Torres como pilares de la ilusión", "Camino entre las torres", "Luna llena con rostro", "Gotas de sangre lunar cayendo"],
+      "keywords": ["ilusión lunar", "subconsciente profundo", "sueños", "instinto primordial", "disolución de Piscis", "sendero oscuro"],
+      "keywordsSpanish": ["ilusión lunar", "subconsciente profundo", "sueños", "instinto primordial", "disolución de Piscis", "sendero oscuro"],
+      "divinatory": {
+        "upright": "Travesía del sendero oscuro del alma, ilusiones lunares que deben ser atravesadas. El subconsciente revela sus terrores. La prueba antes del amanecer. Disolución necesaria de Piscis.",
+        "reversed": "Terror superado, ilusiones menores, imaginación sin control, confusión pequeña"
+      }
+    },
+    {
+      "id": "the-sun",
+      "keyNumber": 19,
+      "name": "The Sun",
+      "nameSpanish": "El Sol",
+      "kabbalistic": {
+        "hebrewLetter": "Resh (ר)",
+        "letterName": "Resh",
+        "letterValue": 200,
+        "path": 30,
+        "sefirot": ["Hod", "Yesod"],
+        "element": null
+      },
+      "astrology": {
+        "planet": "Sun",
+        "zodiacSign": null,
+        "element": null
+      },
+      "rosicrucian": {
+        "symbol": "Cabeza coronada por el Sol de Tiphareth",
+        "grade": "Iluminación del Adepto",
+        "ritual": "Nacimiento del Niño Solar"
+      },
+      "symbolism": ["Cabeza (Resh) iluminada por conciencia solar", "Sol radiante de Tiphareth manifestado", "Niño inocente sobre caballo blanco", "Bandera roja con cruz rosacruz", "Girasoles mirando al sol", "Muro de jardín hermético", "Diecinueve rayos solares"],
+      "keywords": ["iluminación solar", "conciencia de Tiphareth", "inocencia recuperada", "alegría divina", "gloria manifestada", "niño solar"],
+      "keywordsSpanish": ["iluminación solar", "conciencia de Tiphareth", "inocencia recuperada", "alegría divina", "gloria manifestada", "niño solar"],
+      "divinatory": {
+        "upright": "Iluminación plena de la conciencia solar, el Niño de Luz renace después de la noche oscura. Gloria y éxito en todos los planos. La Cabeza coronada con luz de Tiphareth. Alegría pura.",
+        "reversed": "Éxito menor, alegría temporal, conciencia nublada, gloria opacada"
+      }
+    },
+    {
+      "id": "judgement",
+      "keyNumber": 20,
+      "name": "Judgement",
+      "nameSpanish": "El Juicio",
+      "kabbalistic": {
+        "hebrewLetter": "Shin (ש)",
+        "letterName": "Shin",
+        "letterValue": 300,
+        "path": 31,
+        "sefirot": ["Hod", "Malkuth"],
+        "element": "Fire"
+      },
+      "astrology": {
+        "planet": null,
+        "zodiacSign": null,
+        "element": "Fire"
+      },
+      "rosicrucian": {
+        "symbol": "Diente de fuego que consume",
+        "grade": "Resurrección del Adepto",
+        "ritual": "Trompeta del Juicio Final"
+      },
+      "symbolism": ["Diente (Shin) - triple llama del Espíritu Santo", "Fuego elemental que transforma", "Ángel Gabriel con trompeta", "Cruz rosacruz en la bandera", "Figuras resurgiendo de tumbas", "Montañas de realización al fondo", "Familia reunida - trinidad humana"],
+      "keywords": ["resurrección", "juicio final", "fuego del espíritu", "despertar definitivo", "llamado angélico", "renacimiento total"],
+      "keywordsSpanish": ["resurrección", "juicio final", "fuego del espíritu", "despertar definitivo", "llamado angélico", "renacimiento total"],
+      "divinatory": {
+        "upright": "Resurrección espiritual completa, el llamado angélico despierta a los muertos. Juicio final del alma por el Espíritu. El fuego de Shin consume lo caduco y renueva. Renacimiento definitivo.",
+        "reversed": "Resistencia al llamado, despertar incompleto, juicio pospuesto, miedo a la transformación final"
+      }
+    },
+    {
+      "id": "the-world",
+      "keyNumber": 21,
+      "name": "The World",
+      "nameSpanish": "El Mundo",
+      "kabbalistic": {
+        "hebrewLetter": "Tav (ת)",
+        "letterName": "Tav",
+        "letterValue": 400,
+        "path": 32,
+        "sefirot": ["Yesod", "Malkuth"],
+        "element": null
+      },
+      "astrology": {
+        "planet": "Saturn",
+        "zodiacSign": null,
+        "element": null
+      },
+      "rosicrucian": {
+        "symbol": "Cruz de manifestación completa",
+        "grade": "Ipsissimus - Maestro Perfecto",
+        "ritual": "Gran Obra Completada"
+      },
+      "symbolism": ["Cruz (Tav) como sello de la Gran Obra", "Saturno como señor del tiempo cumplido", "Guirnalda de laureles - victoria total", "Figura danzante andrógina", "Cuatro criaturas vivientes (Tetramorfo)", "León, Toro, Águila, Ángel", "Cruz rosacruz de oro en el centro", "Varitas gemelas de poder"],
+      "keywords": ["completitud", "Gran Obra realizada", "cosmos perfecto", "danza cósmica", "maestría total", "Saturno cumplido"],
+      "keywordsSpanish": ["completitud", "Gran Obra realizada", "cosmos perfecto", "danza cósmica", "maestría total", "Saturno cumplido"],
+      "divinatory": {
+        "upright": "Gran Obra completada, el alquimista ha logrado la piedra filosofal. El cosmos danza en perfección. Saturno cierra el ciclo con éxito total. El sello de Tav marca la consumación. Maestría absoluta.",
+        "reversed": "Obra incompleta, falta el último paso, ciclo no cerrado, victoria parcial, resistencia a la culminación"
+      }
+    }
+  ]
+}

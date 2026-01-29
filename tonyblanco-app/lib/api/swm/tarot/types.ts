@@ -8,27 +8,30 @@
 // ENUMS (matching Django model choices)
 // =============================================================================
 
+// Backend SpreadType choices from models.py:
+// FREE, TREE_OF_LIFE, CROSS, THREE_CARDS, HORSESHOE, SEPHIROTH_PATH
 export type SpreadType = 
   | 'free'
   | 'tree_of_life'
-  | 'natal_chart'
-  | 'correspondences'
-  | 'custom';
+  | 'cross'
+  | 'three_cards'
+  | 'horseshoe'
+  | 'sephiroth_path';
 
 export type TarotSystem =
-  | 'rider_waite'
+  | 'rider-waite'
   | 'thoth'
-  | 'golden_dawn'
-  | 'bota'
-  | 'hermetic'
-  | 'sephiroth';
+  | 'marseille'
+  | 'golden-dawn'
+  | 'bota';
 
+// Backend WorkspaceStatus choices from models.py:
+// CREATED, IN_PROGRESS, SEALED, REVIEWED
 export type WorkspaceStatus =
-  | 'draft'
-  | 'active'
+  | 'created'
+  | 'in_progress'
   | 'sealed'
-  | 'reviewed'
-  | 'archived';
+  | 'reviewed';
 
 export type ArtifactType =
   | 'spread'

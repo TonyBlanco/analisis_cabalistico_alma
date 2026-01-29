@@ -1,0 +1,757 @@
+{
+  "deck": {
+    "name": "Rider-Waite-Smith Tarot",
+    "system": "Rider-Waite-Smith",
+    "tradition": "Western Esoteric",
+    "totalCards": 22,
+    "year": 1909,
+    "artist": "Pamela Colman Smith",
+    "author": "Arthur Edward Waite"
+  },
+  "majorArcana": [
+    {
+      "id": "the-fool",
+      "keyNumber": 0,
+      "name": "The Fool",
+      "nameSpanish": "El Loco",
+      "kabbalistic": {
+        "hebrewLetter": "Aleph (א)",
+        "letterName": "Aleph",
+        "letterValue": 1,
+        "path": 11,
+        "sefirot": ["Kether", "Chokmah"]
+      },
+      "astrology": {
+        "planet": null,
+        "zodiacSign": null,
+        "element": "Air"
+      },
+      "symbolism": [
+        "Young man on cliff edge represents new beginning",
+        "White sun symbolizes consciousness and enlightenment",
+        "Mountains in background indicate future challenges",
+        "White rose in hand signifies purity and desire",
+        "Small dog as companion represents loyalty and instinct",
+        "Knapsack contains untapped potential",
+        "Colorful clothing shows optimism and naivety"
+      ],
+      "keywords": ["beginning", "innocence", "spontaneity", "leap of faith", "new journey", "unlimited potential"],
+      "keywordsSpanish": ["comienzo", "inocencia", "espontaneidad", "salto de fe", "nuevo viaje", "potencial ilimitado"],
+      "divinatory": {
+        "upright": "Folly, mania, extravagance, intoxication, delirium, frenzy, bewrayment. New beginnings, having faith in the future, being inexperienced, not knowing what to expect, having beginner's luck, improvisation and believing in the universe.",
+        "reversed": "Negligence, absence, distribution, carelessness, apathy, nullity, vanity. Folly, recklessness, risk-taking, thoughtlessness."
+      }
+    },
+    {
+      "id": "the-magician",
+      "keyNumber": 1,
+      "name": "The Magician",
+      "nameSpanish": "El Mago",
+      "kabbalistic": {
+        "hebrewLetter": "Beth (ב)",
+        "letterName": "Beth",
+        "letterValue": 2,
+        "path": 12,
+        "sefirot": ["Kether", "Binah"]
+      },
+      "astrology": {
+        "planet": "Mercury",
+        "zodiacSign": null,
+        "element": null
+      },
+      "symbolism": [
+        "Infinity symbol above head represents unlimited potential",
+        "Right hand pointing upward to heaven, left pointing to earth - as above, so below",
+        "Red robe symbolizes action and worldly experience",
+        "White undergarment represents spiritual purity",
+        "Four suit symbols on table - mastery of all elements (wands, cups, swords, pentacles)",
+        "Red roses and white lilies represent desire and pure thought",
+        "Yellow background symbolizes conscious mind and intellect"
+      ],
+      "keywords": ["manifestation", "resourcefulness", "power", "inspired action", "concentration", "skill"],
+      "keywordsSpanish": ["manifestación", "ingenio", "poder", "acción inspirada", "concentración", "habilidad"],
+      "divinatory": {
+        "upright": "Skill, diplomacy, address, subtlety; sickness, pain, loss, disaster, snares of enemies; self-confidence, will; the Querent, if male. Power, concentration, action, consciousness.",
+        "reversed": "Physician, Magus, mental disease, disgrace, disquiet. Manipulation, poor planning, untapped talents."
+      }
+    },
+    {
+      "id": "the-high-priestess",
+      "keyNumber": 2,
+      "name": "The High Priestess",
+      "nameSpanish": "La Sacerdotisa",
+      "kabbalistic": {
+        "hebrewLetter": "Gimel (ג)",
+        "letterName": "Gimel",
+        "letterValue": 3,
+        "path": 13,
+        "sefirot": ["Kether", "Tiphareth"]
+      },
+      "astrology": {
+        "planet": "Moon",
+        "zodiacSign": null,
+        "element": null
+      },
+      "symbolism": [
+        "Seated between black and white pillars (B and J) representing duality",
+        "Veil decorated with pomegranates behind her conceals mysteries",
+        "Crown with horns and globe represents three phases of moon",
+        "Blue robe flows like water symbolizing unconscious",
+        "Torah scroll labeled TORA represents divine law and hidden knowledge",
+        "Cross on breast shows balance of masculine/feminine",
+        "Crescent moon at feet connects to lunar mysteries"
+      ],
+      "keywords": ["intuition", "sacred knowledge", "divine feminine", "subconscious mind", "mystery", "inner voice"],
+      "keywordsSpanish": ["intuición", "conocimiento sagrado", "femenino divino", "mente subconsciente", "misterio", "voz interior"],
+      "divinatory": {
+        "upright": "Secrets, mystery, the future as yet unrevealed; the woman who interests the Querent, if male; the Querent herself, if female; silence, tenacity; mystery, wisdom, science. Intuition, higher powers, the subconscious mind.",
+        "reversed": "Passion, moral or physical ardor, conceit, surface knowledge. Secrets, disconnected from intuition, withdrawal."
+      }
+    },
+    {
+      "id": "the-empress",
+      "keyNumber": 3,
+      "name": "The Empress",
+      "nameSpanish": "La Emperatriz",
+      "kabbalistic": {
+        "hebrewLetter": "Daleth (ד)",
+        "letterName": "Daleth",
+        "letterValue": 4,
+        "path": 14,
+        "sefirot": ["Chokmah", "Binah"]
+      },
+      "astrology": {
+        "planet": "Venus",
+        "zodiacSign": null,
+        "element": null
+      },
+      "symbolism": [
+        "Seated on cushioned throne in abundant nature",
+        "Crown with twelve stars represents twelve months and zodiac",
+        "Venus symbol on heart-shaped shield shows love and beauty",
+        "Scepter represents dominion over life",
+        "Flowing robe suggests pregnancy and fertility",
+        "Wheat field symbolizes harvest and abundance",
+        "Waterfall and trees represent fertility of nature",
+        "Pomegranates on robe indicate fertility"
+      ],
+      "keywords": ["fertility", "femininity", "beauty", "nature", "abundance", "nurturing", "motherhood"],
+      "keywordsSpanish": ["fertilidad", "feminidad", "belleza", "naturaleza", "abundancia", "nutrición", "maternidad"],
+      "divinatory": {
+        "upright": "Fruitfulness, action, initiative, length of days; the unknown, clandestine; also difficulty, doubt, ignorance. Abundance, nurturing, fertility, life creation.",
+        "reversed": "Light, truth, the unraveling of involved matters, public rejoicings; according to another reading, vacillation. Creative block, dependence on others."
+      }
+    },
+    {
+      "id": "the-emperor",
+      "keyNumber": 4,
+      "name": "The Emperor",
+      "nameSpanish": "El Emperador",
+      "kabbalistic": {
+        "hebrewLetter": "Heh (ה)",
+        "letterName": "Heh",
+        "letterValue": 5,
+        "path": 15,
+        "sefirot": ["Chokmah", "Tiphareth"]
+      },
+      "astrology": {
+        "planet": null,
+        "zodiacSign": "Aries",
+        "element": "Fire"
+      },
+      "symbolism": [
+        "Stone throne decorated with ram heads (Aries symbol)",
+        "Red robe under armor shows passion controlled by structure",
+        "Ankh scepter represents life and masculine power",
+        "Golden orb in left hand symbolizes world domination",
+        "Barren mountain background shows solitary authority",
+        "Long white beard indicates wisdom and experience",
+        "Crown represents sovereignty and established power",
+        "Armor suggests protection and defensive strength"
+      ],
+      "keywords": ["authority", "establishment", "structure", "father figure", "control", "leadership", "stability"],
+      "keywordsSpanish": ["autoridad", "establecimiento", "estructura", "figura paterna", "control", "liderazgo", "estabilidad"],
+      "divinatory": {
+        "upright": "Stability, power, protection, realization; a great person; aid, reason, conviction; also authority and will. Leadership, father figure, structure, solid foundation.",
+        "reversed": "Benevolence, compassion, credit; also confusion to enemies, obstruction, immaturity. Domination, excessive control, rigidity, inflexibility."
+      }
+    },
+    {
+      "id": "the-hierophant",
+      "keyNumber": 5,
+      "name": "The Hierophant",
+      "nameSpanish": "El Hierofante",
+      "kabbalistic": {
+        "hebrewLetter": "Vav (ו)",
+        "letterName": "Vav",
+        "letterValue": 6,
+        "path": 16,
+        "sefirot": ["Chokmah", "Chesed"]
+      },
+      "astrology": {
+        "planet": null,
+        "zodiacSign": "Taurus",
+        "element": "Earth"
+      },
+      "symbolism": [
+        "Religious figure seated between two pillars like High Priestess",
+        "Triple crown represents three worlds - conscious, subconscious, superconscious",
+        "Raised right hand in blessing shows spiritual authority",
+        "Papal cross staff with three crossbars symbolizes trinity",
+        "Two acolytes kneeling represent exoteric and esoteric knowledge",
+        "Crossed keys at feet unlock spiritual mysteries",
+        "Red and white roses on acolytes' robes show passion and purity"
+      ],
+      "keywords": ["tradition", "conformity", "morality", "ethics", "spiritual wisdom", "religious beliefs", "institutions"],
+      "keywordsSpanish": ["tradición", "conformidad", "moralidad", "ética", "sabiduría espiritual", "creencias religiosas", "instituciones"],
+      "divinatory": {
+        "upright": "Marriage, alliance, captivity, servitude; by another account, mercy and goodness; inspiration; the man to whom the Querent has recourse. Spiritual wisdom, religious beliefs, conformity, tradition.",
+        "reversed": "Society, good understanding, concord, overkindness, weakness. Personal beliefs, freedom, challenging the status quo."
+      }
+    },
+    {
+      "id": "the-lovers",
+      "keyNumber": 6,
+      "name": "The Lovers",
+      "nameSpanish": "Los Enamorados",
+      "kabbalistic": {
+        "hebrewLetter": "Zain (ז)",
+        "letterName": "Zain",
+        "letterValue": 7,
+        "path": 17,
+        "sefirot": ["Binah", "Tiphareth"]
+      },
+      "astrology": {
+        "planet": null,
+        "zodiacSign": "Gemini",
+        "element": "Air"
+      },
+      "symbolism": [
+        "Naked man and woman represent Adam and Eve before the fall",
+        "Archangel Raphael above with arms outstretched in blessing",
+        "Sun shining behind angel symbolizes conscious partnership",
+        "Tree behind woman with serpent is Tree of Knowledge (temptation)",
+        "Tree behind man with flames is Tree of Life (passion)",
+        "Mountain represents challenges in relationship",
+        "Purple robe of angel shows spirituality",
+        "Clouds beneath angel suggest divine intervention"
+      ],
+      "keywords": ["love", "harmony", "relationships", "choices", "values alignment", "union", "duality"],
+      "keywordsSpanish": ["amor", "armonía", "relaciones", "elecciones", "alineación de valores", "unión", "dualidad"],
+      "divinatory": {
+        "upright": "Attraction, love, beauty, trials overcome. Love, union, relationships, values alignment, choices.",
+        "reversed": "Failure, foolish designs. Another account speaks of marriage frustrated and contrarieties of all kinds. Disharmony, imbalance, misalignment of values."
+      }
+    },
+    {
+      "id": "the-chariot",
+      "keyNumber": 7,
+      "name": "The Chariot",
+      "nameSpanish": "El Carro",
+      "kabbalistic": {
+        "hebrewLetter": "Cheth (ח)",
+        "letterName": "Cheth",
+        "letterValue": 8,
+        "path": 18,
+        "sefirot": ["Binah", "Geburah"]
+      },
+      "astrology": {
+        "planet": null,
+        "zodiacSign": "Cancer",
+        "element": "Water"
+      },
+      "symbolism": [
+        "Armored warrior in chariot shows control and confidence",
+        "Starry crown and canopy represent celestial influences",
+        "Black and white sphinxes represent opposing forces controlled by will",
+        "Square on breastplate shows earth element and stability",
+        "Crescent moons on shoulders represent receptivity",
+        "Wand or scepter shows authority and command",
+        "City behind represents civilization and accomplishment",
+        "Blue background suggests emotional control"
+      ],
+      "keywords": ["control", "willpower", "success", "action", "determination", "victory", "discipline"],
+      "keywordsSpanish": ["control", "fuerza de voluntad", "éxito", "acción", "determinación", "victoria", "disciplina"],
+      "divinatory": {
+        "upright": "Succour, providence; also war, triumph, presumption, vengeance, trouble. Control, willpower, success, action, determination.",
+        "reversed": "Riot, quarrel, dispute, litigation, defeat. Lack of control, lack of direction, aggression."
+      }
+    },
+    {
+      "id": "strength",
+      "keyNumber": 8,
+      "name": "Strength",
+      "nameSpanish": "La Fuerza",
+      "kabbalistic": {
+        "hebrewLetter": "Teth (ט)",
+        "letterName": "Teth",
+        "letterValue": 9,
+        "path": 19,
+        "sefirot": ["Chesed", "Geburah"]
+      },
+      "astrology": {
+        "planet": null,
+        "zodiacSign": "Leo",
+        "element": "Fire"
+      },
+      "symbolism": [
+        "Woman gently closing lion's mouth shows inner strength over brute force",
+        "Infinity symbol above head represents unlimited spiritual power",
+        "White robe symbolizes purity and spiritual nature",
+        "Flowers in background and garland suggest natural harmony",
+        "Mountain in distance represents achievement through patience",
+        "Lion represents primal passions and instincts",
+        "Calm expression shows mastery through compassion",
+        "Gentle touch rather than force shows true power"
+      ],
+      "keywords": ["strength", "courage", "patience", "compassion", "self-control", "inner power", "gentle influence"],
+      "keywordsSpanish": ["fuerza", "coraje", "paciencia", "compasión", "autocontrol", "poder interior", "influencia gentil"],
+      "divinatory": {
+        "upright": "Power, energy, action, courage, magnanimity; also complete success and honours. Strength, courage, persuasion, influence, compassion.",
+        "reversed": "Despotism, abuse of power, weakness, discord, disgrace. Self-doubt, weakness, insecurity, low energy."
+      }
+    },
+    {
+      "id": "the-hermit",
+      "keyNumber": 9,
+      "name": "The Hermit",
+      "nameSpanish": "El Ermitaño",
+      "kabbalistic": {
+        "hebrewLetter": "Yod (י)",
+        "letterName": "Yod",
+        "letterValue": 10,
+        "path": 20,
+        "sefirot": ["Chesed", "Tiphareth"]
+      },
+      "astrology": {
+        "planet": null,
+        "zodiacSign": "Virgo",
+        "element": "Earth"
+      },
+      "symbolism": [
+        "Old man with long beard stands alone on snowy mountain peak",
+        "Grey hooded robe represents invisibility and withdrawal",
+        "Lantern held high contains six-pointed star (Seal of Solomon)",
+        "Staff in left hand aids journey and provides support",
+        "Mountain top represents spiritual attainment through isolation",
+        "Snow suggests clarity and purity of thought",
+        "Looking down implies sharing wisdom with those below",
+        "Six-pointed star in lantern represents divine wisdom"
+      ],
+      "keywords": ["introspection", "solitude", "inner guidance", "spiritual enlightenment", "wisdom", "contemplation", "soul searching"],
+      "keywordsSpanish": ["introspección", "soledad", "guía interior", "iluminación espiritual", "sabiduría", "contemplación", "búsqueda del alma"],
+      "divinatory": {
+        "upright": "Prudence, circumspection; also and especially treason, dissimulation, roguery, corruption. Soul searching, introspection, being alone, inner guidance.",
+        "reversed": "Concealment, disguise, policy, fear, unreasoned caution. Isolation, loneliness, withdrawal."
+      }
+    },
+    {
+      "id": "wheel-of-fortune",
+      "keyNumber": 10,
+      "name": "Wheel of Fortune",
+      "nameSpanish": "La Rueda de la Fortuna",
+      "kabbalistic": {
+        "hebrewLetter": "Kaph (כ)",
+        "letterName": "Kaph",
+        "letterValue": 20,
+        "path": 21,
+        "sefirot": ["Chesed", "Netzach"]
+      },
+      "astrology": {
+        "planet": "Jupiter",
+        "zodiacSign": null,
+        "element": null
+      },
+      "symbolism": [
+        "Large wheel in center represents cycles and destiny",
+        "Hebrew letters YHVH on wheel spell name of God",
+        "Four creatures in corners - angel, eagle, lion, bull - represent fixed zodiac signs",
+        "Snake descending on left represents Set and material forces",
+        "Anubis ascending on right represents rising consciousness",
+        "Sphinx on top with sword represents riddles of existence",
+        "Alchemical symbols on wheel - mercury, sulfur, water, salt",
+        "Books held by figures suggest learning and wisdom"
+      ],
+      "keywords": ["destiny", "fortune", "cycles", "karma", "turning point", "life cycles", "fate"],
+      "keywordsSpanish": ["destino", "fortuna", "ciclos", "karma", "punto de inflexión", "ciclos de vida", "hado"],
+      "divinatory": {
+        "upright": "Destiny, fortune, success, elevation, luck, felicity. Good luck, karma, life cycles, destiny, a turning point.",
+        "reversed": "Increase, abundance, superfluity. Bad luck, negative external forces, out of control."
+      }
+    },
+    {
+      "id": "justice",
+      "keyNumber": 11,
+      "name": "Justice",
+      "nameSpanish": "La Justicia",
+      "kabbalistic": {
+        "hebrewLetter": "Lamed (ל)",
+        "letterName": "Lamed",
+        "letterValue": 30,
+        "path": 22,
+        "sefirot": ["Geburah", "Tiphareth"]
+      },
+      "astrology": {
+        "planet": null,
+        "zodiacSign": "Libra",
+        "element": "Air"
+      },
+      "symbolism": [
+        "Crowned figure seated between two pillars like High Priestess",
+        "Scales in left hand represent balanced judgment",
+        "Upright sword in right hand shows clarity and decisiveness",
+        "Purple veil behind suggests spiritual authority",
+        "Red robe indicates passion for truth",
+        "Green mantle represents growth through justice",
+        "Square on crown shows organized thought",
+        "Stern expression indicates impartiality"
+      ],
+      "keywords": ["justice", "fairness", "truth", "cause and effect", "law", "balance", "accountability"],
+      "keywordsSpanish": ["justicia", "equidad", "verdad", "causa y efecto", "ley", "equilibrio", "responsabilidad"],
+      "divinatory": {
+        "upright": "Equity, rightness, probity, executive; triumph of the deserving side in law. Justice, fairness, truth, cause and effect, law.",
+        "reversed": "Law in all its departments, legal complications, bigotry, bias, excessive severity. Unfairness, lack of accountability, dishonesty."
+      }
+    },
+    {
+      "id": "the-hanged-man",
+      "keyNumber": 12,
+      "name": "The Hanged Man",
+      "nameSpanish": "El Colgado",
+      "kabbalistic": {
+        "hebrewLetter": "Mem (מ)",
+        "letterName": "Mem",
+        "letterValue": 40,
+        "path": 23,
+        "sefirot": ["Geburah", "Hod"]
+      },
+      "astrology": {
+        "planet": "Neptune",
+        "zodiacSign": null,
+        "element": "Water"
+      },
+      "symbolism": [
+        "Man suspended upside-down from T-shaped tree",
+        "Halo around head shows spiritual enlightenment through sacrifice",
+        "Peaceful expression indicates voluntary surrender",
+        "One leg crossed behind forms number 4 (stability through surrender)",
+        "Hands behind back suggest binding or acceptance",
+        "Blue tunic represents knowledge and calm",
+        "Red pants/tights show passion and life force",
+        "Yellow shoes and hair suggest mental and spiritual illumination"
+      ],
+      "keywords": ["suspension", "restriction", "letting go", "sacrifice", "new perspective", "contemplation", "surrender"],
+      "keywordsSpanish": ["suspensión", "restricción", "soltar", "sacrificio", "nueva perspectiva", "contemplación", "rendición"],
+      "divinatory": {
+        "upright": "Wisdom, circumspection, discernment, trials, sacrifice, intuition, divination, prophecy. Suspension, restriction, letting go, sacrifice.",
+        "reversed": "Selfishness, the crowd, body politic. Delays, resistance, stalling, indecision."
+      }
+    },
+    {
+      "id": "death",
+      "keyNumber": 13,
+      "name": "Death",
+      "nameSpanish": "La Muerte",
+      "kabbalistic": {
+        "hebrewLetter": "Nun (נ)",
+        "letterName": "Nun",
+        "letterValue": 50,
+        "path": 24,
+        "sefirot": ["Tiphareth", "Netzach"]
+      },
+      "astrology": {
+        "planet": null,
+        "zodiacSign": "Scorpio",
+        "element": "Water"
+      },
+      "symbolism": [
+        "Skeleton knight in black armor represents inevitable change",
+        "Black horse symbolizes death and unknown",
+        "White rose on black banner shows beauty and immortality",
+        "Fallen king shows death comes to all regardless of status",
+        "Pleading figures - king, child, maiden, bishop - show universal impact",
+        "Rising sun between towers indicates rebirth and new beginning",
+        "River in background represents flow between life and death",
+        "Five-petaled rose represents five senses transcended"
+      ],
+      "keywords": ["endings", "change", "transformation", "transition", "new beginnings", "release", "metamorphosis"],
+      "keywordsSpanish": ["finales", "cambio", "transformación", "transición", "nuevos comienzos", "liberación", "metamorfosis"],
+      "divinatory": {
+        "upright": "End, mortality, destruction, corruption; also for a man, the loss of a benefactor; for a woman, many contrarieties; for a maid, failure of marriage projects. Endings, change, transformation, transition.",
+        "reversed": "Inertia, sleep, lethargy, petrifaction, somnambulism; hope destroyed. Resistance to change, stagnation, decay."
+      }
+    },
+    {
+      "id": "temperance",
+      "keyNumber": 14,
+      "name": "Temperance",
+      "nameSpanish": "La Templanza",
+      "kabbalistic": {
+        "hebrewLetter": "Samekh (ס)",
+        "letterName": "Samekh",
+        "letterValue": 60,
+        "path": 25,
+        "sefirot": ["Tiphareth", "Yesod"]
+      },
+      "astrology": {
+        "planet": null,
+        "zodiacSign": "Sagittarius",
+        "element": "Fire"
+      },
+      "symbolism": [
+        "Angel with large wings represents higher self and protection",
+        "Pouring water between two cups shows alchemy and flow",
+        "One foot on land, one in water represents balance of conscious/subconscious",
+        "Triangle in square on chest shows fire within matter",
+        "Iris flowers represent hope and the rainbow bridge",
+        "Sun with crown rising between mountains shows enlightened consciousness",
+        "Path leading to mountains represents spiritual journey",
+        "Yellow background suggests conscious awareness"
+      ],
+      "keywords": ["balance", "moderation", "patience", "purpose", "meaning", "alchemy", "harmony"],
+      "keywordsSpanish": ["equilibrio", "moderación", "paciencia", "propósito", "significado", "alquimia", "armonía"],
+      "divinatory": {
+        "upright": "Economy, moderation, frugality, management, accommodation. Balance, moderation, patience, purpose.",
+        "reversed": "Things connected with churches, religions, sects, the priesthood, sometimes even the priest who will marry the Querent; also disunion, unfortunate combinations, competing interests. Imbalance, excess, self-healing, re-alignment."
+      }
+    },
+    {
+      "id": "the-devil",
+      "keyNumber": 15,
+      "name": "The Devil",
+      "nameSpanish": "El Diablo",
+      "kabbalistic": {
+        "hebrewLetter": "Ayin (ע)",
+        "letterName": "Ayin",
+        "letterValue": 70,
+        "path": 26,
+        "sefirot": ["Tiphareth", "Hod"]
+      },
+      "astrology": {
+        "planet": null,
+        "zodiacSign": "Capricorn",
+        "element": "Earth"
+      },
+      "symbolism": [
+        "Horned devil figure resembles Baphomet - symbol of material bondage",
+        "Inverted pentagram on forehead represents inverted spirituality",
+        "Bat wings indicate inability to fly toward light",
+        "Torch held downward brings fire and destruction",
+        "Man and woman chained loosely - bondage is voluntary",
+        "Horns and tails on humans show animal nature",
+        "Black background represents ignorance and unknowing",
+        "Chains are loose enough to remove - slavery is self-imposed"
+      ],
+      "keywords": ["bondage", "addiction", "sexuality", "materialism", "shadow self", "attachment", "restriction"],
+      "keywordsSpanish": ["esclavitud", "adicción", "sexualidad", "materialismo", "sombra", "apego", "restricción"],
+      "divinatory": {
+        "upright": "Ravage, violence, vehemence, extraordinary efforts, force, fatality; that which is predestined but is not for this reason evil. Shadow self, attachment, addiction, restriction, sexuality.",
+        "reversed": "Evil fatality, weakness, pettiness, blindness. Releasing limiting beliefs, exploring dark thoughts, detachment."
+      }
+    },
+    {
+      "id": "the-tower",
+      "keyNumber": 16,
+      "name": "The Tower",
+      "nameSpanish": "La Torre",
+      "kabbalistic": {
+        "hebrewLetter": "Peh (פ)",
+        "letterName": "Peh",
+        "letterValue": 80,
+        "path": 27,
+        "sefirot": ["Netzach", "Hod"]
+      },
+      "astrology": {
+        "planet": "Mars",
+        "zodiacSign": null,
+        "element": null
+      },
+      "symbolism": [
+        "Lightning bolt striking tower represents sudden divine intervention",
+        "Crown blown off top shows ego and false constructs destroyed",
+        "Two figures falling headfirst show loss of control",
+        "Flames coming from windows indicate purification through destruction",
+        "Grey tower built on rocky mountain represents false structures on shaky foundation",
+        "22 flames represent 22 Hebrew letters and Major Arcana",
+        "Black background shows void and chaos",
+        "White lightning reveals truth through shock"
+      ],
+      "keywords": ["sudden change", "upheaval", "chaos", "revelation", "breakdown", "disaster", "awakening"],
+      "keywordsSpanish": ["cambio repentino", "trastorno", "caos", "revelación", "colapso", "desastre", "despertar"],
+      "divinatory": {
+        "upright": "Misery, distress, indigence, adversity, calamity, disgrace, deception, ruin. It is a card in particular of unforeseen catastrophe. Sudden change, upheaval, chaos, revelation, awakening.",
+        "reversed": "According to one account, the same in a lesser degree; also oppression, imprisonment, tyranny. Personal transformation, fear of change, averting disaster."
+      }
+    },
+    {
+      "id": "the-star",
+      "keyNumber": 17,
+      "name": "The Star",
+      "nameSpanish": "La Estrella",
+      "kabbalistic": {
+        "hebrewLetter": "Tzaddi (צ)",
+        "letterName": "Tzaddi",
+        "letterValue": 90,
+        "path": 28,
+        "sefirot": ["Netzach", "Yesod"]
+      },
+      "astrology": {
+        "planet": null,
+        "zodiacSign": "Aquarius",
+        "element": "Air"
+      },
+      "symbolism": [
+        "Naked woman kneeling represents openness and vulnerability",
+        "Large eight-pointed star surrounded by seven smaller stars - hope and inspiration",
+        "Pouring water into pool and onto land nourishes conscious and unconscious",
+        "One foot on land, one in water shows balance of elements",
+        "Tree with bird represents thoughts taking flight",
+        "Pool represents subconscious mind",
+        "Mountains in background represent future achievements",
+        "Nudity shows nothing to hide, spiritual nakedness"
+      ],
+      "keywords": ["hope", "faith", "purpose", "renewal", "spirituality", "inspiration", "healing"],
+      "keywordsSpanish": ["esperanza", "fe", "propósito", "renovación", "espiritualidad", "inspiración", "sanación"],
+      "divinatory": {
+        "upright": "Loss, theft, privation, abandonment; another reading says: hope and bright prospects. Hope, faith, purpose, renewal, spirituality.",
+        "reversed": "Arrogance, haughtiness, impotence. Lack of faith, despair, self-trust, disconnection."
+      }
+    },
+    {
+      "id": "the-moon",
+      "keyNumber": 18,
+      "name": "The Moon",
+      "nameSpanish": "La Luna",
+      "kabbalistic": {
+        "hebrewLetter": "Qoph (ק)",
+        "letterName": "Qoph",
+        "letterValue": 100,
+        "path": 29,
+        "sefirot": ["Netzach", "Malkuth"]
+      },
+      "astrology": {
+        "planet": null,
+        "zodiacSign": "Pisces",
+        "element": "Water"
+      },
+      "symbolism": [
+        "Moon with face shows consciousness in the unconscious",
+        "Dog and wolf howling represent tamed and wild aspects of mind",
+        "Crayfish emerging from water symbolizes early stages of consciousness",
+        "Path between two towers leads to unknown",
+        "Towers represent known world and threshold to unconscious",
+        "Water represents subconscious and emotions",
+        "Mountains in distance show challenges ahead",
+        "Droplets falling represent manifestation from above"
+      ],
+      "keywords": ["illusion", "fear", "anxiety", "subconscious", "intuition", "dreams", "confusion"],
+      "keywordsSpanish": ["ilusión", "miedo", "ansiedad", "subconsciente", "intuición", "sueños", "confusión"],
+      "divinatory": {
+        "upright": "Hidden enemies, danger, calumny, darkness, terror, deception, occult forces, error. Illusion, fear, anxiety, subconscious, intuition.",
+        "reversed": "Instability, inconstancy, silence, lesser degrees of deception and error. Release of fear, repressed emotion, inner confusion."
+      }
+    },
+    {
+      "id": "the-sun",
+      "keyNumber": 19,
+      "name": "The Sun",
+      "nameSpanish": "El Sol",
+      "kabbalistic": {
+        "hebrewLetter": "Resh (ר)",
+        "letterName": "Resh",
+        "letterValue": 200,
+        "path": 30,
+        "sefirot": ["Hod", "Yesod"]
+      },
+      "astrology": {
+        "planet": "Sun",
+        "zodiacSign": null,
+        "element": null
+      },
+      "symbolism": [
+        "Bright sun with face radiates warmth and consciousness",
+        "Naked child on white horse represents innocence and purity",
+        "Red banner shows energy and life force",
+        "Sunflowers facing sun represent natural growth toward light",
+        "Brick wall behind shows civilization and accomplishment",
+        "Child's nudity shows nothing to hide, authenticity",
+        "Straight sunbeams alternate with wavy ones - direct and reflected light",
+        "White horse symbolizes purity of thought"
+      ],
+      "keywords": ["success", "positivity", "vitality", "joy", "confidence", "warmth", "optimism"],
+      "keywordsSpanish": ["éxito", "positividad", "vitalidad", "alegría", "confianza", "calidez", "optimismo"],
+      "divinatory": {
+        "upright": "Material happiness, fortunate marriage, contentment. Success, positivity, fun, warmth, optimism, vitality.",
+        "reversed": "The same in a lesser sense. Temporary depression, lack of success, sadness."
+      }
+    },
+    {
+      "id": "judgement",
+      "keyNumber": 20,
+      "name": "Judgement",
+      "nameSpanish": "El Juicio",
+      "kabbalistic": {
+        "hebrewLetter": "Shin (ש)",
+        "letterName": "Shin",
+        "letterValue": 300,
+        "path": 31,
+        "sefirot": ["Hod", "Malkuth"]
+      },
+      "astrology": {
+        "planet": "Pluto",
+        "zodiacSign": null,
+        "element": "Fire"
+      },
+      "symbolism": [
+        "Archangel Gabriel blowing trumpet announces resurrection",
+        "People rising from coffins represent rebirth and renewal",
+        "Man, woman, and child show family and universal experience",
+        "Cross on banner represents spiritual awakening",
+        "Mountain range in background represents challenges overcome",
+        "Grey skin of figures shows they come from death/shadow",
+        "Raised arms show receptivity to divine call",
+        "Coffins floating on water represent emotional depths transcended"
+      ],
+      "keywords": ["judgement", "rebirth", "inner calling", "absolution", "evaluation", "awakening", "renewal"],
+      "keywordsSpanish": ["juicio", "renacimiento", "llamado interior", "absolución", "evaluación", "despertar", "renovación"],
+      "divinatory": {
+        "upright": "Change of position, renewal, outcome. Another account specifies total loss though lawsuit. Judgement, rebirth, inner calling, absolution.",
+        "reversed": "Weakness, pusillanimity, simplicity; also deliberation, decision, sentence. Self-doubt, inner critic, ignoring the call."
+      }
+    },
+    {
+      "id": "the-world",
+      "keyNumber": 21,
+      "name": "The World",
+      "nameSpanish": "El Mundo",
+      "kabbalistic": {
+        "hebrewLetter": "Tav (ת)",
+        "letterName": "Tav",
+        "letterValue": 400,
+        "path": 32,
+        "sefirot": ["Yesod", "Malkuth"]
+      },
+      "astrology": {
+        "planet": "Saturn",
+        "zodiacSign": null,
+        "element": null
+      },
+      "symbolism": [
+        "Dancing figure in center represents cosmic consciousness and unity",
+        "Purple veil suggests wisdom and spiritual knowledge",
+        "Two wands in hands show balance of masculine/feminine",
+        "Laurel wreath symbolizes victory and achievement",
+        "Four figures in corners - angel, eagle, lion, bull - represent fixed signs and elements",
+        "Infinity symbol formed by purple scarves",
+        "Androgynous figure represents wholeness and integration",
+        "Green wreath indicates growth and natural cycles completed"
+      ],
+      "keywords": ["completion", "accomplishment", "travel", "integration", "wholeness", "fulfillment", "success"],
+      "keywordsSpanish": ["completitud", "logro", "viaje", "integración", "totalidad", "plenitud", "éxito"],
+      "divinatory": {
+        "upright": "Assured success, recompense, voyage, route, emigration, flight, change of place. Completion, integration, accomplishment, travel.",
+        "reversed": "Inertia, fixity, stagnation, permanence. Seeking personal closure, shortcuts, delays."
+      }
+    }
+  ]
+}

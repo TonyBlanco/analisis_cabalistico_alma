@@ -58,12 +58,30 @@ type SwmV3PayloadCard = {
 };
 
 type SwmV3Payload = {
-  id: string;
-  summary: string;
-  themes: string[];
-  correspondences: string[];
-  caution: string;
+  reading_id?: string;
+  system?: {
+    id: string;
+    name: string;
+    implemented: boolean;
+    description: string;
+    source: string;
+  };
+  spread?: {
+    id: string;
+    name: string;
+    positions: number;
+  };
   cards: SwmV3PayloadCard[];
+  context?: string | null;
+  intention?: string | null;
+  generated_at?: string;
+  educational_disclaimer?: string;
+  // Legacy fields for compatibility
+  id?: string;
+  summary?: string;
+  themes?: string[];
+  correspondences?: string[];
+  caution?: string;
   symbolic_reading?: {
     system?: { id: string; label: string };
     card?: { name: string; arcana: string; keywords: string[] };
@@ -73,6 +91,8 @@ type SwmV3Payload = {
       position_meaning: string;
       system_frame: string;
     };
+    ai_generated?: boolean;
+    ai_provider?: string;
     notes?: string;
   };
 };
@@ -200,6 +220,13 @@ export default function AstrologyTarotVisualCore({
 
   const activeSwmCard = swmPayload?.cards?.[0] ?? null;
   const activeKabbalisticDetails = activeSwmCard?.kabbalistic_details ?? null;
+  
+  // DEBUG: Log para verificar datos
+  if (typeof window !== 'undefined' && activeSwmCard) {
+    console.log('🔍 DEBUG activeSwmCard:', activeSwmCard);
+    console.log('🔍 DEBUG kabbalistic_details:', activeKabbalisticDetails);
+  }
+  
   const structured = swmPayload?.symbolic_reading?.symbolic_reading ?? null;
   const structuredKeywords = swmPayload?.symbolic_reading?.card?.keywords ?? null;
 
@@ -371,6 +398,7 @@ export default function AstrologyTarotVisualCore({
           ...(token ? { Authorization: `Token ${token}` } : {}),
         };
 
+        console.log('📤 Sending card ID to SWM API:', selectedCard.id);
         const response = await fetch(`${API_BASE_URL}/swm-v3/symbolic-readings/`, {
           method: 'POST',
           headers,
@@ -389,10 +417,14 @@ export default function AstrologyTarotVisualCore({
         }
 
         const data = (await response.json()) as SwmV3ApiResponse;
+        console.log('🔍 SWM API Response:', JSON.stringify(data, null, 2));
         if (!data?.success || !data?.payload) {
+          console.log('❌ SWM: No success or no payload');
           setSwmPayload(null);
           return;
         }
+        console.log('✅ SWM Payload cards:', data.payload.cards);
+        console.log('✅ First card kabbalistic_details:', data.payload.cards?.[0]?.kabbalistic_details);
 
         setSwmPayload(data.payload);
       } catch (error) {
@@ -542,8 +574,8 @@ export default function AstrologyTarotVisualCore({
               </div>
               <div className="mt-2 grid gap-2 text-xs">
                 <div>
-                  <span className="font-medium">Paciente:</span>{' '}
-                  <span>{patientName || 'Paciente no seleccionado'}</span>
+                  <span className="font-medium">Consultante:</span>{' '}
+                  <span>{patientName || 'Consultante no seleccionado'}</span>
                 </div>
                 <div>
                   <span className="font-medium">ID:</span>{' '}
@@ -838,10 +870,23 @@ export default function AstrologyTarotVisualCore({
                   </span>
                 </div>
                 <div className="pt-2 border-t border-gray-200">
-                  <div className="text-xs uppercase tracking-wide text-gray-500">
-                    Lectura simbólica (mínima)
+                  <div className="flex items-center gap-2">
+                    <div className="text-xs uppercase tracking-wide text-gray-500">
+                      Lectura simbólica
+                    </div>
+                    {swmPayload?.symbolic_reading?.ai_generated !== undefined && (
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
+                        swmPayload.symbolic_reading.ai_generated 
+                          ? 'bg-green-100 text-green-700' 
+                          : 'bg-blue-100 text-blue-700'
+                      }`}>
+                        {swmPayload.symbolic_reading.ai_generated 
+                          ? `✨ ${swmPayload.symbolic_reading.ai_provider?.toUpperCase() || 'IA'}` 
+                          : '📚 Tradición'}
+                      </span>
+                    )}
                   </div>
-                  <div className="mt-1 text-xs text-gray-600">
+                  <div className="mt-1 text-xs text-gray-600 italic">
                     {structured?.system_frame ?? 'Marco simbólico no disponible.'}
                   </div>
                   {Array.isArray(structuredKeywords) && structuredKeywords.length > 0 && (
@@ -856,18 +901,23 @@ export default function AstrologyTarotVisualCore({
                       ))}
                     </div>
                   )}
-                  <div className="mt-2">
-                    <div className="text-xs font-medium text-gray-700">Significado central</div>
-                    <div className="text-sm text-gray-700">
+                  <div className="mt-3">
+                    <div className="text-xs font-semibold text-purple-800">Significado central</div>
+                    <div className="text-sm text-gray-700 mt-0.5">
                       {structured?.core_meaning ?? 'Significado no disponible.'}
                     </div>
                   </div>
                   <div className="mt-2">
-                    <div className="text-xs font-medium text-gray-700">Contexto</div>
-                    <div className="text-sm text-gray-700">
+                    <div className="text-xs font-semibold text-purple-800">Contexto</div>
+                    <div className="text-sm text-gray-700 mt-0.5">
                       {structured?.contextual_meaning ?? 'Contexto no disponible.'}
                     </div>
                   </div>
+                  {swmPayload?.symbolic_reading?.notes && (
+                    <div className="mt-2 text-[11px] text-gray-400 italic">
+                      {swmPayload.symbolic_reading.notes}
+                    </div>
+                  )}
                 </div>
               </div>
             )}

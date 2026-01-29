@@ -1,10 +1,14 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 import ConsentModal, { type SwmV3ConsentMode } from '@/components/SWMV3/ConsentModal';
 import { API_BASE_URL, getAuthToken } from '@/lib/api';
 import TarotSpreadView, { type TarotCardDraw, type TarotSpread, type TarotSpreadPosition } from './TarotSpreadView';
 import SymbolicReadingPanel from './SymbolicReadingPanel';
+import AstrologyEnrichmentToggle, { 
+  type AstrologyEnrichmentOptions, 
+  DEFAULT_ASTROLOGY_OPTIONS 
+} from './AstrologyEnrichmentToggle';
 import { resolveBotaIdentity, buildBotaPositionMeaning, buildBotaSynthesis } from '@holistica/symbolic/tarot/bota';
 
 type ConsentState = {
@@ -177,6 +181,7 @@ function synthesize(cards: TarotCardDraw[], contextFocus: string): string {
 
 export default function TarotDrawPanel(props: {
   consultantId?: string | null;
+  patientId?: number | null;
   systemId?: string;
   onSystemChange?: (systemId: string) => void;
   useBotaSvg?: boolean;
@@ -191,7 +196,51 @@ export default function TarotDrawPanel(props: {
   const [intention, setIntention] = useState<string>('');
   const [contextFocus, setContextFocus] = useState<string>('general');
 
-  const [consent, setConsent] = useState<ConsentState | null>(null);
+  // Astrology enrichment state
+  const [astrologyOptions, setAstrologyOptions] = useState<AstrologyEnrichmentOptions>(DEFAULT_ASTROLOGY_OPTIONS);
+  const [hasNatalChart, setHasNatalChart] = useState<boolean>(false);
+  const [checkingNatalChart, setCheckingNatalChart] = useState<boolean>(false);
+
+  // Check if patient has natal chart when patientId changes
+  useEffect(() => {
+    const checkNatalChart = async () => {
+      if (!props.patientId) {
+        setHasNatalChart(false);
+        return;
+      }
+      
+      setCheckingNatalChart(true);
+      try {
+        const token = getAuthToken();
+        const response = await fetch(
+          `${API_BASE_URL}/therapist/patients/${props.patientId}/astrology/natal-chart/`,
+          {
+            headers: token ? { Authorization: `Token ${token}` } : {},
+          }
+        );
+        setHasNatalChart(response.ok);
+      } catch {
+        setHasNatalChart(false);
+      } finally {
+        setCheckingNatalChart(false);
+      }
+    };
+
+    checkNatalChart();
+  }, [props.patientId]);
+
+  const handleAstrologyOptionsChange = useCallback((options: AstrologyEnrichmentOptions) => {
+    setAstrologyOptions(options);
+  }, []);
+
+  // ⚠️ LEGACY MODE: Consent forced to TRUE, modal disabled
+  // Previous consent flow required user explicit consent before readings
+  // Now bypassed to simplify UX
+  const [consent, setConsent] = useState<ConsentState | null>({
+    mode: 'store_with_consent',
+    acceptedAt: new Date().toISOString(),
+    version: '1.0',
+  });
   const [showConsent, setShowConsent] = useState(false);
 
   const [loading, setLoading] = useState(false);
@@ -205,10 +254,11 @@ export default function TarotDrawPanel(props: {
   const handleRun = async () => {
     setError(null);
 
-    if (!consent) {
-      setShowConsent(true);
-      return;
-    }
+    // ⚠️ LEGACY: Consent check disabled
+    // if (!consent) {
+    //   setShowConsent(true);
+    //   return;
+    // }
 
     setLoading(true);
     try {
@@ -230,6 +280,14 @@ export default function TarotDrawPanel(props: {
           context_focus: contextFocus,
           intention,
           consultant_id: consent.mode === 'store_with_consent' ? props.consultantId ?? null : null,
+          // Astrology enrichment options
+          astrology_enrichment: astrologyOptions.enabled ? {
+            enabled: true,
+            patient_id: props.patientId,
+            include_transits: astrologyOptions.includeTransits,
+            include_progressions: astrologyOptions.includeProgressions,
+            include_solar_return: astrologyOptions.includeSolarReturn,
+          } : null,
           ...(consent.mode === 'no_store'
             ? {}
             : {
@@ -363,6 +421,17 @@ export default function TarotDrawPanel(props: {
             />
           </div>
 
+          {/* Astrology Enrichment Toggle */}
+          {props.patientId && (
+            <AstrologyEnrichmentToggle
+              hasNatalChart={hasNatalChart}
+              value={astrologyOptions}
+              onChange={handleAstrologyOptionsChange}
+              isLoading={checkingNatalChart}
+              disabled={loading}
+            />
+          )}
+
           <div className="flex items-center gap-2">
             <button
               type="button"
@@ -370,8 +439,9 @@ export default function TarotDrawPanel(props: {
               disabled={loading}
               className="inline-flex items-center rounded-md bg-emerald-600 px-3 py-2 text-sm font-medium text-white disabled:opacity-60"
             >
-              {loading ? 'Ejecutando…' : consent ? 'Ejecutar lectura' : 'Configurar consentimiento'}
+              {loading ? 'Ejecutando…' : 'Ejecutar lectura'}
             </button>
+            {/* LEGACY: Consent button removed
             {consent ? (
               <button
                 type="button"
@@ -381,6 +451,7 @@ export default function TarotDrawPanel(props: {
                 Cambiar consentimiento
               </button>
             ) : null}
+            */}
           </div>
 
           {error ? (
@@ -452,6 +523,7 @@ export default function TarotDrawPanel(props: {
         </div>
       </div>
 
+      {/* LEGACY: ConsentModal disabled
       <ConsentModal
         open={showConsent}
         onClose={() => setShowConsent(false)}
@@ -460,6 +532,7 @@ export default function TarotDrawPanel(props: {
           setShowConsent(false);
         }}
       />
+      */}
     </section>
   );
 }

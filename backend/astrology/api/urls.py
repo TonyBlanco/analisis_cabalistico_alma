@@ -17,6 +17,7 @@ from .views import (
     RelocationView,
     ArabicPartsView
 )
+from .context_summary_view import ContextSummaryView
 
 app_name = 'astrology'
 
@@ -98,5 +99,11 @@ urlpatterns = [
         'patients/<int:patient_id>/arabic-parts/',
         ArabicPartsView.as_view(),
         name='arabic-parts'
+    ),
+    # Context Summary for symbolic enrichment (Tarot/Oracle integration)
+    path(
+        'patients/<int:patient_id>/context-summary/',
+        ContextSummaryView.as_view(),
+        name='context-summary'
     ),
 ]

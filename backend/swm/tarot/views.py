@@ -94,8 +94,14 @@ class CreateWorkspaceView(APIView):
     permission_classes = [IsAuthenticated]
     
     def post(self, request):
+        # Debug logging
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info(f"[SWM Tarot] Create request data: {request.data}")
+        
         serializer = WorkspaceInstanceCreateSerializer(data=request.data)
         if not serializer.is_valid():
+            logger.error(f"[SWM Tarot] Validation failed: {serializer.errors}")
             return Response(
                 {'error': 'Validation failed', 'details': serializer.errors},
                 status=status.HTTP_400_BAD_REQUEST
@@ -118,7 +124,7 @@ class CreateWorkspaceView(APIView):
             )
             
             return Response(
-                WorkspaceInstanceSerializer(instance).data,
+                {'instance': WorkspaceInstanceSerializer(instance).data},
                 status=status.HTTP_201_CREATED
             )
             

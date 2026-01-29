@@ -1,0 +1,694 @@
+{
+  "deck": {
+    "name": "Tarot de Marsella",
+    "system": "Marsella Tradition",
+    "tradition": "French Historical",
+    "totalCards": 22,
+    "period": "15th-18th century",
+    "style": "Medieval European"
+  },
+  "majorArcana": [
+    {
+      "id": "the-fool",
+      "keyNumber": 0,
+      "name": "Le Mat",
+      "nameSpanish": "El Loco",
+      "nameEnglish": "The Fool",
+      "kabbalistic": {
+        "hebrewLetter": "Aleph (א)",
+        "letterName": "Aleph",
+        "letterValue": 1,
+        "path": 11,
+        "sefirot": ["Kether", "Chokmah"],
+        "note": "Atribución posterior por tradición hermética, no original de Marsella"
+      },
+      "symbolism": [
+        "Vagabond con bastón y hatillo sobre el hombro",
+        "Perro mordiendo la pierna representa los instintos naturales",
+        "Vestimenta de colores vivos - locura divina o locura mundana",
+        "Sin número o marcado como 0 - fuera del orden establecido",
+        "Camina hacia el precipicio - inconsciencia del peligro",
+        "Bastón representa el apoyo en el viaje",
+        "Figura errante sin rumbo fijo"
+      ],
+      "keywords": ["vagabundeo", "locura", "inocencia", "libertad", "lo inesperado", "imprudencia"],
+      "keywordsSpanish": ["vagabundeo", "locura", "inocencia", "libertad", "lo inesperado", "imprudencia"],
+      "divinatory": {
+        "traditional": "Folly, mania, extravagance, intoxication, delirium, frenzy, betrayal",
+        "modern": "New beginnings, spontaneity, free spirit, innocence, inexperience"
+      },
+      "notes": "En Marsella tradicional, no hay sistema hermético fijo. Las interpretaciones varían por escuela."
+    },
+    {
+      "id": "the-magician",
+      "keyNumber": 1,
+      "name": "Le Bateleur",
+      "nameSpanish": "El Juglar",
+      "nameEnglish": "The Magician",
+      "kabbalistic": {
+        "hebrewLetter": "Beth (ב)",
+        "letterName": "Beth",
+        "letterValue": 2,
+        "path": 12,
+        "sefirot": ["Kether", "Binah"],
+        "note": "Atribución posterior hermética"
+      },
+      "symbolism": [
+        "Juglar de feria ante una mesa con objetos diversos",
+        "Sombrero en forma de infinito o de ocho tumbado",
+        "Mesa con cubiletes, monedas, dados - instrumentos del prestidigitador",
+        "Bastón o varita en una mano",
+        "Copa o recipiente sobre la mesa",
+        "Postura de manos - una arriba, una abajo",
+        "Vestimenta de colores primarios - rojo, azul, amarillo"
+      ],
+      "keywords": ["habilidad", "destreza", "manipulación", "comercio", "engaño", "potencial"],
+      "keywordsSpanish": ["habilidad", "destreza", "manipulación", "comercio", "engaño", "potencial"],
+      "divinatory": {
+        "traditional": "Skill, diplomacy, subtlety, sickness, pain, loss, disaster, enemies",
+        "modern": "Manifestation, resourcefulness, power, inspired action"
+      },
+      "notes": "El Bateleur es un vendedor ambulante o juglar, no necesariamente un mago místico"
+    },
+    {
+      "id": "the-high-priestess",
+      "keyNumber": 2,
+      "name": "La Papesse",
+      "nameSpanish": "La Papisa",
+      "nameEnglish": "The High Priestess",
+      "kabbalistic": {
+        "hebrewLetter": "Gimel (ג)",
+        "letterName": "Gimel",
+        "letterValue": 3,
+        "path": 13,
+        "sefirot": ["Kether", "Tiphareth"],
+        "note": "Atribución posterior hermética"
+      },
+      "symbolism": [
+        "Mujer con vestimenta papal o religiosa",
+        "Tiara de tres coronas o tocado papal",
+        "Libro abierto en el regazo - las Sagradas Escrituras",
+        "Manto azul o verde",
+        "Velo que cubre parcialmente la figura",
+        "Cruz pectoral sobre el pecho",
+        "Postura sedente y contemplativa"
+      ],
+      "keywords": ["secreto", "sabiduría oculta", "religión", "doctrina", "estudio", "paciencia"],
+      "keywordsSpanish": ["secreto", "sabiduría oculta", "religión", "doctrina", "estudio", "paciencia"],
+      "divinatory": {
+        "traditional": "Secrets, mystery, silence, tenacity, hidden things, religion",
+        "modern": "Intuition, sacred knowledge, divine feminine, subconscious mind"
+      },
+      "notes": "Posiblemente representa a la legendaria Papisa Juana"
+    },
+    {
+      "id": "the-empress",
+      "keyNumber": 3,
+      "name": "L'Impératrice",
+      "nameSpanish": "La Emperatriz",
+      "nameEnglish": "The Empress",
+      "kabbalistic": {
+        "hebrewLetter": "Daleth (ד)",
+        "letterName": "Daleth",
+        "letterValue": 4,
+        "path": 14,
+        "sefirot": ["Chokmah", "Binah"],
+        "note": "Atribución posterior hermética"
+      },
+      "symbolism": [
+        "Mujer coronada sentada en trono",
+        "Escudo con águila imperial",
+        "Cetro en mano derecha - símbolo de poder temporal",
+        "Corona con doce puntas o estrellas",
+        "Manto rojo y amarillo - colores imperiales",
+        "Actitud regia y dominante",
+        "Alas en algunos mazos - protección divina"
+      ],
+      "keywords": ["poder", "abundancia", "creatividad", "fertilidad", "autoridad femenina", "madre"],
+      "keywordsSpanish": ["poder", "abundancia", "creatividad", "fertilidad", "autoridad femenina", "madre"],
+      "divinatory": {
+        "traditional": "Fruitfulness, action, initiative, length of days, the unknown, clandestine, difficulty",
+        "modern": "Abundance, nurturing, fertility, beauty, nature, motherhood"
+      },
+      "notes": "Representa el poder temporal femenino y la fertilidad"
+    },
+    {
+      "id": "the-emperor",
+      "keyNumber": 4,
+      "name": "L'Empereur",
+      "nameSpanish": "El Emperador",
+      "nameEnglish": "The Emperor",
+      "kabbalistic": {
+        "hebrewLetter": "Heh (ה)",
+        "letterName": "Heh",
+        "letterValue": 5,
+        "path": 15,
+        "sefirot": ["Chokmah", "Tiphareth"],
+        "note": "Atribución posterior hermética"
+      },
+      "symbolism": [
+        "Hombre barbado con corona imperial",
+        "Sentado en trono de piedra",
+        "Cetro en mano derecha",
+        "Escudo con águila a su lado",
+        "Piernas cruzadas formando el número 4",
+        "Armadura visible bajo el manto",
+        "Expresión severa y autoritaria"
+      ],
+      "keywords": ["autoridad", "poder masculino", "estructura", "padre", "ley", "dominio"],
+      "keywordsSpanish": ["autoridad", "poder masculino", "estructura", "padre", "ley", "dominio"],
+      "divinatory": {
+        "traditional": "Stability, power, protection, realization, aid, reason, conviction, authority",
+        "modern": "Authority, father figure, structure, control, leadership"
+      },
+      "notes": "Complemento masculino de la Emperatriz, representa el poder temporal masculino"
+    },
+    {
+      "id": "the-hierophant",
+      "keyNumber": 5,
+      "name": "Le Pape",
+      "nameSpanish": "El Papa",
+      "nameEnglish": "The Hierophant",
+      "kabbalistic": {
+        "hebrewLetter": "Vav (ו)",
+        "letterName": "Vav",
+        "letterValue": 6,
+        "path": 16,
+        "sefirot": ["Chokmah", "Chesed"],
+        "note": "Atribución posterior hermética"
+      },
+      "symbolism": [
+        "Papa sentado entre dos columnas",
+        "Tiara triple coronando la cabeza",
+        "Mano derecha levantada en bendición",
+        "Cruz de tres travesaños (cruz papal)",
+        "Dos monjes o acólitos arrodillados",
+        "Llaves cruzadas a los pies",
+        "Vestimenta papal completa"
+      ],
+      "keywords": ["religión", "tradición", "enseñanza", "ortodoxia", "espiritualidad institucional", "consejo"],
+      "keywordsSpanish": ["religión", "tradición", "enseñanza", "ortodoxia", "espiritualidad institucional", "consejo"],
+      "divinatory": {
+        "traditional": "Marriage, alliance, servitude, mercy, goodness, inspiration, the confessor",
+        "modern": "Spiritual wisdom, religious beliefs, conformity, tradition, institutions"
+      },
+      "notes": "Representa el poder espiritual y la ortodoxia religiosa"
+    },
+    {
+      "id": "the-lovers",
+      "keyNumber": 6,
+      "name": "L'Amoureux",
+      "nameSpanish": "Los Enamorados",
+      "nameEnglish": "The Lovers",
+      "kabbalistic": {
+        "hebrewLetter": "Zain (ז)",
+        "letterName": "Zain",
+        "letterValue": 7,
+        "path": 17,
+        "sefirot": ["Binah", "Tiphareth"],
+        "note": "Atribución posterior hermética"
+      },
+      "symbolism": [
+        "Joven entre dos mujeres - elección entre dos caminos",
+        "Cupido o ángel apuntando con flecha desde arriba",
+        "Una mujer virtuosa a la derecha",
+        "Una mujer tentadora a la izquierda",
+        "Sol radiante en el cielo",
+        "Encrucijada de caminos",
+        "Decisión moral representada visualmente"
+      ],
+      "keywords": ["elección", "amor", "tentación", "decisión", "unión", "dualidad"],
+      "keywordsSpanish": ["elección", "amor", "tentación", "decisión", "unión", "dualidad"],
+      "divinatory": {
+        "traditional": "Attraction, love, beauty, trials overcome, choice between virtue and vice",
+        "modern": "Love, relationships, values alignment, important choices"
+      },
+      "notes": "En Marsella tradicional, enfatiza la elección moral más que el amor romántico"
+    },
+    {
+      "id": "the-chariot",
+      "keyNumber": 7,
+      "name": "Le Chariot",
+      "nameSpanish": "El Carro",
+      "nameEnglish": "The Chariot",
+      "kabbalistic": {
+        "hebrewLetter": "Cheth (ח)",
+        "letterName": "Cheth",
+        "letterValue": 8,
+        "path": 18,
+        "sefirot": ["Binah", "Geburah"],
+        "note": "Atribución posterior hermética"
+      },
+      "symbolism": [
+        "Príncipe o guerrero en carro triunfal",
+        "Corona en la cabeza del conductor",
+        "Cetro o espada en alto",
+        "Dos caballos o esfinges - uno blanco, uno negro",
+        "Dosel estrellado sobre el carro",
+        "Armadura o coraza del guerrero",
+        "Expresión de victoria y determinación"
+      ],
+      "keywords": ["victoria", "triunfo", "control", "determinación", "conquista", "voluntad"],
+      "keywordsSpanish": ["victoria", "triunfo", "control", "determinación", "conquista", "voluntad"],
+      "divinatory": {
+        "traditional": "Succour, providence, war, triumph, presumption, vengeance, trouble",
+        "modern": "Control, willpower, success, action, determination"
+      },
+      "notes": "Representa el triunfo mediante la voluntad y el control de fuerzas opuestas"
+    },
+    {
+      "id": "justice",
+      "keyNumber": 8,
+      "name": "La Justice",
+      "nameSpanish": "La Justicia",
+      "nameEnglish": "Justice",
+      "kabbalistic": {
+        "hebrewLetter": "Lamed (ל)",
+        "letterName": "Lamed",
+        "letterValue": 30,
+        "path": 22,
+        "sefirot": ["Geburah", "Tiphareth"],
+        "note": "Atribución posterior hermética"
+      },
+      "symbolism": [
+        "Mujer sentada con balanza y espada",
+        "Balanza sostenida en mano izquierda",
+        "Espada erecta en mano derecha",
+        "Corona en la cabeza",
+        "Trono entre dos columnas",
+        "Expresión imparcial y severa",
+        "Vestimenta roja y azul - pasión templada por razón"
+      ],
+      "keywords": ["justicia", "equilibrio", "verdad", "ley", "karma", "decisión justa"],
+      "keywordsSpanish": ["justicia", "equilibrio", "verdad", "ley", "karma", "decisión justa"],
+      "divinatory": {
+        "traditional": "Equity, rightness, probity, executive, triumph of deserving side in law",
+        "modern": "Justice, fairness, truth, cause and effect, law"
+      },
+      "notes": "En Marsella, la Justicia es carta 8 (en Rider-Waite es 11 por cambio de Waite)"
+    },
+    {
+      "id": "the-hermit",
+      "keyNumber": 9,
+      "name": "L'Hermite",
+      "nameSpanish": "El Ermitaño",
+      "nameEnglish": "The Hermit",
+      "kabbalistic": {
+        "hebrewLetter": "Yod (י)",
+        "letterName": "Yod",
+        "letterValue": 10,
+        "path": 20,
+        "sefirot": ["Chesed", "Tiphareth"],
+        "note": "Atribución posterior hermética"
+      },
+      "symbolism": [
+        "Anciano con larga barba y bastón",
+        "Manto con capucha que cubre casi todo el cuerpo",
+        "Linterna sostenida en alto",
+        "Caminando solo por paisaje desolado",
+        "Bastón de peregrino como apoyo",
+        "Postura encorvada por la edad y sabiduría",
+        "Búsqueda solitaria de la verdad"
+      ],
+      "keywords": ["soledad", "búsqueda", "sabiduría", "introspección", "prudencia", "retiro"],
+      "keywordsSpanish": ["soledad", "búsqueda", "sabiduría", "introspección", "prudencia", "retiro"],
+      "divinatory": {
+        "traditional": "Prudence, circumspection, treason, dissimulation, roguery, corruption",
+        "modern": "Soul searching, introspection, being alone, inner guidance"
+      },
+      "notes": "Representa la búsqueda de la verdad mediante el retiro y la contemplación"
+    },
+    {
+      "id": "wheel-of-fortune",
+      "keyNumber": 10,
+      "name": "La Roue de Fortune",
+      "nameSpanish": "La Rueda de la Fortuna",
+      "nameEnglish": "Wheel of Fortune",
+      "kabbalistic": {
+        "hebrewLetter": "Kaph (כ)",
+        "letterName": "Kaph",
+        "letterValue": 20,
+        "path": 21,
+        "sefirot": ["Chesed", "Netzach"],
+        "note": "Atribución posterior hermética"
+      },
+      "symbolism": [
+        "Rueda grande con manivela",
+        "Criaturas subiendo y bajando por la rueda",
+        "Figura coronada en la cima - gloria temporal",
+        "Figura cayendo a un lado - caída de la fortuna",
+        "Animal o demonio trepando - ascenso de la suerte",
+        "Esfinge con espada en la cima en algunos mazos",
+        "Ciclos eternos de subida y bajada"
+      ],
+      "keywords": ["destino", "fortuna", "ciclos", "cambio", "karma", "suerte variable"],
+      "keywordsSpanish": ["destino", "fortuna", "ciclos", "cambio", "karma", "suerte variable"],
+      "divinatory": {
+        "traditional": "Destiny, fortune, success, elevation, luck, felicity",
+        "modern": "Good luck, karma, life cycles, destiny, turning point"
+      },
+      "notes": "Representa los ciclos inevitables de la fortuna - lo que sube debe bajar"
+    },
+    {
+      "id": "strength",
+      "keyNumber": 11,
+      "name": "La Force",
+      "nameSpanish": "La Fuerza",
+      "nameEnglish": "Strength",
+      "kabbalistic": {
+        "hebrewLetter": "Teth (ט)",
+        "letterName": "Teth",
+        "letterValue": 9,
+        "path": 19,
+        "sefirot": ["Chesed", "Geburah"],
+        "note": "Atribución posterior hermética"
+      },
+      "symbolism": [
+        "Mujer abriendo o cerrando las fauces de un león",
+        "Sombrero en forma de infinito o lemniscata",
+        "León domesticado por la fuerza tranquila",
+        "Expresión serena de la mujer",
+        "Control de la bestia sin violencia",
+        "Vestido sencillo de colores vivos",
+        "Fuerza moral dominando fuerza bruta"
+      ],
+      "keywords": ["fuerza", "coraje", "paciencia", "compasión", "dominio", "control interior"],
+      "keywordsSpanish": ["fuerza", "coraje", "paciencia", "compasión", "dominio", "control interior"],
+      "divinatory": {
+        "traditional": "Power, energy, action, courage, magnanimity, complete success",
+        "modern": "Strength, courage, persuasion, influence, compassion"
+      },
+      "notes": "En Marsella, La Force es carta 11 (en Rider-Waite es 8 por cambio de Waite)"
+    },
+    {
+      "id": "the-hanged-man",
+      "keyNumber": 12,
+      "name": "Le Pendu",
+      "nameSpanish": "El Colgado",
+      "nameEnglish": "The Hanged Man",
+      "kabbalistic": {
+        "hebrewLetter": "Mem (מ)",
+        "letterName": "Mem",
+        "letterValue": 40,
+        "path": 23,
+        "sefirot": ["Geburah", "Hod"],
+        "note": "Atribución posterior hermética"
+      },
+      "symbolism": [
+        "Hombre suspendido por un pie de una horca en T",
+        "Pierna libre cruzada detrás de la pierna atada",
+        "Manos atadas o detrás de la espalda",
+        "Expresión tranquila o pensativa",
+        "Cabeza abajo, mundo al revés",
+        "Árbol vivo con hojas en algunos mazos",
+        "Sacrificio voluntario o castigo"
+      ],
+      "keywords": ["sacrificio", "suspensión", "espera", "perspectiva invertida", "martirio", "rendición"],
+      "keywordsSpanish": ["sacrificio", "suspensión", "espera", "perspectiva invertida", "martirio", "rendición"],
+      "divinatory": {
+        "traditional": "Wisdom, trials, sacrifice, intuition, divination, prophecy",
+        "modern": "Suspension, letting go, sacrifice, new perspective"
+      },
+      "notes": "Representa el sacrificio necesario y la sabiduría adquirida mediante la suspensión"
+    },
+    {
+      "id": "death",
+      "keyNumber": 13,
+      "name": "L'Arcane sans Nom",
+      "nameSpanish": "El Arcano sin Nombre (La Muerte)",
+      "nameEnglish": "Death",
+      "kabbalistic": {
+        "hebrewLetter": "Nun (נ)",
+        "letterName": "Nun",
+        "letterValue": 50,
+        "path": 24,
+        "sefirot": ["Tiphareth", "Netzach"],
+        "note": "Atribución posterior hermética"
+      },
+      "symbolism": [
+        "Esqueleto con guadaña segando en campo",
+        "Cabezas y miembros cortados brotando del suelo",
+        "Manos y pies de reyes y pobres por igual",
+        "Hierba o flores creciendo de los restos",
+        "A menudo sin título en mazos tradicionales",
+        "Movimiento inexorable del segador",
+        "Igualdad ante la muerte"
+      ],
+      "keywords": ["transformación", "final", "cambio radical", "muerte", "renacimiento", "igualdad"],
+      "keywordsSpanish": ["transformación", "final", "cambio radical", "muerte", "renacimiento", "igualdad"],
+      "divinatory": {
+        "traditional": "End, mortality, destruction, corruption",
+        "modern": "Endings, change, transformation, transition"
+      },
+      "notes": "Tradicionalmente sin nombre en Marsella por superstición. Representa transformación inevitable."
+    },
+    {
+      "id": "temperance",
+      "keyNumber": 14,
+      "name": "Tempérance",
+      "nameSpanish": "La Templanza",
+      "nameEnglish": "Temperance",
+      "kabbalistic": {
+        "hebrewLetter": "Samekh (ס)",
+        "letterName": "Samekh",
+        "letterValue": 60,
+        "path": 25,
+        "sefirot": ["Tiphareth", "Yesod"],
+        "note": "Atribución posterior hermética"
+      },
+      "symbolism": [
+        "Ángel vertiendo líquido entre dos jarras",
+        "Alas grandes del ángel",
+        "Flujo continuo de agua o vino entre recipientes",
+        "Una jarra elevada, otra baja",
+        "Vestidura colorida del ángel",
+        "Equilibrio en el acto de verter",
+        "Mezcla y templanza de elementos"
+      ],
+      "keywords": ["equilibrio", "moderación", "paciencia", "mezcla", "alquimia", "templanza"],
+      "keywordsSpanish": ["equilibrio", "moderación", "paciencia", "mezcla", "alquimia", "templanza"],
+      "divinatory": {
+        "traditional": "Economy, moderation, frugality, management, accommodation",
+        "modern": "Balance, moderation, patience, purpose, meaning"
+      },
+      "notes": "Representa la moderación y el equilibrio necesario en todas las cosas"
+    },
+    {
+      "id": "the-devil",
+      "keyNumber": 15,
+      "name": "Le Diable",
+      "nameSpanish": "El Diablo",
+      "nameEnglish": "The Devil",
+      "kabbalistic": {
+        "hebrewLetter": "Ayin (ע)",
+        "letterName": "Ayin",
+        "letterValue": 70,
+        "path": 26,
+        "sefirot": ["Tiphareth", "Hod"],
+        "note": "Atribución posterior hermética"
+      },
+      "symbolism": [
+        "Figura demoníaca con alas de murciélago",
+        "Cuernos en la cabeza",
+        "Dos figuras humanas encadenadas a pedestal",
+        "Cola y atributos animales",
+        "Cadenas sueltas - esclavitud voluntaria",
+        "Expresión grotesca o bestial",
+        "Inversión de valores espirituales"
+      ],
+      "keywords": ["tentación", "materialismo", "esclavitud", "pasiones", "sombra", "atadura"],
+      "keywordsSpanish": ["tentación", "materialismo", "esclavitud", "pasiones", "sombra", "atadura"],
+      "divinatory": {
+        "traditional": "Ravage, violence, force, fatality, predestination",
+        "modern": "Shadow self, attachment, addiction, sexuality, materialism"
+      },
+      "notes": "Representa las ataduras materiales y las pasiones que esclavizan"
+    },
+    {
+      "id": "the-tower",
+      "keyNumber": 16,
+      "name": "La Maison Dieu",
+      "nameSpanish": "La Casa de Dios (La Torre)",
+      "nameEnglish": "The Tower",
+      "kabbalistic": {
+        "hebrewLetter": "Peh (פ)",
+        "letterName": "Peh",
+        "letterValue": 80,
+        "path": 27,
+        "sefirot": ["Netzach", "Hod"],
+        "note": "Atribución posterior hermética"
+      },
+      "symbolism": [
+        "Torre siendo destruida por rayo o fuego celeste",
+        "Corona cayendo de la cima",
+        "Dos o más figuras precipitándose al vacío",
+        "Llamas saliendo de ventanas y puertas",
+        "Rayos descendiendo del cielo",
+        "Destrucción súbita e inevitable",
+        "Construcción humana derribada por fuerza divina"
+      ],
+      "keywords": ["destrucción", "caos", "caída", "revelación súbita", "colapso", "catástrofe"],
+      "keywordsSpanish": ["destrucción", "caos", "caída", "revelación súbita", "colapso", "catástrofe"],
+      "divinatory": {
+        "traditional": "Misery, distress, indigence, adversity, calamity, unforeseen catastrophe",
+        "modern": "Sudden change, upheaval, chaos, revelation, awakening"
+      },
+      "notes": "La Maison Dieu - representa el orgullo humano derribado por intervención divina"
+    },
+    {
+      "id": "the-star",
+      "keyNumber": 17,
+      "name": "L'Étoile",
+      "nameSpanish": "La Estrella",
+      "nameEnglish": "The Star",
+      "kabbalistic": {
+        "hebrewLetter": "Tzaddi (צ)",
+        "letterName": "Tzaddi",
+        "letterValue": 90,
+        "path": 28,
+        "sefirot": ["Netzach", "Yesod"],
+        "note": "Atribución posterior hermética"
+      },
+      "symbolism": [
+        "Mujer desnuda arrodillada junto al agua",
+        "Vertiendo agua de dos jarras - una al río, otra a la tierra",
+        "Gran estrella central rodeada de siete estrellas menores",
+        "Árbol con pájaro posado",
+        "Desnudez representa verdad y transparencia",
+        "Agua nutriendo tierra y mar",
+        "Esperanza y renovación tras la destrucción"
+      ],
+      "keywords": ["esperanza", "inspiración", "serenidad", "guía", "renovación", "fe"],
+      "keywordsSpanish": ["esperanza", "inspiración", "serenidad", "guía", "renovación", "fe"],
+      "divinatory": {
+        "traditional": "Loss, theft, privation, abandonment; also hope and bright prospects",
+        "modern": "Hope, faith, purpose, renewal, spirituality"
+      },
+      "notes": "Representa la esperanza y guía divina tras la catástrofe de la Torre"
+    },
+    {
+      "id": "the-moon",
+      "keyNumber": 18,
+      "name": "La Lune",
+      "nameSpanish": "La Luna",
+      "nameEnglish": "The Moon",
+      "kabbalistic": {
+        "hebrewLetter": "Qoph (ק)",
+        "letterName": "Qoph",
+        "letterValue": 100,
+        "path": 29,
+        "sefirot": ["Netzach", "Malkuth"],
+        "note": "Atribución posterior hermética"
+      },
+      "symbolism": [
+        "Luna creciente o llena con rostro",
+        "Perro y lobo aullando a la luna",
+        "Cangrejo o langosta emergiendo del agua",
+        "Camino entre dos torres hacia el horizonte",
+        "Gotas de sangre o rocío cayendo de la luna",
+        "Paisaje nocturno misterioso",
+        "Aguas turbulentas o estancadas"
+      ],
+      "keywords": ["ilusión", "engaño", "miedo", "subconsciente", "sueños", "confusión"],
+      "keywordsSpanish": ["ilusión", "engaño", "miedo", "subconsciente", "sueños", "confusión"],
+      "divinatory": {
+        "traditional": "Hidden enemies, danger, calumny, darkness, terror, deception, error",
+        "modern": "Illusion, fear, anxiety, subconscious, intuition"
+      },
+      "notes": "Representa el mundo de las ilusiones, miedos y el inconsciente"
+    },
+    {
+      "id": "the-sun",
+      "keyNumber": 19,
+      "name": "Le Soleil",
+      "nameSpanish": "El Sol",
+      "nameEnglish": "The Sun",
+      "kabbalistic": {
+        "hebrewLetter": "Resh (ר)",
+        "letterName": "Resh",
+        "letterValue": 200,
+        "path": 30,
+        "sefirot": ["Hod", "Yesod"],
+        "note": "Atribución posterior hermética"
+      },
+      "symbolism": [
+        "Sol radiante con rostro sonriente",
+        "Dos niños o gemelos desnudos abrazados",
+        "Muro bajo separando jardín del mundo exterior",
+        "Rayos solares alternados rectos y ondulados",
+        "Gotas de luz cayendo como lluvia dorada",
+        "Inocencia y alegría infantil",
+        "Luz que disipa las sombras de la Luna"
+      ],
+      "keywords": ["alegría", "éxito", "vitalidad", "claridad", "inocencia", "luz"],
+      "keywordsSpanish": ["alegría", "éxito", "vitalidad", "claridad", "inocencia", "luz"],
+      "divinatory": {
+        "traditional": "Material happiness, fortunate marriage, contentment",
+        "modern": "Success, positivity, fun, warmth, optimism, vitality"
+      },
+      "notes": "Representa la alegría, claridad y éxito tras superar las pruebas"
+    },
+    {
+      "id": "judgement",
+      "keyNumber": 20,
+      "name": "Le Jugement",
+      "nameSpanish": "El Juicio",
+      "nameEnglish": "Judgement",
+      "kabbalistic": {
+        "hebrewLetter": "Shin (ש)",
+        "letterName": "Shin",
+        "letterValue": 300,
+        "path": 31,
+        "sefirot": ["Hod", "Malkuth"],
+        "note": "Atribución posterior hermética"
+      },
+      "symbolism": [
+        "Ángel tocando trompeta en las nubes",
+        "Muertos levantándose de tumbas o ataúdes",
+        "Hombre, mujer y niño - familia resucitando",
+        "Cruz o estandarte en la trompeta",
+        "Llamado al juicio final",
+        "Resurrección de los muertos",
+        "Despertar a nueva vida o conciencia"
+      ],
+      "keywords": ["juicio", "despertar", "renovación", "absolución", "llamado", "resurrección"],
+      "keywordsSpanish": ["juicio", "despertar", "renovación", "absolución", "llamado", "resurrección"],
+      "divinatory": {
+        "traditional": "Change of position, renewal, outcome",
+        "modern": "Judgement, rebirth, inner calling, absolution"
+      },
+      "notes": "Representa el juicio final, renovación y despertar a nueva conciencia"
+    },
+    {
+      "id": "the-world",
+      "keyNumber": 21,
+      "name": "Le Monde",
+      "nameSpanish": "El Mundo",
+      "nameEnglish": "The World",
+      "kabbalistic": {
+        "hebrewLetter": "Tav (ת)",
+        "letterName": "Tav",
+        "letterValue": 400,
+        "path": 32,
+        "sefirot": ["Yesod", "Malkuth"],
+        "note": "Atribución posterior hermética"
+      },
+      "symbolism": [
+        "Figura danzante en corona de laurel ovalada",
+        "Varas o bastones en ambas manos",
+        "Velo púrpura cubriendo parcialmente la figura",
+        "Cuatro figuras en esquinas - ángel, águila, león, toro",
+        "Corona vegetal representa victoria y realización",
+        "Danza cósmica de la completitud",
+        "Unión de todos los elementos y logro final"
+      ],
+      "keywords": ["completitud", "realización", "totalidad", "éxito", "integración", "mundo"],
+      "keywordsSpanish": ["completitud", "realización", "totalidad", "éxito", "integración", "mundo"],
+      "divinatory": {
+        "traditional": "Assured success, recompense, voyage, route, emigration, change of place",
+        "modern": "Completion, integration, accomplishment, travel, fulfillment"
+      },
+      "notes": "Representa la culminación del viaje del Loco a través de todos los arcanos"
+    }
+  ]
+}

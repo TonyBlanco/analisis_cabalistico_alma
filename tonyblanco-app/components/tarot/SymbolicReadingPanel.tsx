@@ -81,6 +81,12 @@ export default function SymbolicReadingPanel({ systemLabel, selectedCard, contex
   const cardName = (selectedCard?.card?.nameSpanish || selectedCard?.card?.name || '').trim();
   const extracted = extractSelectedReading(selectedCard);
   const symbols = selectedCard?.symbols && typeof selectedCard.symbols === 'object' ? (selectedCard.symbols as any) : null;
+  
+  // NEW: Extract kabbalistic_details from card
+  const kabbalah = selectedCard?.kabbalistic_details && typeof selectedCard.kabbalistic_details === 'object' 
+    ? (selectedCard.kabbalistic_details as any) 
+    : null;
+  
   const systemId = (symbols?.system || '').toString().toLowerCase();
   const isBota = systemId === 'bota' || (systemLabel || '').toLowerCase().includes('b.o.t.a');
   const orientationKey = selectedCard?.reversed ? 'reversed' : 'upright';
@@ -395,6 +401,30 @@ export default function SymbolicReadingPanel({ systemLabel, selectedCard, contex
             <div className="mt-1 text-sm text-slate-700">{isBota ? '—' : FIELD_FALLBACK}</div>
           )}
         </div>
+
+        {/* Kabbalistic Data Section */}
+        {kabbalah && (
+          <div className="rounded-md border border-purple-200 bg-purple-50 p-3">
+            <div className="text-xs font-medium text-purple-900">Datos Cabalísticos</div>
+            <div className="mt-2 grid gap-2 text-sm text-slate-700">
+              <div className="flex items-center gap-2">
+                <span className="text-lg text-purple-700">{kabbalah.hebrew_letter || '-'}</span>
+                <span className="text-xs text-slate-600">{kabbalah.letter_name || '-'}</span>
+              </div>
+              <div className="text-xs">
+                <span className="font-medium text-slate-700">Gematria:</span> {kabbalah.gematria ?? '-'}
+              </div>
+              <div className="text-xs">
+                <span className="font-medium text-slate-700">Sendero:</span> {kabbalah.path ?? '-'}
+              </div>
+              {kabbalah.sefirot && Array.isArray(kabbalah.sefirot) && kabbalah.sefirot.length > 0 && (
+                <div className="text-xs">
+                  <span className="font-medium text-slate-700">Sefirot:</span> {kabbalah.sefirot.join(' → ')}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );

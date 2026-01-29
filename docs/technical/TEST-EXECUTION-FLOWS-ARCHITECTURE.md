@@ -119,6 +119,23 @@ TEST_EXECUTION_MODE_MAP: Record<string, TestExecutionMode>
 
 ## 🎨 Separación en UI
 
+### Caso especial: Auditoría de Armonía Sefirótica (SHA)
+
+- Tipo de flujo: híbrido `patient_self` + revisión terapéutica. El paciente completa, el terapeuta valida y sella.
+- Asignación: se asigna como tarea al paciente (aparece en su portal con guía breve y campos simples). No se sella automáticamente.
+- Estados propuestos:
+   - `assigned` → `in_progress` (paciente edita) → `submitted` (pendiente de revisión) → `sealed` (solo terapeuta) → `reviewed`.
+- Artefactos:
+   - Principal (obligatorio): balance Misericordia/Severidad + integración emocional + recomendación breve.
+   - Notas del terapeuta (histórico de entradas).
+   - Guía consultante (opcional, reducida) si `share_with_consultant=true`.
+- Visibilidad:
+   - Por defecto solo terapeuta. El paciente ve la tarea y, tras enviar, el acuse “En revisión”.
+   - La guía consultante solo se expone si el terapeuta la activa en el sellado.
+- Validaciones:
+   - Sellado requiere artefacto principal con contenido > 0.
+   - Se excluyen `cancelled` de listados por defecto.
+
 ### Dashboard del Terapeuta
 
 **Sidebar Separado:**

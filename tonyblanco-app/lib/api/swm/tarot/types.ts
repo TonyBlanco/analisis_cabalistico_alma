@@ -276,7 +276,8 @@ export interface ReviewWorkspaceResponse {
 }
 
 export interface ListWorkspacesResponse {
-  workspaces: WorkspaceInstanceList[];
+  count: number;
+  results: WorkspaceInstanceList[];
 }
 
 export interface ArtifactsResponse {

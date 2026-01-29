@@ -366,6 +366,9 @@ urlpatterns = [
     
     # SWM Transgeneracional Profundo (Psychogenealogy Workspace)
     path('swm/transgenerational/', include('swm.transgenerational.urls', namespace='swm_transgenerational')),
+
+    # SWM Auditoría de Armonía Sefirótica (SHA)
+    path('swm/sha/', include('swm.sha.urls', namespace='swm_sha')),
     
     # Active Inquiry Engine (Patient context collection)
     path('inquiry/', include('api.inquiry.urls')),

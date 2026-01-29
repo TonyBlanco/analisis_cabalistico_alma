@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'swm.tarot',        # SWM Tarot Evolutivo (Symbolic Tarot Workspace)
     'swm.cabala',       # SWM Cábala Aplicada (Tree of Life Workspace)
     'swm.transgenerational',  # SWM Transgeneracional Profundo (Psychogenealogy Workspace)
+    'swm.sha',          # SWM Auditoría de Armonía Sefirótica (SHA)
     'api.inquiry',            # Active Inquiry Engine (Patient context collection)
     # Symbolic systems (Python implementations)
     'symbolic.swm_v3',  # SWM v3 governed symbolic readings (Phase 3)

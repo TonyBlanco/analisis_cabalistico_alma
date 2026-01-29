@@ -125,8 +125,13 @@ export const swmTarotApi = {
     const response = await fetch(url, {
       headers: getAuthHeaders(token),
     });
-    const result = await handleResponse<ListWorkspacesResponse>(response);
-    return result.workspaces;
+    const result = await handleResponse<
+      ListWorkspacesResponse | WorkspaceInstanceList[]
+    >(response);
+    if (Array.isArray(result)) {
+      return result;
+    }
+    return result.results ?? result.workspaces ?? [];
   },
 
   /**

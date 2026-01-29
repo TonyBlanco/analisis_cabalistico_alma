@@ -4,6 +4,14 @@ import type { NextRequest } from 'next/server';
 export function middleware(request: NextRequest) {
     const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
 
+    const sanitizedPath = request.nextUrl.pathname.replace(/\/\([^/]+\)/g, '');
+    const canonicalPath = sanitizedPath.replace(/\/{2,}/g, '/') || '/';
+    if (canonicalPath !== request.nextUrl.pathname) {
+        const redirectUrl = request.nextUrl.clone();
+        redirectUrl.pathname = canonicalPath;
+        return NextResponse.redirect(redirectUrl);
+    }
+
     // Define CSP policies
     // Note: We include 'unsafe-inline' for now to ensure compatibility with existing components that might use it,
     // but we aim for a more restrictive policy later once verified.

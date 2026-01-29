@@ -1,75 +1,104 @@
-export type ToolGroupId =
-  | 'observation'
-  | 'evaluation'
-  | 'symbolic'
-  | 'history'
-  | 'resources';
+import type { PanelDefinition } from './types';
 
-export type ToolId =
-  | 'bioemotional'
-  | 'tree-of-life'
-  | 'hypotheses'
-  | 'history'
-  | 'kabbalah'
-  | 'resources';
-  
-// NOTE: 'notes' is intentionally omitted from the runtime registry
-// because notes panel is provided by the central workspace context map.
-// Including in the type union keeps call sites like `openPanel('notes')`
-// type-safe without reintroducing a runtime tool entry here.
-export type ExtendedToolId = ToolId | 'notes';
-
-export interface ToolDefinition {
-  id: ToolId;
-  label: string;
-  description: string;
-  summary: string;
-  group: ToolGroupId;
-}
-
-export const toolRegistry: ToolDefinition[] = [
-  // REMOVED: 'overview', 'notes', 'tests' - ya están en el Context Map del workspace central
-
+export const panelRegistry: PanelDefinition[] = [
+  {
+    id: 'overview',
+    type: 'observation',
+    title: 'Resumen',
+    description: 'Contexto situacional en una mirada.',
+    summary: 'Un resumen calmado para orientar la observacion.',
+    closable: true,
+    collapsible: true,
+    component: PanelText,
+  },
+  {
+    id: 'notes',
+    type: 'observation',
+    title: 'Notas integrativas',
+    description: 'Notas humanas y reflexiones.',
+    summary: 'Notas manuales y consultivas, sin automatizacion.',
+    closable: true,
+    collapsible: true,
+    component: PanelText,
+  },
+  {
+    id: 'assignedTests',
+    type: 'analysis',
+    title: 'Tests asignados',
+    description: 'Estado en solo lectura.',
+    summary: 'Referencia secundaria sin salir del espacio clinico.',
+    closable: true,
+    collapsible: true,
+    component: PanelText,
+  },
   {
     id: 'bioemotional',
-    label: 'Bio-Emocional',
-    description: 'Workspace de observación simbólica.',
-    summary: 'Abre el workspace completo de Bio-Emoción.',
-    group: 'symbolic',
+    type: 'symbolic',
+    title: 'Bio-Emocion',
+    description: 'Observaciones simbolicas consultivas.',
+    summary: 'Capa de referencia simbolica y relacional.',
+    closable: true,
+    collapsible: true,
+    component: PanelText,
   },
   {
-    id: 'tree-of-life',
-    label: 'Árbol de la Vida',
-    description: 'Workspace de Cábala aplicada.',
-    summary: 'Abre el workspace completo de Cábala.',
-    group: 'symbolic',
+    id: 'treeOfLife',
+    type: 'symbolic',
+    title: 'Arbol de la Vida',
+    description: 'Estructura simbolica para reflexion.',
+    summary: 'Apoyo simbolico sin conclusiones.',
+    closable: true,
+    collapsible: true,
+    component: PanelText,
   },
   {
-    id: 'hypotheses',
-    label: 'Transgeneracional',
-    description: 'Workspace de hipótesis de linaje.',
-    summary: 'Abre el workspace completo de Transgeneracional.',
-    group: 'symbolic',
+    id: 'transgenerational',
+    type: 'symbolic',
+    title: 'Transgeneracional',
+    description: 'Notas humanas y linaje.',
+    summary: 'Observaciones humanas sin interpretacion automatica.',
+    closable: true,
+    collapsible: true,
+    component: PanelText,
   },
   {
     id: 'history',
-    label: 'Historial',
-    description: 'Línea temporal longitudinal.',
-    summary: 'Mantén continuidad sin salir del espacio clínico.',
-    group: 'history',
+    type: 'history',
+    title: 'Historial',
+    description: 'Linea longitudinal.',
+    summary: 'Continuidad sin salir del espacio clinico.',
+    closable: true,
+    collapsible: true,
+    component: PanelText,
   },
   {
     id: 'kabbalah',
-    label: 'Cábala',
-    description: 'Herramientas simbólicas para reflexión.',
-    summary: 'Referencia contextual para análisis simbólico.',
-    group: 'resources',
+    type: 'resource',
+    title: 'Cabala',
+    description: 'Herramientas simbolicas de reflexion.',
+    summary: 'Referencia contextual para herramientas simbolicas.',
+    closable: true,
+    collapsible: true,
+    component: PanelText,
   },
   {
     id: 'resources',
-    label: 'Recursos',
-    description: 'Materiales de referencia.',
-    summary: 'Mantén referencias cerca sin romper la atención.',
-    group: 'resources',
+    type: 'resource',
+    title: 'Recursos',
+    description: 'Material de referencia.',
+    summary: 'Referencia cercana sin interrumpir la atencion.',
+    closable: true,
+    collapsible: true,
+    component: PanelText,
   },
 ];
+
+function PanelText() {
+  return (
+    <div className="space-y-2">
+      <p className="text-xs text-gray-600">
+        Contenido consultivo. Sin automatizacion ni diagnostico.
+      </p>
+    </div>
+  );
+}

@@ -1,86 +1,86 @@
-> ΓÜá∩╕Å DOCUMENTO HIST├ôRICO / LEGACY  
-> Este documento describe un sistema anterior de tests con membres├¡as.  
-> NO es aplicable al sistema cl├¡nico actual (ver AUDITORIA CABALA APP 12182025.md).
+> ⚠️ DOCUMENTO HISTÓRICO / LEGACY  
+> Este documento describe un sistema anterior de tests con membresías.  
+> NO es aplicable al sistema clínico actual (ver AUDITORIA CABALA APP 12182025.md).
 
 # Sistema de Tests Modulares
 
-Sistema completo de tests cabal├¡sticos modulares con control de acceso basado en membres├¡a.
+Sistema completo de tests cabalísticos modulares con control de acceso basado en membresía.
 
-## ≡ƒôï Estructura del Sistema
+## 📋 Estructura del Sistema
 
 ### Modelos de Base de Datos
 
 #### TestModule
-M├│dulos de tests disponibles en la plataforma.
+Módulos de tests disponibles en la plataforma.
 
 **Campos principales:**
-- `code`: C├│digo ├║nico del test (ej: 'basic-analysis')
+- `code`: Código único del test (ej: 'basic-analysis')
 - `name`: Nombre del test
-- `description`: Descripci├│n del test
+- `description`: Descripción del test
 - `test_type`: Tipo de test (basic, numerology, compatibility, etc.)
-- `required_access_level`: Nivel m├¡nimo requerido (free, personal, professional, premium)
-- `uses_per_month`: L├¡mite mensual de usos (null = ilimitado)
-- `is_active`: Si el test est├í activo
-- `available_for_therapists`: Si est├í disponible para terapeutas
-- `available_for_personal`: Si est├í disponible para usuarios personales
+- `required_access_level`: Nivel mínimo requerido (free, personal, professional, premium)
+- `uses_per_month`: Límite mensual de usos (null = ilimitado)
+- `is_active`: Si el test está activo
+- `available_for_therapists`: Si está disponible para terapeutas
+- `available_for_personal`: Si está disponible para usuarios personales
 
 #### UserTestAccess
 Control de acceso y uso de tests por usuario.
 
 **Campos principales:**
 - `user`: Usuario
-- `test_module`: M├│dulo de test
+- `test_module`: Módulo de test
 - `uses_count`: Total de usos
 - `current_month_uses`: Usos en el mes actual
 - `has_special_access`: Acceso especial otorgado
-- `special_access_expires`: Fecha de expiraci├│n del acceso especial
+- `special_access_expires`: Fecha de expiración del acceso especial
 - `special_access_uses`: Usos especiales disponibles
 
 #### TestResult
 Resultados guardados de tests realizados.
 
 **Campos principales:**
-- `user`: Usuario que realiz├│ el test
-- `test_module`: M├│dulo de test
+- `user`: Usuario que realizó el test
+- `test_module`: Módulo de test
 - `input_data`: Datos ingresados (JSON)
 - `result_data`: Resultados calculados (JSON)
 - `client_name`: Nombre del cliente (para terapeutas)
 - `notes`: Notas adicionales
-- `is_favorite`: Si est├í marcado como favorito
-- `is_archived`: Si est├í archivado
+- `is_favorite`: Si está marcado como favorito
+- `is_archived`: Si está archivado
 
-## ≡ƒÄ» Niveles de Acceso
+## 🎯 Niveles de Acceso
 
-### Jerarqu├¡a de Acceso
+### Jerarquía de Acceso
 1. **Free** (0) - Acceso gratuito limitado
-2. **Personal** (1) - Plan personal Γé¼29
-3. **Professional** (2) - Plan profesional Γé¼49
-4. **Premium** (3) - Plan premium Γé¼99
+2. **Personal** (1) - Plan personal €29
+3. **Professional** (2) - Plan profesional €49
+4. **Premium** (3) - Plan premium €99
 
 ### Tests Incluidos por Nivel
 
 #### Free (Gratuito)
-- Γ£à An├ílisis Cabal├¡stico B├ísico (ilimitado)
+- ✅ Análisis Cabalístico Básico (ilimitado)
 
-#### Personal (Γé¼29 ├║nico)
-- Γ£à An├ílisis Cabal├¡stico B├ísico (ilimitado)
-- Γ£à Numerolog├¡a Completa (10 usos/mes)
-- Γ£à Compatibilidad de Pareja (5 usos/mes)
-- Γ£à Orientaci├│n Profesional (5 usos/mes)
+#### Personal (€29 único)
+- ✅ Análisis Cabalístico Básico (ilimitado)
+- ✅ Numerología Completa (10 usos/mes)
+- ✅ Compatibilidad de Pareja (5 usos/mes)
+- ✅ Orientación Profesional (5 usos/mes)
 
-#### Professional (Γé¼49/mes) - Solo Terapeutas
-- Γ£à Todos los tests de Personal
-- Γ£à Camino Espiritual (ilimitado, solo terapeutas)
-- Γ£à Salud y Bienestar (ilimitado)
-- Γ£à Abundancia Financiera (3 usos/mes)
+#### Professional (€49/mes) - Solo Terapeutas
+- ✅ Todos los tests de Personal
+- ✅ Camino Espiritual (ilimitado, solo terapeutas)
+- ✅ Salud y Bienestar (ilimitado)
+- ✅ Abundancia Financiera (3 usos/mes)
 
-#### Premium (Γé¼99/mes)
-- Γ£à Todos los tests anteriores
-- Γ£à Relaciones Familiares (ilimitado)
-- Γ£à Prop├│sito de Vida (ilimitado)
-- Γ£à Vidas Pasadas (2 usos/mes)
+#### Premium (€99/mes)
+- ✅ Todos los tests anteriores
+- ✅ Relaciones Familiares (ilimitado)
+- ✅ Propósito de Vida (ilimitado)
+- ✅ Vidas Pasadas (2 usos/mes)
 
-## ≡ƒöº API Endpoints
+## 🔧 API Endpoints
 
 ### GET /api/tests/
 Lista todos los tests disponibles para el usuario actual.
@@ -96,10 +96,10 @@ Lista todos los tests disponibles para el usuario actual.
 ```
 
 ### GET /api/tests/{code}/
-Obtiene el detalle de un test espec├¡fico.
+Obtiene el detalle de un test específico.
 
-**Par├ímetros:**
-- `code`: C├│digo del test
+**Parámetros:**
+- `code`: Código del test
 
 ### POST /api/tests/execute/
 Ejecuta un test y guarda el resultado.
@@ -109,10 +109,10 @@ Ejecuta un test y guarda el resultado.
 {
   "test_module_code": "basic-analysis",
   "input_data": {
-    "name": "Juan P├⌐rez",
+    "name": "Juan Pérez",
     "birth_date": "1990-05-15"
   },
-  "client_name": "Juan P├⌐rez",
+  "client_name": "Juan Pérez",
   "client_birth_date": "1990-05-15",
   "save_result": true
 }
@@ -132,11 +132,11 @@ Ejecuta un test y guarda el resultado.
 Lista todos los resultados guardados del usuario.
 
 **Query params:**
-- `test_code`: Filtrar por c├│digo de test
+- `test_code`: Filtrar por código de test
 - `favorites`: Mostrar solo favoritos (true/false)
 
 ### GET /api/tests/results/{id}/
-Obtiene un resultado espec├¡fico.
+Obtiene un resultado específico.
 
 ### PATCH /api/tests/results/{id}/
 Actualiza un resultado (notas, favorito, etc.).
@@ -145,7 +145,7 @@ Actualiza un resultado (notas, favorito, etc.).
 Elimina (archiva) un resultado.
 
 ### GET /api/tests/stats/
-Obtiene estad├¡sticas de uso de tests del usuario.
+Obtiene estadísticas de uso de tests del usuario.
 
 ### POST /api/tests/grant-access/
 Otorga acceso especial a un test (solo admin).
@@ -160,7 +160,7 @@ Otorga acceso especial a un test (solo admin).
 }
 ```
 
-## ≡ƒÄ¿ Componentes Frontend
+## 🎨 Componentes Frontend
 
 ### TestCard
 Tarjeta visual para mostrar un test.
@@ -169,23 +169,23 @@ Tarjeta visual para mostrar un test.
 - `test`: TestModule
 - `userLevel`: string (nivel de acceso del usuario)
 
-**Caracter├¡sticas:**
+**Características:**
 - Muestra estado de bloqueo por nivel
-- Indica l├¡mite mensual alcanzado
+- Indica límite mensual alcanzado
 - Muestra badge de acceso especial
-- Estad├¡sticas de uso
-- Bot├│n de acci├│n din├ímico
+- Estadísticas de uso
+- Botón de acción dinámico
 
 ### TestsPage
-P├ígina principal de tests (`/tests`).
+Página principal de tests (`/tests`).
 
-**Caracter├¡sticas:**
+**Características:**
 - Lista todos los tests disponibles
-- Filtrado autom├ítico por tipo de usuario
-- Informaci├│n de membres├¡a
-- Stats r├ípidas (disponibles, realizados, listos)
+- Filtrado automático por tipo de usuario
+- Información de membresía
+- Stats rápidas (disponibles, realizados, listos)
 
-## ≡ƒô¥ Uso del Sistema
+## 📝 Uso del Sistema
 
 ### 1. Inicializar Tests
 ```bash
@@ -194,15 +194,15 @@ python initialize_tests.py
 ```
 
 Este script crea los 10 tests iniciales:
-1. An├ílisis Cabal├¡stico B├ísico
-2. Numerolog├¡a Completa
+1. Análisis Cabalístico Básico
+2. Numerología Completa
 3. Compatibilidad de Pareja
-4. Orientaci├│n Profesional
+4. Orientación Profesional
 5. Camino Espiritual
 6. Salud y Bienestar
 7. Abundancia Financiera
 8. Relaciones Familiares
-9. Prop├│sito de Vida
+9. Propósito de Vida
 10. Vidas Pasadas
 
 ### 2. Verificar Acceso de Usuario
@@ -230,66 +230,66 @@ access.special_access_uses = 10  # 10 usos especiales
 access.save()
 ```
 
-## ≡ƒöÉ Control de Acceso
+## 🔐 Control de Acceso
 
-### Verificaci├│n por Nivel
-El sistema verifica autom├íticamente:
-1. Si el test est├í activo
+### Verificación por Nivel
+El sistema verifica automáticamente:
+1. Si el test está activo
 2. Si el usuario es del tipo correcto (therapist/personal)
-3. Si el nivel de membres├¡a es suficiente
-4. Si no ha alcanzado el l├¡mite mensual
+3. Si el nivel de membresía es suficiente
+4. Si no ha alcanzado el límite mensual
 5. Si tiene acceso especial activo
 
 ### Acceso Especial
 Los administradores pueden otorgar acceso especial que:
-- Sobrepasa el nivel de membres├¡a
-- Tiene fecha de expiraci├│n opcional
-- Tiene l├¡mite de usos opcional
-- Se resetea autom├íticamente al expirar
+- Sobrepasa el nivel de membresía
+- Tiene fecha de expiración opcional
+- Tiene límite de usos opcional
+- Se resetea automáticamente al expirar
 
-## ≡ƒôè Administraci├│n Django
+## 📊 Administración Django
 
-Todos los modelos est├ín registrados en el admin de Django:
+Todos los modelos están registrados en el admin de Django:
 
-- `/admin/api/testmodule/` - Gestionar m├│dulos de tests
+- `/admin/api/testmodule/` - Gestionar módulos de tests
 - `/admin/api/usertestaccess/` - Ver y modificar accesos
 - `/admin/api/testresult/` - Ver resultados guardados
 
-## ≡ƒÜÇ Integraci├│n con Membres├¡as
+## 🚀 Integración con Membresías
 
-El sistema se integra autom├íticamente con el sistema de membres├¡as:
+El sistema se integra automáticamente con el sistema de membresías:
 
 1. **subscription_plan** del UserProfile determina el nivel de acceso
 2. **membership_active** debe ser True para acceso completo
 3. Tests gratuitos siempre disponibles
-4. L├¡mites mensuales se resetean autom├íticamente cada mes
+4. Límites mensuales se resetean automáticamente cada mes
 
-## ≡ƒô▒ Frontend Routes
+## 📱 Frontend Routes
 
 - `/tests` - Lista de tests disponibles
-- `/tests/{code}` - Detalle y ejecuci├│n de test (pr├│ximamente)
-- `/tests/results` - Historial de resultados (pr├│ximamente)
+- `/tests/{code}` - Detalle y ejecución de test (próximamente)
+- `/tests/results` - Historial de resultados (próximamente)
 
-## Γ£à Caracter├¡sticas Implementadas
+## ✅ Características Implementadas
 
-- Γ£à Modelos de base de datos completos
-- Γ£à Sistema de permisos por nivel
-- Γ£à L├¡mites mensuales autom├íticos
-- Γ£à Acceso especial para usuarios
-- Γ£à API REST completa
-- Γ£à Componentes visuales (TestCard)
-- Γ£à P├ígina de listado de tests
-- Γ£à Integraci├│n con dashboards
-- Γ£à Admin de Django configurado
-- Γ£à Script de inicializaci├│n
+- ✅ Modelos de base de datos completos
+- ✅ Sistema de permisos por nivel
+- ✅ Límites mensuales automáticos
+- ✅ Acceso especial para usuarios
+- ✅ API REST completa
+- ✅ Componentes visuales (TestCard)
+- ✅ Página de listado de tests
+- ✅ Integración con dashboards
+- ✅ Admin de Django configurado
+- ✅ Script de inicialización
 
-## ≡ƒöä Pr├│ximas Mejoras
+## 🔄 Próximas Mejoras
 
-- [ ] P├íginas de ejecuci├│n de tests individuales
-- [ ] Implementar l├│gica de procesamiento real
-- [ ] P├ígina de historial de resultados
-- [ ] Exportaci├│n de resultados a PDF
+- [ ] Páginas de ejecución de tests individuales
+- [ ] Implementar lógica de procesamiento real
+- [ ] Página de historial de resultados
+- [ ] Exportación de resultados a PDF
 - [ ] Sistema de favoritos mejorado
-- [ ] B├║squeda y filtros avanzados
-- [ ] Notificaciones cuando se resetean l├¡mites
-- [ ] Dashboard de estad├¡sticas de uso
+- [ ] Búsqueda y filtros avanzados
+- [ ] Notificaciones cuando se resetean límites
+- [ ] Dashboard de estadísticas de uso

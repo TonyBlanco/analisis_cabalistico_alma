@@ -6,7 +6,47 @@ Commit relacionado: 0c37a485 (WIP: SWM SHA module - tests failing, needs debug)
 
 ---
 
-Resumen rápido
+## ✅ RESUELTO (2026-01-30)
+
+### Root Cause identificado
+El `TestResult` id=113 fue creado el 2026-01-30 00:36:33 UTC, **2 minutos antes** de que 
+el commit 0c37a485 (con la lógica de patient lookup) fuera registrado (01:38:59 CET).
+
+**Causa raíz**: El servidor Django estaba ejecutando código antiguo que no incluía la 
+lógica para buscar el `Patient` cuando `execution_mode == 'patient_self'`. El código con 
+el fix ya existía en el repositorio pero el servidor no había sido reiniciado.
+
+### Evidencia
+- `TestResult` id=113: `patient_id=None`, `audit.patient_id=None`, `execution_mode=patient_self`
+- Commit con fix: `0c37a485` @ 01:38:59 CET
+- TestResult creado: 00:36:33 UTC (01:36:33 CET) — **antes del commit**
+- Script de debug (`debug_sha_flow.py`) confirmó que la lógica actual funciona correctamente
+
+### Acciones aplicadas (2026-01-30)
+
+1. **Identificación del root cause**: Análisis de timestamps reveló que el servidor 
+   ejecutaba código anterior al fix
+   
+2. **Mejora del código** en `backend/api/test_views.py`:
+   - Mejor manejo de múltiples `Patient` por usuario (ahora usa el primero por ID)
+   - Logging más explícito con `logger.warning` para casos anómalos
+   - Ya no resetea `patient_for_result` a `None` en caso de excepción
+   - Stack trace completo en excepciones (`exc_info=True`)
+
+3. **Test de integración creado**: `backend/tests/test_execute_patient_self.py`
+   - `test_patient_self_execution_sets_patient_id`: Verifica que `TestResult.patient` se establece
+   - `test_assignment_updated_to_completed`: Verifica que `Assignment.status` se actualiza
+   - `test_multiple_patients_for_user_handles_gracefully`: Verifica comportamiento con edge cases
+   - `test_personal_user_execution_sets_patient_id`: Verifica flujo para usuarios tipo `personal`
+
+### Cómo evitar regresión
+1. Ejecutar tests: `python manage.py test tests.test_execute_patient_self`
+2. Asegurar reinicio del servidor después de cambios en código
+3. Monitorear logs `[SWM]` para detectar anomalías
+
+---
+
+## Historial del incidente (para referencia)
 - Síntoma: Tests completados por el consultante no aparecían en el workspace del terapeuta.
 - Evidencia: `TestResult` creado (ej. id=112) con `patient_id=None` y `details.audit.patient_id=None`; `Assignment` permanecía en `status='assigned'`.
 - Impacto: Los terapeutas no veían resultados completados y el SWM no procesaba el flujo esperado.

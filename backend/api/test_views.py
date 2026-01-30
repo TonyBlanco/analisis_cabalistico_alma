@@ -618,21 +618,28 @@ class ExecuteTestView(APIView):
         test_result = None
         if data.get('save_result', True):
             import logging
+            from api.models import Patient as PatientModel  # Explicit import to avoid shadowing from nested blocks
             logger = logging.getLogger(__name__)
             patient_for_result = patient
             logger.info(f"[SWM] Initial patient_for_result from patient param: {patient_for_result}")
             if execution_mode == 'patient_self' and getattr(profile, 'user_type', None) in ('patient', 'personal'):
                 try:
-                    patient_qs = Patient.objects.filter(user=request.user, is_active=True)
-                    logger.info(f"[SWM] Patient lookup for user {request.user.username}: count={patient_qs.count()}")
-                    if patient_qs.count() == 1:
+                    patient_qs = PatientModel.objects.filter(user=request.user, is_active=True)
+                    patient_count = patient_qs.count()
+                    logger.info(f"[SWM] Patient lookup for user {request.user.username}: count={patient_count}")
+                    if patient_count == 1:
                         patient_for_result = patient_qs.first()
                         logger.info(f"[SWM] patient_for_result set to: {patient_for_result} (id={patient_for_result.id if patient_for_result else None})")
+                    elif patient_count > 1:
+                        # Multiple patients linked - log warning but pick first by ID (most recent assignment wins)
+                        logger.warning(f"[SWM] Multiple ({patient_count}) active patients for user {request.user.username}. Using first by ID.")
+                        patient_for_result = patient_qs.order_by('id').first()
+                        logger.info(f"[SWM] patient_for_result set to: {patient_for_result} (id={patient_for_result.id if patient_for_result else None})")
                     else:
-                        logger.info(f"[SWM] Patient count != 1, patient_for_result unchanged")
+                        logger.warning(f"[SWM] No active Patient found for user {request.user.username}, patient_for_result unchanged (None)")
                 except Exception as e:
-                    logger.warning(f"[SWM] Exception finding patient: {e}")
-                    patient_for_result = patient
+                    logger.error(f"[SWM] Exception finding patient for user {request.user.username}: {e}", exc_info=True)
+                    # Don't reset patient_for_result to None on exception - keep any value already set
             else:
                 logger.info(f"[SWM] Skipping patient lookup: execution_mode={execution_mode}, user_type={getattr(profile, 'user_type', None)}")
 

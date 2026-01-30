@@ -32,22 +32,18 @@ class SHAInterpreter(BaseInterpreter):
         km = self._get_knowledge_manager()
         
         # Build query for RAG
-        rag_query = self._build_rag_query(sha_context, imbalances)
+        # RAG disabled - not justified yet
+        rag_context = []
+        logger.info("RAG disabled - using direct AI interpretation")
         
-        logger.info(f"SHA Interpreter: Retrieving context with query: {rag_query[:100]}...")
-        rag_results = km.retrieve_context(rag_query, top_k=5)
+        # Build prompt for Gemini/Groq (via multi_ai_service)
+        messages = self._build_gemini_messages(sha_context, patient_context, rag_context)
         
-        # Format RAG context for prompt
-        rag_context = self._format_rag_context(rag_results)
+        # Generate interpretation with multi-provider fallback
+        gemini = self._get_gemini_client()
+        logger.info(f"SHA Interpreter: Calling AI (Gemini/Groq fallback)...")
         
-        # Build prompt for GPT-4
-        messages = self._build_gpt4_messages(sha_context, patient_context, rag_context)
-        
-        # Generate interpretation with GPT-4
-        gpt4 = self._get_gpt4_client()
-        logger.info(f"SHA Interpreter: Calling GPT-4 for interpretation...")
-        
-        completion = gpt4.generate_completion(
+        completion = gemini.generate_completion(
             messages=messages,
             response_format={'type': 'json_object'}
         )

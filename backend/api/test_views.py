@@ -938,54 +938,97 @@ class ExecuteTestView(APIView):
                 
                 # Handler for SHA Harmony (AUDIT-based Sephirotic screening)
                 if test_module.code == 'sha_harmony':
+                    # SHA Harmony: Sephirotic balance assessment (NOT AUDIT/alcohol test)
+                    # Uses q1-q10 responses on 1-5 Likert scale mapping to 10 Sefirot
+                    # See: docs/TEST_LEGACY_MIGRATION.md for context on this fix
                     responses = input_data.get('responses', {})
-                    # Calculate AUDIT score (0-40 scale)
+                    
+                    # Map of Sefirot to question IDs
+                    sefirot_map = {
+                        'Keter': 'q1',
+                        'Chokmah': 'q2', 
+                        'Binah': 'q3',
+                        'Chesed': 'q4',
+                        'Gevurah': 'q5',
+                        'Tiferet': 'q6',
+                        'Netzach': 'q7',
+                        'Hod': 'q8',
+                        'Yesod': 'q9',
+                        'Malkuth': 'q10'
+                    }
+                    
+                    # Calculate scores (1-5 scale per Sefirá)
                     total = 0
                     answered_items = 0
-                    for i in range(1, 11):  # AUDIT has 10 items
-                        key = f'AUDIT_{i:02d}'
-                        val = responses.get(key)
+                    sefirot_scores = {}
+                    
+                    for sefira, qid in sefirot_map.items():
+                        val = responses.get(qid)
                         if val is not None:
                             try:
-                                total += int(val)
-                                answered_items += 1
+                                score = int(val)
+                                # Validate 1-5 range
+                                if 1 <= score <= 5:
+                                    total += score
+                                    answered_items += 1
+                                    sefirot_scores[sefira] = score
                             except (ValueError, TypeError):
                                 pass
                     
-                    # Determine risk zone based on AUDIT cutoffs
+                    # Harmony index: average score (1-5 scale)
+                    harmony_index = round(total / answered_items, 2) if answered_items > 0 else 0
+                    
+                    # Determine harmony level
                     if answered_items < 10:
-                        zone = 'Incomplete'
-                        zone_label = 'Cuestionario incompleto'
-                        sefira = None
-                    elif total >= 20:
-                        zone = 'Severe dependence'
-                        zone_label = 'Dependencia severa - Netzach bloqueado'
-                        sefira = 'Netzach (sombra profunda)'
-                    elif total >= 15:
-                        zone = 'Likely dependence'
-                        zone_label = 'Probable dependencia - Netzach en sombra'
-                        sefira = 'Netzach (desequilibrio)'
-                    elif total >= 8:
-                        zone = 'Hazardous use'
-                        zone_label = 'Uso riesgoso - Desequilibrio pasional'
-                        sefira = 'Netzach (tensión)'
+                        harmony_level = 'incomplete'
+                        harmony_label = 'Cuestionario incompleto'
+                        recommendations = ['Completa las 10 preguntas para obtener tu análisis completo.']
+                    elif harmony_index >= 4.5:
+                        harmony_level = 'excellent'
+                        harmony_label = 'Armonía excelente'
+                        recommendations = [
+                            'Tu balance sefirótico es excepcional.',
+                            'Continúa con tus prácticas actuales.',
+                            'Considera compartir tu sabiduría con otros.'
+                        ]
+                    elif harmony_index >= 3.5:
+                        harmony_level = 'good'
+                        harmony_label = 'Buena armonía'
+                        recommendations = [
+                            'Tu equilibrio es saludable.',
+                            'Identifica las Sefirot con menor puntuación para trabajo focalizado.',
+                            'Mantén tus prácticas de auto-cuidado.'
+                        ]
+                    elif harmony_index >= 2.5:
+                        harmony_level = 'moderate'
+                        harmony_label = 'Armonía moderada'
+                        recommendations = [
+                            'Se observan áreas de desequilibrio.',
+                            'Explora prácticas de meditación y reflexión.',
+                            'Considera acompañamiento terapéutico para las Sefirot más bajas.'
+                        ]
                     else:
-                        zone = 'Low risk'
-                        zone_label = 'Bajo riesgo - Equilibrio Netzach'
-                        sefira = 'Netzach (armonía)'
+                        harmony_level = 'low'
+                        harmony_label = 'Armonía reducida'
+                        recommendations = [
+                            'Tu balance sefirótico necesita atención.',
+                            'Se recomienda acompañamiento profesional.',
+                            'Explora las raíces emocionales de las Sefirot en desequilibrio.'
+                        ]
                     
                     return {
-                        'schema_version': 'sha_harmony:v1',
+                        'schema_version': 'sha_harmony:v2',
                         'test_type': 'sephirotic_harmony',
                         'processed': True,
                         'timestamp': datetime.now().isoformat(),
-                        'total': total,
-                        'max_score': 40,
+                        'total_score': total,
+                        'max_score': 50,  # 10 questions × 5 max
                         'answered_items': answered_items,
-                        'zone': zone,
-                        'zone_label': zone_label,
-                        'sefira': sefira,
-                        'interpretation': f'Puntuación AUDIT: {total}/40. {zone_label}.',
+                        'harmony_index': harmony_index,
+                        'harmony_level': harmony_level,
+                        'harmony_label': harmony_label,
+                        'sefirot_scores': sefirot_scores,
+                        'recommendations': recommendations,
                         'message': 'Auditoría de Armonía Sefirótica completada'
                     }
                 

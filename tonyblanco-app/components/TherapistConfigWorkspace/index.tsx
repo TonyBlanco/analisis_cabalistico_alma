@@ -24,22 +24,30 @@ interface PatientDataSummary {
 }
 
 interface CleanupPreview {
-  patient_id: number;
-  patient_name: string;
-  items_to_delete: {
-    test_results: number;
-    assignments: number;
-  };
   dry_run: boolean;
+  patient: {
+    id: number;
+    full_name: string;
+  };
+  counts: {
+    test_results_linked: number;
+    test_results_orphan: number;
+    assignments: number;
+    test_accesses?: number;
+  };
 }
 
 interface CleanupResult {
-  success: boolean;
-  patient_id: number;
-  patient_name: string;
+  dry_run: boolean;
+  patient: {
+    id: number;
+    full_name: string;
+  };
   deleted: {
-    test_results: number;
+    test_results_linked: number;
+    test_results_orphan: number;
     assignments: number;
+    test_accesses?: number;
   };
 }
 
@@ -179,11 +187,21 @@ export default function TherapistConfigWorkspace() {
   const handleExecuteCleanup = async () => {
     if (!patientId || !cleanupPreview) return;
 
+    const previewCounts = cleanupPreview?.counts || {
+      test_results_linked: 0,
+      test_results_orphan: 0,
+      assignments: 0,
+      test_accesses: 0,
+    };
+    const totalResults =
+      (previewCounts.test_results_linked || 0) + (previewCounts.test_results_orphan || 0);
+
     const confirmed = window.confirm(
       `¿Estás seguro de eliminar todos los datos de test de ${patientName}?\n\n` +
       `Se eliminarán:\n` +
-      `- ${cleanupPreview.items_to_delete.test_results} resultados de test\n` +
-      `- ${cleanupPreview.items_to_delete.assignments} asignaciones\n\n` +
+      `- ${totalResults} resultados de test\n` +
+      `- ${previewCounts.assignments || 0} asignaciones\n` +
+      `- ${previewCounts.test_accesses || 0} accesos a tests\n\n` +
       `Esta acción no se puede deshacer.`
     );
 
@@ -213,9 +231,19 @@ export default function TherapistConfigWorkspace() {
 
       const result: CleanupResult = await response.json();
       
+      const deletedCounts = result.deleted || {
+        test_results_linked: 0,
+        test_results_orphan: 0,
+        assignments: 0,
+        test_accesses: 0,
+      };
+      const deletedResultsTotal =
+        (deletedCounts.test_results_linked || 0) + (deletedCounts.test_results_orphan || 0);
+
       setSuccessMessage(
-        `Limpieza completada: ${result.deleted.test_results} resultados y ` +
-        `${result.deleted.assignments} asignaciones eliminadas.`
+        `Limpieza completada: ${deletedResultsTotal} resultados, ` +
+        `${deletedCounts.assignments || 0} asignaciones y ` +
+        `${deletedCounts.test_accesses || 0} accesos eliminados.`
       );
       setCleanupPreview(null);
       
@@ -381,8 +409,13 @@ export default function TherapistConfigWorkspace() {
                       <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
                         <h3 className="text-sm font-medium text-amber-800 mb-2">Vista previa de eliminación</h3>
                         <ul className="text-sm text-amber-700 space-y-1">
-                          <li>• {cleanupPreview.items_to_delete.test_results} resultados de test</li>
-                          <li>• {cleanupPreview.items_to_delete.assignments} asignaciones</li>
+                          <li>
+                            • {(cleanupPreview.counts.test_results_linked || 0) +
+                              (cleanupPreview.counts.test_results_orphan || 0)}{' '}
+                            resultados de test
+                          </li>
+                          <li>• {cleanupPreview.counts.assignments || 0} asignaciones</li>
+                          <li>• {cleanupPreview.counts.test_accesses || 0} accesos a tests</li>
                         </ul>
                       </div>
                     )}

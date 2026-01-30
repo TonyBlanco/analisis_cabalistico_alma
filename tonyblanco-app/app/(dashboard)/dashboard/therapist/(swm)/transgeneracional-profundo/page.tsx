@@ -1,4 +1,5 @@
 'use client';
+'use client';
 
 import TransgenerationalDeepWorkspace from '@/components/TransgenerationalDeepWorkspace';
 

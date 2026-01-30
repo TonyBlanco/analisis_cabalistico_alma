@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import AstrologyProfessionalView from '@/components/AstrologyWorkspace/AstrologyProfessionalView';
 import { useNatalChart } from '@/hooks/useNatalChart';
 import { getCanonicalConsultantIdentity } from '@/hooks/getCanonicalConsultantIdentity';
+import TherapistBackLink from '@/components/TherapistBackLink';
 
 function IdentidadNoDisponible() {
   return (
@@ -50,5 +51,10 @@ export default function AstrologyPage() {
     snapshot_id: canonical.snapshot_id ?? undefined,
   };
 
-  return <AstrologyProfessionalView consultante={canonicalActive} chart={chart} analysis_result={analysisResult} calculateChart={calculateChart} refetch={refetch} />;
+  return (
+    <>
+      <TherapistBackLink />
+      <AstrologyProfessionalView consultante={canonicalActive} chart={chart} analysis_result={analysisResult} calculateChart={calculateChart} refetch={refetch} />
+    </>
+  );
 }

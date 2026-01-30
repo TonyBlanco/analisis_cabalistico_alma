@@ -1,4 +1,5 @@
 'use client';
+'use client';
 
 import ResonanciaAncestralWorkspace from '@/components/ResonanciaAncestralWorkspace/ResonanciaAncestralWorkspace';
 

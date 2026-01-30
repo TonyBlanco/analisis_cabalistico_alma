@@ -1,4 +1,5 @@
 'use client';
+'use client';
 
 import BioEmotionalExperientialWorkspace from '@/components/BioEmotionalExperientialWorkspace';
 

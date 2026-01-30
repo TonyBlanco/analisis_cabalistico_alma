@@ -248,11 +248,260 @@ test('SHA Harmony completes with q1-q10 responses', async () => {
 
 ---
 
+## Caso 2: SHA Harmony Frontend Multi-View Sync (v2 Display Fix)
+
+### Problema Detectado
+
+**Fecha**: 30 de enero de 2026  
+**Síntoma**: Después de corregir el backend para enviar SHA Harmony v2 (`harmony_index`, `sefirot_scores`, `recommendations`), la página individual del resultado mostraba correctamente los datos, pero:
+
+1. **Página general de resultados** (`/dashboard/patient/results`) mostraba:
+   - Etiqueta: "Unknown"
+   - Puntuación: "7 / 50" (incorrecta)
+   
+2. **Workspace del terapeuta** (`/dashboard/therapist/sha`) mostraba:
+   - "Puntuación Total N/A / 50" (sin datos)
+   - No renderizaba los detalles del resultado
+
+### Causa Raíz
+
+Los componentes frontend responsables de renderizar resultados SHA en distintas vistas solo reconocían el formato **v1 legacy**:
+
+**Archivos afectados**:
+- `tonyblanco-app/components/test-results/ReadableResult.tsx` (línea 381)
+- `tonyblanco-app/components/SHAWorkspace/index.tsx` (líneas 503-524)
+
+**Código problemático** (ReadableResult.tsx):
+```typescript
+// ❌ Solo reconocía v1
+const isSHAHarmony = payload?.schema_version === 'sha_harmony:v1' || testCode === 'sha_harmony';
+const shaData = isSHAHarmony ? {
+  total: payload?.total ?? null,        // v1 field
+  max_score: payload?.max_score ?? 40,  // v1 scale
+  zone: payload?.zone ?? 'Unknown',     // v1 risk zone
+  sefira: payload?.sefira ?? null,      // v1 single sefira
+} : null;
+```
+
+**Formato esperado v1**:
+```json
+{
+  "schema_version": "sha_harmony:v1",
+  "total": 28,
+  "max_score": 40,
+  "zone": "Hazardous use",
+  "zone_label": "Uso peligroso",
+  "sefira": "Gevurah (Rigor)",
+  "interpretation": "..."
+}
+```
+
+**Formato enviado v2** (backend corregido):
+```json
+{
+  "schema_version": "sha_harmony:v2",
+  "harmony_index": 2.8,
+  "harmony_level": "moderate",
+  "harmony_label": "Armonía moderada",
+  "total_score": 28,
+  "max_score": 50,
+  "sefirot_scores": {
+    "Keter": 2, "Chokmah": 3, "Binah": 3, "Chesed": 2,
+    "Gevurah": 2, "Tiferet": 5, "Netzach": 3, "Hod": 3,
+    "Yesod": 3, "Malkuth": 4
+  },
+  "recommendations": [
+    "Medita sobre Keter para reconectar con tu propósito divino",
+    "Trabaja con Chesed para cultivar la bondad y compasión",
+    "..."
+  ]
+}
+```
+
+### Solución Implementada
+
+**Commits**: 
+- `d97ad3ad` - ReadableResult v2 recognition (2026-01-30)
+- `52e0143e` - SHAWorkspace v2 display (2026-01-30)
+
+#### Fix 1: ReadableResult.tsx
+
+**Cambios**:
+1. Reconocer `sha_harmony:v2` como válido
+2. Detectar formato por presencia de `harmony_index`
+3. Renderizar v2 con:
+   - Índice de armonía (1-5 scale) en lugar de total/40
+   - Barra de progreso sobre 5.0
+   - Color-coding: verde (≥4.5), azul (≥3.5), amarillo (≥2.5), naranja (<2.5)
+   - Todas las 10 Sefirot con barras individuales
+   - Lista de recomendaciones con checkmarks
+4. Mantener compatibilidad con v1 legacy
+
+**Código corregido**:
+```typescript
+// ✅ Reconoce ambas versiones
+const isSHAHarmony = payload?.schema_version === 'sha_harmony:v1' || 
+                     payload?.schema_version === 'sha_harmony:v2' || 
+                     testCode === 'sha_harmony';
+
+const isV2 = payload?.harmony_index !== undefined;
+
+const shaData = isSHAHarmony ? (isV2 ? {
+  // v2 format
+  harmony_index: payload?.harmony_index ?? null,
+  harmony_level: payload?.harmony_level ?? 'moderate',
+  sefirot_scores: payload?.sefirot_scores ?? {},
+  recommendations: payload?.recommendations ?? [],
+  version: 2
+} : {
+  // v1 format (legacy)
+  total: payload?.total ?? null,
+  zone: payload?.zone ?? 'Unknown',
+  version: 1
+}) : null;
+```
+
+**Renderizado v2**:
+```tsx
+{/* Harmony Index - 1-5 scale */}
+<div className="flex items-center gap-3">
+  <div className="w-12 h-12 bg-yellow-500 rounded-full">
+    <span className="text-white font-bold text-lg">2.8</span>
+  </div>
+  <div>
+    <p className="font-semibold text-yellow-800">Índice de Armonía</p>
+    <p className="text-sm">2.8 / 5.0</p>
+  </div>
+</div>
+
+{/* Sefirot Scores */}
+<div className="space-y-2">
+  {Object.entries(sefirot_scores).map(([sefira, score]) => (
+    <div key={sefira} className="flex items-center gap-2">
+      <span className="w-20">{sefira}</span>
+      <div className="flex-1 bg-purple-200 rounded-full h-2">
+        <div className="bg-purple-600 h-2 rounded-full" 
+             style={{ width: `${(score / 5) * 100}%` }} />
+      </div>
+      <span className="w-8 text-right">{score}/5</span>
+    </div>
+  ))}
+</div>
+
+{/* Recommendations */}
+<ul className="space-y-1">
+  {recommendations.map((rec, idx) => (
+    <li key={idx} className="flex items-start gap-2">
+      <span className="text-green-600">✓</span>
+      <span>{rec}</span>
+    </li>
+  ))}
+</ul>
+```
+
+#### Fix 2: SHAWorkspace/index.tsx
+
+**Cambios**:
+1. Detectar formato v2 por `scores?.harmony_index`
+2. Mostrar índice de armonía en lugar de total/max_score
+3. Renderizar nivel de armonía con color según `harmony_level`
+4. Mostrar todas las Sefirot con mini barras de progreso
+5. Listar top 3 recomendaciones
+6. Mantener compatibilidad con v1
+
+**Código corregido**:
+```typescript
+{/* Handle v2 format */}
+{shaHarmonyResult.scores?.harmony_index !== undefined ? (
+  <>
+    <div>
+      <p className="text-gray-500">Índice de Armonía</p>
+      <p className="font-medium text-lg">
+        {shaHarmonyResult.scores.harmony_index.toFixed(1)} / 5.0
+      </p>
+    </div>
+    <div className="col-span-2">
+      <p className="text-gray-500">Nivel de Armonía</p>
+      <p className={`font-semibold ${
+        shaHarmonyResult.scores.harmony_level === 'excellent' ? 'text-green-600' :
+        shaHarmonyResult.scores.harmony_level === 'good' ? 'text-blue-600' :
+        shaHarmonyResult.scores.harmony_level === 'moderate' ? 'text-yellow-600' :
+        'text-orange-600'
+      }`}>
+        {shaHarmonyResult.scores.harmony_label}
+      </p>
+    </div>
+    <div className="col-span-2">
+      <p className="text-gray-500 mb-2">Distribución Sefirótica</p>
+      <div className="space-y-1">
+        {Object.entries(shaHarmonyResult.scores.sefirot_scores).map(([sefira, score]) => (
+          <div key={sefira} className="flex items-center gap-2 text-xs">
+            <span className="w-20 text-purple-700">{sefira}</span>
+            <div className="flex-1 bg-purple-200 rounded-full h-1.5">
+              <div className="bg-purple-600 h-1.5 rounded-full"
+                   style={{ width: `${(Number(score) / 5) * 100}%` }} />
+            </div>
+            <span className="w-10 text-right text-purple-700">{score}/5</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </>
+) : /* v1 legacy format */ ...}
+```
+
+### Resultado
+
+**Antes del fix**:
+- ❌ Individual page: ✅ OK (tenía fix custom desde antes)
+- ❌ General results: Mostraba "Unknown" y "7/50"
+- ❌ Therapist workspace: Mostraba "N/A / 50"
+
+**Después del fix**:
+- ✅ Individual page: Sigue funcionando perfectamente
+- ✅ General results: Modal con datos completos (harmony index, Sefirot, recomendaciones)
+- ✅ Therapist workspace: Tarjeta verde con índice 2.8/5.0, nivel "moderada", Sefirot, recomendaciones
+
+### Lecciones Aprendidas
+
+1. **Múltiples puntos de renderizado**: Un test puede mostrarse en varias vistas (individual, lista, workspace), cada una con su propio componente
+
+2. **Sincronización de schemas**: Cuando se actualiza el schema backend (v1→v2), TODOS los componentes frontend que renderizan ese test deben actualizarse
+
+3. **Detección de versión**: Usar feature detection (`harmony_index !== undefined`) en lugar de solo `schema_version` para máxima compatibilidad
+
+4. **Retrocompatibilidad**: Mantener rendering de v1 legacy para resultados históricos
+
+5. **Componentes compartidos**: `ReadableResult` es usado por múltiples páginas → un fix allí beneficia a todos
+
+### Checklist para Futuros Cambios de Schema
+
+Cuando se actualice el schema de cualquier test:
+
+- [ ] Actualizar backend executor (`backend/api/test_views.py`)
+- [ ] Actualizar schema version (`v1` → `v2`)
+- [ ] Identificar TODOS los componentes frontend que renderizan ese test:
+  - [ ] Página individual (`/tests/<test-code>/result/page.tsx`)
+  - [ ] Lista general de resultados (usa `ReadableResult`)
+  - [ ] Workspace del terapeuta (si existe)
+  - [ ] Dashboard personal (si aplica)
+- [ ] Para cada componente:
+  - [ ] Agregar detección de nueva versión
+  - [ ] Renderizar nuevos campos
+  - [ ] Mantener compatibilidad con versión anterior
+  - [ ] Testear visualmente
+- [ ] Commit cada componente por separado con mensaje descriptivo
+- [ ] Documentar en este archivo
+
+---
+
 ## Historial de Cambios
 
 | Fecha | Test | Cambio | Commit | Autor |
 |-------|------|--------|--------|-------|
 | 2026-01-30 | sha_harmony | Migración de AUDIT legacy (v1) a Sefirotic balance (v2) | f05a1669 | Copilot + Luis Blanco |
+| 2026-01-30 | sha_harmony | Fix ReadableResult para reconocer v2 (multi-view sync) | d97ad3ad | Copilot + Luis Blanco |
+| 2026-01-30 | sha_harmony | Fix SHAWorkspace para mostrar resultados v2 del paciente | 52e0143e | Copilot + Luis Blanco |
 | 2026-01-30 | - | Creación de TEST_LEGACY_MIGRATION.md | - | Copilot + Luis Blanco |
 
 ---

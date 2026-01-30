@@ -364,15 +364,18 @@ export default function ReadableResult({
           </div>
         )}
 
-        <details className="bg-gray-50 border border-gray-200 rounded-lg p-3">
-          <summary className="cursor-pointer text-sm text-gray-600 font-medium flex items-center gap-2">
-            <FileJson size={14} />
-            Ver datos completos (JSON)
-          </summary>
-          <pre className="text-xs whitespace-pre-wrap break-words text-gray-800 mt-3 font-mono bg-white p-2 rounded border border-gray-100">
-            {JSON.stringify(resultData, null, 2)}
-          </pre>
-        </details>
+        {/* Technical JSON view - only for therapists */}
+        {isTherapist && (
+          <details className="bg-gray-50 border border-gray-200 rounded-lg p-3 mt-3">
+            <summary className="cursor-pointer text-sm text-gray-600 font-medium flex items-center gap-2">
+              <FileJson size={14} />
+              Ver datos técnicos (JSON) - Solo Terapeuta
+            </summary>
+            <pre className="text-xs whitespace-pre-wrap break-words text-gray-800 mt-3 font-mono bg-white p-2 rounded border border-gray-100">
+              {JSON.stringify(resultData, null, 2)}
+            </pre>
+          </details>
+        )}
       </div>
     );
   }
@@ -528,15 +531,18 @@ export default function ReadableResult({
             </div>
           )}
 
-          <details className="bg-gray-50 border border-gray-200 rounded-lg p-3">
-            <summary className="cursor-pointer text-sm text-gray-600 font-medium flex items-center gap-2">
-              <FileJson size={14} />
-              Ver datos completos (JSON)
-            </summary>
-            <pre className="text-xs whitespace-pre-wrap break-words text-gray-800 mt-3 font-mono bg-white p-2 rounded border border-gray-100">
-              {JSON.stringify(resultData, null, 2)}
-            </pre>
-          </details>
+          {/* Technical JSON view - only for therapists */}
+          {isTherapist && (
+            <details className="bg-gray-50 border border-gray-200 rounded-lg p-3 mt-3">
+              <summary className="cursor-pointer text-sm text-gray-600 font-medium flex items-center gap-2">
+                <FileJson size={14} />
+                Ver datos técnicos (JSON) - Solo Terapeuta
+              </summary>
+              <pre className="text-xs whitespace-pre-wrap break-words text-gray-800 mt-3 font-mono bg-white p-2 rounded border border-gray-100">
+                {JSON.stringify(resultData, null, 2)}
+              </pre>
+            </details>
+          )}
         </div>
       );
     }
@@ -642,15 +648,18 @@ export default function ReadableResult({
           </div>
         )}
 
-        <details className="bg-gray-50 border border-gray-200 rounded-lg p-3">
-          <summary className="cursor-pointer text-sm text-gray-600 font-medium flex items-center gap-2">
-            <FileJson size={14} />
-            Ver datos completos (JSON)
-          </summary>
-          <pre className="text-xs whitespace-pre-wrap break-words text-gray-800 mt-3 font-mono bg-white p-2 rounded border border-gray-100">
-            {JSON.stringify(resultData, null, 2)}
-          </pre>
-        </details>
+        {/* Technical JSON view - only for therapists */}
+        {isTherapist && (
+          <details className="bg-gray-50 border border-gray-200 rounded-lg p-3 mt-3">
+            <summary className="cursor-pointer text-sm text-gray-600 font-medium flex items-center gap-2">
+              <FileJson size={14} />
+              Ver datos técnicos (JSON) - Solo Terapeuta
+            </summary>
+            <pre className="text-xs whitespace-pre-wrap break-words text-gray-800 mt-3 font-mono bg-white p-2 rounded border border-gray-100">
+              {JSON.stringify(resultData, null, 2)}
+            </pre>
+          </details>
+        )}
       </div>
     );
   }
@@ -666,15 +675,18 @@ export default function ReadableResult({
             {isMCMI4Signal ? 'Resultado recibido, pendiente de normalización' : 'Sin datos estructurados'}
           </span>
         </div>
-        <details className="bg-gray-50 border border-gray-200 rounded-lg p-3">
-          <summary className="cursor-pointer text-sm text-gray-600 font-medium flex items-center gap-2">
-            <FileJson size={14} />
-            Ver datos completos (JSON)
-          </summary>
-          <pre className="text-xs whitespace-pre-wrap break-words text-gray-800 mt-3 font-mono bg-white p-2 rounded border border-gray-100">
-            {JSON.stringify(resultData, null, 2)}
-          </pre>
-        </details>
+        {/* Technical JSON view - only for therapists */}
+        {isTherapist && (
+          <details className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+            <summary className="cursor-pointer text-sm text-gray-600 font-medium flex items-center gap-2">
+              <FileJson size={14} />
+              Ver datos técnicos (JSON) - Solo Terapeuta
+            </summary>
+            <pre className="text-xs whitespace-pre-wrap break-words text-gray-800 mt-3 font-mono bg-white p-2 rounded border border-gray-100">
+              {JSON.stringify(resultData, null, 2)}
+            </pre>
+          </details>
+        )}
       </div>
     );
   }

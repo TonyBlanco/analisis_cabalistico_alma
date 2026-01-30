@@ -491,8 +491,63 @@ export default function SHAWorkspace() {
                           <p className="text-gray-500">Fecha de completado</p>
                           <p className="font-medium">{new Date(shaHarmonyResult.created_at).toLocaleString('es-ES')}</p>
                         </div>
-                        {/* Handle both new format (scores.total) and legacy format (scores directly) */}
-                        {(shaHarmonyResult.scores?.total !== undefined || shaHarmonyResult.scores?.schema_version) ? (
+                        {/* Handle v2 format (harmony_index) */}
+                        {shaHarmonyResult.scores?.harmony_index !== undefined ? (
+                          <>
+                            <div>
+                              <p className="text-gray-500">Índice de Armonía</p>
+                              <p className="font-medium text-lg">
+                                {shaHarmonyResult.scores.harmony_index.toFixed(1)} / 5.0
+                              </p>
+                            </div>
+                            {shaHarmonyResult.scores.harmony_level && (
+                              <div className="col-span-2">
+                                <p className="text-gray-500">Nivel de Armonía</p>
+                                <p className={`font-semibold ${
+                                  shaHarmonyResult.scores.harmony_level === 'excellent' ? 'text-green-600' :
+                                  shaHarmonyResult.scores.harmony_level === 'good' ? 'text-blue-600' :
+                                  shaHarmonyResult.scores.harmony_level === 'moderate' ? 'text-yellow-600' :
+                                  'text-orange-600'
+                                }`}>
+                                  {shaHarmonyResult.scores.harmony_label || shaHarmonyResult.scores.harmony_level}
+                                </p>
+                              </div>
+                            )}
+                            {shaHarmonyResult.scores.sefirot_scores && (
+                              <div className="col-span-2">
+                                <p className="text-gray-500 mb-2">Distribución Sefirótica</p>
+                                <div className="space-y-1">
+                                  {Object.entries(shaHarmonyResult.scores.sefirot_scores).map(([sefira, score]) => (
+                                    <div key={sefira} className="flex items-center gap-2 text-xs">
+                                      <span className="w-20 text-purple-700 font-medium">{sefira}</span>
+                                      <div className="flex-1 bg-purple-200 rounded-full h-1.5">
+                                        <div
+                                          className="bg-purple-600 h-1.5 rounded-full"
+                                          style={{ width: `${(Number(score) / 5) * 100}%` }}
+                                        />
+                                      </div>
+                                      <span className="w-10 text-right text-purple-700 font-bold">{score}/5</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            {shaHarmonyResult.scores.recommendations && shaHarmonyResult.scores.recommendations.length > 0 && (
+                              <div className="col-span-2 mt-2 pt-2 border-t border-green-200">
+                                <p className="text-gray-500 mb-1">Recomendaciones</p>
+                                <ul className="space-y-0.5 text-xs text-gray-700">
+                                  {shaHarmonyResult.scores.recommendations.slice(0, 3).map((rec: string, idx: number) => (
+                                    <li key={idx} className="flex items-start gap-1">
+                                      <span className="text-green-600">✓</span>
+                                      <span>{rec}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                          </>
+                        ) : (shaHarmonyResult.scores?.total !== undefined || shaHarmonyResult.scores?.schema_version) ? (
+                          /* Handle v1 format (legacy) */
                           <>
                             <div>
                               <p className="text-gray-500">Puntuación Total</p>

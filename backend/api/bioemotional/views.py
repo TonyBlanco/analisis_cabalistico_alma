@@ -767,19 +767,20 @@ class BioEmotionalExportView(APIView):
     permission_classes = [IsAuthenticated, IsTherapist]
 
     def get(self, request, patient_id: int):
-        # Validar acceso al paciente
         try:
-            patient = Patient.objects.get(pk=patient_id, therapist=request.user)
-        except Patient.DoesNotExist:
-            return Response(
-                {"detail": "Paciente no encontrado o no autorizado."},
-                status=status.HTTP_404_NOT_FOUND
-            )
+            # Validar acceso al paciente
+            try:
+                patient = Patient.objects.get(pk=patient_id, therapist=request.user)
+            except Patient.DoesNotExist:
+                return Response(
+                    {"detail": "Paciente no encontrado o no autorizado."},
+                    status=status.HTTP_404_NOT_FOUND
+                )
 
-        # Obtener sesiones
-        sessions = BioEmotionalSession.objects.filter(
-            patient=patient
-        ).order_by("-date")
+            # Obtener sesiones
+            sessions = BioEmotionalSession.objects.filter(
+                patient=patient
+            ).order_by("-date")
 
         # Obtener observaciones e hipótesis
         observations = BioEmotionalObservation.objects.filter(
@@ -861,9 +862,21 @@ class BioEmotionalExportView(APIView):
             "export_timestamp": timezone.now()
         }
 
-        from .serializers import BioEmotionalExportSerializer
-        serializer = BioEmotionalExportSerializer(export_data)
-        return Response(serializer.data)
+            from .serializers import BioEmotionalExportSerializer
+            serializer = BioEmotionalExportSerializer(export_data)
+            return Response(serializer.data)
+        
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error in BioEmotionalExportView for patient {patient_id}: {str(e)}", exc_info=True)
+            return Response(
+                {
+                    "detail": "Error interno al exportar datos BioEmotional",
+                    "error": str(e)
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 class MSHEImportBioEmotionalView(APIView):

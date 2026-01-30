@@ -17,7 +17,9 @@ class AIInterpretation(models.Model):
     test_result = models.ForeignKey(
         TestResult,
         on_delete=models.CASCADE,
-        related_name='ai_interpretations'
+        related_name='ai_interpretations',
+        null=True,
+        blank=True
     )
     patient = models.ForeignKey(
         Patient,
@@ -57,7 +59,8 @@ class AIInterpretation(models.Model):
         ]
     
     def __str__(self):
-        return f"AI Interpretation {self.id} for TestResult {self.test_result_id}"
+        tr = self.test_result_id if self.test_result_id is not None else 'assignment/none'
+        return f"AI Interpretation {self.id} for TestResult {tr}"
 
 
 class AIAuditLog(models.Model):

@@ -5,8 +5,9 @@
  */
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Sparkles, RefreshCw, AlertTriangle, CheckCircle, BookOpen, Loader2 } from 'lucide-react';
+import { API_BASE_URL } from '@/lib/api';
 
 interface AIInterpretation {
   interpretation_id: string;
@@ -62,6 +63,64 @@ export default function AIInterpretationPanel({
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [testExists, setTestExists] = useState<boolean | null>(null);
+  const [isAssignment, setIsAssignment] = useState<boolean>(false);
+
+  useEffect(() => {
+    // Verify the test result exists before enabling AI generation
+    let mounted = true;
+    (async () => {
+      try {
+        const authToken = localStorage.getItem('authToken');
+        const res = await fetch(`${API_BASE_URL}/tests/results/${testResultId}/`, {
+          method: 'GET',
+          headers: authToken
+            ? { 'Authorization': `Token ${authToken}`, 'Content-Type': 'application/json' }
+            : { 'Content-Type': 'application/json' }
+        });
+
+        if (!mounted) return;
+
+        if (res.status === 404) {
+          // Maybe this ID is an assignment (SHA uses assignments.results) — try assignments endpoint
+          try {
+            const assignRes = await fetch(`${API_BASE_URL}/assignments/${testResultId}/`, {
+              method: 'GET',
+              headers: authToken
+                ? { 'Authorization': `Token ${authToken}`, 'Content-Type': 'application/json' }
+                : { 'Content-Type': 'application/json' }
+            });
+            if (assignRes.ok) {
+              setIsAssignment(true);
+              setTestExists(true);
+              return;
+            }
+          } catch (e) {
+            console.error('assignment lookup failed', e);
+          }
+
+          setTestExists(false);
+          setError('Resultado no encontrado. Asegúrate de que el paciente haya completado el test.');
+          return;
+        }
+
+        if (!res.ok) {
+          setTestExists(false);
+          setError('No se pudo verificar el resultado del test.');
+          return;
+        }
+
+        setTestExists(true);
+      } catch (e) {
+        if (!mounted) return;
+        setTestExists(false);
+        setError('Error de red al verificar el resultado del test');
+        console.error('verify test result error', e);
+      }
+    })();
+
+    return () => { mounted = false; };
+  }, [testResultId]);
 
   const generateInterpretation = async (forceRefresh: boolean = false) => {
     setLoading(true);
@@ -73,7 +132,11 @@ export default function AIInterpretationPanel({
         throw new Error('No authentication token found');
       }
 
-      const response = await fetch(`/api/ai-engine/interpret/${testResultId}/`, {
+      const endpoint = isAssignment
+        ? `${API_BASE_URL}/ai-engine/interpret-assignment/${testResultId}/`
+        : `${API_BASE_URL}/ai-engine/interpret/${testResultId}/`;
+
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -100,6 +163,28 @@ export default function AIInterpretationPanel({
   };
 
   if (!interpretation && !loading) {
+    // If we haven't verified the test result yet, show a lightweight loading state
+    if (testExists === null) {
+      return (
+        <div className="bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-200 rounded-xl p-6 shadow-sm text-center">
+          <Loader2 className="animate-spin h-8 w-8 text-purple-600 mx-auto mb-3" />
+          <p className="text-gray-600">Verificando resultado del test...</p>
+        </div>
+      );
+    }
+
+    // If test does not exist, show helpful message
+    if (testExists === false) {
+      return (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6">
+          <div className="flex items-center gap-2 mb-2">
+            <AlertTriangle className="w-5 h-5 text-yellow-700" />
+            <h3 className="font-semibold text-yellow-900">Resultado no disponible</h3>
+          </div>
+          <p className="text-yellow-800 mb-4">{error || 'El resultado del test no fue encontrado. Asegúrate de que el paciente haya completado el cuestionario.'}</p>
+        </div>
+      );
+    }
     return (
       <div className="bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-200 rounded-xl p-6 shadow-sm">
         <div className="flex items-center gap-3 mb-4">
@@ -189,6 +274,36 @@ export default function AIInterpretationPanel({
           >
             <RefreshCw className="w-4 h-4" />
           </button>
+          <button
+            onClick={async () => {
+              try {
+                const authToken = localStorage.getItem('authToken');
+                if (!authToken) throw new Error('No auth token');
+                const resp = await fetch(`${API_BASE_URL}/ai-engine/export-to-mshe/${interpretation.interpretation_id}/`, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Token ${authToken}`
+                  }
+                });
+                if (!resp.ok) {
+                  const err = await resp.json().catch(() => ({}));
+                  throw new Error(err.detail || 'Export failed');
+                }
+                const data = await resp.json();
+                // Redirect to MSHE page for patient
+                const pid = data.patient_id;
+                window.location.href = `/dashboard/therapist/mshe?patient_id=${pid}`;
+              } catch (e) {
+                console.error('Export to MSHE failed', e);
+                setError('Exportar a MSHE falló: ' + (e instanceof Error ? e.message : '')); 
+              }
+            }}
+            className="ml-3 text-sm bg-indigo-100 text-indigo-700 px-2 py-1 rounded-md"
+            title="Exportar resumen a MSHE"
+          >
+            Exportar a MSHE
+          </button>
         </div>
       </div>
 
@@ -199,14 +314,14 @@ export default function AIInterpretationPanel({
       </div>
 
       {/* Key Insights */}
-      {interpretation.narrative.key_insights.length > 0 && (
+      {(interpretation.narrative?.key_insights?.length ?? 0) > 0 && (
         <div className="mb-6 bg-white rounded-lg p-4 border border-green-100">
           <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
             <CheckCircle className="w-5 h-5 text-green-600" />
             Insights Clave
           </h4>
           <ul className="space-y-2">
-            {interpretation.narrative.key_insights.map((insight, idx) => (
+            {(interpretation.narrative?.key_insights || []).map((insight, idx) => (
               <li key={idx} className="flex items-start gap-2">
                 <span className="text-green-600 mt-1">✓</span>
                 <span className="text-gray-700">{insight}</span>
@@ -217,11 +332,11 @@ export default function AIInterpretationPanel({
       )}
 
       {/* Strengths */}
-      {interpretation.narrative.strengths.length > 0 && (
+      {(interpretation.narrative?.strengths?.length ?? 0) > 0 && (
         <div className="mb-6 bg-white rounded-lg p-4 border border-blue-100">
           <h4 className="font-semibold text-gray-900 mb-3">Fortalezas</h4>
           <ul className="space-y-2">
-            {interpretation.narrative.strengths.map((strength, idx) => (
+            {(interpretation.narrative?.strengths || []).map((strength, idx) => (
               <li key={idx} className="flex items-start gap-2">
                 <span className="text-blue-600 mt-1">★</span>
                 <span className="text-gray-700">{strength}</span>
@@ -232,14 +347,14 @@ export default function AIInterpretationPanel({
       )}
 
       {/* Clinical Concerns */}
-      {interpretation.narrative.clinical_concerns.length > 0 && (
+      {(interpretation.narrative?.clinical_concerns?.length ?? 0) > 0 && (
         <div className="mb-6 bg-white rounded-lg p-4 border border-orange-100">
           <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
             <AlertTriangle className="w-5 h-5 text-orange-600" />
             Áreas de Atención
           </h4>
           <ul className="space-y-2">
-            {interpretation.narrative.clinical_concerns.map((concern, idx) => (
+            {(interpretation.narrative?.clinical_concerns || []).map((concern, idx) => (
               <li key={idx} className="flex items-start gap-2">
                 <span className="text-orange-600 mt-1">•</span>
                 <span className="text-gray-700">{concern}</span>
@@ -250,14 +365,14 @@ export default function AIInterpretationPanel({
       )}
 
       {/* Suggested Diagnoses */}
-      {interpretation.suggested_diagnoses.length > 0 && (
+      {(interpretation.suggested_diagnoses?.length ?? 0) > 0 && (
         <div className="mb-6 bg-white rounded-lg p-4 border border-indigo-100">
           <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
             <BookOpen className="w-5 h-5 text-indigo-600" />
             Patrones Sugeridos
           </h4>
           <div className="space-y-3">
-            {interpretation.suggested_diagnoses.map((diagnosis, idx) => (
+            {(interpretation.suggested_diagnoses || []).map((diagnosis, idx) => (
               <div key={idx} className="bg-indigo-50 border border-indigo-200 rounded-lg p-3">
                 <div className="flex items-center justify-between mb-2">
                   <div>
@@ -286,25 +401,25 @@ export default function AIInterpretationPanel({
         {/* Immediate Focus */}
         <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-4">
           <h5 className="font-medium text-purple-900 mb-2">Enfoque Inmediato</h5>
-          {interpretation.therapeutic_route.immediate_focus.sefira && (
+          {interpretation.therapeutic_route?.immediate_focus?.sefira && (
             <p className="text-sm text-gray-600 mb-1">
               <strong>Sefirá:</strong> {interpretation.therapeutic_route.immediate_focus.sefira}
             </p>
           )}
           <p className="text-gray-700 mb-2 font-medium">{interpretation.therapeutic_route.immediate_focus.issue}</p>
           <ul className="text-sm text-gray-600 space-y-1">
-            {interpretation.therapeutic_route.immediate_focus.techniques.map((technique, idx) => (
+            {(interpretation.therapeutic_route?.immediate_focus?.techniques || []).map((technique, idx) => (
               <li key={idx}>✓ {technique}</li>
             ))}
           </ul>
         </div>
 
         {/* Complementary Modalities */}
-        {interpretation.therapeutic_route.complementary_modalities.length > 0 && (
+        {(interpretation.therapeutic_route?.complementary_modalities?.length ?? 0) > 0 && (
           <div className="mb-4">
             <h5 className="font-medium text-gray-900 mb-2">Modalidades Complementarias</h5>
             <div className="space-y-2">
-              {interpretation.therapeutic_route.complementary_modalities.map((modality, idx) => (
+              {(interpretation.therapeutic_route?.complementary_modalities || []).map((modality, idx) => (
                 <div key={idx} className="bg-gray-50 border border-gray-200 rounded-lg p-3">
                   <p className="font-medium text-gray-900 text-sm">{modality.modality}</p>
                   <p className="text-sm text-gray-600">{modality.rationale}</p>
@@ -315,11 +430,11 @@ export default function AIInterpretationPanel({
         )}
 
         {/* Next Assessments */}
-        {interpretation.therapeutic_route.next_assessments.length > 0 && (
+        {(interpretation.therapeutic_route?.next_assessments?.length ?? 0) > 0 && (
           <div className="mb-4">
             <h5 className="font-medium text-gray-900 mb-2">Evaluaciones Sugeridas</h5>
             <ul className="text-sm text-gray-700 space-y-1">
-              {interpretation.therapeutic_route.next_assessments.map((assessment, idx) => (
+              {(interpretation.therapeutic_route?.next_assessments || []).map((assessment, idx) => (
                 <li key={idx}>→ {assessment}</li>
               ))}
             </ul>
@@ -327,11 +442,11 @@ export default function AIInterpretationPanel({
         )}
 
         {/* Contraindications */}
-        {interpretation.therapeutic_route.contraindications.length > 0 && (
+        {(interpretation.therapeutic_route?.contraindications?.length ?? 0) > 0 && (
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
             <h5 className="font-medium text-yellow-900 mb-2">Contraindicaciones</h5>
             <ul className="text-sm text-yellow-800 space-y-1">
-              {interpretation.therapeutic_route.contraindications.map((contra, idx) => (
+              {(interpretation.therapeutic_route?.contraindications || []).map((contra, idx) => (
                 <li key={idx}>⚠ {contra}</li>
               ))}
             </ul>

@@ -97,23 +97,32 @@ class AIEngineOrchestrator:
         
         try:
             interpretation_data = interpreter.interpret(test_result, user)
+            # Attach patient id for frontend consumers when available
+            try:
+                interpretation_data['patient_id'] = test_result.patient.id if getattr(test_result, 'patient', None) else None
+            except Exception:
+                interpretation_data['patient_id'] = None
             
             latency_ms = int((time.time() - start_time) * 1000)
             interpretation_data['metadata']['latency_ms'] = latency_ms
             
             # Save to database
+            # Support both TestResult instances and assignment-like objects (no TestResult row)
+            tr_val = test_result if isinstance(test_result, TestResult) else None
+            patient_val = getattr(test_result, 'patient', None)
+
             ai_interpretation = AIInterpretation.objects.create(
                 id=interpretation_data['interpretation_id'],
-                test_result=test_result,
-                patient=test_result.patient,
+                test_result=tr_val,
+                patient=patient_val,
                 interpreter_type=test_type,
                 narrative=interpretation_data['narrative'],
                 suggested_diagnoses=interpretation_data.get('suggested_diagnoses', []),
                 therapeutic_route=interpretation_data['therapeutic_route'],
                 model_used=interpretation_data['metadata']['model_used'],
-                prompt_tokens=interpretation_data['metadata']['tokens']['prompt'],
-                completion_tokens=interpretation_data['metadata']['tokens']['completion'],
-                total_cost_usd=interpretation_data['metadata']['cost_usd'],
+                prompt_tokens=interpretation_data['metadata']['tokens'].get('prompt', 0),
+                completion_tokens=interpretation_data['metadata']['tokens'].get('completion', 0),
+                total_cost_usd=interpretation_data['metadata'].get('cost_usd', 0.0),
                 rag_sources=interpretation_data['metadata'].get('rag_sources', []),
                 created_by=user,
                 is_cached=False

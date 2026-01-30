@@ -60,18 +60,10 @@ class SHAInterpreter(BaseInterpreter):
             'suggested_diagnoses': interpretation_content.get('suggested_diagnoses', []),
             'therapeutic_route': interpretation_content.get('therapeutic_route', {}),
             'metadata': {
-                'model_used': 'gpt-4-turbo-preview',
+                'model_used': 'multi-ai-service (Gemini/Groq/OpenAI/Ollama)',
                 'tokens': completion['tokens'],
                 'cost_usd': completion['cost_usd'],
-                'rag_sources': [
-                    {
-                        'text': r['text'][:200] + '...',
-                        'source': r['source'],
-                        'category': r['category'],
-                        'score': r['score']
-                    }
-                    for r in rag_results
-                ],
+                'rag_sources': [],  # RAG disabled
                 'timestamp': test_result.created_at.isoformat()
             }
         }

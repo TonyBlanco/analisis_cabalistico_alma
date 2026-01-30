@@ -92,7 +92,7 @@ const mainNavLinks = [
   {
     id: 'settings',
     label: 'Configuración',
-    href: '/settings',
+    href: '/dashboard/therapist/therapist-config',
     icon: Settings,
   },
 ];
@@ -175,6 +175,14 @@ const swmLaunchers = [
     description: 'Auditoría de balance sefirotico observacional.',
     href: '/dashboard/therapist/sha',
     icon: Layers,
+    enabled: true,
+  },
+  {
+    id: 'therapist-config',
+    title: 'Configuración',
+    description: 'Herramientas de administración y mantenimiento.',
+    href: '/dashboard/therapist/therapist-config',
+    icon: Settings,
     enabled: true,
   },
 ];

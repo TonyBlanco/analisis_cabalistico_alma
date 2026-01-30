@@ -378,8 +378,26 @@ export default function ReadableResult({
   }
 
   // (C) Check for SHA Harmony (Sephirotic Harmony Audit) schema
-  const isSHAHarmony = payload?.schema_version === 'sha_harmony:v1' || testCode === 'sha_harmony';
-  const shaData = isSHAHarmony ? {
+  const isSHAHarmony = payload?.schema_version === 'sha_harmony:v1' || 
+                       payload?.schema_version === 'sha_harmony:v2' || 
+                       testCode === 'sha_harmony';
+  
+  // Detect v2 format: harmony_index, sefirot_scores, recommendations
+  const isV2 = payload?.harmony_index !== undefined;
+  
+  const shaData = isSHAHarmony ? (isV2 ? {
+    // v2 format
+    harmony_index: payload?.harmony_index ?? null,
+    harmony_level: payload?.harmony_level ?? 'moderate',
+    harmony_label: payload?.harmony_label ?? '',
+    sefirot_scores: payload?.sefirot_scores ?? {},
+    recommendations: payload?.recommendations ?? [],
+    total_score: payload?.total_score ?? null,
+    max_score: payload?.max_score ?? 50,
+    timestamp: payload?.timestamp ?? date,
+    version: 2
+  } : {
+    // v1 format (legacy)
     total: payload?.total ?? null,
     max_score: payload?.max_score ?? 40,
     zone: payload?.zone ?? 'Unknown',
@@ -387,10 +405,143 @@ export default function ReadableResult({
     sefira: payload?.sefira ?? null,
     interpretation: payload?.interpretation ?? null,
     timestamp: payload?.timestamp ?? date,
-  } : null;
+    version: 1
+  }) : null;
 
   // Render SHA Harmony schema
   if (isSHAHarmony && shaData) {
+    // Handle v2 format
+    if ('version' in shaData && shaData.version === 2) {
+      const harmonyIndex = shaData.harmony_index ?? 0;
+      const harmonyPercent = Math.round((harmonyIndex / 5) * 100);
+      
+      const getHarmonyColor = (index: number) => {
+        if (index >= 4.5) return 'green'; // excellent
+        if (index >= 3.5) return 'blue';  // good
+        if (index >= 2.5) return 'yellow'; // moderate
+        return 'orange'; // low
+      };
+      
+      const harmonyColor = getHarmonyColor(harmonyIndex);
+      const colorClasses: Record<string, { bg: string; border: string; text: string; accent: string }> = {
+        green: { bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-800', accent: 'bg-green-500' },
+        blue: { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-800', accent: 'bg-blue-500' },
+        yellow: { bg: 'bg-yellow-50', border: 'border-yellow-200', text: 'text-yellow-800', accent: 'bg-yellow-500' },
+        orange: { bg: 'bg-orange-50', border: 'border-orange-200', text: 'text-orange-800', accent: 'bg-orange-500' },
+      };
+      const colors = colorClasses[harmonyColor] || colorClasses.yellow;
+
+      return (
+        <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+          <div className="flex items-start justify-between mb-3">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                {testName || 'Auditoría de Armonía Sefirótica (SHA)'}
+                {testCode && <span className="text-xs font-normal text-gray-500 px-2 py-0.5 bg-gray-100 rounded-full border border-gray-200">{testCode}</span>}
+              </h3>
+              {shaData.timestamp && (
+                <div className="flex items-center gap-1 mt-1 text-xs text-gray-500">
+                  <Calendar size={12} />
+                  <span>{new Date(shaData.timestamp).toLocaleString('es-ES', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                </div>
+              )}
+            </div>
+            {onClose && (
+              <button
+                onClick={onClose}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+                aria-label="Cerrar"
+              >
+                <X size={20} />
+              </button>
+            )}
+          </div>
+          
+          {/* Harmony Index Display */}
+          <div className={`${colors.bg} ${colors.border} border rounded-lg p-4 mb-3`}>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-3">
+                <div className={`w-12 h-12 ${colors.accent} rounded-full flex items-center justify-center`}>
+                  <span className="text-white font-bold text-lg">{harmonyIndex.toFixed(1)}</span>
+                </div>
+                <div>
+                  <p className={`font-semibold ${colors.text}`}>Índice de Armonía</p>
+                  <p className="text-sm text-gray-600">{harmonyIndex.toFixed(1)} / 5.0</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-2xl font-bold text-gray-700">{harmonyPercent}%</p>
+                <p className="text-xs text-gray-500">del máximo</p>
+              </div>
+            </div>
+            
+            {/* Progress bar */}
+            <div className="w-full bg-gray-200 rounded-full h-2 mb-3">
+              <div 
+                className={`${colors.accent} h-2 rounded-full transition-all`}
+                style={{ width: `${Math.min(harmonyPercent, 100)}%` }}
+              />
+            </div>
+            
+            {/* Harmony Level Label */}
+            <div className={`${colors.text} font-medium text-sm`}>
+              {shaData.harmony_label || shaData.harmony_level}
+            </div>
+          </div>
+
+          {/* Sefirot Scores */}
+          {shaData.sefirot_scores && Object.keys(shaData.sefirot_scores).length > 0 && (
+            <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 mb-3">
+              <div className="flex items-center gap-2 text-purple-700 mb-2">
+                <span className="text-lg">✡</span>
+                <span className="font-medium text-sm">Distribución Sefirótica</span>
+              </div>
+              <div className="space-y-2">
+                {Object.entries(shaData.sefirot_scores).map(([sefira, score]) => (
+                  <div key={sefira} className="flex items-center gap-2">
+                    <span className="text-xs text-purple-800 w-20 font-medium">{sefira}</span>
+                    <div className="flex-1 bg-purple-200 rounded-full h-2">
+                      <div
+                        className="bg-purple-600 h-2 rounded-full"
+                        style={{ width: `${(Number(score) / 5) * 100}%` }}
+                      />
+                    </div>
+                    <span className="text-xs text-purple-700 font-bold w-8 text-right">{score}/5</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Recommendations */}
+          {shaData.recommendations && shaData.recommendations.length > 0 && (
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 mb-3">
+              <h4 className="text-sm font-semibold text-gray-900 mb-2">Recomendaciones</h4>
+              <ul className="space-y-1 text-sm text-gray-700">
+                {shaData.recommendations.map((rec: string, idx: number) => (
+                  <li key={idx} className="flex items-start gap-2">
+                    <span className="text-green-600 mt-0.5">✓</span>
+                    <span>{rec}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <details className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+            <summary className="cursor-pointer text-sm text-gray-600 font-medium flex items-center gap-2">
+              <FileJson size={14} />
+              Ver datos completos (JSON)
+            </summary>
+            <pre className="text-xs whitespace-pre-wrap break-words text-gray-800 mt-3 font-mono bg-white p-2 rounded border border-gray-100">
+              {JSON.stringify(resultData, null, 2)}
+            </pre>
+          </details>
+        </div>
+      );
+    }
+
+    // Handle v1 format (legacy)
     const scorePercent = shaData.total !== null ? Math.round((shaData.total / shaData.max_score) * 100) : null;
     const getZoneColor = (zone: string) => {
       switch (zone) {

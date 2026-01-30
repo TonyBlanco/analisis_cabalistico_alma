@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import get_user_model
 from api.models import Patient
-from api.test_models import TestResult, Assignment
+from api.test_models import TestResult, Assignment, UserTestAccess
 from django.db.models import Q
 
 User = get_user_model()
@@ -55,6 +55,9 @@ class DataCleanupView(APIView):
                 Q(clinical_profile=patient) | Q(subject_user=patient.user)
             ).count()
             
+            # Count test accesses (assigned tests)
+            test_accesses = UserTestAccess.objects.filter(user=patient.user).count()
+            
             patient_data.append({
                 'id': patient.id,
                 'user_id': patient.user.id,
@@ -64,7 +67,8 @@ class DataCleanupView(APIView):
                     'test_results_linked': tr_linked,
                     'test_results_orphan': tr_orphan,
                     'assignments': assignments,
-                    'total': tr_linked + tr_orphan + assignments
+                    'test_accesses': test_accesses,
+                    'total': tr_linked + tr_orphan + assignments + test_accesses
                 }
             })
         
@@ -125,11 +129,13 @@ class DataCleanupView(APIView):
         assign_qs = Assignment.objects.filter(
             Q(clinical_profile=patient) | Q(subject_user=patient.user)
         )
+        access_qs = UserTestAccess.objects.filter(user=patient.user)
         
         counts = {
             'test_results_linked': tr_linked_qs.count(),
             'test_results_orphan': tr_orphan_qs.count(),
             'assignments': assign_qs.count(),
+            'test_accesses': access_qs.count(),
         }
         
         if dry_run:
@@ -147,6 +153,7 @@ class DataCleanupView(APIView):
         deleted_tr_orphan = tr_orphan_qs.delete()
         deleted_tr_linked = tr_linked_qs.delete()
         deleted_assign = assign_qs.delete()
+        deleted_access = access_qs.delete()
         
         return Response({
             'dry_run': False,
@@ -158,6 +165,7 @@ class DataCleanupView(APIView):
                 'test_results_orphan': deleted_tr_orphan[0] if deleted_tr_orphan else 0,
                 'test_results_linked': deleted_tr_linked[0] if deleted_tr_linked else 0,
                 'assignments': deleted_assign[0] if deleted_assign else 0,
+                'test_accesses': deleted_access[0] if deleted_access else 0,
             },
             'message': 'Cleanup completed successfully'
         })

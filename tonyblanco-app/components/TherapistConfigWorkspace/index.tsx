@@ -18,6 +18,7 @@ interface PatientDataSummary {
     test_results_linked: number;
     test_results_orphan: number;
     assignments: number;
+    test_accesses: number;
     total: number;
   };
 }
@@ -346,7 +347,7 @@ export default function TherapistConfigWorkspace() {
                     ) : patientData ? (
                       <div className="bg-gray-50 rounded-lg p-4">
                         <h3 className="text-sm font-medium text-gray-700 mb-3">Resumen de datos</h3>
-                        <div className="grid grid-cols-4 gap-4">
+                        <div className="grid grid-cols-5 gap-3">
                           <div className="bg-white rounded-lg p-3 border border-gray-200">
                             <div className="text-2xl font-bold text-gray-900">{patientData.counts.test_results_linked}</div>
                             <div className="text-xs text-gray-500">Tests Vinculados</div>
@@ -358,6 +359,10 @@ export default function TherapistConfigWorkspace() {
                           <div className="bg-white rounded-lg p-3 border border-gray-200">
                             <div className="text-2xl font-bold text-gray-900">{patientData.counts.assignments}</div>
                             <div className="text-xs text-gray-500">Asignaciones</div>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 border border-gray-200">
+                            <div className="text-2xl font-bold text-purple-600">{patientData.counts.test_accesses}</div>
+                            <div className="text-xs text-gray-500">Tests Asignados</div>
                           </div>
                           <div className="bg-white rounded-lg p-3 border border-gray-200">
                             <div className="text-2xl font-bold text-indigo-600">{patientData.counts.total}</div>

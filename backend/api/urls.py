@@ -376,4 +376,7 @@ urlpatterns = [
     
     # Active Inquiry Engine (Patient context collection)
     path('inquiry/', include('api.inquiry.urls')),
+    
+    # AI Engine (Therapeutic interpretation with GPT-4 + RAG)
+    path('ai-engine/', include('api.ai_engine.urls')),
 ]

@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     'swm.transgenerational',  # SWM Transgeneracional Profundo (Psychogenealogy Workspace)
     'swm.sha',          # SWM Auditoría de Armonía Sefirótica (SHA)
     'api.inquiry',            # Active Inquiry Engine (Patient context collection)
+    'api.ai_engine',          # AI Engine (Therapeutic interpretations with GPT-4 + RAG)
     # Symbolic systems (Python implementations)
     'symbolic.swm_v3',  # SWM v3 governed symbolic readings (Phase 3)
 ]
@@ -255,3 +256,26 @@ AI_TAROT_ENABLED = config('AI_TAROT_ENABLED', default=True, cast=bool)
 KERYKEION_AI_SNIPPETS_ENABLED = config('KERYKEION_AI_SNIPPETS_ENABLED', default=False, cast=bool)
 ASTRO_MULTITECH_ENABLED = config('ASTRO_MULTITECH_ENABLED', default=True, cast=bool)
 KERYKEION_AI_SNIPPETS_MODEL = config('KERYKEION_AI_SNIPPETS_MODEL', default='')
+
+# =============================================================================
+# AI ENGINE - Therapeutic Interpretations (GPT-4 + RAG)
+# =============================================================================
+
+# AI Engine Configuration
+AI_ENGINE_ENABLED = config('AI_ENGINE_ENABLED', default=False, cast=bool)
+OPENAI_API_KEY = config('OPENAI_API_KEY', default='')
+OPENAI_MODEL = config('OPENAI_MODEL', default='gpt-4-turbo-preview')
+OPENAI_EMBEDDING_MODEL = config('OPENAI_EMBEDDING_MODEL', default='text-embedding-3-large')
+
+# Vector Database (Pinecone)
+PINECONE_API_KEY = config('PINECONE_API_KEY', default='')
+PINECONE_ENVIRONMENT = config('PINECONE_ENVIRONMENT', default='us-west1-gcp')
+PINECONE_INDEX_NAME = config('PINECONE_INDEX_NAME', default='holistica-knowledge')
+
+# Redis Cache
+REDIS_URL = config('REDIS_URL', default='redis://localhost:6379/0')
+
+# AI Engine Limits
+AI_MAX_TOKENS = config('AI_MAX_TOKENS', default=4000, cast=int)
+AI_TEMPERATURE = config('AI_TEMPERATURE', default=0.3, cast=float)
+AI_CACHE_TTL = config('AI_CACHE_TTL', default=86400, cast=int)  # 24 hours

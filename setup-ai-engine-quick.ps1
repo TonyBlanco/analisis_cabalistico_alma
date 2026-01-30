@@ -153,7 +153,11 @@ Write-Host "  • Testing: docs/AI_ENGINE_TESTING_GUIDE.md"
 
 Write-Host "`n⚠️  Important Notes:" -ForegroundColor Yellow
 Write-Host "  • System works without Pinecone (uses fallback context)"
-Write-Host "  • Frontend component: AIInterpretationPanel"
+Write-Host "  • Frontend component: AIInterpretationPanel"# 1. Asegúrate que el backend esté corriendo
+.\start-backend.ps1
+
+# 2. En otra terminal, ejecuta el test
+.\test_ai_engine.ps1
 Write-Host "  • Access: Therapist role ONLY"
 Write-Host "  • Safety filters: Prevents diagnostic language"
 

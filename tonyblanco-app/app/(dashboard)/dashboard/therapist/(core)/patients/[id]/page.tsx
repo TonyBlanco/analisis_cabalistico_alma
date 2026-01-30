@@ -10,6 +10,7 @@ import dynamic from 'next/dynamic'
 import { getActivePatient, setActivePatientId } from '@/lib/active-patient';
 import AssignMCMI4Modal from '@/components/AssignMCMI4Modal';
 import AssignMCMI4MysticModal from '@/components/AssignMCMI4MysticModal';
+import DataCleanupPanel from '@/components/therapist/DataCleanupPanel';
 
 import { getApiBaseUrl } from '@/lib/api-base';
 import { getAuthToken } from '@/lib/api';
@@ -295,6 +296,15 @@ export default function TherapistPatientDetailPage() {
       <section className="bg-white border border-gray-200 rounded-lg p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-3">Kabbalah Interpretation (PoC)</h2>
         <KabbalahPanel patientId={patientId} />
+      </section>
+
+      <section className="bg-white border border-gray-200 rounded-lg p-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-3">Utilidades — Limpieza de Datos</h2>
+        <p className="text-sm text-gray-600 mb-4">
+          Limpia datos de tests anteriores para poder ejecutar nuevos tests con este consultante.
+          Útil cuando necesitas repetir tests o limpiar datos de pruebas.
+        </p>
+        <DataCleanupPanel patientId={patientId} />
       </section>
 
       {showEditor && (

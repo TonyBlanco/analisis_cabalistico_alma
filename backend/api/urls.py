@@ -44,6 +44,7 @@ from .views import (
     service_stats,
 )
 from .ai_views import AIHolisticQueryView
+from .cleanup_views import DataCleanupView
 from .astrology_ai_views import (
     AstrologyInterpretNatalView,
     AstrologyInterpretTransitsView,
@@ -197,6 +198,7 @@ urlpatterns = [
     # Endpoints exclusivos para terapeutas
     path('therapist/patients/create/', CreatePatientWithAccountView.as_view(), name='create_patient_with_account'),
     path('therapist/dashboard/', TherapistDashboardView.as_view(), name='therapist_dashboard'),
+    path('therapist/cleanup/', DataCleanupView.as_view(), name='therapist_data_cleanup'),
     path('therapist/patients/', PatientListCreateView.as_view(), name='patient_list_create'),
     path('therapist/patients/<int:pk>/', PatientDetailView.as_view(), name='patient_detail'),
     path('therapist/patients/<int:pk>/profile/', TherapistPatientProfileView.as_view(), name='therapist_patient_profile'),

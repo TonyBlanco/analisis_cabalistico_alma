@@ -27,6 +27,7 @@ These workspace **components** already include their own back navigation:
 | `resonancia-ancestral/` | `ResonanciaAncestralWorkspace` | Top of component | "Volver al espacio clínico" | Single button |
 | `cabala-aplicada/` | `CabalAppliedWorkspace` | Top of component | "Volver al espacio clinico" | Single button |
 | `astrologia-tarot/` | `AstrologyTarotWorkspace` | Top of component | "Volver al espacio clinico" | Single button |
+| `astrologia/` | `AstrologyProfessionalView` | Header right | "← Volver" (router.back()) | Single button - **WAS DUPLICATE**, fixed |
 | `holistica-aplicada/` | (Phoenix Report - direct page component) | Fixed header | "Volver" (router.back()) | Single button |
 | `swm/mcmi4/page.tsx` | (List page - direct page component) | Top section | "Volver" (Link to /dashboard/therapist) | Single button |
 
@@ -43,9 +44,8 @@ These pages **do NOT** have built-in "Volver" in their workspace components:
 | SWM Page | Component | Current State | Action |
 |----------|-----------|---------------|--------|
 | `therapist-config/` | `TherapistConfigWorkspace` | ❌ No back button | ✅ Added `<TherapistBackLink />` |
-| `astrologia/` | `AstrologyProfessionalView` | ❌ No back button | ✅ Added `<TherapistBackLink />` |
 
-**Action Taken:** Added `<TherapistBackLink />` wrapper to these two pages only.
+**Action Taken:** Only `therapist-config` needs external back link. All other SWMs have internal navigation.
 
 ---
 

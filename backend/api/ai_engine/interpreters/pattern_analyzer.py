@@ -63,7 +63,7 @@ Provide a comprehensive therapeutic interpretation.'''
             }
         ]
         
-        completion = gpt4.generate_completion(
+        completion = gemini.generate_completion(
             messages=messages,
             response_format={'type': 'json_object'}
         )

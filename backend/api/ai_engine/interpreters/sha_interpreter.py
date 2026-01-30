@@ -184,7 +184,7 @@ class SHAInterpreter(BaseInterpreter):
         
         return '\n'.join(context_parts)
     
-    def _build_gpt4_messages(
+    def _build_gemini_messages(
         self,
         sha_context: Dict,
         patient_context: Dict,

@@ -14,7 +14,7 @@ class BaseInterpreter(ABC):
     
     def __init__(self):
         self.knowledge_manager = None  # Lazy-loaded
-        self.gpt4_client = None  # Lazy-loaded
+        self.gemini_client = None  # Lazy-loaded
     
     @abstractmethod
     def interpret(self, test_result: TestResult, user: User) -> Dict[str, Any]:
@@ -69,12 +69,12 @@ class BaseInterpreter(ABC):
             self.knowledge_manager = KnowledgeManager()
         return self.knowledge_manager
     
-    def _get_gpt4_client(self):
-        """Lazy-load GPT-4 client."""
-        if self.gpt4_client is None:
-            from ..llm.openai_client import GPT4Client
-            self.gpt4_client = GPT4Client()
-        return self.gpt4_client
+    def _get_gemini_client(self):
+        """Lazy-load Gemini client."""
+        if self.gemini_client is None:
+            from ..llm.gemini_client import GeminiClient
+            self.gemini_client = GeminiClient()
+        return self.gemini_client
     
     def _generate_interpretation_id(self) -> str:
         """Generate unique interpretation ID."""

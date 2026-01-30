@@ -782,85 +782,85 @@ class BioEmotionalExportView(APIView):
                 patient=patient
             ).order_by("-date")
 
-        # Obtener observaciones e hipótesis
-        observations = BioEmotionalObservation.objects.filter(
-            patient=patient
-        )
-        hypotheses = BioEmotionalHypothesis.objects.filter(
-            patient=patient
-        )
+            # Obtener observaciones e hipótesis
+            observations = BioEmotionalObservation.objects.filter(
+                patient=patient
+            )
+            hypotheses = BioEmotionalHypothesis.objects.filter(
+                patient=patient
+            )
 
-        # Calcular ranking de regiones
-        from collections import Counter, defaultdict
-        region_counts = Counter()
-        region_intensities = defaultdict(list)
+            # Calcular ranking de regiones
+            from collections import Counter, defaultdict
+            region_counts = Counter()
+            region_intensities = defaultdict(list)
         
-        for obs in observations:
-            if obs.region_id:
-                region_counts[obs.region_id] += 1
+            for obs in observations:
+                if obs.region_id:
+                    region_counts[obs.region_id] += 1
         
-        for session in sessions:
-            if session.heatmap_data:
-                for region_id, intensity in session.heatmap_data.items():
-                    region_intensities[region_id].append(intensity)
+            for session in sessions:
+                if session.heatmap_data:
+                    for region_id, intensity in session.heatmap_data.items():
+                        region_intensities[region_id].append(intensity)
 
-        top_regions = []
-        for region_id, count in region_counts.most_common(10):
-            intensities = region_intensities.get(region_id, [0])
-            avg_intensity = sum(intensities) / len(intensities) if intensities else 0
-            top_regions.append({
-                "region_id": region_id,
-                "observation_count": count,
-                "avg_intensity": round(avg_intensity, 2),
-                "dominant_emotion": None  # Podría calcularse si hay datos de tipo de emoción
-            })
+            top_regions = []
+            for region_id, count in region_counts.most_common(10):
+                intensities = region_intensities.get(region_id, [0])
+                avg_intensity = sum(intensities) / len(intensities) if intensities else 0
+                top_regions.append({
+                    "region_id": region_id,
+                    "observation_count": count,
+                    "avg_intensity": round(avg_intensity, 2),
+                    "dominant_emotion": None  # Podría calcularse si hay datos de tipo de emoción
+                })
 
-        # Calcular tendencias emocionales
-        emotional_trends = [
-            {
-                "date": s.date,
-                "state": s.emotional_state,
-                "feeling_score": s.patient_feeling_score
-            }
-            for s in sessions[:20]  # Últimas 20 sesiones
-        ]
-
-        # Agregar heatmap
-        heatmap_aggregate = defaultdict(list)
-        for session in sessions:
-            if session.heatmap_data:
-                for region_id, intensity in session.heatmap_data.items():
-                    heatmap_aggregate[region_id].append(intensity)
-        
-        heatmap_final = {
-            region_id: round(sum(values) / len(values), 2)
-            for region_id, values in heatmap_aggregate.items()
-        }
-
-        # Construir respuesta
-        export_data = {
-            "patient_id": patient.id,
-            "patient_name": patient.nombre,
-            "sessions_summary": [
+            # Calcular tendencias emocionales
+            emotional_trends = [
                 {
-                    "id": s.id,
                     "date": s.date,
-                    "emotional_state": s.emotional_state,
-                    "observations_count": s.observations_count,
-                    "hypotheses_count": s.hypotheses_count,
-                    "synthesis_completed": s.synthesis_completed,
-                    "regions_observed": s.regions_observed or []
+                    "state": s.emotional_state,
+                    "feeling_score": s.patient_feeling_score
                 }
-                for s in sessions[:20]
-            ],
-            "top_regions": top_regions,
-            "emotional_trends": emotional_trends,
-            "heatmap_aggregate": heatmap_final,
-            "total_sessions": sessions.count(),
-            "total_observations": observations.count(),
-            "total_hypotheses": hypotheses.count(),
-            "export_timestamp": timezone.now()
-        }
+                for s in sessions[:20]  # Últimas 20 sesiones
+            ]
+
+            # Agregar heatmap
+            heatmap_aggregate = defaultdict(list)
+            for session in sessions:
+                if session.heatmap_data:
+                    for region_id, intensity in session.heatmap_data.items():
+                        heatmap_aggregate[region_id].append(intensity)
+        
+            heatmap_final = {
+                region_id: round(sum(values) / len(values), 2)
+                for region_id, values in heatmap_aggregate.items()
+            }
+
+            # Construir respuesta
+            export_data = {
+                "patient_id": patient.id,
+                "patient_name": patient.nombre,
+                "sessions_summary": [
+                    {
+                        "id": s.id,
+                        "date": s.date,
+                        "emotional_state": s.emotional_state,
+                        "observations_count": s.observations_count,
+                        "hypotheses_count": s.hypotheses_count,
+                        "synthesis_completed": s.synthesis_completed,
+                        "regions_observed": s.regions_observed or []
+                    }
+                    for s in sessions[:20]
+                ],
+                "top_regions": top_regions,
+                "emotional_trends": emotional_trends,
+                "heatmap_aggregate": heatmap_final,
+                "total_sessions": sessions.count(),
+                "total_observations": observations.count(),
+                "total_hypotheses": hypotheses.count(),
+                "export_timestamp": timezone.now()
+            }
 
             from .serializers import BioEmotionalExportSerializer
             serializer = BioEmotionalExportSerializer(export_data)

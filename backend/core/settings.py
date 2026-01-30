@@ -258,16 +258,17 @@ ASTRO_MULTITECH_ENABLED = config('ASTRO_MULTITECH_ENABLED', default=True, cast=b
 KERYKEION_AI_SNIPPETS_MODEL = config('KERYKEION_AI_SNIPPETS_MODEL', default='')
 
 # =============================================================================
-# AI ENGINE - Therapeutic Interpretations (GPT-4 + RAG)
+# AI ENGINE - Therapeutic Interpretations (Gemini + RAG)
 # =============================================================================
+# ⚠️ Uses existing GEMINI_API_KEY from above (line 226)
+# ⚠️ Integrated with current Gemini 2.5 Flash setup
 
 # AI Engine Configuration
-AI_ENGINE_ENABLED = config('AI_ENGINE_ENABLED', default=False, cast=bool)
-OPENAI_API_KEY = config('OPENAI_API_KEY', default='')
-OPENAI_MODEL = config('OPENAI_MODEL', default='gpt-4-turbo-preview')
-OPENAI_EMBEDDING_MODEL = config('OPENAI_EMBEDDING_MODEL', default='text-embedding-3-large')
+AI_ENGINE_ENABLED = config('AI_ENGINE_ENABLED', default=True, cast=bool)  # Enable by default
+# AI Engine uses GEMINI_API_KEY and GEMINI_MODEL defined above
+AI_ENGINE_EMBEDDING_MODEL = config('AI_ENGINE_EMBEDDING_MODEL', default='text-embedding-004')
 
-# Vector Database (Pinecone)
+# Vector Database (Pinecone) - Optional for RAG
 PINECONE_API_KEY = config('PINECONE_API_KEY', default='')
 PINECONE_ENVIRONMENT = config('PINECONE_ENVIRONMENT', default='us-west1-gcp')
 PINECONE_INDEX_NAME = config('PINECONE_INDEX_NAME', default='holistica-knowledge')
@@ -275,7 +276,7 @@ PINECONE_INDEX_NAME = config('PINECONE_INDEX_NAME', default='holistica-knowledge
 # Redis Cache
 REDIS_URL = config('REDIS_URL', default='redis://localhost:6379/0')
 
-# AI Engine Limits
-AI_MAX_TOKENS = config('AI_MAX_TOKENS', default=4000, cast=int)
+# AI Engine Limits (Gemini 2.5 Flash has higher limits than GPT-4)
+AI_MAX_TOKENS = config('AI_MAX_TOKENS', default=8000, cast=int)  # Increased for Gemini
 AI_TEMPERATURE = config('AI_TEMPERATURE', default=0.3, cast=float)
 AI_CACHE_TTL = config('AI_CACHE_TTL', default=86400, cast=int)  # 24 hours

@@ -7,6 +7,7 @@ import { swmShaApi, WorkspaceInstance, WorkspaceArtifact } from '@/lib/api/swm-s
 import { getActivePatientId, getActivePatientName } from '@/lib/active-patient';
 import { API_BASE_URL, getAuthToken } from '@/lib/api';
 import { createAssignment } from '@/lib/assignment-api';
+import { AIInterpretationPanel } from '@/components/ai';
 
 // SHA Harmony test result interface
 interface ShaHarmonyResult {
@@ -647,16 +648,26 @@ export default function SHAWorkspace() {
                     </div>
                   )}
 
+                  {/* AI Interpretation Panel */}
+                  {shaHarmonyResult && (
+                    <div className="rounded-lg border border-gray-200 bg-white p-6">
+                      <AIInterpretationPanel 
+                        testResultId={shaHarmonyResult.id}
+                        onRefresh={() => loadShaHarmonyStatus()}
+                      />
+                    </div>
+                  )}
+                  
                   {/* Workspace Analysis Placeholder */}
-                  <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 p-8 text-center">
-                    <Layers className="mx-auto mb-4 h-12 w-12 text-gray-400" />
-                    <p className="text-gray-500">Área de trabajo del módulo SHA</p>
-                    <p className="mt-2 text-sm text-gray-400">
-                      {shaHarmonyResult 
-                        ? 'Resultados disponibles para análisis sefirótico'
-                        : 'Envía el cuestionario al paciente para comenzar el análisis'}
-                    </p>
-                  </div>
+                  {!shaHarmonyResult && (
+                    <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 p-8 text-center">
+                      <Layers className="mx-auto mb-4 h-12 w-12 text-gray-400" />
+                      <p className="text-gray-500">Área de trabajo del módulo SHA</p>
+                      <p className="mt-2 text-sm text-gray-400">
+                        Envía el cuestionario al paciente para comenzar el análisis
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

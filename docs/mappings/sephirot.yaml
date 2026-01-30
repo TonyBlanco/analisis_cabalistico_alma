@@ -1,0 +1,10 @@
+sefirot:
+  "1":
+    name: Keter
+    quality: Corona divina
+  "2":
+    name: Chokmah
+    quality: Sabiduría
+  "4":
+    name: Chesed
+    quality: Misericordia

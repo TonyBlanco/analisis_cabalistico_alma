@@ -1,3 +1,5 @@
+from datetime import date
+
 from django.test import TestCase
 from api.mcmi4_utils import generate_mcmi4_mystic_test
 from api.models import Patient
@@ -5,10 +7,21 @@ from django.contrib.auth.models import User
 
 class Mcmi4QuestionIdTest(TestCase):
     def setUp(self):
-        # Create a dummy user and patient for context if needed by generator
-        # (Though generate_mcmi4_mystic_test usually just needs an ID to seed RNG)
-        self.user = User.objects.create_user(username='testuser', password='password')
-        self.patient = Patient.objects.create(user=self.user, full_name="Test Patient")
+        # Create a dummy therapist, user, and patient context for generator seeding
+        self.therapist = User.objects.create_user(
+            username='testtherapist', password='password', email='therapist@example.com'
+        )
+        self.user = User.objects.create_user(
+            username='testuser', password='password', email='patient@example.com'
+        )
+        self.patient = Patient.objects.create(
+            user=self.user,
+            therapist=self.therapist,
+            full_name="Test Patient",
+            email='patient@example.com',
+            birth_date=date(1990, 1, 1),
+            is_active=True,
+        )
 
     def test_question_id_uniqueness_and_structure(self):
         """

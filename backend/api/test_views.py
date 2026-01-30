@@ -1748,7 +1748,7 @@ class PatientPreviousTestsView(APIView):
                     except Exception:
                         has_result = False
 
-                    status = 'completed' if has_result else 'pending'
+                    assignment_status = 'completed' if has_result else 'pending'
 
                     pseudo = {
                         'id': f'useraccess-{access.id}',
@@ -1763,7 +1763,7 @@ class PatientPreviousTestsView(APIView):
                         'details': {'assigned_via_user_access': True},
                         'created_at': access.created_at.isoformat() if getattr(access, 'created_at', None) else None,
                         # Backfill UI-friendly fields so frontend can render pending/completed and route to patient test page
-                        'status': status,
+                        'status': assignment_status,
                         'patient_route': f"/dashboard/patient/tests/{getattr(tm, 'code', '')}"
                     }
                     augmented.append(pseudo)

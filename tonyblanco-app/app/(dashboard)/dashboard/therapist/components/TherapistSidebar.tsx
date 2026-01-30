@@ -17,8 +17,6 @@ import {
   ChevronRight,
   ChevronLeft,
   Users,
-  Stars,
-  Flower2,
   Microscope,
   BarChart3,
   Settings,
@@ -66,18 +64,6 @@ const mainNavLinks = [
     icon: Users,
   },
   {
-    id: 'astrology',
-    label: 'Astrología',
-    href: '/dashboard/therapist/astrologia',
-    icon: Stars,
-  },
-  {
-    id: 'cabala',
-    label: 'Cábala Fénix',
-    href: '/dashboard/therapist/holistica-aplicada',
-    icon: Flower2,
-  },
-  {
     id: 'tests',
     label: 'Tests Modulares',
     href: '/dashboard/therapist/tests',
@@ -88,12 +74,6 @@ const mainNavLinks = [
     label: 'Reportes',
     href: '/dashboard/therapist/reports',
     icon: BarChart3,
-  },
-  {
-    id: 'settings',
-    label: 'Configuración',
-    href: '/dashboard/therapist/therapist-config',
-    icon: Settings,
   },
 ];
 

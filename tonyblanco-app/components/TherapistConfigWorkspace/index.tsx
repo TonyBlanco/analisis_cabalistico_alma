@@ -10,11 +10,16 @@ import { API_BASE_URL, getAuthToken } from '@/lib/api';
 // ============================================================================
 
 interface PatientDataSummary {
-  patient_id: number;
-  patient_name: string;
-  test_results_count: number;
-  assignments_count: number;
-  total_items: number;
+  id: number;
+  user_id: number;
+  full_name: string;
+  email: string;
+  counts: {
+    test_results_linked: number;
+    test_results_orphan: number;
+    assignments: number;
+    total: number;
+  };
 }
 
 interface CleanupPreview {
@@ -125,8 +130,8 @@ export default function TherapistConfigWorkspace() {
       const data = await response.json();
       const patients: PatientDataSummary[] = data.patients || [];
       
-      // Find the active patient's data
-      const activePatientData = patients.find(p => p.patient_id === patientId);
+      // Find the active patient's data (by patient id, not patient_id)
+      const activePatientData = patients.find(p => p.id === patientId);
       setPatientData(activePatientData || null);
     } catch (err: any) {
       setError(err.message || 'Error cargando datos');
@@ -341,18 +346,22 @@ export default function TherapistConfigWorkspace() {
                     ) : patientData ? (
                       <div className="bg-gray-50 rounded-lg p-4">
                         <h3 className="text-sm font-medium text-gray-700 mb-3">Resumen de datos</h3>
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-4 gap-4">
                           <div className="bg-white rounded-lg p-3 border border-gray-200">
-                            <div className="text-2xl font-bold text-gray-900">{patientData.test_results_count}</div>
-                            <div className="text-xs text-gray-500">Resultados de Test</div>
+                            <div className="text-2xl font-bold text-gray-900">{patientData.counts.test_results_linked}</div>
+                            <div className="text-xs text-gray-500">Tests Vinculados</div>
                           </div>
                           <div className="bg-white rounded-lg p-3 border border-gray-200">
-                            <div className="text-2xl font-bold text-gray-900">{patientData.assignments_count}</div>
+                            <div className="text-2xl font-bold text-amber-600">{patientData.counts.test_results_orphan}</div>
+                            <div className="text-xs text-gray-500">Tests Huérfanos</div>
+                          </div>
+                          <div className="bg-white rounded-lg p-3 border border-gray-200">
+                            <div className="text-2xl font-bold text-gray-900">{patientData.counts.assignments}</div>
                             <div className="text-xs text-gray-500">Asignaciones</div>
                           </div>
                           <div className="bg-white rounded-lg p-3 border border-gray-200">
-                            <div className="text-2xl font-bold text-indigo-600">{patientData.total_items}</div>
-                            <div className="text-xs text-gray-500">Total Items</div>
+                            <div className="text-2xl font-bold text-indigo-600">{patientData.counts.total}</div>
+                            <div className="text-xs text-gray-500">Total</div>
                           </div>
                         </div>
                       </div>
@@ -378,7 +387,7 @@ export default function TherapistConfigWorkspace() {
                       <button
                         type="button"
                         onClick={handlePreviewCleanup}
-                        disabled={isPreviewLoading || isExecuting || !patientData?.total_items}
+                        disabled={isPreviewLoading || isExecuting || !patientData?.counts?.total}
                         className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
                       >
                         {isPreviewLoading ? (

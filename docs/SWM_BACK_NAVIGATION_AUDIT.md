@@ -19,18 +19,20 @@ Most SWM workspace components have their own navigation integrated as part of th
 
 These workspace **components** already include their own back navigation:
 
-| SWM Page | Component | Back Button Location | Text |
-|----------|-----------|---------------------|------|
-| `bioemotional-experiencial-profunda/` | `BioEmotionalExperientialWorkspace` | Top of component | "← Volver al espacio clínico" |
-| `transgeneracional-profundo/` | `TransgenerationalDeepWorkspace` | Top of component | "Volver al espacio clinico" |
-| `sha/` | `SHAWorkspace` | Top of component (2 instances) | "Volver al espacio clínico" |
-| `resonancia-ancestral/` | `ResonanciaAncestralWorkspace` | Top of component | "Volver al espacio clínico" |
-| `cabala-aplicada/` | `CabalAppliedWorkspace` | Top of component | "Volver al espacio clinico" |
-| `astrologia-tarot/` | `AstrologyTarotWorkspace` | Top of component | "Volver al espacio clinico" |
-| `holistica-aplicada/` | (Phoenix Report - direct page component) | Fixed header | "Volver" (router.back()) |
-| `swm/mcmi4/page.tsx` | (List page - direct page component) | Top section | "Volver" (Link to /dashboard/therapist) |
+| SWM Page | Component | Back Button Location | Text | Notes |
+|----------|-----------|---------------------|------|-------|
+| `bioemotional-experiencial-profunda/` | `BioEmotionalExperientialWorkspace` | Top of component | "← Volver al espacio clínico" | Single button |
+| `transgeneracional-profundo/` | `TransgenerationalDeepWorkspace` | Top of component | "Volver al espacio clinico" | Single button |
+| `sha/` | `SHAWorkspace` | Header (2 conditional renders) | "Volver al espacio clínico" | **Two separate renders**: one for "no patient" state, one for normal state. NOT a bug. |
+| `resonancia-ancestral/` | `ResonanciaAncestralWorkspace` | Top of component | "Volver al espacio clínico" | Single button |
+| `cabala-aplicada/` | `CabalAppliedWorkspace` | Top of component | "Volver al espacio clinico" | Single button |
+| `astrologia-tarot/` | `AstrologyTarotWorkspace` | Top of component | "Volver al espacio clinico" | Single button |
+| `holistica-aplicada/` | (Phoenix Report - direct page component) | Fixed header | "Volver" (router.back()) | Single button |
+| `swm/mcmi4/page.tsx` | (List page - direct page component) | Top section | "Volver" (Link to /dashboard/therapist) | Single button |
 
 **Action Taken:** Removed `<TherapistBackLink />` from all these pages (was causing duplicates).
+
+**⚠️ Important:** `SHAWorkspace` has TWO headers but they are in **different conditional renders** (one for "no patient selected" state, one for normal state). This is **NOT a duplication bug** - it's intentional conditional rendering.
 
 ---
 

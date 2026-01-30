@@ -31,6 +31,7 @@ function getTestDisplayName(testType: string): string {
     'mcmi4-signal': 'MCMI-4 Místico (Cribado Holístico)',
     'mcmi4-mystic': 'MCMI-4 Místico',
     'mcmi4': 'MCMI-4',
+    'sha_harmony': 'Auditoría de Armonía Sefirótica (SHA)',
   };
   return names[testType] || testType;
 }
@@ -105,9 +106,12 @@ export default function PendingAssignmentsSection() {
   const handleStartAssignment = (assignment: Assignment) => {
     // Navigate to correct test execution page based on test_type
     // mcmi4-signal → dedicated signal page
+    // sha_harmony → SHA Harmony questionnaire
     // other tests → holistic assessment flow
     if (assignment.test_type === 'mcmi4-signal') {
       router.push('/dashboard/patient/tests/mcmi4-signal');
+    } else if (assignment.test_type === 'sha_harmony') {
+      router.push('/dashboard/patient/tests/sha-harmony');
     } else {
       router.push(`/dashboard/patient/tests/holistic?assignment_id=${assignment.id}`);
     }

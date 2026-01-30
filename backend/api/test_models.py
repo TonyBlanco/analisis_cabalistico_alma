@@ -147,10 +147,38 @@ class TestModule(models.Model):
         
         profile = user.profile
         
-        # Verificar tipo de usuario
+        # PRIORITY CHECK: Patients with Assignment-based access bypass availability checks
+        # This MUST come before user_type checks to allow assigned therapist-only tests
+        if profile.user_type == 'patient':
+            try:
+                from api.models import Patient
+                from api.test_models import Assignment
+                patient_obj = Patient.objects.filter(user=user).first()
+                if patient_obj:
+                    has_assignment = Assignment.objects.filter(
+                        patient=patient_obj,
+                        test_type__iexact=self.code,
+                        status__in=['assigned', 'in_progress']
+                    ).exists()
+                    if has_assignment:
+                        return True
+                # Also check via assigned_to_user
+                if Assignment.objects.filter(
+                    assigned_to_user=user,
+                    test_type__iexact=self.code,
+                    status__in=['assigned', 'in_progress']
+                ).exists():
+                    return True
+            except Exception:
+                pass
+        
+        # Verificar tipo de usuario (after assignment check for patients)
         if profile.user_type == 'therapist' and not self.available_for_therapists:
             return False
         if profile.user_type == 'personal' and not self.available_for_personal:
+            return False
+        # Patients without assignment need available_for_personal flag
+        if profile.user_type == 'patient' and not self.available_for_personal:
             return False
         
         # Si el módulo requiere licencia, solo está disponible para usuarios con licencia activa
@@ -163,7 +191,8 @@ class TestModule(models.Model):
         # Verificar nivel de acceso
         # Therapists are not capped by plan (functional full access), but we still keep
         # explicit restrictions (availability flags + licenses) above.
-        user_level = 'premium' if profile.user_type == 'therapist' else (profile.subscription_plan or 'free')
+        # Patients inherit premium access for assigned tests (already handled above).
+        user_level = 'premium' if profile.user_type in ('therapist', 'patient') else (profile.subscription_plan or 'free')
         
         access_hierarchy = {
             'free': 0,

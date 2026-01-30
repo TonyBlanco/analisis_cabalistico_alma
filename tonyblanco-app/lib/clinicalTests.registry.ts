@@ -619,6 +619,22 @@ export const clinicalTestsRegistry: ClinicalTestRegistryEntry[] = [
     implemented: true,
     patient_route: "/dashboard/patient/tests/mcmi4-signal",
   },
+  {
+    test_code: "sha_harmony",
+    display_name: "Auditoría de Armonía Sefirótica (SHA)",
+    domain: "Equilibrio sefirótico",
+    family: "cabalisticos",
+    implemented: true,
+    patient_route: "/dashboard/patient/tests/sha-harmony",
+    therapist_route: "/dashboard/therapist/sha",
+    guidance: {
+      what: "Evaluación holística del balance sefirótico basada en el cuestionario AUDIT.",
+      when: "Mediante asignación del terapeuta para evaluar patrones de consumo y correspondencia sefirótica.",
+      diff: "Combina AUDIT clínico con interpretación cabalística de 4 zonas de armonía.",
+      after: "Resultados muestran zona de riesgo y Sefirá correspondiente para trabajo terapéutico.",
+      reminder: "Cuestionario de 10 preguntas, tiempo estimado: 5 minutos.",
+    },
+  },
 
 
 

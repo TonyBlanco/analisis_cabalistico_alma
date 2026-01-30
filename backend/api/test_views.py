@@ -617,14 +617,24 @@ class ExecuteTestView(APIView):
 
         test_result = None
         if data.get('save_result', True):
+            import logging
+            logger = logging.getLogger(__name__)
             patient_for_result = patient
+            logger.info(f"[SWM] Initial patient_for_result from patient param: {patient_for_result}")
             if execution_mode == 'patient_self' and getattr(profile, 'user_type', None) in ('patient', 'personal'):
                 try:
                     patient_qs = Patient.objects.filter(user=request.user, is_active=True)
+                    logger.info(f"[SWM] Patient lookup for user {request.user.username}: count={patient_qs.count()}")
                     if patient_qs.count() == 1:
                         patient_for_result = patient_qs.first()
-                except Exception:
+                        logger.info(f"[SWM] patient_for_result set to: {patient_for_result} (id={patient_for_result.id if patient_for_result else None})")
+                    else:
+                        logger.info(f"[SWM] Patient count != 1, patient_for_result unchanged")
+                except Exception as e:
+                    logger.warning(f"[SWM] Exception finding patient: {e}")
                     patient_for_result = patient
+            else:
+                logger.info(f"[SWM] Skipping patient lookup: execution_mode={execution_mode}, user_type={getattr(profile, 'user_type', None)}")
 
             # Preparar datos del cliente
             if execution_mode == 'patient_self':
@@ -678,6 +688,29 @@ class ExecuteTestView(APIView):
                 details=details_dict,  # H4: Audit metadata stored in details JSONField
                 notes=clinician_notes
             )
+            
+            # Update related Assignment if patient completed an assigned test (SWM workflow)
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.info(f"[SWM] Post-TestResult: patient_for_result={patient_for_result}, execution_mode={execution_mode}, test_code={test_module.code}")
+            if patient_for_result and execution_mode == 'patient_self':
+                try:
+                    related_assignment = Assignment.objects.filter(
+                        patient=patient_for_result,
+                        test_type__iexact=test_module.code,
+                        status__in=['assigned', 'in_progress']
+                    ).first()
+                    logger.info(f"[SWM] Found assignment: {related_assignment}")
+                    if related_assignment:
+                        related_assignment.status = 'completed'
+                        related_assignment.results = result_data
+                        related_assignment.save(update_fields=['status', 'results'])
+                        logger.info(f"[SWM] Assignment {related_assignment.id} updated to completed")
+                except Exception as e:
+                    # Log but don't fail the test execution
+                    logger.warning(f"[SWM] Failed to update assignment: {e}")
+            else:
+                logger.info(f"[SWM] Skipping assignment update: patient_for_result={patient_for_result is not None}, execution_mode={execution_mode}")
 
         response_data = {
             'success': bool(processed_ok),
@@ -894,6 +927,59 @@ class ExecuteTestView(APIView):
                         'answers': answers,
                         'note': 'reflection_textual',
                         'message': 'Reflexión registrada correctamente'
+                    }
+                
+                # Handler for SHA Harmony (AUDIT-based Sephirotic screening)
+                if test_module.code == 'sha_harmony':
+                    responses = input_data.get('responses', {})
+                    # Calculate AUDIT score (0-40 scale)
+                    total = 0
+                    answered_items = 0
+                    for i in range(1, 11):  # AUDIT has 10 items
+                        key = f'AUDIT_{i:02d}'
+                        val = responses.get(key)
+                        if val is not None:
+                            try:
+                                total += int(val)
+                                answered_items += 1
+                            except (ValueError, TypeError):
+                                pass
+                    
+                    # Determine risk zone based on AUDIT cutoffs
+                    if answered_items < 10:
+                        zone = 'Incomplete'
+                        zone_label = 'Cuestionario incompleto'
+                        sefira = None
+                    elif total >= 20:
+                        zone = 'Severe dependence'
+                        zone_label = 'Dependencia severa - Netzach bloqueado'
+                        sefira = 'Netzach (sombra profunda)'
+                    elif total >= 15:
+                        zone = 'Likely dependence'
+                        zone_label = 'Probable dependencia - Netzach en sombra'
+                        sefira = 'Netzach (desequilibrio)'
+                    elif total >= 8:
+                        zone = 'Hazardous use'
+                        zone_label = 'Uso riesgoso - Desequilibrio pasional'
+                        sefira = 'Netzach (tensión)'
+                    else:
+                        zone = 'Low risk'
+                        zone_label = 'Bajo riesgo - Equilibrio Netzach'
+                        sefira = 'Netzach (armonía)'
+                    
+                    return {
+                        'schema_version': 'sha_harmony:v1',
+                        'test_type': 'sephirotic_harmony',
+                        'processed': True,
+                        'timestamp': datetime.now().isoformat(),
+                        'total': total,
+                        'max_score': 40,
+                        'answered_items': answered_items,
+                        'zone': zone,
+                        'zone_label': zone_label,
+                        'sefira': sefira,
+                        'interpretation': f'Puntuación AUDIT: {total}/40. {zone_label}.',
+                        'message': 'Auditoría de Armonía Sefirótica completada'
                     }
                 
                 # Route by code to avoid collisions with other holistic_screening entries

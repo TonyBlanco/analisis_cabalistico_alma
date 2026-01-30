@@ -11,6 +11,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import TokenAuthentication, SessionAuthentication
 
 from .models import (
     WorkspaceDefinition,
@@ -68,6 +69,7 @@ def check_permission(instance: WorkspaceInstance, user: User, required: str) -> 
 
 
 class CreateWorkspaceView(APIView):
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
@@ -123,6 +125,7 @@ class CreateWorkspaceView(APIView):
 
 
 class ListWorkspacesView(APIView):
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -146,6 +149,7 @@ class ListWorkspacesView(APIView):
 
 
 class WorkspaceStatusView(APIView):
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -162,6 +166,7 @@ class WorkspaceStatusView(APIView):
 
 
 class SaveArtifactView(APIView):
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
@@ -199,6 +204,7 @@ class SaveArtifactView(APIView):
 
 
 class ArtifactsView(APIView):
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -222,6 +228,7 @@ class ArtifactsView(APIView):
 
 
 class SealWorkspaceView(APIView):
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
@@ -247,6 +254,7 @@ class SealWorkspaceView(APIView):
 
 
 class ReviewWorkspaceView(APIView):
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
 
     def post(self, request):

@@ -235,3 +235,46 @@ class AssignmentResultsView(APIView):
             return Response({"error": "forbidden"}, status=status.HTTP_403_FORBIDDEN)
 
         return Response(_assignment_payload(assignment, full=True))
+
+
+class AssignmentResetView(APIView):
+    """Reset an assignment to allow the patient to complete it again."""
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, assignment_id: int):
+        try:
+            assignment = Assignment.objects.select_related("patient").get(id=assignment_id)
+        except Assignment.DoesNotExist:
+            return Response({"error": "not_found"}, status=status.HTTP_404_NOT_FOUND)
+
+        profile = getattr(request.user, "profile", None)
+
+        # Only therapists can reset
+        if not _is_therapist(profile):
+            return Response({"error": "forbidden", "message": "Solo terapeutas pueden resetear asignaciones"}, status=status.HTTP_403_FORBIDDEN)
+
+        # Verify ownership
+        if assignment.patient.therapist_id != request.user.id:
+            return Response({"error": "forbidden", "message": "No tienes permiso para resetear esta asignación"}, status=status.HTTP_403_FORBIDDEN)
+
+        # Delete related TestResults for this patient and test_type
+        from api.test_models import TestResult
+        deleted_count, _ = TestResult.objects.filter(
+            patient=assignment.patient,
+            test_module__code=assignment.test_type
+        ).delete()
+
+        # Reset assignment status
+        assignment.status = "assigned"
+        assignment.results = {}  # Empty dict (NOT NULL constraint)
+        assignment.raw_responses = {}  # Empty dict (NOT NULL constraint)
+        assignment.responses_hash = ""  # Empty string (NOT NULL constraint)
+        assignment.completed_at = None
+        assignment.append_audit("reset", {"deleted_results": deleted_count, "by_user": request.user.username})
+        assignment.save()
+
+        return Response({
+            "status": "reset",
+            "message": f"Asignación reseteada. Se eliminaron {deleted_count} resultado(s) previo(s).",
+            "assignment": _assignment_payload(assignment, full=False)
+        })

@@ -377,6 +377,133 @@ export default function ReadableResult({
     );
   }
 
+  // (C) Check for SHA Harmony (Sephirotic Harmony Audit) schema
+  const isSHAHarmony = payload?.schema_version === 'sha_harmony:v1' || testCode === 'sha_harmony';
+  const shaData = isSHAHarmony ? {
+    total: payload?.total ?? null,
+    max_score: payload?.max_score ?? 40,
+    zone: payload?.zone ?? 'Unknown',
+    zone_label: payload?.zone_label ?? '',
+    sefira: payload?.sefira ?? null,
+    interpretation: payload?.interpretation ?? null,
+    timestamp: payload?.timestamp ?? date,
+  } : null;
+
+  // Render SHA Harmony schema
+  if (isSHAHarmony && shaData) {
+    const scorePercent = shaData.total !== null ? Math.round((shaData.total / shaData.max_score) * 100) : null;
+    const getZoneColor = (zone: string) => {
+      switch (zone) {
+        case 'Low risk': return 'green';
+        case 'Hazardous use': return 'yellow';
+        case 'Likely dependence': return 'orange';
+        case 'Severe dependence': return 'red';
+        default: return 'gray';
+      }
+    };
+    const zoneColor = getZoneColor(shaData.zone);
+    const colorClasses: Record<string, { bg: string; border: string; text: string; accent: string }> = {
+      green: { bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-800', accent: 'bg-green-500' },
+      yellow: { bg: 'bg-yellow-50', border: 'border-yellow-200', text: 'text-yellow-800', accent: 'bg-yellow-500' },
+      orange: { bg: 'bg-orange-50', border: 'border-orange-200', text: 'text-orange-800', accent: 'bg-orange-500' },
+      red: { bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-800', accent: 'bg-red-500' },
+      gray: { bg: 'bg-gray-50', border: 'border-gray-200', text: 'text-gray-800', accent: 'bg-gray-500' },
+    };
+    const colors = colorClasses[zoneColor] || colorClasses.gray;
+
+    return (
+      <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+        <div className="flex items-start justify-between mb-3">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+              {testName || 'Auditoría de Armonía Sefirótica (SHA)'}
+              {testCode && <span className="text-xs font-normal text-gray-500 px-2 py-0.5 bg-gray-100 rounded-full border border-gray-200">{testCode}</span>}
+            </h3>
+            {shaData.timestamp && (
+              <div className="flex items-center gap-1 mt-1 text-xs text-gray-500">
+                <Calendar size={12} />
+                <span>{new Date(shaData.timestamp).toLocaleString('es-ES', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+              </div>
+            )}
+          </div>
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 transition-colors"
+              aria-label="Cerrar"
+            >
+              <X size={20} />
+            </button>
+          )}
+        </div>
+        
+        {/* Score and Zone Display */}
+        <div className={`${colors.bg} ${colors.border} border rounded-lg p-4 mb-3`}>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-3">
+              <div className={`w-12 h-12 ${colors.accent} rounded-full flex items-center justify-center`}>
+                <span className="text-white font-bold text-lg">{shaData.total ?? '?'}</span>
+              </div>
+              <div>
+                <p className={`font-semibold ${colors.text}`}>Puntuación Total</p>
+                <p className="text-sm text-gray-600">{shaData.total ?? '?'} / {shaData.max_score}</p>
+              </div>
+            </div>
+            {scorePercent !== null && (
+              <div className="text-right">
+                <p className="text-2xl font-bold text-gray-700">{scorePercent}%</p>
+                <p className="text-xs text-gray-500">del máximo</p>
+              </div>
+            )}
+          </div>
+          
+          {/* Progress bar */}
+          {scorePercent !== null && (
+            <div className="w-full bg-gray-200 rounded-full h-2 mb-3">
+              <div 
+                className={`${colors.accent} h-2 rounded-full transition-all`}
+                style={{ width: `${Math.min(scorePercent, 100)}%` }}
+              />
+            </div>
+          )}
+          
+          {/* Zone Label */}
+          <div className={`${colors.text} font-medium text-sm`}>
+            {shaData.zone_label || shaData.zone}
+          </div>
+        </div>
+
+        {/* Sephirotic Interpretation */}
+        {shaData.sefira && (
+          <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 mb-3">
+            <div className="flex items-center gap-2 text-purple-700 mb-1">
+              <span className="text-lg">✡</span>
+              <span className="font-medium text-sm">Correspondencia Sefirótica</span>
+            </div>
+            <p className="text-sm text-purple-800">{shaData.sefira}</p>
+          </div>
+        )}
+
+        {/* Interpretation */}
+        {shaData.interpretation && (
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 mb-3">
+            <p className="text-sm text-gray-700">{shaData.interpretation}</p>
+          </div>
+        )}
+
+        <details className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+          <summary className="cursor-pointer text-sm text-gray-600 font-medium flex items-center gap-2">
+            <FileJson size={14} />
+            Ver datos completos (JSON)
+          </summary>
+          <pre className="text-xs whitespace-pre-wrap break-words text-gray-800 mt-3 font-mono bg-white p-2 rounded border border-gray-100">
+            {JSON.stringify(resultData, null, 2)}
+          </pre>
+        </details>
+      </div>
+    );
+  }
+
   // Fallback for completely empty content
   if (!hasContent && !showTechnical && !testName) {
     // Force technical view if no content is available

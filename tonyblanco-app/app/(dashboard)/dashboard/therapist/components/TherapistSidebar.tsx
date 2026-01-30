@@ -6,13 +6,11 @@ import type { LucideIcon } from 'lucide-react';
 import {
   Activity,
   BookOpen,
-  ClipboardCheck,
   Compass,
   History,
   Layers,
   LayoutGrid,
   LayoutDashboard,
-  NotebookPen,
   Sparkles,
   Stethoscope,
   Telescope,
@@ -26,31 +24,31 @@ import {
   Settings,
 } from 'lucide-react';
 import { usePanelManager } from '@/components/TherapistWorkspace/PanelManagerContext';
-import { toolRegistry } from '@/components/TherapistWorkspace/panelRegistry';
-import type { ToolGroupId, ToolId } from '@/components/TherapistWorkspace/panelRegistry';
+import { panelRegistry } from '@/components/TherapistWorkspace/panelRegistry';
+import type { PanelType } from '@/components/TherapistWorkspace/types';
 
-const groupLabels: Record<ToolGroupId, string> = {
+const groupLabels: Record<PanelType, string> = {
   observation: 'OBSERVACION',
-  evaluation: 'EVALUACION',
+  analysis: 'ANALISIS',
   symbolic: 'HERRAMIENTAS SIMBOLICAS',
   history: 'HISTORIAL',
-  resources: 'RECURSOS',
+  resource: 'RECURSOS',
 };
 
-const toolIcons: Record<ToolId, LucideIcon> = {
+const panelIcons: Record<string, LucideIcon> = {
   bioemotional: Activity,
-  'tree-of-life': Layers,
-  hypotheses: Stethoscope,
+  treeOfLife: Layers,
+  transgenerational: Stethoscope,
   history: History,
   kabbalah: Sparkles,
   resources: BookOpen,
 };
 
-const groupOrder: ToolGroupId[] = [
-  // 'observation' y 'evaluation' removidos - las herramientas ahora están en el Context Map del workspace
+const groupOrder: PanelType[] = [
+  // 'observation' y 'analysis' no se listan aqui para mantener la navegacion enfocada.
   'symbolic',
   'history',
-  'resources',
+  'resource',
 ];
 
 // Main navigation links for therapist dashboard
@@ -99,10 +97,10 @@ const mainNavLinks = [
   },
 ];
 
-const swmToolRoutes: Partial<Record<ToolId, string>> = {
+const swmPanelRoutes: Partial<Record<string, string>> = {
   bioemotional: '/dashboard/therapist/bioemotional-experiencial-profunda',
-  'tree-of-life': '/dashboard/therapist/cabala-aplicada',
-  hypotheses: '/dashboard/therapist/transgeneracional-profundo',
+  treeOfLife: '/dashboard/therapist/cabala-aplicada',
+  transgenerational: '/dashboard/therapist/transgeneracional-profundo',
   kabbalah: '/dashboard/therapist/cabala-aplicada',
 };
 
@@ -171,22 +169,27 @@ const swmLaunchers = [
     icon: Sparkles,
     enabled: true,
   },
+  {
+    id: 'sha',
+    title: 'SHA - Armonía Sefirótica',
+    description: 'Auditoría de balance sefirotico observacional.',
+    href: '/dashboard/therapist/sha',
+    icon: Layers,
+    enabled: true,
+  },
 ];
 
 export default function TherapistSidebar() {
   const { panels, openPanel } = usePanelManager();
   const [expanded, setExpanded] = useState(false);
 
-  const activeToolIds = useMemo(
-    () => new Set(panels.map((panel) => panel.toolId)),
-    [panels],
-  );
+  const activePanelIds = useMemo(() => new Set(panels.map((panel) => panel.panelId)), [panels]);
 
   const groupedTools = useMemo(() => {
     return groupOrder.map((group) => ({
       id: group,
       label: groupLabels[group],
-      tools: toolRegistry.filter((tool) => tool.group === group),
+      tools: panelRegistry.filter((panel) => panel.type === group),
     }));
   }, []);
 
@@ -253,9 +256,9 @@ export default function TherapistSidebar() {
             )}
             <div className="space-y-1">
               {group.tools.map((tool) => {
-                const Icon = toolIcons[tool.id] || Layers;
-                const isActive = activeToolIds.has(tool.id);
-                const swmHref = swmToolRoutes[tool.id];
+                const Icon = panelIcons[tool.id] || Layers;
+                const isActive = activePanelIds.has(tool.id);
+                const swmHref = swmPanelRoutes[tool.id];
                 const content = (
                   <div
                     className={`flex items-center gap-3 w-full rounded-md px-2 py-2 text-sm transition-colors border ${isActive
@@ -266,13 +269,13 @@ export default function TherapistSidebar() {
                     <Icon className={`h-5 w-5 ${isActive ? 'text-gray-900' : 'text-gray-500'}`} />
                     {expanded && (
                       <div className="text-left">
-                        <div className="text-sm font-medium">{tool.label}</div>
+                        <div className="text-sm font-medium">{tool.title}</div>
                         {tool.description && (
                           <div className="text-[11px] text-gray-400">{tool.description}</div>
                         )}
                       </div>
                     )}
-                    {!expanded && <span className="sr-only">{tool.label}</span>}
+                    {!expanded && <span className="sr-only">{tool.title}</span>}
                   </div>
                 );
 
@@ -289,7 +292,7 @@ export default function TherapistSidebar() {
                     key={tool.id}
                     type="button"
                     onClick={() => openPanel(tool.id)}
-                    title={!expanded ? tool.label : undefined}
+                    title={!expanded ? tool.title : undefined}
                     className="w-full text-left"
                   >
                     {content}

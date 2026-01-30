@@ -5,10 +5,59 @@ from pathlib import Path
 from typing import Dict, List, Tuple
 
 
-_BANK_CACHE: List[Dict] = []
+_BANK_CACHE: Dict[str, List[Dict]] = {}
 
 
-def _load_bank_items() -> List[Dict]:
+def _load_audit_items() -> List[Dict]:
+    """
+    Load AUDIT/SHA-Harmony question bank (10 items).
+    Based on audit_bank.py in the root directory.
+    """
+    # AUDIT items for SHA Harmony (10 questions about balance/passions - Netzach focus)
+    return [
+        {"id": f"AUDIT_{i+1:02d}", "instrument": "AUDIT_sintetico", "position": i+1, "text": text, "scale": "Alcohol", "weight": 1}
+        for i, text in enumerate([
+            "¿Con qué frecuencia tomas una bebida al día?",
+            "¿Cuántas bebidas tomas en un día típico cuando bebes?",
+            "¿Con qué frecuencia tomas 6 o más bebidas en una sola ocasión?",
+            "¿Con qué frecuencia sientes que no puedes dejar de beber una vez que empiezas?",
+            "¿Con qué frecuencia no puedes cumplir con tus responsabilidades por beber?",
+            "¿Alguna vez has necesitado un trago por la mañana para calmarte o curar una resaca?",
+            "¿Has tenido sentimientos de culpa o remordimiento por beber?",
+            "¿Alguna vez has olvidado lo que hiciste mientras bebías?",
+            "¿Alguna vez alguien se preocupó por tu consumo de alcohol o te sugirió reducirlo?",
+            "¿Has tenido lesiones debido al alcohol (tuyas o de otra persona)?"
+        ])
+    ]
+
+
+def _load_bank_items(test_type: str = 'mcmi4-mystic') -> List[Dict]:
+    """
+    Load question bank based on test type.
+    Supports: mcmi4-mystic, sha_harmony, and other holistic tests.
+    """
+    global _BANK_CACHE
+    
+    if test_type in _BANK_CACHE:
+        return _BANK_CACHE[test_type]
+    
+    # SHA Harmony / AUDIT
+    if test_type in ('sha_harmony', 'audit', 'sha-harmony'):
+        items = _load_audit_items()
+        _BANK_CACHE[test_type] = items
+        return items
+    
+    # MCMI-4 Místico (default)
+    if test_type in ('mcmi4-mystic', 'mcmi4_mystic', 'mcmi-iv'):
+        items = _load_mcmi4_items()
+        _BANK_CACHE[test_type] = items
+        return items
+    
+    # For unknown test types, return empty (assignment will still work, just no questions)
+    return []
+
+
+def _load_mcmi4_items() -> List[Dict]:
     """
     Load MCMI-4 Místico question bank from the real JSON files.
     
@@ -16,8 +65,8 @@ def _load_bank_items() -> List[Dict]:
     This function now loads from backend/data/mcmi4_mystic_questions_*.json
     """
     global _BANK_CACHE
-    if _BANK_CACHE:
-        return _BANK_CACHE
+    if 'mcmi4-mystic' in _BANK_CACHE:
+        return _BANK_CACHE['mcmi4-mystic']
 
     # Load from the real MCMI-4 Místico question bank (4 worlds)
     root = Path(__file__).resolve().parents[1]  # backend/
@@ -48,8 +97,8 @@ def _load_bank_items() -> List[Dict]:
             except Exception as e:
                 print(f"Warning: Could not load {json_path}: {e}")
     
-    _BANK_CACHE = items
-    return _BANK_CACHE
+    _BANK_CACHE['mcmi4-mystic'] = items
+    return items
 
 
 def _hash_questions(questions: List[str]) -> str:
@@ -60,7 +109,7 @@ def _hash_questions(questions: List[str]) -> str:
 def select_questions(patient_id: int, test_type: str, n: int = 195) -> Tuple[List[str], Dict]:
     from api.test_models import Assignment
 
-    items = _load_bank_items()
+    items = _load_bank_items(test_type)
     question_ids = [item.get("id") for item in items if item.get("id")]
     total = len(question_ids)
     if total == 0:

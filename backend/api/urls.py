@@ -92,6 +92,7 @@ from .assignments import (
     AssignmentSubmitView,
     AssignmentComputeView,
     AssignmentResultsView,
+    AssignmentResetView,
 )
 from .gematria_views import GematriaInterpretationView
 from .tarot_views import TarotAnalysisView, TarotCabalisticCorrespondenceView
@@ -309,6 +310,7 @@ urlpatterns = [
     path('assignments/<int:assignment_id>/submit', AssignmentSubmitView.as_view(), name='assignment_submit'),
     path('assignments/<int:assignment_id>/compute', AssignmentComputeView.as_view(), name='assignment_compute'),
     path('assignments/<int:assignment_id>/results', AssignmentResultsView.as_view(), name='assignment_results'),
+    path('assignments/<int:assignment_id>/reset', AssignmentResetView.as_view(), name='assignment_reset'),
     # Therapist -> Patient notes (unidirectional)
     path('patient-notes/', PatientNotesView.as_view(), name='patient_notes'),
     path('tests/<str:code>/', TestModuleDetailView.as_view(), name='test_detail'),

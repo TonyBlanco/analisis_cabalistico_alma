@@ -16,6 +16,7 @@ import AssignMCMI4MysticModal from '@/components/AssignMCMI4MysticModal';
 import AssignBioEmotionalModal from '@/components/AssignBioEmotionalModal';
 import { getApiBaseUrl } from '@/lib/api-base';
 import { getAuthToken } from '@/lib/api';
+import { getPatientDetail } from '@/lib/assignment-api';
 
 interface TherapistClinicalDashboardProps {
   onChangePatient: () => void;
@@ -63,6 +64,7 @@ export default function TherapistClinicalDashboard({
   const [showAssignMysticModal, setShowAssignMysticModal] = useState(false);
   const [showAssignBioEmotionalModal, setShowAssignBioEmotionalModal] = useState(false);
   const [signalCompleted, setSignalCompleted] = useState(false);
+  const [patientHasUser, setPatientHasUser] = useState<boolean | null>(null);
 
   const resolvedPatientId = useMemo(() => {
     if (patientId === undefined || patientId === null || patientId === '') return null;
@@ -73,6 +75,29 @@ export default function TherapistClinicalDashboard({
     if (typeof patientId === 'number') return patientId;
     return null;
   }, [patientId]);
+
+  useEffect(() => {
+    // Fetch whether patient has linked user account (so we can enable/disable assign actions)
+    let cancelled = false;
+    const checkPatientUser = async () => {
+      if (!resolvedPatientId) {
+        setPatientHasUser(null);
+        return;
+      }
+      try {
+        const data = await getPatientDetail(resolvedPatientId);
+        if (!cancelled) setPatientHasUser(!!(data && (data.user || data.user_id)));
+      } catch (err) {
+        if (!cancelled) setPatientHasUser(false);
+      }
+    };
+
+    checkPatientUser();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [resolvedPatientId]);
 
   useEffect(() => {
     if (!resolvedPatientId) {
@@ -201,6 +226,12 @@ export default function TherapistClinicalDashboard({
       <div className="rounded-lg border border-border bg-card p-4">
         <h3 className="mb-3 text-sm font-medium text-muted-foreground">Acciones de asignación</h3>
         <div className="flex flex-wrap gap-2">
+          {patientHasUser === false && (
+            <div className="p-3 rounded-md bg-amber-50 border border-amber-100 text-amber-800 text-sm">
+              El consultante no tiene cuenta de usuario vinculada. Vincula una cuenta para asignar tests.
+            </div>
+          )}
+
           <Link
             href="/dashboard/therapist/tarot"
             className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 transition-colors"
@@ -209,15 +240,17 @@ export default function TherapistClinicalDashboard({
             Abrir Tarot en workspace simbólico
           </Link>
           <button
-            onClick={() => setShowAssignModal(true)}
-            className="inline-flex items-center gap-2 rounded-md bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 transition-colors"
+            onClick={() => patientHasUser ? setShowAssignModal(true) : undefined}
+            disabled={patientHasUser === false}
+            className="inline-flex items-center gap-2 rounded-md bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
           >
             <span className="text-lg">📋</span>
             Asignar SIGNAL (16 ítems)
           </button>
           <button
-            onClick={() => setShowAssignBioEmotionalModal(true)}
-            className="inline-flex items-center gap-2 rounded-md bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-700 transition-colors"
+            onClick={() => patientHasUser ? setShowAssignBioEmotionalModal(true) : undefined}
+            disabled={patientHasUser === false}
+            className="inline-flex items-center gap-2 rounded-md bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
           >
             <span className="text-lg">🌿</span>
             Asignar Bio-Emocional (22)

@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import TherapistRoute from '@/components/TherapistRoute';
 import { getAuthToken } from '@/lib/auth';
+import { getApiBaseUrl } from '@/lib/api-base';
 import { 
   calculateShekinahProfile, 
   validateShekinahInput,
@@ -57,9 +58,10 @@ export default function ShekinahAnalysisPage() {
         return;
       }
 
-      const response = await fetch(`/api/patients/${patientId}/`, {
+      const base = getApiBaseUrl();
+      const response = await fetch(`${base}/therapist/patients/${patientId}/`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Token ${token}`,
           'Content-Type': 'application/json',
         },
       });
@@ -102,10 +104,11 @@ export default function ShekinahAnalysisPage() {
       
       const summary = `Shejinah: PIN ${result.identity.pin} - OTD ${result.otd.to}/${result.otd.pt}/${result.otd.td} | Escudos: ${result.shields.list.length} | Imagen Alma: ${result.soulImage.portals.length}`;
 
-      const response = await fetch(`/api/patients/${patientId}/analyses/`, {
+      const base = getApiBaseUrl();
+      const response = await fetch(`${base}/therapist/patients/${patientId}/analyses/`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Token ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({

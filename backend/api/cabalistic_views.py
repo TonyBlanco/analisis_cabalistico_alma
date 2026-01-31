@@ -1240,17 +1240,32 @@ class ConsultanteCabalaCyclesView(APIView):
                 'error': 'El consultante no tiene fecha de nacimiento registrada'
             })
 
-        # Usar el nuevo TikunCycleCalculator
+        # Usar el nuevo TikunCycleCalculator y QliphothCycleCalculator
         try:
             from .cabala_cycles import tikun_cycle_calculator
+            from .cabala_qliphoth_cycles import qliphoth_cycle_calculator
+            
+            # Ciclos de luz (Sefirot)
             cycle_report = tikun_cycle_calculator.generate_cycle_report(consultante.birth_date)
             
-            return Response({
+            # Ciclos de sombra (Qliphoth) - solo si se solicita explícitamente
+            include_shadow = request.GET.get('include_shadow', 'false').lower() == 'true'
+            shadow_analysis = None
+            
+            if include_shadow:
+                shadow_analysis = self._generate_qliphoth_analysis(consultante)
+            
+            response_data = {
                 'consultante_uuid': str(consultante.uuid),
                 'consultante_name': consultante.full_name,
                 'birth_date': consultante.birth_date.isoformat(),
                 **cycle_report
-            })
+            }
+            
+            if shadow_analysis:
+                response_data['shadow_cycles'] = shadow_analysis
+            
+            return Response(response_data)
         except Exception as e:
             logger.error(f"Error calculating tikun cycles: {e}")
             # Fallback a cálculos básicos
@@ -1293,6 +1308,56 @@ class ConsultanteCabalaCyclesView(APIView):
                 },
                 'disclaimer': 'Los ciclos son mapas simbólicos del tiempo. No determinan eventos ni predicen resultados.'
             })
+    
+    def _generate_qliphoth_analysis(self, consultante):
+        """
+        Genera análisis completo de ciclos Qliphoth para el consultante.
+        ÉTICO: Solo para consciencia preventiva, no predictivo.
+        """
+        try:
+            from .cabala_qliphoth_cycles import qliphoth_cycle_calculator
+            
+            # Ciclo actual
+            current_qliphoth = qliphoth_cycle_calculator.calculate_current_qliphoth(consultante.birth_date)
+            
+            # Mapeo de eventos históricos
+            events = qliphoth_cycle_calculator.map_events_to_qliphoth(
+                str(consultante.uuid), 
+                consultante.birth_date
+            )
+            
+            # Detección de patrones
+            patterns = qliphoth_cycle_calculator.detect_shadow_patterns(events)
+            
+            # Alertas éticas
+            alerts = qliphoth_cycle_calculator.generate_shadow_alerts(
+                patterns, 
+                consultante.birth_date
+            )
+            
+            return {
+                'current_qliphoth': current_qliphoth['current_qliphoth'],
+                'cycle_year': current_qliphoth['cycle_year'],
+                'corresponding_sefira': current_qliphoth['corresponding_sefira'],
+                'shadow_manifestation': current_qliphoth['shadow_manifestation'],
+                'biographical_shadow_map': events,
+                'shadow_patterns': patterns,
+                'alerts': alerts,
+                'disclaimer': (
+                    'Este análisis muestra correlaciones históricas, no predicciones. '
+                    'Los ciclos son mapas de reflexión, no determinismo.'
+                )
+            }
+        except Exception as e:
+            logger.error(f"Error in qliphoth analysis: {e}")
+            return {
+                'error': 'No se pudo generar análisis de sombra',
+                'current_qliphoth': None,
+                'disclaimer': (
+                    'Este análisis muestra correlaciones históricas, no predicciones. '
+                    'Los ciclos son mapas de reflexión, no determinismo.'
+                )
+            }
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -1363,3 +1428,95 @@ class ConsultanteSoulMapView(APIView):
                 {'error': f'Error generando mapa del alma: {str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class ConsultanteQliphothCyclesView(APIView):
+    """
+    Análisis completo de Ciclos de Sombra Personal (Qliphoth).
+    
+    Ruta NUEVA:
+      GET /api/consultantes/<uuid>/qliphoth-cycles/
+    
+    ÉTICA: Este endpoint genera análisis de patrones históricos para consciencia preventiva.
+    NO predice crisis futuras ni determina eventos.
+    Usa correlaciones pasadas del consultante para reflexión consciente.
+    """
+    permission_classes = [IsAuthenticated, IsTherapist]
+
+    def get(self, request, uuid):
+        """Genera análisis completo de ciclos de sombra"""
+        try:
+            consultante = Consultante.objects.get(uuid=uuid, therapist=request.user)
+        except Consultante.DoesNotExist:
+            return Response(
+                {'error': 'Consultante no encontrado o no tienes acceso'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        if not consultante.birth_date:
+            return Response({
+                'consultante_uuid': str(consultante.uuid),
+                'consultante_name': consultante.full_name,
+                'error': 'El consultante requiere fecha de nacimiento para análisis de ciclos Qliphoth',
+                'disclaimer': (
+                    'Este análisis muestra correlaciones históricas, no predicciones. '
+                    'Los ciclos son mapas de reflexión, no determinismo.'
+                )
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            from .cabala_qliphoth_cycles import qliphoth_cycle_calculator
+            
+            # Ciclo actual
+            current_qliphoth_info = qliphoth_cycle_calculator.calculate_current_qliphoth(consultante.birth_date)
+            
+            # Mapeo de eventos históricos a Qliphoth
+            biographical_map = qliphoth_cycle_calculator.map_events_to_qliphoth(
+                str(consultante.uuid), 
+                consultante.birth_date
+            )
+            
+            # Detectar patrones de sombra
+            shadow_patterns = qliphoth_cycle_calculator.detect_shadow_patterns(biographical_map)
+            
+            # Generar alertas éticas (consciencia preventiva)
+            alerts = qliphoth_cycle_calculator.generate_shadow_alerts(
+                shadow_patterns, 
+                consultante.birth_date
+            )
+            
+            return Response({
+                'consultante_uuid': str(consultante.uuid),
+                'consultante_name': consultante.full_name,
+                'birth_date': consultante.birth_date.isoformat(),
+                'current_qliphoth': current_qliphoth_info['current_qliphoth'],
+                'cycle_year': current_qliphoth_info['cycle_year'],
+                'corresponding_sefira': current_qliphoth_info['corresponding_sefira'],
+                'shadow_manifestation': current_qliphoth_info['shadow_manifestation'],
+                'biographical_shadow_map': biographical_map,
+                'shadow_patterns': shadow_patterns,
+                'alerts': alerts,
+                'qliphoth_info': current_qliphoth_info.get('qliphah_info', {}),
+                'integration_path': current_qliphoth_info.get('integration_path', ''),
+                'disclaimer': (
+                    'Este análisis muestra correlaciones históricas, no predicciones. '
+                    'Los ciclos son mapas de reflexión, no determinismo.'
+                ),
+                'ethical_notice': (
+                    'Las alertas son invitaciones a consciencia preventiva basadas en tu historia personal. '
+                    'No predicen crisis ni determinan eventos futuros.'
+                )
+            })
+
+        except Exception as e:
+            logger.error(f"Error in qliphoth cycles analysis for {uuid}: {e}")
+            return Response({
+                'consultante_uuid': str(consultante.uuid),
+                'consultante_name': consultante.full_name,
+                'error': f'Error generando análisis de ciclos Qliphoth: {str(e)}',
+                'disclaimer': (
+                    'Este análisis muestra correlaciones históricas, no predicciones. '
+                    'Los ciclos son mapas de reflexión, no determinismo.'
+                )
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

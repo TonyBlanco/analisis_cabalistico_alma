@@ -449,25 +449,72 @@ Responde en JSON con esta estructura:
         """Export synthesis to the holistic synthesis (AnalysisRecord)"""
         
         try:
+            # Prepare data with safe serialization
+            raw_input = {
+                'synthesis_id': str(synthesis.id),
+                'readings_count': synthesis.readings_count,
+                'methods_covered': synthesis.methods_covered or [],
+                'ai_synthesis': synthesis.ai_synthesis or {},
+                'source': 'gematria_synthesis',
+            }
+            
+            computed_result = {
+                'dominant_numbers': synthesis.dominant_numbers or [],
+                'recurring_sefirot': synthesis.recurring_sefirot or [],
+                'archetypal_patterns': synthesis.archetypal_patterns or [],
+                'light_themes': synthesis.light_themes or [],
+                'shadow_themes': synthesis.shadow_themes or [],
+                'tikun_suggestions': synthesis.tikun_suggestions or [],
+                'narrative': synthesis.ai_narrative or '',
+                'type': 'gematria_synthesis',
+            }
+            
+            # Build required birth_data_snapshot
+            # Prefer legal_full_name from associated UserProfile when available
+            legal_name = None
+            try:
+                if getattr(self.patient, 'user', None) and getattr(self.patient.user, 'profile', None):
+                    legal_name = getattr(self.patient.user.profile, 'legal_full_name', None)
+            except Exception:
+                legal_name = None
+
+            legal_name = legal_name or getattr(self.patient, 'legal_full_name', None) or getattr(self.patient, 'full_name', None)
+
+            birth_data_snapshot = {
+                'legal_name': legal_name,
+                'birth_date': str(self.patient.birth_date) if self.patient.birth_date else None,
+                'birth_time': str(self.patient.birth_time) if hasattr(self.patient, 'birth_time') and self.patient.birth_time else None,
+                'city': getattr(self.patient, 'city_of_birth', None) or '',
+                'country': getattr(self.patient, 'country_of_birth', None) or '',
+                'lat': getattr(self.patient, 'birth_latitude', None),
+                'lng': getattr(self.patient, 'birth_longitude', None),
+                'timezone': getattr(self.patient, 'birth_timezone', None) or 'UTC',
+                'geocode_source': 'patient_profile',
+            }
+            
+            # Build required algorithm_snapshot
+            algorithm_snapshot = {
+                'engine': 'gematria_synthesis_service',
+                'version': '1.0.0',
+                'params': {
+                    'methods_count': len(synthesis.methods_covered or []),
+                    'readings_count': synthesis.readings_count,
+                    'include_cross_swm': bool(synthesis.cross_swm_sources),
+                },
+            }
+            
+            logger.info(f"Exporting synthesis {synthesis.id} to holistic for patient {self.patient.id}")
+            
             record = AnalysisRecord.objects.create(
                 patient=self.patient,
                 therapist=self.therapist,
-                kind='gematria_synthesis',
-                raw_input={
-                    'synthesis_id': str(synthesis.id),
-                    'readings_count': synthesis.readings_count,
-                    'methods_covered': synthesis.methods_covered,
-                    'ai_synthesis': synthesis.ai_synthesis,
-                },
-                computed_result={
-                    'dominant_numbers': synthesis.dominant_numbers,
-                    'recurring_sefirot': synthesis.recurring_sefirot,
-                    'archetypal_patterns': synthesis.archetypal_patterns,
-                    'light_themes': synthesis.light_themes,
-                    'shadow_themes': synthesis.shadow_themes,
-                    'tikun_suggestions': synthesis.tikun_suggestions,
-                    'narrative': synthesis.ai_narrative,
-                },
+                kind='kabbalah',  # Use existing kind choice
+                module_code='GEMATRIA_SYNTHESIS',
+                role_context='therapist',
+                birth_data_snapshot=birth_data_snapshot,
+                algorithm_snapshot=algorithm_snapshot,
+                raw_input=raw_input,
+                computed_result=computed_result,
             )
             
             # Update synthesis record

@@ -123,6 +123,19 @@ from .cabalistic_views import (
     ConsultanteCabalaAnalysisListView,
     ConsultanteCabalaCyclesView,
     ConsultanteSoulMapView,
+    ConsultanteQliphothCyclesView,
+)
+# Qliphoth AI Views (importación separada)
+from .qliphoth_views_extension import (
+    ConsultanteQliphothAIAnalysisView,
+    SaveQliphothAnalysisView,
+    QliphothAnalysisHistoryView,
+    GenerateQliphothReportView,
+)
+# Eventos biográficos para Sincronías/Alertas
+from .biographical_events_views import (
+    ConsultanteBiographicalEventsView,
+    ConsultanteAddBiographicalEventView,
 )
 from .admin_views import (
     AdminCheckView,
@@ -229,7 +242,16 @@ urlpatterns = [
     path('consultantes/<uuid:uuid>/cabala-aplicada/records/', ConsultanteCabalaAplicadaRecordView.as_view(), name='consultante_cabala_aplicada_records'),
     path('consultantes/<uuid:uuid>/cabala-analyses/', ConsultanteCabalaAnalysisListView.as_view(), name='consultante_cabala_analyses'),
     path('consultantes/<uuid:uuid>/cabala-cycles/', ConsultanteCabalaCyclesView.as_view(), name='consultante_cabala_cycles'),
+    path('consultantes/<uuid:uuid>/qliphoth-cycles/', ConsultanteQliphothCyclesView.as_view(), name='consultante_qliphoth_cycles'),
+    path('consultantes/<uuid:uuid>/qliphoth-ai-analysis/', ConsultanteQliphothAIAnalysisView.as_view(), name='consultante_qliphoth_ai_analysis'),
+    path('consultantes/<uuid:uuid>/qliphoth-analysis/save/', SaveQliphothAnalysisView.as_view(), name='save_qliphoth_analysis'),
+    path('consultantes/<uuid:uuid>/qliphoth-analysis/history/', QliphothAnalysisHistoryView.as_view(), name='qliphoth_analysis_history'),
+    path('consultantes/<uuid:uuid>/qliphoth-report/generate/', GenerateQliphothReportView.as_view(), name='generate_qliphoth_report'),
     path('consultantes/<uuid:uuid>/soul-map/', ConsultanteSoulMapView.as_view(), name='consultante_soul_map'),
+    
+    # Eventos biográficos para Sincronías y Alertas
+    path('consultantes/<uuid:uuid>/biographical-events/', ConsultanteBiographicalEventsView.as_view(), name='consultante_biographical_events'),
+    path('consultantes/<uuid:uuid>/biographical-events/add/', ConsultanteAddBiographicalEventView.as_view(), name='consultante_add_biographical_event'),
     
     # Endpoints exclusivos para terapeutas
     path('therapist/patients/create/', CreatePatientWithAccountView.as_view(), name='create_patient_with_account'),
@@ -415,6 +437,10 @@ urlpatterns = [
     
     # AI Engine (Therapeutic interpretation with GPT-4 + RAG)
     path('ai-engine/', include('api.ai_engine.urls')),
+    
+    # ========== CÁBALA INNOVACIONES (Sincronías, Alertas, Narrativa, Calendario) ==========
+    # Innovaciones terapéuticas: detector de sincronías, alertas éticas, exportación narrativa, calendario cósmico
+    path('cabala/', include('api.urls_cabala_innovations', namespace='cabala_innovations')),
     
     # ========== CÁBALA APLICADA AI SERVICE (P3 - IA Asistida) ==========
     # Ethical AI assistance for Kabbalistic analysis - Therapist only

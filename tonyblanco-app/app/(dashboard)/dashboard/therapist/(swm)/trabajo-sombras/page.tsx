@@ -11,11 +11,12 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Moon, Eye, Calendar, AlertTriangle, BookOpen, Shield, Save } from 'lucide-react';
+import { Moon, Eye, Calendar, AlertTriangle, BookOpen, Shield, Save, Sparkles } from 'lucide-react';
 import QliphothCyclesTimeline from '@/components/CabalAppliedWorkspace/QliphothCyclesTimeline';
 import ShadowWorkPanel from '@/components/CabalAppliedWorkspace/ShadowWorkPanel';
 import useActiveConsultante from '@/hooks/useActiveConsultante';
 import { saveQliphothAnalysis } from '@/lib/cabala-qliphoth-cycles-api';
+import { GenericAIAssistantPanel } from '@/components/ai';
 
 const TrabajoSombrasPage: React.FC = () => {
   const activePatient = useActiveConsultante();
@@ -157,11 +158,22 @@ const TrabajoSombrasPage: React.FC = () => {
         {/* Contenido de Pestañas */}
         <div className="p-6">
           {activeTab === 'shadow-work' && (
-            <div>
+            <div className="space-y-6">
               <h2 className="text-xl font-semibold mb-4">Análisis de Qliphoth Clásico</h2>
               <p className="text-gray-600 mb-6">
                 Análisis simbólico de aspectos sombríos basado en correspondencias cabalísticas tradicionales.
               </p>
+              
+              {/* Panel de IA para Trabajo de Sombras */}
+              <GenericAIAssistantPanel
+                moduleType="trabajo-sombras"
+                moduleTitle="Trabajo de Sombras"
+                consultanteId={activePatient?.id}
+                context={{
+                  consultante_name: activePatient?.nombre_completo,
+                  module: 'shadow-work',
+                }}
+              />
               
               {/* Aquí se integraría el componente ShadowWorkPanel existente */}
               <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">

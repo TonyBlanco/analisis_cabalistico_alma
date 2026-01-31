@@ -35,14 +35,14 @@ class GematriaReadingCreateSerializer(serializers.Serializer):
     patient_id = serializers.IntegerField()
     method = serializers.ChoiceField(choices=GematriaReading.METHOD_CHOICES)
     input_name = serializers.CharField(max_length=200)
-    input_birth_date = serializers.DateField(required=False, allow_null=True)
-    hebrew_transliteration = serializers.CharField(max_length=200, required=False, default='')
-    calculated_numbers = serializers.JSONField()
+    input_birth_date = serializers.DateField(required=False, allow_null=True, default=None)
+    hebrew_transliteration = serializers.CharField(max_length=200, required=False, allow_blank=True, default='')
+    calculated_numbers = serializers.JSONField(required=False, default=dict)
     calculation_details = serializers.JSONField(required=False, default=dict)
     sefirotic_correspondence = serializers.JSONField(required=False, default=dict)
     number_interpretations = serializers.JSONField(required=False, default=dict)
-    method_interpretation = serializers.CharField(required=False, default='')
-    therapist_notes = serializers.CharField(required=False, default='')
+    method_interpretation = serializers.CharField(required=False, allow_blank=True, default='')
+    therapist_notes = serializers.CharField(required=False, allow_blank=True, default='')
 
 
 class GematriaReadingListSerializer(serializers.ModelSerializer):

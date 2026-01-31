@@ -1909,6 +1909,55 @@ export default function CabalAppliedVisualCore({
     );
   }
 
+  // INNOVACIÓN 4: Laboratorio de Nombres (Gematría Relacional Familiar)
+  if (activeSection === 'laboratorio-nombres') {
+    const LaboratorioNombresPanel = require('./innovations/LaboratorioNombresPanel').default;
+    
+    return (
+      <section className="flex-1">
+        <LaboratorioNombresPanel
+          consultantName={patientProfile?.full_name || patientProfile?.legal_full_name || ''}
+          onAnalysisComplete={(analysis: unknown) => {
+            console.log('[CabalAppliedVisualCore] Name analysis completed:', analysis);
+          }}
+        />
+      </section>
+    );
+  }
+
+  // INNOVACIÓN 5: Meditaciones Personalizadas por Sefirá
+  if (activeSection === 'meditaciones') {
+    const MeditacionesPersonalizadasPanel = require('./innovations/MeditacionesPersonalizadasPanel').default;
+    
+    return (
+      <section className="flex-1">
+        <MeditacionesPersonalizadasPanel
+          consultantName={patientProfile?.full_name || patientProfile?.legal_full_name || 'Consultante'}
+          onMeditationGenerated={(meditation: unknown) => {
+            console.log('[CabalAppliedVisualCore] Meditation generated:', meditation);
+          }}
+        />
+      </section>
+    );
+  }
+
+  // INNOVACIÓN 13: Árbol Vivo (Gamificación)
+  if (activeSection === 'arbol-vivo') {
+    const ArbolVivoPanel = require('./innovations/ArbolVivoPanel').default;
+    
+    return (
+      <section className="flex-1">
+        <ArbolVivoPanel
+          consultanteUuid={consultanteUuid || undefined}
+          consultantName={patientProfile?.full_name || patientProfile?.legal_full_name || 'Consultante'}
+          onProgressUpdated={(progress: unknown) => {
+            console.log('[CabalAppliedVisualCore] Arbol Vivo progress updated:', progress);
+          }}
+        />
+      </section>
+    );
+  }
+
   // Resources Section
   if (activeSection === 'resources') {
     return (

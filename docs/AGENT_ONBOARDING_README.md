@@ -3,7 +3,18 @@ AGENT_ONBOARDING_README
 
 Rol obligatorio: Documentation & Governance Engineer (lectura previa a cualquier intervenci├│n).
 
-1) Qu├⌐ es este proyecto
+## 🚀 ÚLTIMA ACTUALIZACIÓN: 1 Febrero 2026
+
+### ✅ Mejoras Completadas Recientemente
+- **Tooltips informativos universales**: 100% cobertura en workspace Cábala Aplicada
+- **Corrección APIs críticas**: Resuelto problema URLs duplicadas (/api/api/)
+- **Experiencia de usuario mejorada**: Información contextual clara para todos los módulos
+
+Ver: `docs/CHANGELOG_2026-02-01_TOOLTIPS_API_FIXES.md` para detalles completos.
+
+---
+
+## 1) Qué es este proyecto
 
 Este repositorio alberga una plataforma con Workspaces aislados que representan espacios de trabajo aut├│nomos (p. ej. notas cl├¡nicas, exportaciones, hist├│ricos). La integridad de los datos legacy es prioritaria y no puede ser modificada. Todas las exportaciones y transferencias de contenido deben ser manuales y expl├¡citas. La gobernanza es estricta: cambios en copy, exportaciones o comportamiento de aislamiento requieren revisiones documentales y cumplimiento del contrato de workspace.
 

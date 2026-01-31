@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { GitBranch } from 'lucide-react';
 import TransgenerationalSidebar from './TransgenerationalSidebar';
 import TransgenerationalVisualCore from './TransgenerationalVisualCore';
+import { GenericAIAssistantPanel } from '@/components/ai';
 import type { TransgenerationalSectionId } from './types';
 
 export default function TransgenerationalDeepWorkspace() {
@@ -39,6 +40,16 @@ export default function TransgenerationalDeepWorkspace() {
           <div className="flex gap-6 items-start">
             <TransgenerationalVisualCore activeSection={activeSection} />
             <aside className="w-72 space-y-4">
+              {/* Panel de IA Transgeneracional */}
+              <GenericAIAssistantPanel
+                moduleType="transgenerational"
+                moduleTitle="Transgeneracional"
+                context={{
+                  activeSection,
+                  module: 'transgenerational-deep',
+                }}
+              />
+              
               <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
                 <h3 className="text-sm font-semibold text-gray-900">Panel interno</h3>
                 <p className="text-xs text-gray-600">

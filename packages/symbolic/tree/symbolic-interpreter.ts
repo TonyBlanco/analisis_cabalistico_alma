@@ -312,9 +312,24 @@ export function validateTreeStateForInterpretation(treeState: TreeStructuralStat
 export function createFallbackInterpretation(treeState: TreeStructuralState): SymbolicInterpretation {
   const dominantSefirot = treeState.sefirot.filter(s => s.role === 'dominant');
   const presentSefirot = treeState.sefirot.filter(s => s.role === 'present');
+  const latentSefirot = treeState.sefirot.filter(s => s.role === 'latent');
   const harmonicFlows = treeState.flows.filter(f => f.polarity === 'harmonic');
   const integrativeFlows = treeState.flows.filter(f => f.polarity === 'integrative');
   const tensionalFlows = treeState.flows.filter(f => f.polarity === 'tensional');
+  
+  // Sefira name mapping for display
+  const SEFIRA_NAMES: Record<string, string> = {
+    'keter': 'Keter (Corona)',
+    'chokmah': 'Chokmah (Sabiduría)',
+    'binah': 'Binah (Entendimiento)',
+    'chesed': 'Chesed (Misericordia)',
+    'gevurah': 'Gevurah (Rigor)',
+    'tiferet': 'Tiferet (Belleza)',
+    'netzach': 'Netzach (Victoria)',
+    'hod': 'Hod (Gloria)',
+    'yesod': 'Yesod (Fundamento)',
+    'malchut': 'Malchut (Reino)',
+  };
   
   // Calculate vertical emphasis (flows crossing triads)
   const verticalFlows = treeState.flows.filter(f => {
@@ -330,26 +345,59 @@ export function createFallbackInterpretation(treeState: TreeStructuralState): Sy
     return (fromUpper && (toMiddle || toLower)) || (fromMiddle && toLower);
   });
   
+  // Build dynamic content based on actual data
+  const dominantNames = dominantSefirot.map(s => SEFIRA_NAMES[s.id] || s.id).join(', ');
+  const presentNames = presentSefirot.map(s => SEFIRA_NAMES[s.id] || s.id).join(', ');
+  
+  // Get strongest flows for display
+  const strongestFlows = [...treeState.flows]
+    .sort((a, b) => b.intensity - a.intensity)
+    .slice(0, 3)
+    .map(f => `${SEFIRA_NAMES[f.from]?.split(' ')[0] || f.from} → ${SEFIRA_NAMES[f.to]?.split(' ')[0] || f.to}`)
+    .join(', ');
+  
+  // Method-specific descriptions
+  const methodDescriptions: Record<string, string> = {
+    'pitagoras': 'el análisis numerológico pitagórico con reducción a dígitos maestros',
+    'gematria-standard': 'la gematría hebrea estándar (Mispar Hechrachi)',
+    'gematria-katan': 'la gematría katan (valores reducidos 1-9)',
+    'mispar-gadol': 'el Mispar Gadol (valores finales extendidos)',
+    'mispar-siduri': 'el Mispar Siduri (valor ordinal de letras)',
+    'milui': 'el Milui (expansión de nombres de letras)',
+    'atbash': 'la cifra Atbash (sustitución espejo)',
+    'albam': 'la cifra Albam (sustitución por mitades)',
+    'avgad': 'la cifra Avgad (desplazamiento adelante)',
+    'temurah': 'la Temurah (permutación de letras)',
+    'notarikon': 'el Notarikón (acrósticos y abreviaciones)',
+  };
+  const methodDesc = methodDescriptions[treeState.source.method] || 'el método seleccionado';
+  
   const fallbackObservations: SymbolicObservation[] = [
     {
       type: 'structural-analysis',
       title: 'Panorama Estructural',
-      content: `La estructura presenta ${dominantSefirot.length} sefirot dominantes y ${presentSefirot.length} presentes, con ${treeState.flows.length} conexiones activas. ${verticalFlows.length > treeState.flows.length / 2 ? 'Énfasis vertical predominante' : 'Distribución equilibrada entre ejes'}. La densidad estructural indica un patrón ${treeState.flows.length > 15 ? 'complejo' : treeState.flows.length > 10 ? 'moderado' : 'concentrado'}.`,
+      content: dominantSefirot.length > 0
+        ? `Sefirot dominantes: ${dominantNames}. ${presentSefirot.length > 0 ? `Presentes: ${presentNames}.` : ''} La estructura muestra ${treeState.flows.length} conexiones activas con ${verticalFlows.length > treeState.flows.length / 2 ? 'énfasis vertical (descenso de luz)' : 'distribución equilibrada entre ejes'}.`
+        : `No se detectaron sefirot dominantes en esta lectura. ${presentSefirot.length > 0 ? `Sefirot presentes: ${presentNames}.` : 'La estructura requiere más datos para manifestar patrones claros.'}`,
     },
     {
       type: 'pattern-recognition',
       title: 'Dinámica Sefirática',
-      content: `Los flujos se distribuyen en ${harmonicFlows.length} armónicos, ${integrativeFlows.length} integrativos y ${tensionalFlows.length} tensionales. ${harmonicFlows.length > tensionalFlows.length ? 'Predominancia de patrones armónicos' : 'Balance entre polaridades'}. Las sefirot dominantes establecen centros de concentración estructural que definen el patrón relacional.`,
+      content: treeState.flows.length > 0
+        ? `Flujos principales: ${strongestFlows || 'ninguno detectado'}. Distribución: ${harmonicFlows.length} armónicos, ${integrativeFlows.length} integrativos, ${tensionalFlows.length} tensionales. ${harmonicFlows.length > tensionalFlows.length ? 'Predominan patrones de flujo armónico (luz descendente estable).' : tensionalFlows.length > harmonicFlows.length ? 'Mayor presencia de tensiones (zonas de trabajo interior).' : 'Balance entre luz y sombra en el árbol.'}`
+        : 'No se detectaron flujos activos. Esto puede indicar un patrón estático o la necesidad de mayor contexto numerológico.',
     },
     {
       type: 'educational-context',
       title: 'Contexto Metodológico',
-      content: `Método aplicado: ${treeState.source.method}. Este método enfatiza la reducción numerológica y el mapeo directo sefirático. No captura dinámicas astrológicas ni simbología tarótica. La estructura observada refleja exclusivamente el modelo matemático-cabalístico del método.`,
+      content: `Análisis basado en ${methodDesc}. Este método mapea valores numéricos a las sefirot del Árbol de la Vida según correspondencias tradicionales. La lectura es estructural y educativa, no diagnóstica ni predictiva.`,
     },
     {
       type: 'symbolic-comparison',
       title: 'Claves de Observación Profesional',
-      content: `Para análisis profundo, considerar: ¿Qué sefirot dominantes establecen polaridades estructurales? ¿Cómo se distribuye la energía entre triadas (Supernal/Ética/Astral)? ¿Qué ausencias latentes podrían ser significativas? La observación sistemática de flujos tensionales puede revelar zonas de potencial transformación estructural.`,
+      content: dominantSefirot.length > 0
+        ? `Observar: ¿Cómo interactúan ${dominantSefirot[0] ? SEFIRA_NAMES[dominantSefirot[0].id]?.split(' ')[0] : 'las sefirot'} con las energías circundantes? ${tensionalFlows.length > 0 ? 'Las tensiones detectadas sugieren áreas de potencial transformación.' : ''} ${latentSefirot.length > 0 ? `Ausencias notables pueden indicar áreas de desarrollo.` : ''}`
+        : 'Considerar ejecutar métodos adicionales para obtener un panorama más completo del patrón simbólico.',
     },
   ];
   
@@ -358,7 +406,7 @@ export function createFallbackInterpretation(treeState: TreeStructuralState): Sy
     timestamp: new Date().toISOString(),
     safetyLevel: 'educational',
     observations: fallbackObservations,
-    educationalContext: 'Interpretación generada sin asistencia de IA (modo fallback) — Análisis estructural algorítmico basado en conteo de patrones',
+    educationalContext: `Interpretación algorítmica (sin IA) — Método: ${treeState.source.method} — ${new Date().toLocaleDateString('es-ES')}`,
     safetyValidation: {
       passed: true,
       warnings: [],

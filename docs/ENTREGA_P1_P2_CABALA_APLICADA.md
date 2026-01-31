@@ -1,7 +1,21 @@
 # ENTREGA FASE P1 + P2 + P3 COMPLETA - MÓDULO CABALA APLICADA
 
 ## Fecha
-**31 de Enero de 2026** (actualizado - P3 IA Asistida completa)
+**1 de Febrero de 2026** (actualizado - UX Enhancement & API Fixes completos)
+
+---
+
+## 🚀 ÚLTIMAS ACTUALIZACIONES (01/02/2026)
+
+### ✅ TOOLTIPS INFORMATIVOS UNIVERSALES
+- **Estado**: 100% COMPLETADO
+- **Alcance**: TODOS los módulos de Cábala Aplicada
+- **Impacto**: Mejora significativa de UX y orientación contextual
+
+### ✅ CORRECCIÓN API CRÍTICA  
+- **Problema**: URLs duplicadas `/api/api/` causando errores 404
+- **Estado**: RESUELTO
+- **Impacto**: Exportación narrativa y endpoints funcionando completamente
 
 ---
 

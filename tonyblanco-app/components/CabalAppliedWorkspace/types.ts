@@ -14,4 +14,8 @@ export type CabalSectionId =
   | 'sincronias'
   | 'alertas-preventivas'
   | 'exportacion-narrativa'
-  | 'calendario-cosmico';
+  | 'calendario-cosmico'
+  // Nuevas innovaciones
+  | 'laboratorio-nombres'
+  | 'meditaciones'
+  | 'arbol-vivo';

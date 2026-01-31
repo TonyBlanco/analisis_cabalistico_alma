@@ -18,11 +18,14 @@ const sections: Array<{ id: CabalSectionId; label: string; description: string; 
   // Módulos Avanzados
   { id: 'sefirot-radar', label: '📊 Radar Sefirot', description: 'Desequilibrios: tests + bio + cálculos.', group: 'advanced' },
   { id: 'multi-system', label: '🔮 Multi-Sistema', description: 'Integración Cábala-Tarot-Astro-Bio-Trans.', group: 'advanced' },
+  { id: 'laboratorio-nombres', label: '🔤 Lab Nombres', description: 'Gematría relacional familiar.', group: 'advanced' },
   // Innovaciones Terapéuticas
   { id: 'sincronias', label: '✨ Sincronías', description: 'Detector de coincidencias biográficas.', group: 'innovations' },
   { id: 'alertas-preventivas', label: '🔔 Alertas', description: 'Avisos éticos basados en tu historia.', group: 'innovations' },
   { id: 'exportacion-narrativa', label: '📜 Narrativa', description: 'Carta del Alma, Mapa del Viaje, Libro.', group: 'innovations' },
   { id: 'calendario-cosmico', label: '🌙 Calendario', description: 'Ciclos lunares y sefiróticos reales.', group: 'innovations' },
+  { id: 'meditaciones', label: '🧘 Meditaciones', description: 'Meditaciones personalizadas por Sefirá.', group: 'innovations' },
+  { id: 'arbol-vivo', label: '🌳 Árbol Vivo', description: 'Tu Árbol crece con tu progreso.', group: 'innovations' },
   // Síntesis y Ayuda
   { id: 'synthesis', label: '📝 Síntesis', description: 'Notas humanas de integración.', group: 'synthesis' },
   { id: 'ai-assistant', label: '✨ IA Asistida', description: 'Asistente ético de exploración textual.', group: 'synthesis' },

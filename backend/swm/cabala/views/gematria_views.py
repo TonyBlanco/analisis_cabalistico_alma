@@ -66,8 +66,13 @@ class GematriaReadingCreateView(APIView):
     permission_classes = [IsAuthenticated]
     
     def post(self, request):
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info(f"[GematriaReading] Received data: {request.data}")
+        
         serializer = GematriaReadingCreateSerializer(data=request.data)
         if not serializer.is_valid():
+            logger.error(f"[GematriaReading] Validation errors: {serializer.errors}")
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
         data = serializer.validated_data
@@ -227,8 +232,8 @@ class GematriaSynthesisCreateView(APIView):
 
 class GematriaSynthesisDetailView(APIView):
     """
-    Get or update a specific synthesis.
-    GET/PATCH /api/swm/cabala/gematria-synthesis/<id>/
+    Get, update or delete a specific synthesis.
+    GET/PATCH/DELETE /api/swm/cabala/gematria-synthesis/<id>/
     """
     permission_classes = [IsAuthenticated]
     
@@ -263,6 +268,23 @@ class GematriaSynthesisDetailView(APIView):
         
         synthesis.save()
         return Response(GematriaSynthesisSerializer(synthesis).data)
+    
+    def delete(self, request, synthesis_id):
+        """Delete a synthesis"""
+        synthesis = self.get_synthesis(synthesis_id, request.user)
+        if not synthesis:
+            return Response(
+                {'error': 'No tiene acceso a esta síntesis'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        synthesis_title = synthesis.title
+        synthesis.delete()
+        
+        return Response({
+            'success': True,
+            'message': f'Síntesis "{synthesis_title}" eliminada correctamente',
+        })
 
 
 class GematriaSynthesisExportView(APIView):
@@ -273,8 +295,12 @@ class GematriaSynthesisExportView(APIView):
     permission_classes = [IsAuthenticated]
     
     def post(self, request):
+        import logging
+        logger = logging.getLogger(__name__)
+        
         serializer = GematriaSynthesisExportSerializer(data=request.data)
         if not serializer.is_valid():
+            logger.error(f"[Export] Validation error: {serializer.errors}")
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
         synthesis = get_object_or_404(
@@ -288,18 +314,26 @@ class GematriaSynthesisExportView(APIView):
                 status=status.HTTP_403_FORBIDDEN
             )
         
-        service = GematriaSynthesisService(synthesis.patient, request.user)
-        record_id = service.export_to_holistic(synthesis)
-        
-        if record_id:
-            return Response({
-                'success': True,
-                'message': 'Síntesis exportada a resumen holístico',
-                'holistic_record_id': record_id,
-            })
-        else:
+        try:
+            service = GematriaSynthesisService(synthesis.patient, request.user)
+            record_id = service.export_to_holistic(synthesis)
+            
+            if record_id:
+                return Response({
+                    'success': True,
+                    'message': 'Síntesis exportada al registro holístico del paciente (AnalysisRecord)',
+                    'holistic_record_id': record_id,
+                    'destination': 'AnalysisRecord (resumen holístico longitudinal)',
+                })
+            else:
+                return Response(
+                    {'error': 'Error interno al exportar la síntesis. Revise los logs.'},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+        except Exception as e:
+            logger.exception(f"[Export] Exception: {e}")
             return Response(
-                {'error': 'Error al exportar la síntesis'},
+                {'error': f'Error al exportar: {str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 

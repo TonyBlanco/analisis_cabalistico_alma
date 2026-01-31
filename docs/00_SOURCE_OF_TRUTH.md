@@ -33,10 +33,12 @@ Incluye el inventario final de contradicciones, dumps runtime, estado del paquet
 
 ## Checklist de decisiones (para gobernanza)
 1. **[APROBADA - 31/01/2026]** Migración Patient→Consultante: Implementar arquitectura unificada con UUID primary keys y compatibility layer
-2. Acordar destino de cada ítem clasificado: **KEEP**, **REBUILD**, **REMOVE**.
-3. Decidir política de empaquetado para `@holistica/symbolic` (subpath exports vs single entry) y autorizar cambios de producción.
-4. Determinar el futuro de la "Symbolic Interpreter AI": Implementar (endpoint + infra) o Deprecate (archivar docs y código asociado).
-5. Aprobar el movimiento administrativo de documentos obsoletos a `docs/backLegacy/` y la plantilla de cabecera de trazabilidad que se aplicará a cada documento movido.
+2. **[COMPLETADA - 01/02/2026]** Tooltips informativos universales: 100% cobertura implementada en workspace Cábala Aplicada
+3. **[COMPLETADA - 01/02/2026]** Corrección URLs API duplicadas: Resuelto problema /api/api/ que causaba errores 404
+4. Acordar destino de cada ítem clasificado: **KEEP**, **REBUILD**, **REMOVE**.
+5. Decidir política de empaquetado para `@holistica/symbolic` (subpath exports vs single entry) y autorizar cambios de producción.
+6. Determinar el futuro de la "Symbolic Interpreter AI": Implementar (endpoint + infra) o Deprecate (archivar docs y código asociado).
+7. Aprobar el movimiento administrativo de documentos obsoletos a `docs/backLegacy/` y la plantilla de cabecera de trazabilidad que se aplicará a cada documento movido.
 
 > Nota: `docs/backLegacy/` es una ubicación histórica para archivos archivados; su contenido sirve como evidencia histórica y **no es vinculante** para políticas u operaciones activas.
 

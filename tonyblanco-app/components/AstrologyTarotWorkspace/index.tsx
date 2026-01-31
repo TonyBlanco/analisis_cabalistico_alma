@@ -6,6 +6,7 @@ import { Star, Play, Lock } from 'lucide-react';
 import AstrologyTarotSidebar from './AstrologyTarotSidebar';
 import AstrologyTarotVisualCore from './AstrologyTarotVisualCore';
 import TarotHistoryPanel from './TarotHistoryPanel';
+import { GenericAIAssistantPanel } from '@/components/ai';
 import type { AstrologyTarotSectionId, TarotSystemId } from './types';
 import { getActivePatientId, getActivePatientName } from '@/lib/active-patient';
 import { API_BASE_URL, getAuthToken } from '@/lib/api';
@@ -346,6 +347,19 @@ export default function AstrologyTarotWorkspace({
               isWorkspaceActive={workspaceStatus === 'active'}
             />
             <aside className="w-72 space-y-4">
+              {/* Panel de IA Tarot */}
+              <GenericAIAssistantPanel
+                moduleType="tarot"
+                moduleTitle="Tarot"
+                consultanteId={patientId}
+                context={{
+                  activeSection,
+                  selectedSystem,
+                  instanceId: currentInstanceId,
+                  consultante_name: patientName,
+                }}
+              />
+              
               {/* Historial de Lecturas */}
               <TarotHistoryPanel
                 patientId={patientId ? parseInt(patientId, 10) : undefined}

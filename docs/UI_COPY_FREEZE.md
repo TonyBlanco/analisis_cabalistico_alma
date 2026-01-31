@@ -1,30 +1,47 @@
 # UI Copy Freeze
 
+⚠️ **ACTUALIZACIÓN**: Aplicar terminología `Consultante` (no `paciente`) en todo copy nuevo. Ver [`CONSULTANTE_TERMINOLOGY.md`](CONSULTANTE_TERMINOLOGY.md).
+
 ## 1. Lenguaje PERMITIDO
 
+### Terminología de personas:
+- **"Consultante"** (no "paciente")
+- **"Terapeuta"**
+- **"Usuario"** (cuenta técnica)
+
+### Acciones permitidas:
 - "Vista previa"
-- "Acci├│n manual"
+- "Acción manual"
 - "Confirmar"
 - "Copiar (pegar manualmente...)"
 - "Solo lectura"
 - "No se sincroniza con otros workspaces"
-- "Revisi├│n requerida antes de insertar"
+- "Revisión requerida antes de insertar"
+- "Seleccionar consultante"
+- "Agregar nuevo consultante"
+- "Datos del consultante"
 
-## 2. Lenguaje PROHIBIDO (lista expl├¡cita)
+## 2. Lenguaje PROHIBIDO (lista explícita)
 
-Evitar cualquier texto que pueda sugerir automatismo, sincronizaci├│n o inyecci├│n.
+### Terminología legacy:
+- **"Paciente"** → Usar "consultante"
+- **"Patient"** → Usar "Consultante" 
+- **"El/la paciente"** → Usar "el/la consultante"
+
+### Acciones automatizadas prohibidas:
+Evitar cualquier texto que pueda sugerir automatismo, sincronización o inyección.
 
 - insertar
 - inyectar
-- enviar autom├íticamente
+- enviar automáticamente
 - se guarda en notas
 - se sincroniza
 - se aplica al caso
-- generar informe cl├¡nico
+- generar informe clínico
 - se inyecta
-- enviar al terapista (cuando implique acci├│n autom├ítica)
+- enviar al terapista (cuando implique acción automática)
 
-Ejemplos de patrones prohibidos: "se inyecta en", "se guarda autom├íticamente en", "env├¡a a notas".
+Ejemplos de patrones prohibidos: "se inyecta en", "se guarda automáticamente en", "envía a notas".
 
 ## 3. Reglas de redacci├│n UI
 

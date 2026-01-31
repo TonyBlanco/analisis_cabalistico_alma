@@ -5,16 +5,18 @@ Index of canonical documents and their roles. This file is an index only; it doe
 
 ## Canonical documents (reading order)
 1. `00_SOURCE_OF_TRUTH/PROJECT_LOCK.md` ΓÇö Governing lock file (read first). Role: governance / enforcement.
-2. `docs/DOCUMENTATION_GOVERNANCE.md` ΓÇö Documentation governance rules. Role: governance / process.
-3. `docs/WORKSPACE_ISOLATION_POLICY.md` ΓÇö Workspace isolation policy. Role: policy.
-4. `docs/WORKSPACE_MATRIX.md` ΓÇö Workspace inventory and classification. Role: reference / inventory.
-5. `docs/ARCHITECTURE_SYMBOLIC_SYSTEM.md` ΓÇö System architecture for symbolic subsystems. Role: architecture / reference.
-6. `docs/SWM_V3_GOVERNANCE_ARTIFACTS.md` ΓÇö SWM v3 governance artifacts. Role: normative / SWM governance.
-7. `docs/AI_SYMBOLIC_CONTRACT.md` ΓÇö Canonical AI symbolic contract. Role: normative / data contract.
-8. `docs/TREE_STRUCTURAL_STATE_CONTRACT.md` ΓÇö Tree structural state contract. Role: normative / data contract.
-9. `docs/EPHEMERIS_DATA_POLICY.md` ΓÇö Ephemeris policy (astro). Role: policy / operational.
-10. `docs/RUNBOOK_ASTRO_PROD.md` ΓÇö Runbook operational (astro). Role: operational / runbook.
-11. `docs/WORKSPACE_EXPORT_CONTRACT.md` ΓÇö (New) Export contract for workspace-to-therapist static transfers. Role: policy / export contract.
+2. `docs/DOCUMENTATION_GOVERNANCE.md` — Documentation governance rules. Role: governance / process.
+3. `docs/UNIFIED_CONSULTANTE_ARCHITECTURE.md` ⭐ **NEW** — Unified Patient→Consultante architecture. Role: architecture / migration.
+4. `docs/CONSULTANTE_MIGRATION_GUIDE.md` ⭐ **NEW** — Practical migration guide for developers/therapists. Role: operational / guide.
+5. `docs/WORKSPACE_ISOLATION_POLICY.md` — Workspace isolation policy. Role: policy.
+6. `docs/WORKSPACE_MATRIX.md` — Workspace inventory and classification. Role: reference / inventory.
+7. `docs/ARCHITECTURE_SYMBOLIC_SYSTEM.md` — System architecture for symbolic subsystems. Role: architecture / reference.
+8. `docs/SWM_V3_GOVERNANCE_ARTIFACTS.md` — SWM v3 governance artifacts. Role: normative / SWM governance.
+9. `docs/AI_SYMBOLIC_CONTRACT.md` — Canonical AI symbolic contract. Role: normative / data contract.
+10. `docs/TREE_STRUCTURAL_STATE_CONTRACT.md` — Tree structural state contract. Role: normative / data contract.
+11. `docs/EPHEMERIS_DATA_POLICY.md` — Ephemeris policy (astro). Role: policy / operational.
+12. `docs/RUNBOOK_ASTRO_PROD.md` — Runbook operational (astro). Role: operational / runbook.
+13. `docs/WORKSPACE_EXPORT_CONTRACT.md` — (New) Export contract for workspace-to-therapist static transfers. Role: policy / export contract.
 
 ## Note
 Estos documentos no son roadmap ni dise├▒o t├⌐cnico. No contienen instrucciones de implementaci├│n. Son referencias de gobernanza, pol├¡tica y contratos de datos.

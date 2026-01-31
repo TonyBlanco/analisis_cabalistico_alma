@@ -41,7 +41,7 @@ Un Workspace es una **unidad cerrada** que contiene:
 * Su propia l├│gica
 * Su propia interfaz
 * Su propio contexto sem├íntico
-
+**IMPORTANTE**: Cada Workspace opera sobre un **Consultante** específico (ver `UNIFIED_CONSULTANTE_ARCHITECTURE.md`). El término "paciente" es legacy - usar "consultante" en todo código nuevo.
 Un Workspace **no es**:
 
 * una vista de datos globales

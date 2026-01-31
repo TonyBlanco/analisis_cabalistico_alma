@@ -11,6 +11,7 @@ Este repositorio alberga una plataforma con Workspaces aislados que representan 
 
 - `PROJECT_LOCK.md`
 - `DOCUMENT_AUTHORITY_INDEX.md`
+- `UNIFIED_CONSULTANTE_ARCHITECTURE.md` ⭐ **NUEVO**: Arquitectura unificada Patient→Consultante
 - `WORKSPACE_ISOLATION_POLICY.md`
 - `WORKSPACE_MATRIX.md`
 - `WORKSPACE_EXPORT_CONTRACT.md`

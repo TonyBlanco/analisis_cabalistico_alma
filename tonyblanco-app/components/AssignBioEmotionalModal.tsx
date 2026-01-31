@@ -59,6 +59,20 @@ export default function AssignBioEmotionalModal({
       .finally(() => setFetchingUser(false));
   }, [isOpen, patientId, propPatientUserId]);
 
+  // ESC key handler
+  useEffect(() => {
+    if (!isOpen) return;
+    
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    
+    document.addEventListener('keydown', handleEsc);
+    return () => document.removeEventListener('keydown', handleEsc);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const handleAssign = async () => {
@@ -118,9 +132,15 @@ export default function AssignBioEmotionalModal({
               <h4 className="text-lg font-semibold text-gray-900 mb-2">
                 ¡Asignación exitosa!
               </h4>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 mb-6">
                 {patientName} recibirá el cuestionario en su dashboard.
               </p>
+              <button
+                onClick={onClose}
+                className="px-6 py-2.5 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors"
+              >
+                Cerrar
+              </button>
             </div>
           ) : (
             <>

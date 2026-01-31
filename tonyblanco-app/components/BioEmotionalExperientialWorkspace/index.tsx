@@ -9,6 +9,9 @@ import { useExperientialContext } from './hooks/useExperientialContext';
 import { useBodySelection } from './hooks/useBodySelection';
 import type { WorkspaceState, WorkspaceProgress } from './types';
 import type { BioEmotionalSynthesis } from '@/lib/api/bioemotional-clinical';
+import AssignMCMI4Modal from '@/components/AssignMCMI4Modal';
+import AssignMCMI4MysticModal from '@/components/AssignMCMI4MysticModal';
+import AssignBioEmotionalModal from '@/components/AssignBioEmotionalModal';
 
 // Import design system
 import './design-tokens.css';
@@ -23,6 +26,11 @@ export default function BioEmotionalExperientialWorkspace() {
   const [hypothesisInsert, setHypothesisInsert] = useState<string | null>(null);
   const [synthesisInsert, setSynthesisInsert] = useState<string | null>(null);
   const [referenceSnippets, setReferenceSnippets] = useState<string[]>([]);
+  
+  // Assignment modal states
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [showAssignMysticModal, setShowAssignMysticModal] = useState(false);
+  const [showAssignBioEmotionalModal, setShowAssignBioEmotionalModal] = useState(false);
 
   const isReadOnly = workspaceState === 'closure' || Boolean(synthesisRecord?.is_closed);
 
@@ -129,6 +137,33 @@ export default function BioEmotionalExperientialWorkspace() {
                 📍 Región: {selectedRegion.label}
               </div>
             )}
+            
+            {/* Assignment Actions - visible when patient is loaded */}
+            {context.patientId && (
+              <div className="flex gap-2 ml-auto">
+                <button
+                  onClick={() => setShowAssignModal(true)}
+                  className="bio-btn bio-btn-sm bg-purple-600 text-white hover:bg-purple-700 transition-colors"
+                  title="Asignar SIGNAL (16 ítems)"
+                >
+                  📋 SIGNAL
+                </button>
+                <button
+                  onClick={() => setShowAssignBioEmotionalModal(true)}
+                  className="bio-btn bio-btn-sm bg-teal-600 text-white hover:bg-teal-700 transition-colors"
+                  title="Asignar Bio-Emocional (22 ítems)"
+                >
+                  🌿 Bio-Emocional
+                </button>
+                <button
+                  onClick={() => setShowAssignMysticModal(true)}
+                  className="bio-btn bio-btn-sm bg-amber-600 text-white hover:bg-amber-700 transition-colors"
+                  title="Asignar MCMI-4 Místico (195 ítems)"
+                >
+                  ✨ Místico
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-[minmax(0,34%)_minmax(0,42%)_minmax(0,24%)] gap-6 items-start">
@@ -166,6 +201,30 @@ export default function BioEmotionalExperientialWorkspace() {
           </div>
         </main>
       </div>
+      
+      {/* Assignment Modals */}
+      {context.patientId && (
+        <>
+          <AssignMCMI4Modal
+            isOpen={showAssignModal}
+            onClose={() => setShowAssignModal(false)}
+            patientId={context.patientId}
+            patientName={context.patientName || 'Paciente'}
+          />
+          <AssignMCMI4MysticModal
+            isOpen={showAssignMysticModal}
+            onClose={() => setShowAssignMysticModal(false)}
+            patientId={context.patientId}
+            patientName={context.patientName || 'Paciente'}
+          />
+          <AssignBioEmotionalModal
+            isOpen={showAssignBioEmotionalModal}
+            onClose={() => setShowAssignBioEmotionalModal(false)}
+            patientId={context.patientId}
+            patientName={context.patientName || 'Paciente'}
+          />
+        </>
+      )}
     </div>
   );
 }

@@ -5,6 +5,7 @@
  */
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+import { resolveConsultanteByLegacyId } from '../consultante-api';
 
 export interface Patient {
   id: number;
@@ -100,9 +101,15 @@ export async function fetchPatientById(patientId: number): Promise<Patient> {
   if (!token) {
     throw new Error('No authentication token found');
   }
+  // First try to resolve as Consultante (compatibility layer)
+  try {
+    const consult = await resolveConsultanteByLegacyId(patientId);
+    if (consult) return consult as unknown as Patient;
+  } catch (e) {
+    // ignore and fallback to legacy patient endpoint
+  }
 
   const url = `${API_BASE_URL}/therapist/patients/${patientId}/`;
-  
   const response = await fetch(url, {
     method: 'GET',
     headers: {

@@ -153,7 +153,7 @@ export default function TherapistPatientDetailPage() {
     return (
       <div className="max-w-5xl mx-auto p-6">
         <div className="bg-white border border-gray-200 rounded-lg p-6">
-          <p className="text-gray-600">Loading patient...</p>
+          <p className="text-gray-600">Cargando consultante…</p>
         </div>
       </div>
     );
@@ -162,7 +162,7 @@ export default function TherapistPatientDetailPage() {
   return (
     <div className="max-w-5xl mx-auto p-6 space-y-6">
       <div className="bg-white border border-gray-200 rounded-lg p-6">
-        <h1 className="text-xl font-semibold text-gray-900">Vista clínica del consultante</h1>
+        <h1 className="text-xl font-semibold text-gray-900">Vista del consultante</h1>
         <p className="text-sm text-gray-600">ID consultante: {patientId}</p>
         <div className="mt-4 flex flex-wrap gap-3">
           <Link

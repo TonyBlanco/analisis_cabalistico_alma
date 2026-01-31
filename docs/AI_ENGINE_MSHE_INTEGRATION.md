@@ -8,13 +8,13 @@ Design
 ------
 - After an AI interpretation is generated (for either a `TestResult` or `Assignment`), the orchestrator attaches `patient_id` to the JSON response.
 - A new backend endpoint was added: `POST /api/ai-engine/export-to-mshe/<interpretation_id>/`.
-- The endpoint will validate therapist ownership, create a `BioEmotionalPatientBrief` with a compact summary (summary, key insights, suggested diagnoses) and return the `brief_id` and `patient_id`.
-- Frontend `AIInterpretationPanel` shows an `Exportar a MSHE` button after an interpretation is generated. When clicked it calls the new endpoint and redirects the therapist to `/dashboard/therapist/mshe?patient_id=<patient_id>`.
+- The endpoint will validate therapist ownership, create a `BioEmotionalConsultanteBrief` with a compact summary (summary, key insights, suggested diagnoses) and return the `brief_id` and `consultante_uuid`.
+- Frontend `AIInterpretationPanel` shows an `Exportar a MSHE` button after an interpretation is generated. When clicked it calls the new endpoint and redirects the therapist to `/dashboard/therapist/mshe?consultante_uuid=<consultante_uuid>`.
 
 Notes & Safety
 --------------
-- Only therapists who own the patient can export.
-- The created brief is stored under `BioEmotionalPatientBrief` and is not auto-published; the therapist can publish/share from the BioEmotional UI.
+- Only therapists who own the consultante can export.
+- The created brief is stored under `BioEmotionalConsultanteBrief` and is not auto-published; the therapist can publish/share from the BioEmotional UI.
 - Changes include defensive checks to avoid breaking existing flows.
 
 Files changed

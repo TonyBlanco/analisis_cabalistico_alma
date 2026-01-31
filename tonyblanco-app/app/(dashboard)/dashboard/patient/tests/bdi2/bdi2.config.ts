@@ -1,6 +1,6 @@
 export const bdi2Definition = {
-  name: "BDI-II (Inventario de Depresión de Beck – II)",
-  purpose: "Evaluar la severidad de síntomas depresivos",
+  name: "Inventario de Reflexión Profunda — 21 señales",
+  purpose: "Exploración del ánimo, el sentido y la vitalidad (no diagnóstica)",
   target_population: "Adultos y adolescentes mayores",
   execution_mode: "patient_self",
   estimated_time_minutes: "5–10",

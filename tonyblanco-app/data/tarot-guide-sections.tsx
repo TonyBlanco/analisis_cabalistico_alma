@@ -1,6 +1,6 @@
 /**
  * Secciones estructuradas para la Guía del Tarot del Alma
- * Enfocada en el Diagnóstico Cruzado: Tarot + Estado Clínico
+ * Enfocada en el Mapa Cruzado: Tarot + Señal actual
  */
 import React from 'react';
 import { GuideSection } from '@/components/shared/AnalysisGuide';
@@ -9,14 +9,14 @@ import { GitMerge, User, Activity, AlertTriangle, Anchor, BookOpen } from 'lucid
 export const TAROT_GUIDE_SECTIONS: GuideSection[] = [
   {
     id: 'diagnostico-cruzado',
-    title: '🧬 ¿Qué es el Diagnóstico Cruzado?',
-    subtitle: 'Cruce Clínico: Arquetipo vs Síntoma',
+    title: '🧬 ¿Qué es el Mapa Cruzado?',
+    subtitle: 'Cruce simbólico: Arquetipo vs Señal',
     icon: <GitMerge className="h-6 w-6 text-purple-600" />,
     color: 'purple',
     content: (
       <>
         <p className="mb-4 leading-relaxed">
-          A diferencia de una lectura de tarot adivinatoria, esta herramienta realiza un <strong className="text-purple-900">Cruce Clínico</strong>. Compara la energía base del paciente (su Arcano de Nacimiento) con su sintomatología actual (Resultados de Tests).
+          A diferencia de una lectura de tarot adivinatoria, esta herramienta realiza un <strong className="text-purple-900">Cruce simbólico</strong>. Compara la energía base del consultante (su Arcano de Nacimiento) con su señal actual (resultados de lecturas).
         </p>
         <p className="mb-4 leading-relaxed">
           El objetivo <strong>no es predecir el futuro</strong>, sino <strong>detectar cómo su energía nativa está contribuyendo al desequilibrio actual</strong>.
@@ -24,7 +24,7 @@ export const TAROT_GUIDE_SECTIONS: GuideSection[] = [
         <div className="bg-purple-50 rounded-lg p-4 border border-purple-200 mt-4">
           <p className="text-sm font-semibold text-purple-900 mb-2">Metodología:</p>
           <p className="text-sm text-purple-800 leading-relaxed">
-            <strong>Arquetipo (Hardware del Alma)</strong> + <strong>Síntoma Clínico (Software Actual)</strong> = <strong>Análisis de Fricción y Prescripción de Equilibrio</strong>
+            <strong>Arquetipo (Hardware del Alma)</strong> + <strong>Señal actual (Software actual)</strong> = <strong>Análisis de Fricción y Prescripción de Equilibrio</strong>
           </p>
         </div>
       </>
@@ -36,11 +36,11 @@ export const TAROT_GUIDE_SECTIONS: GuideSection[] = [
       },
       {
         label: 'Es',
-        value: 'Diagnóstico del desequilibrio energético actual'
+        value: 'Mapa del desequilibrio energético actual'
       },
       {
         label: 'Objetivo',
-        value: 'Identificar cómo el arquetipo nativo agrava el síntoma'
+        value: 'Identificar cómo el arquetipo nativo agrava la señal'
       }
     ]
   },
@@ -58,7 +58,7 @@ export const TAROT_GUIDE_SECTIONS: GuideSection[] = [
         <div className="bg-blue-50 rounded-lg p-4 border border-blue-200 mt-4">
           <p className="text-sm font-semibold text-blue-900 mb-2">Ejemplo:</p>
           <p className="text-sm text-blue-800 leading-relaxed">
-            Un paciente con <strong>El Loco (Aleph)</strong> tiene una configuración nativa de:
+            Un consultante con <strong>El Loco (Aleph)</strong> tiene una configuración nativa de:
           </p>
           <ul className="text-sm text-blue-800 list-disc list-inside mt-2 space-y-1">
             <li><strong>Aire:</strong> Movimiento constante, ligereza</li>
@@ -89,19 +89,19 @@ export const TAROT_GUIDE_SECTIONS: GuideSection[] = [
   },
   {
     id: 'realidad-clinica',
-    title: '2. La Realidad Clínica (El Síntoma)',
+    title: '2. La Realidad Vivida (La Señal)',
     subtitle: 'El Software Actual',
     icon: <Activity className="h-6 w-6 text-red-600" />,
     color: 'rose',
     content: (
       <>
         <p className="mb-4 leading-relaxed">
-          Extraído de los <strong className="text-red-900">últimos tests psicométricos</strong> (GAD-7, PHQ-9, BDI-II, etc.). Representa el <strong>"Software" actual</strong> o el estado de crisis.
+          Extraído de las <strong className="text-red-900">últimas lecturas de bienestar</strong>. Representa el <strong>"Software" actual</strong> o el estado de tensión que hoy está activo.
         </p>
         <div className="bg-red-50 rounded-lg p-4 border border-red-200 mt-4">
           <p className="text-sm font-semibold text-red-900 mb-2">Ejemplo:</p>
           <p className="text-sm text-red-800 leading-relaxed">
-            Los tests indican <strong>"Ansiedad Severa"</strong>. Clínicamente, esto es:
+            Las lecturas indican <strong>"tensión elevada"</strong>. En la experiencia cotidiana, esto puede verse como:
           </p>
           <ul className="text-sm text-red-800 list-disc list-inside mt-2 space-y-1">
             <li>Exceso de actividad simpática (lucha/huida)</li>
@@ -111,14 +111,14 @@ export const TAROT_GUIDE_SECTIONS: GuideSection[] = [
           </ul>
         </div>
         <p className="text-sm leading-relaxed mt-4 text-gray-700">
-          Este es el <strong>estado actual</strong>, el síntoma que necesita ser tratado. Es dinámico y puede cambiar con el tratamiento.
+          Este es el <strong>estado actual</strong>, una señal que necesita acompañamiento. Es dinámico y puede cambiar con prácticas, hábitos y sostén.
         </p>
       </>
     ),
     examples: [
       {
         label: 'Fuente',
-        value: 'Último test clínico realizado (GAD-7, PHQ-9, etc.)'
+        value: 'Última lectura de bienestar registrada'
       },
       {
         label: 'Representa',
@@ -239,13 +239,13 @@ export const TAROT_GUIDE_SECTIONS: GuideSection[] = [
     content: (
       <>
         <div className="bg-indigo-50 rounded-lg p-4 border border-indigo-200">
-          <h4 className="font-semibold text-indigo-900 mb-3">Pasos del Diagnóstico Cruzado:</h4>
+          <h4 className="font-semibold text-indigo-900 mb-3">Pasos del Mapa Cruzado:</h4>
           <ol className="space-y-3 text-sm list-decimal list-inside text-gray-700">
             <li>
               <strong>Calcula el Arcano de Vida:</strong> Suma fecha de nacimiento → Reduce a 1-22. Este es el arquetipo base (Hardware).
             </li>
             <li>
-              <strong>Identifica el Síntoma Clínico:</strong> Revisa el último test (GAD-7, PHQ-9, etc.) y su severidad. Este es el estado actual (Software).
+              <strong>Identifica la Señal Actual:</strong> Revisa la última lectura disponible y su intensidad. Este es el estado actual (Software).
             </li>
             <li>
               <strong>Analiza la Fricción:</strong> La IA identifica cómo el arquetipo en sombra está agravando el síntoma. Lee el "Análisis de Sombra".
@@ -254,7 +254,7 @@ export const TAROT_GUIDE_SECTIONS: GuideSection[] = [
               <strong>Aplica el Tikún:</strong> Sigue las 3 acciones de sanación prescritas. Son específicas y opuestas complementarias al arquetipo.
             </li>
             <li>
-              <strong>Monitorea el Progreso:</strong> Repite tests periódicamente para ver si el equilibrio se está restaurando.
+              <strong>Monitorea el Progreso:</strong> Repite lecturas periódicamente para ver si el equilibrio se está restaurando.
             </li>
           </ol>
         </div>
@@ -273,7 +273,7 @@ export const TAROT_GUIDE_SECTIONS: GuideSection[] = [
       },
       {
         label: 'Paso 2',
-        value: 'Identificar Síntoma Clínico'
+        value: 'Identificar Señal Actual'
       },
       {
         label: 'Paso 3',

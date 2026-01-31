@@ -20,6 +20,7 @@ from .models import (
     TherapistHolisticConfig,
     ResonanciaObservation,
     ResonanciaRelation,
+    Consultante,
 )
 from .birth_data_model import UserBirthData
 from django.contrib.auth.models import User
@@ -1141,3 +1142,232 @@ class ResonanciaRelationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({'tags': 'Máximo 30 elementos.'})
 
         return cleaned
+
+
+# ==============================================================================
+# CONSULTANTE SERIALIZERS
+# Ver: docs/UNIFIED_CONSULTANTE_ARCHITECTURE.md
+# ==============================================================================
+
+class ConsultanteUserAccountSerializer(serializers.ModelSerializer):
+    """Serializer para datos de user_account anidado en Consultante"""
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email']
+        read_only_fields = ['id', 'username', 'email']
+
+
+class ConsultanteTherapistSerializer(serializers.ModelSerializer):
+    """Serializer para datos de therapist anidado en Consultante"""
+    full_name = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'full_name']
+        read_only_fields = ['id', 'username', 'full_name']
+    
+    def get_full_name(self, obj):
+        if hasattr(obj, 'profile') and obj.profile:
+            return obj.profile.full_name or obj.get_full_name()
+        return obj.get_full_name() or obj.username
+
+
+class ConsultanteSerializer(serializers.ModelSerializer):
+    """
+    Serializer completo para Consultante.
+    
+    Incluye campos de compatibilidad para frontend legacy:
+    - id: alias de user_account.id (para assignments)
+    - user_id: alias de user_account.id
+    - user: objeto con id y username
+    
+    Ver: docs/UNIFIED_CONSULTANTE_ARCHITECTURE.md sección "Formato de Respuesta"
+    """
+    
+    # Campos anidados
+    therapist = ConsultanteTherapistSerializer(read_only=True)
+    user_account = ConsultanteUserAccountSerializer(read_only=True)
+    
+    # Campos de compatibilidad para frontend legacy
+    id = serializers.SerializerMethodField(help_text="Alias de user_account.id para assignments")
+    user_id = serializers.SerializerMethodField(help_text="Alias de user_account.id")
+    user = serializers.SerializerMethodField(help_text="Objeto user para compatibilidad legacy")
+    
+    class Meta:
+        model = Consultante
+        fields = [
+            # Primary key
+            'uuid',
+            
+            # Identidad personal
+            'full_name',
+            'email',
+            'phone',
+            
+            # Datos de nacimiento
+            'birth_date',
+            'birth_time',
+            'birth_place',
+            'birth_city',
+            'birth_country',
+            'birth_latitude',
+            'birth_longitude',
+            'birth_timezone',
+            
+            # Identidad biológica
+            'biological_sex',
+            'gender_identity',
+            
+            # Relaciones (anidadas)
+            'therapist',
+            'user_account',
+            
+            # Estado terapéutico
+            'therapy_status',
+            'pause_reason',
+            'therapy_level',
+            
+            # Historia clínica
+            'main_complaint',
+            'clinical_history',
+            'treatment_plan',
+            
+            # Consentimientos
+            'consent_federation',
+            'consent_federation_date',
+            
+            # Metadatos
+            'is_active',
+            'created_at',
+            'updated_at',
+            'avatar',
+            
+            # Campos de compatibilidad legacy
+            'id',
+            'user_id',
+            'user',
+            'legacy_patient_id',
+        ]
+        read_only_fields = [
+            'uuid',
+            'therapist',
+            'user_account',
+            'created_at',
+            'updated_at',
+            'id',
+            'user_id',
+            'user',
+        ]
+    
+    def get_id(self, obj):
+        """Devuelve user_account.id para compatibilidad con assignments"""
+        return obj.user_account.id if obj.user_account else None
+    
+    def get_user_id(self, obj):
+        """Devuelve user_account.id para compatibilidad legacy"""
+        return obj.user_account.id if obj.user_account else None
+    
+    def get_user(self, obj):
+        """Devuelve objeto user para compatibilidad legacy"""
+        if obj.user_account:
+            return {
+                'id': obj.user_account.id,
+                'username': obj.user_account.username
+            }
+        return None
+
+
+class ConsultanteCreateSerializer(serializers.ModelSerializer):
+    """
+    Serializer para crear nuevos Consultantes.
+    
+    Auto-crea cuenta de usuario (user_account) basada en email.
+    """
+    
+    class Meta:
+        model = Consultante
+        fields = [
+            'full_name',
+            'email',
+            'phone',
+            'birth_date',
+            'birth_time',
+            'birth_place',
+            'birth_city',
+            'birth_country',
+            'biological_sex',
+            'gender_identity',
+            'main_complaint',
+            'therapy_level',
+        ]
+    
+    def validate_email(self, value):
+        """Verificar que el email no esté en uso"""
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError(
+                "Ya existe un usuario con este email. "
+                "Use el endpoint de vinculación en su lugar."
+            )
+        if Consultante.objects.filter(email=value).exists():
+            raise serializers.ValidationError(
+                "Ya existe un consultante con este email."
+            )
+        return value
+    
+    def create(self, validated_data):
+        """
+        Crear Consultante con cuenta de usuario automática.
+        
+        1. Crea User con username basado en email
+        2. Crea Consultante vinculado a ese User
+        """
+        therapist = self.context['request'].user
+        email = validated_data['email']
+        full_name = validated_data['full_name']
+        
+        # Generar username único basado en email
+        base_username = email.split('@')[0].lower()
+        username = base_username
+        counter = 1
+        while User.objects.filter(username=username).exists():
+            username = f"{base_username}_{counter}"
+            counter += 1
+        
+        # Crear User account
+        user = User.objects.create_user(
+            username=username,
+            email=email,
+            first_name=full_name.split()[0] if full_name else '',
+            last_name=' '.join(full_name.split()[1:]) if full_name and len(full_name.split()) > 1 else '',
+            # Password temporal - consultante puede resetearlo
+            password=User.objects.make_random_password()
+        )
+        
+        # Crear Consultante
+        consultante = Consultante.objects.create(
+            therapist=therapist,
+            user_account=user,
+            **validated_data
+        )
+        
+        return consultante
+
+
+class ConsultanteLegacySerializer(serializers.Serializer):
+    """
+    Serializer para respuestas de compatibilidad legacy.
+    
+    Usado por PatientLegacyAdapter para devolver datos en formato
+    esperado por frontend legacy.
+    """
+    id = serializers.IntegerField()
+    full_name = serializers.CharField()
+    email = serializers.EmailField()
+    user_id = serializers.IntegerField()
+    user = serializers.DictField()
+    therapy_status = serializers.CharField()
+    uuid = serializers.UUIDField()
+    biological_sex = serializers.CharField()
+    birth_date = serializers.DateField(allow_null=True)
+    birth_city = serializers.CharField(allow_null=True)
+    birth_country = serializers.CharField(allow_null=True)

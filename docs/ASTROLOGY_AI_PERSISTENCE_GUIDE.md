@@ -14,7 +14,7 @@
 - **Propósito:** Persistir interpretaciones AI generadas
 - **Características:**
   - Guarda contenido de interpretación
-  - Trackea si está compartida con el paciente
+  - Trackea si está compartida con el consultante
   - Permite notas del terapeuta
   - Soft delete (archivado)
   - Historial de versiones con `AstrologyAIInterpretationVersion`
@@ -26,7 +26,7 @@
   - **Nuevos endpoints:**
     - `GET /api/astrology/interpretations/` - Lista interpretaciones guardadas
     - `GET /api/astrology/interpretations/<id>/` - Detalle de interpretación
-    - `PUT /api/astrology/interpretations/<id>/` - Actualizar (compartir con paciente)
+    - `PUT /api/astrology/interpretations/<id>/` - Actualizar (compartir con consultante)
     - `DELETE /api/astrology/interpretations/<id>/` - Archivar interpretación
 
 #### 3. **URLs Actualizadas**
@@ -81,12 +81,12 @@
 
 1. **Rendimiento**
    - Reduce llamadas a API de Gemini
-   - Caché inteligente por paciente y tipo
+   - Caché inteligente por consultante y tipo
    - Menor costo de tokens AI
 
 2. **Trazabilidad**
    - Historial completo de interpretaciones
-   - Auditoría de cuándo se compartió con paciente
+   - Auditoría de cuándo se compartió con consultante
    - Versiones de interpretaciones
 
 ---
@@ -114,7 +114,7 @@
 }
 ```
 
-### Backend - Compartir con Paciente
+### Backend - Compartir con Consultante
 
 ```python
 # PUT /api/astrology/interpretations/42/

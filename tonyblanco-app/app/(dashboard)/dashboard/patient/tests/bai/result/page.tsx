@@ -70,7 +70,7 @@ export default function BaiPatientResultPage() {
   if (loading) {
     return (
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <p className="text-sm text-gray-600">Cargando resultado BAI…</p>
+        <p className="text-sm text-gray-600">Cargando lectura…</p>
       </div>
     );
   }
@@ -89,7 +89,7 @@ export default function BaiPatientResultPage() {
     return (
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white border border-gray-200 rounded-lg p-6">
-          <h1 className="text-xl font-semibold text-gray-900">BAI</h1>
+          <h1 className="text-xl font-semibold text-gray-900">Señales del Cuerpo — Intensidad</h1>
           <p className="text-sm text-gray-600 mt-2">Aún no hay resultados registrados.</p>
         </div>
       </div>
@@ -102,9 +102,9 @@ export default function BaiPatientResultPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-        <h1 className="text-2xl font-semibold text-gray-900">BAI — Resultado</h1>
+        <h1 className="text-2xl font-semibold text-gray-900">Señales del Cuerpo — Resultado</h1>
         <p className="text-sm text-gray-600 mt-2">
-          Inventario de ansiedad de Beck. Este resultado es una lectura orientativa.
+          Lectura orientativa basada en 21 señales corporales reportadas. No es diagnóstico.
         </p>
       </div>
 

@@ -19,8 +19,8 @@ export interface TestConfig {
 export const TESTS_DB: Record<string, TestConfig> = {
   'phq-9': {
     id: 'phq-9',
-    title: 'PHQ-9 - Test de Depresión',
-    description: 'Cuestionario sobre la salud del paciente. Responde según las últimas 2 semanas.',
+    title: 'Pulso del Ánimo — 9 señales',
+    description: 'Lectura de bienestar basada en 9 señales. Responde según las últimas 2 semanas.',
     questions: [
       {
         id: 'phq9-q1',
@@ -117,8 +117,8 @@ export const TESTS_DB: Record<string, TestConfig> = {
 
   'gad-7': {
     id: 'gad-7',
-    title: 'GAD-7 (Ansiedad Generalizada)',
-    description: 'Cuestionario para identificar el trastorno de ansiedad generalizada. Responde según las últimas 2 semanas.',
+    title: 'Mapa de Preocupación — 7 señales',
+    description: 'Lectura de bienestar basada en 7 señales de preocupación/tensión. Responde según las últimas 2 semanas.',
     questions: [
       {
         id: 'gad7-q1',
@@ -413,8 +413,8 @@ export const TESTS_DB: Record<string, TestConfig> = {
 
   'bdi-ii': {
     id: 'bdi-ii',
-    title: 'Inventario de Depresión de Beck',
-    description: 'Selecciona la afirmación que mejor describa cómo te has sentido las últimas dos semanas.',
+    title: 'Inventario de Reflexión Profunda',
+    description: 'Selecciona la afirmación que mejor describa cómo te has sentido en las últimas dos semanas.',
     questions: [
       {
         id: 'bdii-q1',
@@ -928,8 +928,8 @@ export const TESTS_DB: Record<string, TestConfig> = {
 
   'scl-90-r': {
     id: 'scl-90-r',
-    title: 'SCL-90-R',
-    description: 'Evalúa una amplia gama de síntomas psicológicos. Indica cuánto te ha molestado cada síntoma durante la última semana.',
+    title: 'Lente de Simetría del Alma (Revisada)',
+    description: 'Explora una amplia gama de señales internas. Indica cuánto te ha molestado cada señal durante la última semana.',
     questions: [
       {
         id: 'scl90-q1',

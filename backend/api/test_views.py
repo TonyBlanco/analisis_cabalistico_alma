@@ -612,6 +612,10 @@ class ExecuteTestView(APIView):
         else:
             result_data = self._process_test(test_module, input_data)
 
+            # If the processor returns an explicit processed flag, honor it.
+            if isinstance(result_data, dict) and 'processed' in result_data:
+                processed_ok = bool(result_data.get('processed', False))
+
         if processed_ok:
             user_access.record_use()
 
@@ -708,7 +712,7 @@ class ExecuteTestView(APIView):
                         status__in=['assigned', 'in_progress']
                     ).first()
                     logger.info(f"[SWM] Found assignment: {related_assignment}")
-                    if related_assignment:
+                    if related_assignment and processed_ok:
                         related_assignment.status = 'completed'
                         related_assignment.results = result_data
                         related_assignment.save(update_fields=['status', 'results'])
@@ -744,6 +748,7 @@ class ExecuteTestView(APIView):
         compute_screening_general = None
         compute_stress_screening = None
         compute_past_lives = None
+        compute_dudit_spirit = None
         compute_scdf = None
         try:
             # optional internal modules; if missing, we'll continue with None placeholders
@@ -758,6 +763,7 @@ class ExecuteTestView(APIView):
             compute_stai,
             compute_mcmi4,
             compute_scid5,
+            compute_dudit_spirit,
             compute_wellness_assessment,
             compute_insomnia_wellness,
             compute_nutrition_wellness,
@@ -1075,6 +1081,20 @@ class ExecuteTestView(APIView):
                         'dominant_themes': [],
                         'reflection_axes': [],
                         'summary_text': 'compute_past_lives not available; missing module',
+                    }
+
+                if test_module.code == 'dudit_spirit':
+                    responses = input_data.get('responses', {})
+                    if compute_dudit_spirit:
+                        return compute_dudit_spirit({'responses': responses})
+                    return {
+                        'schema_version': 'dudit_spirit:v1',
+                        'test_type': 'holistic_introspection',
+                        'processed': False,
+                        'structured_data': None,
+                        'raw_answers': responses,
+                        'message': 'compute_dudit_spirit not available; missing module',
+                        'timestamp': datetime.now().isoformat(),
                     }
             # Astrología Cabalística (se calcula en el frontend con astronomy-engine)
             if test_type == 'astrology' or test_module.code == 'cabalistic-astrology':

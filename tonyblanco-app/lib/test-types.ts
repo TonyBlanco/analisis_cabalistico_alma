@@ -164,13 +164,13 @@ export const TEST_TYPE_NAMES: Record<TestType, string> = {
   family: 'Relaciones Familiares',
   purpose: 'Propósito de Vida',
   past_life: 'Vidas Pasadas',
-  pai: 'PAI - Evaluación Profesional',
-  scl90: 'SCL-90-R - Lista de Síntomas Revisada',
-  stai: 'STAI - Ansiedad Estado-Rasgo',
-  'mcmi-iv': 'MCMI-IV - Evaluación de Personalidad',
-  scid5: 'SCID-5-RV - Entrevista DSM-5',
-  bdi: 'BDI-II - Depresión (Beck)',
-  bai: 'BAI - Ansiedad (Beck)',
+  pai: 'Perfil de Integración (Profesional)',
+  scl90: 'Lente de Simetría del Alma (Revisada)',
+  stai: 'Equilibrio Interno — Estado y Rasgo',
+  'mcmi-iv': 'Matriz Multiaxial — Perfil',
+  scid5: 'Entrevista Estructurada — Guía',
+  bdi: 'Inventario de Reflexión Profunda',
+  bai: 'Señales del Cuerpo — Intensidad',
 };
 
 // Nombres legibles para niveles de acceso

@@ -1,5 +1,6 @@
 import { TestModule, TestResult, ExecuteTestRequest, ExecuteTestResponse, UserTestStats } from './test-types';
 import { getApiBaseUrl } from './api-base';
+import { resolveConsultanteByLegacyId } from './consultante-api';
 
 export type { ExecuteTestRequest, ExecuteTestResponse };
 
@@ -31,7 +32,17 @@ export async function getAvailableTests(patientId?: number): Promise<{
   subscription_plan: string;
   membership_active: boolean;
 }> {
-  const query = patientId ? `?patient_id=${encodeURIComponent(patientId)}` : '';
+  let pid = patientId;
+  if (patientId) {
+    try {
+      const resolved = await resolveConsultanteByLegacyId(patientId);
+      if (resolved && resolved.user_id) pid = resolved.user_id;
+    } catch (e) {
+      // ignore and keep original patientId
+    }
+  }
+
+  const query = pid ? `?patient_id=${encodeURIComponent(pid)}` : '';
   const response = await fetch(`${API_BASE_URL}/tests/${query}`, {
     headers: getAuthHeaders(),
     credentials: 'include',
@@ -80,7 +91,13 @@ export async function executeTest(data: ExecuteTestRequest): Promise<ExecuteTest
   };
 
   if (data.patient_id) {
-    payload.patient_id = data.patient_id;
+    // resolve legacy patient id to integer user_id when possible
+    try {
+      const resolved = await resolveConsultanteByLegacyId(data.patient_id as number);
+      payload.patient_id = resolved && resolved.user_id ? resolved.user_id : data.patient_id;
+    } catch (e) {
+      payload.patient_id = data.patient_id;
+    }
   }
   if (data.client_name) {
     payload.client_name = data.client_name;
@@ -192,7 +209,14 @@ export async function getTestResultsForPatient(params: {
   test_code?: string;
 }): Promise<TestResult[]> {
   const queryParams = new URLSearchParams();
-  queryParams.append('patient_id', params.patient_id.toString());
+  // resolve legacy id
+  let pid = params.patient_id;
+  try {
+    const resolved = await resolveConsultanteByLegacyId(params.patient_id);
+    if (resolved && resolved.user_id) pid = resolved.user_id;
+  } catch (e) {}
+
+  queryParams.append('patient_id', pid.toString());
   if (params.test_code) queryParams.append('test_code', params.test_code);
 
   const url = `${API_BASE_URL}/tests/results/?${queryParams.toString()}`;
@@ -308,7 +332,15 @@ export async function getPatientPreviousTests(params: {
   patient_birth_date?: string;
 }): Promise<{ count: number; results: TestResult[] }> {
   const queryParams = new URLSearchParams();
-  if (params.patient_id) queryParams.append('patient_id', params.patient_id.toString());
+  if (params.patient_id) {
+    try {
+      const resolved = await resolveConsultanteByLegacyId(params.patient_id);
+      const pid = resolved && resolved.user_id ? resolved.user_id : params.patient_id;
+      queryParams.append('patient_id', pid.toString());
+    } catch (e) {
+      queryParams.append('patient_id', params.patient_id.toString());
+    }
+  }
   if (params.patient_name) queryParams.append('patient_name', params.patient_name);
   if (params.patient_birth_date) queryParams.append('patient_birth_date', params.patient_birth_date);
 

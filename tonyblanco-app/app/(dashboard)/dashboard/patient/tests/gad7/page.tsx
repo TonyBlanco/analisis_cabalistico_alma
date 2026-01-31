@@ -49,7 +49,7 @@ export default function Gad7Page() {
       });
 
       if (!response.ok) {
-        let msg = "No se pudo guardar el GAD-7.";
+        let msg = `No se pudo guardar "${gad7Definition.name}".`;
         try {
           const data = await response.json();
           msg = data?.message || data?.error || msg;

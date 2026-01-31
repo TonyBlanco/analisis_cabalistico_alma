@@ -30,6 +30,7 @@ from .models import (
     BlockedDate,
     Resource,
     UserResourceAccess,
+    Consultante,
 )
 from .birth_data_model import UserBirthData
 from .serializers import (
@@ -49,6 +50,8 @@ from .serializers import (
     BlockedDateSerializer,
     UserProfileDetailSerializer,
     UserResourceAccessSerializer,
+    ConsultanteSerializer,
+    ConsultanteCreateSerializer,
 )
 from .serializers import UserBirthDataSerializer
 from .emails import send_welcome_email, send_booking_confirmation_email
@@ -2941,4 +2944,226 @@ class GeocodeCityView(APIView):
             )
 
 
+# ==============================================================================
+# CONSULTANTE VIEWS
+# Ver: docs/UNIFIED_CONSULTANTE_ARCHITECTURE.md
+# ==============================================================================
 
+from django.db.models import Q
+
+
+class ConsultanteListCreateView(generics.ListCreateAPIView):
+    """
+    Lista y crea consultantes del terapeuta autenticado.
+    
+    GET: Lista consultantes del terapeuta
+    POST: Crea nuevo consultante (auto-crea user_account)
+    
+    Ver: docs/UNIFIED_CONSULTANTE_ARCHITECTURE.md
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return ConsultanteCreateSerializer
+        return ConsultanteSerializer
+    
+    def get_queryset(self):
+        return Consultante.objects.filter(
+            therapist=self.request.user,
+            is_active=True
+        ).select_related('user_account', 'therapist')
+
+
+class ConsultanteDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    Ver, editar o archivar un consultante específico.
+    
+    GET: Detalle del consultante
+    PUT/PATCH: Actualizar datos
+    DELETE: Archivar (is_active=False)
+    
+    Ver: docs/UNIFIED_CONSULTANTE_ARCHITECTURE.md
+    """
+    serializer_class = ConsultanteSerializer
+    permission_classes = [IsAuthenticated]
+    lookup_field = 'uuid'
+    
+    def get_queryset(self):
+        return Consultante.objects.filter(
+            therapist=self.request.user
+        ).select_related('user_account', 'therapist')
+    
+    def perform_destroy(self, instance):
+        """Archivar en lugar de eliminar físicamente"""
+        instance.is_active = False
+        instance.therapy_status = 'archived'
+        instance.status_changed_by = self.request.user
+        instance.save()
+
+
+class ConsultanteResolveView(APIView):
+    """
+    Resolver consultante por legacy_patient_id o user_account.id.
+    
+    Usado para compatibilidad con endpoints legacy que usan IDs enteros.
+    
+    GET /api/consultantes/resolve/{id}/
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, legacy_id):
+        try:
+            # Buscar por legacy_patient_id O user_account.id
+            consultante = Consultante.objects.filter(
+                Q(legacy_patient_id=legacy_id) | Q(user_account__id=legacy_id),
+                therapist=request.user
+            ).select_related('user_account', 'therapist').first()
+            
+            if not consultante:
+                return Response(
+                    {'detail': 'Consultante no encontrado.'},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+            serializer = ConsultanteSerializer(consultante)
+            return Response(serializer.data)
+            
+        except Exception as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class PatientLegacyAdapter(APIView):
+    """
+    Adapter para compatibilidad con endpoints legacy /api/therapist/patients/{id}/.
+    
+    Busca consultante por legacy_patient_id o user_account.id y devuelve
+    respuesta en formato legacy esperado por frontend.
+    
+    Ver: docs/UNIFIED_CONSULTANTE_ARCHITECTURE.md sección "Legacy compatibility adapter"
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, pk):
+        try:
+            # Buscar consultante por legacy_patient_id O user_account.id
+            consultante = Consultante.objects.filter(
+                Q(legacy_patient_id=pk) | Q(user_account__id=pk),
+                therapist=request.user
+            ).select_related('user_account', 'therapist').first()
+            
+            if consultante:
+                # Devolver en formato legacy
+                return Response({
+                    'id': consultante.user_id,
+                    'full_name': consultante.full_name,
+                    'email': consultante.email,
+                    'user_id': consultante.user_id,
+                    'user': {
+                        'id': consultante.user_id,
+                        'username': consultante.user_account.username if consultante.user_account else None
+                    },
+                    'therapy_status': consultante.therapy_status,
+                    'uuid': str(consultante.uuid),
+                    'biological_sex': consultante.biological_sex,
+                    'birth_date': consultante.birth_date.isoformat() if consultante.birth_date else None,
+                    'birth_city': consultante.birth_city,
+                    'birth_country': consultante.birth_country,
+                    'birth_latitude': float(consultante.birth_latitude) if consultante.birth_latitude else None,
+                    'birth_longitude': float(consultante.birth_longitude) if consultante.birth_longitude else None,
+                    'birth_timezone': consultante.birth_timezone,
+                    'main_complaint': consultante.main_complaint,
+                    'is_active': consultante.is_active,
+                })
+            
+            # Fallback: buscar en modelo Patient legacy
+            try:
+                patient = Patient.objects.get(pk=pk, therapist=request.user)
+                # Intentar resolver si existe un Consultante equivalente por email
+                consultante = Consultante.objects.filter(email=patient.email, therapist=request.user).select_related('user_account').first()
+                if consultante:
+                    return Response({
+                        'id': consultante.user_id,
+                        'full_name': consultante.full_name,
+                        'email': consultante.email,
+                        'user_id': consultante.user_id,
+                        'user': {
+                            'id': consultante.user_id,
+                            'username': consultante.user_account.username if consultante.user_account else None
+                        },
+                        'therapy_status': consultante.therapy_status,
+                        'uuid': str(consultante.uuid),
+                        'biological_sex': consultante.biological_sex,
+                        'birth_date': consultante.birth_date.isoformat() if consultante.birth_date else None,
+                        'birth_city': consultante.birth_city,
+                        'birth_country': consultante.birth_country,
+                        'birth_latitude': float(consultante.birth_latitude) if consultante.birth_latitude else None,
+                        'birth_longitude': float(consultante.birth_longitude) if consultante.birth_longitude else None,
+                        'birth_timezone': consultante.birth_timezone,
+                        'main_complaint': consultante.main_complaint,
+                        'is_active': consultante.is_active,
+                    })
+
+                # Si no hay consultante equivalente, devolver los datos legacy del Patient
+                return Response({
+                    'id': patient.user.id if patient.user else patient.id,
+                    'full_name': patient.full_name,
+                    'email': patient.email,
+                    'user_id': patient.user.id if patient.user else None,
+                    'user': {
+                        'id': patient.user.id if patient.user else None,
+                        'username': patient.user.username if patient.user else None
+                    },
+                    'therapy_status': patient.therapy_status,
+                    'uuid': None,  # Legacy patient no tiene UUID
+                    'biological_sex': patient.biological_sex,
+                    'birth_date': patient.birth_date.isoformat() if patient.birth_date else None,
+                    'birth_city': patient.birth_city,
+                    'birth_country': patient.birth_country,
+                    'birth_latitude': float(patient.birth_latitude) if patient.birth_latitude else None,
+                    'birth_longitude': float(patient.birth_longitude) if patient.birth_longitude else None,
+                    'birth_timezone': patient.birth_timezone,
+                    'main_complaint': patient.main_complaint,
+                    'is_active': patient.is_active,
+                })
+            except Patient.DoesNotExist:
+                return Response(
+                    {'detail': 'Not found.'},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+                
+        except Exception as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class ConsultanteHealthCheckView(APIView):
+    """
+    Health check para el sistema de consultantes.
+    
+    Devuelve métricas de integridad:
+    - Total consultantes
+    - Consultantes sin user_account (debe ser 0)
+    - Usuarios huérfanos
+    
+    Ver: docs/UNIFIED_CONSULTANTE_ARCHITECTURE.md sección "Health Checks"
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        checks = {
+            'total_consultantes': Consultante.objects.count(),
+            'consultantes_without_user': Consultante.objects.filter(user_account__isnull=True).count(),
+            'active_consultantes': Consultante.objects.filter(is_active=True).count(),
+            'therapist_consultantes': Consultante.objects.filter(therapist=request.user).count(),
+        }
+        
+        # Determinar estado de salud
+        checks['status'] = 'healthy' if checks['consultantes_without_user'] == 0 else 'warning'
+        
+        return Response(checks)

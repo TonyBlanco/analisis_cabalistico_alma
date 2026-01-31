@@ -49,7 +49,7 @@ export default function Phq9Page() {
       });
 
       if (!response.ok) {
-        let msg = "No se pudo guardar el PHQ-9.";
+        let msg = `No se pudo guardar "${phq9Definition.name}".`;
         try {
           const data = await response.json();
           msg = data?.message || data?.error || msg;

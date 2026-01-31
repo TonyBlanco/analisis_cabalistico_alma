@@ -138,7 +138,7 @@ export default function TherapistPatientBdi2Page() {
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <p className="text-sm text-gray-600">Cargando resultado BDI-II…</p>
+        <p className="text-sm text-gray-600">Cargando lectura…</p>
       </div>
     );
   }
@@ -157,7 +157,7 @@ export default function TherapistPatientBdi2Page() {
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white border border-gray-200 rounded-lg p-6">
-          <h1 className="text-xl font-semibold text-gray-900">BDI-II (consultante)</h1>
+          <h1 className="text-xl font-semibold text-gray-900">Inventario de Reflexión Profunda (consultante)</h1>
           <p className="text-sm text-gray-600 mt-2">No hay resultados registrados para este consultante.</p>
         </div>
       </div>
@@ -173,9 +173,9 @@ export default function TherapistPatientBdi2Page() {
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900">BDI-II — Resultado del consultante</h1>
+          <h1 className="text-2xl font-semibold text-gray-900">Inventario de Reflexión Profunda — Resultado del consultante</h1>
           <p className="text-sm text-gray-600 mt-1">
-            Seguimiento de cribado. Este resultado no es una lectura.
+            Seguimiento orientativo para acompañamiento. No es diagnóstico.
           </p>
           <p className="text-xs text-gray-500">Fecha: {formatDate(result.created_at)}</p>
         </div>
@@ -185,7 +185,7 @@ export default function TherapistPatientBdi2Page() {
           className="px-4 py-2 text-sm font-medium text-white rounded-md hover:opacity-90 transition-opacity"
           style={{ backgroundColor: "var(--accent-color)" }}
         >
-          Guía holística BDI-II
+          Guía holística
         </button>
       </div>
 
@@ -254,7 +254,7 @@ export default function TherapistPatientBdi2Page() {
             onChange={(e) => setNotes(e.target.value)}
             rows={5}
             className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Notas clínicas (solo visible para el terapeuta)"
+            placeholder="Notas del terapeuta (solo visible para el terapeuta)"
           />
           <button
             type="button"
@@ -280,8 +280,8 @@ export default function TherapistPatientBdi2Page() {
           >
             <div className="flex items-start justify-between">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">Guía holística BDI-II</h3>
-                <p className="text-xs text-gray-500">Instrumento de severidad, no lectura.</p>
+                <h3 className="text-lg font-semibold text-gray-900">Guía holística — Reflexión Profunda</h3>
+                <p className="text-xs text-gray-500">Lectura orientativa (no diagnóstico).</p>
               </div>
               <button
                 onClick={() => setShowGuidance(false)}
@@ -291,11 +291,11 @@ export default function TherapistPatientBdi2Page() {
               </button>
             </div>
             <div className="space-y-2 text-sm text-gray-700">
-              <p>¿Qué mide? Severidad de síntomas depresivos en adultos/adolescentes mayores.</p>
-              <p>Interpretación (0–63): mínima (0–13), leve (14–19), moderada (20–28), grave (29–63).</p>
-              <p>Diferencias vs PHQ-9: mayor detalle sintomático y énfasis en severidad.</p>
-              <p>Considerar evaluación adicional ante puntajes moderados/altos o ítem de ideación suicida.</p>
-              <p>Recordatorio: herramienta de cribado; interpretar siempre con juicio holístico.</p>
+              <p>¿Qué explora? Intensidad de señales internas reportadas en 21 ítems.</p>
+              <p>Rangos (0–63): baja (0–13), media (14–19), alta (20–28), muy alta (29–63).</p>
+              <p>Comparación con Pulso del Ánimo: mayor detalle y énfasis en intensidad.</p>
+              <p>Priorizar acompañamiento adicional ante puntajes altos o señales de malestar intenso.</p>
+              <p>Recordatorio: lectura orientativa; interpretar siempre con criterio holístico y contexto.</p>
             </div>
             <div className="text-xs text-gray-500">
               Uso informativo. No genera decisiones automáticas ni recomendaciones.

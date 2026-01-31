@@ -126,7 +126,7 @@ export default function TherapistPatientBaiPage() {
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <p className="text-sm text-gray-600">Cargando resultado BAI…</p>
+        <p className="text-sm text-gray-600">Cargando lectura…</p>
       </div>
     );
   }
@@ -145,7 +145,7 @@ export default function TherapistPatientBaiPage() {
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white border border-gray-200 rounded-lg p-6">
-          <h1 className="text-xl font-semibold text-gray-900">BAI (consultante)</h1>
+          <h1 className="text-xl font-semibold text-gray-900">Señales del Cuerpo (consultante)</h1>
           <p className="text-sm text-gray-600 mt-2">No hay resultados registrados para este consultante.</p>
         </div>
       </div>
@@ -160,9 +160,9 @@ export default function TherapistPatientBaiPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-        <h1 className="text-2xl font-semibold text-gray-900">BAI — Resultado del consultante</h1>
+        <h1 className="text-2xl font-semibold text-gray-900">Señales del Cuerpo — Resultado del consultante</h1>
         <p className="text-sm text-gray-600 mt-2">
-          Seguimiento de cribado. Este resultado es una lectura orientativa.
+          Seguimiento orientativo para acompañamiento. No es diagnóstico.
         </p>
       </div>
 
@@ -220,7 +220,7 @@ export default function TherapistPatientBaiPage() {
             onChange={(e) => setNotes(e.target.value)}
             rows={5}
             className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Notas clínicas (solo visible para el terapeuta)"
+            placeholder="Notas del terapeuta (solo visible para el terapeuta)"
           />
           <button
             type="button"

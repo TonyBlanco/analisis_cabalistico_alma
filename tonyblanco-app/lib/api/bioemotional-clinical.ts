@@ -1,4 +1,5 @@
 import { API_BASE_URL, getAuthToken } from "../api";
+import { resolveConsultanteByLegacyId } from "../consultante-api";
 
 export type HypothesisStatus = "open" | "in_review" | "discarded";
 
@@ -135,31 +136,48 @@ async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
   return response.json();
 }
 
+async function resolvePatientIdLegacy(patientId?: number): Promise<number | undefined> {
+  if (patientId === undefined || patientId === null) return undefined;
+  try {
+    const resolved = await resolveConsultanteByLegacyId(patientId);
+    if (resolved && (resolved as any).user_id) return (resolved as any).user_id;
+  } catch (e) {
+    // fallback to provided id
+  }
+  return patientId;
+}
+
 export async function listObservations(patientId: number): Promise<BioEmotionalObservation[]> {
-  const url = `${OBSERVATIONS_URL}?patient_id=${patientId}`;
+  const pid = await resolvePatientIdLegacy(patientId);
+  const url = `${OBSERVATIONS_URL}?patient_id=${pid}`;
   return request<BioEmotionalObservation[]>(url);
 }
 
 export async function createObservation(
   payload: BioEmotionalObservationPayload
 ): Promise<BioEmotionalObservation> {
+  const pid = await resolvePatientIdLegacy(payload.patient_id);
+  const body = { ...payload, patient_id: pid };
   return request<BioEmotionalObservation>(OBSERVATIONS_URL, {
     method: "POST",
-    body: JSON.stringify(payload),
+    body: JSON.stringify(body),
   });
 }
 
 export async function listHypotheses(patientId: number): Promise<BioEmotionalHypothesis[]> {
-  const url = `${HYPOTHESES_URL}?patient_id=${patientId}`;
+  const pid = await resolvePatientIdLegacy(patientId);
+  const url = `${HYPOTHESES_URL}?patient_id=${pid}`;
   return request<BioEmotionalHypothesis[]>(url);
 }
 
 export async function createHypothesis(
   payload: BioEmotionalHypothesisPayload
 ): Promise<BioEmotionalHypothesis> {
+  const pid = await resolvePatientIdLegacy(payload.patient_id);
+  const body = { ...payload, patient_id: pid };
   return request<BioEmotionalHypothesis>(HYPOTHESES_URL, {
     method: "POST",
-    body: JSON.stringify(payload),
+    body: JSON.stringify(body),
   });
 }
 
@@ -176,9 +194,11 @@ export async function updateHypothesis(
 export async function createSynthesis(
   payload: BioEmotionalSynthesisPayload
 ): Promise<BioEmotionalSynthesis> {
+  const pid = await resolvePatientIdLegacy(payload.patient_id);
+  const body = { ...payload, patient_id: pid };
   return request<BioEmotionalSynthesis>(SYNTHESIS_URL, {
     method: "POST",
-    body: JSON.stringify(payload),
+    body: JSON.stringify(body),
   });
 }
 
@@ -191,16 +211,19 @@ export async function closeSynthesis(id: string): Promise<BioEmotionalSynthesis>
 export async function listAssistedDiagnosis(
   patientId: number
 ): Promise<AssistedDiagnosisRecord[]> {
-  const url = `${ASSISTED_DIAGNOSIS_URL}?patient_id=${patientId}`;
+  const pid = await resolvePatientIdLegacy(patientId);
+  const url = `${ASSISTED_DIAGNOSIS_URL}?patient_id=${pid}`;
   return request<AssistedDiagnosisRecord[]>(url);
 }
 
 export async function createAssistedDiagnosis(
   payload: AssistedDiagnosisPayload
 ): Promise<AssistedDiagnosisRecord> {
+  const pid = await resolvePatientIdLegacy(payload.patient_id);
+  const body = { ...payload, patient_id: pid };
   return request<AssistedDiagnosisRecord>(ASSISTED_DIAGNOSIS_URL, {
     method: "POST",
-    body: JSON.stringify(payload),
+    body: JSON.stringify(body),
   });
 }
 
@@ -214,16 +237,19 @@ export async function validateAssistedDiagnosis(
 
 
 export async function listPatientBriefs(patientId: number): Promise<BioEmotionalPatientBrief[]> {
-  const url = `${PATIENT_BRIEF_URL}?patient_id=${patientId}`;
+  const pid = await resolvePatientIdLegacy(patientId);
+  const url = `${PATIENT_BRIEF_URL}?patient_id=${pid}`;
   return request<BioEmotionalPatientBrief[]>(url);
 }
 
 export async function createPatientBrief(
   payload: BioEmotionalPatientBriefPayload
 ): Promise<BioEmotionalPatientBrief> {
+  const pid = await resolvePatientIdLegacy(payload.patient_id);
+  const body = { ...payload, patient_id: pid };
   return request<BioEmotionalPatientBrief>(PATIENT_BRIEF_URL, {
     method: "POST",
-    body: JSON.stringify(payload),
+    body: JSON.stringify(body),
   });
 }
 
@@ -308,7 +334,7 @@ const MY_CURRENT_SESSION_URL = `${API_BASE_URL}/bioemotional/sessions/my/current
  * Lista sesiones de un paciente (solo terapeuta).
  */
 export async function listSessions(patientId?: number): Promise<BioEmotionalSessionListItem[]> {
-  const url = patientId ? `${SESSIONS_URL}?patient_id=${patientId}` : SESSIONS_URL;
+  const url = patientId ? `${SESSIONS_URL}?patient_id=${await resolvePatientIdLegacy(patientId)}` : SESSIONS_URL;
   return request<BioEmotionalSessionListItem[]>(url);
 }
 
@@ -318,9 +344,11 @@ export async function listSessions(patientId?: number): Promise<BioEmotionalSess
 export async function createSession(
   payload: BioEmotionalSessionCreatePayload
 ): Promise<BioEmotionalSession> {
+  const pid = await resolvePatientIdLegacy(payload.patient_id);
+  const body = { ...payload, patient_id: pid };
   return request<BioEmotionalSession>(SESSIONS_URL, {
     method: "POST",
-    body: JSON.stringify(payload),
+    body: JSON.stringify(body),
   });
 }
 
@@ -335,7 +363,8 @@ export async function getSession(sessionId: string): Promise<BioEmotionalSession
  * Obtiene la sesión activa de un paciente específico (solo terapeuta).
  */
 export async function getActiveSessionForPatient(patientId: number): Promise<BioEmotionalSession> {
-  return request<BioEmotionalSession>(`${SESSIONS_URL}active/${patientId}/`);
+  const pid = await resolvePatientIdLegacy(patientId);
+  return request<BioEmotionalSession>(`${SESSIONS_URL}active/${pid}/`);
 }
 
 /**
@@ -482,7 +511,8 @@ export interface SCID5CorrelationPayload {
  * Incluye resumen de sesiones, ranking de regiones, tendencias emocionales.
  */
 export async function exportForSWM(patientId: number): Promise<BioEmotionalExportData> {
-  return request<BioEmotionalExportData>(`${EXPORT_URL}${patientId}/`);
+  const pid = await resolvePatientIdLegacy(patientId);
+  return request<BioEmotionalExportData>(`${EXPORT_URL}${pid}/`);
 }
 
 /**
@@ -490,9 +520,10 @@ export async function exportForSWM(patientId: number): Promise<BioEmotionalExpor
  * Crea una referencia del estado BioEmotional actual para síntesis holística.
  */
 export async function importToMSHE(patientId: number): Promise<MSHEImportResult> {
+  const pid = await resolvePatientIdLegacy(patientId);
   return request<MSHEImportResult>(MSHE_IMPORT_URL, {
     method: "POST",
-    body: JSON.stringify({ patient_id: patientId }),
+    body: JSON.stringify({ patient_id: pid }),
   });
 }
 
@@ -527,9 +558,10 @@ export async function correlateSCID5AllSections(
 
   const results: Record<string, SCID5CorrelationResult> = {};
 
+  const pid = await resolvePatientIdLegacy(patientId);
   for (const section of sections) {
     const result = await correlateSCID5({
-      patient_id: patientId,
+      patient_id: pid,
       section_key: section,
       bioemotional_regions: regions,
     });

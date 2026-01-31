@@ -27,7 +27,7 @@ Usuario reportó que los resultados de SHA Harmony no se sincronizaban correctam
 **URL**: `/dashboard/therapist/sha`
 - ❌ Mostraba "Puntuación Total N/A / 50"
 - ❌ No renderizaba los detalles del resultado
-- ❌ Paciente completó el test pero terapeuta no lo veía
+- ❌ Consultante completó el test pero terapeuta no lo veía
 
 ---
 
@@ -252,7 +252,7 @@ Cuando se actualice el schema de cualquier test:
 ## 🚀 Testing Recomendado
 
 ### Manual Testing
-1. **Como Paciente**:
+1. **Como Consultante**:
    - Ir a `/dashboard/patient/tests/sha-harmony`
    - Completar cuestionario con respuestas variadas (1-5)
    - Verificar página individual muestra harmony index
@@ -261,7 +261,7 @@ Cuando se actualice el schema de cualquier test:
    - Verificar muestra datos completos con Sefirot y recomendaciones
 
 2. **Como Terapeuta**:
-   - Seleccionar paciente activo
+   - Seleccionar consultante activo
    - Ir a `/dashboard/therapist/sha`
    - Verificar tarjeta verde muestra "Cuestionario SHA Harmony Completado"
    - Verificar muestra índice de armonía X.X / 5.0

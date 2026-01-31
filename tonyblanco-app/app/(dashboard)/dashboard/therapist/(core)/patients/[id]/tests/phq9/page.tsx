@@ -129,7 +129,7 @@ export default function TherapistPatientPhq9Page() {
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <p className="text-sm text-gray-600">Cargando resultado PHQ-9…</p>
+        <p className="text-sm text-gray-600">Cargando lectura…</p>
       </div>
     );
   }
@@ -148,7 +148,7 @@ export default function TherapistPatientPhq9Page() {
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white border border-gray-200 rounded-lg p-6">
-          <h1 className="text-xl font-semibold text-gray-900">PHQ-9 (consultante)</h1>
+          <h1 className="text-xl font-semibold text-gray-900">Pulso del Ánimo (consultante)</h1>
           <p className="text-sm text-gray-600 mt-2">No hay resultados registrados para este consultante.</p>
         </div>
       </div>
@@ -163,9 +163,9 @@ export default function TherapistPatientPhq9Page() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-        <h1 className="text-2xl font-semibold text-gray-900">PHQ-9 — Resultado del consultante</h1>
+        <h1 className="text-2xl font-semibold text-gray-900">Pulso del Ánimo — Resultado del consultante</h1>
         <p className="text-sm text-gray-600 mt-2">
-          Seguimiento de cribado. Este resultado no es una lectura.
+          Seguimiento orientativo para acompañamiento. No es diagnóstico.
         </p>
         <div className="mt-3">
           <button
@@ -173,7 +173,7 @@ export default function TherapistPatientPhq9Page() {
             onClick={() => setOpenHelp(true)}
             className="text-sm text-blue-600 hover:text-blue-800 underline"
           >
-            Que es este test?
+            ¿Qué es esta lectura?
           </button>
         </div>
       </div>
@@ -243,7 +243,7 @@ export default function TherapistPatientPhq9Page() {
             onChange={(e) => setNotes(e.target.value)}
             rows={5}
             className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Notas clínicas (solo visible para el terapeuta)"
+            placeholder="Notas del terapeuta (solo visible para el terapeuta)"
           />
           <button
             type="button"

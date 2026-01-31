@@ -30,7 +30,7 @@ Activar la funcionalidad de interpretación IA **holística** siguiendo las 6 fa
 - ❌ DO NOT touch: Módulos clínicos en `backend/api/` (mantener separación holístico/clínico)
 - ❌ DO NOT execute: Cambios sin feature flag
 - ❌ DO NOT bypass: Sistema de consentimiento
-- ❌ DO NOT use: Terminología clínica ("paciente", "diagnóstico", "terapéutico")
+- ❌ DO NOT use: Terminología clínica ("paciente" es legacy, usar "consultante", "diagnóstico", "terapéutico")
 - ✅ Authorized scope: 
   - Nuevos endpoints bajo `/api/ai/tarot/` (holísticos)
   - Reutilizar `astrology_ai_service.py` (multi-provider ya implementado)
@@ -531,7 +531,7 @@ TAROT_AI_TEMPERATURE=0.8
 - Revisión de 50+ interpretaciones antes de producción
 - Disclaimer holístico visible en cada interpretación
 - Botón de "Reportar lenguaje inadecuado"
-- Lista negra de términos: "diagnóstico", "terapia", "tratamiento", "paciente", "síntoma"
+- Lista negra de términos: "diagnóstico", "terapia", "tratamiento", "paciente" (legacy), "síntoma"
 
 ### 🟡 MEDIO: Sobrecarga o falla de providers
 **Mitigación**:

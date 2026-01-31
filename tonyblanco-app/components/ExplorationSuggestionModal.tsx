@@ -8,7 +8,7 @@
  * 🎯 PIEZA CENTRAL DEL MOTOR DE TRANSICIÓN SIMBÓLICA
  * 
  * Este modal es el componente que traduce los datos estructurados de un
- * resultado de exploración en una explicación clínica pedagógica para el
+ * resultado de exploración en una explicación simbólica pedagógica para el
  * terapeuta, basándose en el modelo cabalístico de los Cuatro Mundos.
  * 
  * ┌─────────────────────────────────────────────────────────────────────────┐
@@ -29,7 +29,8 @@
 import React from 'react';
 import { Lightbulb, ArrowRight, BookOpen, Sparkles, ClipboardList } from 'lucide-react';
 
-// Cabalistic world metadata for clinical explanations
+// Cabalistic world metadata for symbolic explanations
+// (uso interno para explicación simbólica; no para etiquetas diagnósticas)
 const WORLD_METADATA: Record<string, {
   name: string;
   hebrewName: string;
@@ -50,7 +51,7 @@ const WORLD_METADATA: Record<string, {
     clinicalFocus: 'Explorar la conexión con el propósito vital, la identidad esencial y los patrones arquetípicos profundos.',
     suggestedTests: [
       { code: 'past-lives', name: 'Exploración de Vidas Pasadas' },
-      { code: 'asrs_essence', name: 'ASRS-Essence (Ritmo Esencial)' },
+      { code: 'asrs_essence', name: 'Ritmo del Alma — Esencia' },
     ],
   },
   beria: {
@@ -60,11 +61,11 @@ const WORLD_METADATA: Record<string, {
     color: 'text-blue-700',
     bgColor: 'bg-blue-50 border-blue-200',
     description: 'El mundo de la creación mental, donde se forman los pensamientos y la comprensión.',
-    clinicalFocus: 'Evaluar cómo la persona piensa, organiza y da sentido a su experiencia. Explorar patrones cognitivos y sistemas de creencias.',
+    clinicalFocus: 'Observar cómo la persona piensa, organiza y da sentido a su experiencia. Explorar patrones cognitivos y sistemas de creencias.',
     suggestedTests: [
       { code: 'wellness', name: 'Wellness Assessment' },
-      { code: 'screening-general', name: 'Screening Psicológico General' },
-      { code: 'scl90', name: 'SCL-90 (Visión Holística)' },
+      { code: 'screening-general', name: 'Mapa de Bienestar General' },
+      { code: 'scl90', name: 'Lente de Simetría del Alma' },
     ],
   },
   yetzirah: {
@@ -76,9 +77,9 @@ const WORLD_METADATA: Record<string, {
     description: 'El mundo de la formación emocional, donde se gestan los afectos y las reacciones.',
     clinicalFocus: 'Observar el movimiento afectivo, la regulación emocional interna y los patrones de reacción ante el entorno.',
     suggestedTests: [
-      { code: 'anxiety-state-trait', name: 'Ansiedad Estado-Rasgo' },
+      { code: 'anxiety-state-trait', name: 'Equilibrio Interno — Estado y Rasgo' },
       { code: 'stress-regulation', name: 'Regulación del Estrés' },
-      { code: 'bdi-ii', name: 'BDI-II (Inventario de Depresión)' },
+      { code: 'bdi-ii', name: 'Inventario de Reflexión Profunda' },
     ],
   },
   assiah: {
@@ -90,9 +91,9 @@ const WORLD_METADATA: Record<string, {
     description: 'El mundo de la acción material, donde se manifiestan los hábitos y el cuerpo físico.',
     clinicalFocus: 'Explorar hábitos, rutinas, sueño, alimentación y la relación con el cuerpo físico.',
     suggestedTests: [
-      { code: 'insomnia', name: 'Evaluación de Insomnio' },
-      { code: 'nutrition', name: 'Hábitos Nutricionales' },
-      { code: 'dudit_spirit', name: 'DUDIT (Uso de Sustancias)' },
+      { code: 'insomnia', name: 'Sueño — Ritmo y descanso' },
+      { code: 'nutrition', name: 'Alimentación — Hábitos y vínculo' },
+      { code: 'dudit_spirit', name: 'Introspección de Unidad (Rúaj)' },
     ],
   },
 };

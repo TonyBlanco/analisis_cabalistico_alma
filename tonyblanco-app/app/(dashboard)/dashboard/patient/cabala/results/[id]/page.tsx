@@ -136,7 +136,7 @@ export default function PatientCabalisticResultPage() {
           )}
           {resultData.interpretacion_clinica && (
             <div className="mb-6">
-              <h3 className="text-md font-medium text-gray-900 mb-2">Interpretación Clínica</h3>
+              <h3 className="text-md font-medium text-gray-900 mb-2">Interpretación Integrativa</h3>
               <div className="text-sm text-gray-700 whitespace-pre-wrap">{resultData.interpretacion_clinica}</div>
             </div>
           )}

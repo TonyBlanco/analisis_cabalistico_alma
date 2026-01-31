@@ -1,7 +1,7 @@
 export const scl90Definition = {
   code: "scl90",
-  name: "SCL-90 — Screening Holístico",
-  purpose: "Evaluación holística para explorar síntomas generales sin etiqueta médica.",
+  name: "Lente de Simetría del Alma",
+  purpose: "Exploración holística para observar señales generales sin etiquetas.",
   model: "wellness",
   estimatedTimeMinutes: "12-15",
   scale: {
@@ -15,5 +15,5 @@ export const scl90Definition = {
       "4": "Mucho",
     } as Record<string, string>,
   },
-  disclaimer: "Resultado orientativo. No diagnóstico.",
+  disclaimer: "Resultado orientativo. No es diagnóstico.",
 } as const;

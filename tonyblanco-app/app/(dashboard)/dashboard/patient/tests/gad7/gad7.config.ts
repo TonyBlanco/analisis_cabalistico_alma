@@ -1,6 +1,6 @@
 export const gad7Definition = {
-  name: "GAD-7",
-  purpose: "Cribado de ansiedad generalizada",
+  name: "Mapa de Preocupación — 7 señales",
+  purpose: "Exploración de preocupación y tensión (no diagnóstica)",
   target_population: "Adultos",
   execution_mode: "patient_self",
   estimated_time_minutes: "2–3",
@@ -105,8 +105,8 @@ export const gad7Definition = {
     }
   ],
   clinical_notes: [
-    "Instrumento de cribado para ansiedad generalizada; no reemplaza la evaluación clínica.",
-    "Requiere seguimiento clínico para puntajes en rango moderado o superior.",
-    "Usar en contexto de entrevista clínica cuando sea necesario."
+    "Herramienta orientativa (no diagnóstica).",
+    "Útil para observar cambios en el tiempo.",
+    "Interpretar en conversación terapéutica y contexto personal."
   ]
 } as const;

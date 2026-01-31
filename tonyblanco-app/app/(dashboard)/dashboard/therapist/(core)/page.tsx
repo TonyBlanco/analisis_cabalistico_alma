@@ -8,10 +8,10 @@
  * NO MODIFICAR sin autorización del propietario del proyecto.
  * 
  * Comportamiento:
- * - Si hay consultante activo → Muestra TherapistClinicalDashboard (workspace clínico)
+ * - Si hay consultante activo → Muestra TherapistClinicalDashboard (workspace de trabajo)
  * - Si NO hay consultante → Muestra prompt para seleccionar consultante
  * 
- * El sidebar ya tiene "Pacientes" para la lista completa.
+ * El sidebar ya tiene "Consultantes" para la lista completa.
  * Este dashboard es para TRABAJAR con el consultante activo.
  * 
  * @author Tony Blanco - Holistica Aplicada
@@ -71,7 +71,7 @@ export default function TherapistDashboard() {
     );
   }
 
-  // Si hay paciente activo → Mostrar workspace clínico
+  // Si hay consultante activo → Mostrar workspace de trabajo
   if (activePatientId) {
     return (
       <TherapistClinicalDashboard
@@ -105,7 +105,7 @@ export default function TherapistDashboard() {
           </h2>
           
           <p className="text-gray-600 mb-6">
-            Para usar el espacio clínico, primero selecciona un consultante desde la lista de Pacientes.
+            Para usar el espacio de trabajo, primero selecciona un consultante desde la lista de Consultantes.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -135,9 +135,9 @@ export default function TherapistDashboard() {
         <div>
           <p className="text-sm text-amber-800 font-medium">¿Cómo funciona?</p>
           <p className="text-sm text-amber-700 mt-1">
-            Ve a <strong>Pacientes</strong> en el sidebar, haz clic en un consultante, 
+            Ve a <strong>Consultantes</strong> en el sidebar, haz clic en un consultante, 
             y su información aparecerá en el header. Luego regresa aquí para usar 
-            las herramientas clínicas.
+            las herramientas de acompañamiento.
           </p>
         </div>
       </div>

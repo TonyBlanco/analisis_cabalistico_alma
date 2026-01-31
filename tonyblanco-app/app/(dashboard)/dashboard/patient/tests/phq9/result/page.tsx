@@ -81,7 +81,7 @@ export default function Phq9PatientResultPage() {
   if (loading) {
     return (
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <p className="text-sm text-gray-600">Cargando resultado PHQ-9…</p>
+        <p className="text-sm text-gray-600">Cargando lectura…</p>
       </div>
     );
   }
@@ -100,7 +100,7 @@ export default function Phq9PatientResultPage() {
     return (
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white border border-gray-200 rounded-lg p-6">
-          <h1 className="text-xl font-semibold text-gray-900">PHQ-9</h1>
+          <h1 className="text-xl font-semibold text-gray-900">Pulso del Ánimo</h1>
           <p className="text-sm text-gray-600 mt-2">Aún no hay resultados registrados.</p>
         </div>
       </div>
@@ -112,9 +112,9 @@ export default function Phq9PatientResultPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-        <h1 className="text-2xl font-semibold text-gray-900">PHQ-9 — Resultado</h1>
+        <h1 className="text-2xl font-semibold text-gray-900">Pulso del Ánimo — Resultado</h1>
         <p className="text-sm text-gray-600 mt-2">
-          Cuestionario de cribado de depresión. Este resultado es una lectura orientativa.
+          Lectura orientativa basada en 9 señales reportadas. No es diagnóstico.
         </p>
       </div>
 
@@ -146,7 +146,7 @@ export default function Phq9PatientResultPage() {
         {suicidalFlag && (
           <div className="rounded-md border border-amber-200 bg-amber-50 p-4">
             <p className="text-sm text-amber-800">
-              Hemos detectado respuestas en el ítem 9. Si necesitas apoyo, contacta con tu profesional de salud o con servicios de emergencia. Este mensaje es preventivo y calmado.
+              Hay una señal de malestar intenso en una de las preguntas. Si necesitas apoyo, contacta con tu red de apoyo o un profesional de confianza. Si hay riesgo inmediato, busca ayuda urgente local.
             </p>
           </div>
         )}

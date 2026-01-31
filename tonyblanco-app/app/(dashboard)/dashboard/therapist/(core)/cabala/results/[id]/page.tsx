@@ -192,7 +192,7 @@ export default function TherapistCabalisticResultPage() {
           )}
           {resultData.interpretacion_clinica && (
             <div className="mb-6">
-              <h3 className="text-md font-medium text-gray-900 mb-2">Interpretación Clínica</h3>
+              <h3 className="text-md font-medium text-gray-900 mb-2">Interpretación Integrativa</h3>
               <div className="text-sm text-gray-700 whitespace-pre-wrap">{resultData.interpretacion_clinica}</div>
             </div>
           )}
@@ -232,7 +232,7 @@ export default function TherapistCabalisticResultPage() {
             onChange={(e) => setNotes(e.target.value)}
             rows={8}
             className="w-full px-4 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition-colors resize-y"
-            placeholder="Agrega tus notas clínicas, observaciones o interpretaciones adicionales aquí..."
+            placeholder="Agrega tus notas del terapeuta, observaciones o interpretaciones adicionales aquí..."
           />
           <div className="flex items-center justify-end gap-3">
             <button

@@ -73,7 +73,7 @@ export default function Bdi2PatientResultPage() {
   if (loading) {
     return (
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <p className="text-sm text-gray-600">Cargando resultado BDI-II…</p>
+        <p className="text-sm text-gray-600">Cargando lectura…</p>
       </div>
     );
   }
@@ -92,7 +92,7 @@ export default function Bdi2PatientResultPage() {
     return (
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white border border-gray-200 rounded-lg p-6">
-          <h1 className="text-xl font-semibold text-gray-900">BDI-II</h1>
+          <h1 className="text-xl font-semibold text-gray-900">Inventario de Reflexión Profunda</h1>
           <p className="text-sm text-gray-600 mt-2">Aún no hay resultados registrados.</p>
         </div>
       </div>
@@ -105,9 +105,9 @@ export default function Bdi2PatientResultPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-        <h1 className="text-2xl font-semibold text-gray-900">BDI-II — Resultado</h1>
+        <h1 className="text-2xl font-semibold text-gray-900">Inventario de Reflexión Profunda — Resultado</h1>
         <p className="text-sm text-gray-600 mt-2">
-          Inventario de depresión de Beck II. Este resultado es una lectura orientativa.
+          Lectura orientativa basada en 21 señales reportadas. No es diagnóstico.
         </p>
       </div>
 
@@ -139,7 +139,7 @@ export default function Bdi2PatientResultPage() {
         {suicidalFlag && (
           <div className="rounded-md border border-amber-200 bg-amber-50 p-4">
             <p className="text-sm text-amber-800">
-              Respuestas positivas en ítems de ideación suicida. Si necesitas apoyo, contacta con tu profesional de salud.
+              Hay una señal de malestar intenso en una de las preguntas. Si necesitas apoyo, contacta con tu red de apoyo o un profesional de confianza.
             </p>
           </div>
         )}

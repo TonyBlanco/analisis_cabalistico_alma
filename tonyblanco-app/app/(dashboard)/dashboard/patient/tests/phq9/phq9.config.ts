@@ -1,7 +1,7 @@
 export const phq9Definition = {
-  name: "PHQ-9",
-  purpose: "Cribado de depresión",
-  target_population: "Pacientes adultos",
+  name: "Pulso del Ánimo — 9 señales",
+  purpose: "Exploración del ánimo y la energía (no diagnóstica)",
+  target_population: "Consultantes adultos",
   execution_mode: "patient_self",
   estimated_time_minutes: "2–3",
   questions: [

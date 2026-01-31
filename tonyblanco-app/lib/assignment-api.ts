@@ -9,6 +9,7 @@
  */
 
 import { getApiBaseUrl } from './api-base';
+import { resolveConsultanteByLegacyId } from './consultante-api';
 
 const API_BASE_URL = getApiBaseUrl();
 
@@ -69,8 +70,19 @@ export async function createAssignment(params: {
   test_type?: string;
   n_questions?: number;
 }): Promise<AssignmentPayload> {
+  // Resolve legacy patient -> consultante when possible so backend receives integer user_id
+  let resolvedPatientId = params.patient_id;
+  try {
+    const resolved = await resolveConsultanteByLegacyId(params.patient_id);
+    if (resolved && resolved.user_id) {
+      resolvedPatientId = resolved.user_id;
+    }
+  } catch (e) {
+    // ignore resolution errors and fall back to provided patient_id
+  }
+
   const payload = {
-    patient_id: params.patient_id,
+    patient_id: resolvedPatientId,
     assigned_to_user_id: params.assigned_to_user_id,
     test_type: params.test_type || 'mcmi4-mystic',
     n_questions: params.n_questions || 195,
@@ -106,7 +118,13 @@ export async function listAssignments(params: {
   patient_id: number;
   test_type?: string;
 }): Promise<AssignmentPayload[]> {
-  const searchParams = new URLSearchParams({ patient_id: String(params.patient_id) });
+  let pid = params.patient_id;
+  try {
+    const resolved = await resolveConsultanteByLegacyId(params.patient_id);
+    if (resolved && resolved.user_id) pid = resolved.user_id;
+  } catch (e) {}
+
+  const searchParams = new URLSearchParams({ patient_id: String(pid) });
   if (params.test_type) {
     searchParams.set('test_type', params.test_type);
   }
@@ -184,8 +202,19 @@ export async function assignTestToPatient(
   testCode: string,
   executionMode?: string
 ): Promise<AssignTestResponse> {
+  // Resolve legacy patient id to integer user_id when possible
+  let resolvedPatientId = patientId;
+  try {
+    const resolved = await resolveConsultanteByLegacyId(patientId);
+    if (resolved && resolved.user_id) {
+      resolvedPatientId = resolved.user_id;
+    }
+  } catch (e) {
+    // fallback to original
+  }
+
   const payload = {
-    patient_id: patientId,
+    patient_id: resolvedPatientId,
     test_code: testCode,
     ...(executionMode ? { execution_mode: executionMode } : {}),
   };
@@ -245,8 +274,14 @@ export async function unassignTestFromPatient(
   testCode: string,
   deleteCompleted: boolean = false
 ): Promise<UnassignTestResponse> {
+  let resolvedPatientId = patientId;
+  try {
+    const resolved = await resolveConsultanteByLegacyId(patientId);
+    if (resolved && resolved.user_id) resolvedPatientId = resolved.user_id;
+  } catch (e) {}
+
   const payload = {
-    patient_id: patientId,
+    patient_id: resolvedPatientId,
     test_code: testCode,
     delete_completed: deleteCompleted,
   };
@@ -296,6 +331,17 @@ export async function unassignTestFromPatient(
  * @returns Patient object with user field
  */
 export async function getPatientDetail(patientId: number): Promise<any> {
+  // First try consultantes resolve endpoint which returns compatibility fields
+  try {
+    const consultResp = await fetch(`${getApiBaseUrl()}/consultantes/resolve/${patientId}/`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+    if (consultResp.ok) return consultResp.json();
+  } catch (e) {
+    // ignore and fallback to legacy
+  }
+
   const response = await fetch(`${API_BASE_URL}/therapist/patients/${patientId}/`, {
     method: 'GET',
     headers: getAuthHeaders(),

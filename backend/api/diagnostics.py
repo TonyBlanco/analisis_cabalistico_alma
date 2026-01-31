@@ -1754,11 +1754,11 @@ def compute_somatic_awareness(input_data: dict) -> dict:
 
 def compute_dudit_spirit(input_data: dict) -> dict:
     """
-    Divine Unity Drug Introspection (DUDIT-Spirit)
+    Introspección de Unidad — Patrones de desconexión (DUDIT-Spirit)
     Mundo: Ietzirá → Asiá
-    
-    Evaluates relationship with substances, regulation, awareness, and compulsion.
-    Based on DUDIT framework but with symbolic-clinical perspective.
+
+    Exploración holística orientativa (no diagnóstica) sobre patrones de
+    desconexión/escape, autorregulación y conexión corporal.
     """
     responses = input_data.get('responses', {}) or {}
     
@@ -1772,14 +1772,41 @@ def compute_dudit_spirit(input_data: dict) -> dict:
     
     def _clamp_0_4(v: int) -> int:
         return max(0, min(4, v))
+
+    # Validate: require 11 answered items (q1..q11). Prevents empty submissions being treated as completed.
+    required_keys = [f"q{i}" for i in range(1, 12)]
+    normalized: dict[str, int] = {}
+    missing: list[str] = []
+    invalid: list[str] = []
+
+    for key in required_keys:
+        if key not in responses:
+            missing.append(key)
+            continue
+        try:
+            normalized[key] = _clamp_0_4(_as_int(responses.get(key)))
+        except Exception:
+            invalid.append(key)
+
+    if missing or invalid:
+        return {
+            'processed': False,
+            'message': 'Respuestas incompletas para Introspección de Unidad.',
+            'missing_items': missing,
+            'invalid_items': invalid,
+            'raw_answers': responses,
+            'timestamp': str(datetime.now()),
+        }
+
+    responses = normalized
     
-    # DUDIT-style scoring dimensions
-    # Frequency/quantity (q1-q3): consumption pattern
+    # Scoring dimensions (DUDIT-inspired structure, but holistically framed)
+    # Frequency/intensity (q1-q3): pattern activation
     freq_keys = ['q1', 'q2', 'q3']
     freq_vals = [_clamp_0_4(_as_int(responses.get(k, 0))) for k in freq_keys]
     freq_score = sum(freq_vals)
     
-    # Problems/consequences (q4-q6): functional impact
+    # Consequences (q4-q6): functional impact
     impact_keys = ['q4', 'q5', 'q6']
     impact_vals = [_clamp_0_4(_as_int(responses.get(k, 0))) for k in impact_keys]
     impact_score = sum(impact_vals)
@@ -1789,7 +1816,7 @@ def compute_dudit_spirit(input_data: dict) -> dict:
     control_vals = [_clamp_0_4(_as_int(responses.get(k, 0))) for k in control_keys]
     control_score = sum(control_vals)
     
-    # Body awareness (q10-q11): somatic connection
+    # Body disconnection (q10-q11): somatic disconnection
     body_keys = ['q10', 'q11']
     body_vals = [_clamp_0_4(_as_int(responses.get(k, 0))) for k in body_keys]
     body_score = sum(body_vals)
@@ -1805,7 +1832,7 @@ def compute_dudit_spirit(input_data: dict) -> dict:
     else:
         risk_level = "low"
     
-    # Usage pattern classification
+    # Pattern classification
     if control_score >= 8:
         usage_pattern = "compulsive"
     elif freq_score >= 8:
@@ -1813,14 +1840,14 @@ def compute_dudit_spirit(input_data: dict) -> dict:
     else:
         usage_pattern = "exploratory"
     
-    # Body awareness level (inverted: lower body score = lower awareness)
+    # Presence level (inverted: higher disconnection score = lower presence)
     body_avg = body_score / (len(body_keys) * 4.0)
     if body_avg >= 0.66:
-        body_awareness_level = "high"
+        body_awareness_level = "low"
     elif body_avg >= 0.33:
         body_awareness_level = "medium"
     else:
-        body_awareness_level = "low"
+        body_awareness_level = "high"
     
     # Transition suggestion (Ietzirá → Asiá)
     # Suggest Asiá if body awareness is low or physical symptoms are high
@@ -1828,11 +1855,11 @@ def compute_dudit_spirit(input_data: dict) -> dict:
     if body_awareness_level == "low" or impact_score >= 8:
         transition_suggestion = "assiah"
     
-    # Summary text
+    # Summary text (no diagnóstico)
     summary_map = {
-        "low": "Relación de bajo riesgo con sustancias. Mantén atención a patrones y regulación emocional.",
-        "medium": "Relación moderada que merece atención. Observa si hay evasión emocional o patrones automáticos.",
-        "high": "Patrón de alto riesgo detectado. Se sugiere apoyo profesional especializado y exploración de raíces emocionales.",
+        "low": "Interferencia baja. Mantén atención a tus señales internas y a la regulación emocional.",
+        "medium": "Interferencia moderada. Observa automatismos y posibles funciones de escape/desconexión.",
+        "high": "Interferencia alta. Se sugiere acompañamiento profesional y explorar raíces emocionales con contención.",
     }
     
     structured_data = {
@@ -1844,6 +1871,8 @@ def compute_dudit_spirit(input_data: dict) -> dict:
     }
     
     return {
+        'schema_version': 'dudit_spirit:v1',
+        'test_type': 'holistic_introspection',
         'processed': True,
         'structured_data': structured_data,
         'raw_answers': responses,

@@ -121,7 +121,7 @@ export default function SHAWorkspace() {
             // Assignment completed - show results
             setShaHarmonyResult({
               id: latestAssignment.id,
-              test_module: { code: 'sha_harmony', name: 'Sephirotic Harmony Audit' },
+              test_module: { code: 'sha_harmony', name: 'Armonía Sefirótica (SHA)' },
               scores: latestAssignment.results,
               created_at: latestAssignment.updated_at || latestAssignment.created_at,
             });
@@ -165,7 +165,7 @@ export default function SHAWorkspace() {
         patient_id: patientId,
         assigned_to_user_id: patientUserId,
         test_type: 'sha_harmony',
-        n_questions: 10, // AUDIT has 10 items
+        n_questions: 10, // cuestionario SHA: 10 ítems
       });
       
       setAssignmentStatus({

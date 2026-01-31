@@ -39,6 +39,180 @@ GENDER_IDENTITY_CHOICES = [
     ('not_recorded', 'Sin registro'),
 ]
 
+# Estados de terapia para Consultante
+THERAPY_STATUS_CHOICES = [
+    ('active', 'Activo'),
+    ('paused', 'Pausado'),
+    ('completed', 'Completado'),
+    ('archived', 'Archivado'),
+]
+
+# Niveles de terapia holística
+THERAPY_LEVEL_CHOICES = [
+    ('exploratory', 'Exploratorio'),
+    ('therapeutic', 'Terapéutico'),
+    ('transformational', 'Transformacional'),
+    ('mastery', 'Maestría'),
+]
+
+
+class Consultante(models.Model):
+    """
+    Modelo unificado para personas en terapia holística.
+    Reemplaza al modelo Patient (clínico legacy).
+    
+    Arquitectura:
+    - UUID como primary key (identificador global)
+    - OneToOne con User (SIEMPRE disponible para assignments)
+    - ForeignKey a therapist (relación terapéutica)
+    
+    Ver: docs/UNIFIED_CONSULTANTE_ARCHITECTURE.md
+    """
+    
+    # Identificación global (UUID como primary key)
+    uuid = models.UUIDField(
+        primary_key=True, 
+        default=uuid.uuid4, 
+        editable=False,
+        help_text='Identificador único global del consultante'
+    )
+    
+    # Identidad personal
+    full_name = models.CharField(
+        max_length=200, 
+        help_text="Nombre completo del consultante"
+    )
+    email = models.EmailField(unique=True)
+    phone = models.CharField(max_length=20, null=True, blank=True)
+    
+    # Datos de nacimiento (para análisis astrológicos/cabalísticos)
+    birth_date = models.DateField(null=True, blank=True)
+    birth_time = models.TimeField(null=True, blank=True)
+    birth_place = models.CharField(max_length=200, null=True, blank=True)
+    birth_city = models.CharField(max_length=100, null=True, blank=True)
+    birth_country = models.CharField(max_length=100, null=True, blank=True)
+    birth_latitude = models.DecimalField(
+        max_digits=10, 
+        decimal_places=7, 
+        null=True, 
+        blank=True
+    )
+    birth_longitude = models.DecimalField(
+        max_digits=10, 
+        decimal_places=7, 
+        null=True, 
+        blank=True
+    )
+    birth_timezone = models.CharField(max_length=50, null=True, blank=True)
+    
+    # Identidad biológica/energética
+    biological_sex = models.CharField(
+        max_length=20,
+        choices=BIOLOGICAL_SEX_CHOICES,
+        default='unknown'
+    )
+    gender_identity = models.CharField(
+        max_length=20,
+        choices=GENDER_IDENTITY_CHOICES,
+        default='not_recorded',
+        blank=True
+    )
+    
+    # Relación terapéutica
+    therapist = models.ForeignKey(
+        User, 
+        on_delete=models.CASCADE,
+        related_name='consultantes',
+        help_text="Terapeuta asignado a este consultante"
+    )
+    
+    # Cuenta de usuario (para tests/assignments) - CRÍTICO
+    user_account = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='consultante_profile',
+        help_text="Cuenta de usuario para login y asignaciones de tests"
+    )
+    
+    # Estado terapéutico
+    therapy_status = models.CharField(
+        max_length=20,
+        choices=THERAPY_STATUS_CHOICES,
+        default='active'
+    )
+    pause_reason = models.TextField(null=True, blank=True)
+    status_changed_at = models.DateTimeField(auto_now=True)
+    status_changed_by = models.ForeignKey(
+        User, 
+        on_delete=models.SET_NULL, 
+        null=True,
+        blank=True,
+        related_name='consultante_status_changes'
+    )
+    
+    # Consentimientos
+    consent_federation = models.BooleanField(
+        default=False,
+        help_text="Consiente compartir datos en Federation Hub (SCDF, SCID-5, MSHE)"
+    )
+    consent_federation_date = models.DateTimeField(null=True, blank=True)
+    
+    # Historia clínica holística
+    main_complaint = models.TextField(
+        null=True, 
+        blank=True, 
+        help_text="Motivo principal de consulta"
+    )
+    clinical_history = models.TextField(null=True, blank=True)
+    treatment_plan = models.TextField(null=True, blank=True)
+    therapy_level = models.CharField(
+        max_length=20,
+        choices=THERAPY_LEVEL_CHOICES,
+        default='exploratory'
+    )
+    
+    # Metadatos
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    # Avatar/imagen
+    avatar = models.ImageField(
+        upload_to='consultante_avatars/', 
+        null=True, 
+        blank=True
+    )
+    
+    # Compatibility con sistema legacy (temporal)
+    legacy_patient_id = models.IntegerField(
+        null=True, 
+        blank=True, 
+        unique=True,
+        help_text="ID del Patient legacy para migración"
+    )
+    
+    class Meta:
+        verbose_name = "Consultante"
+        verbose_name_plural = "Consultantes"
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.full_name} ({str(self.uuid)[:8]})"
+    
+    @property
+    def display_name(self):
+        """Nombre para mostrar en UI"""
+        return self.full_name
+    
+    @property
+    def user_id(self):
+        """Compatibility property para APIs legacy - devuelve user_account.id"""
+        return self.user_account.id if self.user_account else None
+    
+    def get_absolute_url(self):
+        return f"/dashboard/therapist/consultantes/{self.uuid}/"
+
+
 class IdentityProfile(models.Model):
     """
     Perfil de Identidad Simbólica/Astrológica

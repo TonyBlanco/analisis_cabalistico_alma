@@ -1,6 +1,6 @@
 export const baiDefinition = {
-  name: "BAI (Inventario de Ansiedad de Beck)",
-  purpose: "Evaluación de la severidad de síntomas de ansiedad",
+  name: "Señales del Cuerpo — Intensidad",
+  purpose: "Exploración de intensidad de activación corporal (no diagnóstica)",
   target_population: "Adultos",
   execution_mode: "patient_self",
   estimated_time_minutes: "5–10",
@@ -112,8 +112,8 @@ export const baiDefinition = {
     }
   ],
   clinical_notes: [
-    "Instrumento de severidad, no diagnóstico.",
-    "Útil para seguimiento y respuesta al tratamiento.",
-    "Interpretar junto con juicio clínico."
+    "Herramienta orientativa (no diagnóstica).",
+    "Útil para observar cambios en el tiempo.",
+    "Interpretar junto con contexto personal y funcional."
   ]
 } as const;

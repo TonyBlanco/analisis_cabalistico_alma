@@ -3,8 +3,17 @@ export type WorkspaceState = 'observation' | 'analysis' | 'synthesis' | 'closure
 export type BodyAnatomy = 'male' | 'female' | 'intersex' | 'unknown';
 
 export interface ExperientialContext {
+  // Legacy fields (kept for backward compatibility)
   patientId: number | null;
   patientName: string | null;
+  
+  // NEW: Consultante-specific fields (always available)
+  // See: docs/UNIFIED_CONSULTANTE_ARCHITECTURE.md
+  consultanteId?: number | null;
+  consultanteUserId?: number | null;  // CRITICAL for assignments!
+  consultanteName?: string | null;
+  consultanteUuid?: string | null;
+  
   biologicalSex: BodyAnatomy;
   sessionLabel: string;
 }

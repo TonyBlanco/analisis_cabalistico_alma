@@ -49,7 +49,7 @@ export default function Bdi2Page() {
       });
 
       if (!response.ok) {
-        let msg = "No se pudo guardar el BDI-II.";
+        let msg = `No se pudo guardar "${bdi2Definition.name}".`;
         try {
           const data = await response.json();
           msg = data?.message || data?.error || msg;

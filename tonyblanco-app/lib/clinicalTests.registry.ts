@@ -38,9 +38,9 @@ export const clinicalTestsRegistry: ClinicalTestRegistryEntry[] = [
 
     test_code: "phq-9",
 
-    display_name: "PHQ-9 (Depresion)",
+    display_name: "Pulso del Ánimo — 9 señales",
 
-    domain: "Estado de animo y depresion",
+    domain: "Ánimo y energía",
 
     family: "psicologicos",
 
@@ -52,15 +52,15 @@ export const clinicalTestsRegistry: ClinicalTestRegistryEntry[] = [
 
     guidance: {
 
-      what: "Cribado breve de sintomas depresivos en adultos.",
+      what: "Exploración breve del ánimo y la energía (no diagnóstica).",
 
-      when: "Usar en evaluacion inicial y seguimiento.",
+      when: "Útil en evaluación inicial y seguimiento de ánimo.",
 
-      diff: "Mas breve que BDI-II; orientado a frecuencia en 2 semanas.",
+      diff: "Más breve que Inventario de Reflexión Profunda; orientado a frecuencia en 2 semanas.",
 
-      after: "Revisar severidad y respuestas al item de ideacion suicida.",
+      after: "Revisar respuestas de desesperanza, autocuidado y funcionalidad.",
 
-      reminder: "Instrumento de cribado, no diagnostico.",
+      reminder: "Herramienta orientativa. No es diagnóstico.",
 
     },
 
@@ -70,9 +70,9 @@ export const clinicalTestsRegistry: ClinicalTestRegistryEntry[] = [
 
     test_code: "gad-7",
 
-    display_name: "GAD-7 (Ansiedad)",
+    display_name: "Mapa de Preocupación — 7 señales",
 
-    domain: "Ansiedad y estres",
+    domain: "Tensión y regulación",
 
     family: "psicologicos",
 
@@ -84,15 +84,15 @@ export const clinicalTestsRegistry: ClinicalTestRegistryEntry[] = [
 
     guidance: {
 
-      what: "Cribado de ansiedad generalizada.",
+      what: "Exploración de preocupación, tensión y capacidad de autorregulación (no diagnóstica).",
 
-      when: "Util en sintomas ansiosos persistentes.",
+      when: "Útil cuando hay preocupación sostenida o tensión persistente.",
 
-      diff: "Enfocado en GAD; no cubre panico ni fobias.",
+      diff: "Enfocado en preocupación y tensión; no cubre todos los matices emocionales.",
 
       after: "Observar severidad y funcionalidad.",
 
-      reminder: "Instrumento de cribado, no diagnostico.",
+      reminder: "Herramienta orientativa. No es diagnóstico.",
 
     },
 
@@ -102,9 +102,9 @@ export const clinicalTestsRegistry: ClinicalTestRegistryEntry[] = [
 
     test_code: "bai",
 
-    display_name: "BAI (Ansiedad de Beck)",
+    display_name: "Señales del Cuerpo — Intensidad",
 
-    domain: "Ansiedad y estres",
+    domain: "Cuerpo y activación",
 
     family: "psicologicos",
 
@@ -116,15 +116,15 @@ export const clinicalTestsRegistry: ClinicalTestRegistryEntry[] = [
 
     guidance: {
 
-      what: "Severidad de sintomas de ansiedad.",
+      what: "Exploración de intensidad de activación corporal (no diagnóstica).",
 
-      when: "Evaluacion inicial y seguimiento de tratamiento ansioso.",
+      when: "Útil para observar activación corporal y su variación en el tiempo.",
 
-      diff: "Mas centrado en sintomas fisiologicos que GAD-7.",
+      diff: "Más centrado en señales corporales que el Mapa de Preocupación.",
 
-      after: "Contrastar con contexto clinico y funcional.",
+      after: "Contrastar con contexto personal, relacional y funcional.",
 
-      reminder: "Instrumento de severidad, no diagnostico.",
+      reminder: "Herramienta orientativa. No es diagnóstico.",
 
     },
 
@@ -134,7 +134,7 @@ export const clinicalTestsRegistry: ClinicalTestRegistryEntry[] = [
 
     test_code: "isi",
 
-    display_name: "ISI (Insomnio)",
+    display_name: "Sueño — Ritmo y descanso",
 
     domain: "Sueno y ritmos",
 
@@ -156,7 +156,7 @@ export const clinicalTestsRegistry: ClinicalTestRegistryEntry[] = [
 
       after: "Observar severidad y repercusion diurna.",
 
-      reminder: "Instrumento de severidad, no diagnostico.",
+      reminder: "Herramienta orientativa. No es diagnóstico.",
 
     },
 
@@ -166,9 +166,9 @@ export const clinicalTestsRegistry: ClinicalTestRegistryEntry[] = [
 
     test_code: "bdi-ii",
 
-    display_name: "BDI-II (Depresion de Beck)",
+    display_name: "Inventario de Reflexión Profunda — 21 señales",
 
-    domain: "Estado de animo y depresion",
+    domain: "Ánimo, sentido y vitalidad",
 
     family: "psicologicos",
 
@@ -180,13 +180,13 @@ export const clinicalTestsRegistry: ClinicalTestRegistryEntry[] = [
 
     guidance: {
 
-      what: "Severidad de sintomas depresivos.",
+      what: "Exploración estructurada del ánimo, el sentido y la vitalidad (no diagnóstica).",
 
-      when: "Evaluacion inicial y seguimiento de depresion.",
+      when: "Útil para observar cambios de ánimo a lo largo del tiempo.",
 
-      diff: "Mas detallado que PHQ-9; incluye varios dominios sintomaticos.",
+      diff: "Más detallado que Pulso del Ánimo; incluye varios dominios de experiencia interna.",
 
-      after: "Revisar item de ideacion suicida y cambios en funcionalidad.",
+      after: "Revisar cambios en funcionalidad, autocuidado y narrativa interna.",
 
       reminder: "Instrumento de severidad, no diagnostico.",
 
@@ -214,7 +214,7 @@ export const clinicalTestsRegistry: ClinicalTestRegistryEntry[] = [
 
     test_code: "anxiety-state-trait",
 
-    display_name: "STAI (Ansiedad Estado-Rasgo)",
+    display_name: "Equilibrio Interno — Estado y Rasgo",
 
     domain: "Ansiedad y estres",
 
@@ -240,9 +240,9 @@ export const clinicalTestsRegistry: ClinicalTestRegistryEntry[] = [
 
     test_code: "scl-90-r",
 
-    display_name: "SCL-90-R (Psicopatologia)",
+    display_name: "Lente de Simetría del Alma (Revisada)",
 
-    domain: "Psicopatologia general",
+    domain: "Simetría emocional (panorama)",
 
     family: "psicologicos",
 
@@ -254,9 +254,9 @@ export const clinicalTestsRegistry: ClinicalTestRegistryEntry[] = [
 
     test_code: "mcmi-iv",
 
-    display_name: "MCMI-IV",
+    display_name: "Matriz Multiaxial — Perfil",
 
-    domain: "Personalidad y psicopatologia",
+    domain: "Perfil multiaxial (integrativo)",
 
     family: "psicologicos",
 
@@ -268,9 +268,9 @@ export const clinicalTestsRegistry: ClinicalTestRegistryEntry[] = [
 
     test_code: "scid5",
 
-    display_name: "SCID-5 (Entrevista estructurada)",
+    display_name: "Guía Estructurada (Exploración)",
 
-    domain: "Entrevistas estructuradas",
+    domain: "Exploración guiada",
 
     family: "psicologicos",
 
@@ -408,7 +408,7 @@ export const clinicalTestsRegistry: ClinicalTestRegistryEntry[] = [
 
     test_code: "scl90",
 
-    display_name: "SCL-90 — Screening Holístico",
+    display_name: "Lente de Simetría del Alma",
 
     domain: "Bienestar general",
 
@@ -473,6 +473,20 @@ export const clinicalTestsRegistry: ClinicalTestRegistryEntry[] = [
   },
 
   {
+    test_code: "dudit_spirit",
+    display_name: "Introspección de Unidad — Patrones de desconexión (Rúaj)",
+    domain: "Acción y cuerpo",
+    family: "cabalisticos",
+    implemented: true,
+    patient_route: "/dashboard/patient/tests/dudit-spirit",
+    guidance: {
+      what: "Exploración holística sobre patrones de desconexión/escape y autorregulación (no diagnóstica).",
+      when: "Útil cuando hay automatismos, desconexión corporal o dificultad para regular impulsos.",
+      reminder: "Herramienta orientativa para acompañamiento terapéutico. No sustituye ayuda profesional.",
+    },
+  },
+
+  {
 
     test_code: "past-lives",
 
@@ -502,7 +516,7 @@ export const clinicalTestsRegistry: ClinicalTestRegistryEntry[] = [
 
     test_code: "asrs_essence",
 
-    display_name: "ASRS-Essence (Ritmo del Alma)",
+    display_name: "Ritmo del Alma — Esencia",
 
     domain: "Exploración arquetipal",
 
@@ -558,7 +572,7 @@ export const clinicalTestsRegistry: ClinicalTestRegistryEntry[] = [
 
     test_code: "gematria",
 
-    display_name: "Gematria clinica",
+    display_name: "Gematría simbólica",
 
     domain: "Analisis cabalistico",
 
@@ -597,8 +611,8 @@ export const clinicalTestsRegistry: ClinicalTestRegistryEntry[] = [
   },
   {
     test_code: "mcmi4-mystic",
-    display_name: "MCMI-4-Mystic (Matriz Cósmica Multiaxial)",
-    domain: "Evaluación clínica especializada",
+    display_name: "Matriz Cósmica Multiaxial (Místico)",
+    domain: "Exploración multiaxial cabalística",
     family: "psicologicos",
     implemented: true,
     patient_route: "/dashboard/patient/tests/mcmi4-mystic",
@@ -613,7 +627,7 @@ export const clinicalTestsRegistry: ClinicalTestRegistryEntry[] = [
   },
   {
     test_code: "mcmi4-signal",
-    display_name: "SWM MCMI-4 SIGNAL",
+    display_name: "Señal de Coherencia — Registro mínimo",
     domain: "Señal mínima",
     family: "cabalisticos",
     implemented: true,
@@ -628,9 +642,9 @@ export const clinicalTestsRegistry: ClinicalTestRegistryEntry[] = [
     patient_route: "/dashboard/patient/tests/sha-harmony",
     therapist_route: "/dashboard/therapist/sha",
     guidance: {
-      what: "Evaluación holística del balance sefirótico basada en el cuestionario AUDIT.",
-      when: "Mediante asignación del terapeuta para evaluar patrones de consumo y correspondencia sefirótica.",
-      diff: "Combina AUDIT clínico con interpretación cabalística de 4 zonas de armonía.",
+      what: "Evaluación holística del balance sefirótico mediante un cuestionario breve de 10 ítems.",
+      when: "Mediante asignación del terapeuta para explorar patrones de hábito y correspondencia sefirótica.",
+      diff: "Integra lectura cabalística de 4 zonas de armonía con un cuestionario estructurado.",
       after: "Resultados muestran zona de riesgo y Sefirá correspondiente para trabajo terapéutico.",
       reminder: "Cuestionario de 10 preguntas, tiempo estimado: 5 minutos.",
     },

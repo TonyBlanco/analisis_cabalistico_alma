@@ -90,11 +90,23 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
   // Normaliza modo para decidir acciones
   // NOTE: Tests with T:true P:false are ASSIGNABLE by therapist to patients (patient_self execution).
   // Only explicitly marked therapist_clinical tests (e.g., SCDF) should be treated as clinical-only.
+  const therapistOnlyCodes = new Set([
+    'scdf',
+    'scid5',
+    // Catalog-only / professional-only tools
+    'mcmi4_mystic',
+  ]);
   const normalizedTests = tests.map((test) => {
-    const isClinical = test.execution_mode === 'therapist_clinical';
+    const code = String(test.code || '').toLowerCase();
+    const isExplicitTherapistOnly =
+      test.execution_mode === 'therapist_clinical' &&
+      (therapistOnlyCodes.has(code) || test.is_assignable === false);
     return {
       ...test,
-      mode: isClinical ? 'therapist_clinical' : 'patient_self',
+      // Most tests shown here are assignable to consultantes even if backend reports
+      // execution_mode=therapist_clinical (used as a visibility flag). Only treat as
+      // therapist-only when explicitly marked or non-assignable.
+      mode: isExplicitTherapistOnly ? 'therapist_clinical' : 'patient_self',
     };
   });
   // ...
@@ -442,7 +454,13 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
                                       .map((c: any) => String(c).toLowerCase()),
                                   );
                                   const hasPatientRoute = Boolean((test as any).patient_route);
-                                  const isAssignable = Boolean(test.is_active) && Boolean((test as any).available_for_therapists) && Boolean(activePatientHasUser);
+                                  const isAssignableFlag = (test as any).is_assignable ?? test.is_assignable ?? true;
+                                  const isAssignable =
+                                    Boolean(test.is_active) &&
+                                    Boolean((test as any).available_for_therapists) &&
+                                    Boolean(activePatientHasUser) &&
+                                    Boolean(isAssignableFlag) &&
+                                    !isTherapistOnly;
                                   const isAssigned = Boolean((test as any).already_assigned) || Boolean((test as any).locked) || (isAssignable && assignedCodes.has(String(test.code).toLowerCase()));
                                   const isAssigning = assigningTestCode === test.code;
 

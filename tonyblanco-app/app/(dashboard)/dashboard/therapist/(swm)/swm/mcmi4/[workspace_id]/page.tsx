@@ -656,7 +656,7 @@ export default function SwmMcmi4WorkspacePage() {
               ✓ Reflexión del consultante completada y disponible para consulta.
             </p>
             <p className="text-xs text-emerald-600 mt-1">
-              Puedes acceder a la reflexión desde el panel de gestión de pacientes.
+              Puedes acceder a la reflexión desde el panel de consultantes.
             </p>
           </div>
         ) : (

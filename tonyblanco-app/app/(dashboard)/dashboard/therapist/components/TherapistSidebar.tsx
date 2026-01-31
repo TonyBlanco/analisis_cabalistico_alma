@@ -59,7 +59,7 @@ const mainNavLinks = [
   },
   {
     id: 'patients',
-    label: 'Pacientes',
+    label: 'Consultantes',
     href: '/dashboard/therapist/patients',
     icon: Users,
   },

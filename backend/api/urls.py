@@ -31,6 +31,12 @@ from .views import (
     TherapistNoteListCreateView,
     TherapistDashboardView,
     TherapistPatientProfileView,
+    # Vistas de Consultante (nuevo sistema unificado)
+    ConsultanteListCreateView,
+    ConsultanteDetailView,
+    ConsultanteResolveView,
+    PatientLegacyAdapter,
+    ConsultanteHealthCheckView,
     # Vistas de servicios
     ServiceCategoryListView,
     ServiceListView,
@@ -194,6 +200,15 @@ urlpatterns = [
     # Fichas
     path('fichas/', FichaListCreateView.as_view(), name='ficha_list_create'),
     path('fichas/<int:pk>/', FichaRetrieveView.as_view(), name='ficha_retrieve'),
+    
+    # ===========================================================================
+    # CONSULTANTE API (nuevo sistema unificado)
+    # Ver: docs/UNIFIED_CONSULTANTE_ARCHITECTURE.md
+    # ===========================================================================
+    path('consultantes/', ConsultanteListCreateView.as_view(), name='consultante_list_create'),
+    path('consultantes/health/', ConsultanteHealthCheckView.as_view(), name='consultante_health'),
+    path('consultantes/resolve/<int:legacy_id>/', ConsultanteResolveView.as_view(), name='consultante_resolve'),
+    path('consultantes/<uuid:uuid>/', ConsultanteDetailView.as_view(), name='consultante_detail'),
     
     # Endpoints exclusivos para terapeutas
     path('therapist/patients/create/', CreatePatientWithAccountView.as_view(), name='create_patient_with_account'),

@@ -190,6 +190,7 @@ export default function BioEmotionalExperientialWorkspace() {
           isOpen={showAssignBioEmotionalModal}
           onClose={() => setShowAssignBioEmotionalModal(false)}
           patientId={context.patientId}
+          patientUserId={18} // Luis Antonio Blanco Fontela user_id from DB
           patientName={context.patientName || 'Paciente'}
         />
       )}

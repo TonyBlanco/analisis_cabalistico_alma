@@ -1032,6 +1032,18 @@ class ExecuteTestView(APIView):
                         'message': 'Auditoría de Armonía Sefirótica completada'
                     }
                 
+                # Handler for BioEmotional Intake (22-question holistic screening)
+                if test_module.code == 'bioemotional_intake':
+                    try:
+                        from api.compute_functions.bioemotional_intake import compute_bioemotional_intake
+                        return compute_bioemotional_intake(input_data)
+                    except ImportError:
+                        return {
+                            'error': 'compute_bioemotional_intake not available',
+                            'processed': False,
+                            'raw_responses': input_data.get('responses', {})
+                        }
+                
                 # Route by code to avoid collisions with other holistic_screening entries
                 if test_module.code == 'wellness':
                     responses = input_data.get('responses', {})

@@ -1,134 +1,144 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+/**
+ * THERAPIST DASHBOARD - CENTRO DE CONTROL DEL TERAPEUTA
+ * =====================================================
+ * 
+ * CRITICAL: Esta página es el centro de control del terapeuta.
+ * NO MODIFICAR sin autorización del propietario del proyecto.
+ * 
+ * Comportamiento:
+ * - Si hay consultante activo → Muestra TherapistClinicalDashboard (workspace clínico)
+ * - Si NO hay consultante → Muestra prompt para seleccionar consultante
+ * 
+ * El sidebar ya tiene "Pacientes" para la lista completa.
+ * Este dashboard es para TRABAJAR con el consultante activo.
+ * 
+ * @author Tony Blanco - Holistica Aplicada
+ * @protected NO BORRAR NI SIMPLIFICAR
+ */
+
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { 
-  Users, Calendar, FileText, 
-  Plus, TrendingUp, Clock,
-  UserPlus, ClipboardList, BarChart3,
-  Microscope, Flower2, Stars
+  Users, UserPlus, ChevronRight, Loader2, AlertCircle
 } from 'lucide-react';
+import { getActivePatient, getActivePatientId, getActivePatientName } from '@/lib/active-patient';
+import TherapistClinicalDashboard from '@/components/TherapistClinicalDashboard';
 
 export default function TherapistDashboard() {
   const router = useRouter();
+  const [activePatientId, setActivePatientIdState] = useState<number | null>(null);
+  const [activePatientName, setActivePatientNameState] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
+  // Cargar paciente activo
+  useEffect(() => {
+    const loadActivePatient = () => {
+      const id = getActivePatientId();
+      const name = getActivePatientName();
+      setActivePatientIdState(id);
+      setActivePatientNameState(name);
+      setLoading(false);
+    };
+
+    loadActivePatient();
+
+    // Escuchar cambios en el paciente activo
+    const handlePatientChange = () => {
+      loadActivePatient();
+    };
+
+    window.addEventListener('activePatientChanged', handlePatientChange);
+    window.addEventListener('storage', handlePatientChange);
+    
+    return () => {
+      window.removeEventListener('activePatientChanged', handlePatientChange);
+      window.removeEventListener('storage', handlePatientChange);
+    };
+  }, []);
+
+  const handleChangePatient = useCallback(() => {
+    router.push('/dashboard/therapist/patients');
+  }, [router]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+      </div>
+    );
+  }
+
+  // Si hay paciente activo → Mostrar workspace clínico
+  if (activePatientId) {
+    return (
+      <TherapistClinicalDashboard
+        patientId={activePatientId}
+        patientName={activePatientName || undefined}
+        onChangePatient={handleChangePatient}
+      />
+    );
+  }
+
+  // Si NO hay paciente activo → Prompt para seleccionar
   return (
-    <div>
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-blue-100 rounded-lg">
-              <Users className="h-6 w-6 text-blue-600" />
-            </div>
-            <span className="text-sm font-medium text-green-600">+12%</span>
-          </div>
-          <h3 className="text-2xl font-bold text-gray-900 mb-1">0</h3>
-          <p className="text-sm text-gray-600">Pacientes Activos</p>
-        </div>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl p-6 text-white">
+        <h1 className="text-2xl font-bold mb-2">Centro de Control del Terapeuta</h1>
+        <p className="text-indigo-100">
+          Selecciona un consultante para comenzar a trabajar.
+        </p>
+      </div>
 
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-green-100 rounded-lg">
-              <Calendar className="h-6 w-6 text-green-600" />
-            </div>
-            <span className="text-sm font-medium text-green-600">+8%</span>
+      {/* Mensaje principal */}
+      <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
+        <div className="max-w-md mx-auto">
+          <div className="h-16 w-16 rounded-full bg-indigo-100 flex items-center justify-center mx-auto mb-4">
+            <Users className="h-8 w-8 text-indigo-600" />
           </div>
-          <h3 className="text-2xl font-bold text-gray-900 mb-1">0</h3>
-          <p className="text-sm text-gray-600">Sesiones este mes</p>
-        </div>
+          
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            No hay consultante seleccionado
+          </h2>
+          
+          <p className="text-gray-600 mb-6">
+            Para usar el espacio clínico, primero selecciona un consultante desde la lista de Pacientes.
+          </p>
 
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-purple-100 rounded-lg">
-              <FileText className="h-6 w-6 text-purple-600" />
-            </div>
-            <span className="text-sm font-medium text-green-600">+5%</span>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Link
+              href="/dashboard/therapist/patients"
+              className="inline-flex items-center justify-center px-5 py-3 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors"
+            >
+              <Users className="h-5 w-5 mr-2" />
+              Ver Consultantes
+              <ChevronRight className="h-5 w-5 ml-1" />
+            </Link>
+            
+            <Link
+              href="/dashboard/therapist/patients/create"
+              className="inline-flex items-center justify-center px-5 py-3 border-2 border-indigo-200 text-indigo-700 font-medium rounded-lg hover:bg-indigo-50 transition-colors"
+            >
+              <UserPlus className="h-5 w-5 mr-2" />
+              Crear Nuevo
+            </Link>
           </div>
-          <h3 className="text-2xl font-bold text-gray-900 mb-1">0</h3>
-          <p className="text-sm text-gray-600">Fichas Creadas</p>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-orange-100 rounded-lg">
-              <TrendingUp className="h-6 w-6 text-orange-600" />
-            </div>
-            <span className="text-sm font-medium text-gray-500">0%</span>
-          </div>
-          <h3 className="text-2xl font-bold text-gray-900 mb-1">0%</h3>
-          <p className="text-sm text-gray-600">Tasa de Retención</p>
         </div>
       </div>
 
-      {/* Quick Actions */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
-        <div className="p-6 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">Acciones Rápidas</h2>
-        </div>
-        <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <button
-            onClick={() => router.push('/tests')}
-            className="flex items-center justify-center px-4 py-3 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-medium rounded-lg shadow-sm transition-all"
-          >
-            <ClipboardList className="h-5 w-5 mr-2" />
-            📊 Tests Modulares
-          </button>
-          <button
-            onClick={() => router.push('/therapist/patients/new')}
-            className="flex items-center justify-center px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium rounded-lg shadow-sm transition-all"
-          >
-            <UserPlus className="h-5 w-5 mr-2" />
-            + Nuevo Paciente
-          </button>
-          <button
-            onClick={() => router.push('/therapist/sessions/new')}
-            className="flex items-center justify-center px-4 py-3 bg-white hover:bg-gray-50 text-gray-700 font-medium rounded-lg border-2 border-gray-300 transition-all"
-          >
-            <Plus className="h-5 w-5 mr-2" />
-            + Registrar Sesión
-          </button>
-          <button
-            onClick={() => router.push('/calcular')}
-            className="flex items-center justify-center px-4 py-3 bg-white hover:bg-gray-50 text-gray-700 font-medium rounded-lg border-2 border-gray-300 transition-all"
-          >
-            <FileText className="h-5 w-5 mr-2" />
-            + Nuevo Análisis
-          </button>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Recent Activity */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-          <div className="p-6 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">Actividad Reciente</h2>
-          </div>
-          <div className="p-6">
-            <div className="text-center py-12">
-              <Clock className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600 font-medium">No hay actividad reciente</p>
-              <p className="text-sm text-gray-500 mt-2">
-                Comienza agregando tu primer paciente
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Upcoming Sessions */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-          <div className="p-6 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">Próximas Sesiones</h2>
-          </div>
-          <div className="p-6">
-            <div className="text-center py-12">
-              <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600 font-medium">No hay sesiones programadas</p>
-              <p className="text-sm text-gray-500 mt-2">
-                Las sesiones aparecerán aquí
-              </p>
-            </div>
-          </div>
+      {/* Tip */}
+      <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-start gap-3">
+        <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+        <div>
+          <p className="text-sm text-amber-800 font-medium">¿Cómo funciona?</p>
+          <p className="text-sm text-amber-700 mt-1">
+            Ve a <strong>Pacientes</strong> en el sidebar, haz clic en un consultante, 
+            y su información aparecerá en el header. Luego regresa aquí para usar 
+            las herramientas clínicas.
+          </p>
         </div>
       </div>
     </div>

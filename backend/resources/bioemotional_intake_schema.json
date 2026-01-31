@@ -1,0 +1,225 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Cuestionario Bio-Emocional Inicial",
+  "description": "Evaluación holística del estado físico-emocional para correlación con el Diccionario Bio-Emocional",
+  "version": "1.0.0",
+  "test_code": "bioemotional_intake",
+  "estimated_time_minutes": 12,
+  "instructions": "Responde según cómo te has sentido en las últimas 2 semanas. No hay respuestas correctas o incorrectas.",
+  "scale": {
+    "type": "likert",
+    "min": 0,
+    "max": 4,
+    "labels": {
+      "0": "Nunca",
+      "1": "Raramente",
+      "2": "A veces",
+      "3": "Frecuentemente",
+      "4": "Siempre"
+    }
+  },
+  "axes": [
+    {
+      "id": "sintomas_fisicos",
+      "name": "Síntomas Físicos Actuales",
+      "description": "Manifestaciones corporales recientes",
+      "tags_mapping": ["dolor", "tension", "malestar"]
+    },
+    {
+      "id": "estado_emocional",
+      "name": "Estado Emocional",
+      "description": "Emociones predominantes",
+      "tags_mapping": ["miedo", "culpa", "desvalorizacion", "separacion"]
+    },
+    {
+      "id": "contexto_relacional",
+      "name": "Contexto Relacional",
+      "description": "Dinámicas interpersonales",
+      "tags_mapping": ["familia", "pareja", "trabajo", "social"]
+    },
+    {
+      "id": "patrones_transgeneracionales",
+      "name": "Patrones Transgeneracionales",
+      "description": "Herencias familiares y lealtades invisibles",
+      "tags_mapping": ["herencia", "lealtad", "repeticion", "duelo"]
+    },
+    {
+      "id": "somatizacion",
+      "name": "Somatización Percibida",
+      "description": "Conexión cuerpo-emoción consciente",
+      "tags_mapping": ["somatizacion", "cuerpo", "expresion"]
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "axis": "sintomas_fisicos",
+      "text": "Experimento dolores de cabeza, migrañas o presión en la zona craneal",
+      "body_region": "head",
+      "dictionary_tags": ["cabeza", "migrana", "cefalea"]
+    },
+    {
+      "id": "q2",
+      "axis": "sintomas_fisicos",
+      "text": "Tengo problemas digestivos (acidez, náuseas, hinchazón, estreñimiento)",
+      "body_region": "abdomen",
+      "dictionary_tags": ["estomago", "digestion", "intestino"]
+    },
+    {
+      "id": "q3",
+      "axis": "sintomas_fisicos",
+      "text": "Siento tensión o dolor en cuello, hombros o espalda",
+      "body_region": "back",
+      "dictionary_tags": ["espalda", "cervical", "hombro", "tension"]
+    },
+    {
+      "id": "q4",
+      "axis": "sintomas_fisicos",
+      "text": "Experimento problemas respiratorios o sensación de opresión en el pecho",
+      "body_region": "chest",
+      "dictionary_tags": ["pulmon", "respiracion", "pecho", "asma"]
+    },
+    {
+      "id": "q5",
+      "axis": "sintomas_fisicos",
+      "text": "Tengo problemas de piel (erupciones, picazón, sequedad, acné)",
+      "body_region": "skin",
+      "dictionary_tags": ["piel", "acne", "eczema", "dermatitis"]
+    },
+    {
+      "id": "q6",
+      "axis": "estado_emocional",
+      "text": "Siento miedo o ansiedad sin una causa aparente",
+      "body_region": null,
+      "dictionary_tags": ["miedo", "ansiedad", "panico"]
+    },
+    {
+      "id": "q7",
+      "axis": "estado_emocional",
+      "text": "Me siento culpable por situaciones pasadas o presentes",
+      "body_region": null,
+      "dictionary_tags": ["culpa", "culpabilidad", "remordimiento"]
+    },
+    {
+      "id": "q8",
+      "axis": "estado_emocional",
+      "text": "Siento que no soy suficiente o que valgo menos que otros",
+      "body_region": null,
+      "dictionary_tags": ["desvalorizacion", "autoestima", "inferioridad"]
+    },
+    {
+      "id": "q9",
+      "axis": "estado_emocional",
+      "text": "Me siento solo/a o desconectado/a de los demás",
+      "body_region": null,
+      "dictionary_tags": ["separacion", "soledad", "abandono"]
+    },
+    {
+      "id": "q10",
+      "axis": "contexto_relacional",
+      "text": "Tengo conflictos o tensiones con mi familia de origen (padres, hermanos)",
+      "body_region": null,
+      "dictionary_tags": ["familia", "padre", "madre", "hermano"]
+    },
+    {
+      "id": "q11",
+      "axis": "contexto_relacional",
+      "text": "Mi relación de pareja genera estrés o malestar emocional",
+      "body_region": null,
+      "dictionary_tags": ["pareja", "relacion", "sexualidad"]
+    },
+    {
+      "id": "q12",
+      "axis": "contexto_relacional",
+      "text": "El trabajo o mis responsabilidades me generan agotamiento",
+      "body_region": null,
+      "dictionary_tags": ["trabajo", "estres", "agotamiento", "burnout"]
+    },
+    {
+      "id": "q13",
+      "axis": "contexto_relacional",
+      "text": "Me cuesta establecer límites con otras personas",
+      "body_region": null,
+      "dictionary_tags": ["limites", "codependencia", "sumision"]
+    },
+    {
+      "id": "q14",
+      "axis": "patrones_transgeneracionales",
+      "text": "Algún familiar cercano tuvo/tiene la misma enfermedad o síntoma que yo",
+      "body_region": null,
+      "dictionary_tags": ["herencia", "repeticion", "patron"]
+    },
+    {
+      "id": "q15",
+      "axis": "patrones_transgeneracionales",
+      "text": "En mi familia hay temas que no se hablan (secretos, tabúes)",
+      "body_region": null,
+      "dictionary_tags": ["secreto", "tabu", "silencio"]
+    },
+    {
+      "id": "q16",
+      "axis": "patrones_transgeneracionales",
+      "text": "Siento que cargo con problemas o emociones que no son míos",
+      "body_region": null,
+      "dictionary_tags": ["lealtad", "carga", "transgeneracional"]
+    },
+    {
+      "id": "q17",
+      "axis": "patrones_transgeneracionales",
+      "text": "Hay duelos no resueltos en mi familia (muertes, pérdidas, separaciones)",
+      "body_region": null,
+      "dictionary_tags": ["duelo", "muerte", "perdida", "separacion"]
+    },
+    {
+      "id": "q18",
+      "axis": "somatizacion",
+      "text": "Cuando tengo un conflicto emocional, mi cuerpo reacciona físicamente",
+      "body_region": null,
+      "dictionary_tags": ["somatizacion", "psicosomatico"]
+    },
+    {
+      "id": "q19",
+      "axis": "somatizacion",
+      "text": "Puedo identificar qué emoción está detrás de mis malestares físicos",
+      "body_region": null,
+      "dictionary_tags": ["consciencia", "conexion", "insight"]
+    },
+    {
+      "id": "q20",
+      "axis": "somatizacion",
+      "text": "Mi cuerpo 'me habla' a través de síntomas cuando algo no está bien",
+      "body_region": null,
+      "dictionary_tags": ["mensaje", "simbolo", "expresion"]
+    },
+    {
+      "id": "q21",
+      "axis": "somatizacion",
+      "text": "Tiendo a ignorar o suprimir las señales de mi cuerpo",
+      "body_region": null,
+      "dictionary_tags": ["represion", "negacion", "desconexion"]
+    },
+    {
+      "id": "q22",
+      "axis": "sintomas_fisicos",
+      "text": "Tengo problemas de sueño (insomnio, pesadillas, despertar frecuente)",
+      "body_region": null,
+      "dictionary_tags": ["insomnio", "sueno", "pesadilla"]
+    }
+  ],
+  "scoring": {
+    "method": "axis_sum",
+    "interpretation": {
+      "per_axis": {
+        "low": {"range": [0, 8], "label": "Área en equilibrio"},
+        "moderate": {"range": [9, 16], "label": "Área a explorar"},
+        "high": {"range": [17, 24], "label": "Área prioritaria"}
+      },
+      "total": {
+        "low": {"range": [0, 22], "label": "Estado general equilibrado"},
+        "moderate": {"range": [23, 44], "label": "Exploración recomendada"},
+        "high": {"range": [45, 66], "label": "Atención prioritaria"},
+        "critical": {"range": [67, 88], "label": "Intervención sugerida"}
+      }
+    }
+  }
+}

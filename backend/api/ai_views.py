@@ -10,7 +10,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 import logging
 
-from api.utils.holistic_ai import holistic_ai
+from django.conf import settings
+
+from api.utils.multi_ai_service import generate_messages_with_fallback
 
 logger = logging.getLogger(__name__)
 
@@ -45,38 +47,46 @@ class AIHolisticQueryView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Check if AI is enabled
-        if not holistic_ai.enabled:
-            error_msg = getattr(
-                holistic_ai, 
-                'error_message', 
-                'Servicio de IA no disponible. Verifica la configuración de GEMINI_API_KEY.'
-            )
-            return Response(
-                {'error': error_msg},
-                status=status.HTTP_503_SERVICE_UNAVAILABLE
-            )
-        
         try:
-            # Create a simple prompt for quick queries
-            prompt = f"""Eres un asistente clínico especializado en terapia holística.
-            
-Pregunta del terapeuta: {query}
+            system_prompt = (
+                "Eres un asistente para terapeutas dentro de una plataforma de psicoterapia holística. "
+                "Responde en español. Sé conciso y profesional (máximo 200 palabras). "
+                "No des diagnósticos ni afirmaciones médicas; ofrece orientación educativa y sugerencias prácticas. "
+                "Si falta información, pide aclaraciones o sugiere dónde encontrarla dentro del sistema."
+            )
 
-Responde de forma concisa y profesional (máximo 200 palabras). 
-Si la pregunta es sobre interpretación de tests, contexto clínico, o herramientas del sistema, proporciona orientación práctica.
-Si no tienes información suficiente, sugiere cómo el terapeuta podría encontrar más detalles."""
+            result = generate_messages_with_fallback(
+                [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": query},
+                ],
+                temperature=0.3,
+                max_tokens=450,
+                top_p=0.9,
+            )
 
-            # Use the holistic AI to generate response
-            response_text = holistic_ai.model.generate_content(prompt)
-            
+            if not result.get('success'):
+                return Response(
+                    {'error': result.get('error') or 'Servicio de IA no disponible'},
+                    status=status.HTTP_503_SERVICE_UNAVAILABLE,
+                )
+
             return Response({
-                'response': response_text.text if hasattr(response_text, 'text') else str(response_text),
-                'query': query
+                'response': result.get('text', ''),
+                'query': query,
+                'provider_used': result.get('provider'),
             })
             
         except Exception as e:
             logger.error(f"Error in AIHolisticQueryView: {e}", exc_info=True)
+            if getattr(settings, 'DEBUG', False):
+                return Response(
+                    {
+                        'error': 'Error al procesar la consulta',
+                        'detail': str(e),
+                    },
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
             return Response(
                 {'error': 'Error al procesar la consulta'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR

@@ -3,37 +3,70 @@
  * 
  * Modal to assign mcmi4-signal test to patient
  * Used in therapist patient detail page
+ * 
+ * Auto-fetches patientUserId if not provided
  */
 
 'use client';
 
-import { useState } from 'react';
-import { createAssignment } from '@/lib/assignment-api';
-import { X, CheckCircle, AlertCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { createAssignment, getPatientDetail } from '@/lib/assignment-api';
+import { X, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 
 interface AssignMCMI4ModalProps {
-  open: boolean;
+  isOpen?: boolean;  // Alternate prop name for compatibility
+  open?: boolean;
   onClose: () => void;
   patientId: number;
   patientName: string;
-  patientUserId: number | null;
+  patientUserId?: number | null;  // Optional - will be fetched if not provided
 }
 
 export default function AssignMCMI4Modal({
+  isOpen,
   open,
   onClose,
   patientId,
   patientName,
-  patientUserId,
+  patientUserId: propPatientUserId,
 }: AssignMCMI4ModalProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [resolvedUserId, setResolvedUserId] = useState<number | null>(propPatientUserId ?? null);
+  const [fetchingUser, setFetchingUser] = useState(false);
 
-  if (!open) return null;
+  const isVisible = isOpen ?? open ?? false;
+
+  // Auto-fetch user_id when modal opens if not provided
+  useEffect(() => {
+    if (!isVisible) return;
+    if (propPatientUserId) {
+      setResolvedUserId(propPatientUserId);
+      return;
+    }
+
+    // Fetch patient detail to get user_id
+    setFetchingUser(true);
+    getPatientDetail(patientId)
+      .then((patient) => {
+        const userId = patient?.user?.id || patient?.user_id || null;
+        setResolvedUserId(userId);
+        if (!userId) {
+          setError('El consultante no tiene cuenta de usuario vinculada.');
+        }
+      })
+      .catch((err) => {
+        console.error('Error fetching patient user:', err);
+        setError('No se pudo obtener información del consultante.');
+      })
+      .finally(() => setFetchingUser(false));
+  }, [isVisible, patientId, propPatientUserId]);
+
+  if (!isVisible) return null;
 
   const handleAssign = async () => {
-    if (!patientUserId) {
+    if (!resolvedUserId) {
       setError('El consultante debe tener una cuenta activa para asignar tests.');
       return;
     }
@@ -44,7 +77,7 @@ export default function AssignMCMI4Modal({
     try {
       await createAssignment({
         patient_id: patientId,
-        assigned_to_user_id: patientUserId,
+        assigned_to_user_id: resolvedUserId,
         test_type: 'mcmi4-signal',
         n_questions: 16, // MCMI-4 SIGNAL (16 ítems)
       });
@@ -101,7 +134,12 @@ export default function AssignMCMI4Modal({
         </div>
 
         {/* Content */}
-        {success ? (
+        {fetchingUser ? (
+          <div className="flex flex-col items-center justify-center py-6">
+            <Loader2 className="w-8 h-8 text-blue-500 animate-spin mb-3" />
+            <p className="text-sm text-gray-600">Obteniendo información del consultante...</p>
+          </div>
+        ) : success ? (
           <div className="flex flex-col items-center justify-center py-6">
             <CheckCircle className="w-12 h-12 text-green-500 mb-3" />
             <p className="text-sm font-medium text-gray-900">¡Asignación exitosa!</p>
@@ -117,11 +155,11 @@ export default function AssignMCMI4Modal({
                   <span className="font-medium">Consultante:</span> {patientName}
                 </p>
                 <p className="text-xs text-blue-700 mt-1">
-                  ID Consultante: {patientId} | ID Usuario: {patientUserId || 'N/A'}
+                  ID Consultante: {patientId} | ID Usuario: {resolvedUserId || 'N/A'}
                 </p>
               </div>
 
-              {!patientUserId && (
+              {!resolvedUserId && (
                 <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3 flex items-start gap-2">
                   <AlertCircle className="w-4 h-4 text-yellow-600 flex-shrink-0 mt-0.5" />
                   <div className="text-xs text-yellow-800">
@@ -159,7 +197,7 @@ export default function AssignMCMI4Modal({
               </button>
               <button
                 onClick={handleAssign}
-                disabled={loading || !patientUserId}
+                disabled={loading || !resolvedUserId}
                 className="flex-1 px-4 py-2 text-sm font-medium text-white rounded-md hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{ backgroundColor: 'var(--accent-color)' }}
               >

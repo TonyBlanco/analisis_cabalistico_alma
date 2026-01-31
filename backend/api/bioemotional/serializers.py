@@ -315,7 +315,7 @@ class BioEmotionalSessionSerializer(serializers.ModelSerializer):
 
     therapist_id = serializers.IntegerField(source="therapist.id", read_only=True, allow_null=True)
     patient_id = serializers.IntegerField(source="patient.id", read_only=True)
-    patient_name = serializers.CharField(source="patient.nombre", read_only=True)
+    patient_name = serializers.CharField(source="patient.full_name", read_only=True)
 
     class Meta:
         model = BioEmotionalSession
@@ -434,7 +434,7 @@ class SCID5CorrelationResultSerializer(serializers.Serializer):
 class BioEmotionalSessionListSerializer(serializers.ModelSerializer):
     """Serializer ligero para listados de sesiones (timeline)."""
 
-    patient_name = serializers.CharField(source="patient.nombre", read_only=True)
+    patient_name = serializers.CharField(source="patient.full_name", read_only=True)
 
     class Meta:
         model = BioEmotionalSession

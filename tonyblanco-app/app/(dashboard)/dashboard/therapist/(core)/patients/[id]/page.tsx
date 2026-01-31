@@ -10,6 +10,7 @@ import dynamic from 'next/dynamic'
 import { getActivePatient, setActivePatientId } from '@/lib/active-patient';
 import AssignMCMI4Modal from '@/components/AssignMCMI4Modal';
 import AssignMCMI4MysticModal from '@/components/AssignMCMI4MysticModal';
+import AssignBioEmotionalModal from '@/components/AssignBioEmotionalModal';
 import DataCleanupPanel from '@/components/therapist/DataCleanupPanel';
 
 import { getApiBaseUrl } from '@/lib/api-base';
@@ -33,6 +34,7 @@ export default function TherapistPatientDetailPage() {
   const [showEditor, setShowEditor] = useState(false);
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [showAssignMysticModal, setShowAssignMysticModal] = useState(false);
+  const [showAssignBioEmotionalModal, setShowAssignBioEmotionalModal] = useState(false);
 
   // Detect if patient has completed SIGNAL
   const signalResult = useMemo(() => {
@@ -175,6 +177,12 @@ export default function TherapistPatientDetailPage() {
             style={{ backgroundColor: 'var(--accent-color)' }}
           >
             Asignar SIGNAL (16 ítems)
+          </button>
+          <button
+            onClick={() => setShowAssignBioEmotionalModal(true)}
+            className="inline-flex items-center rounded-md px-3 py-2 text-sm font-medium text-white hover:opacity-90 transition-opacity bg-gradient-to-r from-indigo-500 to-purple-500"
+          >
+            Asignar Bio-Emocional (22)
           </button>
           {/* Show 195 assignment only if SIGNAL completed */}
           {hasCompletedSignal && (
@@ -340,6 +348,16 @@ export default function TherapistPatientDetailPage() {
         shadowWorld={signalResult?.result_data?.structured_data?.weakest_axis || null}
         signalTestResultId={signalResult?.id || null}
       />
+
+      {showAssignBioEmotionalModal && patient?.user && (
+        <AssignBioEmotionalModal
+          patientId={Number(patientId)}
+          patientUserId={patient.user?.id || patient.user}
+          patientName={patient?.full_name || patient?.legal_full_name || patient?.name || 'Consultante'}
+          onClose={() => setShowAssignBioEmotionalModal(false)}
+          onSuccess={() => loadData()}
+        />
+      )}
     </div>
   );
 }

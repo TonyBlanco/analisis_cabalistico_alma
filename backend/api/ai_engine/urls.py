@@ -2,7 +2,7 @@
 AI Engine URL Configuration
 """
 from django.urls import path
-from .views import GenerateInterpretationView, InterpretationHistoryView, AIEngineStatusView, InterpretAssignmentView
+from .views import GenerateInterpretationView, InterpretationHistoryView, AIEngineStatusView, InterpretAssignmentView, ExportInterpretationToMSHEView
 
 urlpatterns = [
     path('interpret/<int:test_result_id>/', GenerateInterpretationView.as_view(), name='ai_generate_interpretation'),

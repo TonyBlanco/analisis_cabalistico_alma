@@ -109,6 +109,30 @@ def _call_openai(prompt: str, config: Dict[str, Any]) -> Optional[str]:
     client = _get_openai_client()
     if not client:
         return None
+
+
+def _call_openai_messages(messages: List[Dict[str, str]], config: Dict[str, Any]) -> Optional[str]:
+    """Call OpenAI API with chat messages."""
+    client = _get_openai_client()
+    if not client:
+        return None
+
+    model = getattr(settings, 'OPENAI_MODEL', 'gpt-4o-mini')
+    try:
+        response = client.chat.completions.create(
+            model=model,
+            messages=messages,
+            temperature=config.get('temperature', 0.7),
+            max_tokens=config.get('max_tokens', 1024),
+        )
+        return response.choices[0].message.content
+    except Exception as e:
+        error_str = str(e)
+        if '429' in error_str or 'rate' in error_str.lower():
+            logger.warning("[MultiAI] OpenAI rate limited - trying fallback")
+        else:
+            logger.error(f"[MultiAI] OpenAI error: {e}")
+        return None
     
     model = getattr(settings, 'OPENAI_MODEL', 'gpt-4o-mini')
     try:
@@ -152,6 +176,43 @@ def _call_groq(prompt: str, config: Dict[str, Any]) -> Optional[str]:
     except Exception as e:
         logger.error(f"[MultiAI] Groq error: {e}")
         return None
+
+
+def _call_groq_messages(messages: List[Dict[str, str]], config: Dict[str, Any]) -> Optional[str]:
+    """Call Groq API with chat messages."""
+    client = _get_groq_client()
+    if not client:
+        return None
+
+    model = getattr(settings, 'GROQ_MODEL', 'llama-3.3-70b-versatile')
+    try:
+        response = client.chat.completions.create(
+            model=model,
+            messages=messages,
+            temperature=config.get('temperature', 0.7),
+            max_tokens=config.get('max_tokens', 1024),
+        )
+        return response.choices[0].message.content
+    except Exception as e:
+        logger.error(f"[MultiAI] Groq error: {e}")
+        return None
+
+
+def _messages_to_prompt(messages: List[Dict[str, str]]) -> str:
+    """Convert chat messages to a single prompt for providers that don't support chat natively."""
+    lines: List[str] = []
+    for message in messages:
+        role = (message.get('role') or 'user').strip().lower()
+        content = (message.get('content') or '').strip()
+        if not content:
+            continue
+        if role == 'system':
+            lines.append(f"INSTRUCCIONES DEL SISTEMA:\n{content}")
+        elif role == 'assistant':
+            lines.append(f"ASISTENTE:\n{content}")
+        else:
+            lines.append(f"USUARIO:\n{content}")
+    return "\n\n".join(lines).strip()
 
 
 def _call_ollama(prompt: str, config: Dict[str, Any]) -> Optional[str]:
@@ -290,6 +351,63 @@ class MultiAIService:
             "error": error_msg,
         }
 
+    def generate_messages(
+        self,
+        messages: List[Dict[str, str]],
+        temperature: float = 0.7,
+        max_tokens: int = 1024,
+        top_p: float = 0.8,
+    ) -> Dict[str, Any]:
+        """Generate AI response from chat messages with automatic fallback."""
+        config = {
+            'temperature': temperature,
+            'max_tokens': max_tokens,
+            'top_p': top_p,
+        }
+
+        providers = list(self.PROVIDERS)
+        if self.preferred and self.preferred in providers:
+            providers.remove(self.preferred)
+            providers.insert(0, self.preferred)
+
+        prompt = _messages_to_prompt(messages)
+
+        errors = []
+        for provider in providers:
+            if provider not in self.available_providers:
+                continue
+
+            logger.info(f"[MultiAI] Trying provider (messages): {provider}")
+
+            result = None
+            if provider == 'gemini':
+                result = _call_gemini(prompt, config)
+            elif provider == 'openai':
+                result = _call_openai_messages(messages, config)
+            elif provider == 'groq':
+                result = _call_groq_messages(messages, config)
+            elif provider == 'ollama':
+                result = _call_ollama(prompt, config)
+
+            if result:
+                logger.info(f"[MultiAI] Success with provider (messages): {provider}")
+                return {
+                    'success': True,
+                    'text': result,
+                    'provider': provider,
+                    'error': None,
+                }
+            errors.append(f"{provider} failed")
+
+        error_msg = f"All AI providers failed: {', '.join(errors)}"
+        logger.error(f"[MultiAI] {error_msg}")
+        return {
+            'success': False,
+            'text': '',
+            'provider': None,
+            'error': error_msg,
+        }
+
 
 # Global instance
 multi_ai = MultiAIService()
@@ -307,3 +425,8 @@ def generate_with_fallback(prompt: str, **kwargs) -> Dict[str, Any]:
         Dict with success, text, provider, and error fields
     """
     return multi_ai.generate(prompt, **kwargs)
+
+
+def generate_messages_with_fallback(messages: List[Dict[str, str]], **kwargs) -> Dict[str, Any]:
+    """Convenience function for generating AI text from messages with fallback."""
+    return multi_ai.generate_messages(messages, **kwargs)

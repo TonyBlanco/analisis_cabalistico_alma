@@ -6,20 +6,23 @@
  * Shows detected dominant/shadow world from SIGNAL
  * 
  * Flow: SIGNAL (16) → [this modal] → assigns mcmi4-mystic (195)
+ * 
+ * Auto-fetches patientUserId if not provided
  */
 
 'use client';
 
-import { useState } from 'react';
-import { createAssignment } from '@/lib/assignment-api';
-import { X, CheckCircle, AlertCircle, Sparkles } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { createAssignment, getPatientDetail } from '@/lib/assignment-api';
+import { X, CheckCircle, AlertCircle, Sparkles, Loader2 } from 'lucide-react';
 
 interface AssignMCMI4MysticModalProps {
-  open: boolean;
+  isOpen?: boolean;  // Alternate prop name for compatibility
+  open?: boolean;
   onClose: () => void;
   patientId: number;
   patientName: string;
-  patientUserId: number | null;
+  patientUserId?: number | null;  // Optional - will be fetched if not provided
   /** Optional: dominant world detected from SIGNAL */
   dominantWorld?: string | null;
   /** Optional: shadow/weakest world detected from SIGNAL */
@@ -36,11 +39,12 @@ const WORLD_LABELS: Record<string, string> = {
 };
 
 export default function AssignMCMI4MysticModal({
+  isOpen,
   open,
   onClose,
   patientId,
   patientName,
-  patientUserId,
+  patientUserId: propPatientUserId,
   dominantWorld,
   shadowWorld,
   signalTestResultId,
@@ -48,11 +52,39 @@ export default function AssignMCMI4MysticModal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [resolvedUserId, setResolvedUserId] = useState<number | null>(propPatientUserId ?? null);
+  const [fetchingUser, setFetchingUser] = useState(false);
 
-  if (!open) return null;
+  const isVisible = isOpen ?? open ?? false;
+
+  // Auto-fetch user_id when modal opens if not provided
+  useEffect(() => {
+    if (!isVisible) return;
+    if (propPatientUserId) {
+      setResolvedUserId(propPatientUserId);
+      return;
+    }
+
+    setFetchingUser(true);
+    getPatientDetail(patientId)
+      .then((patient) => {
+        const userId = patient?.user?.id || patient?.user_id || null;
+        setResolvedUserId(userId);
+        if (!userId) {
+          setError('El consultante no tiene cuenta de usuario vinculada.');
+        }
+      })
+      .catch((err) => {
+        console.error('Error fetching patient user:', err);
+        setError('No se pudo obtener información del consultante.');
+      })
+      .finally(() => setFetchingUser(false));
+  }, [isVisible, patientId, propPatientUserId]);
+
+  if (!isVisible) return null;
 
   const handleAssign = async () => {
-    if (!patientUserId) {
+    if (!resolvedUserId) {
       setError('El consultante debe tener una cuenta activa para asignar tests.');
       return;
     }
@@ -63,7 +95,7 @@ export default function AssignMCMI4MysticModal({
     try {
       await createAssignment({
         patient_id: patientId,
-        assigned_to_user_id: patientUserId,
+        assigned_to_user_id: resolvedUserId,
         test_type: 'mcmi4-mystic',  // 195 ítems
         n_questions: 195,
       });

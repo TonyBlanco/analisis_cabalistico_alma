@@ -11,6 +11,11 @@ import { getApiBaseUrl } from './api-base';
 
 const API_URL = getApiBaseUrl();
 
+if (typeof window !== 'undefined') {
+  // eslint-disable-next-line no-console
+  console.warn(`[session] Using API_URL=${API_URL}`);
+}
+
 export interface SessionUser {
   id: number;
   username: string;
@@ -99,7 +104,9 @@ export async function fetchSession(): Promise<SessionResponse> {
   } catch (error) {
     // Network errors, etc.
     // IMPORTANT: If we have a token, this is a REAL network error - don't bypass!
-    console.error('❌ Session fetch error (network):', error);
+      // Log the full URL attempted for easier diagnosis
+      // eslint-disable-next-line no-console
+      console.error(`❌ Session fetch error (network) -> ${API_URL}/me/ :`, error);
     
     // Only use bypass if NO token was provided (already handled above)
     return { isAuthenticated: false, user: null };

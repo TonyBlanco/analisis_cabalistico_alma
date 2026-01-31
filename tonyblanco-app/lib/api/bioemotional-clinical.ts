@@ -332,6 +332,13 @@ export async function getSession(sessionId: string): Promise<BioEmotionalSession
 }
 
 /**
+ * Obtiene la sesión activa de un paciente específico (solo terapeuta).
+ */
+export async function getActiveSessionForPatient(patientId: number): Promise<BioEmotionalSession> {
+  return request<BioEmotionalSession>(`${SESSIONS_URL}active/${patientId}/`);
+}
+
+/**
  * Actualiza una sesión existente (solo terapeuta).
  */
 export async function updateSession(

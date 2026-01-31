@@ -8,6 +8,7 @@ import SynthesisPanel from './SynthesisPanel';
 import ClosurePanel from './ClosurePanel';
 import GuidedExplorationPanel from './GuidedExplorationPanel';
 import ExperientialEvolutionPanel from './ExperientialEvolutionPanel';
+import PatientInputPanel from './PatientInputPanel';
 import type { WorkspaceState } from './types';
 import type { AnatomicalRegion } from './data/anatomicalRegions';
 import type { BioEmotionalSynthesis } from '@/lib/api/bioemotional-clinical';
@@ -68,6 +69,11 @@ export default function ExperientialToolPanels({
         <div className="bg-white border border-amber-200 rounded-xl p-4 text-xs text-amber-700">
           No hay paciente activo. Este workspace necesita contexto de paciente para operar.
         </div>
+      )}
+
+      {/* Panel de Input del Consultante - siempre visible cuando hay paciente */}
+      {hasPatient && (
+        <PatientInputPanel patientId={patientId} />
       )}
 
       <div className="grid grid-cols-[minmax(0,65%)_minmax(0,35%)] gap-4 items-start">

@@ -44,6 +44,8 @@ from .views import (
 
     BioEmotionalSessionDetailView,
 
+    BioEmotionalSessionActiveView,
+
     BioEmotionalSessionCloseView,
 
     BioEmotionalSessionPatientInputView,
@@ -230,6 +232,12 @@ urlpatterns = [
         "sessions/<uuid:id>/",
         BioEmotionalSessionDetailView.as_view(),
         name="session_detail",
+    ),
+    # GET /api/bioemotional/sessions/active/{patient_id}/
+    path(
+        "sessions/active/<int:patient_id>/",
+        BioEmotionalSessionActiveView.as_view(),
+        name="session_active",
     ),
     # PATCH /api/bioemotional/sessions/{id}/close/
     path(

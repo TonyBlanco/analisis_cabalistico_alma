@@ -652,7 +652,44 @@ class BioEmotionalSessionDetailView(generics.RetrieveUpdateDestroyAPIView):
         user = self.request.user
         return BioEmotionalSession.objects.filter(
             Q(therapist=user) | Q(patient__therapist=user)
-        ).select_related("patient")
+        )
+
+
+class BioEmotionalSessionActiveView(APIView):
+    """Obtiene la sesión activa de un paciente específico (para terapeutas).
+
+    GET /api/bioemotional/sessions/active/{patient_id}/
+
+    Devuelve la sesión más reciente no cerrada del paciente.
+    Si no hay sesión activa, devuelve 404.
+    """
+
+    permission_classes = [IsAuthenticated, IsTherapist]
+
+    def get(self, request, patient_id: int):
+        try:
+            # Validar que el terapeuta tiene acceso al paciente
+            patient = Patient.objects.get(pk=patient_id, therapist=request.user)
+        except Patient.DoesNotExist:
+            return Response(
+                {"detail": "Paciente no encontrado o no autorizado."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Buscar la sesión activa más reciente
+        active_session = BioEmotionalSession.objects.filter(
+            patient=patient,
+            is_closed=False
+        ).order_by("-date").first()
+
+        if not active_session:
+            return Response(
+                {"detail": "No hay sesión activa para este paciente."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = BioEmotionalSessionSerializer(active_session)
+        return Response(serializer.data).select_related("patient")
 
 
 class BioEmotionalSessionCloseView(generics.UpdateAPIView):
@@ -840,7 +877,7 @@ class BioEmotionalExportView(APIView):
             # Construir respuesta
             export_data = {
                 "patient_id": patient.id,
-                "patient_name": patient.nombre,
+                "patient_name": patient.full_name,
                 "sessions_summary": [
                     {
                         "id": s.id,

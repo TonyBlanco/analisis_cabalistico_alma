@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import PatientHeader from './PatientHeader';
 import ContextNav from './ContextNav';
 import CenterVisual from './CenterVisual';
@@ -10,6 +11,11 @@ import type { ContextSection, ContextSectionId, IntegrativeNote } from './types'
 import type { VisualizationState } from '@/components/BodySoulVisualization/types';
 import { usePanelManager } from '@/components/TherapistWorkspace/PanelManagerContext';
 import { createTherapistNote, listTherapistNotes } from '@/lib/therapist-notes-api';
+import AssignMCMI4Modal from '@/components/AssignMCMI4Modal';
+import AssignMCMI4MysticModal from '@/components/AssignMCMI4MysticModal';
+import AssignBioEmotionalModal from '@/components/AssignBioEmotionalModal';
+import { getApiBaseUrl } from '@/lib/api-base';
+import { getAuthToken } from '@/lib/api';
 
 interface TherapistClinicalDashboardProps {
   onChangePatient: () => void;
@@ -27,16 +33,6 @@ const contextSections: ContextSection[] = [
     id: 'clinical-history',
     label: 'Historia clínica',
     description: 'Contexto longitudinal',
-  },
-  {
-    id: 'bioemotional',
-    label: 'Bio-Emocional',
-    description: 'Observación simbólica',
-  },
-  {
-    id: 'visualization',
-    label: 'Cuerpo-Alma',
-    description: 'Visualización por capas',
   },
   {
     id: 'evaluations',
@@ -61,6 +57,12 @@ export default function TherapistClinicalDashboard({
   const [notesLoading, setNotesLoading] = useState(false);
   const [notesError, setNotesError] = useState<string | null>(null);
   const { openPanel } = usePanelManager();
+
+  // Modal states for test assignment
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [showAssignMysticModal, setShowAssignMysticModal] = useState(false);
+  const [showAssignBioEmotionalModal, setShowAssignBioEmotionalModal] = useState(false);
+  const [signalCompleted, setSignalCompleted] = useState(false);
 
   const resolvedPatientId = useMemo(() => {
     if (patientId === undefined || patientId === null || patientId === '') return null;
@@ -106,6 +108,35 @@ export default function TherapistClinicalDashboard({
     return () => {
       cancelled = true;
     };
+  }, [resolvedPatientId]);
+
+  // Check if SIGNAL test is completed for this patient
+  useEffect(() => {
+    if (!resolvedPatientId) {
+      setSignalCompleted(false);
+      return;
+    }
+
+    const checkSignalStatus = async () => {
+      try {
+        const token = getAuthToken();
+        const baseUrl = getApiBaseUrl();
+        const res = await fetch(`${baseUrl}/api/test-assignments/?patient=${resolvedPatientId}`, {
+          headers: { Authorization: `Token ${token}` },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const signalAssignment = data.find(
+            (a: any) => a.test_module?.code === 'mcmi4_signal' && a.status === 'completed'
+          );
+          setSignalCompleted(!!signalAssignment);
+        }
+      } catch (err) {
+        console.warn('Could not check SIGNAL status:', err);
+      }
+    };
+
+    checkSignalStatus();
   }, [resolvedPatientId]);
 
   const handleAddNote = useCallback(
@@ -166,6 +197,48 @@ export default function TherapistClinicalDashboard({
         patientName={patientName}
       />
 
+      {/* Assignment Actions */}
+      <div className="rounded-lg border border-border bg-card p-4">
+        <h3 className="mb-3 text-sm font-medium text-muted-foreground">Acciones de asignación</h3>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href="/dashboard/therapist/tarot"
+            className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 transition-colors"
+          >
+            <span className="text-lg">🔮</span>
+            Abrir Tarot en workspace simbólico
+          </Link>
+          <button
+            onClick={() => setShowAssignModal(true)}
+            className="inline-flex items-center gap-2 rounded-md bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 transition-colors"
+          >
+            <span className="text-lg">📋</span>
+            Asignar SIGNAL (16 ítems)
+          </button>
+          <button
+            onClick={() => setShowAssignBioEmotionalModal(true)}
+            className="inline-flex items-center gap-2 rounded-md bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-700 transition-colors"
+          >
+            <span className="text-lg">🌿</span>
+            Asignar Bio-Emocional (22)
+          </button>
+          {signalCompleted && (
+            <button
+              onClick={() => setShowAssignMysticModal(true)}
+              className="inline-flex items-center gap-2 rounded-md bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700 transition-colors"
+            >
+              <span className="text-lg">✨</span>
+              Asignar MCMI-4 Místico (195)
+            </button>
+          )}
+        </div>
+        {!signalCompleted && (
+          <p className="mt-2 text-xs text-muted-foreground">
+            💡 El paciente debe completar SIGNAL antes de poder asignar MCMI-4 Místico
+          </p>
+        )}
+      </div>
+
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[240px_minmax(0,1fr)_320px]">
         <aside className="space-y-4">
           <ContextNav
@@ -195,6 +268,30 @@ export default function TherapistClinicalDashboard({
           <SendPatientNoteBlock patientId={patientId} />
         </aside>
       </div>
+
+      {/* Assignment Modals */}
+      {resolvedPatientId && (
+        <>
+          <AssignMCMI4Modal
+            isOpen={showAssignModal}
+            onClose={() => setShowAssignModal(false)}
+            patientId={resolvedPatientId}
+            patientName={patientName || 'Paciente'}
+          />
+          <AssignMCMI4MysticModal
+            isOpen={showAssignMysticModal}
+            onClose={() => setShowAssignMysticModal(false)}
+            patientId={resolvedPatientId}
+            patientName={patientName || 'Paciente'}
+          />
+          <AssignBioEmotionalModal
+            isOpen={showAssignBioEmotionalModal}
+            onClose={() => setShowAssignBioEmotionalModal(false)}
+            patientId={resolvedPatientId}
+            patientName={patientName || 'Paciente'}
+          />
+        </>
+      )}
     </div>
   );
 }

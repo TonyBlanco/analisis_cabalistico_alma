@@ -100,7 +100,7 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
     const code = String(test.code || '').toLowerCase();
     const isExplicitTherapistOnly =
       test.execution_mode === 'therapist_clinical' &&
-      (therapistOnlyCodes.has(code) || test.is_assignable === false);
+      (therapistOnlyCodes.has(code) || (test as any).is_assignable === false);
     return {
       ...test,
       // Most tests shown here are assignable to consultantes even if backend reports
@@ -454,7 +454,7 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
                                       .map((c: any) => String(c).toLowerCase()),
                                   );
                                   const hasPatientRoute = Boolean((test as any).patient_route);
-                                  const isAssignableFlag = (test as any).is_assignable ?? test.is_assignable ?? true;
+                                  const isAssignableFlag = (test as any).is_assignable ?? true;
                                   const isAssignable =
                                     Boolean(test.is_active) &&
                                     Boolean((test as any).available_for_therapists) &&

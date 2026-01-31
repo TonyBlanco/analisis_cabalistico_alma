@@ -1,6 +1,11 @@
 """
 Vistas para análisis de Alta Cábala
 Gematria, Tarot, Mapa del Alma, Astrología, Tikún
+
+TERMINOLOGÍA UNIFICADA (31 enero 2026):
+- Usar "consultante" en lugar de "patient" en código nuevo
+- Endpoints legacy con "patient" mantienen compatibilidad
+- Ver: docs/UNIFIED_CONSULTANTE_ARCHITECTURE.md
 """
 from rest_framework import status
 from rest_framework.views import APIView
@@ -11,7 +16,9 @@ from django.utils.decorators import method_decorator
 from django.shortcuts import get_object_or_404
 from django.db import OperationalError
 import logging
-from .models import Patient, CabalisticAnalysis, AnalysisRecord
+from uuid import UUID
+from .models import Patient, Consultante, CabalisticAnalysis, AnalysisRecord
+from .compatibility import LegacyPatientAdapter
 from .models_astrology import AstrologyNatalChart
 from .utils.tarot_service import analyze_archetype_vs_clinical
 from .astrology_kerykeion.service import execute_kerykeion
@@ -935,3 +942,424 @@ class CrossoverSynthesisView(APIView):
             )
 
 
+# ==============================================================================
+# CONSULTANTE-BASED VIEWS (NUEVO SISTEMA UNIFICADO)
+# Ver: docs/UNIFIED_CONSULTANTE_ARCHITECTURE.md
+# ==============================================================================
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class ConsultanteCabalaAplicadaRecordView(APIView):
+    """
+    Guarda una ejecución del workspace Cabala Aplicada como AnalysisRecord.
+    
+    Ruta NUEVA:
+      POST /api/consultantes/<uuid>/cabala-aplicada/records/
+    
+    Esta es la versión UUID-based que reemplaza a CabalaAplicadaMethodRecordView.
+    Mantiene compatibilidad total con el formato de datos.
+    """
+    permission_classes = [IsAuthenticated, IsTherapist]
+
+    def post(self, request, uuid):
+        try:
+            # Obtener consultante por UUID
+            try:
+                consultante = Consultante.objects.select_related(
+                    'user_account', 'therapist'
+                ).get(uuid=uuid, therapist=request.user)
+            except Consultante.DoesNotExist:
+                return Response(
+                    {'error': 'Consultante no encontrado o no tienes acceso'},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+
+            body = request.data if isinstance(request.data, dict) else {}
+            method_id = body.get('method_id')
+            method_name = body.get('method_name')
+
+            if not isinstance(method_id, str) or not method_id.strip():
+                return Response(
+                    {'error': 'method_id es requerido'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Normalizar módulo estable (max_length=64)
+            normalized_method = method_id.strip().lower().replace(' ', '-')
+            module_code = f"CABALA_APLICADA_{normalized_method}"[:64]
+
+            birth_snapshot = {
+                'legal_name': consultante.full_name or '',
+                'birth_date': consultante.birth_date.strftime('%Y-%m-%d') if consultante.birth_date else '',
+                'birth_time': consultante.birth_time.strftime('%H:%M') if consultante.birth_time else '',
+                'city': consultante.birth_city or '',
+                'country': consultante.birth_country or '',
+                'lat': float(consultante.birth_latitude) if consultante.birth_latitude is not None else None,
+                'lng': float(consultante.birth_longitude) if consultante.birth_longitude is not None else None,
+                'timezone': consultante.birth_timezone or '',
+                'geocode_source': 'consultante_profile',
+            }
+
+            algo_snapshot = {
+                'engine': 'cabala_aplicada_client',
+                'version': '0.2.0',  # Nueva versión con Consultante
+                'params': {
+                    'method_id': normalized_method,
+                    'method_name': method_name or None,
+                },
+            }
+
+            raw_input = {
+                'method_id': normalized_method,
+                'method_name': method_name or None,
+                'input': body.get('input') if isinstance(body.get('input'), dict) else None,
+            }
+
+            # computed_result: mantener un namespace claro
+            computed_result = {
+                'cabala_aplicada': {
+                    'method_id': normalized_method,
+                    'method_name': method_name or None,
+                    'method_output': body.get('method_output') if isinstance(body.get('method_output'), dict) else None,
+                    'tree_state': body.get('tree_state') if isinstance(body.get('tree_state'), dict) else None,
+                    'backend_structural_state': body.get('backend_structural_state') if isinstance(body.get('backend_structural_state'), dict) else None,
+                    'symbolic_interpretation': body.get('symbolic_interpretation') if isinstance(body.get('symbolic_interpretation'), dict) else None,
+                }
+            }
+
+            # Crear AnalysisRecord con referencia a Consultante
+            # Nota: Usamos patient para compatibilidad (ver migración)
+            legacy_patient = None
+            if consultante.legacy_patient_id:
+                try:
+                    legacy_patient = Patient.objects.get(id=consultante.legacy_patient_id)
+                except Patient.DoesNotExist:
+                    pass
+
+            record = AnalysisRecord.objects.create(
+                kind='kabbalah',
+                module_code=module_code,
+                role_context='therapist',
+                execution_mode=None,
+                birth_data_snapshot=birth_snapshot,
+                algorithm_snapshot=algo_snapshot,
+                raw_input=raw_input,
+                computed_result=computed_result,
+                visibility='therapist',
+                created_by_user=request.user,
+                therapist=request.user,
+                patient=legacy_patient,  # Para compatibilidad
+                subject_user=consultante.user_account,
+            )
+
+            serializer = AnalysisRecordSerializer(record, context={'request': request})
+            return Response({
+                'success': True,
+                'record': serializer.data,
+                'consultante_uuid': str(consultante.uuid),
+            }, status=status.HTTP_201_CREATED)
+
+        except Exception:
+            logger.exception('Error inesperado en ConsultanteCabalaAplicadaRecordView')
+            return Response(
+                {'error': 'Error interno del servidor'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class ConsultanteCabalaAnalysisListView(APIView):
+    """
+    Lista/crea análisis de Alta Cábala para un consultante.
+    
+    Ruta NUEVA:
+      GET  /api/consultantes/<uuid>/cabala-analyses/
+      POST /api/consultantes/<uuid>/cabala-analyses/
+    
+    Esta es la versión UUID-based que reemplaza endpoints legacy de Patient.
+    """
+    permission_classes = [IsAuthenticated, IsTherapist]
+
+    def get(self, request, uuid):
+        """Lista análisis cabalísticos del consultante"""
+        try:
+            consultante = Consultante.objects.get(uuid=uuid, therapist=request.user)
+        except Consultante.DoesNotExist:
+            return Response(
+                {'error': 'Consultante no encontrado o no tienes acceso'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Filtrar por tipo si se especifica
+        analysis_type = request.query_params.get('type')
+        
+        # Buscar análisis por subject_user o legacy_patient
+        analyses_qs = CabalisticAnalysis.objects.filter(
+            therapist=request.user
+        )
+        
+        # Filtrar por consultante (via legacy_patient_id o subject_user_id)
+        if consultante.legacy_patient_id:
+            analyses_qs = analyses_qs.filter(patient_id=consultante.legacy_patient_id)
+        else:
+            # Si no hay legacy, buscar por email match
+            legacy_patient = Patient.objects.filter(
+                therapist=request.user, 
+                email=consultante.email
+            ).first()
+            if legacy_patient:
+                analyses_qs = analyses_qs.filter(patient=legacy_patient)
+            else:
+                # No hay análisis legacy
+                analyses_qs = CabalisticAnalysis.objects.none()
+
+        if analysis_type:
+            analyses_qs = analyses_qs.filter(analysis_type=analysis_type)
+
+        analyses = analyses_qs.order_by('-created_at')
+
+        results = []
+        for analysis in analyses:
+            results.append({
+                'id': analysis.id,
+                'analysis_type': analysis.analysis_type,
+                'analysis_type_display': analysis.get_analysis_type_display(),
+                'input_data': analysis.input_data,
+                'result_data': analysis.result_data,
+                'summary': analysis.summary,
+                'therapist_notes': analysis.therapist_notes,
+                'created_at': analysis.created_at.isoformat(),
+                'updated_at': analysis.updated_at.isoformat(),
+                'consultante_uuid': str(consultante.uuid),
+            })
+
+        return Response({
+            'consultante': {
+                'uuid': str(consultante.uuid),
+                'full_name': consultante.full_name,
+            },
+            'analyses': results,
+            'total': len(results),
+        })
+
+    def post(self, request, uuid):
+        """Crea un nuevo análisis cabalístico"""
+        try:
+            consultante = Consultante.objects.get(uuid=uuid, therapist=request.user)
+        except Consultante.DoesNotExist:
+            return Response(
+                {'error': 'Consultante no encontrado o no tienes acceso'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        analysis_type = request.data.get('analysis_type')
+        input_data = request.data.get('input_data', {})
+        result_data = request.data.get('result_data', {})
+        summary = request.data.get('summary', '')
+        therapist_notes = request.data.get('therapist_notes', '')
+
+        if not analysis_type:
+            return Response(
+                {'error': 'El tipo de análisis (analysis_type) es requerido'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        valid_types = [choice[0] for choice in CabalisticAnalysis.ANALYSIS_TYPE_CHOICES]
+        if analysis_type not in valid_types:
+            return Response(
+                {'error': f'Tipo de análisis inválido. Debe ser uno de: {", ".join(valid_types)}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Obtener o crear Patient legacy para compatibilidad
+        legacy_patient = None
+        if consultante.legacy_patient_id:
+            try:
+                legacy_patient = Patient.objects.get(id=consultante.legacy_patient_id)
+            except Patient.DoesNotExist:
+                pass
+        
+        if not legacy_patient:
+            legacy_patient = Patient.objects.filter(
+                therapist=request.user, 
+                email=consultante.email
+            ).first()
+
+        if not legacy_patient:
+            return Response(
+                {'error': 'No se pudo asociar el análisis con un perfil de consultante válido'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        analysis = CabalisticAnalysis.objects.create(
+            patient=legacy_patient,
+            therapist=request.user,
+            analysis_type=analysis_type,
+            input_data=input_data,
+            result_data=result_data,
+            summary=summary,
+            therapist_notes=therapist_notes
+        )
+
+        return Response({
+            'success': True,
+            'analysis_id': analysis.id,
+            'consultante_uuid': str(consultante.uuid),
+            'message': 'Análisis guardado exitosamente'
+        }, status=status.HTTP_201_CREATED)
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class ConsultanteCabalaCyclesView(APIView):
+    """
+    Obtiene los ciclos cabalísticos de tikún de un consultante.
+    
+    Ruta NUEVA:
+      GET /api/consultantes/<uuid>/cabala-cycles/
+    
+    Retorna información de ciclos basada en los datos de nacimiento del consultante.
+    Usa el TikunCycleCalculator para cálculos avanzados.
+    """
+    permission_classes = [IsAuthenticated, IsTherapist]
+
+    def get(self, request, uuid):
+        """Obtiene ciclos cabalísticos del consultante"""
+        try:
+            consultante = Consultante.objects.get(uuid=uuid, therapist=request.user)
+        except Consultante.DoesNotExist:
+            return Response(
+                {'error': 'Consultante no encontrado o no tienes acceso'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        if not consultante.birth_date:
+            return Response({
+                'consultante_uuid': str(consultante.uuid),
+                'consultante_name': consultante.full_name,
+                'cycles': None,
+                'error': 'El consultante no tiene fecha de nacimiento registrada'
+            })
+
+        # Usar el nuevo TikunCycleCalculator
+        try:
+            from .cabala_cycles import tikun_cycle_calculator
+            cycle_report = tikun_cycle_calculator.generate_cycle_report(consultante.birth_date)
+            
+            return Response({
+                'consultante_uuid': str(consultante.uuid),
+                'consultante_name': consultante.full_name,
+                'birth_date': consultante.birth_date.isoformat(),
+                **cycle_report
+            })
+        except Exception as e:
+            logger.error(f"Error calculating tikun cycles: {e}")
+            # Fallback a cálculos básicos
+            from datetime import date
+            today = date.today()
+            birth = consultante.birth_date
+            
+            age_days = (today - birth).days
+            age_years = age_days // 365
+            
+            # Ciclos de 7 años (Saturno)
+            current_septennial = (age_years // 7) + 1
+            septennial_start = birth.year + ((current_septennial - 1) * 7)
+            septennial_end = septennial_start + 7
+            
+            # Ciclos de 9 años
+            current_novenario = (age_years // 9) + 1
+            novenario_start = birth.year + ((current_novenario - 1) * 9)
+            novenario_end = novenario_start + 9
+
+            return Response({
+                'consultante_uuid': str(consultante.uuid),
+                'consultante_name': consultante.full_name,
+                'birth_date': birth.isoformat(),
+                'age': {
+                    'years': age_years,
+                    'days': age_days,
+                },
+                'cycles': {
+                    'septennial': {
+                        'current': current_septennial,
+                        'range': f"{septennial_start}-{septennial_end}",
+                        'description': f"Ciclo septenario #{current_septennial} (años {septennial_start}-{septennial_end})",
+                    },
+                    'novenario': {
+                        'current': current_novenario,
+                        'range': f"{novenario_start}-{novenario_end}",
+                        'description': f"Ciclo novenario #{current_novenario} (años {novenario_start}-{novenario_end})",
+                    },
+                },
+                'disclaimer': 'Los ciclos son mapas simbólicos del tiempo. No determinan eventos ni predicen resultados.'
+            })
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class ConsultanteSoulMapView(APIView):
+    """
+    Genera mapa del alma para un consultante.
+    
+    Ruta NUEVA:
+      GET /api/consultantes/<uuid>/soul-map/
+    
+    P2.1: Soul Maps Calculator - Mapas del alma basados en numerología cabalística.
+    Este endpoint es OBSERVACIONAL - genera datos estructurados, NO interpretaciones.
+    """
+    permission_classes = [IsAuthenticated, IsTherapist]
+
+    def get(self, request, uuid):
+        """Genera mapa del alma del consultante"""
+        try:
+            consultante = Consultante.objects.get(uuid=uuid, therapist=request.user)
+        except Consultante.DoesNotExist:
+            return Response(
+                {'error': 'Consultante no encontrado o no tienes acceso'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        if not consultante.birth_date:
+            return Response({
+                'error': 'El consultante requiere fecha de nacimiento para generar mapa del alma'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        if not consultante.full_name:
+            return Response({
+                'error': 'El consultante requiere nombre completo para generar mapa del alma'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            from .cabala_soul_maps import soul_map_calculator
+            
+            # Obtener tests clínicos del consultante (si tiene Patient asociado)
+            test_results = []
+            try:
+                from .models import TestResult
+                # Si hay Patient legacy asociado, obtener tests
+                if hasattr(consultante, 'patient_legacy') and consultante.patient_legacy:
+                    test_results = list(
+                        TestResult.objects.filter(patient=consultante.patient_legacy)
+                        .values('test_id', 'clinical_diagnosis', 'score')
+                    )
+            except Exception as e:
+                logger.debug(f"No se pudieron obtener tests clínicos: {e}")
+
+            # Generar mapa del alma
+            soul_map = soul_map_calculator.generate_soul_map(
+                birth_date=consultante.birth_date,
+                full_name=consultante.full_name,
+                test_results=test_results if test_results else None
+            )
+
+            return Response({
+                'consultante_uuid': str(consultante.uuid),
+                'consultante_name': consultante.full_name,
+                **soul_map
+            })
+
+        except Exception as e:
+            logger.error(f"Error generating soul map: {e}")
+            return Response(
+                {'error': f'Error generando mapa del alma: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

@@ -6,6 +6,7 @@ spread saving, and audit trail access.
 """
 
 from typing import Optional
+import logging
 
 from rest_framework import status
 from rest_framework.views import APIView
@@ -333,6 +334,7 @@ class SealWorkspaceView(APIView):
     permission_classes = [IsAuthenticated]
     
     def post(self, request):
+        logger = logging.getLogger(__name__)
         serializer = SealWorkspaceSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(
@@ -378,6 +380,13 @@ class SealWorkspaceView(APIView):
             return Response(
                 {'error': str(e)},
                 status=status.HTTP_403_FORBIDDEN
+            )
+        except Exception as e:
+            # Unexpected server error: log and return JSON for client debugging
+            logger.exception("Unexpected error while sealing workspace")
+            return Response(
+                {'error': f'Internal error: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
 

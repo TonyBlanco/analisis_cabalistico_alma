@@ -48,6 +48,7 @@ export default function PatientInputPanel({ patientId, onSessionData }: PatientI
   const [sessionHistory, setSessionHistory] = useState<BioEmotionalSessionListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [tabValue, setTabValue] = useState<string>('current');
 
   const loadSessionData = async () => {
     if (!patientId) {
@@ -175,7 +176,7 @@ export default function PatientInputPanel({ patientId, onSessionData }: PatientI
       </div>
 
       <div className="p-4">
-        <Tabs defaultValue="current" className="w-full">
+        <Tabs value={tabValue} onValueChange={setTabValue} className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="current" className="text-sm">Sesión Actual</TabsTrigger>
             <TabsTrigger value="history" className="text-sm">Historial</TabsTrigger>

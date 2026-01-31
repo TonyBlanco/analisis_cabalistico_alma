@@ -8,9 +8,13 @@ interface CabalAppliedSidebarProps {
 }
 
 const sections: Array<{ id: CabalSectionId; label: string; description: string }> = [
-  { id: 'tree', label: 'Arbol', description: 'Vista simbolica del Arbol de la Vida.' },
-  { id: 'gematria', label: 'Gematria', description: 'Espacio observacional sin calculos.' },
-  { id: 'synthesis', label: 'Sintesis', description: 'Notas humanas de integracion.' },
+  { id: 'tree', label: 'Árbol', description: 'Vista simbólica del Árbol de la Vida.' },
+  { id: 'gematria', label: 'Gematría', description: 'Espacio observacional sin cálculos.' },
+  { id: 'soul-map', label: 'Mapa del Alma', description: 'Mapa simbólico de resonancias sefiróticas.' },
+  { id: 'cycles', label: 'Ciclos Tikún', description: 'Línea temporal de ciclos evolutivos.' },
+  { id: 'notarikon', label: 'Notarikón', description: 'Análisis de acrónimos y síntesis.' },
+  { id: 'synthesis', label: 'Síntesis', description: 'Notas humanas de integración.' },
+  { id: 'ai-assistant', label: '✨ IA Asistida', description: 'Asistente ético de exploración textual.' },
   { id: 'resources', label: 'Recursos', description: 'Material consultivo de apoyo.' },
 ];
 
@@ -21,10 +25,10 @@ export default function CabalAppliedSidebar({
   return (
     <aside className="w-64 border-r border-gray-200 bg-white flex flex-col">
       <div className="px-4 py-4 border-b border-gray-200">
-        <p className="text-xs uppercase tracking-wide text-gray-500">Workspace simbolico</p>
-        <h2 className="text-lg font-semibold text-gray-900">Cabala Aplicada</h2>
+        <p className="text-xs uppercase tracking-wide text-gray-500">Workspace simbólico</p>
+        <h2 className="text-lg font-semibold text-gray-900">Cábala Aplicada</h2>
       </div>
-      <div className="flex-1 px-3 py-4 space-y-2">
+      <div className="flex-1 px-3 py-4 space-y-2 overflow-y-auto">
         {sections.map((section) => {
           const isActive = section.id === activeSection;
           return (
@@ -34,7 +38,7 @@ export default function CabalAppliedSidebar({
               onClick={() => onChange(section.id)}
               className={`w-full text-left rounded-md border px-3 py-2 text-sm transition-colors ${
                 isActive
-                  ? 'border-gray-300 bg-gray-100 text-gray-900'
+                  ? 'border-indigo-300 bg-indigo-50 text-indigo-900'
                   : 'border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900'
               }`}
             >
@@ -45,8 +49,9 @@ export default function CabalAppliedSidebar({
         })}
       </div>
       <div className="px-4 py-3 border-t border-gray-200 text-[11px] text-gray-500">
-        Sin interpretacion ni automatizacion.
+        Sin interpretación ni automatización.
       </div>
     </aside>
   );
 }
+

@@ -95,14 +95,14 @@ function assertNoModernColorFunctions(svgMarkup: string) {
   }
 }
 
-function getExportTreeSvg(): SVGSVGElement {
+function getExportTreeSvg(): SVGSVGElement | null {
   const container = document.getElementById('cabala-aplicada-export-tree');
   if (!container) {
-    throw new Error('No se encontró el contenedor del Árbol exportable (cabala-aplicada-export-tree).');
+    return null; // No tree container available (different section active)
   }
   const svg = container.querySelector('svg');
   if (!svg) {
-    throw new Error('No se encontró el SVG del Árbol dentro del contenedor exportable.');
+    return null; // No SVG rendered
   }
   return svg as SVGSVGElement;
 }
@@ -111,14 +111,6 @@ export async function generateCabalaAplicadaGraphicPDF(params: CabalaAplicadaGra
   filename: string;
   base64: string;
 }> {
-  // Canonical export path: SVG -> PDF. No Tailwind/DOM capture.
-  const svg = getExportTreeSvg();
-  const svgMarkup = svg.outerHTML;
-  assertNoModernColorFunctions(svgMarkup);
-
-  const svg2pdfMod = await import('svg2pdf.js');
-  const svg2pdf = (svg2pdfMod as any).svg2pdf ?? (svg2pdfMod as any).default ?? svg2pdfMod;
-
   const pdf = new jsPDF('p', 'mm', 'a4');
   const pageWidth = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
@@ -131,7 +123,7 @@ export async function generateCabalaAplicadaGraphicPDF(params: CabalaAplicadaGra
 
   pdf.setFont('helvetica', 'normal');
   pdf.setFontSize(10);
-  pdf.text(`Paciente: ${params.patientName}`, margin, 26);
+  pdf.text(`Consultante: ${params.patientName}`, margin, 26);
   pdf.text(`Fecha: ${safeDateEs()}`, margin, 32);
   if (params.patientBirthDate) {
     pdf.text(`Nacimiento: ${params.patientBirthDate}`, margin, 38);
@@ -140,22 +132,37 @@ export async function generateCabalaAplicadaGraphicPDF(params: CabalaAplicadaGra
     pdf.text(`Método: ${params.selectedMethodId}`, margin, params.patientBirthDate ? 44 : 38);
   }
 
-  // Visual (Tree SVG)
+  // Try to get tree SVG
+  const svg = getExportTreeSvg();
   const headerHeight = params.patientBirthDate ? 50 : 44;
-  const availableWidth = pageWidth - margin * 2;
-  const availableHeight = pageHeight - headerHeight - margin;
 
-  const viewBox = svg.viewBox?.baseVal;
-  const vbWidth = viewBox?.width || 400;
-  const vbHeight = viewBox?.height || 600;
-  const scale = Math.min(availableWidth / vbWidth, availableHeight / vbHeight);
+  if (svg) {
+    // Canonical export path: SVG -> PDF
+    const svgMarkup = svg.outerHTML;
+    assertNoModernColorFunctions(svgMarkup);
 
-  // svg2pdf.js uses xOffset/yOffset + scale.
-  await withTimeout(
-    Promise.resolve(svg2pdf(svg, pdf, { xOffset: margin, yOffset: headerHeight, scale })),
-    25_000,
-    'Render SVG (svg2pdf)'
-  );
+    const svg2pdfMod = await import('svg2pdf.js');
+    const svg2pdf = (svg2pdfMod as any).svg2pdf ?? (svg2pdfMod as any).default ?? svg2pdfMod;
+
+    const availableWidth = pageWidth - margin * 2;
+    const availableHeight = pageHeight - headerHeight - margin;
+
+    const viewBox = svg.viewBox?.baseVal;
+    const vbWidth = viewBox?.width || 400;
+    const vbHeight = viewBox?.height || 600;
+    const scale = Math.min(availableWidth / vbWidth, availableHeight / vbHeight);
+
+    await withTimeout(
+      Promise.resolve(svg2pdf(svg, pdf, { xOffset: margin, yOffset: headerHeight, scale })),
+      25_000,
+      'Render SVG (svg2pdf)'
+    );
+  } else {
+    // No SVG available - add info text
+    pdf.setFont('helvetica', 'italic');
+    pdf.setFontSize(10);
+    pdf.text('(Árbol no disponible - navegue a la sección Árbol para incluir gráfico)', margin, headerHeight + 10);
+  }
 
   // Data page (plain text only)
   pdf.addPage();
@@ -176,7 +183,7 @@ export async function generateCabalaAplicadaGraphicPDF(params: CabalaAplicadaGra
 
   const headerLines = splitText(
     pdf,
-    `Paciente: ${params.patientName}${params.patientBirthDate ? `\nNacimiento: ${params.patientBirthDate}` : ''}${
+    `Consultante: ${params.patientName}${params.patientBirthDate ? `\nNacimiento: ${params.patientBirthDate}` : ''}${
       params.selectedMethodId ? `\nMétodo: ${params.selectedMethodId}` : ''
     }\nFecha: ${safeDateEs()}`,
     maxWidth,

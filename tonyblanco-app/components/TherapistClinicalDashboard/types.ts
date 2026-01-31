@@ -1,6 +1,8 @@
 export type ContextSectionId =
   | 'overview'
   | 'clinical-history'
+  | 'bioemotional'
+  | 'visualization'
   | 'evaluations'
   | 'integrative-notes';
 

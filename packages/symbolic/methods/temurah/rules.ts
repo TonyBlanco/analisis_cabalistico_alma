@@ -1,1 +1,144 @@
-import type { TemurahInput } from './types'; export function calcularAnalisisTemurah(i:TemurahInput){ const name=i.nombreCompleto||''; let seed=0; for(let j=0;j<name.length;j++) seed += name.charCodeAt(j); const casas:{}={} as any; for(let k=1;k<=9;k++){ (casas as any)[k]={numero:k,conteo:(seed+k)%4,letras:[]} } return {identidad:{nombreCompleto:name,fechaNacimiento:`${i.fechaNacimiento.anio}-${i.fechaNacimiento.mes}-${i.fechaNacimiento.dia}`},numeros:{esencia:{original:seed,reducido:(seed%9)+1,esMaestro:false},expresion:{original:seed+1,reducido:((seed+1)%9)+1,esMaestro:false},herencia:{original:seed+2,reducido:((seed+2)%9)+1,esMaestro:false},caminoVida:{original:seed+3,reducido:((seed+3)%9)+1,esMaestro:false,edadTransformacion:0}},casasInclusion:casas,ausencias:[],dominantes:[],metadatos:{metodo:'temurah',sistema:'temurah',alfabeto:'hebrew',version:'1.0.0',timestamp:new Date().toISOString()}} }
+import type { TemurahInput } from './types';
+import { 
+  latinToHebrew, 
+  atbashTransform,
+  albamTransform,
+  avgadTransform,
+  ayakBakarTransform,
+  calcGematriaStandard,
+  reduceToSingleDigit,
+  findKnownWords,
+  numberToSefira,
+  GEMATRIA_STANDARD
+} from '../../utils/hebrew-gematria';
+
+/**
+ * Calcula Temurah - Sistema completo de transformaciones
+ * Incluye: Atbash, Albam, Avgad, Ayak Bakar
+ */
+export function calcularAnalisisTemurah(input: TemurahInput) {
+  const name = input.nombreCompleto || '';
+  const dateStr = `${input.fechaNacimiento.anio}-${input.fechaNacimiento.mes}-${input.fechaNacimiento.dia}`;
+  
+  const hebrewName = latinToHebrew(name);
+  const words = name.split(/\s+/).filter(w => w.length > 0);
+  const hebrewWords = words.map(w => latinToHebrew(w));
+  const fullHebrew = hebrewWords.join('');
+  
+  // Aplicar todas las transformaciones
+  const transformations = {
+    original: {
+      text: fullHebrew,
+      value: calcGematriaStandard(fullHebrew),
+      reduced: reduceToSingleDigit(calcGematriaStandard(fullHebrew))
+    },
+    atbash: {
+      text: fullHebrew.split('').map(atbashTransform).join(''),
+      value: 0 as number,
+      reduced: { original: 0, reduced: 0, isMaster: false },
+      description: 'Inversión del alfabeto: א↔ת'
+    },
+    albam: {
+      text: fullHebrew.split('').map(albamTransform).join(''),
+      value: 0 as number,
+      reduced: { original: 0, reduced: 0, isMaster: false },
+      description: 'Intercambio de mitades: א↔ל'
+    },
+    avgad: {
+      text: fullHebrew.split('').map(avgadTransform).join(''),
+      value: 0 as number,
+      reduced: { original: 0, reduced: 0, isMaster: false },
+      description: 'Avance de una posición: א→ב'
+    },
+    ayakBakar: {
+      text: fullHebrew.split('').map(ayakBakarTransform).join(''),
+      value: 0 as number,
+      reduced: { original: 0, reduced: 0, isMaster: false },
+      description: 'Grupos de 9: unidades↔decenas↔centenas'
+    }
+  };
+  
+  // Calcular valores para cada transformación
+  (['atbash', 'albam', 'avgad', 'ayakBakar'] as const).forEach(key => {
+    transformations[key].value = calcGematriaStandard(transformations[key].text);
+    transformations[key].reduced = reduceToSingleDigit(transformations[key].value);
+  });
+  
+  const { dia, mes, anio } = input.fechaNacimiento;
+  const dateSum = dia + mes + anio;
+  const caminoVida = reduceToSingleDigit(dateSum);
+  
+  // Encontrar palabras relacionadas
+  const relatedWords: Record<string, string[]> = {
+    original: findKnownWords(transformations.original.value),
+    atbash: findKnownWords(transformations.atbash.value),
+    albam: findKnownWords(transformations.albam.value),
+    avgad: findKnownWords(transformations.avgad.value),
+    ayakBakar: findKnownWords(transformations.ayakBakar.value),
+  };
+  
+  // Casas de inclusión del original
+  const casasInclusion: Record<number, { numero: number; conteo: number; letras: string[] }> = {};
+  for (let i = 1; i <= 9; i++) {
+    casasInclusion[i] = { numero: i, conteo: 0, letras: [] };
+  }
+  
+  fullHebrew.split('').forEach(letter => {
+    const val = GEMATRIA_STANDARD[letter];
+    if (val) {
+      const reduced = reduceToSingleDigit(val).reduced;
+      if (reduced >= 1 && reduced <= 9) {
+        casasInclusion[reduced].conteo++;
+        casasInclusion[reduced].letras.push(letter);
+      }
+    }
+  });
+  
+  const ausencias = Object.keys(casasInclusion).filter(k => casasInclusion[Number(k)].conteo === 0).map(k => Number(k));
+  const maxConteo = Math.max(...Object.values(casasInclusion).map(c => c.conteo));
+  const dominantes = Object.keys(casasInclusion).filter(k => casasInclusion[Number(k)].conteo === maxConteo && maxConteo > 0).map(k => Number(k));
+  
+  // Correspondencias sefiróticas
+  const sefiraOriginal = numberToSefira(transformations.original.reduced.reduced);
+  const sefiraAtbash = numberToSefira(transformations.atbash.reduced.reduced);
+  
+  return {
+    identidad: {
+      nombreCompleto: name,
+      hebrewOriginal: hebrewWords.join(' '),
+      fechaNacimiento: dateStr,
+    },
+    calculo: {
+      metodo: 'Temurah (Permutación)',
+      descripcion: 'Sistema de cifrados y permutaciones del alfabeto hebreo',
+      explicacion: 'Temurah revela significados ocultos mediante diferentes sistemas de sustitución de letras.',
+      transformaciones: transformations,
+      palabrasRelacionadas: relatedWords,
+    },
+    numeros: {
+      esencia: { original: transformations.original.value, reducido: transformations.original.reduced.reduced, esMaestro: transformations.original.reduced.isMaster },
+      expresion: { original: transformations.atbash.value, reducido: transformations.atbash.reduced.reduced, esMaestro: transformations.atbash.reduced.isMaster },
+      herencia: { original: transformations.albam.value, reducido: transformations.albam.reduced.reduced, esMaestro: transformations.albam.reduced.isMaster },
+      caminoVida: { original: dateSum, reducido: caminoVida.reduced, esMaestro: caminoVida.isMaster, edadTransformacion: 0 },
+    },
+    correspondencia: {
+      sefiraOriginal: sefiraOriginal.name,
+      sefirahOriginalHebrew: sefiraOriginal.hebrew,
+      sefirahOriginalMeaning: sefiraOriginal.meaning,
+      sefiraAtbash: sefiraAtbash.name,
+      cambioEnergetico: sefiraOriginal.name !== sefiraAtbash.name 
+        ? `De ${sefiraOriginal.meaning} a ${sefiraAtbash.meaning}`
+        : 'Sin cambio de correspondencia',
+    },
+    casasInclusion,
+    ausencias,
+    dominantes,
+    metadatos: {
+      metodo: 'temurah',
+      sistema: 'temurah',
+      alfabeto: 'hebrew',
+      version: '1.0.0',
+      timestamp: new Date().toISOString(),
+    },
+  };
+}

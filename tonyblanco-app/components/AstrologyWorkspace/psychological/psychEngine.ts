@@ -50,6 +50,14 @@ const MODALITIES: Record<string, string> = {
   gemini: 'mutable', virgo: 'mutable', sagittarius: 'mutable', pisces: 'mutable'
 };
 
+const SIGNS = ['aries','taurus','gemini','cancer','leo','virgo','libra','scorpio','sagittarius','capricorn','aquarius','pisces'];
+
+function lonToSign(lon: number): string {
+  if (typeof lon !== 'number' || !Number.isFinite(lon)) return '';
+  const idx = Math.floor(((lon % 360) + 360) % 360 / 30);
+  return SIGNS[idx] || '';
+}
+
 /**
  * Calcula dignidad esencial de un planeta en un signo
  * @returns Puntos: +5 domicilio, +4 exaltación, -2 destierro, -3 caída, 0 peregrino
@@ -163,7 +171,7 @@ export function buildPsychProfile(input: AdvancedChartInput): PsychProfile {
   });
   
   // 5. REGENTE DEL ASCENDENTE: +6 puntos (identidad primaria)
-  const ascSign = input.houses[0]?.sign?.toLowerCase();
+  const ascSign = (input.houses[0] as any)?.sign?.toLowerCase() || (typeof (input.houses[0] as any)?.cuspLon === 'number' ? lonToSign((input.houses[0] as any).cuspLon) : undefined);
   if (ascSign) {
     const ascRuler = RULERS[ascSign];
     if (ascRuler && archetypeWeights[ascRuler]) {

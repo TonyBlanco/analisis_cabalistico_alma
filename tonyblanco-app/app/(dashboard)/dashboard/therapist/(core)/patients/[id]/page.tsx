@@ -351,6 +351,7 @@ export default function TherapistPatientDetailPage() {
 
       {showAssignBioEmotionalModal && patient?.user && (
         <AssignBioEmotionalModal
+          isOpen={showAssignBioEmotionalModal}
           patientId={Number(patientId)}
           patientUserId={patient.user?.id || patient.user}
           patientName={patient?.full_name || patient?.legal_full_name || patient?.name || 'Consultante'}

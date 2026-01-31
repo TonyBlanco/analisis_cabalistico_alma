@@ -337,3 +337,225 @@ export function hasCompleteBirthData(consultante: Consultante): boolean {
     consultante.birth_longitude
   );
 }
+// ==============================================================================
+// CABALA APLICADA API FUNCTIONS (NUEVO SISTEMA CONSULTANTE)
+// Ver: docs/UNIFIED_CONSULTANTE_ARCHITECTURE.md
+// ==============================================================================
+
+export interface CabalaAplicadaRecordInput {
+  method_id: string;
+  method_name?: string;
+  input?: Record<string, unknown>;
+  method_output?: Record<string, unknown>;
+  tree_state?: Record<string, unknown>;
+  backend_structural_state?: Record<string, unknown>;
+  symbolic_interpretation?: Record<string, unknown>;
+}
+
+export interface CabalaAplicadaRecordResponse {
+  success: boolean;
+  record: {
+    id: number;
+    kind: string;
+    module_code: string;
+    computed_result: Record<string, unknown>;
+    created_at: string;
+  };
+  consultante_uuid: string;
+}
+
+export interface CabalaAnalysis {
+  id: number;
+  analysis_type: string;
+  analysis_type_display: string;
+  input_data: Record<string, unknown>;
+  result_data: Record<string, unknown>;
+  summary: string;
+  therapist_notes: string;
+  created_at: string;
+  updated_at: string;
+  consultante_uuid: string;
+}
+
+export interface CabalaAnalysisListResponse {
+  consultante: {
+    uuid: string;
+    full_name: string;
+  };
+  analyses: CabalaAnalysis[];
+  total: number;
+}
+
+export interface CabalaCyclesResponse {
+  consultante_uuid: string;
+  consultante_name: string;
+  birth_date?: string;
+  age?: {
+    years: number;
+    days: number;
+  };
+  cycles?: {
+    septennial: {
+      current: number;
+      range: string;
+      description: string;
+    };
+    novenario: {
+      current: number;
+      range: string;
+      description: string;
+    };
+  };
+  error?: string;
+}
+
+/**
+ * Save a Cabala Aplicada execution record for a consultante
+ * 
+ * @param consultanteUuid - UUID of the consultante
+ * @param data - Record data including method_id and outputs
+ */
+export async function saveCabalaAplicadaRecord(
+  consultanteUuid: string,
+  data: CabalaAplicadaRecordInput
+): Promise<CabalaAplicadaRecordResponse> {
+  const response = await fetch(
+    `${getApiBaseUrl()}/consultantes/${consultanteUuid}/cabala-aplicada/records/`,
+    {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data),
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ detail: 'Error desconocido' }));
+    throw new Error(error.error || error.detail || 'Error al guardar registro de Cabala Aplicada');
+  }
+
+  return response.json();
+}
+
+/**
+ * List Cabala analyses for a consultante
+ * 
+ * @param consultanteUuid - UUID of the consultante
+ * @param analysisType - Optional filter by analysis type
+ */
+export async function listCabalaAnalyses(
+  consultanteUuid: string,
+  analysisType?: string
+): Promise<CabalaAnalysisListResponse> {
+  const params = new URLSearchParams();
+  if (analysisType) {
+    params.append('type', analysisType);
+  }
+
+  const url = `${getApiBaseUrl()}/consultantes/${consultanteUuid}/cabala-analyses/${
+    params.toString() ? `?${params.toString()}` : ''
+  }`;
+
+  const response = await fetch(url, {
+    headers: getAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ detail: 'Error desconocido' }));
+    throw new Error(error.error || error.detail || 'Error al listar análisis');
+  }
+
+  return response.json();
+}
+
+/**
+ * Create a new Cabala analysis for a consultante
+ * 
+ * @param consultanteUuid - UUID of the consultante
+ * @param data - Analysis data
+ */
+export async function createCabalaAnalysis(
+  consultanteUuid: string,
+  data: {
+    analysis_type: string;
+    input_data?: Record<string, unknown>;
+    result_data?: Record<string, unknown>;
+    summary?: string;
+    therapist_notes?: string;
+  }
+): Promise<{ success: boolean; analysis_id: number; consultante_uuid: string }> {
+  const response = await fetch(
+    `${getApiBaseUrl()}/consultantes/${consultanteUuid}/cabala-analyses/`,
+    {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data),
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ detail: 'Error desconocido' }));
+    throw new Error(error.error || error.detail || 'Error al crear análisis');
+  }
+
+  return response.json();
+}
+
+/**
+ * Get Cabala cycles for a consultante
+ * 
+ * @param consultanteUuid - UUID of the consultante
+ */
+export async function getCabalaCycles(consultanteUuid: string): Promise<CabalaCyclesResponse> {
+  const response = await fetch(
+    `${getApiBaseUrl()}/consultantes/${consultanteUuid}/cabala-cycles/`,
+    {
+      headers: getAuthHeaders(),
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ detail: 'Error desconocido' }));
+    throw new Error(error.error || error.detail || 'Error al obtener ciclos');
+  }
+
+  return response.json();
+}
+
+// ==============================================================================
+// LEGACY COMPATIBILITY ALIASES
+// ==============================================================================
+
+/**
+ * @deprecated Use saveCabalaAplicadaRecord with consultanteUuid instead
+ */
+export async function saveCabalaAplicadaRecordLegacy(
+  patientId: number,
+  data: CabalaAplicadaRecordInput
+): Promise<CabalaAplicadaRecordResponse> {
+  // Intentar resolver a UUID primero
+  try {
+    const consultante = await resolveConsultanteByLegacyId(patientId);
+    if (consultante?.uuid) {
+      return saveCabalaAplicadaRecord(consultante.uuid, data);
+    }
+  } catch {
+    // Fall through to legacy endpoint
+  }
+
+  // Fallback a endpoint legacy
+  const response = await fetch(
+    `${getApiBaseUrl()}/therapist/patients/${patientId}/cabala-aplicada/records/`,
+    {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data),
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ detail: 'Error desconocido' }));
+    throw new Error(error.error || error.detail || 'Error al guardar registro');
+  }
+
+  return response.json();
+}

@@ -1,8 +1,40 @@
 import type { MisparSiduriInput } from './types';
-export declare function calcularAnalisisMisparSiduri(i: MisparSiduriInput): {
+/**
+ * Calcula Mispar Siduri (Ordinal)
+ * Posición en el alfabeto: א=1, ב=2, ... ת=22
+ */
+export declare function calcularAnalisisMisparSiduri(input: MisparSiduriInput): {
     identidad: {
         nombreCompleto: string;
+        hebrewTransliteration: string;
         fechaNacimiento: string;
+    };
+    calculo: {
+        metodo: string;
+        descripcion: string;
+        explicacion: string;
+        palabras: {
+            original: string;
+            hebrew: string;
+            valueSiduri: number;
+            valueStandard: number;
+            reducedSiduri: {
+                original: number;
+                reduced: number;
+                isMaster: boolean;
+            };
+            letterBreakdown: {
+                letter: string;
+                position: number;
+                valueStandard: number;
+            }[];
+        }[];
+        valorTotal: number;
+        valorReducido: {
+            original: number;
+            reduced: number;
+            isMaster: boolean;
+        };
     };
     numeros: {
         esencia: {
@@ -27,9 +59,18 @@ export declare function calcularAnalisisMisparSiduri(i: MisparSiduriInput): {
             edadTransformacion: number;
         };
     };
-    casasInclusion: {};
-    ausencias: any[];
-    dominantes: any[];
+    casasInclusion: Record<number, {
+        numero: number;
+        conteo: number;
+        letras: string[];
+    }>;
+    ausencias: number[];
+    dominantes: number[];
+    correspondencia: {
+        sefira: string;
+        sefirahHebrew: string;
+        sefirahMeaning: string;
+    };
     metadatos: {
         metodo: string;
         sistema: string;

@@ -559,6 +559,9 @@ export async function correlateSCID5AllSections(
   const results: Record<string, SCID5CorrelationResult> = {};
 
   const pid = await resolvePatientIdLegacy(patientId);
+  if (!pid) {
+    throw new Error('No se pudo resolver el ID del paciente');
+  }
   for (const section of sections) {
     const result = await correlateSCID5({
       patient_id: pid,

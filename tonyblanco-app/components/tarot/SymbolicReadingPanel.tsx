@@ -83,8 +83,8 @@ export default function SymbolicReadingPanel({ systemLabel, selectedCard, contex
   const symbols = selectedCard?.symbols && typeof selectedCard.symbols === 'object' ? (selectedCard.symbols as any) : null;
   
   // NEW: Extract kabbalistic_details from card
-  const kabbalah = selectedCard?.kabbalistic_details && typeof selectedCard.kabbalistic_details === 'object' 
-    ? (selectedCard.kabbalistic_details as any) 
+  const kabbalah = (selectedCard as any)?.kabbalistic_details && typeof (selectedCard as any).kabbalistic_details === 'object'
+    ? ((selectedCard as any).kabbalistic_details as any)
     : null;
   
   const systemId = (symbols?.system || '').toString().toLowerCase();

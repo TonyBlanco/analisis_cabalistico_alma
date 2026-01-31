@@ -1,9 +1,38 @@
 import type { GematriaStandardInput } from './types';
-/** Deterministic lightweight analysis used for UI-only presentation. */
+/**
+ * Calcula Gematría Estándar (Mispar Hechrachi)
+ * Suma directa de valores tradicionales de letras hebreas
+ */
 export declare function calcularAnalisisGematriaStandard(input: GematriaStandardInput): {
     identidad: {
         nombreCompleto: string;
+        hebrewTransliteration: string;
         fechaNacimiento: string;
+    };
+    calculo: {
+        metodo: string;
+        descripcion: string;
+        palabras: {
+            original: string;
+            hebrew: string;
+            value: number;
+            reduced: {
+                original: number;
+                reduced: number;
+                isMaster: boolean;
+            };
+            letterBreakdown: {
+                letter: string;
+                value: number;
+            }[];
+        }[];
+        valorTotal: number;
+        valorReducido: {
+            original: number;
+            reduced: number;
+            isMaster: boolean;
+        };
+        palabrasRelacionadas: string[];
     };
     numeros: {
         esencia: {
@@ -22,10 +51,10 @@ export declare function calcularAnalisisGematriaStandard(input: GematriaStandard
             esMaestro: boolean;
         };
         caminoVida: {
-            edadTransformacion: number;
             original: number;
             reducido: number;
             esMaestro: boolean;
+            edadTransformacion: number;
         };
     };
     casasInclusion: Record<number, {
@@ -35,6 +64,11 @@ export declare function calcularAnalisisGematriaStandard(input: GematriaStandard
     }>;
     ausencias: number[];
     dominantes: number[];
+    correspondencia: {
+        sefira: string;
+        sefirahHebrew: string;
+        sefirahMeaning: string;
+    };
     metadatos: {
         metodo: string;
         sistema: string;

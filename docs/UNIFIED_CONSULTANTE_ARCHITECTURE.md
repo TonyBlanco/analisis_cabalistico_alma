@@ -918,6 +918,91 @@ cache.clear()
 
 ---
 
+## Cabala Aplicada Integration
+
+### Endpoints Específicos de Cabala Aplicada (UUID-based)
+
+Implementados el 31 de enero de 2026:
+
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| POST | `/api/consultantes/{uuid}/cabala-aplicada/records/` | Guardar ejecución de método simbólico |
+| GET | `/api/consultantes/{uuid}/cabala-analyses/` | Listar análisis cabalísticos |
+| POST | `/api/consultantes/{uuid}/cabala-analyses/` | Crear nuevo análisis |
+| GET | `/api/consultantes/{uuid}/cabala-cycles/` | Obtener ciclos cabalísticos |
+
+### Views (backend/api/cabalistic_views.py)
+
+```python
+# Nuevas vistas implementadas
+
+class ConsultanteCabalaAplicadaRecordView(APIView):
+    """POST /api/consultantes/<uuid>/cabala-aplicada/records/"""
+    # Guarda ejecuciones de métodos simbólicos
+
+class ConsultanteCabalaAnalysisListView(APIView):
+    """GET/POST /api/consultantes/<uuid>/cabala-analyses/"""
+    # Lista y crea análisis cabalísticos
+
+class ConsultanteCabalaCyclesView(APIView):
+    """GET /api/consultantes/<uuid>/cabala-cycles/"""
+    # Retorna ciclos septenarios y novenarios
+```
+
+### Frontend API (lib/consultante-api.ts)
+
+```typescript
+// Funciones añadidas
+
+// Guardar registro de Cabala Aplicada
+await saveCabalaAplicadaRecord(consultanteUuid, {
+  method_id: 'pitagoras',
+  method_name: 'Método Pitágoras',
+  method_output: { /* resultados */ },
+  tree_state: { /* estado del árbol */ }
+});
+
+// Listar análisis
+const { analyses } = await listCabalaAnalyses(consultanteUuid);
+
+// Obtener ciclos
+const { cycles } = await getCabalaCycles(consultanteUuid);
+```
+
+### Compatibilidad Layer (backend/api/compatibility.py)
+
+```python
+from api.compatibility import LegacyPatientAdapter
+
+# Convertir patient_id a consultante_uuid
+uuid = LegacyPatientAdapter.patient_id_to_uuid(patient_id, therapist)
+
+# Obtener consultante por ID legacy
+consultante = LegacyPatientAdapter.get_consultante_by_legacy_id(patient_id, therapist)
+
+# Convertir a formato legacy para frontend antiguo
+legacy_data = LegacyPatientAdapter.to_legacy_format(consultante)
+```
+
+### UI Terminology Updates
+
+Archivos actualizados para usar "consultante" en lugar de "paciente":
+
+- `CabalAppliedToolsPanel.tsx`
+- `CabalaAplicadaHistoryList.tsx`
+- `CabalAppliedVisualCore.tsx`
+
+Ejemplo de cambio:
+```tsx
+// ❌ ANTES
+<span>Selecciona un paciente para ver el historial.</span>
+
+// ✅ DESPUÉS
+<span>Selecciona un consultante para ver el historial.</span>
+```
+
+---
+
 ## Future Enhancements
 
 ### Phase 2 Features (Post-Migration)

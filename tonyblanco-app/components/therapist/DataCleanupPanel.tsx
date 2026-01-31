@@ -281,7 +281,7 @@ export default function DataCleanupPanel({ patientId }: DataCleanupPanelProps) {
                 </button>
                 <button
                   onClick={() => handleCleanup(false)}
-                  disabled={isExecuting || (cleanupResult && !cleanupResult.dry_run)}
+                  disabled={isExecuting || Boolean(cleanupResult && !cleanupResult.dry_run)}
                   className="flex-1 px-4 py-3 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {isExecuting ? (

@@ -718,7 +718,7 @@ export default function AstrologyTarotVisualCore({
                           tarotSystem: systemKey,
                           context: {
                             question: intention || undefined,
-                            consultantId: patientId,
+                            consultantId: patientId ? Number(patientId) : undefined,
                           },
                         });
                         setAiInterpretation(result.text);

@@ -20,14 +20,33 @@ export function getApiBaseUrl(): string {
   const isLocalHost =
     typeof window !== 'undefined' &&
     (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+  // In local dev, prefer a local backend when running in the browser on localhost.
+  // This avoids trying to call the production API (e.g., Render) which may be
+  // unreachable from local dev environments.
+  if (isLocalHost) {
+    const g = globalThis as unknown as { __warnedApiBaseOverride?: boolean };
+    // If a local override is explicitly provided, use it.
+    if (localOverride) return localOverride;
 
-  // In local dev, missing env should fall back to local backend and warn once.
-  if (!envValue && !localOverride && isLocalHost) {
-    const g = globalThis as unknown as { __warnedMissingApiBaseUrl?: boolean };
-    if (!g.__warnedMissingApiBaseUrl) {
-      g.__warnedMissingApiBaseUrl = true;
-      // eslint-disable-next-line no-console
-      console.warn(`[api] NEXT_PUBLIC_API_URL not set; falling back to ${LOCAL_FALLBACK_API_BASE}`);
+    // If envValue points to a non-local host, override it with the local fallback
+    // and warn once to help developers adjust their env vars.
+    if (envValue && !envValue.includes('localhost') && !envValue.includes('127.0.0.1')) {
+      if (!g.__warnedApiBaseOverride) {
+        g.__warnedApiBaseOverride = true;
+        // eslint-disable-next-line no-console
+        console.warn(`[api] NEXT_PUBLIC_API_URL set to ${envValue} but running on localhost — overriding to ${LOCAL_FALLBACK_API_BASE} for local dev.`);
+      }
+      return LOCAL_FALLBACK_API_BASE;
+    }
+
+    // If no envValue, just fall back to local
+    if (!envValue) {
+      if (!g.__warnedApiBaseOverride) {
+        g.__warnedApiBaseOverride = true;
+        // eslint-disable-next-line no-console
+        console.warn(`[api] NEXT_PUBLIC_API_URL not set; falling back to ${LOCAL_FALLBACK_API_BASE}`);
+      }
+      return LOCAL_FALLBACK_API_BASE;
     }
   }
 

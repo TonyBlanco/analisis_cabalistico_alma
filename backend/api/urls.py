@@ -117,7 +117,12 @@ from .cabalistic_views import (
     KerykeionAnalysisView,
     KabbalahInterpretationView,
     CabalaAplicadaMethodRecordView,
-    CrossoverSynthesisView
+    CrossoverSynthesisView,
+    # Consultante-based views (nuevo sistema unificado)
+    ConsultanteCabalaAplicadaRecordView,
+    ConsultanteCabalaAnalysisListView,
+    ConsultanteCabalaCyclesView,
+    ConsultanteSoulMapView,
 )
 from .admin_views import (
     AdminCheckView,
@@ -161,6 +166,16 @@ from .resonancia_views import (
     ResonanciaObservationListCreateView,
     ResonanciaObservationDetailView,
     ResonanciaRelationListCreateView,
+)
+from .cabala_ai_views import (
+    CabalaAIExtractConceptsView,
+    CabalaAISuggestReadingsView,
+    CabalaAISummarizeNotesView,
+    CabalaAIReflectionQuestionsView,
+    CabalaAIGenerateMeditationView,
+    CabalaAISefiraAttributesView,
+    CabalaAIGovernanceStatusView,
+    CabalaAIValidatePromptView,
 )
 # SWM v3 - Symbolic Workspace Module v3
 from symbolic.swm_v3.views import SwmV3SymbolicReadingCreateView, SwmV3SystemsListView
@@ -209,6 +224,12 @@ urlpatterns = [
     path('consultantes/health/', ConsultanteHealthCheckView.as_view(), name='consultante_health'),
     path('consultantes/resolve/<int:legacy_id>/', ConsultanteResolveView.as_view(), name='consultante_resolve'),
     path('consultantes/<uuid:uuid>/', ConsultanteDetailView.as_view(), name='consultante_detail'),
+    
+    # Consultante Cabala Aplicada (nuevo sistema UUID-based)
+    path('consultantes/<uuid:uuid>/cabala-aplicada/records/', ConsultanteCabalaAplicadaRecordView.as_view(), name='consultante_cabala_aplicada_records'),
+    path('consultantes/<uuid:uuid>/cabala-analyses/', ConsultanteCabalaAnalysisListView.as_view(), name='consultante_cabala_analyses'),
+    path('consultantes/<uuid:uuid>/cabala-cycles/', ConsultanteCabalaCyclesView.as_view(), name='consultante_cabala_cycles'),
+    path('consultantes/<uuid:uuid>/soul-map/', ConsultanteSoulMapView.as_view(), name='consultante_soul_map'),
     
     # Endpoints exclusivos para terapeutas
     path('therapist/patients/create/', CreatePatientWithAccountView.as_view(), name='create_patient_with_account'),
@@ -394,4 +415,15 @@ urlpatterns = [
     
     # AI Engine (Therapeutic interpretation with GPT-4 + RAG)
     path('ai-engine/', include('api.ai_engine.urls')),
+    
+    # ========== CÁBALA APLICADA AI SERVICE (P3 - IA Asistida) ==========
+    # Ethical AI assistance for Kabbalistic analysis - Therapist only
+    path('cabala-ai/extract-concepts/', CabalaAIExtractConceptsView.as_view(), name='cabala_ai_extract_concepts'),
+    path('cabala-ai/suggest-readings/', CabalaAISuggestReadingsView.as_view(), name='cabala_ai_suggest_readings'),
+    path('cabala-ai/summarize-notes/', CabalaAISummarizeNotesView.as_view(), name='cabala_ai_summarize_notes'),
+    path('cabala-ai/reflection-questions/', CabalaAIReflectionQuestionsView.as_view(), name='cabala_ai_reflection_questions'),
+    path('cabala-ai/generate-meditation/', CabalaAIGenerateMeditationView.as_view(), name='cabala_ai_generate_meditation'),
+    path('cabala-ai/sefira-attributes/<str:sefira>/', CabalaAISefiraAttributesView.as_view(), name='cabala_ai_sefira_attributes'),
+    path('cabala-ai/governance-status/', CabalaAIGovernanceStatusView.as_view(), name='cabala_ai_governance_status'),
+    path('cabala-ai/validate-prompt/', CabalaAIValidatePromptView.as_view(), name='cabala_ai_validate_prompt'),
 ]

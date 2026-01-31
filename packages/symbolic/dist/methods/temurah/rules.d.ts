@@ -1,8 +1,70 @@
 import type { TemurahInput } from './types';
-export declare function calcularAnalisisTemurah(i: TemurahInput): {
+/**
+ * Calcula Temurah - Sistema completo de transformaciones
+ * Incluye: Atbash, Albam, Avgad, Ayak Bakar
+ */
+export declare function calcularAnalisisTemurah(input: TemurahInput): {
     identidad: {
         nombreCompleto: string;
+        hebrewOriginal: string;
         fechaNacimiento: string;
+    };
+    calculo: {
+        metodo: string;
+        descripcion: string;
+        explicacion: string;
+        transformaciones: {
+            original: {
+                text: string;
+                value: number;
+                reduced: {
+                    original: number;
+                    reduced: number;
+                    isMaster: boolean;
+                };
+            };
+            atbash: {
+                text: string;
+                value: number;
+                reduced: {
+                    original: number;
+                    reduced: number;
+                    isMaster: boolean;
+                };
+                description: string;
+            };
+            albam: {
+                text: string;
+                value: number;
+                reduced: {
+                    original: number;
+                    reduced: number;
+                    isMaster: boolean;
+                };
+                description: string;
+            };
+            avgad: {
+                text: string;
+                value: number;
+                reduced: {
+                    original: number;
+                    reduced: number;
+                    isMaster: boolean;
+                };
+                description: string;
+            };
+            ayakBakar: {
+                text: string;
+                value: number;
+                reduced: {
+                    original: number;
+                    reduced: number;
+                    isMaster: boolean;
+                };
+                description: string;
+            };
+        };
+        palabrasRelacionadas: Record<string, string[]>;
     };
     numeros: {
         esencia: {
@@ -27,9 +89,20 @@ export declare function calcularAnalisisTemurah(i: TemurahInput): {
             edadTransformacion: number;
         };
     };
-    casasInclusion: {};
-    ausencias: any[];
-    dominantes: any[];
+    correspondencia: {
+        sefiraOriginal: string;
+        sefirahOriginalHebrew: string;
+        sefirahOriginalMeaning: string;
+        sefiraAtbash: string;
+        cambioEnergetico: string;
+    };
+    casasInclusion: Record<number, {
+        numero: number;
+        conteo: number;
+        letras: string[];
+    }>;
+    ausencias: number[];
+    dominantes: number[];
     metadatos: {
         metodo: string;
         sistema: string;

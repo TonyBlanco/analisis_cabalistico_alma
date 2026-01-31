@@ -527,7 +527,7 @@ export default function SHAWorkspace() {
                                           style={{ width: `${(Number(score) / 5) * 100}%` }}
                                         />
                                       </div>
-                                      <span className="w-10 text-right text-purple-700 font-bold">{score}/5</span>
+                                      <span className="w-10 text-right text-purple-700 font-bold">{String(score)}/5</span>
                                     </div>
                                   ))}
                                 </div>

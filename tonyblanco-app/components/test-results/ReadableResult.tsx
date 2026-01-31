@@ -509,7 +509,7 @@ export default function ReadableResult({
                         style={{ width: `${(Number(score) / 5) * 100}%` }}
                       />
                     </div>
-                    <span className="text-xs text-purple-700 font-bold w-8 text-right">{score}/5</span>
+                    <span className="text-xs text-purple-700 font-bold w-8 text-right">{String(score)}/5</span>
                   </div>
                 ))}
               </div>

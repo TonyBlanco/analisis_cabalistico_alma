@@ -28,7 +28,7 @@ import { API_BASE_URL, getAuthToken } from '@/lib/api';
 // TYPES
 // ============================================================================
 
-export type AIModuleType = 'tarot' | 'sha' | 'transgenerational' | 'trabajo-sombras' | 'astrologia' | 'generic';
+export type AIModuleType = 'tarot' | 'sha' | 'transgenerational' | 'trabajo-sombras' | 'astrologia' | 'resonancia-ancestral' | 'bioemocional' | 'holistica' | 'generic';
 
 interface AIResponse {
   data?: Record<string, unknown>;
@@ -88,6 +88,24 @@ const MODULE_CONFIG: Record<AIModuleType, {
     promptContext: 'Interpretación astrológica simbólica para autoconocimiento',
     icon: '⭐',
     features: ['Análisis natal', 'Tránsitos actuales', 'Ciclos personales'],
+  },
+  'resonancia-ancestral': {
+    endpoint: 'ai/resonancia/interpret',
+    promptContext: 'Exploración de resonancias y ecos transgeneracionales del sistema familiar',
+    icon: '🧬',
+    features: ['Mapeo de resonancias', 'Ejes ancestrales', 'Patrones sistémicos'],
+  },
+  bioemocional: {
+    endpoint: 'ai/bioemotional/interpret',
+    promptContext: 'Análisis de correspondencias bio-emocionales y somatizaciones simbólicas',
+    icon: '💫',
+    features: ['Mapeo corporal', 'Correspondencias emocionales', 'Síntesis somática'],
+  },
+  holistica: {
+    endpoint: 'ai/holistica/interpret',
+    promptContext: 'Síntesis holística integrando múltiples dimensiones del ser',
+    icon: '🌀',
+    features: ['Integración multidimensional', 'Síntesis global', 'Visión unificada'],
   },
   generic: {
     endpoint: 'ai-engine/interpret-symbolic',

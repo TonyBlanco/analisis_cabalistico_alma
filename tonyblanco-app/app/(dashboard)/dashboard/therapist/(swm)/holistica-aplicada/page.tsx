@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { AlertCircle, ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import useActiveConsultante from '@/hooks/useActiveConsultante';
+import { GenericAIAssistantPanel } from '@/components/ai';
 import SoulIdentityHeader from '@/src/components/cabala/comprehensive-report/SoulIdentityHeader';
 import ArcanaGrid from '@/src/components/cabala/comprehensive-report/ArcanaGrid';
 import KarmicMatrix from '@/src/components/cabala/comprehensive-report/KarmicMatrix';
@@ -215,6 +216,21 @@ export default function CabalaReportPage() {
 
         {/* Letters of the Soul */}
         <LetrasDelAlma nombre={userName} />
+        
+        {/* Panel de IA Holística */}
+        <GenericAIAssistantPanel
+          moduleType="holistica"
+          moduleTitle="Holística Aplicada"
+          consultanteId={consultante?.id}
+          context={{
+            consultante_name: userName,
+            birth_date: birthDate,
+            has_numeros: Boolean(numeros_principales),
+            has_inclusion: Boolean(inclusion_base),
+            module: 'holistica-aplicada',
+          }}
+          className="mx-auto max-w-4xl"
+        />
 
         {/* Kabbalistic Analysis */}
         {analisis_cabalista && analisis_cabalista.length > 0 && (

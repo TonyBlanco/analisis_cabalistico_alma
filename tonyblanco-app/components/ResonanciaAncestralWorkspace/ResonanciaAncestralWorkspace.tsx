@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { Activity, HelpCircle, GitBranch, Repeat, Circle, Minus, AlertTriangle, Sparkles, Users, Network, BookOpen } from 'lucide-react';
 import useActiveConsultante from '@/hooks/useActiveConsultante';
+import { GenericAIAssistantPanel } from '@/components/ai';
 import {
   createResonanciaObservation,
   createResonanciaRelation,
@@ -2076,6 +2077,19 @@ export default function ResonanciaAncestralWorkspace() {
               Cuando algunos datos del consultante no están disponibles, el workspace permanece accesible, aunque
               ciertas visualizaciones pueden mostrarse de forma limitada.
             </div>
+            
+            {/* Panel de IA Resonancia Ancestral */}
+            <GenericAIAssistantPanel
+              moduleType="resonancia-ancestral"
+              moduleTitle="Resonancia Ancestral"
+              consultanteId={consultante?.id}
+              context={{
+                consultante_name: consultante?.nombre_completo,
+                observations_count: observations.length,
+                relations_count: relations.length,
+                module: 'resonancia-ancestral',
+              }}
+            />
           </div>
         )}
       </main>

@@ -7,6 +7,7 @@ import ExperientialToolPanels from './ExperientialToolPanels';
 import ExperientialVisualCore from './ExperientialVisualCore';
 import { useExperientialContext } from './hooks/useExperientialContext';
 import { useBodySelection } from './hooks/useBodySelection';
+import { GenericAIAssistantPanel } from '@/components/ai';
 import type { WorkspaceState, WorkspaceProgress } from './types';
 import type { BioEmotionalSynthesis } from '@/lib/api/bioemotional-clinical';
 import AssignBioEmotionalModal from '@/components/AssignBioEmotionalModal';
@@ -157,7 +158,7 @@ export default function BioEmotionalExperientialWorkspace() {
               selectedRegion={selectedRegion}
               onClearSelection={clearSelection}
             />
-            <div className="col-span-2">
+            <div className="col-span-1">
               <ExperientialToolPanels
                 state={workspaceState}
                 hasPatient={Boolean(context.patientId)}
@@ -178,6 +179,20 @@ export default function BioEmotionalExperientialWorkspace() {
                 onInsertToSynthesis={(text) => setSynthesisInsert(text)}
                 isReadOnly={isReadOnly}
                 referenceSnippets={referenceSnippets}
+              />
+            </div>
+            <div className="col-span-1">
+              {/* Panel de IA Bio-Emocional */}
+              <GenericAIAssistantPanel
+                moduleType="bioemocional"
+                moduleTitle="Bio-Emocional"
+                consultanteId={context.patientId ?? undefined}
+                context={{
+                  consultante_name: context.patientName,
+                  selected_region: selectedRegion?.label,
+                  workspace_state: workspaceState,
+                  module: 'bioemotional-experiential',
+                }}
               />
             </div>
           </div>

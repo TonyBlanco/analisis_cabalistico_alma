@@ -1911,7 +1911,7 @@ export default function CabalAppliedVisualCore({
 
   // INNOVACIÓN 4: Laboratorio de Nombres (Gematría Relacional Familiar)
   if (activeSection === 'laboratorio-nombres') {
-    const LaboratorioNombresPanel = require('./innovations/LaboratorioNombresPanel').default;
+    const LaboratorioNombresPanel = require('./LaboratorioNombresPanel').default;
     
     return (
       <section className="flex-1">
@@ -1927,7 +1927,7 @@ export default function CabalAppliedVisualCore({
 
   // INNOVACIÓN 5: Meditaciones Personalizadas por Sefirá
   if (activeSection === 'meditaciones') {
-    const MeditacionesPersonalizadasPanel = require('./innovations/MeditacionesPersonalizadasPanel').default;
+    const MeditacionesPersonalizadasPanel = require('./MeditacionesPersonalizadasPanel').default;
     
     return (
       <section className="flex-1">
@@ -1943,12 +1943,12 @@ export default function CabalAppliedVisualCore({
 
   // INNOVACIÓN 13: Árbol Vivo (Gamificación)
   if (activeSection === 'arbol-vivo') {
-    const ArbolVivoPanel = require('./innovations/ArbolVivoPanel').default;
+    const ArbolVivoPanel = require('./ArbolVivoPanel').default;
     
     return (
       <section className="flex-1">
         <ArbolVivoPanel
-          consultanteUuid={consultanteUuid || undefined}
+          consultanteUuid={consultantUuid || undefined}
           consultantName={patientProfile?.full_name || patientProfile?.legal_full_name || 'Consultante'}
           onProgressUpdated={(progress: unknown) => {
             console.log('[CabalAppliedVisualCore] Arbol Vivo progress updated:', progress);

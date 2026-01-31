@@ -13,7 +13,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Calendar, Moon, Sun, RefreshCw, AlertTriangle, Download, Save, BookOpen, ChevronDown, ChevronUp } from 'lucide-react';
+import { Calendar, Moon, Sun, RefreshCw, AlertTriangle, Download, Save, BookOpen, ChevronDown, ChevronUp, Info } from 'lucide-react';
 import { getApiBaseUrl } from '@/lib/api-base';
 
 // Diccionario completo de interpretaciones simbólicas por Sefirá
@@ -738,6 +738,24 @@ export default function CyclesTimeline({
 
   return (
     <div className="cycles-timeline space-y-4">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Ciclos Tikún</h3>
+          <div className="group relative">
+            <Info className="h-4 w-4 text-gray-500 hover:text-gray-700 cursor-help transition-colors" />
+            <div className="absolute left-0 top-6 invisible group-hover:visible bg-black text-white text-xs rounded-lg py-2 px-3 w-72 shadow-lg z-10">
+              <p className="font-medium mb-1">Línea Temporal de Corrección</p>
+              <p>• Ciclos de 9 años (anual), 28 días (lunar), 7 días (semanal)</p>
+              <p>• Cada ciclo muestra Sefirá dominante actual</p>
+              <p>• Preguntas reflexivas para autoindagación</p>
+              <p>• NO predice eventos, solo muestra influencias</p>
+              <div className="absolute -top-1 left-4 w-2 h-2 bg-black transform rotate-45"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Disclaimer */}
       <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 rounded-r-lg">
         <div className="flex items-start gap-2">

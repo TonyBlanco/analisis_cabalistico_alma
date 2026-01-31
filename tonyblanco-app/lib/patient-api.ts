@@ -50,6 +50,7 @@ export interface Patient {
 
 export interface PatientProfileSummary {
   patient_id: number;
+  uuid?: string | null;  // UUID del consultante
   full_name?: string | null;
   legal_full_name: string | null;
   birth_date: string | null;
@@ -111,6 +112,26 @@ export async function getPatientProfileSummary(
   }
 
   return response.json();
+}
+
+/**
+ * Resuelve el UUID del consultante a partir del patient_id.
+ */
+export async function resolveConsultanteUuid(patientId: number): Promise<string | null> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/consultantes/resolve/${patientId}/`, {
+      method: 'GET',
+      headers: getAuthHeaders(),
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      return data.uuid || null;
+    }
+    return null;
+  } catch {
+    return null;
+  }
 }
 
 // ========================================

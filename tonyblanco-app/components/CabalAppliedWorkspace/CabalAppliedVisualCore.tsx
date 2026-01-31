@@ -4,13 +4,14 @@ import { useEffect, useMemo, useState } from 'react';
 import { ChevronDown, ChevronUp, BookOpen, Hash, Sparkles, Activity, Sun, Scale, Info } from 'lucide-react';
 import type { CabalSectionId } from './types';
 import { getActivePatientId } from '@/lib/active-patient';
-import { getPatientProfileSummary, type PatientProfileSummary } from '@/lib/patient-api';
+import { getPatientProfileSummary, resolveConsultanteUuid, type PatientProfileSummary } from '@/lib/patient-api';
 import { useTreeStructuralState } from '@/lib/tree-structural-state';
 import TreeOfLifeSVG from '@/components/Tree/TreeOfLifeSVG';
 import { TreeWithFlows } from '@/components/Tree';
 import TreeVisualPlaceholder from './TreeVisualPlaceholder';
 import { NarrativeIntegrationPanel } from './NarrativeIntegration';
 import { CabalaAIAssistant } from './CabalaAIAssistant';
+import GematriaReadingsPanel from './GematriaReadingsPanel';
 import { ejecutarMetodoPitagorico } from '@holistica/symbolic/methods/pitagoras';
 import type { PitagorasSymbolicState, PitagorasNumberMeaning } from '@holistica/symbolic/methods/pitagoras/pitagoras.types';
 import { adaptPitagorasToTree, type TreeStructuralState } from '@holistica/symbolic/tree';
@@ -1114,6 +1115,7 @@ export default function CabalAppliedVisualCore({
   onWorkspaceStateChange,
 }: CabalAppliedVisualCoreProps) {
   const [activePatientId, setActivePatientId] = useState<number | null>(null);
+  const [consultantUuid, setConsultantUuid] = useState<string | null>(null);  // UUID para APIs de consultante
   const [patientProfile, setPatientProfile] = useState<PatientProfileSummary | null>(null);
   const [pitagorasState, setPitagorasState] = useState<PitagorasSymbolicState | null>(null);
   const [treeStructuralState, setTreeStructuralState] = useState<TreeStructuralState | null>(null);
@@ -1218,6 +1220,7 @@ export default function CabalAppliedVisualCore({
       setActivePatientId(patientId ?? null);
       if (!patientId) {
         setPatientProfile(null);
+        setConsultantUuid(null);
         setClinicalContext(null);
         return;
       }
@@ -1226,9 +1229,15 @@ export default function CabalAppliedVisualCore({
         if (isMounted) {
           setPatientProfile(profile);
         }
+        // Resolver UUID del consultante para APIs de innovaciones
+        const uuid = await resolveConsultanteUuid(patientId);
+        if (isMounted) {
+          setConsultantUuid(uuid);
+        }
       } catch (error) {
         if (isMounted) {
           setPatientProfile(null);
+          setConsultantUuid(null);
         }
       }
     };
@@ -1253,10 +1262,10 @@ export default function CabalAppliedVisualCore({
       
       try {
         // Fetch clinical context summary from backend
-        // This endpoint should be implemented in swm/cabala/views.py
+        const token = localStorage.getItem('authToken') || '';
         const response = await fetch(`/api/swm/cabala/clinical-summary/${activePatientId}/`, {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`,
+            'Authorization': `Token ${token}`,
             'Content-Type': 'application/json',
           },
         });
@@ -1430,7 +1439,11 @@ export default function CabalAppliedVisualCore({
     'soul-map': { title: 'Mapa del Alma', description: 'Mapa simbólico de resonancias sefiróticas.' },
     'cycles': { title: 'Ciclos Tikún', description: 'Línea temporal de ciclos evolutivos.' },
     'notarikon': { title: 'Notarikón', description: 'Análisis de acrónimos y síntesis.' },
+    'shadow-work': { title: 'Trabajo de Sombras', description: 'Qliphoth, polaridades y sombras numéricas.' },
+    'sefirot-radar': { title: 'Radar de Desequilibrios', description: 'Visualización integrando tests clínicos, biografía y cálculos cabalísticos.' },
+    'multi-system': { title: 'Integración Multi-Sistema', description: 'Diálogo simbólico entre Cábala, Tarot, Astrología, Bio-Emociones y Transgeneracional.' },
     'synthesis': { title: 'Síntesis', description: 'Notas humanas de integración.' },
+    'ai-assistant': { title: 'IA Asistida', description: 'Asistente ético de exploración textual.' },
     'resources': { title: 'Recursos', description: 'Material consultivo de apoyo.' },
   };
 
@@ -1705,6 +1718,197 @@ export default function CabalAppliedVisualCore({
     );
   }
 
+  // Shadow Work Section (Qliphoth & Polarities)
+  if (activeSection === 'shadow-work') {
+    // Extract active sefirot and missing numbers from pitagoras state
+    const activeSefirot: string[] = [];
+    
+    // Get ausencias from rawData within pitagorasState
+    const pitagorasRawData = pitagorasState?.rawData;
+    const ausencias = pitagorasRawData?.inclusion?.ausencias || [];
+    const dominantes = pitagorasRawData?.inclusion?.dominantes || [];
+    const caminoVida = pitagorasRawData?.numeros?.caminoVida?.reducido;
+    
+    // Get sefirot from highlighted or derive from inclusion map
+    if (highlightedSefirot && highlightedSefirot.length > 0) {
+      activeSefirot.push(...(highlightedSefirot as string[]));
+    } else if (pitagorasState?.inclusionMap) {
+      // Derive from pitagoras state - numbers present indicate active sefirot
+      const numberToSefira: Record<number, string> = {
+        1: 'keter', 2: 'chokmah', 3: 'binah',
+        4: 'chesed', 5: 'gevurah', 6: 'tiferet',
+        7: 'netzach', 8: 'hod', 9: 'yesod',
+      };
+      
+      // Mark sefirot as active if their number is dominant (not absent)
+      Object.entries(pitagorasState.inclusionMap).forEach(([numStr, data]) => {
+        const num = parseInt(numStr);
+        if (!data.isAbsent && numberToSefira[num]) {
+          activeSefirot.push(numberToSefira[num]);
+        }
+      });
+    }
+
+    // Dynamic import of ShadowWorkPanel
+    const ShadowWorkPanel = require('./ShadowWorkPanel').default;
+    
+    return (
+      <section className="flex-1">
+        <ShadowWorkPanel
+          activeSefirot={activeSefirot}
+          missingNumbers={ausencias}
+          dominantNumber={caminoVida}
+          ausencias={ausencias}
+          sobrantes={dominantes}
+        />
+      </section>
+    );
+  }
+
+  // Sefirot Radar Section (Desequilibrios)
+  if (activeSection === 'sefirot-radar') {
+    // Dynamic import of SefirotRadarPanel
+    const SefirotRadarPanel = require('./SefirotRadarPanel').default;
+    
+    // Extract pitagoras data from current state
+    const pitagorasRawData = pitagorasState?.rawData;
+    const pitagorasData = pitagorasRawData ? {
+      ausencias: pitagorasRawData?.inclusion?.ausencias || [],
+      dominantes: pitagorasRawData?.inclusion?.dominantes || [],
+      caminoVida: pitagorasRawData?.numeros?.caminoVida?.reducido,
+    } : undefined;
+    
+    return (
+      <section className="flex-1">
+        <SefirotRadarPanel
+          consultantId={activePatientId ?? undefined}
+          pitagorasData={pitagorasData}
+          onRadarGenerated={(result: unknown) => {
+            console.log('[CabalAppliedVisualCore] Sefirot Radar generated:', result);
+          }}
+        />
+      </section>
+    );
+  }
+
+  // Multi-System Integration Section
+  if (activeSection === 'multi-system') {
+    // Dynamic import of MultiSystemIntegrationPanel
+    const MultiSystemIntegrationPanel = require('./MultiSystemIntegrationPanel').default;
+    
+    return (
+      <section className="flex-1">
+        <MultiSystemIntegrationPanel
+          consultantId={activePatientId ?? undefined}
+          consultantBirthDate={patientProfile?.birth_date ? new Date(patientProfile.birth_date) : undefined}
+          onSaveReport={(report: unknown) => {
+            console.log('[CabalAppliedVisualCore] Integration report generated:', report);
+            // TODO: Save report to backend or state
+          }}
+        />
+      </section>
+    );
+  }
+
+  // ============================================================================
+  // INNOVACIONES TERAPÉUTICAS (4 nuevos módulos)
+  // ============================================================================
+
+  // Sincronías Biográficas Section
+  if (activeSection === 'sincronias') {
+    const SincroniasPanel = require('./SincroniasPanel').default;
+    
+    return (
+      <section className="flex-1">
+        <SincroniasPanel
+          birthDate={patientProfile?.birth_date || ''}
+          consultantUuid={consultantUuid || undefined}
+          consultantName={patientProfile?.full_name || patientProfile?.legal_full_name || 'Consultante'}
+          onSincroniasLoaded={(result: unknown) => {
+            console.log('[CabalAppliedVisualCore] Sincronías detected:', result);
+          }}
+        />
+        {!patientProfile?.birth_date && (
+          <div className="mt-4 p-4 bg-slate-50 border border-slate-200 rounded-xl text-slate-600 text-sm">
+            ⚠️ Selecciona un consultante con fecha de nacimiento para detectar sincronías.
+          </div>
+        )}
+      </section>
+    );
+  }
+
+  // Alertas Preventivas Section
+  if (activeSection === 'alertas-preventivas') {
+    const AlertasPreventivasPanel = require('./AlertasPreventivasPanel').default;
+    
+    return (
+      <section className="flex-1">
+        <AlertasPreventivasPanel
+          birthDate={patientProfile?.birth_date || ''}
+          consultantUuid={consultantUuid || undefined}
+          consultantName={patientProfile?.full_name || patientProfile?.legal_full_name || 'Consultante'}
+          monthsAhead={3}
+          onAlertsLoaded={(result: unknown) => {
+            console.log('[CabalAppliedVisualCore] Alertas generated:', result);
+          }}
+        />
+        {!patientProfile?.birth_date && (
+          <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-700 text-sm">
+            ⚠️ Selecciona un consultante con fecha de nacimiento para generar alertas.
+          </div>
+        )}
+      </section>
+    );
+  }
+
+  // Exportación Narrativa Section
+  if (activeSection === 'exportacion-narrativa') {
+    const ExportacionNarrativaPanel = require('./ExportacionNarrativaPanel').default;
+    
+    // Preparar datos del viaje terapéutico
+    const journeyData = {
+      events: [] as Array<{date: string; type: string; description: string}>,
+      insights: [] as string[],
+      transformations: [] as string[],
+      current_sefira: pitagorasState?.primaryNumbers?.[0]?.meaning?.titulo || undefined,
+    };
+    
+    return (
+      <section className="flex-1">
+        <ExportacionNarrativaPanel
+          birthDate={patientProfile?.birth_date || ''}
+          consultantName={patientProfile?.full_name || patientProfile?.legal_full_name || 'Consultante'}
+          journeyData={journeyData}
+          onExportGenerated={(doc: unknown) => {
+            console.log('[CabalAppliedVisualCore] Export generated:', doc);
+          }}
+        />
+        {!patientProfile?.birth_date && (
+          <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-700 text-sm">
+            ⚠️ Selecciona un consultante con fecha de nacimiento para generar exportaciones.
+          </div>
+        )}
+      </section>
+    );
+  }
+
+  // Calendario Cósmico Section
+  if (activeSection === 'calendario-cosmico') {
+    const CalendarioCosmicPanel = require('./CalendarioCosmicPanel').default;
+    
+    return (
+      <section className="flex-1">
+        <CalendarioCosmicPanel
+          birthDate={patientProfile?.birth_date || undefined}
+          consultantName={patientProfile?.full_name || patientProfile?.legal_full_name || 'Consultante'}
+          onContextLoaded={(context: unknown) => {
+            console.log('[CabalAppliedVisualCore] Cosmic context loaded:', context);
+          }}
+        />
+      </section>
+    );
+  }
+
   // Resources Section
   if (activeSection === 'resources') {
     return (
@@ -1911,6 +2115,31 @@ export default function CabalAppliedVisualCore({
               treeState={state}
               treeLoading={loading}
             />
+          )}
+          
+          {/* Gematria Readings Panel - Guardar lecturas y generar síntesis */}
+          {activePatientId && patientProfile && (
+            <div className="mt-6">
+              <GematriaReadingsPanel
+                patientId={activePatientId}
+                patientName={patientProfile.legal_full_name || 'Consultante'}
+                currentReading={pitagorasState ? {
+                  method: selectedMethod,
+                  methodDisplay: METHODS.find((m: any) => m.id === selectedMethod)?.name || selectedMethod,
+                  inputName: patientProfile.legal_full_name || '',
+                  inputBirthDate: patientProfile.birth_date || undefined,
+                  hebrewTransliteration: (pitagorasState.rawData as any)?.identidad?.hebrewTransliteration || '',
+                  calculatedNumbers: (pitagorasState.rawData as any)?.numeros || {},
+                  calculationDetails: (pitagorasState.rawData as any)?.calculo || {},
+                  sefirotCorrespondence: (pitagorasState.rawData as any)?.correspondencia || {},
+                  numberInterpretations: {},
+                  methodInterpretation: '',
+                } : null}
+                onSaveSuccess={() => {
+                  // Optional: refresh or show feedback
+                }}
+              />
+            </div>
           )}
           </div>
         </>

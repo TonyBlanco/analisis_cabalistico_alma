@@ -74,7 +74,7 @@ export async function getFederationHubFeed(args: {
     params.set('scope', args.scope.join(','));
   }
 
-  const response = await fetch(`${API_BASE_URL}/api/federation/hub-feed/?${params.toString()}`, {
+  const response = await fetch(`${API_BASE_URL}/federation/hub-feed/?${params.toString()}`, {
     method: 'GET',
     headers: {
       'Authorization': `Token ${token}`,

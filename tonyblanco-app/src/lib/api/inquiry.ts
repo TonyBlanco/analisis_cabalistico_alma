@@ -24,7 +24,7 @@ export async function fetchInquiryGaps(
     throw new Error('Usuario no autenticado');
   }
 
-  const url = `${API_BASE_URL}/api/inquiry/gaps/?patient_id=${patientId}&module=${moduleCode}`;
+  const url = `${API_BASE_URL}/inquiry/gaps/?patient_id=${patientId}&module=${moduleCode}`;
   
   const response = await fetch(url, {
     method: 'GET',
@@ -54,7 +54,7 @@ export async function saveInquiryResponse(
     throw new Error('Usuario no autenticado');
   }
 
-  const response = await fetch(`${API_BASE_URL}/api/inquiry/responses/`, {
+  const response = await fetch(`${API_BASE_URL}/inquiry/responses/`, {
     method: 'POST',
     headers: {
       'Authorization': `Token ${token}`,
@@ -83,7 +83,7 @@ export async function createInquiryBatch(
     throw new Error('Usuario no autenticado');
   }
 
-  const response = await fetch(`${API_BASE_URL}/api/inquiry/batches/`, {
+  const response = await fetch(`${API_BASE_URL}/inquiry/batches/`, {
     method: 'POST',
     headers: {
       'Authorization': `Token ${token}`,
@@ -113,7 +113,7 @@ export async function fetchPatientResponses(
     throw new Error('Usuario no autenticado');
   }
 
-  let url = `${API_BASE_URL}/api/inquiry/responses/${patientId}/`;
+  let url = `${API_BASE_URL}/inquiry/responses/${patientId}/`;
   if (moduleCode) {
     url += `?module=${moduleCode}`;
   }

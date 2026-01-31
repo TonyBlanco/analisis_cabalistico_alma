@@ -7,15 +7,26 @@ interface CabalAppliedSidebarProps {
   onChange: (section: CabalSectionId) => void;
 }
 
-const sections: Array<{ id: CabalSectionId; label: string; description: string }> = [
-  { id: 'tree', label: 'Árbol', description: 'Vista simbólica del Árbol de la Vida.' },
-  { id: 'gematria', label: 'Gematría', description: 'Espacio observacional sin cálculos.' },
-  { id: 'soul-map', label: 'Mapa del Alma', description: 'Mapa simbólico de resonancias sefiróticas.' },
-  { id: 'cycles', label: 'Ciclos Tikún', description: 'Línea temporal de ciclos evolutivos.' },
-  { id: 'notarikon', label: 'Notarikón', description: 'Análisis de acrónimos y síntesis.' },
-  { id: 'synthesis', label: 'Síntesis', description: 'Notas humanas de integración.' },
-  { id: 'ai-assistant', label: '✨ IA Asistida', description: 'Asistente ético de exploración textual.' },
-  { id: 'resources', label: 'Recursos', description: 'Material consultivo de apoyo.' },
+const sections: Array<{ id: CabalSectionId; label: string; description: string; group?: string }> = [
+  // Módulos Base
+  { id: 'tree', label: '🔯 Árbol', description: 'Vista simbólica del Árbol de la Vida.', group: 'base' },
+  { id: 'gematria', label: '🔢 Gematría', description: 'Espacio observacional sin cálculos.', group: 'base' },
+  { id: 'soul-map', label: '🗺️ Mapa del Alma', description: 'Mapa simbólico de resonancias sefiróticas.', group: 'base' },
+  { id: 'cycles', label: '🔄 Ciclos Tikún', description: 'Línea temporal de ciclos evolutivos.', group: 'base' },
+  { id: 'notarikon', label: '✍️ Notarikón', description: 'Análisis de acrónimos y síntesis.', group: 'base' },
+  { id: 'shadow-work', label: '🌑 Sombras', description: 'Qliphoth y polaridades luz/sombra.', group: 'base' },
+  // Módulos Avanzados
+  { id: 'sefirot-radar', label: '📊 Radar Sefirot', description: 'Desequilibrios: tests + bio + cálculos.', group: 'advanced' },
+  { id: 'multi-system', label: '🔮 Multi-Sistema', description: 'Integración Cábala-Tarot-Astro-Bio-Trans.', group: 'advanced' },
+  // Innovaciones Terapéuticas
+  { id: 'sincronias', label: '✨ Sincronías', description: 'Detector de coincidencias biográficas.', group: 'innovations' },
+  { id: 'alertas-preventivas', label: '🔔 Alertas', description: 'Avisos éticos basados en tu historia.', group: 'innovations' },
+  { id: 'exportacion-narrativa', label: '📜 Narrativa', description: 'Carta del Alma, Mapa del Viaje, Libro.', group: 'innovations' },
+  { id: 'calendario-cosmico', label: '🌙 Calendario', description: 'Ciclos lunares y sefiróticos reales.', group: 'innovations' },
+  // Síntesis y Ayuda
+  { id: 'synthesis', label: '📝 Síntesis', description: 'Notas humanas de integración.', group: 'synthesis' },
+  { id: 'ai-assistant', label: '✨ IA Asistida', description: 'Asistente ético de exploración textual.', group: 'synthesis' },
+  { id: 'resources', label: '📚 Recursos', description: 'Material consultivo de apoyo.', group: 'synthesis' },
 ];
 
 export default function CabalAppliedSidebar({

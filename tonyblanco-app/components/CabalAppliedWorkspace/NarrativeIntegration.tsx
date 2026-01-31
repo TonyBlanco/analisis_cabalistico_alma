@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { 
   FileText, 
   Tag, 
@@ -11,8 +11,21 @@ import {
   ChevronUp,
   Bookmark,
   Calendar,
-  Hash
+  Hash,
+  BookOpen,
+  Brain,
+  Loader2,
+  Trash2,
+  Eye,
+  Info,
 } from 'lucide-react';
+import {
+  listGematriaReadings,
+  listGematriaSyntheses,
+  type GematriaReadingListItem,
+  type GematriaSynthesis,
+} from '@/lib/gematria-readings-api';
+import { saveCabalaAplicadaMethodRecord } from '@/lib/cabala-aplicada-api';
 
 // ============================================================================
 // TYPES
@@ -594,23 +607,91 @@ export function NarrativeIntegrationPanel({
   const [activePrompt, setActivePrompt] = useState<string | null>(null);
   const [savedNotes, setSavedNotes] = useState<SymbolicNote[]>([]);
   const [view, setView] = useState<'editor' | 'history'>('editor');
+  
+  // Gematria readings state
+  const [gematriaReadings, setGematriaReadings] = useState<GematriaReadingListItem[]>([]);
+  const [gematriaSyntheses, setGematriaSyntheses] = useState<GematriaSynthesis[]>([]);
+  const [loadingGematria, setLoadingGematria] = useState(false);
+  const [savingNote, setSavingNote] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
+
+  // Load gematria readings
+  useEffect(() => {
+    if (!consultanteId) return;
+    
+    const loadGematriaData = async () => {
+      setLoadingGematria(true);
+      try {
+        const [readingsRes, synthesisRes] = await Promise.all([
+          listGematriaReadings(consultanteId).catch(() => ({ readings: [] })),
+          listGematriaSyntheses(consultanteId).catch(() => ({ syntheses: [] })),
+        ]);
+        setGematriaReadings(readingsRes.readings || []);
+        setGematriaSyntheses(synthesisRes.syntheses || []);
+      } catch (err) {
+        console.error('Error loading gematria data:', err);
+      } finally {
+        setLoadingGematria(false);
+      }
+    };
+    
+    loadGematriaData();
+  }, [consultanteId]);
 
   const handleSelectTemplate = useCallback((template: ReflectionTemplate) => {
     setActivePrompt(template.prompt);
     setView('editor');
   }, []);
 
-  const handleSaveNote = useCallback((note: Omit<SymbolicNote, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const handleSaveNote = useCallback(async (note: Omit<SymbolicNote, 'id' | 'createdAt' | 'updatedAt'>) => {
+    if (!consultanteId) return;
+    
+    setSavingNote(true);
+    setSaveError(null);
+    setSaveSuccess(null);
+    
     const newNote: SymbolicNote = {
       ...note,
       id: `note-${Date.now()}`,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
-    setSavedNotes(prev => [newNote, ...prev]);
-    onNotesSaved?.([newNote, ...savedNotes]);
-    setActivePrompt(null);
-  }, [savedNotes, onNotesSaved]);
+    
+    try {
+      // Save to backend as AnalysisRecord
+      await saveCabalaAplicadaMethodRecord(consultanteId, {
+        method_id: 'narrative_note',
+        method_name: 'Nota Simbólica Narrativa',
+        input: {
+          content: note.content,
+          tags: note.tags,
+          sefira: note.sefira,
+          method: note.method,
+          cycle: note.cycle,
+          prompt: activePrompt,
+          source: 'narrative_integration',
+        },
+        method_output: {
+          type: 'symbolic_note',
+          saved_at: new Date().toISOString(),
+        },
+      });
+      
+      setSavedNotes(prev => [newNote, ...prev]);
+      onNotesSaved?.([newNote, ...savedNotes]);
+      setActivePrompt(null);
+      setSaveSuccess('Nota guardada correctamente');
+      setTimeout(() => setSaveSuccess(null), 3000);
+    } catch (err: any) {
+      console.error('Error saving note:', err);
+      setSaveError(err.message || 'Error al guardar la nota');
+      // Still add to local state
+      setSavedNotes(prev => [newNote, ...prev]);
+    } finally {
+      setSavingNote(false);
+    }
+  }, [consultanteId, savedNotes, onNotesSaved, activePrompt]);
 
   if (!consultanteId) {
     return (
@@ -625,13 +706,38 @@ export function NarrativeIntegrationPanel({
 
   return (
     <div className="space-y-6">
+      {/* Success/Error Messages */}
+      {saveSuccess && (
+        <div className="rounded-md bg-green-50 border border-green-200 p-3 text-sm text-green-700">
+          ✓ {saveSuccess}
+        </div>
+      )}
+      {saveError && (
+        <div className="rounded-md bg-red-50 border border-red-200 p-3 text-sm text-red-700">
+          ⚠ {saveError}
+        </div>
+      )}
+      
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900">Integración Narrativa</h3>
-          <p className="text-xs text-gray-500">
-            Notas simbólicas para {consultanteName || 'consultante'}
-          </p>
+        <div className="flex items-center gap-2">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900">Integración Narrativa</h3>
+            <p className="text-xs text-gray-500">
+              Notas simbólicas para {consultanteName || 'consultante'}
+            </p>
+          </div>
+          <div className="group relative">
+            <Info className="h-4 w-4 text-gray-500 hover:text-gray-700 cursor-help transition-colors" />
+            <div className="absolute left-0 top-6 invisible group-hover:visible bg-black text-white text-xs rounded-lg py-2 px-3 w-72 shadow-lg z-10">
+              <p className="font-medium mb-1">Síntesis Narrativa Humana</p>
+              <p>• Notas libres del terapeuta sobre el proceso</p>
+              <p>• Templates reflexivos por Sefirá</p>
+              <p>• Integración de insights de múltiples sesiones</p>
+              <p>• Archivo de evolución terapéutica</p>
+              <div className="absolute -top-1 left-4 w-2 h-2 bg-black transform rotate-45"></div>
+            </div>
+          </div>
         </div>
         <div className="flex gap-1">
           <button
@@ -658,6 +764,87 @@ export function NarrativeIntegrationPanel({
           </button>
         </div>
       </div>
+      
+      {/* Gematria Readings Summary */}
+      {(gematriaReadings.length > 0 || gematriaSyntheses.length > 0) && (
+        <div className="rounded-lg border border-purple-200 bg-gradient-to-r from-purple-50 to-indigo-50 p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <BookOpen className="h-4 w-4 text-purple-600" />
+            <h4 className="text-sm font-semibold text-purple-900">Lecturas Gematricas Guardadas</h4>
+            {loadingGematria && <Loader2 className="h-3 w-3 animate-spin text-purple-400" />}
+          </div>
+          
+          {gematriaReadings.length > 0 && (
+            <div className="mb-3">
+              <p className="text-xs text-purple-700 mb-2">
+                {gematriaReadings.length} lectura(s) individual(es):
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {gematriaReadings.slice(0, 5).map((r) => (
+                  <div 
+                    key={r.id}
+                    className="bg-white rounded px-2 py-1 text-xs border border-purple-100"
+                  >
+                    <span className="font-medium text-purple-700">{r.method_display}</span>
+                    <span className="text-gray-500 ml-1">
+                      ({new Date(r.created_at).toLocaleDateString('es-ES')})
+                    </span>
+                  </div>
+                ))}
+                {gematriaReadings.length > 5 && (
+                  <span className="text-xs text-purple-500">
+                    +{gematriaReadings.length - 5} más
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+          
+          {gematriaSyntheses.length > 0 && (
+            <div>
+              <p className="text-xs text-purple-700 mb-2">
+                {gematriaSyntheses.length} síntesis AI generada(s):
+              </p>
+              <div className="space-y-2">
+                {gematriaSyntheses.slice(0, 2).map((s) => (
+                  <div 
+                    key={s.id}
+                    className="bg-white rounded p-2 text-xs border border-purple-100"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-purple-800">{s.title}</span>
+                      <span className="text-[10px] text-gray-400">
+                        {new Date(s.created_at).toLocaleDateString('es-ES')}
+                      </span>
+                    </div>
+                    {s.ai_narrative && (
+                      <p className="text-gray-600 mt-1 line-clamp-2">{s.ai_narrative}</p>
+                    )}
+                    {s.dominant_numbers.length > 0 && (
+                      <div className="flex gap-1 mt-1">
+                        {s.dominant_numbers.slice(0, 4).map((d, i) => (
+                          <span key={i} className="bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded text-[10px]">
+                            {d.number}×{d.count}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    {s.exported_to_holistic && (
+                      <span className="inline-flex items-center gap-1 mt-1 text-[10px] text-green-600">
+                        ✓ Exportado a resumen holístico
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          <p className="text-[10px] text-purple-500 mt-2">
+            Usa estas lecturas como contexto para tus notas de integración narrativa.
+          </p>
+        </div>
+      )}
 
       {view === 'editor' ? (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

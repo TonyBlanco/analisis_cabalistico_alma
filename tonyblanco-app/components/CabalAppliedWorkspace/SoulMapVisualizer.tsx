@@ -11,7 +11,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { Download, Save, AlertTriangle, RefreshCw, Loader2 } from 'lucide-react';
+import { Download, Save, AlertTriangle, RefreshCw, Loader2, Info } from 'lucide-react';
 import { getApiBaseUrl } from '@/lib/api-base';
 
 interface SoulMap {
@@ -323,6 +323,24 @@ export default function SoulMapVisualizer({
 
   return (
     <div className="soul-map-container bg-white dark:bg-gray-900 rounded-lg p-4">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Mapa del Alma</h3>
+          <div className="group relative">
+            <Info className="h-4 w-4 text-gray-500 hover:text-gray-700 cursor-help transition-colors" />
+            <div className="absolute left-0 top-6 invisible group-hover:visible bg-black text-white text-xs rounded-lg py-2 px-3 w-72 shadow-lg z-10">
+              <p className="font-medium mb-1">Visualización Simbólica del Alma</p>
+              <p>• Árbol de la Vida con Sefirot primarias</p>
+              <p>• Resonancias basadas en nombre y fecha</p>
+              <p>• Intensidades de energía por Sefirá</p>
+              <p>• NO es predicción, es contemplación</p>
+              <div className="absolute -top-1 left-4 w-2 h-2 bg-black transform rotate-45"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Disclaimer */}
       <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 rounded-r-lg">
         <div className="flex items-start gap-2">

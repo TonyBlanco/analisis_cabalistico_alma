@@ -104,7 +104,7 @@ export default function AISituationChat({ patientId, hasChart, patientName }: Pr
       try {
         const response = await fetch(`${getApiBaseUrl()}/api/astrology/ai-status/`, {
           headers: {
-            Authorization: `Bearer ${getAuthToken()}`,
+            Authorization: `Token ${getAuthToken()}`,
           },
         });
         const data = await response.json();
@@ -159,7 +159,7 @@ export default function AISituationChat({ patientId, hasChart, patientName }: Pr
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${getAuthToken()}`,
+            Authorization: `Token ${getAuthToken()}`,
           },
           body: JSON.stringify({
             patient_id: patientId,

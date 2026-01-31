@@ -166,7 +166,7 @@ export default function SCID5ClinicalModule() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${getAuthToken()}`,
+          'Authorization': `Token ${getAuthToken()}`,
         },
         body: JSON.stringify({
           scid5_data: data,
@@ -203,7 +203,7 @@ export default function SCID5ClinicalModule() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${getAuthToken()}`,
+          'Authorization': `Token ${getAuthToken()}`,
         },
         body: JSON.stringify({
           kind: 'holistic_exploration',

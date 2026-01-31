@@ -59,7 +59,7 @@ export async function calcularAnalisisCabalistico(data: CalculoRequest): Promise
     throw new Error('Usuario no autenticado. Inicia sesión para continuar.');
   }
 
-  const response = await fetch(`${API_BASE_URL}/api/calcular/`, {
+  const response = await fetch(`${API_BASE_URL}/calcular/`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

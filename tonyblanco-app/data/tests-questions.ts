@@ -195,8 +195,8 @@ export const TESTS_DB: Record<string, TestConfig> = {
 
   'bai': {
     id: 'bai',
-    title: 'Inventario de Ansiedad de Beck',
-    description: 'Inventario de Ansiedad de Beck. Indica cuánto te ha molestado cada síntoma en la última semana.',
+    title: 'Señales del Cuerpo — Intensidad',
+    description: 'Lectura de bienestar sobre señales corporales. Indica la intensidad con la que ha sentido cada señal en la última semana.',
     questions: [
       {
         id: 'bai-q1',

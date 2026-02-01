@@ -12,6 +12,7 @@ import TreeVisualPlaceholder from './TreeVisualPlaceholder';
 import { NarrativeIntegrationPanel } from './NarrativeIntegration';
 import { CabalaAIAssistant } from './CabalaAIAssistant';
 import GematriaReadingsPanel from './GematriaReadingsPanel';
+import ResourcesPanel from './ResourcesPanel';
 import { ejecutarMetodoPitagorico } from '@holistica/symbolic/methods/pitagoras';
 import type { PitagorasSymbolicState, PitagorasNumberMeaning } from '@holistica/symbolic/methods/pitagoras/pitagoras.types';
 import { adaptPitagorasToTree, type TreeStructuralState } from '@holistica/symbolic/tree';
@@ -1878,6 +1879,7 @@ export default function CabalAppliedVisualCore({
         <ExportacionNarrativaPanel
           birthDate={patientProfile?.birth_date || ''}
           consultantName={patientProfile?.full_name || patientProfile?.legal_full_name || 'Consultante'}
+          consultanteUuid={consultantUuid || undefined}
           journeyData={journeyData}
           onExportGenerated={(doc: unknown) => {
             console.log('[CabalAppliedVisualCore] Export generated:', doc);
@@ -1961,34 +1963,8 @@ export default function CabalAppliedVisualCore({
   // Resources Section
   if (activeSection === 'resources') {
     return (
-      <section className="flex-1 bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-        <div className="flex items-start justify-between gap-4 mb-4">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900">{currentSection.title}</h3>
-            <p className="text-xs text-gray-500">{currentSection.description}</p>
-          </div>
-          <div className="text-right text-xs text-gray-500">
-            Sección activa: <span className="font-medium text-indigo-600">{currentSection.title}</span>
-          </div>
-        </div>
-        <div className="space-y-3">
-          <div className="rounded-lg border border-gray-200 bg-white p-4 hover:bg-gray-50 cursor-pointer transition-colors">
-            <p className="text-sm font-medium text-gray-900">📖 Manual de Cábala Aplicada</p>
-            <p className="text-xs text-gray-500 mt-1">Guía de uso del workspace simbólico.</p>
-          </div>
-          <div className="rounded-lg border border-gray-200 bg-white p-4 hover:bg-gray-50 cursor-pointer transition-colors">
-            <p className="text-sm font-medium text-gray-900">🔢 Diccionario de Gematría</p>
-            <p className="text-xs text-gray-500 mt-1">Valores numéricos y correspondencias.</p>
-          </div>
-          <div className="rounded-lg border border-gray-200 bg-white p-4 hover:bg-gray-50 cursor-pointer transition-colors">
-            <p className="text-sm font-medium text-gray-900">🌳 Árbol de la Vida - Referencia</p>
-            <p className="text-xs text-gray-500 mt-1">Sefirot, senderos y atributos.</p>
-          </div>
-          <div className="rounded-lg border border-gray-200 bg-white p-4 hover:bg-gray-50 cursor-pointer transition-colors">
-            <p className="text-sm font-medium text-gray-900">❓ Preguntas Frecuentes</p>
-            <p className="text-xs text-gray-500 mt-1">FAQ sobre el uso terapéutico.</p>
-          </div>
-        </div>
+      <section className="flex-1 bg-white border border-gray-200 rounded-xl p-6 shadow-sm overflow-y-auto">
+        <ResourcesPanel />
       </section>
     );
   }

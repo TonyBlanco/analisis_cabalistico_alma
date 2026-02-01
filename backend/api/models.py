@@ -1680,3 +1680,68 @@ class FederationAuditLog(models.Model):
     def __str__(self) -> str:  # pragma: no cover
         return f'ResonanciaRelation {self.position} ({self.subject_id})'
 
+
+# ==============================================================================
+# NARRATIVE DOCUMENTS - Documentos Narrativos para Consultantes
+# ==============================================================================
+
+NARRATIVE_DOCUMENT_TYPES = [
+    ('soul_letter', 'Carta del Alma'),
+    ('journey_map', 'Mapa del Viaje'),
+    ('process_book', 'Libro del Proceso'),
+]
+
+class NarrativeDocument(models.Model):
+    """
+    Documentos narrativos generados para el consultante.
+    Se muestran en su panel personal de "Proceso".
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    
+    # Relación con consultante
+    consultante = models.ForeignKey(
+        Consultante,
+        on_delete=models.CASCADE,
+        related_name='narrative_documents',
+        help_text='Consultante dueño del documento'
+    )
+    
+    # Terapeuta que generó el documento
+    generated_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='generated_narratives',
+        help_text='Terapeuta que generó el documento'
+    )
+    
+    # Tipo y contenido
+    document_type = models.CharField(
+        max_length=20,
+        choices=NARRATIVE_DOCUMENT_TYPES,
+        help_text='Tipo de documento narrativo'
+    )
+    title = models.CharField(max_length=255, help_text='Título del documento')
+    content = models.JSONField(help_text='Contenido del documento en formato JSON')
+    
+    # Metadatos
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_visible_to_consultante = models.BooleanField(
+        default=True,
+        help_text='Si el consultante puede ver este documento'
+    )
+    
+    class Meta:
+        verbose_name = 'Documento Narrativo'
+        verbose_name_plural = 'Documentos Narrativos'
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['consultante', '-created_at']),
+            models.Index(fields=['document_type', '-created_at']),
+        ]
+    
+    def __str__(self):
+        return f'{self.get_document_type_display()} - {self.consultante.full_name}'
+
+

@@ -79,6 +79,7 @@ interface ArbolVivoPanelProps {
   consultantUuid?: string;
   consultantName?: string;
   onProgressUpdate?: (state: ArbolVivoState) => void;
+  readOnly?: boolean; // If true, hides add/edit controls (for patient view)
 }
 
 // ==============================================================================
@@ -134,7 +135,8 @@ const ACHIEVEMENT_CATEGORIES: Record<Achievement['category'], { label: string; c
 export default function ArbolVivoPanel({
   consultantUuid,
   consultantName = 'Consultante',
-  onProgressUpdate
+  onProgressUpdate,
+  readOnly = false
 }: ArbolVivoPanelProps) {
   // State
   const [state, setState] = useState<ArbolVivoState | null>(null);
@@ -453,24 +455,26 @@ export default function ArbolVivoPanel({
           </span>
         </div>
 
-        {/* Add new milestone */}
-        <div className="flex gap-2 mb-4">
-          <input
-            type="text"
-            value={newMilestone}
-            onChange={(e) => setNewMilestone(e.target.value)}
-            placeholder="Nuevo hito terapéutico..."
-            className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500"
-            onKeyPress={(e) => e.key === 'Enter' && addMilestone()}
-          />
-          <button
-            onClick={addMilestone}
-            disabled={!newMilestone.trim() || addingMilestone}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors"
-          >
-            <Plus className="h-4 w-4" />
-          </button>
-        </div>
+        {/* Add new milestone - only visible for therapists */}
+        {!readOnly && (
+          <div className="flex gap-2 mb-4">
+            <input
+              type="text"
+              value={newMilestone}
+              onChange={(e) => setNewMilestone(e.target.value)}
+              placeholder="Nuevo hito terapéutico..."
+              className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500"
+              onKeyPress={(e) => e.key === 'Enter' && addMilestone()}
+            />
+            <button
+              onClick={addMilestone}
+              disabled={!newMilestone.trim() || addingMilestone}
+              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors"
+            >
+              <Plus className="h-4 w-4" />
+            </button>
+          </div>
+        )}
 
         {/* Milestones list */}
         <div className="space-y-2">
@@ -478,13 +482,14 @@ export default function ArbolVivoPanel({
             <div 
               key={milestone.id}
               className={`
-                flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all
+                flex items-center gap-3 p-3 rounded-lg border transition-all
+                ${!readOnly ? 'cursor-pointer' : ''}
                 ${milestone.completed 
                   ? 'bg-green-50 border-green-200' 
                   : 'bg-white border-gray-200 hover:border-gray-300'
                 }
               `}
-              onClick={() => toggleMilestone(milestone.id)}
+              onClick={() => !readOnly && toggleMilestone(milestone.id)}
             >
               <div className={`
                 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors

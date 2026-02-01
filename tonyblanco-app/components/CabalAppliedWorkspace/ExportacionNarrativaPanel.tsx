@@ -48,6 +48,7 @@ interface ExportDocument {
 interface ExportacionNarrativaPanelProps {
   birthDate: string;
   consultantName: string;
+  consultanteUuid?: string;  // UUID del consultante para guardar documento
   journeyData?: JourneyData;
   onExportGenerated?: (doc: ExportDocument) => void;
 }
@@ -86,6 +87,7 @@ const EXPORT_TYPES = [
 export default function ExportacionNarrativaPanel({
   birthDate,
   consultantName,
+  consultanteUuid,
   journeyData = {},
   onExportGenerated
 }: ExportacionNarrativaPanelProps) {
@@ -94,6 +96,37 @@ export default function ExportacionNarrativaPanel({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [previewMode, setPreviewMode] = useState(false);
+  const [savedToConsultant, setSavedToConsultant] = useState(false);
+
+  // Función para guardar documento en el perfil del consultante
+  const saveToConsultantProfile = useCallback(async (doc: ExportDocument, docType: string) => {
+    if (!consultanteUuid) return;
+    
+    try {
+      const token = getAuthToken();
+      const response = await fetch(`${API_BASE_URL}/narrative-documents/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Token ${token}` } : {})
+        },
+        body: JSON.stringify({
+          consultante_uuid: consultanteUuid,
+          document_type: docType,
+          title: doc.title,
+          content: doc.content
+        })
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setSavedToConsultant(true);
+        console.log('[ExportacionNarrativa] Documento guardado para consultante:', data.message);
+      }
+    } catch (err) {
+      console.error('[ExportacionNarrativa] Error guardando documento:', err);
+    }
+  }, [consultanteUuid]);
 
   const generateExport = useCallback(async (exportType: string) => {
     if (!birthDate) {
@@ -126,6 +159,11 @@ export default function ExportacionNarrativaPanel({
         setGeneratedDoc(data.document);
         setPreviewMode(true);
         onExportGenerated?.(data.document);
+        
+        // Guardar automáticamente en el perfil del consultante
+        if (consultanteUuid) {
+          await saveToConsultantProfile(data.document, exportType);
+        }
       } else {
         setError(data.error || 'Error al generar documento');
       }
@@ -134,7 +172,7 @@ export default function ExportacionNarrativaPanel({
     } finally {
       setLoading(false);
     }
-  }, [birthDate, consultantName, journeyData, onExportGenerated]);
+  }, [birthDate, consultantName, consultanteUuid, journeyData, onExportGenerated, saveToConsultantProfile]);
 
   const downloadDocument = useCallback(() => {
     if (!generatedDoc) return;
@@ -288,6 +326,23 @@ export default function ExportacionNarrativaPanel({
         </div>
       </div>
 
+      {/* Mensaje de guardado exitoso para el consultante */}
+      {savedToConsultant && (
+        <div className="mx-6 mt-4 bg-emerald-50 border border-emerald-200 rounded-lg p-3 flex items-center gap-3">
+          <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center">
+            <Sparkles className="w-4 h-4 text-emerald-600" />
+          </div>
+          <div>
+            <p className="text-sm font-medium text-emerald-800">
+              ✓ Documento enviado al consultante
+            </p>
+            <p className="text-xs text-emerald-600">
+              {consultantName} podrá verlo en su panel de Proceso
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="p-6">
         {generatedDoc && (
           <DocumentPreview document={generatedDoc} />
@@ -300,6 +355,18 @@ export default function ExportacionNarrativaPanel({
 // Componente de previsualización de documento
 function DocumentPreview({ document }: { document: ExportDocument }) {
   const { content } = document;
+
+  // Validar que content exista y sea un objeto
+  if (!content || typeof content !== 'object') {
+    return (
+      <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg p-4">
+        <div className="flex items-center gap-2 text-yellow-700 dark:text-yellow-300">
+          <AlertCircle className="w-5 h-5" />
+          <p className="text-sm">Estructura de documento incompleta. Contenido no disponible.</p>
+        </div>
+      </div>
+    );
+  }
 
   // Renderizar según el tipo de documento
   if (content.format === 'soul_letter') {

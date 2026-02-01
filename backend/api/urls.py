@@ -190,6 +190,10 @@ from .cabala_ai_views import (
     CabalaAIGovernanceStatusView,
     CabalaAIValidatePromptView,
 )
+from .views_narrative_documents import (
+    NarrativeDocumentListCreateView,
+    NarrativeDocumentDetailView,
+)
 # SWM v3 - Symbolic Workspace Module v3
 from symbolic.swm_v3.views import SwmV3SymbolicReadingCreateView, SwmV3SystemsListView
 
@@ -452,4 +456,8 @@ urlpatterns = [
     path('cabala-ai/sefira-attributes/<str:sefira>/', CabalaAISefiraAttributesView.as_view(), name='cabala_ai_sefira_attributes'),
     path('cabala-ai/governance-status/', CabalaAIGovernanceStatusView.as_view(), name='cabala_ai_governance_status'),
     path('cabala-ai/validate-prompt/', CabalaAIValidatePromptView.as_view(), name='cabala_ai_validate_prompt'),
+    
+    # ========== DOCUMENTOS NARRATIVOS (Carta del Alma, Mapa del Viaje, Libro del Proceso) ==========
+    path('narrative-documents/', NarrativeDocumentListCreateView.as_view(), name='narrative_documents_list_create'),
+    path('narrative-documents/<uuid:document_id>/', NarrativeDocumentDetailView.as_view(), name='narrative_document_detail'),
 ]

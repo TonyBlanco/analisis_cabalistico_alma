@@ -1,13 +1,14 @@
 """
 Multi-Provider AI Service with Automatic Fallback
 
-Provides reliable AI text generation with automatic failover between:
-1. Gemini (Google) - Primary
-2. OpenAI (GPT-4o-mini) - Secondary  
-3. Groq (Llama) - Tertiary
-4. Ollama (Local) - Final fallback
+Provides reliable AI text generation with automatic failover between providers.
+This deployment prioritizes GROQ as the primary provider (for performance and governance).
+Fallback order (default):
+1. Groq (preferred)
+2. OpenAI (fallback)
+3. Ollama (local fallback)
 
-If one provider fails (503, rate limit, etc.), automatically tries the next.
+If one provider fails (503, rate limit, etc.), the service tries the next available provider.
 """
 import logging
 from typing import Optional, Dict, Any, List
@@ -252,8 +253,8 @@ class MultiAIService:
         response = ai.generate("Your prompt here")
     """
     
-    # Provider order for fallback - Groq first (better rate limits), then Gemini, then OpenAI
-    PROVIDERS = ['groq', 'gemini', 'openai', 'ollama']
+    # Provider order for fallback - Groq first (preferred), then OpenAI, then Ollama
+    PROVIDERS = ['groq', 'openai', 'ollama']
     
     def __init__(self, preferred_provider: Optional[str] = None):
         """
@@ -268,13 +269,12 @@ class MultiAIService:
     def _check_available_providers(self) -> List[str]:
         """Check which providers are available"""
         available = []
-        
-        if getattr(settings, 'GEMINI_API_KEY', ''):
-            available.append('gemini')
-        if getattr(settings, 'OPENAI_API_KEY', ''):
-            available.append('openai')
+        # Prefer GROQ if configured
         if getattr(settings, 'GROQ_API_KEY', ''):
             available.append('groq')
+        # OpenAI only as fallback if GROQ not available or as configured
+        if getattr(settings, 'OPENAI_API_KEY', ''):
+            available.append('openai')
         # Ollama is always potentially available (local)
         available.append('ollama')
         

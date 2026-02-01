@@ -163,22 +163,28 @@ export async function generateSymbolicSuggestion(
   }
 
   try {
-    // Call the AI API (using OpenAI-compatible endpoint)
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    // Call the AI API via configured provider endpoint (env-configurable)
+    const aiApiUrl = typeof process !== 'undefined' ? process.env.NEXT_PUBLIC_AI_API_URL : undefined;
+    const endpoint = aiApiUrl || 'https://api.groq.example/v1/complete';
+
+    const payload = {
+      // Generic provider payload: adapter on server should translate to GROQ or provider-specific format
+      model: process?.env?.NEXT_PUBLIC_AI_MODEL || 'gpt-4o-mini',
+      messages: [
+        { role: 'system', content: phaseSystemPrompt },
+        { role: 'user', content: userPrompt },
+      ],
+      max_tokens: 150,
+      temperature: 0.7,
+    };
+
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${apiKey}`,
       },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: phaseSystemPrompt },
-          { role: 'user', content: userPrompt },
-        ],
-        max_tokens: 150,
-        temperature: 0.7,
-      }),
+      body: JSON.stringify(payload),
     });
 
     if (!response.ok) {

@@ -7,8 +7,12 @@
 
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
+// Detectar si el frontend debe usar el proxy / proveedor externo (GROQ)
+export const USE_GROQ_PROXY = Boolean(process.env.NEXT_PUBLIC_AI_API_URL || process.env.NEXT_PUBLIC_GROQ_API_URL);
+
 // ==================== CONFIGURACIÓN DE API KEY ====================
-export const GEMINI_API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY || "";
+// Si existe una URL de proxy/GROQ preferimos no inicializar Gemini en el cliente.
+export const GEMINI_API_KEY = USE_GROQ_PROXY ? "" : (process.env.NEXT_PUBLIC_GEMINI_API_KEY || "");
 
 // ==================== MODELOS DISPONIBLES (ORDEN DE PRIORIDAD) ====================
 // IMPORTANTE: Estos modelos están verificados y funcionan con tu cuenta
@@ -33,16 +37,21 @@ export const GEMINI_GENERATION_CONFIG = {
 let geminiClient: GoogleGenerativeAI | null = null;
 
 export function getGeminiClient(): GoogleGenerativeAI | null {
+  if (USE_GROQ_PROXY) {
+    console.info("ℹ️ GROQ/proxy detected in env; frontend will use proxy endpoint instead of initializing Gemini client.");
+    return null;
+  }
+
   if (!GEMINI_API_KEY) {
     console.warn("⚠️ NEXT_PUBLIC_GEMINI_API_KEY no está configurada");
     return null;
   }
-  
+
   if (!geminiClient) {
     geminiClient = new GoogleGenerativeAI(GEMINI_API_KEY);
     console.log("✅ Cliente Gemini inicializado");
   }
-  
+
   return geminiClient;
 }
 

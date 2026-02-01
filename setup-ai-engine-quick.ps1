@@ -30,7 +30,8 @@ cd ..
 # Step 2: Install Dependencies
 Write-Host "`n[2/4] Installing AI dependencies..." -ForegroundColor Yellow
 $packages = @(
-    "openai==1.12.0",
+    # Use GROQ provider by default; OpenAI is optional fallback
+    # "openai==1.12.0",
     "pinecone-client==3.0.0",
     "tiktoken==0.6.0",
     "tenacity==8.2.3",
@@ -63,9 +64,9 @@ if (Test-Path $envPath) {
 
 # Check if AI_ENGINE_ENABLED already exists
 if ($existingEnv -notmatch "AI_ENGINE_ENABLED") {
-    Write-Host "`nEnter API keys (press Enter to skip):" -ForegroundColor Cyan
+    Write-Host "\nEnter API keys (press Enter to skip):" -ForegroundColor Cyan
     
-    $openaiKey = Read-Host "OpenAI API Key (sk-...)"
+    $groqKey = Read-Host "GROQ API Key (or provider key)"
     $pineconeKey = Read-Host "Pinecone API Key (optional)"
     $pineconeEnv = Read-Host "Pinecone Environment (default: us-west1-gcp)"
     
@@ -79,9 +80,9 @@ if ($existingEnv -notmatch "AI_ENGINE_ENABLED") {
 # AI Engine Configuration (Added by setup-ai-engine-quick.ps1)
 # ============================================================================
 AI_ENGINE_ENABLED=true
-OPENAI_API_KEY=$openaiKey
-OPENAI_MODEL=gpt-4-turbo-preview
-OPENAI_EMBEDDING_MODEL=text-embedding-3-large
+GROQ_API_KEY=$groqKey
+GROQ_MODEL=gpt-4o-mini
+GROQ_EMBEDDING_MODEL=text-embedding-3-large
 PINECONE_API_KEY=$pineconeKey
 PINECONE_ENVIRONMENT=$pineconeEnv
 PINECONE_INDEX_NAME=holistica-knowledge
@@ -99,11 +100,11 @@ AI_CACHE_TTL=86400
 # Step 4: Verification
 Write-Host "`n[4/4] Verifying setup..." -ForegroundColor Yellow
 
-# Check OpenAI key
-if ($openaiKey -and $openaiKey.StartsWith("sk-")) {
-    Write-Host "  ✅ OpenAI API key configured" -ForegroundColor Green
+# Check GROQ key (best-effort validation)
+if ($groqKey) {
+    Write-Host "  ✅ GROQ/API provider key configured" -ForegroundColor Green
 } else {
-    Write-Host "  ⚠️  No valid OpenAI key - AI Engine will not work" -ForegroundColor Yellow
+    Write-Host "  ⚠️  No provider key configured - AI Engine may be limited" -ForegroundColor Yellow
 }
 
 # Check Pinecone key

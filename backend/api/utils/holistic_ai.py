@@ -6,6 +6,7 @@ import json
 from typing import Dict, Any, List, Optional
 from django.conf import settings
 from .genai_response import extract_text
+from .multi_ai_service import MultiAIService
 
 # Importar Gemini
 genai = None
@@ -21,13 +22,27 @@ class HolisticTherapistAI:
     
     def __init__(self):
         """Inicializa el cliente de Gemini"""
-        api_key = getattr(settings, 'GEMINI_API_KEY', None)
-        model_name = getattr(settings, 'GEMINI_MODEL', 'gemini-1.5-flash')
-        
+        # Preferir Groq si está configurado, usando el servicio multi-provider
+        groq_key = getattr(settings, 'GROQ_API_KEY', '')
         self.enabled = False
         self.model = None
         self.error_message = None
-        
+        self._use_multi = False
+
+        if groq_key:
+            try:
+                self.model = MultiAIService(preferred_provider='groq')
+                self._use_multi = True
+                self.enabled = True
+                print("[OK] HolisticTherapistAI configurado usando MultiAIService con preferencia GROQ")
+                return
+            except Exception as e:
+                self.error_message = f"Error iniciando MultiAIService: {e}"
+                print(f"[WARNING] {self.error_message}")
+
+        # Fallback: intentar inicializar Gemini (legacy)
+        api_key = getattr(settings, 'GEMINI_API_KEY', None)
+        model_name = getattr(settings, 'GEMINI_MODEL', 'gemini-1.5-flash')
         if not api_key:
             self.error_message = "GEMINI_API_KEY no está configurada en settings.py"
             print(f"[WARNING] {self.error_message}")
@@ -199,19 +214,24 @@ IMPORTANTE:
 """
         
         try:
-            response = self.model(
-                model=getattr(settings, 'GEMINI_MODEL', 'gemini-2.5-flash'),
-                contents=prompt,
-                config={
-                    "temperature": 0.7,
-                    "top_p": 0.8,
-                    "top_k": 40,
-                    "max_output_tokens": 2048,
-                }
-            )
-            
-            # Extraer el texto de la respuesta
-            response_text = extract_text(response).strip()
+            if self._use_multi and isinstance(self.model, MultiAIService):
+                result = self.model.generate(prompt, temperature=0.7, max_tokens=2048, top_p=0.8)
+                if not result.get('success'):
+                    return {"error": result.get('error', 'MultiAIService error')}
+                response_text = result.get('text', '').strip()
+            else:
+                response = self.model(
+                    model=getattr(settings, 'GEMINI_MODEL', 'gemini-2.5-flash'),
+                    contents=prompt,
+                    config={
+                        "temperature": 0.7,
+                        "top_p": 0.8,
+                        "top_k": 40,
+                        "max_output_tokens": 2048,
+                    }
+                )
+                # Extraer el texto de la respuesta
+                response_text = extract_text(response).strip()
             
             # Limpiar el texto si tiene markdown code blocks
             if response_text.startswith('```json'):

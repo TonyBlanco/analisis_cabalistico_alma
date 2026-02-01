@@ -26,6 +26,7 @@ try:
     genai = genai_local
 except ImportError:
     genai = None
+from .multi_ai_service import MultiAIService
 
 
 # ==============================================================================
@@ -288,22 +289,35 @@ class MeditationAIService:
     
     def __init__(self):
         """Initialize Gemini client."""
-        api_key = getattr(settings, 'GEMINI_API_KEY', None)
-        model_name = getattr(settings, 'GEMINI_MODEL', 'gemini-1.5-flash')
-        
+        groq_key = getattr(settings, 'GROQ_API_KEY', '')
         self.enabled = False
         self.error_message = None
-        
+        self._use_multi = False
+
+        if groq_key:
+            try:
+                self.client = MultiAIService(preferred_provider='groq')
+                self._use_multi = True
+                self.enabled = True
+                logger.info("MeditationAIService configured using MultiAIService (GROQ preferred)")
+                return
+            except Exception as e:
+                self.error_message = f"Error initializing MultiAIService: {e}"
+                logger.warning(self.error_message)
+
+        api_key = getattr(settings, 'GEMINI_API_KEY', None)
+        model_name = getattr(settings, 'GEMINI_MODEL', 'gemini-1.5-flash')
+
         if not api_key:
             self.error_message = "GEMINI_API_KEY not configured"
             logger.warning(self.error_message)
             return
-        
+
         if not genai:
             self.error_message = "google.genai module not installed"
             logger.warning(self.error_message)
             return
-        
+
         try:
             self.client = genai.Client(api_key=api_key)
             self.model_name = model_name
@@ -360,29 +374,36 @@ class MeditationAIService:
         )
         
         try:
-            # Llamar a Gemini
-            response = self.client.models.generate_content(
-                model=self.model_name,
-                contents=[
-                    {"role": "user", "parts": [{"text": SYSTEM_PROMPT}]},
-                    {"role": "model", "parts": [{"text": "Entendido. Estoy listo para generar meditaciones cabalísticas siguiendo la estructura y principios indicados. Por favor, proporciona los parámetros."}]},
-                    {"role": "user", "parts": [{"text": user_prompt}]}
-                ],
-                config={
-                    "temperature": 0.7,
-                    "top_p": 0.85,
-                    "max_output_tokens": 4096,
-                }
-            )
-            
-            # Extraer texto
-            response_text = ""
-            if hasattr(response, 'text'):
-                response_text = response.text
-            elif hasattr(response, 'candidates') and response.candidates:
-                candidate = response.candidates[0]
-                if hasattr(candidate, 'content') and candidate.content.parts:
-                    response_text = candidate.content.parts[0].text
+            if self._use_multi and isinstance(self.client, MultiAIService):
+                # Usar prompt compuesto como texto para MultiAIService
+                result = self.client.generate(user_prompt, temperature=0.7, max_tokens=4096, top_p=0.85)
+                if not result.get('success'):
+                    raise RuntimeError(result.get('error', 'MultiAIService error'))
+                response_text = result.get('text', '')
+            else:
+                # Llamar a Gemini
+                response = self.client.models.generate_content(
+                    model=self.model_name,
+                    contents=[
+                        {"role": "user", "parts": [{"text": SYSTEM_PROMPT}]},
+                        {"role": "model", "parts": [{"text": "Entendido. Estoy listo para generar meditaciones cabalísticas siguiendo la estructura y principios indicados. Por favor, proporciona los parámetros."}]},
+                        {"role": "user", "parts": [{"text": user_prompt}]}
+                    ],
+                    config={
+                        "temperature": 0.7,
+                        "top_p": 0.85,
+                        "max_output_tokens": 4096,
+                    }
+                )
+                
+                # Extraer texto
+                response_text = ""
+                if hasattr(response, 'text'):
+                    response_text = response.text
+                elif hasattr(response, 'candidates') and response.candidates:
+                    candidate = response.candidates[0]
+                    if hasattr(candidate, 'content') and candidate.content.parts:
+                        response_text = candidate.content.parts[0].text
             
             if not response_text:
                 raise RuntimeError("No se recibió respuesta de la IA")

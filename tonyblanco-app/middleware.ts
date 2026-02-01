@@ -15,13 +15,15 @@ export function middleware(request: NextRequest) {
     // Define CSP policies
     // Note: We include 'unsafe-inline' for now to ensure compatibility with existing components that might use it,
     // but we aim for a more restrictive policy later once verified.
+    const aiProvider = process.env.NEXT_PUBLIC_AI_PROVIDER_URL || 'https://api.groq.example';
+
     const cspHeader = `
     default-src 'self';
     script-src 'self' 'unsafe-inline' 'unsafe-eval';
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
     img-src 'self' blob: data: https:;
     font-src 'self' https://fonts.gstatic.com;
-    connect-src 'self' http://localhost:8000 http://127.0.0.1:8000 http://localhost:5000 https://api.openai.com https://generativelanguage.googleapis.com;
+    connect-src 'self' http://localhost:8000 http://127.0.0.1:8000 http://localhost:5000 ${aiProvider} https://generativelanguage.googleapis.com;
     frame-src 'self';
     object-src 'none';
     base-uri 'self';

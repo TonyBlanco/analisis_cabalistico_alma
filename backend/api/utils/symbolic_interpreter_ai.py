@@ -16,6 +16,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from .genai_response import extract_text
+from .multi_ai_service import MultiAIService
 
 # Import Gemini
 genai = None
@@ -31,12 +32,26 @@ class SymbolicInterpreterAI:
     
     def __init__(self):
         """Initialize Gemini client"""
-        api_key = getattr(settings, 'GEMINI_API_KEY', None)
-        model_name = getattr(settings, 'GEMINI_MODEL', 'gemini-1.5-flash')
-        
+        # Prefer Groq via MultiAIService if available
+        groq_key = getattr(settings, 'GROQ_API_KEY', '')
         self.enabled = False
         self.model = None
         self.error_message = None
+        self._use_multi = False
+
+        if groq_key:
+            try:
+                self.client = MultiAIService(preferred_provider='groq')
+                self._use_multi = True
+                self.enabled = True
+                print('[OK] SymbolicInterpreterAI configured using MultiAIService (GROQ preferred)')
+                return
+            except Exception as e:
+                self.error_message = f"Error initializing MultiAIService: {e}"
+                print(f"[WARNING] {self.error_message}")
+
+        api_key = getattr(settings, 'GEMINI_API_KEY', None)
+        model_name = getattr(settings, 'GEMINI_MODEL', 'gemini-1.5-flash')
         
         if not api_key:
             self.error_message = "GEMINI_API_KEY not configured"
@@ -112,12 +127,18 @@ class SymbolicInterpreterAI:
             raise Exception(self.error_message or "AI service not enabled")
         
         try:
-            response = self.model(
-                model=self.model_name,
-                contents=prompt,
-                config=self.generation_config
-            )
-            return extract_text(response)
+            if self._use_multi and isinstance(self.client, MultiAIService):
+                result = self.client.generate(prompt, temperature=0.7, max_tokens=1024, top_p=0.8)
+                if not result.get('success'):
+                    raise Exception(result.get('error', 'MultiAIService error'))
+                return result.get('text', '')
+            else:
+                response = self.model(
+                    model=self.model_name,
+                    contents=prompt,
+                    config=self.generation_config
+                )
+                return extract_text(response)
         except Exception as e:
             error_msg = f"Error generating AI interpretation: {str(e)}"
             print(f"[ERROR] {error_msg}")

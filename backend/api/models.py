@@ -1689,6 +1689,7 @@ NARRATIVE_DOCUMENT_TYPES = [
     ('soul_letter', 'Carta del Alma'),
     ('journey_map', 'Mapa del Viaje'),
     ('process_book', 'Libro del Proceso'),
+    ('meditation', 'Meditación Personalizada'),
 ]
 
 class NarrativeDocument(models.Model):

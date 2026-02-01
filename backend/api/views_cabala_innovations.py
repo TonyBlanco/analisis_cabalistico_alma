@@ -6,6 +6,7 @@ Endpoints:
 2. /api/cabala/alertas-preventivas/ - Alertas Preventivas Éticas
 3. /api/cabala/exportacion-narrativa/ - Exportación Narrativa Hermosa
 4. /api/cabala/calendario-cosmico/ - Conexión Calendario Lunar/Solar
+5. /api/cabala/meditaciones/ - Meditaciones Personalizadas por Sefirá (con IA)
 
 Todos los endpoints requieren autenticación y datos del consultante.
 """
@@ -26,6 +27,8 @@ from .cabala_calendario_cosmico import CalendarioCosmicoCabala
 from .cabala_laboratorio_nombres import LaboratorioNombres
 from .cabala_meditaciones_personalizadas import MeditacionesPersonalizadas
 from .cabala_arbol_vivo import ArbolVivo
+from .utils.meditation_ai_service import meditation_ai_service, SEFIROT_MEDITATION_DATA, MEDITATION_TYPES
+from .models import NarrativeDocument
 
 logger = logging.getLogger(__name__)
 
@@ -620,25 +623,26 @@ class CabalaLaboratorioNombresView(APIView):
 
 
 # ==============================================================================
-# INNOVACIÓN 5: MEDITACIONES PERSONALIZADAS
+# INNOVACIÓN 5: MEDITACIONES PERSONALIZADAS (CON IA)
 # ==============================================================================
 
 class CabalaMeditacionesView(APIView):
     """
-    INNOVACIÓN 5: Meditaciones Personalizadas por Sefirá
+    INNOVACIÓN 5: Meditaciones Personalizadas por Sefirá con IA Generativa
     
     POST /api/cabala/meditaciones/
     
-    Genera meditaciones guiadas adaptadas:
-    - Sefirá objetivo
-    - Tipo (equilibrio, fortalecimiento, sanación, integración)
-    - Duración personalizada
-    - Intención personal
+    Genera meditaciones guiadas usando Gemini AI con prompt especializado
+    en Cábala Aplicada. Cada meditación:
+    - Está alineada con la Sefirá seleccionada
+    - Respeta la duración solicitada
+    - Incluye estructura tradicional (apertura, activación, contemplación, cierre)
+    - Puede guardarse en el perfil del consultante
     """
     permission_classes = [IsAuthenticated]
     
     def post(self, request):
-        """Genera meditación personalizada"""
+        """Genera meditación personalizada con IA"""
         try:
             # Validar datos requeridos
             target_sefira = request.data.get('target_sefira')
@@ -651,61 +655,119 @@ class CabalaMeditacionesView(APIView):
                 )
             
             # Validar sefirá
-            valid_sefirot = [
-                'keter', 'chokmah', 'binah', 'chesed', 'gevurah',
-                'tiferet', 'netzach', 'hod', 'yesod', 'malkuth'
-            ]
-            if target_sefira.lower() not in valid_sefirot:
+            target_sefira = target_sefira.lower()
+            if target_sefira not in SEFIROT_MEDITATION_DATA:
                 return Response(
-                    {'error': f'Sefirá inválida. Válidas: {valid_sefirot}'},
+                    {'error': f'Sefirá inválida: {target_sefira}'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
             
             # Validar tipo
-            valid_types = ['equilibrio', 'fortalecimiento', 'sanacion', 'integracion']
-            if meditation_type.lower() not in valid_types:
+            meditation_type = meditation_type.lower()
+            if meditation_type not in MEDITATION_TYPES:
                 return Response(
-                    {'error': f'Tipo inválido. Válidos: {valid_types}'},
+                    {'error': f'Tipo inválido: {meditation_type}'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
             
-            # Parámetros opcionales
+            # Verificar que el servicio de IA esté disponible
+            if not meditation_ai_service.enabled:
+                # Fallback al generador estático si IA no disponible
+                logger.warning("IA no disponible, usando generador estático")
+                generator = MeditacionesPersonalizadas()
+                duration = int(request.data.get('duration_minutes', 10))
+                include_breathing = request.data.get('include_breathing', True)
+                include_visualization = request.data.get('include_visualization', True)
+                personal_intention = request.data.get('personal_intention', '')
+                consultant_name = request.data.get('consultant_name', 'Consultante')
+                
+                result = generator.generate_meditation(
+                    target_sefira=target_sefira,
+                    meditation_type=meditation_type,
+                    duration_minutes=min(max(5, duration), 60),
+                    include_breathing=include_breathing,
+                    include_visualization=include_visualization,
+                    personal_intention=personal_intention,
+                    consultant_name=consultant_name
+                )
+                
+                return Response({
+                    'success': True,
+                    'meditation': result,
+                    'generated_at': datetime.now().isoformat(),
+                    'ai_generated': False,
+                    'usage_note': (
+                        'Esta meditación fue generada con plantillas. '
+                        'Para meditaciones personalizadas con IA, configura GEMINI_API_KEY.'
+                    )
+                })
+            
+            # Parámetros
             duration = int(request.data.get('duration_minutes', 10))
             include_breathing = request.data.get('include_breathing', True)
             include_visualization = request.data.get('include_visualization', True)
             personal_intention = request.data.get('personal_intention', '')
-            consultant_name = request.data.get('consultant_name', 'Consultante')
+            consultante_uuid = request.data.get('consultante_uuid')
+            save_to_profile = request.data.get('save_to_profile', False)
             
             # Limitar duración
             duration = min(max(5, duration), 60)
             
-            # Generar meditación
-            generator = MeditacionesPersonalizadas()
-            result = generator.generate_meditation(
-                target_sefira=target_sefira.lower(),
-                meditation_type=meditation_type.lower(),
+            # Generar meditación con IA
+            result = meditation_ai_service.generate_meditation(
+                target_sefira=target_sefira,
+                meditation_type=meditation_type,
                 duration_minutes=duration,
                 include_breathing=include_breathing,
                 include_visualization=include_visualization,
-                personal_intention=personal_intention,
-                consultant_name=consultant_name
+                personal_intention=personal_intention
             )
+            
+            # Guardar en perfil del consultante si se solicita
+            saved_document_id = None
+            if save_to_profile and consultante_uuid:
+                try:
+                    from .models import CustomUser
+                    consultante = CustomUser.objects.filter(uuid=consultante_uuid).first()
+                    
+                    if consultante:
+                        # Crear documento narrativo de tipo meditación
+                        doc = NarrativeDocument.objects.create(
+                            consultante=consultante,
+                            generated_by=request.user,
+                            document_type='meditation',
+                            title=result.get('title', f"Meditación de {result.get('type_name', '')} - {result.get('sefira_name', '')}"),
+                            content=result,
+                            is_visible_to_consultante=True
+                        )
+                        saved_document_id = str(doc.id)
+                        logger.info(f"Meditación guardada para consultante {consultante_uuid}: {doc.id}")
+                except Exception as save_error:
+                    logger.error(f"Error guardando meditación: {save_error}")
+                    # No fallar si no se puede guardar, solo loggear
             
             return Response({
                 'success': True,
                 'meditation': result,
                 'generated_at': datetime.now().isoformat(),
+                'ai_generated': True,
+                'saved_document_id': saved_document_id,
                 'usage_note': (
-                    'Esta meditación es una guía para tu práctica personal. '
-                    'Adáptala según te sientas guiado/a. El objetivo no es la perfección, '
-                    'sino la presencia y la intención amorosa.'
+                    'Esta meditación fue creada especialmente para ti con inteligencia artificial. '
+                    'Es una guía para tu práctica personal. Adáptala según te sientas guiado/a. '
+                    'El objetivo no es la perfección, sino la presencia y la intención amorosa.'
                 )
             })
             
+        except ValueError as ve:
+            return Response(
+                {'error': str(ve)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         except Exception as e:
             logger.error(f"Error en meditaciones personalizadas: {str(e)}")
             return Response(
-                {'error': str(e)},
+                {'error': f'Error generando meditación: {str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 

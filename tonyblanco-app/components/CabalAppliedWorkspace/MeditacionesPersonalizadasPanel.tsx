@@ -52,20 +52,33 @@ interface MeditationConfig {
 interface MeditationContent {
   title: string;
   sefira: SefiraName;
+  sefira_name?: string;
   duration_minutes: number;
   type: MeditationType;
-  introduction: string;
+  type_name?: string;
+  // Static generator fields
+  introduction?: string;
   breathing_exercise?: string;
-  visualization: string;
-  affirmations: string[];
-  closing: string;
-  practice_tips: string[];
-  best_time: string;
-  frequency_recommendation: string;
+  visualization?: string;
+  affirmations?: string[];
+  closing?: string;
+  practice_tips?: string[];
+  best_time?: string;
+  frequency_recommendation?: string;
+  // AI generator fields
+  opening?: string;
+  sefira_explanation?: string;
+  activation?: string;
+  divine_name_contemplation?: string;
+  integration?: string;
+  divine_name?: string;
+  color?: string;
+  generated_by_ai?: boolean;
 }
 
 interface MeditacionesPanelProps {
   consultantName?: string;
+  consultanteUuid?: string;
   currentSefira?: SefiraName;
   deficientSefira?: SefiraName;
   onMeditationGenerated?: (meditation: MeditationContent) => void;
@@ -207,6 +220,7 @@ const DURATION_OPTIONS = [5, 10, 15, 20, 30];
 
 export default function MeditacionesPersonalizadasPanel({
   consultantName = 'Consultante',
+  consultanteUuid,
   currentSefira,
   deficientSefira,
   onMeditationGenerated
@@ -218,12 +232,14 @@ export default function MeditacionesPersonalizadasPanel({
   const [includeBreathing, setIncludeBreathing] = useState(true);
   const [includeVisualization, setIncludeVisualization] = useState(true);
   const [personalIntention, setPersonalIntention] = useState('');
+  const [saveToProfile, setSaveToProfile] = useState(true);
 
   // Result State
   const [meditation, setMeditation] = useState<MeditationContent | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [savedToConsultant, setSavedToConsultant] = useState(false);
 
   // Handlers
   const generateMeditation = useCallback(async () => {
@@ -234,10 +250,11 @@ export default function MeditacionesPersonalizadasPanel({
 
     setLoading(true);
     setError(null);
+    setSavedToConsultant(false);
 
     try {
       const token = getAuthToken();
-      const response = await fetch(`${API_BASE_URL}/api/cabala/meditaciones/`, {
+      const response = await fetch(`${API_BASE_URL}/cabala/meditaciones/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -250,18 +267,24 @@ export default function MeditacionesPersonalizadasPanel({
           include_breathing: includeBreathing,
           include_visualization: includeVisualization,
           personal_intention: personalIntention || null,
-          consultant_name: consultantName
-        } as MeditationConfig & { consultant_name: string })
+          consultant_name: consultantName,
+          consultante_uuid: consultanteUuid,
+          save_to_profile: saveToProfile && !!consultanteUuid
+        })
       });
 
       if (!response.ok) {
-        throw new Error('Error al generar meditación');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Error al generar meditación');
       }
 
       const data = await response.json();
       
       if (data.success && data.meditation) {
         setMeditation(data.meditation);
+        if (data.saved_document_id) {
+          setSavedToConsultant(true);
+        }
         onMeditationGenerated?.(data.meditation);
       } else {
         throw new Error(data.error || 'Error en la generación');
@@ -272,41 +295,86 @@ export default function MeditacionesPersonalizadasPanel({
     } finally {
       setLoading(false);
     }
-  }, [selectedSefira, meditationType, duration, includeBreathing, includeVisualization, personalIntention, consultantName, onMeditationGenerated]);
+  }, [selectedSefira, meditationType, duration, includeBreathing, includeVisualization, personalIntention, consultantName, consultanteUuid, saveToProfile, onMeditationGenerated]);
 
   const copyMeditation = useCallback(() => {
     if (!meditation) return;
 
-    const text = `
+    // Formato para meditación generada por IA
+    if (meditation.generated_by_ai) {
+      const text = `
 MEDITACIÓN: ${meditation.title}
 Duración: ${meditation.duration_minutes} minutos
-Sefirá: ${SEFIROT_INFO[meditation.sefira].name}
+Sefirá: ${meditation.sefira_name || SEFIROT_INFO[meditation.sefira]?.name || meditation.sefira}
+Tipo: ${meditation.type_name || meditation.type}
+${meditation.divine_name ? `Nombre Divino: ${meditation.divine_name}` : ''}
+${meditation.color ? `Color: ${meditation.color}` : ''}
 
 ═══════════════════════════════════
 
-INTRODUCCIÓN
-${meditation.introduction}
+APERTURA Y ENRAIZAMIENTO
+${meditation.opening || ''}
 
-${meditation.breathing_exercise ? `EJERCICIO DE RESPIRACIÓN\n${meditation.breathing_exercise}\n\n` : ''}
-VISUALIZACIÓN
-${meditation.visualization}
+SOBRE LA SEFIRÁ
+${meditation.sefira_explanation || ''}
 
-AFIRMACIONES
-${meditation.affirmations.map(a => `• ${a}`).join('\n')}
+${meditation.breathing_exercise ? `EJERCICIO DE RESPIRACIÓN\n${meditation.breathing_exercise}\n` : ''}
+ACTIVACIÓN
+${meditation.activation || ''}
+
+CONTEMPLACIÓN DEL NOMBRE
+${meditation.divine_name_contemplation || ''}
+
+${meditation.visualization ? `VISUALIZACIÓN\n${meditation.visualization}\n` : ''}
+INTEGRACIÓN
+${meditation.integration || ''}
 
 CIERRE
-${meditation.closing}
+${meditation.closing || ''}
 
 ═══════════════════════════════════
 
 CONSEJOS PARA LA PRÁCTICA
-${meditation.practice_tips.map(t => `• ${t}`).join('\n')}
+${(meditation.practice_tips || []).map(t => `• ${t}`).join('\n')}
 
-Mejor momento: ${meditation.best_time}
-Frecuencia recomendada: ${meditation.frequency_recommendation}
-    `.trim();
+${meditation.best_time ? `Mejor momento: ${meditation.best_time}` : ''}
+      `.trim();
 
-    navigator.clipboard.writeText(text);
+      navigator.clipboard.writeText(text);
+    } else {
+      // Formato para meditación estática (fallback)
+      const text = `
+MEDITACIÓN: ${meditation.title}
+Duración: ${meditation.duration_minutes} minutos
+Sefirá: ${SEFIROT_INFO[meditation.sefira]?.name || meditation.sefira}
+
+═══════════════════════════════════
+
+INTRODUCCIÓN
+${meditation.introduction || ''}
+
+${meditation.breathing_exercise ? `EJERCICIO DE RESPIRACIÓN\n${meditation.breathing_exercise}\n\n` : ''}
+VISUALIZACIÓN
+${meditation.visualization || ''}
+
+AFIRMACIONES
+${(meditation.affirmations || []).map(a => `• ${a}`).join('\n')}
+
+CIERRE
+${meditation.closing || ''}
+
+═══════════════════════════════════
+
+CONSEJOS PARA LA PRÁCTICA
+${(meditation.practice_tips || []).map(t => `• ${t}`).join('\n')}
+
+Mejor momento: ${meditation.best_time || 'En cualquier momento tranquilo'}
+Frecuencia recomendada: ${meditation.frequency_recommendation || 'Según tu ritmo'}
+      `.trim();
+
+      navigator.clipboard.writeText(text);
+    }
+
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }, [meditation]);
@@ -519,17 +587,35 @@ Frecuencia recomendada: ${meditation.frequency_recommendation}
       {/* Result Section */}
       {meditation && (
         <div className="border-t border-purple-200 bg-white">
+          {/* Success banner if saved to consultant */}
+          {savedToConsultant && (
+            <div className="bg-green-50 border-b border-green-200 px-6 py-3 flex items-center gap-2 text-green-700">
+              <CheckCircle2 className="h-5 w-5" />
+              <span className="text-sm font-medium">
+                ¡Meditación guardada en el perfil del consultante!
+              </span>
+            </div>
+          )}
+          
+          {/* AI-generated badge */}
+          {meditation.generated_by_ai && (
+            <div className="bg-gradient-to-r from-purple-100 to-indigo-100 px-6 py-2 flex items-center gap-2 text-purple-700 text-sm">
+              <Sparkles className="h-4 w-4" />
+              <span>Generada con IA Cabalística especializada</span>
+            </div>
+          )}
+          
           {/* Meditation Header */}
-          <div className={`${SEFIROT_INFO[meditation.sefira].bgColor} px-6 py-4`}>
+          <div className={`${SEFIROT_INFO[meditation.sefira]?.bgColor || 'bg-purple-600'} px-6 py-4`}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <span className="text-3xl">{SEFIROT_INFO[meditation.sefira].icon}</span>
+                <span className="text-3xl">{SEFIROT_INFO[meditation.sefira]?.icon || '✨'}</span>
                 <div>
-                  <h3 className={`text-lg font-bold ${SEFIROT_INFO[meditation.sefira].color}`}>
+                  <h3 className={`text-lg font-bold ${SEFIROT_INFO[meditation.sefira]?.color || 'text-white'}`}>
                     {meditation.title}
                   </h3>
-                  <p className={`text-sm ${SEFIROT_INFO[meditation.sefira].color} opacity-80`}>
-                    {meditation.duration_minutes} minutos • {MEDITATION_TYPES[meditation.type].label}
+                  <p className={`text-sm ${SEFIROT_INFO[meditation.sefira]?.color || 'text-white'} opacity-80`}>
+                    {meditation.duration_minutes} minutos • {meditation.type_name || MEDITATION_TYPES[meditation.type]?.label || meditation.type}
                   </p>
                 </div>
               </div>
@@ -544,94 +630,230 @@ Frecuencia recomendada: ${meditation.frequency_recommendation}
                   </>
                 ) : (
                   <>
-                    <Copy className={`h-4 w-4 ${SEFIROT_INFO[meditation.sefira].color}`} />
-                    <span className={`text-sm ${SEFIROT_INFO[meditation.sefira].color}`}>Copiar</span>
+                    <Copy className={`h-4 w-4 ${SEFIROT_INFO[meditation.sefira]?.color || 'text-white'}`} />
+                    <span className={`text-sm ${SEFIROT_INFO[meditation.sefira]?.color || 'text-white'}`}>Copiar</span>
                   </>
                 )}
               </button>
             </div>
           </div>
 
-          {/* Meditation Content */}
-          <div className="p-6 space-y-6">
-            {/* Introduction */}
-            <div>
-              <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                <Sun className="h-4 w-4 text-amber-500" />
-                Introducción
-              </h4>
-              <p className="text-gray-700 leading-relaxed">{meditation.introduction}</p>
-            </div>
+          {/* Meditation Content - AI Format */}
+          {meditation.generated_by_ai ? (
+            <div className="p-6 space-y-6">
+              {/* Divine Name and Color */}
+              {(meditation.divine_name || meditation.color) && (
+                <div className="flex gap-4 text-sm">
+                  {meditation.divine_name && (
+                    <div className="bg-purple-50 px-3 py-1 rounded-full border border-purple-200">
+                      <span className="text-purple-700">Nombre: </span>
+                      <span className="font-medium text-purple-900">{meditation.divine_name}</span>
+                    </div>
+                  )}
+                  {meditation.color && (
+                    <div className="bg-gray-50 px-3 py-1 rounded-full border border-gray-200">
+                      <span className="text-gray-600">Color: </span>
+                      <span className="font-medium text-gray-900">{meditation.color}</span>
+                    </div>
+                  )}
+                </div>
+              )}
 
-            {/* Breathing Exercise */}
-            {meditation.breathing_exercise && (
-              <div className="bg-blue-50 rounded-lg p-4 border border-blue-100">
-                <h4 className="font-semibold text-blue-900 mb-2 flex items-center gap-2">
-                  🌬️ Ejercicio de Respiración
+              {/* Opening */}
+              {meditation.opening && (
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                    <Sun className="h-4 w-4 text-amber-500" />
+                    Apertura y Enraizamiento
+                  </h4>
+                  <p className="text-gray-700 leading-relaxed whitespace-pre-line">{meditation.opening}</p>
+                </div>
+              )}
+
+              {/* Sefira Explanation */}
+              {meditation.sefira_explanation && (
+                <div className="bg-indigo-50 rounded-lg p-4 border border-indigo-100">
+                  <h4 className="font-semibold text-indigo-900 mb-2 flex items-center gap-2">
+                    ✡️ Sobre {meditation.sefira_name || meditation.sefira}
+                  </h4>
+                  <p className="text-indigo-800 leading-relaxed whitespace-pre-line">{meditation.sefira_explanation}</p>
+                </div>
+              )}
+
+              {/* Breathing Exercise */}
+              {meditation.breathing_exercise && (
+                <div className="bg-blue-50 rounded-lg p-4 border border-blue-100">
+                  <h4 className="font-semibold text-blue-900 mb-2 flex items-center gap-2">
+                    🌬️ Ejercicio de Respiración
+                  </h4>
+                  <p className="text-blue-800 leading-relaxed whitespace-pre-line">{meditation.breathing_exercise}</p>
+                </div>
+              )}
+
+              {/* Activation */}
+              {meditation.activation && (
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                    ⚡ Activación
+                  </h4>
+                  <p className="text-gray-700 leading-relaxed whitespace-pre-line">{meditation.activation}</p>
+                </div>
+              )}
+
+              {/* Divine Name Contemplation */}
+              {meditation.divine_name_contemplation && (
+                <div className="bg-purple-50 rounded-lg p-4 border border-purple-100">
+                  <h4 className="font-semibold text-purple-900 mb-2 flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-purple-500" />
+                    Contemplación del Nombre
+                  </h4>
+                  <p className="text-purple-800 leading-relaxed whitespace-pre-line">{meditation.divine_name_contemplation}</p>
+                </div>
+              )}
+
+              {/* Visualization */}
+              {meditation.visualization && (
+                <div className="bg-pink-50 rounded-lg p-4 border border-pink-100">
+                  <h4 className="font-semibold text-pink-900 mb-2 flex items-center gap-2">
+                    🔮 Visualización
+                  </h4>
+                  <p className="text-pink-800 leading-relaxed whitespace-pre-line">{meditation.visualization}</p>
+                </div>
+              )}
+
+              {/* Integration */}
+              {meditation.integration && (
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                    <Heart className="h-4 w-4 text-pink-500" />
+                    Integración
+                  </h4>
+                  <p className="text-gray-700 leading-relaxed whitespace-pre-line">{meditation.integration}</p>
+                </div>
+              )}
+
+              {/* Closing */}
+              {meditation.closing && (
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                    <Moon className="h-4 w-4 text-indigo-500" />
+                    Cierre
+                  </h4>
+                  <p className="text-gray-700 leading-relaxed whitespace-pre-line">{meditation.closing}</p>
+                </div>
+              )}
+
+              {/* Practice Tips */}
+              {meditation.practice_tips && meditation.practice_tips.length > 0 && (
+                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-2">💡 Consejos para la Práctica</h4>
+                  <ul className="space-y-1">
+                    {meditation.practice_tips.map((tip, idx) => (
+                      <li key={idx} className="text-sm text-gray-600 flex items-start gap-2">
+                        <span className="text-purple-500 mt-1">•</span>
+                        {tip}
+                      </li>
+                    ))}
+                  </ul>
+                  {meditation.best_time && (
+                    <div className="mt-3 pt-3 border-t border-gray-200 text-sm">
+                      <span className="text-gray-500">Mejor momento:</span>{' '}
+                      <span className="font-medium text-gray-900">{meditation.best_time}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          ) : (
+            /* Meditation Content - Static Format (Fallback) */
+            <div className="p-6 space-y-6">
+              {/* Introduction */}
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                  <Sun className="h-4 w-4 text-amber-500" />
+                  Introducción
                 </h4>
-                <p className="text-blue-800 leading-relaxed">{meditation.breathing_exercise}</p>
+                <p className="text-gray-700 leading-relaxed">{meditation.introduction}</p>
               </div>
-            )}
 
-            {/* Visualization */}
-            <div className="bg-purple-50 rounded-lg p-4 border border-purple-100">
-              <h4 className="font-semibold text-purple-900 mb-2 flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-purple-500" />
-                Visualización
-              </h4>
-              <p className="text-purple-800 leading-relaxed whitespace-pre-line">{meditation.visualization}</p>
-            </div>
+              {/* Breathing Exercise */}
+              {meditation.breathing_exercise && (
+                <div className="bg-blue-50 rounded-lg p-4 border border-blue-100">
+                  <h4 className="font-semibold text-blue-900 mb-2 flex items-center gap-2">
+                    🌬️ Ejercicio de Respiración
+                  </h4>
+                  <p className="text-blue-800 leading-relaxed">{meditation.breathing_exercise}</p>
+                </div>
+              )}
 
-            {/* Affirmations */}
-            <div>
-              <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                <Heart className="h-4 w-4 text-pink-500" />
-                Afirmaciones
-              </h4>
-              <div className="space-y-2">
-                {meditation.affirmations.map((aff, idx) => (
-                  <div 
-                    key={idx}
-                    className="bg-pink-50 border border-pink-100 rounded-lg px-4 py-2 text-pink-900"
-                  >
-                    "{aff}"
+              {/* Visualization */}
+              {meditation.visualization && (
+                <div className="bg-purple-50 rounded-lg p-4 border border-purple-100">
+                  <h4 className="font-semibold text-purple-900 mb-2 flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-purple-500" />
+                    Visualización
+                  </h4>
+                  <p className="text-purple-800 leading-relaxed whitespace-pre-line">{meditation.visualization}</p>
+                </div>
+              )}
+
+              {/* Affirmations */}
+              {meditation.affirmations && meditation.affirmations.length > 0 && (
+                <div>
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                    <Heart className="h-4 w-4 text-pink-500" />
+                    Afirmaciones
+                  </h4>
+                  <div className="space-y-2">
+                    {meditation.affirmations.map((aff, idx) => (
+                      <div 
+                        key={idx}
+                        className="bg-pink-50 border border-pink-100 rounded-lg px-4 py-2 text-pink-900"
+                      >
+                        "{aff}"
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Closing */}
-            <div>
-              <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                <Moon className="h-4 w-4 text-indigo-500" />
-                Cierre
-              </h4>
-              <p className="text-gray-700 leading-relaxed">{meditation.closing}</p>
-            </div>
-
-            {/* Practice Tips */}
-            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-              <h4 className="font-semibold text-gray-900 mb-2">💡 Consejos para la Práctica</h4>
-              <ul className="space-y-1">
-                {meditation.practice_tips.map((tip, idx) => (
-                  <li key={idx} className="text-sm text-gray-600 flex items-start gap-2">
-                    <span className="text-purple-500 mt-1">•</span>
-                    {tip}
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-3 pt-3 border-t border-gray-200 flex gap-6 text-sm">
-                <div>
-                  <span className="text-gray-500">Mejor momento:</span>{' '}
-                  <span className="font-medium text-gray-900">{meditation.best_time}</span>
                 </div>
+              )}
+
+              {/* Closing */}
+              {meditation.closing && (
                 <div>
-                  <span className="text-gray-500">Frecuencia:</span>{' '}
-                  <span className="font-medium text-gray-900">{meditation.frequency_recommendation}</span>
+                  <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                    <Moon className="h-4 w-4 text-indigo-500" />
+                    Cierre
+                  </h4>
+                  <p className="text-gray-700 leading-relaxed">{meditation.closing}</p>
                 </div>
-              </div>
+              )}
+
+              {/* Practice Tips */}
+              {meditation.practice_tips && meditation.practice_tips.length > 0 && (
+                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-2">💡 Consejos para la Práctica</h4>
+                  <ul className="space-y-1">
+                    {meditation.practice_tips.map((tip, idx) => (
+                      <li key={idx} className="text-sm text-gray-600 flex items-start gap-2">
+                        <span className="text-purple-500 mt-1">•</span>
+                        {tip}
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="mt-3 pt-3 border-t border-gray-200 flex gap-6 text-sm">
+                    <div>
+                      <span className="text-gray-500">Mejor momento:</span>{' '}
+                      <span className="font-medium text-gray-900">{meditation.best_time}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Frecuencia:</span>{' '}
+                      <span className="font-medium text-gray-900">{meditation.frequency_recommendation}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
-          </div>
+          )}
 
           {/* Disclaimer */}
           <div className="px-6 pb-6">

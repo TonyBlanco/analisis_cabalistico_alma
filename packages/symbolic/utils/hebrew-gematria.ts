@@ -29,6 +29,76 @@ export const HEBREW_FINALS: Record<string, string> = {
 /** All Hebrew letters including finals */
 export const ALL_HEBREW = HEBREW_ALPHABET + 'ךםןףץ';
 
+/**
+ * Normalize Hebrew text according to options.
+ * - remove niqqud (U+0591–U+05C7) when requested
+ * - map final letters using HEBREW_FINALS
+ * - keep only Hebrew letters (and optionally spaces)
+ * - unicode normalize to NFC/NFD
+ */
+export function normalizeHebrew(text: string, opts?: {
+  mapFinals?: 'toBase' | 'keep' | 'toSofit';
+  removeNiqqud?: boolean;
+  unicode?: 'NFC' | 'NFD';
+  onlyHebrew?: boolean;
+  keepSpaces?: boolean;
+  collapseSpaces?: boolean;
+}): string {
+  const options = Object.assign({
+    mapFinals: 'toBase',
+    removeNiqqud: true,
+    unicode: 'NFD',
+    onlyHebrew: true,
+    keepSpaces: true,
+    collapseSpaces: true,
+  }, opts || {});
+
+  if (!text) return '';
+
+  // Unicode normalize first
+  try {
+    text = options.unicode === 'NFC' ? text.normalize('NFC') : text.normalize('NFD');
+  } catch (e) {
+    // ignore if normalize not supported
+  }
+
+  // Remove niqqud / cantillation marks: U+0591 - U+05C7
+  if (options.removeNiqqud) {
+    text = text.replace(/[\u0591-\u05C7]/g, '');
+    // Also remove common combining marks if any remain in higher planes
+    text = text.replace(/\p{M}/gu, '');
+  }
+
+  // Optionally map final letters
+  if (options.mapFinals === 'toBase') {
+    text = text.split('').map(ch => HEBREW_FINALS[ch] || ch).join('');
+  } else if (options.mapFinals === 'toSofit') {
+    // invert HEBREW_FINALS mapping
+    const invert: Record<string, string> = {};
+    for (const k in HEBREW_FINALS) invert[HEBREW_FINALS[k]] = k;
+    text = text.split('').map(ch => invert[ch] || ch).join('');
+  }
+
+  // Filter only Hebrew letters and optionally spaces
+  if (options.onlyHebrew) {
+    const resultChars: string[] = [];
+    for (const ch of text.split('')) {
+      if (ALL_HEBREW.includes(ch)) {
+        resultChars.push(ch);
+      } else if (options.keepSpaces && ch === ' ') {
+        resultChars.push(ch);
+      }
+    }
+    text = resultChars.join('');
+  }
+
+  if (options.collapseSpaces) {
+    text = text.replace(/\s+/g, ' ').trim();
+  }
+
+  return text;
+}
+
 // ============================================================================
 // GEMATRÍA VALUES
 // ============================================================================
@@ -174,10 +244,22 @@ export function ayakBakarTransform(letter: string): string {
 /**
  * Calcula Gematría de un texto usando una tabla específica
  */
-export function calculateGematria(text: string, table: Record<string, number>): number {
-  return text.split('').reduce((sum, char) => {
+export function calculateGematria(text: string, table: Record<string, number>, opts?: { mapFinals?: 'toBase' | 'keep' | 'toSofit' }): number {
+  // Default behavior: map finals to base for comparability
+  const mapFinals: 'toBase' | 'keep' | 'toSofit' = opts && opts.mapFinals ? opts.mapFinals : 'toBase';
+
+  const clean = normalizeHebrew(text, { mapFinals, removeNiqqud: true, onlyHebrew: true, keepSpaces: false, collapseSpaces: false });
+
+  return clean.split('').reduce((sum, char) => {
     return sum + (table[char] || 0);
   }, 0);
+}
+
+/**
+ * Explicit Mispar Gadol calculator that preserves sofit values.
+ */
+export function calculateGematriaGadol(text: string): number {
+  return calculateGematria(text, MISPAR_GADOL, { mapFinals: 'keep' });
 }
 
 /**
@@ -250,8 +332,8 @@ export function applyTemurah(text: string, method: 'atbash' | 'albam' | 'avgad' 
   
   const transform = transforms[method];
   if (!transform) return text;
-  
-  return text.split('').map(transform).join('');
+  const clean = normalizeHebrew(text, { mapFinals: 'toBase', removeNiqqud: true, onlyHebrew: true, keepSpaces: false, collapseSpaces: false });
+  return clean.split('').map(transform).join('');
 }
 
 /**
@@ -274,7 +356,7 @@ export function latinToHebrew(text: string): string {
  * Extrae solo letras hebreas de un texto
  */
 export function extractHebrew(text: string): string {
-  return text.split('').filter(c => ALL_HEBREW.includes(c)).join('');
+  return normalizeHebrew(text, { mapFinals: 'toBase', removeNiqqud: true, unicode: 'NFD', onlyHebrew: true, keepSpaces: true, collapseSpaces: true });
 }
 
 // ============================================================================

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { getAuthToken, API_BASE_URL } from '@/lib/api';
 import ArbolVivoPanel from '@/components/CabalAppliedWorkspace/ArbolVivoPanel';
-import { Heart, Map, BookOpen, ChevronRight, Sparkles } from 'lucide-react';
+import { Heart, Map, BookOpen, ChevronRight, Sparkles, Moon } from 'lucide-react';
 
 interface UserProfile {
   id: number;
@@ -26,12 +26,14 @@ const DOCUMENT_ICONS: Record<string, React.ReactNode> = {
   soul_letter: <Heart className="w-5 h-5 text-rose-500" />,
   journey_map: <Map className="w-5 h-5 text-blue-500" />,
   process_book: <BookOpen className="w-5 h-5 text-amber-500" />,
+  meditation: <Moon className="w-5 h-5 text-purple-500" />,
 };
 
 const DOCUMENT_COLORS: Record<string, string> = {
   soul_letter: 'from-rose-50 to-pink-50 border-rose-100',
   journey_map: 'from-blue-50 to-indigo-50 border-blue-100',
   process_book: 'from-amber-50 to-orange-50 border-amber-100',
+  meditation: 'from-purple-50 to-indigo-50 border-purple-100',
 };
 
 export default function PatientProcessPage() {
@@ -125,7 +127,84 @@ export default function PatientProcessPage() {
 
         {/* Contenido del documento */}
         <div className="bg-white rounded-xl p-8 border border-gray-200 shadow-sm prose prose-indigo max-w-none">
-          {typeof selectedDoc.content === 'string' ? (
+          {/* Renderizado especial para meditaciones */}
+          {selectedDoc.type === 'meditation' && selectedDoc.content?.generated_by_ai ? (
+            <div className="space-y-6">
+              {selectedDoc.content.opening && (
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">🌱 Apertura y Enraizamiento</h3>
+                  <p className="whitespace-pre-wrap text-gray-700">{selectedDoc.content.opening}</p>
+                </div>
+              )}
+              
+              {selectedDoc.content.sefira_explanation && (
+                <div className="bg-indigo-50 rounded-lg p-4 border border-indigo-100">
+                  <h3 className="text-lg font-semibold text-indigo-900 mb-2">
+                    ✡️ Sobre {selectedDoc.content.sefira_name || selectedDoc.content.sefira}
+                  </h3>
+                  <p className="whitespace-pre-wrap text-indigo-800">{selectedDoc.content.sefira_explanation}</p>
+                </div>
+              )}
+              
+              {selectedDoc.content.breathing_exercise && (
+                <div className="bg-blue-50 rounded-lg p-4 border border-blue-100">
+                  <h3 className="text-lg font-semibold text-blue-900 mb-2">🌬️ Ejercicio de Respiración</h3>
+                  <p className="whitespace-pre-wrap text-blue-800">{selectedDoc.content.breathing_exercise}</p>
+                </div>
+              )}
+              
+              {selectedDoc.content.activation && (
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">⚡ Activación</h3>
+                  <p className="whitespace-pre-wrap text-gray-700">{selectedDoc.content.activation}</p>
+                </div>
+              )}
+              
+              {selectedDoc.content.divine_name_contemplation && (
+                <div className="bg-purple-50 rounded-lg p-4 border border-purple-100">
+                  <h3 className="text-lg font-semibold text-purple-900 mb-2">✨ Contemplación del Nombre</h3>
+                  <p className="whitespace-pre-wrap text-purple-800">{selectedDoc.content.divine_name_contemplation}</p>
+                </div>
+              )}
+              
+              {selectedDoc.content.visualization && (
+                <div className="bg-pink-50 rounded-lg p-4 border border-pink-100">
+                  <h3 className="text-lg font-semibold text-pink-900 mb-2">🔮 Visualización</h3>
+                  <p className="whitespace-pre-wrap text-pink-800">{selectedDoc.content.visualization}</p>
+                </div>
+              )}
+              
+              {selectedDoc.content.integration && (
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">💜 Integración</h3>
+                  <p className="whitespace-pre-wrap text-gray-700">{selectedDoc.content.integration}</p>
+                </div>
+              )}
+              
+              {selectedDoc.content.closing && (
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">🌙 Cierre</h3>
+                  <p className="whitespace-pre-wrap text-gray-700">{selectedDoc.content.closing}</p>
+                </div>
+              )}
+              
+              {selectedDoc.content.practice_tips && selectedDoc.content.practice_tips.length > 0 && (
+                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">💡 Consejos para la Práctica</h3>
+                  <ul className="list-disc pl-5 space-y-1">
+                    {selectedDoc.content.practice_tips.map((tip: string, idx: number) => (
+                      <li key={idx} className="text-gray-700">{tip}</li>
+                    ))}
+                  </ul>
+                  {selectedDoc.content.best_time && (
+                    <p className="mt-3 text-sm text-gray-600">
+                      <strong>Mejor momento:</strong> {selectedDoc.content.best_time}
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+          ) : typeof selectedDoc.content === 'string' ? (
             <div dangerouslySetInnerHTML={{ __html: selectedDoc.content.replace(/\n/g, '<br/>') }} />
           ) : selectedDoc.content?.body ? (
             <div>

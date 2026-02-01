@@ -1935,6 +1935,7 @@ export default function CabalAppliedVisualCore({
       <section className="flex-1">
         <MeditacionesPersonalizadasPanel
           consultantName={patientProfile?.full_name || patientProfile?.legal_full_name || 'Consultante'}
+          consultanteUuid={consultantUuid || undefined}
           onMeditationGenerated={(meditation: unknown) => {
             console.log('[CabalAppliedVisualCore] Meditation generated:', meditation);
           }}

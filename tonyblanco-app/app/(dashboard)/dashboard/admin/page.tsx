@@ -2,28 +2,25 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { getUserRole } from '@/lib/getUserRole';
+import { canAccessAdminWorkspace } from '@/lib/canAccessAdminWorkspace';
 import { fetchSession } from '@/lib/session';
 import { AdminProWorkspace } from '@/components/admin-pro/AdminProWorkspace';
 import { resetPageScroll } from '@/lib/reset-page-scroll';
 
 export default function AdminDashboard() {
-  const [role, setRole] = useState<string | null>(null);
+  const [allowed, setAllowed] = useState(false);
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
     resetPageScroll();
     const run = async () => {
       await fetchSession();
-      const r = await getUserRole();
-      setRole(r);
+      setAllowed(await canAccessAdminWorkspace());
       setChecking(false);
     };
 
     run();
   }, []);
-
-
 
   if (checking) {
     return (
@@ -33,7 +30,7 @@ export default function AdminDashboard() {
     );
   }
 
-  if (role !== 'admin') {
+  if (!allowed) {
     return (
       <div className="bg-white border border-slate-200 rounded-md p-6">
         <h1 className="text-xl font-semibold text-slate-900">Acceso denegado</h1>

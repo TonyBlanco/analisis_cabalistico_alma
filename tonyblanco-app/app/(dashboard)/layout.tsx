@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
+import { canAccessAdminWorkspace } from '@/lib/canAccessAdminWorkspace';
 import { getUserRole } from '@/lib/getUserRole';
 import { getActiveRole, setActiveRole } from '@/lib/role-state';
 import { getActiveDashboardRole } from '@/lib/getActiveDashboardRole';
@@ -36,6 +37,7 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const router = useRouter();
   const [realUserRole, setRealUserRole] = useState<string | null>(null);
+  const [platformAdmin, setPlatformAdmin] = useState(false);
   const [themeRole, setThemeRole] = useState<string | null>(null);
 
   // Initialize from localStorage on client mount (hydration-safe)
@@ -48,11 +50,11 @@ export default function DashboardLayout({
 
   useEffect(() => {
     // Get real user role from backend
-    getUserRole()
-      .then((role) => {
+    Promise.all([getUserRole(), canAccessAdminWorkspace()])
+      .then(([role, isPlatformAdmin]) => {
+        setPlatformAdmin(isPlatformAdmin);
         if (role) {
           setRealUserRole(role);
-          // Store in localStorage for persistence
           const stored = getActiveRole();
           if (!stored || stored !== role) {
             setActiveRole(role);
@@ -72,13 +74,12 @@ export default function DashboardLayout({
       
       // If user is admin, use dashboard role for theming (visual simulation)
       // Otherwise, use real user role
-      const calculatedThemeRole = (realUserRole === 'admin' && activeDashboardRole) 
-        ? activeDashboardRole 
-        : realUserRole;
+      const calculatedThemeRole =
+        platformAdmin && activeDashboardRole ? activeDashboardRole : realUserRole;
       
       setThemeRole(calculatedThemeRole);
     }
-  }, [pathname, realUserRole]);
+  }, [pathname, realUserRole, platformAdmin]);
 
   useEffect(() => {
     // Apply theme role class to body and wrapper
@@ -107,14 +108,17 @@ export default function DashboardLayout({
   }, [router]);
 
   // Filter sidebar items based on user role (security: prevent admin leakage)
-  const getSidebarItems = (userRole: string | null): SidebarItem[] => {
+  const getSidebarItems = (userRole: string | null, showAdminLink: boolean): SidebarItem[] => {
     if (!userRole) return [];
+
+    const adminLink: SidebarItem[] = showAdminLink
+      ? [{ href: '/dashboard/admin', label: 'Administración' }]
+      : [];
 
     switch (userRole) {
       case 'admin':
-        // Admin can see all dashboards for simulation
         return [
-          { href: '/dashboard/admin', label: 'Administración' },
+          ...adminLink,
           { href: '/dashboard/therapist', label: 'Terapeuta' },
           { href: '/dashboard/personal', label: 'Personal' },
           { href: '/dashboard/patient', label: 'Consultante' },
@@ -122,6 +126,7 @@ export default function DashboardLayout({
       case 'therapist':
         // Therapist: ONLY therapist dashboard + patients management
         return [
+          ...adminLink,
           { href: '/dashboard/therapist', label: 'Workspace Holístico' },
           { href: '/dashboard/therapist/patients', label: 'Consultantes' },
         ];
@@ -147,7 +152,7 @@ export default function DashboardLayout({
     }
   };
 
-  const sidebarItems = getSidebarItems(realUserRole);
+  const sidebarItems = getSidebarItems(realUserRole, platformAdmin);
 
   // Patient and Therapist have their own layouts with sidebars - skip main layout wrapper
   const isPatientRoute = pathname?.startsWith('/dashboard/patient');
@@ -176,7 +181,7 @@ export default function DashboardLayout({
     );
   }
 
-  if (isTherapistRoute && (realUserRole === 'therapist' || realUserRole === 'admin')) {
+  if (isTherapistRoute && (realUserRole === 'therapist' || platformAdmin)) {
     // Therapist route: let therapist/layout.tsx handle everything
     return (
       <div className={`${themeRole ? `role-${themeRole}` : ''}`}>

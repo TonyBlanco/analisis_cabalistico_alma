@@ -16,23 +16,12 @@ function isValidRole(value: unknown): value is Exclude<UserRole, null> {
 }
 
 function roleFromUserRecord(user: Record<string, unknown>): UserRole {
-  // Staff / superuser flags (flat /me/ payload)
-  if (
-    user.username === 'supertony' ||
-    user.is_superuser === true ||
-    user.is_staff === true ||
-    user.is_admin === true
-  ) {
-    return 'admin';
-  }
-
-  // Top-level fields from CurrentUserView (preferred — already applies admin precedence)
+  // Dashboard route = user_type del perfil (admin workspace usa is_admin aparte)
   if (isValidRole(user.user_type)) return user.user_type;
   if (isValidRole(user.role)) return user.role;
 
   const profile = user.profile as Record<string, unknown> | undefined;
   if (profile) {
-    if (profile.is_admin === true) return 'admin';
     if (isValidRole(profile.user_type)) return profile.user_type;
     if (isValidRole(profile.role)) return profile.role;
   }
@@ -52,7 +41,6 @@ async function roleFromMembership(token: string): Promise<UserRole> {
     });
     if (!response.ok) return null;
     const data = await response.json();
-    if (data?.is_superuser || data?.user_type === 'admin') return 'admin';
     if (isValidRole(data?.user_type)) return data.user_type;
   } catch {
     // ignore

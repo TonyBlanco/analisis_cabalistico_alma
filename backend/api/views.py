@@ -181,15 +181,11 @@ class CurrentUserView(APIView):
         if hasattr(request.user, 'profile'):
             profile = request.user.profile
 
-            # Role precedence: staff/superuser (or explicit is_admin) should always appear as admin
-            effective_user_type = getattr(profile, 'user_type', None)
-            if (
-                request.user.username == 'supertony'
-                or request.user.is_superuser
-                or request.user.is_staff
-                or bool(getattr(profile, 'is_admin', False))
-            ):
-                effective_user_type = 'admin'
+            from .dashboard_role import can_access_admin_workspace, dashboard_role_for_user
+
+            # Dashboard Next.js usa user_type del perfil; admin workspace es aparte (is_admin)
+            effective_user_type = dashboard_role_for_user(request.user)
+            platform_admin = can_access_admin_workspace(request.user)
             
             # Obtener datos de ubicación
             birth_city = getattr(profile, 'birth_city', None)
@@ -217,7 +213,8 @@ class CurrentUserView(APIView):
                 'legal_full_name': getattr(profile, 'legal_full_name', None) or getattr(profile, 'full_name', None),
                 'user_type': effective_user_type,
                 'role': effective_user_type,
-                'is_admin': getattr(profile, 'is_admin', None),
+                'is_admin': platform_admin,
+                'can_access_admin_workspace': platform_admin,
                 'is_superuser': request.user.is_superuser,
                 'is_staff': request.user.is_staff,
                 'subscription_status': getattr(profile, 'subscription_status', None),
@@ -333,16 +330,14 @@ class CurrentUserView(APIView):
             except Exception:
                 pass
         else:
-            # Sin UserProfile: staff/superuser siguen siendo admin en el panel Next.js
-            if (
-                request.user.username == 'supertony'
-                or request.user.is_superuser
-                or request.user.is_staff
-            ):
+            from .dashboard_role import can_access_admin_workspace
+
+            if can_access_admin_workspace(request.user):
                 user_data.update({
-                    'user_type': 'admin',
-                    'role': 'admin',
+                    'user_type': 'visitor',
+                    'role': 'visitor',
                     'is_admin': True,
+                    'can_access_admin_workspace': True,
                     'is_superuser': request.user.is_superuser,
                     'is_staff': request.user.is_staff,
                 })
@@ -812,38 +807,31 @@ class CheckMembershipView(APIView):
         try:
             user = request.user
 
-            # Superusuario / staff sin depender de UserProfile
-            if user.username == 'supertony' or user.is_superuser or user.is_staff:
+            from .dashboard_role import can_access_admin_workspace, dashboard_role_for_user
+
+            profile = request.user.profile
+            dashboard_role = dashboard_role_for_user(user)
+            platform_admin = can_access_admin_workspace(user)
+
+            # Staff/superuser: acceso completo; rol de dashboard = user_type del perfil
+            if user.username == 'supertony' or user.is_superuser or user.is_staff or platform_admin:
                 return Response({
                     'membership_active': True,
-                    'user_type': 'admin',
+                    'user_type': dashboard_role,
                     'subscription_status': 'active',
                     'subscription_plan': 'premium',
                     'membership_expires': None,
                     'can_access_dashboard': True,
                     'can_create_ficha': True,
-                    'is_superuser': True,
+                    'is_superuser': bool(user.is_superuser or platform_admin),
+                    'can_access_admin_workspace': platform_admin,
                 })
 
-            profile = request.user.profile
-            
-            if bool(getattr(profile, 'is_admin', False)):
-                return Response({
-                    'membership_active': True,
-                    'user_type': 'admin',
-                    'subscription_status': 'active',
-                    'subscription_plan': 'premium',  # Máximo nivel
-                    'membership_expires': None,
-                    'can_access_dashboard': True,
-                    'can_create_ficha': True,
-                    'is_superuser': True,  # Flag adicional
-                })
-            
             has_active = profile.has_active_subscription()
             
             return Response({
                 'membership_active': has_active,
-                'user_type': profile.user_type,
+                'user_type': dashboard_role,
                 'subscription_status': profile.subscription_status,
                 'subscription_plan': profile.subscription_plan or 'trial',
                 'membership_expires': profile.membership_expires,
@@ -961,20 +949,9 @@ class EmailOrUsernameAuthToken(APIView):
         # Login exitoso - generar token
         token, _ = Token.objects.get_or_create(user=user_auth)
 
-        # Rol para redirección del frontend (debe coincidir con /api/me/)
-        role = 'visitor'
-        if (
-            user_auth.username == 'supertony'
-            or user_auth.is_superuser
-            or user_auth.is_staff
-        ):
-            role = 'admin'
-        elif hasattr(user_auth, 'profile'):
-            profile = user_auth.profile
-            if bool(getattr(profile, 'is_admin', False)):
-                role = 'admin'
-            else:
-                role = profile.user_type or 'visitor'
+        from .dashboard_role import dashboard_role_for_user
+
+        role = dashboard_role_for_user(user_auth)
 
         return Response({
             'token': token.key,
@@ -2587,6 +2564,8 @@ class GoogleOAuthView(APIView):
             # Obtener o crear token de autenticación
             token, _ = Token.objects.get_or_create(user=user)
             
+            from .dashboard_role import can_access_admin_workspace, dashboard_role_for_user
+
             return Response({
                 'token': token.key,
                 'user': {
@@ -2595,9 +2574,12 @@ class GoogleOAuthView(APIView):
                     'email': user.email,
                     'first_name': user.first_name,
                     'full_name': profile.full_name,
-                    'user_type': profile.user_type,
-                    'is_admin': profile.is_admin,
+                    'user_type': dashboard_role_for_user(user),
+                    'role': dashboard_role_for_user(user),
+                    'is_admin': can_access_admin_workspace(user),
+                    'can_access_admin_workspace': can_access_admin_workspace(user),
                 },
+                'role': dashboard_role_for_user(user),
                 'created': created,
                 'message': 'Login exitoso con Google'
             }, status=status.HTTP_200_OK)

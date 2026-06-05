@@ -145,12 +145,13 @@ export default function LoginPage() {
   const finishLoginWithToken = async (token: string, loginRole?: string) => {
     setAuthToken(token);
     if (
-      loginRole === 'admin' ||
       loginRole === 'therapist' ||
       loginRole === 'personal' ||
       loginRole === 'patient'
     ) {
       setUserRole(loginRole as UserRole);
+    } else if (typeof window !== 'undefined') {
+      localStorage.removeItem('userRole');
     }
     const role = await getUserRole();
     switch (role) {

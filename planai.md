@@ -215,7 +215,7 @@ flowchart TB
 - [ ] Actualizar pesos RAG desde feedback (Fase 1)
 - [x] Feature flags: `AI_KABBALAH_ENABLED`, `AI_BIOEMOTION_DRAFT_ENABLED`
 
-**Criterio de salida:** 0 violaciones en eval harness 50 casos.
+**Criterio de salida:** 0 violaciones en eval harness 50 casos → `api.tests.test_planai_eval_harness` + `planai_eval_cases.py` (50 casos).
 
 ### Fase 3 — Observabilidad y coste (3–5 días)
 

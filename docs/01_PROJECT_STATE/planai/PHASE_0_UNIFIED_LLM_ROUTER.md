@@ -46,9 +46,14 @@ Un solo camino de inferencia en el backend: `generate_with_fallback()` (`api/uti
 ## Verificación
 
 ```bash
-cd backend && python manage.py test api.tests.test_ai_llm_bridge -v2
-curl -s http://localhost:8000/api/ai/status/ -H "Authorization: Token ..."
+cd backend && python manage.py test \
+  api.tests.test_ai_llm_bridge \
+  api.tests.test_ai_router_integration \
+  api.tests.test_planai_eval_harness -v2
+curl -s http://localhost:8000/api/ai/status/
 ```
+
+CI: `.github/workflows/pip-ai-tests.yml`
 
 ## Commit asociado
 

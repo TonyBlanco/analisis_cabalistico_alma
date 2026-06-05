@@ -1,0 +1,57 @@
+name: PIP AI tests (PlanAI)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/api/ai/**"
+      - "backend/api/tests/test_ai_*"
+      - "backend/api/tests/test_planai_*"
+      - "backend/api/tests/planai_eval_cases.py"
+      - "backend/ai/prompts/**"
+      - "backend/api/utils/multi_ai_service.py"
+      - "backend/api/utils/holistic_ai.py"
+      - "backend/api/utils/tarot_service.py"
+      - "backend/api/utils/symbolic_interpreter_ai.py"
+      - "backend/api/holistic_synthesis_engine.py"
+      - "backend/api/ai_views.py"
+      - "backend/api/ai/governed_views.py"
+      - ".github/workflows/pip-ai-tests.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - ".github/workflows/pip-ai-tests.yml"
+
+jobs:
+  pip-ai-unit:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run PlanAI test suite (no live LLM)
+        run: |
+          python manage.py test \
+            api.tests.test_ai_llm_bridge \
+            api.tests.test_ai_guardrails \
+            api.tests.test_planai_prompt_registry \
+            api.tests.test_planai_eval_harness \
+            api.tests.test_ai_router_integration \
+            api.tests.test_ai_governed \
+            --verbosity=2
+        env:
+          DJANGO_SETTINGS_MODULE: core.settings
+          SECRET_KEY: ci-test-secret-key-not-for-production
+          DEBUG: "false"

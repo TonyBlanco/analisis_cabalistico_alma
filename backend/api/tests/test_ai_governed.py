@@ -112,3 +112,83 @@ class GovernedAITests(TestCase):
             content_type="application/json",
         )
         self.assertEqual(resp.status_code, 403)
+
+    def test_bioemotion_closed_synthesis_rejected(self):
+        self.synthesis.is_closed = True
+        self.synthesis.save(update_fields=["is_closed"])
+        url = f"/api/bioemotional/synthesis/{self.synthesis.id}/assist-draft/"
+        resp = self.client_api.post(url, content_type="application/json")
+        self.assertEqual(resp.status_code, 400)
+
+    @override_settings(AI_BIOEMOTION_DRAFT_ENABLED=False)
+    def test_bioemotion_disabled_flag(self):
+        url = f"/api/bioemotional/synthesis/{self.synthesis.id}/assist-draft/"
+        resp = self.client_api.post(url, content_type="application/json")
+        self.assertEqual(resp.status_code, 403)
+
+    @patch("api.ai.governed_views.is_llm_available", return_value=True)
+    @patch("api.ai.governed_views.generate_text")
+    def test_bioemotion_guardrail_blocks_draft(self, mock_gen, _mock_avail):
+        mock_gen.return_value = {
+            "success": True,
+            "text": "Debes abandonar el patrón de inmediato.",
+            "provider": "groq",
+        }
+        url = f"/api/bioemotional/synthesis/{self.synthesis.id}/assist-draft/"
+        resp = self.client_api.post(url, content_type="application/json")
+        self.assertEqual(resp.status_code, 422)
+        self.assertTrue(resp.json().get("guardrail_violation"))
+
+    def test_kabbalah_invalid_tree_state(self):
+        bad_tree = {"source": {}, "sefirot": [], "flows": []}
+        resp = self.client_api.post(
+            "/api/ai/kabbalah/interpret/",
+            data=json.dumps({"tree_structural_state": bad_tree}),
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 400)
+        self.assertEqual(resp.json().get("code"), "invalid_tree_state")
+
+    @patch("api.ai.governed_views.is_llm_available", return_value=False)
+    def test_kabbalah_llm_unavailable(self, _mock_avail):
+        resp = self.client_api.post(
+            "/api/ai/kabbalah/interpret/",
+            data=json.dumps({"tree_structural_state": MIN_TREE}),
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 503)
+        self.assertEqual(resp.json().get("code"), "llm_unavailable")
+
+    def test_feedback_invalid_rating(self):
+        resp = self.client_api.post(
+            "/api/ai/feedback/",
+            data=json.dumps({"feature": "bioemotion_draft", "rating": 9}),
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 400)
+
+    def test_feedback_wrong_patient_denied(self):
+        User = get_user_model()
+        other = User.objects.create_user("other_th", "other@test.com", "pass")
+        other.profile.user_type = "therapist"
+        other.profile.save()
+        foreign = Patient.objects.create(
+            therapist=other,
+            first_name="Otro",
+            last_name="Paciente",
+            email="otro@test.com",
+            full_name="Otro Paciente",
+            birth_date="1985-05-05",
+        )
+        resp = self.client_api.post(
+            "/api/ai/feedback/",
+            data=json.dumps(
+                {
+                    "feature": "kabbalah_interpret",
+                    "rating": 3,
+                    "patient_id": foreign.id,
+                }
+            ),
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 403)

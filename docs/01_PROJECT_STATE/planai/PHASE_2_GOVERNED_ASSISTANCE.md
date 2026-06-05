@@ -80,8 +80,13 @@ Uso futuro (Fase 1): pesos RAG y revisión de prompts — **no** gradientes.
 ## Verificación
 
 ```bash
-cd backend && python manage.py test api.tests.test_ai_governed -v2
+cd backend && python manage.py test \
+  api.tests.test_ai_governed \
+  api.tests.test_ai_router_integration \
+  api.tests.test_planai_eval_harness -v2
 ```
+
+Eval harness: 50 salidas simuladas en `api/tests/planai_eval_cases.py` (sin red).
 
 ## Commits
 

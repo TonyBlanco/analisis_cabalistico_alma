@@ -88,7 +88,8 @@ cd backend && python manage.py test \
 
 Eval harness: 50 salidas simuladas en `api/tests/planai_eval_cases.py` (sin red).
 
-## Commits
+## Commits y producción
 
-- Tras doc: ver commit pre-código en PHASE_0 doc.
-- **Implementación:** `feat(ai): phase 2 governed kabbalah and bioemotion assist (no training)`
+- Ver PHASE_0 doc (hashes git).
+- **Prod:** `https://api.studios33.app/api/ai/kabbalah/interpret/`, `…/bioemotional/synthesis/<uuid>/assist-draft/`, `…/api/ai/feedback/`
+- **Tests servidor:** 35 OK (incl. harness 50 en `planai_eval_cases.py`)

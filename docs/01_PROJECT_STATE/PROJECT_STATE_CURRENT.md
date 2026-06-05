@@ -440,6 +440,10 @@ Cualquier modificación futura requiere actualización explícita de este docume
 ### IA y módulos (2026-06-05)
 - 📋 Auditoría wiring + IA: [AUDIT_MODULOS_IA_2026-06-05.md](./AUDIT_MODULOS_IA_2026-06-05.md)
 - 📋 Plan arquitectura LLM / memoria de proceso: [planai.md](../../planai.md)
+- ✅ **PIP Fase 0–2 desplegado en prod** (`studio33_api` rebuild): router `free_first`, `/api/ai/status/`, kabbalah interpret, bioemotional assist-draft, feedback, guardrails
+- ✅ Tests: 35 + harness 50 casos (OK servidor); CI `pip-ai-tests.yml`
+- 📋 Specs: [planai/PHASE_0_UNIFIED_LLM_ROUTER.md](./planai/PHASE_0_UNIFIED_LLM_ROUTER.md), [PHASE_2_GOVERNED_ASSISTANCE.md](./planai/PHASE_2_GOVERNED_ASSISTANCE.md)
+- ⏳ **PIP Fase 1:** Process Memory + RAG (pendiente)
 
 ### Pendiente
 - ⏳ Fase D: corte Render/Vercel + backup Postgres

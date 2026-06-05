@@ -321,4 +321,16 @@ Estos ítems del [audit](docs/01_PROJECT_STATE/AUDIT_MODULOS_IA_2026-06-05.md) d
 
 ---
 
+---
+
+## 14. Estado de despliegue (2026-06-05)
+
+| Ítem | Estado |
+|------|--------|
+| Fase 0–2 código | ✅ En `main` (commits PIP + tests) |
+| Prod `studio33_api` | ✅ Rebuild + recreate Hetzner |
+| `GET /api/ai/status/` | ✅ `free_first`, `training.*` false |
+| Tests 35 + harness 50 | ✅ Servidor + CI `pip-ai-tests.yml` |
+| Fase 1 RAG | ⏳ Pendiente |
+
 *Documento vivo. Actualizar al cerrar cada fase.*

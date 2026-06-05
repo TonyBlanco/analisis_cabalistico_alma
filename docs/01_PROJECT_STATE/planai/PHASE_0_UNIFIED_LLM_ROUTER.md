@@ -57,5 +57,7 @@ CI: `.github/workflows/pip-ai-tests.yml`
 
 ## Commit asociado
 
-- **Pre-código:** `docs(planai): phase 0 and 2 specs — no training`
-- **Implementación:** `feat(ai): phase 0 unified LLM router (free-first, no training)`
+- **Pre-código:** `b03d5f7c` — `docs(planai): phase 0 and 2 specs, module audit — no training`
+- **Implementación:** `85d679ed` — router + Fase 2; prompts `fee679f5` / `a19e0e03` / `8a614607`
+- **Tests + CI:** `a12b3c0a`, fix `6df70667`
+- **Prod Hetzner:** `studio33_api` rebuild + `--force-recreate` (2026-06-05)

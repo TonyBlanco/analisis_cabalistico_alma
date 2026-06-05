@@ -43,6 +43,21 @@
 | `deploy/studios33/scripts/patch-google-env.sh` | Sincronizar Google desde `.env.studios33` |
 | `deploy/studios33/turnstile_add_hostnames.mjs` | API Turnstile (requiere token Account Turnstile Edit; DNS token no basta) |
 
+### PlanAI / PIP (Fase 0 + 2, sin entrenamiento)
+| Ítem | Detalle |
+|------|---------|
+| Docs | `planai.md`, `docs/01_PROJECT_STATE/planai/PHASE_0_*`, `PHASE_2_*`, `AUDIT_MODULOS_IA_2026-06-05.md` |
+| Código | `api/ai/llm_bridge`, `governed_views`, `guardrails`, prompts `kabbalah_interpret_v1` / `bioemotional_draft_v1` |
+| Prod | `docker compose build` + `--force-recreate studio33_api` (2026-06-05) |
+| Migración | `api.0087_ai_interaction_feedback` |
+| Tests | 35 tests + harness 50 casos — **OK** en servidor |
+| CI | `.github/workflows/pip-ai-tests.yml` |
+
+```bash
+curl -s https://api.studios33.app/api/ai/status/
+# {"ai_provider_mode":"free_first","llm_available":true,"training":{"fine_tune":false,...}}
+```
+
 ### Explícitamente NO hecho (decisión usuario)
 - Desplegar fixes de **scroll admin** Next (`reset-page-scroll`, sidebars) a producción
 - **Commit** del diff local de scroll/UI admin en git
@@ -57,6 +72,7 @@
 | Alta | Smoke test completo HTTPS: login email, Google, registro, dashboard personal, carta/Tarot, API clínica |
 | Media | **Fase D:** desactivar o paralelizar Render/Vercel; backup `pg_dump studio33_db` |
 | Media | **Fase E:** registry tests, Tarot ruta única, ocultar “Próximamente” |
+| Media | **planai Fase 1:** Process Memory + RAG + Ollama embeddings |
 | Baja | Turnstile en más flujos (reset password cuando exista endpoint) |
 | Baja | Turnstile + Google mismo submit (hoy Google no pide Turnstile) |
 
@@ -91,6 +107,7 @@ bash deploy/studios33/scripts/patch-google-env.sh
 # Comprobar API
 curl -s https://api.studios33.app/api/turnstile/config/
 curl -s https://api.studios33.app/api/google/config/
+curl -s https://api.studios33.app/api/ai/status/
 ```
 
 ---

@@ -193,11 +193,11 @@ flowchart LR
 | P | Tarea |
 |---|--------|
 | P0 | Implementar capa **Process Memory** (planai Fase 1) — sin nuevo modelo |
-| P0 | Migrar `holistic_ai`, `tarot_service`, MSHE a **`multi_ai_service`** |
-| P1 | Instalar **Ollama** en Hetzner + healthcheck en deploy |
+| ~~P0~~ | ~~Migrar holistic/tarot/MSHE a multi_ai_service~~ → ✅ **Hecho** (`llm_bridge`, 2026-06-05) |
+| P1 | Instalar **Ollama** en Hetzner + healthcheck en deploy (Ollama ya en `available_providers` si host activo) |
 | P1 | Sincronizar `clinicalTests.registry.ts` |
-| P2 | Bioemocional: endpoint IA **opcional** síntesis (con consent + no-diagnosis guardrails) |
-| P2 | Cábala: RAG sobre `TreeStructuralState` + textos Sefaria curados |
+| ~~P2~~ | ~~Bioemocional assist-draft~~ → ✅ **Hecho** (`/api/bioemotional/synthesis/<id>/assist-draft/`) |
+| P2 | Cábala: **RAG** sobre `TreeStructuralState` + Sefaria (endpoint interpret ✅ sin RAG aún) |
 | P3 | Dataset export anonimizado para evaluación (no entrenamiento aún) |
 | P3 | Descongelar AISymbolic solo con contrato SWM v3 |
 
@@ -215,4 +215,4 @@ flowchart LR
 
 ---
 
-**Siguiente paso:** ejecutar [planai.md](../../planai.md) Fase 0–1 (memoria + router unificado, sin training).
+**Siguiente paso:** [planai.md](../../planai.md) **Fase 1** (Process Memory + RAG). Fase 0–2 core ✅ en prod y tests (ver `SESSION_2026-06-05_STUDIOS33.md`).

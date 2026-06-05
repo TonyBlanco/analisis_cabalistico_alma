@@ -24,6 +24,8 @@ declare global {
             parent: HTMLElement,
             options: { theme?: string; size?: string; width?: number; text?: string; locale?: string }
           ) => void;
+          disableAutoSelect?: () => void;
+          cancel?: () => void;
         };
       };
     };
@@ -40,6 +42,10 @@ async function fetchGoogleConfig(): Promise<GoogleAuthConfig> {
   };
 }
 
+function isGsiReady(): boolean {
+  return Boolean(window.google?.accounts?.id?.initialize && window.google?.accounts?.id?.renderButton);
+}
+
 type GoogleSignInButtonProps = {
   onCredential: (idToken: string) => void;
   onError?: (message: string) => void;
@@ -48,42 +54,78 @@ type GoogleSignInButtonProps = {
 
 export function GoogleSignInButton({ onCredential, onError, disabled }: GoogleSignInButtonProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const onCredentialRef = useRef(onCredential);
+  const onErrorRef = useRef(onError);
   const [config, setConfig] = useState<GoogleAuthConfig | null>(null);
-  const [scriptReady, setScriptReady] = useState(false);
-  const renderedRef = useRef(false);
+  const [gsiReady, setGsiReady] = useState(false);
+  useEffect(() => {
+    onCredentialRef.current = onCredential;
+    onErrorRef.current = onError;
+  }, [onCredential, onError]);
 
   useEffect(() => {
     fetchGoogleConfig().then(setConfig).catch(() => setConfig({ enabled: false, client_id: null }));
   }, []);
 
-  const renderButton = useCallback(() => {
-    if (renderedRef.current || disabled) return;
-    if (!config?.enabled || !config.client_id || !scriptReady || !containerRef.current) return;
-    if (!window.google?.accounts?.id) return;
+  // Tras logout (navegación SPA) el script ya está en window; onLoad del <Script> no vuelve a dispararse.
+  useEffect(() => {
+    if (isGsiReady()) {
+      setGsiReady(true);
+      return;
+    }
+    const interval = window.setInterval(() => {
+      if (isGsiReady()) {
+        setGsiReady(true);
+        window.clearInterval(interval);
+      }
+    }, 150);
+    const timeout = window.setTimeout(() => window.clearInterval(interval), 12_000);
+    return () => {
+      window.clearInterval(interval);
+      window.clearTimeout(timeout);
+    };
+  }, []);
 
-    containerRef.current.innerHTML = '';
-    window.google.accounts.id.initialize({
+  const renderButton = useCallback(() => {
+    if (disabled || !config?.enabled || !config.client_id || !gsiReady || !containerRef.current) {
+      return;
+    }
+    if (!isGsiReady()) return;
+
+    const parent = containerRef.current;
+    parent.innerHTML = '';
+
+    window.google!.accounts.id.initialize({
       client_id: config.client_id,
       callback: (response) => {
-        if (response?.credential) onCredential(response.credential);
-        else onError?.('No se recibió credencial de Google');
+        if (response?.credential) onCredentialRef.current(response.credential);
+        else onErrorRef.current?.('No se recibió credencial de Google');
       },
+      auto_select: false,
       cancel_on_tap_outside: true,
     });
-    window.google.accounts.id.renderButton(containerRef.current, {
+    window.google!.accounts.id.renderButton(parent, {
       theme: 'outline',
       size: 'large',
       text: 'signin_with',
       locale: 'es',
-      width: containerRef.current.offsetWidth || 360,
+      width: parent.offsetWidth || 360,
     });
-    renderedRef.current = true;
-  }, [config, scriptReady, disabled, onCredential, onError]);
+  }, [config, gsiReady, disabled]);
 
   useEffect(() => {
-    renderedRef.current = false;
     renderButton();
   }, [renderButton]);
+
+  useEffect(() => {
+    return () => {
+      try {
+        window.google?.accounts?.id?.cancel?.();
+      } catch {
+        // ignore
+      }
+    };
+  }, []);
 
   if (!config?.enabled) return null;
 
@@ -92,8 +134,9 @@ export function GoogleSignInButton({ onCredential, onError, disabled }: GoogleSi
       <Script
         src="https://accounts.google.com/gsi/client"
         strategy="afterInteractive"
-        onLoad={() => setScriptReady(true)}
-        onError={() => onError?.('No se pudo cargar el inicio de sesión de Google')}
+        onLoad={() => setGsiReady(true)}
+        onReady={() => setGsiReady(true)}
+        onError={() => onErrorRef.current?.('No se pudo cargar el inicio de sesión de Google')}
       />
       <div
         ref={containerRef}

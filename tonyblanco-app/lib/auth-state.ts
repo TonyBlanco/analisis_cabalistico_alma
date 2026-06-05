@@ -33,4 +33,16 @@ export function clearAuthState(): void {
       .replace(/^ +/, '')
       .replace(/=.*/, `=;expires=${new Date(0).toUTCString()};path=/`);
   });
+
+  // Reset Google Identity Services so el botón vuelve a funcionar sin refresh
+  try {
+    const gsi = (window as Window & { google?: { accounts?: { id?: {
+      disableAutoSelect?: () => void;
+      cancel?: () => void;
+    } } } }).google?.accounts?.id;
+    gsi?.disableAutoSelect?.();
+    gsi?.cancel?.();
+  } catch {
+    // ignore
+  }
 }

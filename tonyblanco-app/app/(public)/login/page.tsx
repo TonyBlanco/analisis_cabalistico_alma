@@ -39,13 +39,12 @@ export default function LoginPage() {
   const [resetSent, setResetSent] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
   const turnstileRef = useRef<TurnstileFieldHandle>(null);
+  const [googleSignInKey, setGoogleSignInKey] = useState(0);
 
   // ========== CRITICAL: Limpiar token al entrar a login ==========
   useEffect(() => {
-    // Siempre limpiar estado de auth al entrar a login
-    // Esto previene que tokens viejos/inválidos causen problemas
     clearAuthState();
-    console.log('🧹 Auth state cleared on login page load');
+    setGoogleSignInKey((k) => k + 1);
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -426,6 +425,7 @@ export default function LoginPage() {
             </div>
 
             <GoogleSignInButton
+              key={googleSignInKey}
               disabled={loading}
               onCredential={handleGoogleCredential}
               onError={(msg) => setError({ type: 'other', message: msg })}

@@ -11,8 +11,9 @@ import yaml
 
 PROMPT_CORE_NAME = "planai_agent_core_v1"
 PROMPT_KABBALAH_NAME = "kabbalah_interpret_v1"
+PROMPT_BIOEMOTION_NAME = "bioemotional_draft_v1"
 PROMPT_VERSION_KABBALAH = PROMPT_KABBALAH_NAME
-PROMPT_VERSION_BIOEMOTION_DRAFT = PROMPT_CORE_NAME
+PROMPT_VERSION_BIOEMOTION_DRAFT = PROMPT_BIOEMOTION_NAME
 
 _PROMPTS_DIR = Path(__file__).resolve().parents[2] / "ai" / "prompts"
 

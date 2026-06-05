@@ -175,7 +175,7 @@ flowchart TB
 | IA v1 | `POST /api/bioemotional/synthesis/{id}/assist-draft/` — borrador **no publicado** |
 | Humano en el loop | Terapeuta edita y `publish`; solo entonces ingesta a `process_memory` |
 | RAG | Entradas diccionario + hipótesis validadas del paciente |
-| Prompt | `prompts/bioemotion_synthesis_v1.yaml` — lenguaje exploratorio, no DSM |
+| Prompt | `backend/ai/prompts/bioemotional_draft_v1.yaml` — fenomenológico, no DSM |
 
 ---
 
@@ -207,7 +207,7 @@ flowchart TB
 ### Fase 2 — Asistencia gobernada (1–2 semanas) ✅ (core)
 
 **Especificación:** [docs/01_PROJECT_STATE/planai/PHASE_2_GOVERNED_ASSISTANCE.md](docs/01_PROJECT_STATE/planai/PHASE_2_GOVERNED_ASSISTANCE.md)  
-**Prompt core:** `backend/ai/prompts/planai_agent_core_v1.yaml` → `api/ai/prompt_registry.py`
+**Prompts:** `kabbalah_interpret_v1.yaml`, `bioemotional_draft_v1.yaml`, `planai_agent_core_v1.yaml` → `api/ai/prompt_registry.py`
 
 - [x] `POST /api/ai/kabbalah/interpret/` con TreeStructuralState input (lane `symbolic`)
 - [x] Bioemocional draft assist (no auto-publish) — lane `clinical_support`

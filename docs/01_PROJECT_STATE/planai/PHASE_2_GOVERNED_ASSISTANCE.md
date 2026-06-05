@@ -36,7 +36,8 @@ AI_BIOEMOTION_DRAFT_ENABLED=true
 | `backend/ai/prompts/planai_agent_core_v1.yaml` | System prompt PlanAI (lanes symbolic \| clinical_support) |
 | `backend/ai/prompts/kabbalah_interpret_v1.yaml` | Prompt dominio cábala (lane symbolic, TreeStructuralState) |
 | `api/ai/prompt_registry.py` | Carga YAML + placeholders `{RAG_CONTEXT}`, `{USER_TASK}`, … |
-| `api/ai/prompts.py` | Tareas kabbalah / bioemotion sobre el core |
+| `backend/ai/prompts/bioemotional_draft_v1.yaml` | Prompt dominio bioemoción (lane clinical_support) |
+| `api/ai/prompts.py` | Builders kabbalah / bioemotion → `render_prompt()` |
 | `api/ai/governed_views.py` | Vistas Fase 2 |
 | `api/models.py` + migración | `AIInteractionFeedback` |
 

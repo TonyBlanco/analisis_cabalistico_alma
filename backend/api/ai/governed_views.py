@@ -15,11 +15,7 @@ from rest_framework.views import APIView
 
 from api.ai.guardrails import check_output
 from api.ai.llm_bridge import generate_text, is_llm_available, unavailable_message
-from api.ai.prompts import (
-    PROMPT_VERSION_BIOEMOTION_DRAFT,
-    bioemotion_synthesis_draft_prompt,
-    kabbalah_interpret_prompt,
-)
+from api.ai.prompts import bioemotion_synthesis_draft_prompt, kabbalah_interpret_prompt
 from api.bioemotional.models import (
     BioEmotionalHypothesis,
     BioEmotionalObservation,

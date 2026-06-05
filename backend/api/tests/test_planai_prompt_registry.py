@@ -1,7 +1,7 @@
 from django.test import TestCase
 
-from api.ai.prompt_registry import PROMPT_KABBALAH_NAME, render_planai_prompt, render_prompt
-from api.ai.prompts import kabbalah_interpret_prompt
+from api.ai.prompt_registry import PROMPT_BIOEMOTION_NAME, PROMPT_KABBALAH_NAME, render_planai_prompt, render_prompt
+from api.ai.prompts import bioemotion_synthesis_draft_prompt, kabbalah_interpret_prompt
 
 
 class PlanAIPromptRegistryTests(TestCase):

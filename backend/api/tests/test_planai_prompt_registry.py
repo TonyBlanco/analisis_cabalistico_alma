@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from api.ai.prompt_registry import PROMPT_CORE_NAME, render_planai_prompt
+from api.ai.prompt_registry import PROMPT_KABBALAH_NAME, render_planai_prompt, render_prompt
 from api.ai.prompts import kabbalah_interpret_prompt
 
 
@@ -21,10 +21,25 @@ class PlanAIPromptRegistryTests(TestCase):
         self.assertIn("Tarea de prueba", prompt)
         self.assertIn("— PlanAI", prompt)
 
-    def test_kabbalah_uses_symbolic_lane(self):
-        prompt, _temp, _max = kabbalah_interpret_prompt('{"source":{"methodId":"t"},"sefirot":[],"flows":[]}')
-        self.assertIn("TreeStructuralState", prompt)
-        self.assertIn("Lane: symbolic", prompt)
+    def test_kabbalah_domain_template(self):
+        prompt, temp, max_tok, version = kabbalah_interpret_prompt(
+            '{"source":{"methodId":"t"},"sefirot":[],"flows":[]}'
+        )
+        self.assertEqual(version, "1.0")
+        self.assertEqual(temp, 0.6)
+        self.assertEqual(max_tok, 1200)
+        self.assertIn("intérprete educativo de Cábala", prompt)
+        self.assertIn("arquetípico", prompt)
+
+    def test_kabbalah_yaml_direct(self):
+        prompt, version, _, _ = render_prompt(
+            template_name=PROMPT_KABBALAH_NAME,
+            lane="symbolic",
+            user_task='{"flows":[]}',
+        )
+        self.assertEqual(version, "1.0")
+        self.assertIn("Cábala educativa", prompt)
+        self.assertIn('{"flows":[]}', prompt)
 
     def test_clinical_lane_rejects_wrong_lane_in_builder(self):
         from api.ai.prompt_registry import render_planai_prompt

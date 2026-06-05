@@ -17,7 +17,6 @@ from api.ai.guardrails import check_output
 from api.ai.llm_bridge import generate_text, is_llm_available, unavailable_message
 from api.ai.prompts import (
     PROMPT_VERSION_BIOEMOTION_DRAFT,
-    PROMPT_VERSION_KABBALAH,
     bioemotion_synthesis_draft_prompt,
     kabbalah_interpret_prompt,
 )
@@ -70,9 +69,11 @@ class KabbalahInterpretView(APIView):
             )
 
         rag_context = (request.data.get("rag_context") or "").strip()
-        prompt, temperature, max_tokens = kabbalah_interpret_prompt(
-            json.dumps(tree_state, ensure_ascii=False),
+        patient_history = (request.data.get("patient_history_summary") or "").strip()
+        prompt, temperature, max_tokens, prompt_version = kabbalah_interpret_prompt(
+            json.dumps(tree_state, ensure_ascii=False, indent=2),
             rag_context=rag_context,
+            patient_history_summary=patient_history,
         )
         result = generate_text(prompt, temperature=temperature, max_tokens=max_tokens)
         if not result.get("success"):
@@ -104,7 +105,7 @@ class KabbalahInterpretView(APIView):
                 "lane": "symbolic",
                 "interpretation": text,
                 "provider": result.get("provider"),
-                "prompt_version": PROMPT_VERSION_KABBALAH,
+                "prompt_version": prompt_version,
             }
         )
 

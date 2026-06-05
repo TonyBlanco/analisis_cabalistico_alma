@@ -164,7 +164,7 @@ flowchart TB
 | Motor números/árbol | Mantener **100% determinista** (`tree_calculator`, `comprehensive_engine`) |
 | IA | Solo **interpretación educativa** post-`TreeStructuralState` |
 | Contexto RAG | Sefaria refs curadas + snapshots sellados del paciente |
-| Prompt | `prompts/kabbalah_educational_v1.yaml` — prohibir diagnóstico y “debes” |
+| Prompt | `backend/ai/prompts/kabbalah_interpret_v1.yaml` — tono arquetípico, no predictivo |
 | API nueva | `POST /api/ai/kabbalah/interpret/` → router + RAG + consent |
 
 ### 6.2 Bioemoción (clinical_support lane)
@@ -204,15 +204,16 @@ flowchart TB
 
 **Criterio de salida:** Terapeuta ve “contexto de procesos previos” en panel Tarot (read-only).
 
-### Fase 2 — Asistencia gobernada (1–2 semanas)
+### Fase 2 — Asistencia gobernada (1–2 semanas) ✅ (core)
 
-**Especificación:** [docs/01_PROJECT_STATE/planai/PHASE_2_GOVERNED_ASSISTANCE.md](docs/01_PROJECT_STATE/planai/PHASE_2_GOVERNED_ASSISTANCE.md)
+**Especificación:** [docs/01_PROJECT_STATE/planai/PHASE_2_GOVERNED_ASSISTANCE.md](docs/01_PROJECT_STATE/planai/PHASE_2_GOVERNED_ASSISTANCE.md)  
+**Prompt core:** `backend/ai/prompts/planai_agent_core_v1.yaml` → `api/ai/prompt_registry.py`
 
-- [ ] `POST /api/ai/kabbalah/interpret/` con TreeStructuralState input
-- [ ] Bioemocional draft assist (no auto-publish)
-- [ ] Feedback API: `POST /api/ai/feedback/` (rating, correction text)
-- [ ] Actualizar pesos RAG desde feedback
-- [ ] Feature flags: `AI_KABBALAH_ENABLED`, `AI_BIOEMOTION_DRAFT_ENABLED`
+- [x] `POST /api/ai/kabbalah/interpret/` con TreeStructuralState input (lane `symbolic`)
+- [x] Bioemocional draft assist (no auto-publish) — lane `clinical_support`
+- [x] Feedback API: `POST /api/ai/feedback/` (rating, correction text)
+- [ ] Actualizar pesos RAG desde feedback (Fase 1)
+- [x] Feature flags: `AI_KABBALAH_ENABLED`, `AI_BIOEMOTION_DRAFT_ENABLED`
 
 **Criterio de salida:** 0 violaciones en eval harness 50 casos.
 

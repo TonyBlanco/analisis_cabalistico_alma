@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 from api.ai.prompt_registry import (
+    PROMPT_KABBALAH_NAME,
     PROMPT_VERSION_BIOEMOTION_DRAFT,
     PROMPT_VERSION_KABBALAH,
     render_planai_prompt,
+    render_prompt,
 )
 
 __all__ = [
@@ -16,23 +18,23 @@ __all__ = [
 ]
 
 
-def kabbalah_interpret_prompt(tree_state_json: str, *, rag_context: str = "") -> tuple[str, float, int]:
-    user_task = f"""Lane: symbolic (Cábala educativa).
-
-Redacta una interpretación exploratoria del Árbol de la Vida a partir del TreeStructuralState (JSON).
-No diagnostiques. Máximo 6 párrafos en español.
-
-TreeStructuralState:
-{tree_state_json}
-"""
-    prompt, _version, temperature, max_tokens = render_planai_prompt(
+def kabbalah_interpret_prompt(
+    tree_state_json: str,
+    *,
+    rag_context: str = "",
+    patient_history_summary: str = "",
+) -> tuple[str, float, int, str]:
+    """Returns (prompt, temperature, max_tokens, prompt_version)."""
+    prompt, version, temperature, max_tokens = render_prompt(
+        template_name=PROMPT_KABBALAH_NAME,
         lane="symbolic",
-        user_task=user_task,
+        user_task=tree_state_json,
         rag_context=rag_context,
-        patient_history_summary="(Lane symbolic: sin historial clínico en este endpoint.)",
-        consent_scope="symbolic_interpretation",
+        patient_history_summary=patient_history_summary
+        or "(Sin historial adicional — solo estado estructural del Árbol.)",
+        consent_scope="kabbalah_interpret",
     )
-    return prompt, temperature, max_tokens
+    return prompt, temperature, max_tokens, version
 
 
 def bioemotion_synthesis_draft_prompt(

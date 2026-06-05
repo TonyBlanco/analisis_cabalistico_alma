@@ -10,7 +10,8 @@ from typing import Any, Dict, Tuple
 import yaml
 
 PROMPT_CORE_NAME = "planai_agent_core_v1"
-PROMPT_VERSION_KABBALAH = PROMPT_CORE_NAME
+PROMPT_KABBALAH_NAME = "kabbalah_interpret_v1"
+PROMPT_VERSION_KABBALAH = PROMPT_KABBALAH_NAME
 PROMPT_VERSION_BIOEMOTION_DRAFT = PROMPT_CORE_NAME
 
 _PROMPTS_DIR = Path(__file__).resolve().parents[2] / "ai" / "prompts"
@@ -38,21 +39,24 @@ def _lane_allowed(spec: Dict[str, Any], lane: str) -> bool:
     return lane in allowed if allowed else True
 
 
-def render_planai_prompt(
+def render_prompt(
     *,
-    lane: str,
     user_task: str,
     rag_context: str = "",
     patient_history_summary: str = "",
     consent_scope: str = "therapist_workspace",
     template_name: str = PROMPT_CORE_NAME,
+    lane: str | None = None,
 ) -> Tuple[str, str, float, int]:
     """
     Returns (full_prompt, version, temperature, max_tokens).
     """
     spec = _load_yaml(template_name)
-    if not _lane_allowed(spec, lane):
-        raise ValueError(f"Lane '{lane}' not allowed for template {template_name}")
+    spec_lane = str(spec.get("lane") or "").strip()
+    if spec_lane:
+        check_lane = lane or spec_lane.split("|")[0].strip()
+        if not _lane_allowed(spec, check_lane):
+            raise ValueError(f"Lane '{check_lane}' not allowed for template {template_name}")
 
     template = spec.get("system_prompt") or ""
     if not template.strip():
@@ -73,3 +77,23 @@ def render_planai_prompt(
     temperature = float(spec.get("temperature", 0.65))
     max_tokens = int(spec.get("max_tokens", 1200))
     return prompt, version, temperature, max_tokens
+
+
+def render_planai_prompt(
+    *,
+    lane: str,
+    user_task: str,
+    rag_context: str = "",
+    patient_history_summary: str = "",
+    consent_scope: str = "therapist_workspace",
+    template_name: str = PROMPT_CORE_NAME,
+) -> Tuple[str, str, float, int]:
+    """PlanAI core template (general lanes)."""
+    return render_prompt(
+        lane=lane,
+        user_task=user_task,
+        rag_context=rag_context,
+        patient_history_summary=patient_history_summary,
+        consent_scope=consent_scope,
+        template_name=template_name,
+    )

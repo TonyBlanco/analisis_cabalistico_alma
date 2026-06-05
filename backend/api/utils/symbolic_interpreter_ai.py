@@ -30,40 +30,12 @@ class SymbolicInterpreterAI:
     """AI service for symbolic interpretation (read-only)"""
     
     def __init__(self):
-        """Initialize Gemini client"""
-        api_key = getattr(settings, 'GEMINI_API_KEY', None)
-        model_name = getattr(settings, 'GEMINI_MODEL', 'gemini-1.5-flash')
-        
-        self.enabled = False
+        from api.ai.llm_bridge import is_llm_available, unavailable_message
+
+        self.enabled = is_llm_available()
+        self.error_message = None if self.enabled else unavailable_message()
         self.model = None
-        self.error_message = None
-        
-        if not api_key:
-            self.error_message = "GEMINI_API_KEY not configured"
-            print(f"[WARNING] {self.error_message}")
-            return
-        
-        if not genai:
-            self.error_message = "google.genai module not installed"
-            print(f"[WARNING] {self.error_message}")
-            return
-        
-        try:
-            self.client = genai.Client(api_key=api_key)
-            self.model = self.client.models.generate_content
-            self.model_name = model_name
-            self.generation_config = {
-                'temperature': 0.7,
-                'top_p': 0.8,
-                'top_k': 40,
-                'max_output_tokens': 1024,
-            }
-            self.enabled = True
-            print(f"[OK] SymbolicInterpreterAI configured with model: {model_name}")
-        except Exception as e:
-            self.error_message = f"Error configuring Gemini: {str(e)}"
-            print(f"[ERROR] {self.error_message}")
-            self.enabled = False
+        self.model_name = getattr(settings, 'GEMINI_MODEL', 'gemini-1.5-flash')
     
     def validate_tree_state_structure(self, tree_state: Dict[str, Any]) -> tuple[bool, Optional[str]]:
         """
@@ -104,24 +76,16 @@ class SymbolicInterpreterAI:
         return True, None
     
     def generate_symbolic_interpretation(self, prompt: str) -> str:
-        """
-        Generates symbolic interpretation using Gemini
-        Returns raw AI response
-        """
+        """Generates symbolic interpretation via unified LLM router."""
+        from api.ai.llm_bridge import generate_text, unavailable_message
+
         if not self.enabled:
-            raise Exception(self.error_message or "AI service not enabled")
-        
-        try:
-            response = self.model(
-                model=self.model_name,
-                contents=prompt,
-                config=self.generation_config
-            )
-            return extract_text(response)
-        except Exception as e:
-            error_msg = f"Error generating AI interpretation: {str(e)}"
-            print(f"[ERROR] {error_msg}")
-            raise Exception(error_msg)
+            raise Exception(self.error_message or unavailable_message())
+
+        result = generate_text(prompt, temperature=0.7, max_tokens=1024)
+        if not result.get('success'):
+            raise Exception(result.get('error') or 'AI generation failed')
+        return result.get('text') or ''
 
 
 # Global service instance

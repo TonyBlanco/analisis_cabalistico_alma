@@ -1,7 +1,7 @@
 # Fase 0 — Router LLM unificado (sin entrenamiento)
 
 **Plan maestro:** [planai.md](../../../planai.md)  
-**Estado:** En implementación (2026-06-05)  
+**Estado:** Implementado (2026-06-05)  
 **ADR:** No fine-tuning, LoRA, PEFT, custom training loops, ni model checkpoints.
 
 ---

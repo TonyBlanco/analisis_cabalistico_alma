@@ -10,7 +10,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 import logging
 
-from api.utils.holistic_ai import holistic_ai
+from api.ai.llm_bridge import generate_text, is_llm_available, unavailable_message
 
 logger = logging.getLogger(__name__)
 
@@ -45,34 +45,30 @@ class AIHolisticQueryView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Check if AI is enabled
-        if not holistic_ai.enabled:
-            error_msg = getattr(
-                holistic_ai, 
-                'error_message', 
-                'Servicio de IA no disponible. Verifica la configuración de GEMINI_API_KEY.'
-            )
+        if not is_llm_available():
             return Response(
-                {'error': error_msg},
-                status=status.HTTP_503_SERVICE_UNAVAILABLE
+                {'error': unavailable_message()},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
-        
+
         try:
-            # Create a simple prompt for quick queries
-            prompt = f"""Eres un asistente clínico especializado en terapia holística.
-            
+            prompt = f"""Eres un asistente de terapia holística (orientación educativa, no diagnóstico).
+
 Pregunta del terapeuta: {query}
 
-Responde de forma concisa y profesional (máximo 200 palabras). 
-Si la pregunta es sobre interpretación de tests, contexto clínico, o herramientas del sistema, proporciona orientación práctica.
-Si no tienes información suficiente, sugiere cómo el terapeuta podría encontrar más detalles."""
+Responde en español, máximo 200 palabras, tono profesional."""
 
-            # Use the holistic AI to generate response
-            response_text = holistic_ai.model.generate_content(prompt)
-            
+            result = generate_text(prompt, temperature=0.6, max_tokens=512)
+            if not result.get('success'):
+                return Response(
+                    {'error': result.get('error') or 'Error de IA'},
+                    status=status.HTTP_503_SERVICE_UNAVAILABLE,
+                )
+
             return Response({
-                'response': response_text.text if hasattr(response_text, 'text') else str(response_text),
-                'query': query
+                'response': result.get('text', ''),
+                'query': query,
+                'provider': result.get('provider'),
             })
             
         except Exception as e:

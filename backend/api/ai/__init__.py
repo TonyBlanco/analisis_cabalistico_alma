@@ -1,0 +1,1 @@
+"""Governed LLM helpers — inference and feedback only (no training)."""

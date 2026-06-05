@@ -310,27 +310,19 @@ class HolisticSynthesisEngine:
         return [axis for axis, score in sorted_axes if score > 60][:3]
 
     def generate_ai_analysis(self, synthesis_data: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Generar análisis IA de la síntesis holística
-        """
-        ai_interpreter = GeminiInterpreter()
+        """Generar análisis IA de la síntesis holística vía router unificado."""
+        from api.ai.llm_bridge import generate_text, is_llm_available
 
-        if not ai_interpreter.enabled:
+        if not is_llm_available():
             return self._fallback_ai_analysis(synthesis_data)
 
-        # Preparar prompt para IA
         prompt = self._build_ai_prompt(synthesis_data)
 
         try:
-            response = ai_interpreter.model(
-                model=ai_interpreter.model_name,
-                contents=prompt
-            )
-            ai_text = extract_text(response)
-
-            # Parsear respuesta estructurada
-            return self._parse_ai_response(ai_text)
-
+            result = generate_text(prompt, temperature=0.7, max_tokens=1536)
+            if not result.get('success'):
+                return self._fallback_ai_analysis(synthesis_data)
+            return self._parse_ai_response(result.get('text') or '')
         except Exception as e:
             logger.error(f"Error en análisis IA MSHE: {e}")
             return self._fallback_ai_analysis(synthesis_data)

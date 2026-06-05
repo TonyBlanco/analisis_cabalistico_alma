@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 import os
+from urllib.parse import urlparse
 from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -32,6 +33,14 @@ ALLOWED_HOSTS = config(
     default='localhost,127.0.0.1,testserver',
     cast=lambda v: [s.strip() for s in v.split(',')],
 )
+
+# Detrás de Cloudflare / nginx (HTTPS terminado en el edge)
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
+
+if not DEBUG:
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = True
 
 
 
@@ -70,6 +79,7 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware', 
     
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -101,12 +111,26 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+_database_url = os.environ.get('DATABASE_URL') or config('DATABASE_URL', default='')
+if _database_url:
+    _db = urlparse(_database_url)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': (_db.path or '/').lstrip('/'),
+            'USER': _db.username,
+            'PASSWORD': _db.password,
+            'HOST': _db.hostname,
+            'PORT': str(_db.port or 5432),
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation
@@ -143,8 +167,16 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+STORAGES = {
+    'default': {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
+    },
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedStaticFilesStorage',
+    },
+}
 
 # Media files (User uploads)
 MEDIA_URL = 'media/'
@@ -237,8 +269,8 @@ GROQ_MODEL = config('GROQ_MODEL', default='llama-3.3-70b-versatile')
 OLLAMA_BASE_URL = config('OLLAMA_BASE_URL', default='http://localhost:11434')
 OLLAMA_MODEL = config('OLLAMA_MODEL', default='llama3.2')
 
-# AI Provider Priority: gemini, groq, ollama (first available with API key wins)
-AI_PROVIDER = config('AI_PROVIDER', default='auto')  # auto, gemini, groq, ollama
+# AI Provider Priority: free_first = groq → gemini → openai → ollama (PIP Phase 0)
+AI_PROVIDER = config('AI_PROVIDER', default='free_first')  # free_first, auto, gemini, groq, openai, ollama
 
 # =============================================================================
 # FEATURE FLAGS - AI MODULES
@@ -248,6 +280,10 @@ AI_PROVIDER = config('AI_PROVIDER', default='auto')  # auto, gemini, groq, ollam
 # Habilita los endpoints /api/ai/tarot/* para interpretaciones holísticas
 # Default: False (activar cuando el sistema esté listo para producción)
 AI_TAROT_ENABLED = config('AI_TAROT_ENABLED', default=True, cast=bool)
+
+# PIP Phase 2 — governed assistance (inference only, no training)
+AI_KABBALAH_ENABLED = config('AI_KABBALAH_ENABLED', default=True, cast=bool)
+AI_BIOEMOTION_DRAFT_ENABLED = config('AI_BIOEMOTION_DRAFT_ENABLED', default=True, cast=bool)
 
 # Astrology Kerykeion - AI snippets (therapist in-session guidance)
 # When enabled, the backend may generate short AI-written (non-verbatim) summaries

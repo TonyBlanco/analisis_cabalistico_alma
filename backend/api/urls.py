@@ -16,6 +16,8 @@ from .views import (
     GeocodeCityView,
     CheckMembershipView,
     EmailOrUsernameAuthToken,
+    TurnstileConfigView,
+    GoogleOAuthConfigView,
     GoogleOAuthView,
     AdminStatsView,
     AdminUsersView,
@@ -44,6 +46,8 @@ from .views import (
     service_stats,
 )
 from .ai_views import AIHolisticQueryView
+from api.ai.status_views import AIStatusView
+from api.ai.governed_views import KabbalahInterpretView, AIInteractionFeedbackView
 from .astrology_ai_views import (
     AstrologyInterpretNatalView,
     AstrologyInterpretTransitsView,
@@ -166,6 +170,8 @@ urlpatterns = [
     path('', welcome_api, name='api_welcome'),
     
     # Autenticación
+    path('turnstile/config/', TurnstileConfigView.as_view(), name='turnstile_config'),
+    path('google/config/', GoogleOAuthConfigView.as_view(), name='google_oauth_config'),
     path('login/', EmailOrUsernameAuthToken.as_view(), name='api_token_auth'),
     path('login/google/', GoogleOAuthView.as_view(), name='google_oauth'),
     path('register/therapist/', RegisterTherapistView.as_view(), name='register_therapist'),
@@ -186,8 +192,11 @@ urlpatterns = [
     # Cálculos
     path('calcular/', CalculoCabalisticoView.as_view(), name='calcular_cabala'),
     
-    # AI Assistant
+    # AI Assistant (PIP: unified router + governed lanes)
+    path('ai/status/', AIStatusView.as_view(), name='ai_status'),
     path('ai/holistic-query/', AIHolisticQueryView.as_view(), name='ai_holistic_query'),
+    path('ai/kabbalah/interpret/', KabbalahInterpretView.as_view(), name='ai_kabbalah_interpret'),
+    path('ai/feedback/', AIInteractionFeedbackView.as_view(), name='ai_feedback'),
     
     # Fichas
     path('fichas/', FichaListCreateView.as_view(), name='ficha_list_create'),

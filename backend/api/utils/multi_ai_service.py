@@ -191,8 +191,18 @@ class MultiAIService:
         response = ai.generate("Your prompt here")
     """
     
-    # Provider order for fallback - Groq first (better rate limits), then Gemini, then OpenAI
+    # Default provider order (overridden when AI_PROVIDER=free_first in settings)
     PROVIDERS = ['groq', 'gemini', 'openai', 'ollama']
+
+    @staticmethod
+    def provider_order() -> List[str]:
+        mode = getattr(settings, 'AI_PROVIDER', 'auto')
+        if mode == 'free_first':
+            return ['groq', 'gemini', 'openai', 'ollama']
+        if mode in ('groq', 'gemini', 'openai', 'ollama'):
+            rest = [p for p in MultiAIService.PROVIDERS if p != mode]
+            return [mode] + rest
+        return list(MultiAIService.PROVIDERS)
     
     def __init__(self, preferred_provider: Optional[str] = None):
         """
@@ -246,7 +256,7 @@ class MultiAIService:
         }
         
         # Build provider order
-        providers = list(self.PROVIDERS)
+        providers = self.provider_order()
         if self.preferred and self.preferred in providers:
             providers.remove(self.preferred)
             providers.insert(0, self.preferred)

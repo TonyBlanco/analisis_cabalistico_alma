@@ -85,34 +85,12 @@ class TarotTherapeuticAI:
     """Generador de análisis terapéutico cruzado usando Tarot + Estado Clínico"""
     
     def __init__(self):
-        """Inicializa el cliente de Gemini"""
-        api_key = getattr(settings, 'GEMINI_API_KEY', None)
-        model_name = getattr(settings, 'GEMINI_MODEL', 'gemini-1.5-flash')
-        
-        self.enabled = False
+        from api.ai.llm_bridge import is_llm_available, unavailable_message
+
+        self.enabled = is_llm_available()
+        self.error_message = None if self.enabled else unavailable_message()
         self.model = None
-        self.error_message = None
-        
-        if not api_key:
-            self.error_message = "GEMINI_API_KEY no está configurada en settings.py"
-            print(f"[WARNING] {self.error_message}")
-            return
-        
-        if not genai:
-            self.error_message = "Módulo google.genai no está instalado. Ejecuta: pip install google-genai"
-            print(f"[WARNING] {self.error_message}")
-            return
-        
-        try:
-            self.client = genai.Client(api_key=api_key)
-            self.model = self.client.models.generate_content
-            self.model_name = model_name
-            self.enabled = True
-            print(f"[OK] TarotTherapeuticAI configurado con modelo: {model_name}")
-        except Exception as e:
-            self.error_message = f"Error configurando Gemini: {str(e)}"
-            print(f"[ERROR] {self.error_message}")
-            self.enabled = False
+        self.model_name = getattr(settings, 'GEMINI_MODEL', 'gemini-1.5-flash')
     
     def analyze_archetype_vs_clinical(
         self,
@@ -139,11 +117,8 @@ class TarotTherapeuticAI:
             Dict con el análisis y acciones de sanación
         """
         if not self.enabled:
-            error_msg = self.error_message or "Servicio de IA no disponible. Verifica la configuración de GEMINI_API_KEY."
-            return {
-                "error": error_msg
-            }
-        
+            return {"error": self.error_message or "Servicio de IA no disponible."}
+
         # Construir el prompt
         patient_context = f" del paciente {patient_name}" if patient_name else ""
         prompt = f"""Actúa como un Terapeuta Experto en Psicología Transpersonal y Cábala.
@@ -190,20 +165,13 @@ IMPORTANTE:
 """
         
         try:
-            # Generar respuesta con Gemini
-            response = self.model(
-                model=self.model_name,
-                contents=prompt,
-                config={
-                    "temperature": 0.8,
-                    "top_p": 0.9,
-                    "top_k": 40,
-                    "max_output_tokens": 2048,
-                }
-            )
-            
-            # Extraer el texto de la respuesta
-            response_text = extract_text(response).strip()
+            from api.ai.llm_bridge import generate_text
+
+            ai_result = generate_text(prompt, temperature=0.8, max_tokens=2048)
+            if not ai_result.get('success'):
+                return {"error": ai_result.get('error') or 'Error de IA'}
+
+            response_text = (ai_result.get('text') or '').strip()
             
             # Limpiar el texto si tiene markdown code blocks
             if response_text.startswith('```json'):

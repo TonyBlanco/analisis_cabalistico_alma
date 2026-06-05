@@ -1388,6 +1388,42 @@ class ResonanciaRelation(models.Model):
         verbose_name_plural = 'Relaciones (Resonancia)'
 
 
+class AIInteractionFeedback(models.Model):
+    """Feedback de terapeuta sobre asistencias IA (mejora de prompts/RAG, sin entrenamiento de pesos)."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    therapist = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="ai_interaction_feedback",
+    )
+    patient = models.ForeignKey(
+        Patient,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="ai_interaction_feedback",
+    )
+    feature = models.CharField(max_length=64, db_index=True)
+    provider = models.CharField(max_length=32, blank=True)
+    prompt_version = models.CharField(max_length=64, blank=True)
+    rating = models.PositiveSmallIntegerField()
+    correction_text = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Feedback interacción IA"
+        verbose_name_plural = "Feedback interacciones IA"
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["feature", "-created_at"]),
+            models.Index(fields=["therapist", "-created_at"]),
+        ]
+
+    def __str__(self):
+        return f"AIFeedback {self.feature} ({self.rating}/5) by {self.therapist_id}"
+
+
 class FederationAuditLog(models.Model):
     """Registro inmutable de lecturas federadas cross-workspace.
     

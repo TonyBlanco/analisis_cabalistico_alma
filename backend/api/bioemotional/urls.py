@@ -1,6 +1,6 @@
 from django.urls import path
 
-
+from api.ai.governed_views import BioEmotionalSynthesisAssistDraftView
 
 from .views import (
 
@@ -158,6 +158,11 @@ urlpatterns = [
         "synthesis/<uuid:id>/close/",
         BioEmotionalSynthesisCloseView.as_view(),
         name="synthesis_close",
+    ),
+    path(
+        "synthesis/<uuid:id>/assist-draft/",
+        BioEmotionalSynthesisAssistDraftView.as_view(),
+        name="synthesis_assist_draft",
     ),
 
     # Lectura asistida

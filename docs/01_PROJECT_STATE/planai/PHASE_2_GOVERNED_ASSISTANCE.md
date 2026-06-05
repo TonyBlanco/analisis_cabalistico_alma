@@ -1,6 +1,7 @@
 # Fase 2 — Asistencia IA gobernada (sin entrenamiento)
 
 **Plan maestro:** [planai.md](../../../planai.md)  
+**Estado:** Implementado (2026-06-05)  
 **Depende de:** Fase 0 (router unificado)  
 **No depende de:** Fase 1 RAG (opcional; v2 añade contexto de procesos)  
 **ADR:** No fine-tuning, LoRA, PEFT, custom training loops, ni model checkpoints.

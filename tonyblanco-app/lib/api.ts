@@ -312,10 +312,17 @@ export interface GoogleLoginResponse extends LoginResponse {
   message?: string;
 }
 
-export const loginWithGoogle = async (googleIdToken: string): Promise<GoogleLoginResponse> => {
+export const loginWithGoogle = async (
+  googleIdToken: string,
+  registrationIntent?: 'personal' | 'therapist'
+): Promise<GoogleLoginResponse> => {
+  const body: { token: string; registration_intent?: string } = { token: googleIdToken };
+  if (registrationIntent) {
+    body.registration_intent = registrationIntent;
+  }
   return apiRequest<GoogleLoginResponse>('/login/google/', {
     method: 'POST',
-    body: JSON.stringify({ token: googleIdToken }),
+    body: JSON.stringify(body),
   });
 };
 

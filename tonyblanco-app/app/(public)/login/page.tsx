@@ -3,11 +3,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { AuthGoogleSection } from '@/components/AuthGoogleSection';
 import { login, loginWithGoogle, getCurrentUser } from '@/lib/api';
-import { GoogleSignInButton } from '@/components/GoogleSignInButton';
-import { setAuthToken, setUserRole, type UserRole } from '@/lib/auth';
 import { clearAuthState } from '@/lib/auth-state';
-import { getUserRole } from '@/lib/getUserRole';
+import { completeAuthFromToken } from '@/lib/finishAuthSession';
 import { TurnstileField, type TurnstileFieldHandle } from '@/components/TurnstileField';
 import { turnstileApiErrorMessage } from '@/lib/turnstile-messages';
 import { Eye, EyeOff, Mail, Lock, AlertCircle, User, Sparkles, Heart } from 'lucide-react';
@@ -142,33 +141,8 @@ export default function LoginPage() {
   };
 
   const finishLoginWithToken = async (token: string, loginRole?: string) => {
-    setAuthToken(token);
-    if (
-      loginRole === 'therapist' ||
-      loginRole === 'personal' ||
-      loginRole === 'patient'
-    ) {
-      setUserRole(loginRole as UserRole);
-    } else if (typeof window !== 'undefined') {
-      localStorage.removeItem('userRole');
-    }
-    const role = await getUserRole();
-    switch (role) {
-      case 'admin':
-        router.push('/dashboard/admin');
-        break;
-      case 'therapist':
-        router.push('/dashboard/therapist');
-        break;
-      case 'personal':
-        router.push('/dashboard/personal');
-        break;
-      case 'patient':
-        router.push('/dashboard/patient');
-        break;
-      default:
-        router.push('/dashboard');
-    }
+    const path = await completeAuthFromToken(token, loginRole);
+    router.push(path);
   };
 
   const handleGoogleCredential = async (credential: string) => {
@@ -415,17 +389,8 @@ export default function LoginPage() {
               </button>
             </form>
 
-            <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white text-gray-500">o continúa con</span>
-              </div>
-            </div>
-
-            <GoogleSignInButton
-              key={googleSignInKey}
+            <AuthGoogleSection
+              googleKey={googleSignInKey}
               disabled={loading}
               onCredential={handleGoogleCredential}
               onError={(msg) => setError({ type: 'other', message: msg })}

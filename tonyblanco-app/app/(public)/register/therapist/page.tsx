@@ -3,6 +3,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { AuthGoogleSection } from '@/components/AuthGoogleSection';
+import { loginWithGoogle } from '@/lib/api';
+import { clearAuthState } from '@/lib/auth-state';
+import { completeAuthFromToken } from '@/lib/finishAuthSession';
 import { fetchSession } from '@/lib/session';
 import DisclaimerModal from '@/components/DisclaimerModal';
 import { getApiBaseUrl } from '@/lib/api-base';
@@ -16,15 +20,41 @@ export default function TherapistRegistrationPage() {
   const [showDisclaimer, setShowDisclaimer] = useState(true);
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
   
-  // Check if user is already authenticated - redirect to dashboard if so
+  const [googleSignInKey, setGoogleSignInKey] = useState(0);
+
   useEffect(() => {
     fetchSession().then((session) => {
       if (session.isAuthenticated && session.user) {
-        // User is authenticated - redirect to dashboard (DO NOT logout)
         router.replace('/dashboard');
+      } else {
+        clearAuthState();
+        setGoogleSignInKey((k) => k + 1);
       }
     });
   }, [router]);
+
+  const handleGoogleCredential = async (credential: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await loginWithGoogle(credential, 'therapist');
+      const path = await completeAuthFromToken(
+        res.token,
+        res.user?.user_type ?? res.role
+      );
+      router.replace(path);
+    } catch (err: unknown) {
+      const response = (err as { response?: { message?: string; error?: string } })?.response;
+      setError(
+        response?.message ||
+          (response?.error === 'google_auth_disabled'
+            ? 'Inicio con Google aún no está configurado en el servidor'
+            : 'No se pudo continuar con Google')
+      );
+      setLoading(false);
+    }
+  };
+
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -445,6 +475,13 @@ export default function TherapistRegistrationPage() {
               </div>
             </div>
           </div>
+
+          <AuthGoogleSection
+            googleKey={googleSignInKey}
+            disabled={loading}
+            onCredential={handleGoogleCredential}
+            onError={(msg) => setError(msg)}
+          />
 
           <TurnstileField
             ref={turnstileRef}

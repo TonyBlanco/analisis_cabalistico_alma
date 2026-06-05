@@ -2559,7 +2559,12 @@ class GoogleOAuthView(APIView):
             # Actualizar google_id si no lo tenía
             if not profile.google_id:
                 profile.google_id = google_id
-                profile.save()
+                profile.save(update_fields=['google_id'])
+
+            intent = (request.data.get('registration_intent') or '').strip().lower()
+            if created and intent in ('therapist', 'personal'):
+                profile.user_type = intent
+                profile.save(update_fields=['user_type'])
             
             # Obtener o crear token de autenticación
             token, _ = Token.objects.get_or_create(user=user)

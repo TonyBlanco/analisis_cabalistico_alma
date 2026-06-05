@@ -423,6 +423,31 @@ El objetivo del UX es:
 
 Cualquier modificación futura requiere actualización explícita de este documento.
 
+## Infraestructura — Studios33.app (Hetzner)
+
+- **Estado:** **ACTIVO EN PRODUCCIÓN** (2026-06-05)
+- **Dominio:** `studios33.app` + `api.studios33.app` (reemplaza uso previsto de `tonyblanco.es` para esta app)
+- **Aislamiento:** stack Docker y rutas en `/opt/studio33`, sin interferir con VoxTV (`/opt/voxtvserver`, `voxtv.win`)
+- **Documento canónico:** [STUDIOS33_HETZNER_DEPLOYMENT.md](./STUDIOS33_HETZNER_DEPLOYMENT.md)
+- **Log sesión 2026-06-05:** [SESSION_2026-06-05_STUDIOS33.md](./SESSION_2026-06-05_STUDIOS33.md)
+
+### Hecho (sesión 2026-06-05)
+- ✅ Deploy Hetzner Fases A–C (API, Next, HTTPS, DNS Cloudflare)
+- ✅ Django Admin estilos (CSP API dedicada)
+- ✅ Turnstile en login + registro (widget Studios33, prod enforced)
+- ✅ Google Sign-In Gmail en `/login` (OAuth `studio33-app`, cuenta personal trial verificada)
+
+### IA y módulos (2026-06-05)
+- 📋 Auditoría wiring + IA: [AUDIT_MODULOS_IA_2026-06-05.md](./AUDIT_MODULOS_IA_2026-06-05.md)
+- 📋 Plan arquitectura LLM / memoria de proceso: [planai.md](../../planai.md)
+
+### Pendiente
+- ⏳ Fase D: corte Render/Vercel + backup Postgres
+- ⏳ Fase E: deuda producto (registry tests, Tarot, módulos “Próximamente”)
+- ⏳ Smoke test clínico/simbólico completo en prod
+- ⏳ Commit git de cambios auth/deploy; rotar Google secret si se expuso
+- ⏸️ Scroll admin Next (cambios locales — no desplegados por decisión explícita)
+
 ## Documentation Governance
 - **Status:** RESOLVED (Chaos eliminated)
 - **Rule:** All documentation centralized in `/docs` with canonical structure.

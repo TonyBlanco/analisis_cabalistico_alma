@@ -1,31 +1,59 @@
-"""Versioned prompt templates for governed AI lanes (inference only)."""
+"""Task builders on top of PlanAI core template (YAML registry)."""
 
-PROMPT_VERSION_KABBALAH = "kabbalah_educational_v1"
-PROMPT_VERSION_BIOEMOTION_DRAFT = "bioemotion_draft_v1"
+from __future__ import annotations
+
+from api.ai.prompt_registry import (
+    PROMPT_VERSION_BIOEMOTION_DRAFT,
+    PROMPT_VERSION_KABBALAH,
+    render_planai_prompt,
+)
+
+__all__ = [
+    "PROMPT_VERSION_KABBALAH",
+    "PROMPT_VERSION_BIOEMOTION_DRAFT",
+    "kabbalah_interpret_prompt",
+    "bioemotion_synthesis_draft_prompt",
+]
 
 
-def kabbalah_interpret_prompt(tree_state_json: str) -> str:
-    return f"""Eres un asistente educativo de Cábala hermética. Redacta una interpretación exploratoria
-a partir del estado estructural del Árbol (JSON). No diagnostiques, no des consejos médicos ni psicológicos clínicos.
-Usa lenguaje tentativo ("podría sugerir", "desde una lectura simbólica").
-Máximo 6 párrafos cortos en español.
+def kabbalah_interpret_prompt(tree_state_json: str, *, rag_context: str = "") -> tuple[str, float, int]:
+    user_task = f"""Lane: symbolic (Cábala educativa).
 
-Estado del árbol (JSON):
+Redacta una interpretación exploratoria del Árbol de la Vida a partir del TreeStructuralState (JSON).
+No diagnostiques. Máximo 6 párrafos en español.
+
+TreeStructuralState:
 {tree_state_json}
 """
+    prompt, _version, temperature, max_tokens = render_planai_prompt(
+        lane="symbolic",
+        user_task=user_task,
+        rag_context=rag_context,
+        patient_history_summary="(Lane symbolic: sin historial clínico en este endpoint.)",
+        consent_scope="symbolic_interpretation",
+    )
+    return prompt, temperature, max_tokens
 
 
-def bioemotion_synthesis_draft_prompt(*, patient_context: str, current_text: str) -> str:
-    return f"""Eres un asistente de redacción para terapeutas en bioemoción.
-Genera un BORRADOR de síntesis integradora (no es diagnóstico ni tratamiento).
-No uses etiquetas DSM, no imperatives absolutos ("debes", "nunca", "siempre").
-El terapeuta revisará y editará todo antes de cerrar el caso.
+def bioemotion_synthesis_draft_prompt(
+    *,
+    patient_context: str,
+    current_text: str,
+    rag_context: str = "",
+) -> tuple[str, float, int]:
+    user_task = f"""Lane: clinical_support (bioemoción — borrador no publicado).
 
-Contexto clínico-resumido (notas del terapeuta):
-{patient_context}
+Genera un BORRADOR de síntesis integradora para que el terapeuta revise y edite.
+No cierres el caso ni publiques. Devuelve solo el texto del borrador en español.
 
-Borrador previo del terapeuta (puede estar vacío):
+Borrador previo del terapeuta:
 {current_text or "(vacío)"}
-
-Devuelve solo el texto del borrador sugerido en español.
 """
+    prompt, _version, temperature, max_tokens = render_planai_prompt(
+        lane="clinical_support",
+        user_task=user_task,
+        rag_context=rag_context,
+        patient_history_summary=patient_context,
+        consent_scope="bioemotion_draft_assist",
+    )
+    return prompt, temperature, max_tokens

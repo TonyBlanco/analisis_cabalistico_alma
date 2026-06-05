@@ -69,8 +69,12 @@ class KabbalahInterpretView(APIView):
                 status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
 
-        prompt = kabbalah_interpret_prompt(json.dumps(tree_state, ensure_ascii=False))
-        result = generate_text(prompt, temperature=0.6, max_tokens=1200)
+        rag_context = (request.data.get("rag_context") or "").strip()
+        prompt, temperature, max_tokens = kabbalah_interpret_prompt(
+            json.dumps(tree_state, ensure_ascii=False),
+            rag_context=rag_context,
+        )
+        result = generate_text(prompt, temperature=temperature, max_tokens=max_tokens)
         if not result.get("success"):
             return Response(
                 {
@@ -144,11 +148,13 @@ class BioEmotionalSynthesisAssistDraftView(APIView):
                 status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
 
-        prompt = bioemotion_synthesis_draft_prompt(
+        rag_context = (request.data.get("rag_context") or "").strip()
+        prompt, temperature, max_tokens = bioemotion_synthesis_draft_prompt(
             patient_context=patient_context,
             current_text=synthesis.text,
+            rag_context=rag_context,
         )
-        result = generate_text(prompt, temperature=0.5, max_tokens=900)
+        result = generate_text(prompt, temperature=temperature, max_tokens=max_tokens)
         if not result.get("success"):
             return Response(
                 {

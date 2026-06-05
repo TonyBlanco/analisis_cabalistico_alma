@@ -33,7 +33,9 @@ AI_BIOEMOTION_DRAFT_ENABLED=true
 | Módulo | Rol |
 |--------|-----|
 | `api/ai/guardrails.py` | Términos prohibidos, validación salida |
-| `api/ai/prompts.py` | Plantillas versionadas kabbalah / bioemotion |
+| `backend/ai/prompts/planai_agent_core_v1.yaml` | System prompt PlanAI (lanes symbolic \| clinical_support) |
+| `api/ai/prompt_registry.py` | Carga YAML + placeholders `{RAG_CONTEXT}`, `{USER_TASK}`, … |
+| `api/ai/prompts.py` | Tareas kabbalah / bioemotion sobre el core |
 | `api/ai/governed_views.py` | Vistas Fase 2 |
 | `api/models.py` + migración | `AIInteractionFeedback` |
 

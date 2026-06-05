@@ -80,7 +80,7 @@ flowchart TB
 | **Memory** | Tablas `process_event`, `process_snapshot`, `embedding_chunk` |
 | **RAG** | Recuperar top-k chunks por `patient_id` + `domain` + terapeuta (ownership) |
 | **Router** | `AI_PROVIDER=free_first`: Groq → Gemini → Ollama |
-| **Prompt registry** | Versionado YAML en repo: `backend/ai/prompts/{kabbalah,bioemotion,tarot,clinical}.yaml` |
+| **Prompt registry** | YAML en repo: `backend/ai/prompts/planai_agent_core_v1.yaml` (+ tareas por lane) |
 | **Feedback** | `therapist_rating`, `edited_text`, `rejected` → pesos futuros RAG |
 
 ---
@@ -181,13 +181,13 @@ flowchart TB
 
 ## 7. Plan por fases (DAG)
 
-### Fase 0 — Unificación IA (2–3 días) ⏳
+### Fase 0 — Unificación IA (2–3 días) ✅
 
 **Especificación:** [docs/01_PROJECT_STATE/planai/PHASE_0_UNIFIED_LLM_ROUTER.md](docs/01_PROJECT_STATE/planai/PHASE_0_UNIFIED_LLM_ROUTER.md)
 
-- [ ] Refactor: `holistic_ai`, `tarot_service`, `symbolic_interpreter_ai`, MSHE → `generate_with_fallback()`
-- [ ] Endpoint `GET /api/ai/status/` (providers disponibles, latencia última llamada)
-- [ ] Tests sandbox sin DB para prompts kabbalah/bioemotion
+- [x] Refactor: `holistic_ai`, `tarot_service`, `symbolic_interpreter_ai`, MSHE → `generate_with_fallback()` (vía `llm_bridge`)
+- [x] Endpoint `GET /api/ai/status/` (providers disponibles, latencia última llamada)
+- [x] Tests unitarios prompts/router (`test_ai_llm_bridge`, `test_planai_prompt_registry`)
 - [ ] Limpiar API key de `docs/technical/README_AI.md`
 
 **Criterio de salida:** Tarot + holistic funcionan si solo hay `GROQ_API_KEY`.

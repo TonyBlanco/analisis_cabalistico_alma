@@ -44,12 +44,12 @@ export function middleware(request: NextRequest) {
     // but we aim for a more restrictive policy later once verified.
     const cspHeader = `
     default-src 'self';
-    script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://accounts.google.com;
+    script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://accounts.google.com https://cdn.cookie-script.com https://report.cookie-script.com;
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
     img-src 'self' blob: data: https:;
     font-src 'self' https://fonts.gstatic.com;
-    connect-src ${connectSrcOrigins().join(' ')} https://challenges.cloudflare.com https://accounts.google.com;
-    frame-src 'self' https://challenges.cloudflare.com https://accounts.google.com;
+    connect-src ${connectSrcOrigins().join(' ')} https://challenges.cloudflare.com https://accounts.google.com https://cdn.cookie-script.com https://report.cookie-script.com;
+    frame-src 'self' https://challenges.cloudflare.com https://accounts.google.com https://cdn.cookie-script.com https://report.cookie-script.com;
     object-src 'none';
     base-uri 'self';
     form-action 'self';

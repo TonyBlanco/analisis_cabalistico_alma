@@ -138,6 +138,43 @@ curl -s https://api.studios33.app/api/ai/status/
 
 ---
 
+## Actualización legal / cookies (2026-06-05 — tarde)
+
+### Hecho ✅
+- Restaurado footer legal público en el landing con enlaces a:
+  - `/terms`
+  - `/privacy`
+  - `/cookies`
+- Creadas páginas públicas:
+  - `tonyblanco-app/app/(public)/terms/page.tsx`
+  - `tonyblanco-app/app/(public)/privacy/page.tsx`
+  - `tonyblanco-app/app/(public)/cookies/page.tsx`
+- Integrado Cookie-Script global con el script:
+  - `https://cdn.cookie-script.com/s/3137ed99ea4d07a01c82e4a6a5b6e414.js`
+- Integrado reporte detallado en `/cookies` con:
+  - `https://report.cookie-script.com/r/3137ed99ea4d07a01c82e4a6a5b6e414.js`
+- Corregido bloqueo CSP en frontend para permitir:
+  - `https://cdn.cookie-script.com`
+  - `https://report.cookie-script.com`
+- Deploy forzado a Hetzner ejecutado y validado.
+
+### Causa raíz detectada
+- El banner no aparecía aunque el script estuviera incluido porque la política CSP del frontend bloqueaba Cookie-Script.
+- Además, el footer legal del landing no estaba presente en la versión pública simplificada.
+
+### Verificación hecha
+- `https://studios33.app/` publica el script global de Cookie-Script.
+- `https://studios33.app/cookies` publica la tabla de declaración detallada.
+- La cabecera `Content-Security-Policy` ya incluye ambos dominios de Cookie-Script.
+- Deploy terminó con smoke OK y suites del script:
+  - `Ran 6 tests ... OK`
+  - `Ran 20 tests ... OK`
+
+### Nota operativa
+- Si el banner no aparece en un navegador concreto, comprobar en incógnito o borrar cookies/consentimientos previos del dominio `studios33.app`.
+
+---
+
 ## Pendiente ⏳
 
 ### Go-live / producto

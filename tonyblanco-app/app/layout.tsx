@@ -3,6 +3,9 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Providers } from "@/components/Providers";
 import "./globals.css";
 
+const DEFAULT_COOKIE_SCRIPT_SRC =
+  "https://cdn.cookie-script.com/s/3137ed99ea4d07a01c82e4a6a5b6e414.js";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -35,8 +38,19 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieScriptSrc =
+    process.env.NEXT_PUBLIC_COOKIE_SCRIPT_SRC?.trim() || DEFAULT_COOKIE_SCRIPT_SRC;
+
   return (
     <html lang="es" suppressHydrationWarning>
+      <head>
+        {/* eslint-disable-next-line @next/next/no-sync-scripts */}
+        <script
+          type="text/javascript"
+          charSet="UTF-8"
+          src={cookieScriptSrc.startsWith("//") ? `https:${cookieScriptSrc}` : cookieScriptSrc}
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen app-shell`}
         suppressHydrationWarning
@@ -50,4 +64,3 @@ export default function RootLayout({
     </html>
   );
 }
-

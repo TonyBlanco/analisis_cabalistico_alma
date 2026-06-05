@@ -19,6 +19,13 @@ PROHIBITED_DIAGNOSTIC = [
     "bipolar tipo",
     "tlp",
     "toc severo",
+    "patología",
+    "patologia",
+    "necesita curar",
+    "depresión endógena",
+    "depresion endogena",
+    "tiene depresión",
+    "tiene depresion",
 ]
 
 ABSOLUTE_IMPERATIVE = [

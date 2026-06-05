@@ -22,9 +22,11 @@ class LLMBridgeTests(TestCase):
         self.assertFalse(status["training"]["lora"])
         self.assertFalse(status["training"]["checkpoints"])
 
-    @patch("api.utils.multi_ai_service.multi_ai")
-    def test_is_llm_available_requires_cloud_key(self, mock_multi):
-        mock_multi.available_providers = ["ollama"]
+    @patch("api.ai.llm_bridge.multi_ai._check_available_providers")
+    def test_is_llm_available_requires_cloud_key(self, _mock_check):
+        from api.ai.llm_bridge import multi_ai
+
+        multi_ai.available_providers = ["ollama"]
         self.assertFalse(is_llm_available())
 
     @override_settings(AI_PROVIDER="free_first")

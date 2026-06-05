@@ -504,6 +504,67 @@ class Patient(models.Model):
         verbose_name_plural = 'Pacientes'
 
 
+class TherapistPatientInvitation(models.Model):
+    """
+    Solicitud de un terapeuta para vincular un usuario ya registrado (p. ej. cuenta personal/Google)
+    como consultante en su cartera. Requiere aceptación explícita del usuario.
+    """
+    STATUS_CHOICES = [
+        ('pending', 'Pendiente'),
+        ('accepted', 'Aceptada'),
+        ('rejected', 'Rechazada'),
+        ('cancelled', 'Cancelada'),
+    ]
+
+    therapist = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='patient_invitations_sent',
+        limit_choices_to={'profile__user_type': 'therapist'},
+    )
+    target_user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='therapist_invitations_received',
+    )
+    email = models.EmailField(help_text='Email usado en la búsqueda (auditoría)')
+    message = models.TextField(blank=True, help_text='Mensaje opcional del terapeuta')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    patient = models.ForeignKey(
+        Patient,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='source_invitation',
+    )
+    supplemental_birth_date = models.DateField(
+        null=True,
+        blank=True,
+        help_text='Fecha de nacimiento indicada por el terapeuta si el perfil del usuario no la tiene',
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    responded_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Invitación terapeuta–consultante'
+        verbose_name_plural = 'Invitaciones terapeuta–consultante'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['therapist', 'target_user'],
+                condition=models.Q(status='pending'),
+                name='unique_pending_invitation_per_therapist_user',
+            ),
+        ]
+        indexes = [
+            models.Index(fields=['target_user', 'status'], name='inv_target_status_idx'),
+            models.Index(fields=['therapist', 'status'], name='inv_therapist_status_idx'),
+        ]
+
+    def __str__(self):
+        return f"Invitación {self.therapist_id} → {self.target_user_id} ({self.status})"
+
+
 class Session(models.Model):
     """Sesiones terapéuticas"""
     SESSION_TYPE_CHOICES = [
@@ -1416,12 +1477,151 @@ class AIInteractionFeedback(models.Model):
         verbose_name_plural = "Feedback interacciones IA"
         ordering = ["-created_at"]
         indexes = [
-            models.Index(fields=["feature", "-created_at"]),
-            models.Index(fields=["therapist", "-created_at"]),
+            models.Index(fields=["feature", "-created_at"], name="api_aiif_feat_created_idx"),
+            models.Index(fields=["therapist", "-created_at"], name="api_aiif_ther_created_idx"),
         ]
 
     def __str__(self):
         return f"AIFeedback {self.feature} ({self.rating}/5) by {self.therapist_id}"
+
+
+class ProcessEvent(models.Model):
+    """Evento normalizado de proceso para PIP Fase 1."""
+
+    LANE_CHOICES = [
+        ("symbolic", "Symbolic"),
+        ("clinical_support", "Clinical Support"),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    therapist = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="process_events",
+    )
+    patient = models.ForeignKey(
+        Patient,
+        on_delete=models.CASCADE,
+        related_name="process_events",
+    )
+    event_type = models.CharField(max_length=96, db_index=True)
+    lane = models.CharField(max_length=32, choices=LANE_CHOICES)
+    source_type = models.CharField(max_length=64, db_index=True)
+    source_id = models.CharField(max_length=96, db_index=True)
+    payload = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Evento de proceso PIP"
+        verbose_name_plural = "Eventos de proceso PIP"
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["therapist", "patient", "-created_at"]),
+            models.Index(fields=["event_type", "-created_at"]),
+        ]
+
+    def __str__(self):
+        return f"ProcessEvent {self.event_type} {self.source_type}:{self.source_id}"
+
+
+class ProcessSnapshot(models.Model):
+    """Resumen estructurado reutilizable por RAG, sin PHI innecesaria."""
+
+    DOMAIN_CHOICES = [
+        ("kabbalah", "Kabbalah"),
+        ("bioemotion", "Bioemotion"),
+        ("tarot", "Tarot"),
+        ("clinical", "Clinical"),
+        ("astrology", "Astrology"),
+    ]
+    LANE_CHOICES = ProcessEvent.LANE_CHOICES
+    CONSENT_CHOICES = [
+        ("store_with_consent", "Store with consent"),
+        ("store_anonymized", "Store anonymized"),
+        ("no_store", "No store"),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    therapist = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="process_snapshots",
+    )
+    patient = models.ForeignKey(
+        Patient,
+        on_delete=models.CASCADE,
+        related_name="process_snapshots",
+    )
+    domain = models.CharField(max_length=32, choices=DOMAIN_CHOICES, db_index=True)
+    lane = models.CharField(max_length=32, choices=LANE_CHOICES, db_index=True)
+    source_type = models.CharField(max_length=64, db_index=True)
+    source_id = models.CharField(max_length=96, db_index=True)
+    structured = models.JSONField(default=dict, blank=True)
+    text_summary = models.TextField()
+    consent_scope = models.CharField(
+        max_length=32,
+        choices=CONSENT_CHOICES,
+        default="store_with_consent",
+    )
+    base_weight = models.FloatField(default=1.0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Snapshot de proceso PIP"
+        verbose_name_plural = "Snapshots de proceso PIP"
+        ordering = ["-created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["therapist", "source_type", "source_id"],
+                name="api_process_snapshot_source_unique",
+            ),
+        ]
+        indexes = [
+            models.Index(fields=["therapist", "patient", "lane", "-created_at"]),
+            models.Index(fields=["domain", "lane", "-created_at"]),
+        ]
+
+    def __str__(self):
+        return f"ProcessSnapshot {self.domain}/{self.lane} {self.source_type}:{self.source_id}"
+
+
+class EmbeddingChunk(models.Model):
+    """Chunk embebible ligado a un snapshot; embedding local/mockeable en v1."""
+
+    LANE_CHOICES = ProcessEvent.LANE_CHOICES
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    snapshot = models.ForeignKey(
+        ProcessSnapshot,
+        on_delete=models.CASCADE,
+        related_name="embedding_chunks",
+    )
+    therapist = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="embedding_chunks",
+    )
+    patient = models.ForeignKey(
+        Patient,
+        on_delete=models.CASCADE,
+        related_name="embedding_chunks",
+    )
+    lane = models.CharField(max_length=32, choices=LANE_CHOICES, db_index=True)
+    text = models.TextField()
+    embedding = models.JSONField(default=list, blank=True)
+    weight = models.FloatField(default=1.0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Chunk de embedding PIP"
+        verbose_name_plural = "Chunks de embedding PIP"
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["therapist", "patient", "lane", "-created_at"]),
+        ]
+
+    def __str__(self):
+        return f"EmbeddingChunk {self.snapshot_id} ({self.lane})"
 
 
 class FederationAuditLog(models.Model):
@@ -1541,4 +1741,3 @@ class FederationAuditLog(models.Model):
 
     def __str__(self) -> str:  # pragma: no cover
         return f'ResonanciaRelation {self.position} ({self.subject_id})'
-

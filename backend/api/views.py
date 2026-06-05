@@ -13,6 +13,12 @@ from django.contrib.auth import authenticate, get_user_model
 from google.auth.transport import requests
 from google.oauth2 import id_token
 
+from .turnstile import (
+    TURNSTILE_USER_MESSAGES,
+    turnstile_check_request,
+    turnstile_public_config,
+)
+
 # Importamos tu lógica maestra
 from cabala_py.integracion_arbol import generar_mapa_cabalista_completo
 from .models import (
@@ -77,6 +83,16 @@ class RegisterTherapistView(APIView):
     permission_classes = [AllowAny]
     
     def post(self, request):
+        turnstile_ok, turnstile_error = turnstile_check_request(request)
+        if not turnstile_ok:
+            return Response(
+                {
+                    'error': turnstile_error,
+                    'message': TURNSTILE_USER_MESSAGES.get(turnstile_error, ''),
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         serializer = RegisterTherapistSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
@@ -108,6 +124,16 @@ class RegisterPersonalView(APIView):
     permission_classes = [AllowAny]
     
     def post(self, request):
+        turnstile_ok, turnstile_error = turnstile_check_request(request)
+        if not turnstile_ok:
+            return Response(
+                {
+                    'error': turnstile_error,
+                    'message': TURNSTILE_USER_MESSAGES.get(turnstile_error, ''),
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         serializer = RegisterPersonalSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
@@ -190,7 +216,10 @@ class CurrentUserView(APIView):
                 'full_name': getattr(profile, 'full_name', None),
                 'legal_full_name': getattr(profile, 'legal_full_name', None) or getattr(profile, 'full_name', None),
                 'user_type': effective_user_type,
+                'role': effective_user_type,
                 'is_admin': getattr(profile, 'is_admin', None),
+                'is_superuser': request.user.is_superuser,
+                'is_staff': request.user.is_staff,
                 'subscription_status': getattr(profile, 'subscription_status', None),
                 'subscription_plan': getattr(profile, 'subscription_plan', None),
                 'membership_expires': (
@@ -303,6 +332,24 @@ class CurrentUserView(APIView):
                     ])
             except Exception:
                 pass
+        else:
+            # Sin UserProfile: staff/superuser siguen siendo admin en el panel Next.js
+            if (
+                request.user.username == 'supertony'
+                or request.user.is_superuser
+                or request.user.is_staff
+            ):
+                user_data.update({
+                    'user_type': 'admin',
+                    'role': 'admin',
+                    'is_admin': True,
+                    'is_superuser': request.user.is_superuser,
+                    'is_staff': request.user.is_staff,
+                })
+        
+        # Alias explícito para clientes que leen `role` en lugar de `user_type`
+        if user_data.get('user_type') and 'role' not in user_data:
+            user_data['role'] = user_data['user_type']
         
         return Response(user_data)
 
@@ -763,11 +810,24 @@ class CheckMembershipView(APIView):
 
     def get(self, request, *args, **kwargs):
         try:
-            profile = request.user.profile
             user = request.user
+
+            # Superusuario / staff sin depender de UserProfile
+            if user.username == 'supertony' or user.is_superuser or user.is_staff:
+                return Response({
+                    'membership_active': True,
+                    'user_type': 'admin',
+                    'subscription_status': 'active',
+                    'subscription_plan': 'premium',
+                    'membership_expires': None,
+                    'can_access_dashboard': True,
+                    'can_create_ficha': True,
+                    'is_superuser': True,
+                })
+
+            profile = request.user.profile
             
-            # Superusuario tiene acceso completo
-            if user.username == 'supertony' or user.is_superuser or user.is_staff or bool(getattr(profile, 'is_admin', False)):
+            if bool(getattr(profile, 'is_admin', False)):
                 return Response({
                     'membership_active': True,
                     'user_type': 'admin',
@@ -799,12 +859,37 @@ class CheckMembershipView(APIView):
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+class TurnstileConfigView(APIView):
+    """Config pública del widget Cloudflare Turnstile (login)."""
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        return Response(turnstile_public_config())
+
+
+class GoogleOAuthConfigView(APIView):
+    """Client ID público para Google Sign-In (GIS) en el frontend."""
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        from decouple import config
+
+        client_id = config('GOOGLE_CLIENT_ID', default='').strip()
+        return Response({
+            'enabled': bool(client_id),
+            'client_id': client_id or None,
+        })
+
+
 class EmailOrUsernameAuthToken(APIView):
     """
     Permite login con username o email y devuelve un token.
     
     Respuestas de error específicas:
     - error: 'validation' - Campos requeridos faltantes
+    - error: 'turnstile_required' - Falta verificación anti-bot
+    - error: 'turnstile_invalid' - Token Turnstile inválido
+    - error: 'turnstile_verify_failed' - Error al validar con Cloudflare
     - error: 'user_not_found' - Usuario/email no existe
     - error: 'invalid_password' - Contraseña incorrecta
     - error: 'account_inactive' - Cuenta desactivada
@@ -812,6 +897,20 @@ class EmailOrUsernameAuthToken(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
+        turnstile_ok, turnstile_error = turnstile_check_request(request)
+        if not turnstile_ok:
+            return Response(
+                {
+                    'error': turnstile_error,
+                    'message': TURNSTILE_USER_MESSAGES.get(
+                        turnstile_error,
+                        'Verificación de seguridad requerida.',
+                    ),
+                    'detail': TURNSTILE_USER_MESSAGES.get(turnstile_error, ''),
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         username_or_email = request.data.get('username') or request.data.get('email')
         password = request.data.get('password')
 
@@ -862,19 +961,20 @@ class EmailOrUsernameAuthToken(APIView):
         # Login exitoso - generar token
         token, _ = Token.objects.get_or_create(user=user_auth)
 
-        # Obtener el perfil del usuario para determinar el role
-        role = 'visitor'  # Por defecto
-        if hasattr(user_auth, 'profile'):
+        # Rol para redirección del frontend (debe coincidir con /api/me/)
+        role = 'visitor'
+        if (
+            user_auth.username == 'supertony'
+            or user_auth.is_superuser
+            or user_auth.is_staff
+        ):
+            role = 'admin'
+        elif hasattr(user_auth, 'profile'):
             profile = user_auth.profile
-            if (
-                user_auth.username == 'supertony'
-                or user_auth.is_superuser
-                or user_auth.is_staff
-                or bool(getattr(profile, 'is_admin', False))
-            ):
+            if bool(getattr(profile, 'is_admin', False)):
                 role = 'admin'
             else:
-                role = profile.user_type
+                role = profile.user_type or 'visitor'
 
         return Response({
             'token': token.key,
@@ -2441,12 +2541,17 @@ class GoogleOAuthView(APIView):
                     status=status.HTTP_400_BAD_REQUEST
                 )
             
-            # Verificar el token con Google
-            # Nota: En producción, usar CLIENT_ID desde settings
-            CLIENT_ID = "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
-            
+            from decouple import config
+
+            client_id = config('GOOGLE_CLIENT_ID', default='').strip()
+            if not client_id:
+                return Response(
+                    {'error': 'google_auth_disabled', 'message': 'Inicio con Google no configurado'},
+                    status=status.HTTP_503_SERVICE_UNAVAILABLE,
+                )
+
             try:
-                idinfo = id_token.verify_oauth2_token(token, requests.Request(), CLIENT_ID)
+                idinfo = id_token.verify_oauth2_token(token, requests.Request(), client_id)
                 google_id = idinfo['sub']
                 email = idinfo['email']
                 name = idinfo.get('name', email.split('@')[0])

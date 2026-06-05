@@ -148,6 +148,16 @@ export default function CreatePatientModal({
           setError('Por favor, corrige los errores en el formulario');
           return;
         }
+        const errText = (data.error || data.message || '').toString();
+        if (
+          response.status === 400 &&
+          (errText.toLowerCase().includes('email') || errText.toLowerCase().includes('registrado'))
+        ) {
+          setError(
+            'Este email ya tiene cuenta en la plataforma. Usa «Vincular cuenta existente» en la lista de consultantes.',
+          );
+          return;
+        }
         throw new Error(data.error || data.message || 'Error al crear consultante');
       }
 

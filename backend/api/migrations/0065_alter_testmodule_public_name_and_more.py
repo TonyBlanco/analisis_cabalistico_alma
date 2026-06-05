@@ -23,27 +23,4 @@ class Migration(migrations.Migration):
             name='test_type',
             field=models.CharField(choices=[('basic', 'Análisis Básico'), ('numerology', 'Numerología Completa'), ('compatibility', 'Compatibilidad de Pareja'), ('career', 'Orientación Profesional'), ('spiritual', 'Camino Espiritual'), ('health', 'Salud y Bienestar'), ('financial', 'Abundancia Financiera'), ('family', 'Relaciones Familiares'), ('purpose', 'Propósito de Vida'), ('past_life', 'Vidas Pasadas'), ('pai', 'PAI - Inventario de Personalidad'), ('bdi', 'BDI-II - Inventario de Depresión de Beck'), ('bai', 'BAI - Inventario de Ansiedad de Beck'), ('diagnostic', 'Diagnostic Screenings (PHQ/GAD/Other)'), ('holistic_screening', 'Holistic Screenings (in-house)'), ('wellness', 'Wellness (in-house)')], max_length=50),
         ),
-        migrations.SeparateDatabaseAndState(
-            database_operations=[],
-            state_operations=[
-                        migrations.CreateModel(
-                            name='PatientMessage',
-                            fields=[
-                                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                                ('content', models.CharField(help_text='Texto plano, neutro, no clínico', max_length=1000)),
-                                ('is_archived', models.BooleanField(default=False)),
-                                ('archived_at', models.DateTimeField(blank=True, null=True)),
-                                ('created_at', models.DateTimeField(auto_now_add=True)),
-                                ('patient', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='patient_messages', to='api.patient')),
-                                ('therapist', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='sent_patient_messages', to=settings.AUTH_USER_MODEL)),
-                            ],
-                            options={
-                                'verbose_name': 'Patient Message',
-                                'verbose_name_plural': 'Patient Messages',
-                                'ordering': ['-created_at'],
-                                'indexes': [models.Index(fields=['patient', 'created_at'], name='api_patient_patient_dc8265_idx'), models.Index(fields=['therapist', 'patient', 'created_at'], name='api_patient_therapi_437f70_idx')],
-                            },
-                        ),
-            ],
-        ),
     ]

@@ -28,6 +28,20 @@ import {
 import { usePanelManager } from '@/components/TherapistWorkspace/PanelManagerContext';
 import { toolRegistry } from '@/components/TherapistWorkspace/panelRegistry';
 import type { ToolGroupId, ToolId } from '@/components/TherapistWorkspace/panelRegistry';
+import type { PanelId } from '@/components/TherapistWorkspace/types';
+
+const toolIdToPanelId: Record<ToolId, PanelId> = {
+  bioemotional: 'bioemotional',
+  'tree-of-life': 'treeOfLife',
+  hypotheses: 'transgenerational',
+  history: 'history',
+  kabbalah: 'kabbalah',
+  resources: 'resources',
+};
+
+const panelIdToToolId = Object.fromEntries(
+  Object.entries(toolIdToPanelId).map(([toolId, panelId]) => [panelId, toolId]),
+) as Record<PanelId, ToolId>;
 
 const groupLabels: Record<ToolGroupId, string> = {
   observation: 'OBSERVACION',
@@ -178,7 +192,12 @@ export default function TherapistSidebar() {
   const [expanded, setExpanded] = useState(false);
 
   const activeToolIds = useMemo(
-    () => new Set(panels.map((panel) => panel.toolId)),
+    () =>
+      new Set(
+        panels
+          .map((panel) => panelIdToToolId[panel.panelId])
+          .filter((id): id is ToolId => Boolean(id)),
+      ),
     [panels],
   );
 
@@ -288,7 +307,7 @@ export default function TherapistSidebar() {
                   <button
                     key={tool.id}
                     type="button"
-                    onClick={() => openPanel(tool.id)}
+                    onClick={() => openPanel(toolIdToPanelId[tool.id])}
                     title={!expanded ? tool.label : undefined}
                     className="w-full text-left"
                   >

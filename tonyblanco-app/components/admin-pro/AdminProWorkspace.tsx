@@ -15,6 +15,8 @@ import { AdminProSystemOverview } from './AdminProSystemOverview';
 import { AdminProUsersTable } from './AdminProUsersTable';
 import { AdminProUserDrawer } from './AdminProUserDrawer';
 import { AdminProDomainPanels } from './AdminProDomainPanels';
+import { resetPageScroll } from '@/lib/reset-page-scroll';
+import { ADMIN_HEADER_HEIGHT_PX, adminContentPaddingClass } from './admin-layout';
 
 type Caps = AdminWorkspaceContractV2_1['users']['capabilities'];
 
@@ -91,6 +93,7 @@ export function AdminProWorkspace() {
   };
 
   useEffect(() => {
+    resetPageScroll();
     refresh(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -203,14 +206,20 @@ export function AdminProWorkspace() {
     setContract((prev) => ({ ...prev, users: { ...prev.users, capabilities } }));
   }, [capabilities]);
 
-  const headerOffsetPx = 56;
+  const apiFailures = contract.system.checks.filter((c) => c.status === 'degraded');
 
   if (loading) {
-    return <div className="bg-white border border-slate-200 rounded-md p-4 text-sm text-slate-700">Cargando administración…</div>;
+    return (
+      <div className={`min-h-[100dvh] bg-slate-50 ${adminContentPaddingClass} px-4`}>
+        <div className="mx-auto max-w-7xl rounded-md border border-slate-200 bg-white p-4 text-sm text-slate-700">
+          Cargando administración…
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-[100dvh] bg-slate-50 text-slate-900">
       <AdminProHeader
         status={contract.system.status}
         lastUpdated={lastUpdated}
@@ -218,17 +227,30 @@ export function AdminProWorkspace() {
         refreshing={refreshing}
       />
 
-      <div className="mx-auto flex max-w-7xl gap-0 px-3 pt-16 sm:px-6">
-        <AdminProSidebar sections={sections} headerOffsetPx={headerOffsetPx} />
+      <div className={`mx-auto flex w-full max-w-7xl flex-col ${adminContentPaddingClass}`}>
+        <AdminProSidebar sections={sections} headerOffsetPx={ADMIN_HEADER_HEIGHT_PX} variant="mobile" />
 
-        <main className="w-full px-3 pb-10 md:px-6">
+        <div className="flex min-h-0 flex-1">
+          <AdminProSidebar sections={sections} headerOffsetPx={ADMIN_HEADER_HEIGHT_PX} variant="side" />
+
+          <main className="min-w-0 flex-1 px-3 pb-12 pt-3 sm:px-6">
+          {apiFailures.length > 0 ? (
+            <div className="mb-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-900">
+              No se pudo conectar con la API de administración. Cierra sesión, vuelve a entrar y recarga.
+              {apiFailures.map((c) => (
+                <div key={c.key} className="mt-1">
+                  <span className="font-medium">{c.label}:</span> {c.detail ?? 'error'}
+                </div>
+              ))}
+            </div>
+          ) : null}
           {actionError ? (
             <div className="mb-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
               {actionError}
             </div>
           ) : null}
 
-          <section id="dashboard" className="scroll-mt-24">
+          <section id="dashboard" style={{ scrollMarginTop: ADMIN_HEADER_HEIGHT_PX + 16 }}>
             <div className="mb-2 flex items-end justify-between">
               <div>
                 <div className="text-[11px] font-semibold uppercase tracking-wide text-slate-600">System Overview</div>
@@ -241,7 +263,7 @@ export function AdminProWorkspace() {
             <AdminProSystemOverview contract={contract} />
           </section>
 
-          <section id="users" className="mt-6 scroll-mt-24">
+          <section id="users" className="mt-6" style={{ scrollMarginTop: ADMIN_HEADER_HEIGHT_PX + 16 }}>
             <div className="mb-2 flex items-end justify-between">
               <div>
                 <div className="text-[11px] font-semibold uppercase tracking-wide text-slate-600">Usuarios</div>
@@ -275,7 +297,8 @@ export function AdminProWorkspace() {
             </div>
             <AdminProDomainPanels contract={contract} />
           </div>
-        </main>
+          </main>
+        </div>
       </div>
 
       <AdminProUserDrawer open={drawerOpen} user={drawerUser} onClose={() => (setDrawerOpen(false), setDrawerUser(null))} />
@@ -283,7 +306,7 @@ export function AdminProWorkspace() {
       {showToTop && toTopVisible ? (
         <button
           type="button"
-          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          onClick={() => resetPageScroll()}
           className="fixed bottom-4 right-4 z-40 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-900 shadow-sm hover:bg-slate-50"
         >
           Ir arriba

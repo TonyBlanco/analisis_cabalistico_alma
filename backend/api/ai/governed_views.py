@@ -146,7 +146,7 @@ class BioEmotionalSynthesisAssistDraftView(APIView):
             )
 
         rag_context = (request.data.get("rag_context") or "").strip()
-        prompt, temperature, max_tokens = bioemotion_synthesis_draft_prompt(
+        prompt, temperature, max_tokens, prompt_version = bioemotion_synthesis_draft_prompt(
             patient_context=patient_context,
             current_text=synthesis.text,
             rag_context=rag_context,
@@ -182,7 +182,7 @@ class BioEmotionalSynthesisAssistDraftView(APIView):
                 "synthesis_id": str(synthesis.id),
                 "draft_text": draft,
                 "provider": result.get("provider"),
-                "prompt_version": PROMPT_VERSION_BIOEMOTION_DRAFT,
+                "prompt_version": prompt_version,
                 "persisted": False,
             }
         )

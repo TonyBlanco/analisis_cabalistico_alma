@@ -32,6 +32,9 @@ export interface RegisterResponse {
 
 export interface LoginResponse {
   token: string;
+  username?: string;
+  email?: string;
+  role?: 'admin' | 'therapist' | 'personal' | 'patient' | 'visitor';
 }
 
 export interface Service {
@@ -239,41 +242,80 @@ async function apiRequest<T>(
 
 // ========== AUTH API ==========
 
-export const registerTherapist = async (data: {
-  username: string;
-  email: string;
-  password: string;
-  full_name: string;
-  profession: string;
-  specialization?: string;
-  license_number?: string;
-  years_of_experience: number;
-  phone: string;
-}): Promise<RegisterResponse> => {
+export const registerTherapist = async (
+  data: {
+    username: string;
+    email: string;
+    password: string;
+    full_name: string;
+    profession: string;
+    specialization?: string;
+    license_number?: string;
+    years_of_experience: number;
+    phone: string;
+  },
+  turnstileToken?: string | null
+): Promise<RegisterResponse> => {
+  const body = { ...data } as Record<string, unknown>;
+  if (turnstileToken) body.turnstile_token = turnstileToken;
   return apiRequest<RegisterResponse>('/register/therapist/', {
     method: 'POST',
-    body: JSON.stringify(data),
+    body: JSON.stringify(body),
   });
 };
 
-export const registerPersonal = async (data: {
-  username: string;
-  email: string;
-  password: string;
-  full_name: string;
-  phone?: string;
-  birth_date?: string;
-}): Promise<RegisterResponse> => {
+export const registerPersonal = async (
+  data: {
+    username: string;
+    email: string;
+    password: string;
+    full_name: string;
+    phone?: string;
+    birth_date?: string;
+  },
+  turnstileToken?: string | null
+): Promise<RegisterResponse> => {
+  const body = { ...data } as Record<string, unknown>;
+  if (turnstileToken) body.turnstile_token = turnstileToken;
   return apiRequest<RegisterResponse>('/register/personal/', {
     method: 'POST',
-    body: JSON.stringify(data),
+    body: JSON.stringify(body),
   });
 };
 
-export const login = async (username: string, password: string): Promise<LoginResponse> => {
+export const login = async (
+  username: string,
+  password: string,
+  turnstileToken?: string | null
+): Promise<LoginResponse> => {
+  const body: Record<string, string> = { username, password };
+  if (turnstileToken) {
+    body.turnstile_token = turnstileToken;
+  }
   return apiRequest<LoginResponse>('/login/', {
     method: 'POST',
-    body: JSON.stringify({ username, password }),
+    body: JSON.stringify(body),
+  });
+};
+
+export interface GoogleLoginResponse extends LoginResponse {
+  user?: {
+    id: number;
+    username: string;
+    email: string;
+    first_name: string;
+    full_name?: string;
+    user_type?: string;
+    is_admin?: boolean;
+  };
+  created?: boolean;
+  message?: string;
+}
+
+export const loginWithGoogle = async (googleIdToken: string): Promise<GoogleLoginResponse> => {
+  return apiRequest<GoogleLoginResponse>('/login/google/', {
+    method: 'POST',
+    body: JSON.stringify({ token: googleIdToken }),
   });
 };
 

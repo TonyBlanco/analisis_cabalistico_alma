@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import type { AdminSectionKind } from '@/lib/contracts/adminWorkspace.v2_1';
+import { scrollToPageSection } from '@/lib/reset-page-scroll';
+import { ADMIN_HEADER_HEIGHT_PX } from './admin-layout';
 
 type Section = { id: string; title: string; enabled: boolean; kind: AdminSectionKind };
 
@@ -13,8 +15,8 @@ const groupTitles: Record<AdminSectionKind, string> = {
   config: 'CONFIG',
 };
 
-export function AdminProSidebar(props: { sections: Section[]; headerOffsetPx?: number }) {
-  const { sections, headerOffsetPx = 56 } = props;
+export function AdminProSidebar(props: { sections: Section[]; headerOffsetPx?: number; variant?: 'side' | 'mobile' }) {
+  const { sections, headerOffsetPx = ADMIN_HEADER_HEIGHT_PX, variant = 'side' } = props;
   const [activeId, setActiveId] = useState<string>('dashboard');
 
   const enabled = useMemo(() => sections.filter((s) => s.enabled), [sections]);
@@ -46,9 +48,8 @@ export function AdminProSidebar(props: { sections: Section[]; headerOffsetPx?: n
   }, [enabled, headerOffsetPx]);
 
   const scrollTo = (id: string) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setActiveId(id);
+    scrollToPageSection(id, headerOffsetPx);
   };
 
   const groups = useMemo(() => {
@@ -63,15 +64,50 @@ export function AdminProSidebar(props: { sections: Section[]; headerOffsetPx?: n
 
   const orderedKinds: AdminSectionKind[] = ['system', 'users', 'platform', 'lms', 'config'];
 
+  const navItems = orderedKinds.flatMap((kind) => {
+    const items = groups[kind] || [];
+    return items.map((item) => ({ ...item, kind }));
+  });
+
+  if (variant === 'mobile') {
+    return (
+      <nav
+        aria-label="Secciones admin"
+        className="flex gap-2 overflow-x-auto border-b border-slate-200 bg-white px-2 py-2 [scrollbar-gutter:stable] md:hidden"
+      >
+        {navItems.map((item) => {
+          const isActive = activeId === item.id;
+          return (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => scrollTo(item.id)}
+              className={`shrink-0 rounded-md border px-3 py-1.5 text-xs font-medium ${
+                isActive
+                  ? 'border-blue-600 bg-blue-50 text-blue-900'
+                  : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+              }`}
+            >
+              {item.title}
+            </button>
+          );
+        })}
+      </nav>
+    );
+  }
+
   return (
-    <aside className="hidden w-64 shrink-0 border-r border-slate-200 bg-white md:block">
-      <div className="sticky" style={{ top: headerOffsetPx }}>
-        <div className="border-b border-slate-200 px-3 py-2">
+    <aside className="hidden w-56 shrink-0 border-r border-slate-200 bg-white lg:block xl:w-64">
+      <div
+        className="sticky flex max-h-[calc(100dvh-52px)] flex-col overscroll-contain"
+        style={{ top: headerOffsetPx }}
+      >
+        <div className="shrink-0 border-b border-slate-200 px-3 py-2">
           <div className="text-[11px] font-semibold uppercase tracking-wide text-slate-600">Admin Pro</div>
           <div className="mt-0.5 text-xs text-slate-700">Backoffice</div>
         </div>
 
-        <nav className="p-2">
+        <nav className="min-h-0 flex-1 overflow-y-auto p-2 [scrollbar-gutter:stable]">
           {orderedKinds.map((kind) => {
             const items = groups[kind] || [];
             if (!items.length) return null;
@@ -91,8 +127,8 @@ export function AdminProSidebar(props: { sections: Section[]; headerOffsetPx?: n
                           onClick={() => scrollTo(item.id)}
                           className={`w-full text-left text-sm ${
                             isActive
-                              ? 'pl-3 py-1 border-l-4 border-blue-600 text-slate-900 bg-slate-100'
-                              : 'pl-3 py-1 border-l-4 border-transparent text-slate-600 hover:bg-slate-100'
+                              ? 'border-l-4 border-blue-600 bg-slate-100 py-1 pl-3 text-slate-900'
+                              : 'border-l-4 border-transparent py-1 pl-3 text-slate-600 hover:bg-slate-100'
                           }`}
                         >
                           {item.title}

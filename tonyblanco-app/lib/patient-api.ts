@@ -92,6 +92,128 @@ export async function getTherapistPatients(): Promise<Patient[]> {
   return response.json();
 }
 
+// ========================================
+// LINK EXISTING USER (personal / Google account)
+// ========================================
+
+export type PatientLookupStatus =
+  | 'found_personal'
+  | 'not_found'
+  | 'already_your_patient'
+  | 'already_with_other_therapist'
+  | 'not_linkable';
+
+export interface PatientEmailLookupResult {
+  status: PatientLookupStatus;
+  can_invite: boolean;
+  message: string;
+  display_hint?: string;
+  has_birth_date?: boolean;
+  pending_invitation?: boolean;
+  uses_google?: boolean;
+  patient_id?: number;
+}
+
+export interface TherapistPatientInvitationItem {
+  id: number;
+  email: string;
+  status: string;
+  display_hint: string;
+  message: string;
+  patient_id: number | null;
+  created_at: string;
+  responded_at: string | null;
+}
+
+export async function lookupPatientByEmail(email: string): Promise<PatientEmailLookupResult> {
+  const response = await fetch(`${API_BASE_URL}/therapist/patients/lookup/`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ email: email.trim() }),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data.message || data.error || 'Error al buscar el email');
+  }
+  return data;
+}
+
+export async function inviteExistingPatient(payload: {
+  email: string;
+  message?: string;
+  birth_date?: string;
+}): Promise<{ message: string; invitation: { id: number; status: string } }> {
+  const response = await fetch(`${API_BASE_URL}/therapist/patients/invite/`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(payload),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data.message || data.error || 'Error al enviar la invitación');
+  }
+  return data;
+}
+
+export async function cancelTherapistInvitation(invitationId: number): Promise<void> {
+  const response = await fetch(
+    `${API_BASE_URL}/therapist/patients/invitations/${invitationId}/cancel/`,
+    { method: 'POST', headers: getAuthHeaders() },
+  );
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data.message || data.error || 'Error al cancelar la invitación');
+  }
+}
+
+export async function getTherapistSentInvitations(
+  status: 'pending' | 'all' = 'pending',
+): Promise<TherapistPatientInvitationItem[]> {
+  const response = await fetch(
+    `${API_BASE_URL}/therapist/patients/invitations/?status=${status}`,
+    { method: 'GET', headers: getAuthHeaders() },
+  );
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data.message || data.error || 'Error al cargar invitaciones');
+  }
+  return data.invitations || [];
+}
+
+export interface PersonalTherapistInvitation {
+  id: number;
+  therapist: { id: number; full_name: string; profession: string };
+  message: string;
+  created_at: string;
+}
+
+export async function getPersonalTherapistInvitations(): Promise<PersonalTherapistInvitation[]> {
+  const response = await fetch(`${API_BASE_URL}/personal/therapist-invitations/`, {
+    method: 'GET',
+    headers: getAuthHeaders(),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data.message || data.error || 'Error al cargar invitaciones');
+  }
+  return data.invitations || [];
+}
+
+export async function respondToTherapistInvitation(
+  invitationId: number,
+  action: 'accept' | 'reject',
+): Promise<{ message: string; status: string; patient_id?: number }> {
+  const response = await fetch(
+    `${API_BASE_URL}/personal/therapist-invitations/${invitationId}/${action}/`,
+    { method: 'POST', headers: getAuthHeaders() },
+  );
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data.message || data.error || 'Error al responder la invitación');
+  }
+  return data;
+}
+
 /**
  * Obtiene el perfil básico de un paciente (vista terapeuta).
  */

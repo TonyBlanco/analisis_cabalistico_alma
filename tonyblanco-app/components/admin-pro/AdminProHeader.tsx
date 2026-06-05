@@ -29,8 +29,8 @@ export function AdminProHeader(props: {
   };
 
   return (
-    <header className="sticky top-0 z-30 bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-0 w-full">
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-slate-200 bg-white shadow-sm">
+      <div className="mx-auto flex h-[52px] max-w-7xl items-center justify-between gap-2 px-3 sm:px-6">
         <div className="flex min-w-0 items-center gap-2">
           <h1 className="truncate text-sm font-semibold text-slate-900 sm:text-base">{title}</h1>
           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium border ${badge.className}`}>
@@ -54,9 +54,14 @@ export function AdminProHeader(props: {
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="hidden text-[11px] text-slate-600 sm:block">
-            Última actualización: <span className="font-medium text-slate-900">{lastUpdated ?? '—'}</span>
-          </div>
+          <a
+            href={process.env.NEXT_PUBLIC_DJANGO_ADMIN_URL ?? 'https://api.studios33.app/admin/'}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden items-center rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-900 hover:bg-slate-50 sm:inline-flex"
+          >
+            Django Admin
+          </a>
           <button
             type="button"
             onClick={onRefresh}

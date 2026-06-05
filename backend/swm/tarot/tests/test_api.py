@@ -11,6 +11,8 @@ from rest_framework.test import APIClient
 from rest_framework import status as http_status
 from django.contrib.auth import get_user_model
 
+from api.models import Patient, ProcessSnapshot
+
 from swm.tarot.models import (
     WorkspaceDefinition,
     WorkspaceInstance,
@@ -267,6 +269,69 @@ class SealWorkspaceAPITest(TarotAPITestCase):
         }, format='json')
         
         self.assertEqual(response.status_code, http_status.HTTP_400_BAD_REQUEST)
+
+
+class ProcessMemoryTarotSealTest(TarotAPITestCase):
+    """Seal endpoint ingests a ProcessSnapshot for linked clinical patients."""
+
+    def setUp(self):
+        super().setUp()
+        self.therapist.profile.user_type = "therapist"
+        self.therapist.profile.save()
+        self.clinical_patient = Patient.objects.create(
+            therapist=self.therapist,
+            user=self.patient,
+            first_name="Api",
+            last_name="Patient",
+            email="api_patient@test.com",
+            full_name="Api Patient",
+            birth_date="1990-01-01",
+        )
+
+    def _workspace_ready_to_seal(self):
+        instance = WorkspaceService.create_workspace(
+            creator_user=self.therapist,
+            subject_user=self.patient,
+        )
+        self.client.post(
+            "/api/swm/tarot/start",
+            {"instance_id": str(instance.id)},
+            format="json",
+        )
+        self.client.post(
+            "/api/swm/tarot/save-spread",
+            {
+                "instance_id": str(instance.id),
+                "cards": [
+                    {"position": 1, "card_id": "major_01", "reversed": False},
+                    {"position": 2, "card_id": "major_17", "reversed": False},
+                ],
+                "therapist_notes": "Sesion de prueba",
+            },
+            format="json",
+        )
+        return instance
+
+    def test_seal_creates_process_snapshot(self):
+        instance = self._workspace_ready_to_seal()
+
+        response = self.client.post(
+            "/api/swm/tarot/seal",
+            {"instance_id": str(instance.id)},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, http_status.HTTP_200_OK)
+        self.assertEqual(response.data["instance"]["status"], "sealed")
+
+        snapshot = ProcessSnapshot.objects.get(source_id=str(instance.id))
+        self.assertEqual(snapshot.domain, "tarot")
+        self.assertEqual(snapshot.lane, "symbolic")
+        self.assertEqual(snapshot.source_type, "swm_tarot")
+        self.assertEqual(snapshot.patient, self.clinical_patient)
+        self.assertEqual(snapshot.therapist, self.therapist)
+        self.assertEqual(len(snapshot.structured.get("cards", [])), 2)
+        self.assertIn("major_01", snapshot.text_summary)
 
 
 class AuditTrailAPITest(TarotAPITestCase):

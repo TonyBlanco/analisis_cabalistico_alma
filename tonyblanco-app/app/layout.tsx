@@ -42,7 +42,7 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <Providers>
-          <main className="flex-1">
+          <main className="flex-1 w-full min-h-0 overflow-visible">
             {children}
           </main>
         </Providers>

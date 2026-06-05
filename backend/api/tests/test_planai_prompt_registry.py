@@ -41,8 +41,28 @@ class PlanAIPromptRegistryTests(TestCase):
         self.assertIn("Cábala educativa", prompt)
         self.assertIn('{"flows":[]}', prompt)
 
-    def test_clinical_lane_rejects_wrong_lane_in_builder(self):
-        from api.ai.prompt_registry import render_planai_prompt
+    def test_bioemotion_domain_template(self):
+        prompt, temp, max_tok, version = bioemotion_synthesis_draft_prompt(
+            patient_context="Observación: tensión en pecho",
+            current_text="Borrador parcial",
+        )
+        self.assertEqual(version, "1.0")
+        self.assertEqual(temp, 0.55)
+        self.assertEqual(max_tok, 1000)
+        self.assertIn("síntesis bioemocional", prompt)
+        self.assertIn("fenomenológico", prompt)
+        self.assertIn("Borrador parcial", prompt)
 
+    def test_bioemotion_yaml_lane(self):
+        prompt, version, _, _ = render_prompt(
+            template_name=PROMPT_BIOEMOTION_NAME,
+            lane="clinical_support",
+            user_task="(vacío)",
+            patient_history_summary="Hipótesis: patrón transgeneracional",
+        )
+        self.assertEqual(version, "1.0")
+        self.assertIn("Bioemoción", prompt)
+
+    def test_clinical_lane_rejects_wrong_lane_in_builder(self):
         with self.assertRaises(ValueError):
-            render_planai_prompt(lane="invalid_lane", user_task="x")
+            render_prompt(template_name=PROMPT_BIOEMOTION_NAME, lane="symbolic", user_task="x")

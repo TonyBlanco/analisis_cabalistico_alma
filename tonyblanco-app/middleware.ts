@@ -1,6 +1,33 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+function connectSrcOrigins(): string[] {
+    const origins = new Set<string>([
+        "'self'",
+        'http://localhost:8000',
+        'http://127.0.0.1:8000',
+        'http://localhost:5000',
+        'https://api.studios33.app',
+        'https://api.openai.com',
+        'https://generativelanguage.googleapis.com',
+    ]);
+
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
+    if (apiUrl) {
+        try {
+            const normalized = apiUrl.replace(/\/+$/, '');
+            const origin = normalized.endsWith('/api')
+                ? normalized.slice(0, -4)
+                : normalized;
+            origins.add(new URL(origin).origin);
+        } catch {
+            // ignore invalid env URL
+        }
+    }
+
+    return Array.from(origins);
+}
+
 export function middleware(request: NextRequest) {
     const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
 
@@ -17,12 +44,12 @@ export function middleware(request: NextRequest) {
     // but we aim for a more restrictive policy later once verified.
     const cspHeader = `
     default-src 'self';
-    script-src 'self' 'unsafe-inline' 'unsafe-eval';
+    script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://accounts.google.com;
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
     img-src 'self' blob: data: https:;
     font-src 'self' https://fonts.gstatic.com;
-    connect-src 'self' http://localhost:8000 http://127.0.0.1:8000 http://localhost:5000 https://api.openai.com https://generativelanguage.googleapis.com;
-    frame-src 'self';
+    connect-src ${connectSrcOrigins().join(' ')} https://challenges.cloudflare.com https://accounts.google.com;
+    frame-src 'self' https://challenges.cloudflare.com https://accounts.google.com;
     object-src 'none';
     base-uri 'self';
     form-action 'self';

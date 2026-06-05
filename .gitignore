@@ -69,6 +69,7 @@ dist/
 .env
 .env.local
 .env.*.local
+deploy/studios33/.env.studios33
 
 # Render
 .render/

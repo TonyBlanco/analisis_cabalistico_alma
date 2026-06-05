@@ -1,0 +1,47 @@
+# Studios33 en Hetzner — red Docker compartida solo con Nginx/Postgres de VoxTV.
+# cd /opt/studio33 && docker compose -f docker-compose.studios33.yml up -d
+#
+# Process Memory embeddings (optional): deploy/studios33/ollama-compose.snippet.yml
+# Set PROCESS_MEMORY_EMBEDDINGS=ollama and OLLAMA_BASE_URL=http://ollama:11434 on studio33_api.
+
+services:
+  studio33_api:
+    build:
+      context: .
+      dockerfile: deploy/studios33/Dockerfile.api
+    container_name: studio33_api
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - ./backend/astrology/ephemeris:/app/astrology/ephemeris:ro
+      - studio33_media:/app/media
+      - studio33_static:/app/staticfiles
+    networks:
+      - voxtv_net
+    expose:
+      - "8000"
+
+  studio33_web:
+    build:
+      context: .
+      dockerfile: deploy/studios33/Dockerfile.web
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://api.studios33.app/api}
+    container_name: studio33_web
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+    networks:
+      - voxtv_net
+    expose:
+      - "3000"
+
+volumes:
+  studio33_media:
+  studio33_static:
+
+networks:
+  voxtv_net:
+    external: true
+    name: voxtvserver_voxtv_net

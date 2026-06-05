@@ -6,6 +6,8 @@ import { getUserRole } from '@/lib/getUserRole';
 import { useRoleGuard } from '@/lib/role-guards';
 import { getTherapistPatients, Patient } from '@/lib/patient-api';
 import CreatePatientModal from '@/components/CreatePatientModal';
+import LinkExistingPatientModal from '@/components/LinkExistingPatientModal';
+import TherapistPendingInvitations from '@/components/TherapistPendingInvitations';
 
 /**
  * Therapist Patients Management Page
@@ -22,6 +24,7 @@ export default function TherapistPatientsPage() {
   const [loadingPatients, setLoadingPatients] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showLinkModal, setShowLinkModal] = useState(false);
 
   useEffect(() => {
     getUserRole().then((userRole) => {
@@ -62,10 +65,13 @@ export default function TherapistPatientsPage() {
     }
   };
 
+  const [listRefreshKey, setListRefreshKey] = useState(0);
+
   const handlePatientCreated = () => {
-    // Refresh patient list
     fetchPatients();
+    setListRefreshKey((k) => k + 1);
     setShowCreateModal(false);
+    setShowLinkModal(false);
   };
 
   if (loading) {
@@ -95,15 +101,25 @@ export default function TherapistPatientsPage() {
               Administra los consultantes asignados a tu cuenta
             </p>
           </div>
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="px-4 py-2 text-sm font-medium text-white rounded-md hover:opacity-90 transition-opacity shadow-sm"
-            style={{ backgroundColor: 'var(--accent-color)' }}
-          >
-            Crear Consultante
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setShowLinkModal(true)}
+              className="px-4 py-2 text-sm font-medium text-gray-800 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors shadow-sm"
+            >
+              Vincular cuenta existente
+            </button>
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="px-4 py-2 text-sm font-medium text-white rounded-md hover:opacity-90 transition-opacity shadow-sm"
+              style={{ backgroundColor: 'var(--accent-color)' }}
+            >
+              Crear Consultante
+            </button>
+          </div>
         </div>
       </div>
+
+      <TherapistPendingInvitations key={listRefreshKey} />
 
       {/* Patient List */}
       <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
@@ -167,6 +183,11 @@ export default function TherapistPatientsPage() {
       <CreatePatientModal
         open={showCreateModal}
         onClose={() => setShowCreateModal(false)}
+        onSuccess={handlePatientCreated}
+      />
+      <LinkExistingPatientModal
+        open={showLinkModal}
+        onClose={() => setShowLinkModal(false)}
         onSuccess={handlePatientCreated}
       />
     </div>

@@ -91,7 +91,13 @@ function normalizeUserRow(raw: unknown): AdminUserRow | null {
 
   const profile = isObject((raw as any).profile) ? ((raw as any).profile as Record<string, unknown>) : undefined;
   const roleCandidate = profile?.user_type ?? profile?.role ?? (raw as any).user_type ?? (raw as any).role;
-  const role = normalizeRole(roleCandidate);
+  let role = normalizeRole(roleCandidate);
+  if (role === 'unknown' && profile && (profile as any).is_admin === true) {
+    role = 'admin';
+  }
+  if (role === 'unknown' && ((raw as any).is_staff === true || (raw as any).is_superuser === true)) {
+    role = 'admin';
+  }
 
   const isActive = (raw as any).is_active;
   const is_active = typeof isActive === 'boolean' ? isActive : false;

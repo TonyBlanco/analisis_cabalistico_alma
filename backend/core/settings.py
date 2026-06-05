@@ -237,18 +237,19 @@ REST_FRAMEWORK = {
 }
 
 # Email Configuration
-# Para desarrollo, usar console backend (muestra emails en la consola)
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
-# Para producción, descomentar y configurar:
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = 'smtp.gmail.com'  # o tu servidor SMTP
-# EMAIL_PORT = 587
-# EMAIL_USE_TLS = True
-# EMAIL_HOST_USER = 'tu-email@gmail.com'
-# EMAIL_HOST_PASSWORD = 'tu-contraseña-o-app-password'
-DEFAULT_FROM_EMAIL = 'Tony Blanco <noreply@tonyblanco.com>'
-EMAIL_SUBJECT_PREFIX = '[Kabbalah] '
+EMAIL_BACKEND = config(
+    'EMAIL_BACKEND',
+    default='django.core.mail.backends.console.EmailBackend',
+)
+EMAIL_HOST = config('EMAIL_HOST', default='')
+EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+if EMAIL_HOST and EMAIL_HOST_USER:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='Studios33 <noreply@studios33.app>')
+EMAIL_SUBJECT_PREFIX = config('EMAIL_SUBJECT_PREFIX', default='[Studios33] ')
 
 # Frontend URL (for password reset links, etc.)
 FRONTEND_URL = config('FRONTEND_URL', default='http://localhost:3000')
@@ -268,6 +269,10 @@ GROQ_MODEL = config('GROQ_MODEL', default='llama-3.3-70b-versatile')
 # Ollama Configuration (local AI - no limits)
 OLLAMA_BASE_URL = config('OLLAMA_BASE_URL', default='http://localhost:11434')
 OLLAMA_MODEL = config('OLLAMA_MODEL', default='llama3.2')
+OLLAMA_EMBED_MODEL = config('OLLAMA_EMBED_MODEL', default='nomic-embed-text')
+
+# Process Memory Phase 1 — embeddings (lexical/off = empty vectors; ollama = Ollama API)
+PROCESS_MEMORY_EMBEDDINGS = config('PROCESS_MEMORY_EMBEDDINGS', default='lexical')
 
 # AI Provider Priority: free_first = groq → gemini → openai → ollama (PIP Phase 0)
 AI_PROVIDER = config('AI_PROVIDER', default='free_first')  # free_first, auto, gemini, groq, openai, ollama
@@ -291,3 +296,8 @@ AI_BIOEMOTION_DRAFT_ENABLED = config('AI_BIOEMOTION_DRAFT_ENABLED', default=True
 KERYKEION_AI_SNIPPETS_ENABLED = config('KERYKEION_AI_SNIPPETS_ENABLED', default=False, cast=bool)
 ASTRO_MULTITECH_ENABLED = config('ASTRO_MULTITECH_ENABLED', default=True, cast=bool)
 KERYKEION_AI_SNIPPETS_MODEL = config('KERYKEION_AI_SNIPPETS_MODEL', default='')
+
+# PIP Process Memory — vector retrieval backend (Phase 1 step 3 scaffold)
+# lexical: token overlap on ProcessSnapshot (default, no pgvector)
+# pgvector: EmbeddingChunk cosine search (NotImplementedError until ops deploys extension)
+PROCESS_MEMORY_VECTOR_BACKEND = config('PROCESS_MEMORY_VECTOR_BACKEND', default='lexical')

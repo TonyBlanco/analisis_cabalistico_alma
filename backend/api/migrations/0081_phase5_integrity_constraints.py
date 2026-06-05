@@ -3,6 +3,60 @@
 
 from django.db import migrations, models
 
+
+def _add_assignment_subject_trigger(apps, schema_editor):
+    vendor = schema_editor.connection.vendor
+    if vendor == "sqlite":
+        schema_editor.execute(
+            """
+            CREATE TRIGGER prevent_assignment_without_subject
+            BEFORE INSERT ON api_assignment
+            FOR EACH ROW
+            BEGIN
+                SELECT RAISE(ABORT, 'New assignments must have subject_user_id')
+                WHERE NEW.subject_user_id IS NULL;
+            END;
+            """
+        )
+    elif vendor == "postgresql":
+        schema_editor.execute(
+            """
+            CREATE OR REPLACE FUNCTION prevent_assignment_without_subject()
+            RETURNS TRIGGER AS $$
+            BEGIN
+                IF NEW.subject_user_id IS NULL THEN
+                    RAISE EXCEPTION 'New assignments must have subject_user_id';
+                END IF;
+                RETURN NEW;
+            END;
+            $$ LANGUAGE plpgsql;
+            """
+        )
+        schema_editor.execute(
+            """
+            DROP TRIGGER IF EXISTS prevent_assignment_without_subject ON api_assignment;
+            CREATE TRIGGER prevent_assignment_without_subject
+            BEFORE INSERT ON api_assignment
+            FOR EACH ROW EXECUTE FUNCTION prevent_assignment_without_subject();
+            """
+        )
+
+
+def _drop_assignment_subject_trigger(apps, schema_editor):
+    vendor = schema_editor.connection.vendor
+    if vendor == "sqlite":
+        schema_editor.execute(
+            "DROP TRIGGER IF EXISTS prevent_assignment_without_subject;"
+        )
+    elif vendor == "postgresql":
+        schema_editor.execute(
+            "DROP TRIGGER IF EXISTS prevent_assignment_without_subject ON api_assignment;"
+        )
+        schema_editor.execute(
+            "DROP FUNCTION IF EXISTS prevent_assignment_without_subject();"
+        )
+
+
 class Migration(migrations.Migration):
     """
     PHASE 5: Database Integrity Constraints
@@ -97,18 +151,8 @@ class Migration(migrations.Migration):
             ),
         ),
         
-        # Add validation to prevent patient_id without subject_user_id in new records
-        # (existing records grandfathered)
-        migrations.RunSQL(
-            sql="""
-                CREATE TRIGGER prevent_assignment_without_subject
-                BEFORE INSERT ON api_assignment
-                FOR EACH ROW
-                BEGIN
-                    SELECT RAISE(FAIL, 'New assignments must have subject_user_id')
-                    WHERE NEW.subject_user_id IS NULL;
-                END;
-            """,
-            reverse_sql="DROP TRIGGER IF EXISTS prevent_assignment_without_subject;",
+        migrations.RunPython(
+            code=_add_assignment_subject_trigger,
+            reverse_code=_drop_assignment_subject_trigger,
         ),
     ]

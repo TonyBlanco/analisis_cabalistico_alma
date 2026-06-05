@@ -7,6 +7,14 @@ from django.db.models import Count, Q
 from datetime import datetime, timedelta
 from .models import UserProfile, Ficha
 from .test_models import TestModule, TestResult, UserTestAccess
+from .admin_permissions import user_is_platform_admin
+
+
+def _admin_forbidden():
+    return Response(
+        {'error': 'No tienes permisos de administrador'},
+        status=status.HTTP_403_FORBIDDEN,
+    )
 
 
 class AdminCheckView(APIView):
@@ -14,11 +22,8 @@ class AdminCheckView(APIView):
     permission_classes = [IsAuthenticated]
     
     def get(self, request):
-        if not (request.user.is_staff or request.user.profile.is_admin):
-            return Response(
-                {'error': 'No tienes permisos de administrador'},
-                status=status.HTTP_403_FORBIDDEN
-            )
+        if not user_is_platform_admin(request.user):
+            return _admin_forbidden()
         return Response({'is_admin': True})
 
 
@@ -27,11 +32,8 @@ class EnhancedAdminStatsView(APIView):
     permission_classes = [IsAuthenticated]
     
     def get(self, request):
-        if not (request.user.is_staff or request.user.profile.is_admin):
-            return Response(
-                {'error': 'No autorizado'},
-                status=status.HTTP_403_FORBIDDEN
-            )
+        if not user_is_platform_admin(request.user):
+            return _admin_forbidden()
         
         # Usuarios
         total_users = User.objects.count()
@@ -71,16 +73,18 @@ class EnhancedAdminUsersView(APIView):
     permission_classes = [IsAuthenticated]
     
     def get(self, request):
-        if not (request.user.is_staff or request.user.profile.is_admin):
-            return Response(
-                {'error': 'No autorizado'},
-                status=status.HTTP_403_FORBIDDEN
-            )
+        if not user_is_platform_admin(request.user):
+            return _admin_forbidden()
         
         users = User.objects.select_related('profile').all()
         
         users_data = []
         for user in users:
+            try:
+                profile = user.profile
+            except UserProfile.DoesNotExist:
+                continue
+
             users_data.append({
                 'id': user.id,
                 'username': user.username,
@@ -88,14 +92,17 @@ class EnhancedAdminUsersView(APIView):
                 'first_name': user.first_name,
                 'last_name': user.last_name,
                 'is_active': user.is_active,
+                'is_staff': user.is_staff,
+                'is_superuser': user.is_superuser,
                 'date_joined': user.date_joined,
                 'profile': {
-                    'full_name': user.profile.full_name,
-                    'user_type': user.profile.user_type,
-                    'membership_active': user.profile.membership_active,
-                    'membership_expires': user.profile.membership_expires,
-                    'subscription_plan': user.profile.subscription_plan,
-                    'subscription_status': user.profile.subscription_status,
+                    'full_name': profile.full_name,
+                    'user_type': profile.user_type,
+                    'is_admin': profile.is_admin,
+                    'membership_active': profile.membership_active,
+                    'membership_expires': profile.membership_expires,
+                    'subscription_plan': profile.subscription_plan,
+                    'subscription_status': profile.subscription_status,
                 }
             })
         
@@ -108,11 +115,8 @@ class AdminUserManagementView(APIView):
     
     def get(self, request, user_id):
         """Obtener detalle de un usuario"""
-        if not (request.user.is_staff or request.user.profile.is_admin):
-            return Response(
-                {'error': 'No autorizado'},
-                status=status.HTTP_403_FORBIDDEN
-            )
+        if not user_is_platform_admin(request.user):
+            return _admin_forbidden()
         
         try:
             user = User.objects.select_related('profile').get(id=user_id)
@@ -164,15 +168,13 @@ class AdminUserManagementView(APIView):
     
     def patch(self, request, user_id):
         """Actualizar usuario"""
-        if not (request.user.is_staff or request.user.profile.is_admin):
-            return Response(
-                {'error': 'No autorizado'},
-                status=status.HTTP_403_FORBIDDEN
-            )
+        if not user_is_platform_admin(request.user):
+            return _admin_forbidden()
         
         try:
-            user = User.objects.get(id=user_id)
+            user = User.objects.select_related('profile').get(id=user_id)
             profile = user.profile
+            profile_dirty = False
             
             # Actualizar campos del usuario
             if 'email' in request.data:
@@ -181,19 +183,56 @@ class AdminUserManagementView(APIView):
                 user.is_active = request.data['is_active']
             user.save()
             
-            # Actualizar campos del perfil
+            profile_payload = request.data.get('profile')
+            if isinstance(profile_payload, dict):
+                if 'user_type' in profile_payload:
+                    profile.user_type = profile_payload['user_type']
+                    profile_dirty = True
+                if 'membership_active' in profile_payload:
+                    profile.membership_active = profile_payload['membership_active']
+                    profile_dirty = True
+                if 'subscription_plan' in profile_payload:
+                    profile.subscription_plan = profile_payload['subscription_plan']
+                    profile_dirty = True
+                if 'subscription_status' in profile_payload:
+                    profile.subscription_status = profile_payload['subscription_status']
+                    profile_dirty = True
+                if 'is_admin' in profile_payload:
+                    profile.is_admin = bool(profile_payload['is_admin'])
+                    profile_dirty = True
+            
+            # Campos planos (compatibilidad con el panel Next.js)
+            if 'user_type' in request.data:
+                profile.user_type = request.data['user_type']
+                profile_dirty = True
             if 'membership_active' in request.data:
                 profile.membership_active = request.data['membership_active']
+                profile_dirty = True
             if 'subscription_plan' in request.data:
                 profile.subscription_plan = request.data['subscription_plan']
+                profile_dirty = True
             if 'subscription_status' in request.data:
                 profile.subscription_status = request.data['subscription_status']
+                profile_dirty = True
             
-            profile.save()
+            if profile_dirty:
+                profile.save()
             
             return Response({
                 'success': True,
-                'message': 'Usuario actualizado correctamente'
+                'message': 'Usuario actualizado correctamente',
+                'id': user.id,
+                'email': user.email,
+                'is_active': user.is_active,
+                'profile': {
+                    'full_name': profile.full_name,
+                    'user_type': profile.user_type,
+                    'membership_active': profile.membership_active,
+                    'membership_expires': profile.membership_expires,
+                    'subscription_plan': profile.subscription_plan,
+                    'subscription_status': profile.subscription_status,
+                    'is_admin': profile.is_admin,
+                },
             })
             
         except User.DoesNotExist:
@@ -204,11 +243,8 @@ class AdminUserManagementView(APIView):
     
     def delete(self, request, user_id):
         """Eliminar usuario"""
-        if not (request.user.is_staff or request.user.profile.is_admin):
-            return Response(
-                {'error': 'No autorizado'},
-                status=status.HTTP_403_FORBIDDEN
-            )
+        if not user_is_platform_admin(request.user):
+            return _admin_forbidden()
         
         try:
             user = User.objects.get(id=user_id)

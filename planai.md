@@ -192,15 +192,16 @@ flowchart TB
 
 **Criterio de salida:** Tarot + holistic funcionan si solo hay `GROQ_API_KEY`.
 
-### Fase 1 — Process Memory + RAG (1–2 semanas)
+### Fase 1 — Process Memory + RAG (1–2 semanas) 🟡 base implementada
 
-- [ ] App Django `process_intelligence` o módulo `api/process_memory/`
-- [ ] Migraciones: `process_event`, `process_snapshot`, `embedding_chunk`
-- [ ] Ingestion signals (Django signals post-save en SWM seal, bio synthesis close)
+- [x] Módulo `api/process_memory/`
+- [x] Migraciones: `process_event`, `process_snapshot`, `embedding_chunk`
+- [x] Ingestion signals (Django signals post-save en bio synthesis close y `AnalysisRecord`)
+- [ ] Wiring directo del seal SWM Tarot al servicio `ingest_tarot_seal()`
 - [ ] Instalar Ollama en Hetzner + `docker compose` sidecar o host service
 - [ ] pgvector en `studio33_db` **o** Qdrant container en `studio33_net`
 - [ ] Job: embed `text_summary` con `nomic-embed-text`
-- [ ] `RAGService.retrieve(patient_id, domain, query)` con ownership check
+- [x] `RAGService.retrieve(patient_id, domain, query)` con ownership check y ranking lexical v1
 
 **Criterio de salida:** Terapeuta ve “contexto de procesos previos” en panel Tarot (read-only).
 
@@ -331,6 +332,6 @@ Estos ítems del [audit](docs/01_PROJECT_STATE/AUDIT_MODULOS_IA_2026-06-05.md) d
 | Prod `studio33_api` | ✅ Rebuild + recreate Hetzner |
 | `GET /api/ai/status/` | ✅ `free_first`, `training.*` false |
 | Tests 35 + harness 50 | ✅ Servidor + CI `pip-ai-tests.yml` |
-| Fase 1 RAG | ⏳ Pendiente |
+| Fase 1 RAG | 🟡 Base implementada (`api/process_memory/`); pendiente embeddings/vector DB |
 
 *Documento vivo. Actualizar al cerrar cada fase.*

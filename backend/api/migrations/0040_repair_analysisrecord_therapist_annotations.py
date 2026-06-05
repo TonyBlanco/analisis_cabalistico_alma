@@ -10,6 +10,8 @@ def _add_missing_therapist_annotations_column(apps, schema_editor):
     while django_migrations marks 0029 as applied (schema drift). This adds the column
     in-place so ORM queries/inserts stop failing.
     """
+    if schema_editor.connection.vendor != "sqlite":
+        return
 
     table_name = "api_analysisrecord"
     column_name = "therapist_annotations"

@@ -157,7 +157,9 @@ export default function DashboardLayout({
   // Admin workspace must live in its own isolated space (no global dashboard sidebar/header).
   // The admin page itself is already role-protected and renders its own UI shell.
   if (isAdminRoute) {
-    return <div className={`${themeRole ? `role-${themeRole}` : ''}`}>{children}</div>;
+    return (
+      <div className={`min-h-[100dvh] w-full ${themeRole ? `role-${themeRole}` : ''}`}>{children}</div>
+    );
   }
   
   if (isPatientRoute && realUserRole === 'patient') {

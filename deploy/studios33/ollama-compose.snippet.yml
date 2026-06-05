@@ -1,0 +1,30 @@
+# Optional: merge into docker-compose.studios33.yml or run standalone on Hetzner.
+# Process Memory Phase 1 — nomic-embed-text (no pgvector yet; API stores JSON vectors).
+#
+#   docker compose -f deploy/studios33/ollama-compose.snippet.yml up -d
+#
+# API env (studio33_api):
+#   PROCESS_MEMORY_EMBEDDINGS=ollama
+#   OLLAMA_BASE_URL=http://ollama:11434
+#   OLLAMA_EMBED_MODEL=nomic-embed-text
+# Pull model once: docker exec studio33_ollama ollama pull nomic-embed-text
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: studio33_ollama
+    restart: unless-stopped
+    volumes:
+      - studio33_ollama:/root/.ollama
+    networks:
+      - voxtv_net
+    expose:
+      - "11434"
+
+volumes:
+  studio33_ollama:
+
+networks:
+  voxtv_net:
+    external: true
+    name: voxtvserver_voxtv_net

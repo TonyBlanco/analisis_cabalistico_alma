@@ -1,15 +1,25 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { login, getCurrentUser } from '@/lib/api';
-import { setAuthToken } from '@/lib/auth';
+import { login, loginWithGoogle, getCurrentUser } from '@/lib/api';
+import { GoogleSignInButton } from '@/components/GoogleSignInButton';
+import { setAuthToken, setUserRole, type UserRole } from '@/lib/auth';
 import { clearAuthState } from '@/lib/auth-state';
 import { getUserRole } from '@/lib/getUserRole';
+import { TurnstileField, type TurnstileFieldHandle } from '@/components/TurnstileField';
+import { turnstileApiErrorMessage } from '@/lib/turnstile-messages';
 import { Eye, EyeOff, Mail, Lock, AlertCircle, User, Sparkles, Heart } from 'lucide-react';
 
-type ErrorType = 'user_not_found' | 'invalid_password' | 'account_inactive' | 'validation' | 'network' | 'other';
+type ErrorType =
+  | 'user_not_found'
+  | 'invalid_password'
+  | 'account_inactive'
+  | 'validation'
+  | 'turnstile'
+  | 'network'
+  | 'other';
 
 interface LoginError {
   type: ErrorType;
@@ -28,6 +38,7 @@ export default function LoginPage() {
   const [showResetForm, setShowResetForm] = useState(false);
   const [resetSent, setResetSent] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
+  const turnstileRef = useRef<TurnstileFieldHandle>(null);
 
   // ========== CRITICAL: Limpiar token al entrar a login ==========
   useEffect(() => {
@@ -57,32 +68,26 @@ export default function LoginPage() {
     }
     
     try {
-      // Login con email o username
-      const loginResponse = await login(email.trim(), password);
-      
-      // Guardar token
-      setAuthToken(loginResponse.token);
-      
-      // Obtener rol y redirigir
-      const role = await getUserRole();
-      
-      // Redirigir según rol
-      switch (role) {
-        case 'admin':
-          router.push('/dashboard/admin');
-          break;
-        case 'therapist':
-          router.push('/dashboard/therapist');
-          break;
-        case 'personal':
-          router.push('/dashboard/personal');
-          break;
-        case 'patient':
-          router.push('/dashboard/patient');
-          break;
-        default:
-          router.push('/dashboard');
+      const ts = turnstileRef.current;
+      if (ts?.isEnforced() && !ts.isReady()) {
+        setError({
+          type: 'turnstile',
+          message: 'La verificación de seguridad aún está cargando. Espera un momento.',
+        });
+        setLoading(false);
+        return;
       }
+      if (ts?.isEnforced() && !ts.getToken()) {
+        setError({
+          type: 'turnstile',
+          message: 'Completa la verificación de seguridad antes de continuar.',
+        });
+        setLoading(false);
+        return;
+      }
+
+      const loginResponse = await login(email.trim(), password, ts?.getToken() ?? undefined);
+      await finishLoginWithToken(loginResponse.token, loginResponse.role);
     } catch (err: any) {
       console.error('Login error:', err);
       console.log('Error details:', { 
@@ -119,13 +124,69 @@ export default function LoginPage() {
         displayMessage = 'Esta cuenta ha sido desactivada. Contacta soporte.';
       } else if (errorCode === 'validation') {
         errorType = 'validation';
+      } else if (
+        errorCode === 'turnstile_required' ||
+        errorCode === 'turnstile_invalid' ||
+        errorCode === 'turnstile_verify_failed'
+      ) {
+        errorType = 'turnstile';
+        displayMessage = turnstileApiErrorMessage(errorCode, displayMessage);
+        turnstileRef.current?.reset();
       }
-      
+
       setError({
         type: errorType,
         message: displayMessage,
         email: response.email
       });
+    }
+  };
+
+  const finishLoginWithToken = async (token: string, loginRole?: string) => {
+    setAuthToken(token);
+    if (
+      loginRole === 'admin' ||
+      loginRole === 'therapist' ||
+      loginRole === 'personal' ||
+      loginRole === 'patient'
+    ) {
+      setUserRole(loginRole as UserRole);
+    }
+    const role = await getUserRole();
+    switch (role) {
+      case 'admin':
+        router.push('/dashboard/admin');
+        break;
+      case 'therapist':
+        router.push('/dashboard/therapist');
+        break;
+      case 'personal':
+        router.push('/dashboard/personal');
+        break;
+      case 'patient':
+        router.push('/dashboard/patient');
+        break;
+      default:
+        router.push('/dashboard');
+    }
+  };
+
+  const handleGoogleCredential = async (credential: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await loginWithGoogle(credential);
+      const role = res.user?.user_type ?? res.role;
+      await finishLoginWithToken(res.token, role);
+    } catch (err: any) {
+      const response = err?.response || {};
+      const msg =
+        response.message ||
+        (response.error === 'google_auth_disabled'
+          ? 'Inicio con Google aún no está configurado en el servidor'
+          : 'No se pudo iniciar sesión con Google');
+      setError({ type: 'other', message: msg });
+      setLoading(false);
     }
   };
 
@@ -154,6 +215,8 @@ export default function LoginPage() {
         return 'bg-red-50 border-red-200 text-red-800';
       case 'network':
         return 'bg-gray-50 border-gray-300 text-gray-700';
+      case 'turnstile':
+        return 'bg-sky-50 border-sky-200 text-sky-800';
       default:
         return 'bg-red-50 border-red-200 text-red-700';
     }
@@ -325,6 +388,12 @@ export default function LoginPage() {
                   ✓ Si el email existe, recibirás un enlace para restablecer tu contraseña.
                 </div>
               )}
+
+              <TurnstileField
+                ref={turnstileRef}
+                theme="light"
+                onError={(msg) => setError({ type: 'turnstile', message: msg })}
+              />
               
               {/* Submit Button */}
               <button
@@ -345,6 +414,21 @@ export default function LoginPage() {
                 )}
               </button>
             </form>
+
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-200" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-4 bg-white text-gray-500">o continúa con</span>
+              </div>
+            </div>
+
+            <GoogleSignInButton
+              disabled={loading}
+              onCredential={handleGoogleCredential}
+              onError={(msg) => setError({ type: 'other', message: msg })}
+            />
             
             {/* Forgot Password Link */}
             <div className="mt-4 text-center">

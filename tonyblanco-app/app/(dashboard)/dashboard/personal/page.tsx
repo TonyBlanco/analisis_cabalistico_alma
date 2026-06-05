@@ -9,6 +9,7 @@ import { getAvailableTests } from '@/lib/test-api';
 import PersonalExplorationsSection from '@/components/PersonalExplorationsSection';
 import PersonalResultsSection from '@/components/PersonalResultsSection';
 import UpgradeCTASection from '@/editorial_templates/UpgradeCTASection';
+import TherapistInvitationBanner from '@/components/TherapistInvitationBanner';
 
 export default function PersonalDashboard() {
   const router = useRouter();
@@ -117,6 +118,8 @@ export default function PersonalDashboard() {
           </div>
         </div>
       </div>
+
+      <TherapistInvitationBanner />
 
       {/* Section 2: Available Explorations */}
       <PersonalExplorationsSection />

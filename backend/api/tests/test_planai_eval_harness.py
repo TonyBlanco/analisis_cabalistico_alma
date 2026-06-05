@@ -1,18 +1,18 @@
 """
-PlanAI eval harness — 50 synthetic LLM outputs, guardrails only (no HTTP).
+PlanAI eval harness — 50+ synthetic LLM outputs, guardrails only (no HTTP).
 Exit criterion (planai.md Fase 2): 0 violations on passing cases, 100% catch on failing cases.
 """
 from django.test import SimpleTestCase
 
-from api.ai.guardrails import check_output
+from api.ai.guardrails import PROHIBITED_DIAGNOSTIC, check_output
 from api.tests.planai_eval_cases import EVAL_CASES
 
 
 class PlanAIEvalHarnessTests(SimpleTestCase):
     """Runs outside DB when using SimpleTestCase — fast CI."""
 
-    def test_eval_case_count_is_fifty(self):
-        self.assertEqual(len(EVAL_CASES), 50)
+    def test_eval_case_count_is_at_least_fifty(self):
+        self.assertGreaterEqual(len(EVAL_CASES), 50)
 
     def test_harness_zero_violations_on_passing_cases(self):
         failures = []
@@ -52,3 +52,13 @@ class PlanAIEvalHarnessTests(SimpleTestCase):
                     f"{case['id']}: expected ok={case['expect_ok']} got ok={ok} code={code}"
                 )
         self.assertEqual(wrong, [], "\n".join(wrong))
+
+    def test_all_prohibited_diagnostic_terms_fail(self):
+        missed = []
+        for term in PROHIBITED_DIAGNOSTIC:
+            ok, code, _ = check_output(f"Salida SWM v3 con termino prohibido: {term}.")
+            if ok:
+                missed.append(term)
+            elif code != "guardrail_violation":
+                missed.append(f"{term} -> {code}")
+        self.assertEqual(missed, [], f"Diagnostic terms not caught: {missed}")

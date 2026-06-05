@@ -5,12 +5,14 @@ import { useEffect, useState } from 'react';
 import { getUserRole } from '@/lib/getUserRole';
 import { fetchSession } from '@/lib/session';
 import { AdminProWorkspace } from '@/components/admin-pro/AdminProWorkspace';
+import { resetPageScroll } from '@/lib/reset-page-scroll';
 
 export default function AdminDashboard() {
   const [role, setRole] = useState<string | null>(null);
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
+    resetPageScroll();
     const run = async () => {
       await fetchSession();
       const r = await getUserRole();
@@ -20,6 +22,8 @@ export default function AdminDashboard() {
 
     run();
   }, []);
+
+
 
   if (checking) {
     return (

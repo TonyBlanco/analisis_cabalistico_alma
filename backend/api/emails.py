@@ -488,6 +488,83 @@ def send_password_reset_email(user, token: str, uid: str):
         return False
 
 
+def send_therapist_patient_invitation_email(
+    invitation,
+    therapist_profile: UserProfile,
+    target_user,
+) -> bool:
+    """Notifica al usuario personal que un terapeuta solicita vincularlo como consultante."""
+    from .models import TherapistPatientInvitation
+
+    if not isinstance(invitation, TherapistPatientInvitation):
+        return False
+
+    frontend_url = getattr(settings, 'FRONTEND_URL', 'https://studios33.app').rstrip('/')
+    dashboard_url = f"{frontend_url}/dashboard/personal"
+    therapist_name = therapist_profile.full_name or invitation.therapist.username
+    profession = therapist_profile.profession or 'Terapeuta'
+    message_block = ''
+    if invitation.message:
+        message_block = f'<p style="color:#ccc;font-style:italic;">&ldquo;{invitation.message}&rdquo;</p>'
+
+    subject = f'{settings.EMAIL_SUBJECT_PREFIX}Invitación de {therapist_name} — vinculación como consultante'
+
+    html_message = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body {{ font-family: Arial, sans-serif; background-color: #0A0A1F; color: #ffffff; }}
+            .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+            .content {{ background-color: #1a1a2e; border-radius: 12px; padding: 30px; margin: 20px 0; }}
+            .button {{ display: inline-block; padding: 14px 28px; background-color: #D4AF37; color: #000;
+                text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0; }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="content">
+                <p>Hola,</p>
+                <p><strong>{therapist_name}</strong> ({profession}) quiere añadirte como consultante en su espacio terapéutico en Studios33.</p>
+                {message_block}
+                <p>Debes iniciar sesión con tu cuenta (email o Google) y <strong>aceptar o rechazar</strong> la invitación en tu panel personal.</p>
+                <p style="text-align:center;">
+                    <a class="button" href="{dashboard_url}" target="_blank">Ver invitación en mi cuenta</a>
+                </p>
+                <p style="font-size: 12px; color: #888;">Si no conoces a esta persona, puedes ignorar o rechazar la solicitud.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+
+    plain_message = f"""
+    Invitación de vinculación — Studios33
+
+    {therapist_name} ({profession}) quiere añadirte como consultante.
+    {f'Mensaje: {invitation.message}' if invitation.message else ''}
+
+    Entra en tu cuenta y revisa la invitación:
+    {dashboard_url}
+
+    Si no conoces a esta persona, rechaza o ignora este mensaje.
+    """
+
+    try:
+        email = EmailMultiAlternatives(
+            subject=subject,
+            body=plain_message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[target_user.email],
+        )
+        email.attach_alternative(html_message, 'text/html')
+        email.send(fail_silently=False)
+        return True
+    except Exception as e:
+        print(f'Error enviando email de invitación terapeuta: {e}')
+        return False
+
+
 def send_birthdata_unlock_email(user_profile: UserProfile, token: str):
     """Enviar link de desbloqueo para birth_data"""
     subject = '🔓 Solicitud: Desbloquear datos de nacimiento'

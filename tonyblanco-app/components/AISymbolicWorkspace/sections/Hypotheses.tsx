@@ -8,8 +8,12 @@ interface HypothesesProps {
 
 export default function Hypotheses({ analysis }: HypothesesProps) {
   const systemsLabel = analysis.systems.join(', ');
-  const cards = analysis.cards?.map((card) => card.name || card.id).join(', ');
-  const sefirot = analysis.sefirot?.map((item) => item.name || item.id).join(', ');
+  const cards = analysis.cards
+    ?.map((card: { id?: string; name?: string }) => card.name || card.id)
+    .join(', ');
+  const sefirot = analysis.sefirot
+    ?.map((item: { id?: string; name?: string }) => item.name || item.id)
+    .join(', ');
 
   return (
     <section className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-700">

@@ -1,4 +1,43 @@
-import type { PanelDefinition } from './types';
+import type { PanelDefinition, PanelType } from './types';
+
+export type ToolGroupId =
+  | 'observation'
+  | 'evaluation'
+  | 'symbolic'
+  | 'history'
+  | 'resources';
+
+export type ToolId =
+  | 'bioemotional'
+  | 'tree-of-life'
+  | 'hypotheses'
+  | 'history'
+  | 'kabbalah'
+  | 'resources';
+
+export type ToolDefinition = {
+  id: ToolId;
+  group: ToolGroupId;
+  label: string;
+  description?: string;
+};
+
+const panelTypeToGroup: Record<PanelType, ToolGroupId> = {
+  observation: 'observation',
+  analysis: 'evaluation',
+  symbolic: 'symbolic',
+  history: 'history',
+  resource: 'resources',
+};
+
+const panelIdToToolId: Record<string, ToolId> = {
+  bioemotional: 'bioemotional',
+  treeOfLife: 'tree-of-life',
+  transgenerational: 'hypotheses',
+  history: 'history',
+  kabbalah: 'kabbalah',
+  resources: 'resources',
+};
 
 export const panelRegistry: PanelDefinition[] = [
   {
@@ -92,6 +131,20 @@ export const panelRegistry: PanelDefinition[] = [
     component: PanelText,
   },
 ];
+
+/** Compatibilidad con TherapistSidebar (legacy toolRegistry). */
+export const toolRegistry: ToolDefinition[] = panelRegistry.flatMap((panel) => {
+  const id = panelIdToToolId[panel.id];
+  if (!id) return [];
+  return [
+    {
+      id,
+      group: panelTypeToGroup[panel.type],
+      label: panel.title,
+      description: panel.description,
+    },
+  ];
+});
 
 function PanelText() {
   return (

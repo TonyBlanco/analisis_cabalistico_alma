@@ -9,6 +9,7 @@ class ApiConfig(AppConfig):
         # Registrar modelos del dominio bio-emocional sin tocar models.py
         try:
             from . import bioemotional  # noqa: F401
+            from .process_memory import signals  # noqa: F401
         except Exception:
             # En entornos donde el submódulo no exista aún (p.ej. migraciones antiguas),
             # ignoramos el error para no romper el arranque.

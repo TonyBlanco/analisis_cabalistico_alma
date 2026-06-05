@@ -112,6 +112,7 @@ class GovernedAITests(TestCase):
             content_type="application/json",
         )
         self.assertEqual(resp.status_code, 403)
+        self.assertEqual(resp.json().get("code"), "feature_disabled")
 
     def test_bioemotion_closed_synthesis_rejected(self):
         self.synthesis.is_closed = True
@@ -125,6 +126,7 @@ class GovernedAITests(TestCase):
         url = f"/api/bioemotional/synthesis/{self.synthesis.id}/assist-draft/"
         resp = self.client_api.post(url, content_type="application/json")
         self.assertEqual(resp.status_code, 403)
+        self.assertEqual(resp.json().get("code"), "feature_disabled")
 
     @patch("api.ai.governed_views.is_llm_available", return_value=True)
     @patch("api.ai.governed_views.generate_text")
@@ -192,3 +194,51 @@ class GovernedAITests(TestCase):
             content_type="application/json",
         )
         self.assertEqual(resp.status_code, 403)
+
+    def test_feedback_stores_correction_text_feature_and_prompt_version(self):
+        resp = self.client_api.post(
+            "/api/ai/feedback/",
+            data=json.dumps(
+                {
+                    "feature": "bioemotion_draft",
+                    "rating": 5,
+                    "patient_id": self.patient.id,
+                    "provider": "gemini",
+                    "prompt_version": "bioemotional_draft_v1",
+                    "correction_text": "Mantener el tono fenomenologico y no causal.",
+                }
+            ),
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 201)
+        feedback = AIInteractionFeedback.objects.get()
+        self.assertEqual(feedback.feature, "bioemotion_draft")
+        self.assertEqual(feedback.rating, 5)
+        self.assertEqual(feedback.patient, self.patient)
+        self.assertEqual(feedback.provider, "gemini")
+        self.assertEqual(feedback.prompt_version, "bioemotional_draft_v1")
+        self.assertEqual(
+            feedback.correction_text,
+            "Mantener el tono fenomenologico y no causal.",
+        )
+
+    def test_feedback_create_read_roundtrip_in_test_db(self):
+        created = AIInteractionFeedback.objects.create(
+            therapist=self.user,
+            patient=self.patient,
+            feature="kabbalah_interpret",
+            provider="groq",
+            prompt_version="kabbalah_interpret_v1",
+            rating=4,
+            correction_text="Usar lenguaje mas tentativo.",
+        )
+
+        loaded = AIInteractionFeedback.objects.get(pk=created.pk)
+        self.assertEqual(loaded.therapist, self.user)
+        self.assertEqual(loaded.patient, self.patient)
+        self.assertEqual(loaded.feature, "kabbalah_interpret")
+        self.assertEqual(loaded.provider, "groq")
+        self.assertEqual(loaded.prompt_version, "kabbalah_interpret_v1")
+        self.assertEqual(loaded.rating, 4)
+        self.assertEqual(loaded.correction_text, "Usar lenguaje mas tentativo.")

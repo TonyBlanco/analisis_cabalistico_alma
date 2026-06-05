@@ -40,6 +40,11 @@ from swm.tarot.serializers import (
 from swm.tarot.services.workspace_service import WorkspaceService
 from swm.tarot.services.session_service import SessionService
 from swm.tarot.services.audit_service import AuditService
+from api.process_memory.ingestion import (
+    build_tarot_spread_from_instance,
+    ingest_tarot_seal,
+    resolve_tarot_workspace_patient,
+)
 
 User = get_user_model()
 
@@ -363,6 +368,15 @@ class SealWorkspaceView(APIView):
                 ip_address=get_client_ip(request),
                 user_agent=get_user_agent(request)
             )
+
+            patient = resolve_tarot_workspace_patient(instance)
+            if patient:
+                ingest_tarot_seal(
+                    therapist=instance.creator_user,
+                    patient=patient,
+                    source_id=str(instance.id),
+                    spread=build_tarot_spread_from_instance(instance),
+                )
             
             return Response({
                 'instance': WorkspaceInstanceSerializer(instance).data,

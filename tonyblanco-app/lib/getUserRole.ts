@@ -1,74 +1,88 @@
 /**
  * User Role Helper
- * 
- * Extracts user role from session data.
- * Uses fetchSession() to get current user information.
+ *
+ * Resolves the effective dashboard role from session (/api/me/) with fallbacks.
  */
 
+import { getApiBaseUrl } from './api-base';
 import { fetchSession } from './session';
 
 export type UserRole = 'admin' | 'therapist' | 'personal' | 'patient' | null;
 
+const VALID_ROLES = new Set(['admin', 'therapist', 'personal', 'patient']);
+
+function isValidRole(value: unknown): value is Exclude<UserRole, null> {
+  return typeof value === 'string' && VALID_ROLES.has(value);
+}
+
+function roleFromUserRecord(user: Record<string, unknown>): UserRole {
+  // Staff / superuser flags (flat /me/ payload)
+  if (
+    user.username === 'supertony' ||
+    user.is_superuser === true ||
+    user.is_staff === true ||
+    user.is_admin === true
+  ) {
+    return 'admin';
+  }
+
+  // Top-level fields from CurrentUserView (preferred — already applies admin precedence)
+  if (isValidRole(user.user_type)) return user.user_type;
+  if (isValidRole(user.role)) return user.role;
+
+  const profile = user.profile as Record<string, unknown> | undefined;
+  if (profile) {
+    if (profile.is_admin === true) return 'admin';
+    if (isValidRole(profile.user_type)) return profile.user_type;
+    if (isValidRole(profile.role)) return profile.role;
+  }
+
+  return null;
+}
+
+async function roleFromMembership(token: string): Promise<UserRole> {
+  try {
+    const response = await fetch(`${getApiBaseUrl()}/check-membership/`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Token ${token}`,
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+    });
+    if (!response.ok) return null;
+    const data = await response.json();
+    if (data?.is_superuser || data?.user_type === 'admin') return 'admin';
+    if (isValidRole(data?.user_type)) return data.user_type;
+  } catch {
+    // ignore
+  }
+  return null;
+}
+
+function roleFromLocalStorage(): UserRole {
+  if (typeof window === 'undefined') return null;
+  const stored = localStorage.getItem('userRole');
+  return isValidRole(stored) ? stored : null;
+}
+
 /**
  * Gets the current user's role from the backend session.
- * 
- * Priority order for role extraction:
- * 1. user.profile.user_type
- * 2. user.profile.role
- * 3. user.user_type
- * 4. user.role
- * 
- * @returns UserRole or null if not authenticated or role cannot be determined
  */
 export async function getUserRole(): Promise<UserRole> {
   const session = await fetchSession();
 
-  if (!session.isAuthenticated || !session.user) {
-    return null;
+  if (session.isAuthenticated && session.user) {
+    const fromUser = roleFromUserRecord(session.user as Record<string, unknown>);
+    if (fromUser) return fromUser;
   }
 
-  const user = session.user;
-
-  // Priority 1: profile.user_type
-  if (user.profile?.user_type) {
-    const role = user.profile.user_type;
-    if (isValidRole(role)) {
-      return role;
-    }
+  const token =
+    typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
+  if (token) {
+    const fromMembership = await roleFromMembership(token);
+    if (fromMembership) return fromMembership;
   }
 
-  // Priority 2: profile.role
-  if (user.profile?.role) {
-    const role = user.profile.role;
-    if (isValidRole(role)) {
-      return role;
-    }
-  }
-
-  // Priority 3: user.user_type
-  if (user.user_type) {
-    const role = user.user_type;
-    if (isValidRole(role)) {
-      return role;
-    }
-  }
-
-  // Priority 4: user.role
-  if (user.role) {
-    const role = user.role;
-    if (isValidRole(role)) {
-      return role;
-    }
-  }
-
-  // No valid role found
-  return null;
+  return roleFromLocalStorage();
 }
-
-/**
- * Type guard to validate role value
- */
-function isValidRole(value: any): value is UserRole {
-  return value === 'admin' || value === 'therapist' || value === 'personal' || value === 'patient';
-}
-

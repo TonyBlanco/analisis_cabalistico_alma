@@ -148,6 +148,14 @@ from .patient_status_views import (
 )
 from .patient_symbolic_overview_views import PatientSymbolicOverviewView
 from .patient_holistic_export_views import PatientHolisticExportsView
+from .therapist_patient_invitation_views import (
+    TherapistPatientLookupView,
+    TherapistPatientInviteView,
+    TherapistPatientInvitationListView,
+    TherapistPatientInvitationCancelView,
+    PersonalTherapistInvitationListView,
+    PersonalTherapistInvitationRespondView,
+)
 from .symbolic_views import TreeStructuralStateView
 from .utils.symbolic_interpreter_ai import (
     generate_symbolic_interpretation_view,
@@ -180,6 +188,19 @@ urlpatterns = [
     path('me/profile/', UpdateProfileView.as_view(), name='update_profile'),
     path('profile/me/', UserProfileMeView.as_view(), name='profile_me'),
     path('profile/me/consent/', UserProfileConsentView.as_view(), name='profile_me_consent'),
+    path('personal/therapist-invitations/', PersonalTherapistInvitationListView.as_view(), name='personal_therapist_invitations'),
+    path(
+        'personal/therapist-invitations/<int:invitation_id>/accept/',
+        PersonalTherapistInvitationRespondView.as_view(),
+        {'action': 'accept'},
+        name='personal_therapist_invitation_accept',
+    ),
+    path(
+        'personal/therapist-invitations/<int:invitation_id>/reject/',
+        PersonalTherapistInvitationRespondView.as_view(),
+        {'action': 'reject'},
+        name='personal_therapist_invitation_reject',
+    ),
     path('profile/me/acknowledge-update/', ProfileUpdateAcknowledgeView.as_view(), name='profile_acknowledge_update'),
     # Alias para cuenta de paciente (usa el mismo endpoint que profile/me/)
     path('account/profile/', UserProfileMeView.as_view(), name='account_profile'),
@@ -204,6 +225,14 @@ urlpatterns = [
     
     # Endpoints exclusivos para terapeutas
     path('therapist/patients/create/', CreatePatientWithAccountView.as_view(), name='create_patient_with_account'),
+    path('therapist/patients/lookup/', TherapistPatientLookupView.as_view(), name='therapist_patient_lookup'),
+    path('therapist/patients/invite/', TherapistPatientInviteView.as_view(), name='therapist_patient_invite'),
+    path('therapist/patients/invitations/', TherapistPatientInvitationListView.as_view(), name='therapist_patient_invitations'),
+    path(
+        'therapist/patients/invitations/<int:invitation_id>/cancel/',
+        TherapistPatientInvitationCancelView.as_view(),
+        name='therapist_patient_invitation_cancel',
+    ),
     path('therapist/dashboard/', TherapistDashboardView.as_view(), name='therapist_dashboard'),
     path('therapist/patients/', PatientListCreateView.as_view(), name='patient_list_create'),
     path('therapist/patients/<int:pk>/', PatientDetailView.as_view(), name='patient_detail'),

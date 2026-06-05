@@ -1,10 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { fetchSession } from '@/lib/session';
 import Link from 'next/link';
 import { getApiBaseUrl } from '@/lib/api-base';
+import { TurnstileField, type TurnstileFieldHandle } from '@/components/TurnstileField';
+import { turnstileApiErrorMessage } from '@/lib/turnstile-messages';
 
 const API_URL = getApiBaseUrl();
 
@@ -33,6 +35,7 @@ export default function PersonalRegistrationPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const turnstileRef = useRef<TurnstileFieldHandle>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -96,10 +99,20 @@ export default function PersonalRegistrationPage() {
       return;
     }
 
+    const ts = turnstileRef.current;
+    if (ts?.isEnforced() && !ts.isReady()) {
+      setError('La verificación de seguridad aún está cargando. Espera un momento.');
+      return;
+    }
+    if (ts?.isEnforced() && !ts.getToken()) {
+      setError('Completa la verificación de seguridad antes de continuar.');
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const payload = {
+      const payload: Record<string, unknown> = {
         username: formData.username.trim(),
         email: formData.email.trim(),
         password: formData.password,
@@ -107,6 +120,8 @@ export default function PersonalRegistrationPage() {
         phone: formData.phone.trim() || '',
         birth_date: formData.birth_date,
       };
+      const turnstileToken = ts?.getToken();
+      if (turnstileToken) payload.turnstile_token = turnstileToken;
 
       const response = await fetch(`${API_URL}/register/personal/`, {
         method: 'POST',
@@ -121,16 +136,22 @@ export default function PersonalRegistrationPage() {
       if (!response.ok) {
         // Handle validation errors from backend
         if (response.status === 400 && data) {
+          if (data.error?.startsWith?.('turnstile_')) {
+            setError(turnstileApiErrorMessage(data.error, data.message));
+            turnstileRef.current?.reset();
+            return;
+          }
           const backendErrors: Record<string, string> = {};
           Object.keys(data).forEach((key) => {
+            if (key === 'error' || key === 'message') return;
             if (Array.isArray(data[key])) {
               backendErrors[key] = data[key][0];
-            } else {
+            } else if (typeof data[key] === 'string') {
               backendErrors[key] = data[key];
             }
           });
           setFieldErrors(backendErrors);
-          setError('Por favor, corrige los errores en el formulario');
+          setError(data.message || 'Por favor, corrige los errores en el formulario');
           return;
         }
         throw new Error(data.error || data.message || 'Error al registrar');
@@ -323,6 +344,12 @@ export default function PersonalRegistrationPage() {
               </div>
             </div>
           </div>
+
+          <TurnstileField
+            ref={turnstileRef}
+            theme="light"
+            onError={(msg) => setError(msg)}
+          />
 
           <div className="pt-4">
             <button

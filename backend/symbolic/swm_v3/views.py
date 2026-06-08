@@ -511,6 +511,7 @@ def generate_educational_reading(
     context_focus: Optional[str] = None,
     intention: Optional[str] = None,
     astrology_enrichment: Optional[Dict[str, Any]] = None,
+    include_ai: bool = False,
 ) -> Dict[str, Any]:
     """
     Generate an educational symbolic reading.
@@ -649,7 +650,7 @@ def generate_educational_reading(
             enriched_context = f"{context_focus or ''} [Contexto astrológico: {symbolic_text}]".strip()
             logger.info(f"[SWM-v3] Astrology enrichment applied: {len(symbolic_text)} chars")
     
-    if cards and AI_ENABLED and generate_with_fallback:
+    if cards and include_ai and AI_ENABLED and generate_with_fallback:
         try:
             symbolic_reading = generate_ai_symbolic_reading(
                 cards=cards,
@@ -663,7 +664,6 @@ def generate_educational_reading(
             logger.error(f"[SWM-v3] Error generating AI reading: {e}")
             symbolic_reading = generate_fallback_symbolic_reading(cards, system_meta)
     elif cards:
-        # Fallback when AI not available
         symbolic_reading = generate_fallback_symbolic_reading(cards, system_meta)
     
     return {
@@ -736,6 +736,7 @@ class SwmV3SymbolicReadingCreateView(APIView):
             intention = data.get("intention")
             consultant_id = data.get("consultant_id")
             consent_data = data.get("consent", {})
+            include_ai = bool(data.get("include_ai", False))
             
             # Validate consent mode
             if consent_mode not in ["no_store", "store_anonymized", "store_with_consent"]:
@@ -753,6 +754,7 @@ class SwmV3SymbolicReadingCreateView(APIView):
                 spread_type=spread_type,
                 context_focus=context_focus,
                 intention=intention,
+                include_ai=include_ai,
             )
             
             # Determine if we should store

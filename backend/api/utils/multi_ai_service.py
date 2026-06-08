@@ -228,7 +228,7 @@ class MultiAIService:
             available.append('gemini')
         if getattr(settings, 'OPENAI_API_KEY', ''):
             available.append('openai')
-        if getattr(settings, 'GROQ_API_KEY', ''):
+        if getattr(settings, 'GROQ_API_KEY', '') and _get_groq_client():
             available.append('groq')
         # Ollama is always potentially available (local)
         available.append('ollama')

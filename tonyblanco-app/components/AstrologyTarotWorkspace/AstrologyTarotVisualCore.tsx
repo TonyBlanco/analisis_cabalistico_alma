@@ -422,6 +422,7 @@ export default function AstrologyTarotVisualCore({
             consent_mode: 'no_store',
             reading_type: 'educational',
             selected_cards: [selectedCard.id],
+            include_ai: false,
           }),
         });
 

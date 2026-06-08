@@ -9,3 +9,6 @@
 
 ## [2026-06-08 14:57 UTC] Claude
 [DECISION] AI Memory Layer installed — multi-agent coordination via AGENTS.md and .ai-memory/
+
+## [2026-06-08 14:59 UTC] Grok
+[DECISION] sync-session auto-updates session_context.md on session end — Groq/Claude agents

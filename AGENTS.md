@@ -15,15 +15,27 @@ Memoria compartida para **Claude Code**, **Grok (Cursor)**, **Codex** y otros ag
 
 ## Al cerrar sesión productiva
 
-Guardar decisiones explícitas:
+Guardar decisiones y **sincronizar contexto** (automático en tareas grandes):
 
 ```bash
 python3 memory_manager.py store "[DECISION] resumen — contexto"
 python3 memory_manager.py store "[DEPLOY] qué se desplegó — commit SHA"
+python3 memory_manager.py sync-session
 python3 memory_manager.py dump --out CODEX_CONTEXT.md
 ```
 
-Actualizar `.ai-memory/active/session_context.md` (focus, next steps, HEAD).
+`sync-session` actualiza `session_context.md` con HEAD, rama, entradas recientes de `agent_log.md` y preserva Focus/Tasks/Next Steps.
+
+Opcional — override al cerrar tarea grande:
+
+```bash
+python3 memory_manager.py sync-session \
+  --focus "qué quedó pendiente" \
+  --completed "lo que se hizo en esta sesión" \
+  --next "primer paso del próximo chat"
+```
+
+**Grok:** ejecutar `sync-session` antes del último mensaje si la sesión tocó código, deploy o docs.
 
 ## Etiquetas de memoria
 

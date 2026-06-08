@@ -18,10 +18,11 @@ Read:
 
 ```bash
 python3 memory_manager.py store "[TYPE] concise decision — context"
+python3 memory_manager.py sync-session
 python3 memory_manager.py dump --out CODEX_CONTEXT.md
 ```
 
-Update `.ai-memory/active/session_context.md` before closing.
+`sync-session` runs automatically on Claude **Stop** hook; call manually after large tasks.
 
 | Event | Prefix |
 |-------|--------|

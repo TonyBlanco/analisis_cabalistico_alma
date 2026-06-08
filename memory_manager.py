@@ -342,6 +342,13 @@ examples:
                     help="archive entries older than N days (default: 90)")
     pr.add_argument("--dry-run", action="store_true", help="preview without writing")
 
+    ss = sub.add_parser("sync-session", help="refresh .ai-memory/active/session_context.md")
+    ss.add_argument("--focus", help="override Current Focus")
+    ss.add_argument("--completed", action="append", default=[], help="append to Completed (reciente)")
+    ss.add_argument("--next", action="append", default=[], help="replace Next Steps")
+    ss.add_argument("--task", action="append", default=[], help="replace Active Tasks")
+    ss.add_argument("--dry-run", action="store_true")
+
     return p
 
 
@@ -392,6 +399,33 @@ def main() -> None:
             print(f"  ✓ Listo")
         else:
             print(f"  (sin cambios — modo dry-run)")
+
+    elif args.cmd == "sync-session":
+        from importlib.util import module_from_spec, spec_from_file_location
+
+        hook = REPO_ROOT / ".claude" / "hooks" / "update_session_context.py"
+        spec = spec_from_file_location("update_session_context", hook)
+        if spec is None or spec.loader is None:
+            print("  ✗ missing .claude/hooks/update_session_context.py", file=sys.stderr)
+            sys.exit(1)
+        mod = module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        path = mod.update_session_context(
+            focus=getattr(args, "focus", None),
+            completed_add=args.completed or None,
+            next_steps=args.next or None,
+            active_tasks=args.task or None,
+            dry_run=args.dry_run,
+        )
+        if args.dry_run:
+            print(mod.build_session_context(
+                focus=getattr(args, "focus", None),
+                completed_add=args.completed or None,
+                next_steps=args.next or None,
+                active_tasks=args.task or None,
+            ))
+        else:
+            print(f"  ✓ session context updated: {path}")
 
     else:
         parser.print_help()

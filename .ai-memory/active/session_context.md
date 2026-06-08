@@ -1,7 +1,7 @@
 # Session Context — Análisis Cabalístico / Studios33
 
-**Última actualización:** 2026-06-08  
-**Rama:** `main` · **HEAD:** `fac64d6b`  
+**Última actualización:** 2026-06-08 14:59 UTC  
+**Rama:** `main` · **HEAD:** `80206f43` · **Working tree:** 8 archivo(s) sin commit  
 **Prod:** Hetzner `studios33.app` + `api.studios33.app`
 
 ## Current Focus
@@ -10,6 +10,8 @@ Coordinación multi-agente con AI Memory Layer; mantener wiring BD/API/FE de tes
 
 ## Completed (reciente)
 
+- AI Memory Layer instalado y sync-session automático configurado
+- Último commit: `80206f43` — chore: install ai-memory-layer for multi-agent coordination
 - Test catalog: migración `0090`, registry FE, guards asignación (`TEST_CATALOG_WIRING.md`)
 - Astrología Fase 3: PDF export, timeline UI, snippets vía `llm_bridge` (Groq)
 - Deploy Hetzner OK; `KERYKEION_AI_SNIPPETS_ENABLED=True` + `GROQ_API_KEY`
@@ -23,9 +25,7 @@ Coordinación multi-agente con AI Memory Layer; mantener wiring BD/API/FE de tes
 
 ## Next Steps
 
-1. Al abrir sesión: `python3 memory_manager.py list --n 15`
-2. Leer `docs/01_PROJECT_STATE/PROJECT_STATE_CURRENT.md` si toca arquitectura
-3. Al cerrar: `memory_manager.py store` con `[DECISION]` / `[DEPLOY]` según cambios
+1. Abrir sesión leyendo session_context.md actualizado
 
 ## Key Docs
 

@@ -25,6 +25,8 @@ Memoria persistente entre sesiones de agentes: decisiones, bugs, deploys y conte
 source .venv/bin/activate
 python3 memory_manager.py list
 python3 memory_manager.py store "[DECISION] ejemplo"
+python3 memory_manager.py sync-session          # refresh session_context.md
+python3 memory_manager.py sync-session --focus "..." --completed "..." --next "..."
 python3 memory_manager.py dump --out CODEX_CONTEXT.md
 python3 .claude/hooks/context_loader.py --dry-run "implement feature X"
 python3 .claude/hooks/auto_compact.py --dry-run

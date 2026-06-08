@@ -2,6 +2,12 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { updatePatientProfile } from '@/lib/api';
 
+interface GeoPreview {
+  birth_latitude: number | null;
+  birth_longitude: number | null;
+  birth_timezone: string | null;
+}
+
 interface PatientProfile {
   full_name?: string | null;
   legal_full_name?: string;
@@ -86,6 +92,7 @@ export default function PatientProfileEditor({ profile, patientId, onSave, onClo
   }, [patientId, initialName, profile?.birth_city, profile?.birth_country, profile?.birth_date, profile?.birth_time, profile?.biologicalSex, profile?.genderIdentity]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [geoPreview, setGeoPreview] = useState<GeoPreview | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -117,9 +124,8 @@ export default function PatientProfileEditor({ profile, patientId, onSave, onClo
         return;
       }
 
-      await updatePatientProfile(id, {
+      const saved = await updatePatientProfile(id, {
         full_name: formData.full_name.trim(),
-        // Keep linked UserProfile consistent when patient has an account
         legal_full_name: formData.full_name.trim(),
         birth_date: formData.birth_date,
         birth_time: formData.birth_time || undefined,
@@ -128,6 +134,16 @@ export default function PatientProfileEditor({ profile, patientId, onSave, onClo
         biologicalSex: formData.biologicalSex || undefined,
         genderIdentity: formData.genderIdentity || undefined,
       });
+
+      // Show resolved coordinates from backend response
+      const coords = saved?.coordinates;
+      if (coords && (coords.latitude != null || coords.longitude != null || coords.timezone)) {
+        setGeoPreview({
+          birth_latitude: coords.latitude ?? null,
+          birth_longitude: coords.longitude ?? null,
+          birth_timezone: coords.timezone ?? null,
+        });
+      }
 
       onSave(); // Trigger refresh
       setFocusedField(null);
@@ -278,7 +294,7 @@ export default function PatientProfileEditor({ profile, patientId, onSave, onClo
                 <label className="block text-sm font-medium text-gray-700">Latitud (auto)</label>
                 <input
                   type="text"
-                  value={profile?.birth_latitude ?? ''}
+                  value={geoPreview?.birth_latitude ?? profile?.birth_latitude ?? ''}
                   readOnly
                   className="mt-1 block w-full px-3 py-2 border border-gray-200 rounded-md bg-gray-50 text-gray-700"
                 />
@@ -287,7 +303,7 @@ export default function PatientProfileEditor({ profile, patientId, onSave, onClo
                 <label className="block text-sm font-medium text-gray-700">Longitud (auto)</label>
                 <input
                   type="text"
-                  value={profile?.birth_longitude ?? ''}
+                  value={geoPreview?.birth_longitude ?? profile?.birth_longitude ?? ''}
                   readOnly
                   className="mt-1 block w-full px-3 py-2 border border-gray-200 rounded-md bg-gray-50 text-gray-700"
                 />
@@ -296,7 +312,7 @@ export default function PatientProfileEditor({ profile, patientId, onSave, onClo
                 <label className="block text-sm font-medium text-gray-700">Zona horaria (auto)</label>
                 <input
                   type="text"
-                  value={profile?.birth_timezone ?? ''}
+                  value={geoPreview?.birth_timezone ?? profile?.birth_timezone ?? ''}
                   readOnly
                   className="mt-1 block w-full px-3 py-2 border border-gray-200 rounded-md bg-gray-50 text-gray-700"
                 />
@@ -304,7 +320,9 @@ export default function PatientProfileEditor({ profile, patientId, onSave, onClo
             </div>
 
             <p className="text-xs text-gray-500">
-              Si cambias ciudad/país, el sistema recalcula coordenadas automáticamente.
+              {loading
+                ? 'Geocodificando ciudad y país…'
+                : 'Si cambias ciudad/país, el sistema recalcula coordenadas automáticamente.'}
             </p>
           </div>
 

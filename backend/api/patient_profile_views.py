@@ -134,8 +134,14 @@ class TherapistUpdatePatientProfileView(APIView):
         city_changing = new_city is not None and new_city != (patient.birth_city or "")
         country_changing = new_country is not None and new_country != (patient.birth_country or "")
         location_changing = city_changing or country_changing
-        
-        if location_changing:
+
+        # Also geocode if coordinates are missing but city/country already exist (backfill case)
+        effective_city = new_city if new_city is not None else patient.birth_city
+        effective_country = new_country if new_country is not None else patient.birth_country
+        coords_missing = patient.birth_latitude is None or patient.birth_longitude is None
+        needs_geocode = location_changing or (coords_missing and bool(effective_city or effective_country))
+
+        if needs_geocode:
             final_city = new_city if new_city is not None else patient.birth_city
             final_country = new_country if new_country is not None else patient.birth_country
             
@@ -185,18 +191,19 @@ class TherapistUpdatePatientProfileView(APIView):
                         birth_data.birth_latitude = patient.birth_latitude
                         birth_data.birth_longitude = patient.birth_longitude
             else:
-                # Ciudad/país vacíos - limpiar coordenadas también
-                patient.birth_city = ""
-                patient.birth_country = ""
-                patient.birth_latitude = None
-                patient.birth_longitude = None
-                patient.birth_timezone = ""
-                
-                if birth_data:
-                    birth_data.birth_city = ""
-                    birth_data.birth_country = ""
-                    birth_data.birth_latitude = None
-                    birth_data.birth_longitude = None
+                # Only clear coordinates when the user explicitly sent empty city/country
+                if location_changing:
+                    patient.birth_city = ""
+                    patient.birth_country = ""
+                    patient.birth_latitude = None
+                    patient.birth_longitude = None
+                    patient.birth_timezone = ""
+
+                    if birth_data:
+                        birth_data.birth_city = ""
+                        birth_data.birth_country = ""
+                        birth_data.birth_latitude = None
+                        birth_data.birth_longitude = None
         
         # Guardar Patient
         patient.save()

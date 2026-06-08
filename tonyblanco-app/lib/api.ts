@@ -558,12 +558,13 @@ export const acknowledgeProfileUpdate = async (): Promise<{ message: string; pro
 export const updatePatientProfile = async (
   patientId: number,
   data: Partial<UserProfileData>
-): Promise<{ 
-  message: string; 
-  profile_complete: boolean; 
+): Promise<{
+  message: string;
+  profile_complete: boolean;
   missing_fields: string[];
   profile_updated_by_therapist: boolean;
   last_therapist_update: string | null;
+  coordinates?: { latitude: number | null; longitude: number | null; timezone: string | null };
 }> => {
   return apiRequest(`/therapist/patients/${patientId}/profile/update/`, {
     method: 'PATCH',

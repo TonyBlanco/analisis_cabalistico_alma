@@ -45,7 +45,7 @@ from .views import (
     BlockedDatesView,
     service_stats,
 )
-from .ai_views import AIHolisticQueryView
+from .ai_views import AIHolisticQueryView, AIGenerateView
 from api.ai.status_views import AIStatusView
 from api.ai.governed_views import KabbalahInterpretView, AIInteractionFeedbackView
 from .astrology_ai_views import (
@@ -215,6 +215,7 @@ urlpatterns = [
     
     # AI Assistant (PIP: unified router + governed lanes)
     path('ai/status/', AIStatusView.as_view(), name='ai_status'),
+    path('ai/generate/', AIGenerateView.as_view(), name='ai_generate'),
     path('ai/holistic-query/', AIHolisticQueryView.as_view(), name='ai_holistic_query'),
     path('ai/kabbalah/interpret/', KabbalahInterpretView.as_view(), name='ai_kabbalah_interpret'),
     path('ai/feedback/', AIInteractionFeedbackView.as_view(), name='ai_feedback'),

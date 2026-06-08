@@ -1,132 +1,54 @@
 /**
- * Configuración Centralizada de Gemini AI
- * 
- * Este archivo contiene todos los parámetros y configuración para la integración con Google Gemini API.
- * Úsalo como referencia única para evitar errores de configuración.
+ * AI generation — routes through backend /api/ai/generate/ instead of calling
+ * Gemini directly from the browser (which would expose the API key).
+ *
+ * Drop-in replacement: same exported API as the old Gemini-direct version so
+ * no component changes are needed.
  */
 
-import { GoogleGenerativeAI } from "@google/generative-ai";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
 
-// ==================== CONFIGURACIÓN DE API KEY ====================
-export const GEMINI_API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY || "";
-
-// ==================== MODELOS DISPONIBLES (ORDEN DE PRIORIDAD) ====================
-// IMPORTANTE: Estos modelos están verificados y funcionan con tu cuenta
-export const GEMINI_MODELS = [
-  "gemini-2.5-flash",      // ✅ Modelo principal (verificado y funcional)
-  "gemini-2.5-flash-lite", 
-  "gemini-2.0-flash",
-  "gemini-1.5-flash",
-  "gemini-1.5-pro",
-  "gemini-pro"
-] as const;
-
-// ==================== CONFIGURACIÓN DE GENERACIÓN ====================
-export const GEMINI_GENERATION_CONFIG = {
-  temperature: 0.8,        // Creatividad (0-1, más alto = más creativo)
-  topK: 40,                 // Diversidad de respuestas
-  topP: 0.95,               // Nucleus sampling
-  maxOutputTokens: 4096,    // Máximo de tokens en la respuesta
-} as const;
-
-// ==================== INICIALIZACIÓN DEL CLIENTE ====================
-let geminiClient: GoogleGenerativeAI | null = null;
-
-export function getGeminiClient(): GoogleGenerativeAI | null {
-  if (!GEMINI_API_KEY) {
-    console.warn("⚠️ NEXT_PUBLIC_GEMINI_API_KEY no está configurada");
-    return null;
-  }
-  
-  if (!geminiClient) {
-    geminiClient = new GoogleGenerativeAI(GEMINI_API_KEY);
-    console.log("✅ Cliente Gemini inicializado");
-  }
-  
-  return geminiClient;
-}
-
-// ==================== FUNCIÓN HELPER PARA GENERAR CONTENIDO ====================
 export async function generateWithGemini(
   prompt: string,
-  customModels?: string[]
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _customModels?: string[],
 ): Promise<string | null> {
-  const client = getGeminiClient();
-  if (!client) {
-    throw new Error("Cliente Gemini no disponible. Verifica NEXT_PUBLIC_GEMINI_API_KEY");
+  const token =
+    typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
+
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Token ${token}`;
+
+  // Remove credentials:'include' when using token-based auth to avoid CORS preflight issues
+
+  const res = await fetch(`${API_BASE}/ai/generate/`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ prompt, temperature: 0.8, max_tokens: 2048 }),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || `AI error ${res.status}`);
   }
 
-  const modelsToTry = customModels || GEMINI_MODELS;
-
-  for (const modelName of modelsToTry) {
-    try {
-      console.log(`🔮 Intentando con modelo: ${modelName}...`);
-      const model = client.getGenerativeModel({ 
-        model: modelName,
-        generationConfig: GEMINI_GENERATION_CONFIG
-      });
-      
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-      const text = response.text();
-      
-      if (text) {
-        console.log(`✅ Éxito con ${modelName}`);
-        return text;
-      }
-    } catch (error: any) {
-      const errorMsg = error.message || error.toString();
-      
-      if (errorMsg.includes("404") || errorMsg.includes("not found")) {
-        console.warn(`⚠️ Modelo ${modelName} no disponible (404), probando siguiente...`);
-        continue;
-      }
-      
-      if (errorMsg.includes("quota") || errorMsg.includes("429")) {
-        console.warn(`⚠️ Cuota excedida con ${modelName}, probando siguiente...`);
-        continue;
-      }
-      
-      console.error(`❌ Error con ${modelName}:`, errorMsg);
-      continue;
-    }
-  }
-
-  throw new Error("Todos los modelos de Gemini fallaron. Verifica tu API key y cuota.");
+  const data = await res.json();
+  return data.text ?? null;
 }
 
-// ==================== FUNCIÓN HELPER PARA PARSEAR JSON ====================
 export function parseGeminiJSON<T>(text: string): T | null {
   try {
-    // Limpiar markdown code blocks si existen
-    let cleanedText = text.trim();
-    cleanedText = cleanedText.replace(/```json\n?/g, "").replace(/```\n?/g, "");
-    
-    // Intentar extraer JSON si hay texto antes o después
-    const jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      cleanedText = jsonMatch[0];
-    }
-    
-    return JSON.parse(cleanedText) as T;
-  } catch (error) {
-    console.error("Error parseando JSON de Gemini:", error);
-    console.error("Texto original:", text);
+    let clean = text.trim().replace(/```json\n?/g, '').replace(/```\n?/g, '');
+    const match = clean.match(/\{[\s\S]*\}/);
+    if (match) clean = match[0];
+    return JSON.parse(clean) as T;
+  } catch {
     return null;
   }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+// Legacy exports kept so existing imports compile without changes
+export const GEMINI_API_KEY = '';
+export const GEMINI_MODELS = [] as const;
+export const GEMINI_GENERATION_CONFIG = { temperature: 0.8, topK: 40, topP: 0.95, maxOutputTokens: 4096 } as const;
+export function getGeminiClient() { return null; }

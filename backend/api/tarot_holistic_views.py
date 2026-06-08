@@ -1290,6 +1290,13 @@ class TarotInterpretCardView(APIView):
         
         # Generar interpretación
         ai_service = get_ai_service()
+        ai_service._ensure_initialized()
+        if not ai_service.enabled:
+            return Response({
+                "error": ai_service.error_message or "Servicio AI no disponible",
+                "code": "AI_UNAVAILABLE",
+            }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+
         temperature = options.get('temperature', 0.85)  # Un poco más alta para voz creativa
         
         try:
@@ -1300,6 +1307,12 @@ class TarotInterpretCardView(APIView):
                 temperature=temperature,
             )
             
+            if not interpretation or interpretation.startswith("Error:"):
+                return Response({
+                    "error": interpretation.replace("Error:", "", 1).strip() or "Servicio AI no disponible",
+                    "code": "AI_GENERATION_FAILED",
+                }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+
             # Filtrar términos clínicos (capa de seguridad)
             interpretation = filter_clinical_terms(interpretation)
             
@@ -1457,6 +1470,13 @@ class TarotInterpretSpreadView(APIView):
         
         # Generar interpretación
         ai_service = get_ai_service()
+        ai_service._ensure_initialized()
+        if not ai_service.enabled:
+            return Response({
+                "error": ai_service.error_message or "Servicio AI no disponible",
+                "code": "AI_UNAVAILABLE",
+            }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+
         temperature = options.get('temperature', 0.85)
         
         try:
@@ -1466,6 +1486,12 @@ class TarotInterpretSpreadView(APIView):
                 max_tokens=2048,
                 temperature=temperature,
             )
+
+            if not interpretation or interpretation.startswith("Error:"):
+                return Response({
+                    "error": interpretation.replace("Error:", "", 1).strip() or "Servicio AI no disponible",
+                    "code": "AI_GENERATION_FAILED",
+                }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
             
             # Filtrar términos clínicos
             interpretation = filter_clinical_terms(interpretation)

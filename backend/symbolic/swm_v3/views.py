@@ -529,14 +529,15 @@ def build_per_card_symbolic_reading(
     )
 
     divinatory = extract_divinatory_text(card_data, reversed=reversed)
-    core_meaning = divinatory
-    if not core_meaning and keywords:
+    if symbolism:
+        core_meaning = f"{card_name}: {'. '.join(symbolism[:2])}."
+    elif divinatory:
+        core_meaning = divinatory
+    elif keywords:
         core_meaning = (
             f"{card_name} expresa cualidades asociadas a {', '.join(keywords[:4])}."
         )
-    if not core_meaning and symbolism:
-        core_meaning = f"{card_name}: {symbolism[0]}."
-    if not core_meaning:
+    else:
         core_meaning = f"{card_name} — significado simbólico en exploración."
 
     contextual_parts: List[str] = []

@@ -80,6 +80,11 @@ const SYSTEM_ICONS: Partial<Record<TarotSystemId, typeof CalendarDaysIcon>> = {
   bota: DocumentTextIcon,
   sephiroth: SquaresPlusIcon,
   hermetic: SparklesIcon,
+  marsella: HandRaisedIcon,
+  'rider-waite': RectangleGroupIcon,
+  rota: CubeTransparentIcon,
+  'tarot-cabalistico': Squares2X2Icon,
+  'oracle-symbolic': SparklesIcon,
 };
 
 function tierStyles(tier: TarotSystemTier) {

@@ -122,6 +122,16 @@ def get_tarot_decks_root() -> Path:
     return candidates[0]
 
 
+# Frontend / legacy aliases → canonical SWM system id
+SYSTEM_ID_ALIASES: Dict[str, str] = {
+    "marseille": "marsella",
+}
+
+
+def normalize_system_id(system_id: str) -> str:
+    return SYSTEM_ID_ALIASES.get(system_id, system_id)
+
+
 # (subdir, filename) relative to get_tarot_decks_root()
 DECK_JSON_RELATIVE: Dict[str, tuple[str, str]] = {
     "thoth": ("bota", "bota_tableau_complete.json"),
@@ -130,6 +140,10 @@ DECK_JSON_RELATIVE: Dict[str, tuple[str, str]] = {
     "golden-dawn": ("golden-dawn", "golden_dawn_complete.json"),
     "hermetic": ("hermetic", "hermetic_complete.json"),
     "sephiroth": ("sephiroth", "sephiroth_complete.json"),
+    "marsella": ("marsella", "marsella_complete.json"),
+    "rider-waite": ("rider-waite", "rider_waite_complete.json"),
+    "rota": ("rota", "rota_hermetico_complete.json"),
+    "oracle-symbolic": ("generic", "generic_oracle_complete.json"),
 }
 
 
@@ -145,6 +159,7 @@ def load_deck_json(path: Path, fallback_name: str) -> Dict[str, Any]:
 
 def load_deck_for_system(system_id: str) -> Dict[str, Any]:
     """Load major-arcana JSON for a tarot system."""
+    system_id = normalize_system_id(system_id)
     meta = get_system_metadata(system_id)
     rel = DECK_JSON_RELATIVE.get(system_id)
     if not rel:
@@ -163,6 +178,7 @@ def load_bota_deck() -> Dict[str, Any]:
 
 def get_system_metadata(system_id: str) -> Dict[str, Any]:
     """Get metadata for a symbolic system."""
+    system_id = normalize_system_id(system_id)
     systems = {
         "thoth": {
             "id": "thoth",
@@ -188,16 +204,30 @@ def get_system_metadata(system_id: str) -> Dict[str, Any]:
         "rider-waite": {
             "id": "rider-waite",
             "name": "Rider-Waite-Smith",
-            "implemented": False,
+            "implemented": True,
             "description": "Classic Rider-Waite-Smith imagery",
             "source": "Arthur Edward Waite & Pamela Colman Smith",
         },
         "marsella": {
             "id": "marsella",
             "name": "Tarot de Marsella",
-            "implemented": False,
+            "implemented": True,
             "description": "Traditional Marseille deck",
             "source": "French tradition",
+        },
+        "rota": {
+            "id": "rota",
+            "name": "R.O.T.A. (tarot hermético)",
+            "implemented": True,
+            "description": "Rosicrucian hermetic tarot (Golden Dawn / Book T lineage)",
+            "source": "R.O.T.A. tradition",
+        },
+        "oracle-symbolic": {
+            "id": "oracle-symbolic",
+            "name": "Oráculo simbólico genérico",
+            "implemented": True,
+            "description": "Universal archetypal oracle without fixed hermetic correspondences",
+            "source": "Studios33 symbolic layer",
         },
         "tarot-cabalistico": {
             "id": "tarot-cabalistico",
@@ -532,6 +562,8 @@ def generate_educational_reading(
                 'options': {...}  # include_transits, etc.
             }
     """
+    system_id = normalize_system_id(system_id)
+
     # Normalize card IDs to match BOTA deck format
     selected_cards = [normalize_card_id(cid) for cid in selected_cards]
     logger.info(f"[SWM-v3] Normalized card IDs: {selected_cards}")
@@ -580,7 +612,7 @@ def generate_educational_reading(
             position = positions[i] if i < len(positions) else {"id": f"pos_{i+1}", "name": f"Posición {i+1}"}
             kabbalistic = card_data.get("kabbalistic", {})
             correspondences = card_data.get("correspondences", {})
-            keywords = card_data.get("keywords", [])
+            keywords = card_data.get("keywordsSpanish") or card_data.get("keywords", [])
             
             # Build symbols for frontend compatibility
             symbols = build_symbols_from_kabbalistic(kabbalistic)
@@ -727,7 +759,7 @@ class SwmV3SymbolicReadingCreateView(APIView):
             data = request.data
             
             # Extract request parameters
-            system_id = data.get("system_id", "thoth")
+            system_id = normalize_system_id(data.get("system_id", "thoth"))
             consent_mode = data.get("consent_mode", "no_store")
             reading_type = data.get("reading_type", "educational")
             selected_cards = data.get("selected_cards", [])
@@ -811,6 +843,8 @@ class SwmV3SystemsListView(APIView):
             get_system_metadata("bota"),
             get_system_metadata("rider-waite"),
             get_system_metadata("marsella"),
+            get_system_metadata("rota"),
+            get_system_metadata("oracle-symbolic"),
             get_system_metadata("tarot-cabalistico"),
             get_system_metadata("sephiroth"),
             get_system_metadata("hermetic"),

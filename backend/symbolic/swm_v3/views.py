@@ -144,6 +144,32 @@ def normalize_system_id(system_id: str) -> str:
 
 
 # (subdir, filename) relative to get_tarot_decks_root()
+# Maps keyNumber → Spanish-slug filename in /public/tarot/
+TAROT_IMAGE_SLUGS: Dict[int, str] = {
+    0: "0-el-loco",
+    1: "1-el-mago",
+    2: "2-la-suma-sacerdotisa",
+    3: "3-la-emperatriz-luminosa",
+    4: "4-el-emperador",
+    5: "5-el-sumo-sacerdote",
+    6: "6-los-enamorados",
+    7: "7-el-carro",
+    8: "8-la-justicia",
+    9: "9-el-ermitano",
+    10: "10-la-rueda-de-la-fortuna",
+    11: "11-la-fuerza",
+    12: "12-el-colgado",
+    13: "13-la-muerte",
+    14: "14-la-templanza",
+    15: "15-el-diablo",
+    16: "16-la-torre",
+    17: "17-la-estrella",
+    18: "18-la-luna",
+    19: "19-el-sol",
+    20: "20-el-juicio-final",
+    21: "21-el-mundo",
+}
+
 DECK_JSON_RELATIVE: Dict[str, tuple[str, str]] = {
     "thoth": ("bota", "bota_tableau_complete.json"),
     "bota": ("bota", "bota_tableau_complete.json"),
@@ -739,12 +765,17 @@ def generate_educational_reading(
             if tags:
                 symbols["tags"] = tags
 
+            key_num = card_data.get("keyNumber")
+            image_slug = TAROT_IMAGE_SLUGS.get(key_num) if key_num is not None else None
+            image_url = f"/tarot/{image_slug}.png" if image_slug else None
+
             card_entry: Dict[str, Any] = {
                 "draw_id": f"draw-{i+1}",
                 "id": card_data["id"],
                 "name": card_data["name"],
                 "nameSpanish": card_data.get("nameSpanish", card_data["name"]),
-                "keyNumber": card_data.get("keyNumber"),
+                "keyNumber": key_num,
+                "imageUrl": image_url,
                 "reversed": reversed_flag,
                 "position": position,
                 "kabbalistic": kabbalistic,

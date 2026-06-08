@@ -1,10 +1,18 @@
 # Studios33 en Hetzner — red Docker compartida solo con Nginx/Postgres de VoxTV.
 # cd /opt/studio33 && docker compose -f docker-compose.studios33.yml up -d
-#
-# Process Memory embeddings (optional): deploy/studios33/ollama-compose.snippet.yml
-# Set PROCESS_MEMORY_EMBEDDINGS=ollama and OLLAMA_BASE_URL=http://ollama:11434 on studio33_api.
 
 services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: studio33_ollama
+    restart: unless-stopped
+    volumes:
+      - studio33_ollama:/root/.ollama
+    networks:
+      - voxtv_net
+    expose:
+      - "11434"
+
   studio33_api:
     build:
       context: .
@@ -40,6 +48,7 @@ services:
 volumes:
   studio33_media:
   studio33_static:
+  studio33_ollama:
 
 networks:
   voxtv_net:

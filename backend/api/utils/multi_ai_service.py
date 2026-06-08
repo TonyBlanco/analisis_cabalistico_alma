@@ -155,25 +155,31 @@ def _call_groq(prompt: str, config: Dict[str, Any]) -> Optional[str]:
 
 
 def _call_ollama(prompt: str, config: Dict[str, Any]) -> Optional[str]:
-    """Call local Ollama API"""
+    """Call local Ollama API (server-side, http://ollama:11434 in Docker network)."""
     import requests
-    
+
     base_url = getattr(settings, 'OLLAMA_BASE_URL', 'http://localhost:11434')
-    model = getattr(settings, 'OLLAMA_MODEL', 'llama3.2')
-    
+    model = getattr(settings, 'OLLAMA_MODEL', 'llama3.1')
+    system = getattr(
+        settings,
+        'AI_SYSTEM_PROMPT',
+        "Eres un experto en simbolismo del Tarot y Cábala Hermética. Responde siempre en español.",
+    )
+
     try:
         response = requests.post(
             f"{base_url}/api/generate",
             json={
                 "model": model,
+                "system": system,
                 "prompt": prompt,
                 "stream": False,
                 "options": {
                     "temperature": config.get('temperature', 0.7),
                     "num_predict": config.get('max_tokens', 1024),
-                }
+                },
             },
-            timeout=30
+            timeout=120,
         )
         if response.status_code == 200:
             return response.json().get('response', '')

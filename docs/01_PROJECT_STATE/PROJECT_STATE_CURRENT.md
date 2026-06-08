@@ -73,6 +73,13 @@ Documento vinculante:
 - Zero regression
 - Fase siguiente: consumidores de AnalysisRecord
 
+## Catálogo de tests — wiring BD / API / FE (2026-06-08)
+
+- **Estado:** alineación aplicada (migración `0090`, registry FE, guards en catálogo terapeuta).
+- **Doc operativa:** `TEST_CATALOG_WIRING.md` (esta carpeta).
+- **Regla:** `GET /api/tests/` ≠ implementación FE; el registry `clinicalTests.registry.ts` define `implemented` y rutas paciente.
+- **Pendiente despliegue:** ejecutar `migrate api 0090` en Hetzner en próximo deploy.
+
 ## SWM v3 — Registro documental (2026-01-01)
 
 - **Estado**: DOCUMENTATION-ENABLED (v3) — solamente documentación creada y aprobada para implementación futura por fases.

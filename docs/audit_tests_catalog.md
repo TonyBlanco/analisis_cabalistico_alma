@@ -1,5 +1,6 @@
 ---
 *** Updated audit (corrected serializer mapping) ***
+*** Post-0090 wiring: see docs/01_PROJECT_STATE/TEST_CATALOG_WIRING.md ***
 
 # Audit: TestModule vs /api/tests/ (therapist catalog)
 
@@ -45,4 +46,29 @@
 - Django setup emitted a RuntimeWarning about duplicate registration of `TherapistHolisticConfig` during the run; see `backend/api/models.py`.
 - The apparent earlier "null display_name" was due to checking for a `display_name` key in the endpoint output; the serializer exposes that value as `name` (mapped from `TestModule.display_name`).
 - Next suggested step: inspect `HolisticExploration` records and the semantic bridge helpers (`get_holistic_exploration_for_testmodule`, `get_client_view`) to see how longer descriptions are provided and why some tests include `display_description` while others do not.
+
+---
+
+## Estado esperado tras migración 0090 (2026-06-08)
+
+**Guía operativa:** [`docs/01_PROJECT_STATE/TEST_CATALOG_WIRING.md`](01_PROJECT_STATE/TEST_CATALOG_WIRING.md)
+
+La tabla anterior es un **snapshot** anterior a `0090_align_test_catalog_wiring`. Tras aplicar la migración y desplegar:
+
+| code | Cambio en BD | `appears_in_catalog` esperado | Registry FE `implemented` |
+|------|----------------|-------------------------------|----------------------------|
+| `scl90` | `is_assignable=False` (sigue `is_active=True`) | **false** | **false** — sin cuestionario paciente |
+| `stress` | `is_active=False`, `is_assignable=False` | false (ya era) | alias → `stress-regulation` |
+| `stress-regulation` | `is_active=True`, `is_assignable=True` | true | true |
+
+### Capa FE adicional (no reflejada en este audit)
+
+Aunque un módulo tenga `appears_in_catalog=true`, el terapeuta **no puede asignarlo** desde `TestCatalogSection` si `clinicalTests.registry.ts` marca `implemented: false`. Esto protege contra colisiones tipo `scl90` antes de que la migración se aplique en todos los entornos.
+
+### Cómo re-generar este audit
+
+1. Aplicar migraciones: `python manage.py migrate`
+2. Llamar `GET /api/tests/` con token de terapeuta y paciente activo
+3. Comparar códigos devueltos con `TestModule` en BD usando los criterios de `_safe_testmodule_queryset` (ver TEST_CATALOG_WIRING.md)
+4. Actualizar la tabla y `audit_tests_catalog.json` si existe en repo
 

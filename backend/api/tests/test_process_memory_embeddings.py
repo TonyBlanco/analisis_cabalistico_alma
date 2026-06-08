@@ -30,6 +30,7 @@ class ProcessMemoryEmbeddingsTests(TestCase):
         backend = LexicalEmbeddingBackend()
         self.assertEqual(backend.embed("duelo y regulacion"), [])
 
+    @override_settings(PROCESS_MEMORY_EMBEDDINGS="lexical")
     def test_get_embedding_backend_default_is_lexical(self):
         backend = get_embedding_backend()
         self.assertIsInstance(backend, LexicalEmbeddingBackend)

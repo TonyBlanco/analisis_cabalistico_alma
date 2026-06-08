@@ -5,7 +5,11 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { getAvailableTests, getTestResults, executeTest, getPatientPreviousTests } from '@/lib/test-api';
 import { TestModule, ExecuteTestRequest } from '@/lib/test-types';
-import { clinicalTestsRegistry } from '@/lib/clinicalTests.registry';
+import {
+  clinicalTestsRegistry,
+  DEPRECATED_TEST_CODE_ALIASES,
+  normalizeClinicalTestCode,
+} from '@/lib/clinicalTests.registry';
 import { getActivePatientId } from '@/lib/active-patient';
 import { unassignTestFromPatient } from '@/lib/assignment-api';
 import StartTestModal from '@/components/StartTestModal';
@@ -43,7 +47,7 @@ export default function PatientAssignedTestsSection() {
   const activePatientId = getActivePatientId();
 
   const normalizeCode = (code?: string | null) =>
-    String(code || '').trim().toLowerCase();
+    normalizeClinicalTestCode(String(code || ''));
 
   const routeByTestCode = useState(() => {
     const map = new Map<string, string>();
@@ -53,13 +57,19 @@ export default function PatientAssignedTestsSection() {
     return map;
   })[0];
 
-  const routeAliases = useState(() => new Map<string, string>([
-    ['phq9', 'phq-9'],
-    ['gad7', 'gad-7'],
-    ['bdi2', 'bdi-ii'],
-    ['stai', 'anxiety-state-trait'],
-    ['mcmi4_mystic', 'mcmi4-mystic'],
-  ]))[0];
+  const routeAliases = useState(() => {
+    const aliases = new Map<string, string>([
+      ['phq9', 'phq-9'],
+      ['gad7', 'gad-7'],
+      ['bdi2', 'bdi-ii'],
+      ['stai', 'anxiety-state-trait'],
+      ['mcmi4-mystic', 'mcmi4-mystic'],
+    ]);
+    for (const [from, to] of Object.entries(DEPRECATED_TEST_CODE_ALIASES)) {
+      aliases.set(normalizeClinicalTestCode(from), normalizeClinicalTestCode(to));
+    }
+    return aliases;
+  })[0];
 
   useEffect(() => {
     fetchAssignedTests();

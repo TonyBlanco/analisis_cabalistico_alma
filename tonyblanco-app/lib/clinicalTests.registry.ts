@@ -390,32 +390,7 @@ export const clinicalTestsRegistry: ClinicalTestRegistryEntry[] = [
 
   {
 
-    test_code: "stress",
-
-    display_name: "Estrés — Carga (PSS)",
-
-    domain: "Bienestar",
-
-    family: "psicologicos",
-
-    implemented: true,
-
-    patient_route: "/dashboard/patient/tests/stress",
-
-    guidance: {
-
-      what: "Screening orientativo de carga de estrés, regulación y recursos (3 dimensiones).",
-
-      when: "Útil cuando hay presión sostenida, agotamiento o dificultad para regular emociones.",
-
-      reminder: "No diagnóstico. Herramienta de acompañamiento wellness.",
-
-    },
-
-  },
-
-  {
-
+    // Legacy DB code `stress` is inactive (migration 0051). Canonical module + route: stress-regulation.
     test_code: "stress-regulation",
 
     display_name: "Estrés — Carga y regulación",
@@ -659,4 +634,32 @@ export const clinicalTestsRegistry: ClinicalTestRegistryEntry[] = [
 
 
 ];
+
+/** Normalize test codes for registry lookup (hyphen vs underscore). */
+export function normalizeClinicalTestCode(testCode: string): string {
+  return testCode.trim().toLowerCase().replace(/_/g, "-");
+}
+
+/** Map deprecated API/DB codes to canonical registry entries. */
+export const DEPRECATED_TEST_CODE_ALIASES: Record<string, string> = {
+  stress: "stress-regulation",
+  "insomnia-index": "insomnia",
+  "mcmi4_mystic": "mcmi4-mystic",
+};
+
+export function getClinicalTestRegistryEntry(
+  testCode: string,
+): ClinicalTestRegistryEntry | undefined {
+  const normalized = normalizeClinicalTestCode(testCode);
+  const canonical = DEPRECATED_TEST_CODE_ALIASES[normalized] ?? normalized;
+  return clinicalTestsRegistry.find(
+    (entry) => normalizeClinicalTestCode(entry.test_code) === canonical,
+  );
+}
+
+export function isClinicalTestFeImplemented(testCode: string): boolean {
+  const entry = getClinicalTestRegistryEntry(testCode);
+  if (!entry) return true;
+  return entry.implemented !== false;
+}
 

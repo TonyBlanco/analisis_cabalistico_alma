@@ -3,7 +3,11 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { ClipboardList, Loader2, Mail, CheckCircle, Info, Sun, Feather, Cloud, Star, Zap } from 'lucide-react';
 import { TEST_TYPES, type TestModule } from '@/lib/test-types';
-import { clinicalTestsRegistry } from '@/lib/clinicalTests.registry';
+import {
+  clinicalTestsRegistry,
+  getClinicalTestRegistryEntry,
+  isClinicalTestFeImplemented,
+} from '@/lib/clinicalTests.registry';
 import { getActivePatientId } from '@/lib/active-patient';
 import { useToast } from '@/components/ui/toast';
 import ClinicalTestHelpModal from '@/components/ClinicalTestHelpModal';
@@ -92,9 +96,12 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
   // Only explicitly marked therapist_clinical tests (e.g., SCDF) should be treated as clinical-only.
   const normalizedTests = tests.map((test) => {
     const isClinical = test.execution_mode === 'therapist_clinical';
+    const registryEntry = getClinicalTestRegistryEntry(test.code);
     return {
       ...test,
       mode: isClinical ? 'therapist_clinical' : 'patient_self',
+      implemented: registryEntry?.implemented ?? true,
+      patient_route: registryEntry?.patient_route,
     };
   });
   // ...
@@ -273,7 +280,7 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
         key: 'beria',
         label: 'Beriá — Intelecto y Conciencia',
         desc: 'Exploraciones centradas en pensamiento y consciencia.',
-        codes: ['wellness', 'screening-general', 'scl90'],
+        codes: ['wellness', 'screening-general'],
       },
       {
         key: 'ietzira',
@@ -442,9 +449,18 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
                                       .map((c: any) => String(c).toLowerCase()),
                                   );
                                   const hasPatientRoute = Boolean((test as any).patient_route);
-                                  const isAssignable = Boolean(test.is_active) && Boolean((test as any).available_for_therapists) && Boolean(activePatientHasUser);
+                                  const feImplemented = isClinicalTestFeImplemented(test.code);
+                                  const isAssignable = Boolean(test.is_active) && Boolean((test as any).available_for_therapists) && Boolean(activePatientHasUser) && feImplemented;
                                   const isAssigned = Boolean((test as any).already_assigned) || Boolean((test as any).locked) || (isAssignable && assignedCodes.has(String(test.code).toLowerCase()));
                                   const isAssigning = assigningTestCode === test.code;
+
+                                  if (!feImplemented) {
+                                    return (
+                                      <span className="text-xs text-amber-700 px-2 py-1 rounded border border-amber-200 bg-amber-50">
+                                        En desarrollo (no asignable)
+                                      </span>
+                                    );
+                                  }
 
                                   if (isAssigned) {
                                     return (

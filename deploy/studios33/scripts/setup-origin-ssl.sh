@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# Certificado origen para Cloudflare Full SSL (443) — no toca voxtv.win vhosts.
+# Certificado origen Studios33 (Cloudflare Full SSL :443).
+# Tras este script, ejecutar VOXTVSERVER/scripts/setup-voxtv-origin-ssl.sh
+# para que voxtv.win / api.voxtv.win no reciban el cert CN=studios33.app en :443.
 set -euo pipefail
 
 HETZNER_IP="${HETZNER_IP:-94.130.222.205}"

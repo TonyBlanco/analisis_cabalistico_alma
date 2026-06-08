@@ -1,11 +1,9 @@
 // API base URL normalization.
 //
-// In this codebase we generally expect NEXT_PUBLIC_API_URL to point to the backend
-// API root, e.g. "http://localhost:8000/api".
-// However, env values often vary (missing "/api" or with trailing slashes). This
-// helper normalizes the value to a stable, slash-safe API base.
+// Production should use the current public API host. Local development may still
+// point to a Django server directly.
 
-const DEFAULT_API_BASE = 'https://analisis-cabalistico-alma.onrender.com/api';
+const DEFAULT_API_BASE = 'https://api.studios33.app/api';
 const LOCAL_FALLBACK_API_BASE = 'http://127.0.0.1:8000/api';
 
 function normalizeApiBase(value?: string | null): string | null {
@@ -26,7 +24,6 @@ export function getApiBaseUrl(): string {
     const g = globalThis as unknown as { __warnedMissingApiBaseUrl?: boolean };
     if (!g.__warnedMissingApiBaseUrl) {
       g.__warnedMissingApiBaseUrl = true;
-      // eslint-disable-next-line no-console
       console.warn(`[api] NEXT_PUBLIC_API_URL not set; falling back to ${LOCAL_FALLBACK_API_BASE}`);
     }
   }

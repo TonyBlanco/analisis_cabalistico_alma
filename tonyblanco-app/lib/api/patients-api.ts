@@ -4,7 +4,9 @@
  * Note: Backend models use 'Patient' but UI displays 'Consultante' (holistic, not clinical)
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+import { getApiBaseUrl } from '../api-base';
+
+const API_BASE_URL = getApiBaseUrl();
 
 export interface Patient {
   id: number;

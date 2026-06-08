@@ -6,6 +6,7 @@ import {
   REFLECTION_QUESTIONS,
   type ReflectionWorkspace,
 } from "@/lib/api/mcmi4-reflection-api";
+import { getApiBaseUrl } from "@/lib/api-base";
 
 type MinimalTestResult = {
   test_module?: { code?: string } | null;
@@ -24,7 +25,7 @@ async function getSignalTestResultForUser(userId: string) {
   // For therapist view, we need an endpoint to get patient's results
   // For now, using a query param approach
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/tests/results/?user_id=${userId}`,
+    `${getApiBaseUrl()}/tests/results/?user_id=${userId}`,
     {
       headers: { Authorization: `Token ${token}` },
     }
@@ -52,7 +53,7 @@ async function findReflectionWorkspaceForUser(userId: string): Promise<Reflectio
   
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/swm/mcmi4-reflection/by-user/${userId}`,
+      `${getApiBaseUrl()}/swm/mcmi4-reflection/by-user/${userId}`,
       {
         headers: { Authorization: `Token ${token}` },
       }

@@ -14,7 +14,7 @@ Write-Host "`n📋 SOLUCIÓN 2: Endpoint Browser (Espera redeploy)" -ForegroundC
 Write-Host "-" * 50 -ForegroundColor Green
 Write-Host "Espera 5-10 minutos a que Render redeploy automáticamente" -ForegroundColor White
 Write-Host "Luego visita:" -ForegroundColor White
-Write-Host "https://analisis-cabalistico-alma.onrender.com/api/setup-admin/" -ForegroundColor Yellow
+Write-Host "https://api.studios33.app/api/setup-admin/" -ForegroundColor Yellow
 Write-Host "Si funciona, verás JSON con confirmación" -ForegroundColor White
 
 Write-Host "`n📋 SOLUCIÓN 3: Manual Database (Si tienes DB access)" -ForegroundColor Green
@@ -37,7 +37,7 @@ Write-Host "3. O exporta/importa la data necesaria" -ForegroundColor White
 
 Write-Host "`n✅ DESPUÉS DE CREAR EL ADMIN:" -ForegroundColor Green
 Write-Host "-" * 30 -ForegroundColor Green
-Write-Host "Ve a: https://analisis-cabalistico-alma.onrender.com/admin/" -ForegroundColor Yellow
+Write-Host "Ve a: https://api.studios33.app/admin/" -ForegroundColor Yellow
 Write-Host "Usuario: supertony" -ForegroundColor White
 Write-Host "Password: [el mismo que usas localmente]" -ForegroundColor White
 

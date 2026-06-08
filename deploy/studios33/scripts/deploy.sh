@@ -95,4 +95,12 @@ REMOTE
 
 bash "$(dirname "$0")/setup-origin-ssl.sh"
 
+VOXTV_SSL="${VOXTVSERVER_ROOT:-/Volumes/T7/Development/VOXTVSERVER}/scripts/setup-voxtv-origin-ssl.sh"
+if [[ -x "$VOXTV_SSL" ]]; then
+  echo "▶ TLS origen VoxTV :443 (evita regresión cert tras Studios33)..."
+  bash "$VOXTV_SSL"
+else
+  echo "⚠ No encontrado $VOXTV_SSL — ejecutar manualmente tras deploy"
+fi
+
 echo "▶ Deploy terminado. Prueba: curl -sI https://studios33.app | head -5"

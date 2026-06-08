@@ -4,7 +4,9 @@
  * Typed client following SWM_MCMI4_API_SPEC.md and SWM_MCMI4_FRONTEND_CONTRACT.md
  */
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+import { getApiBaseUrl } from '../api-base';
+
+const API_BASE = getApiBaseUrl();
 const SWM_BASE = `${API_BASE}/swm/mcmi4`;
 
 // Types
@@ -539,4 +541,3 @@ export interface ComputeSymbolicAxesResponse {
   source_test_result_id: string;
   computed_at: string | null;
 }
-

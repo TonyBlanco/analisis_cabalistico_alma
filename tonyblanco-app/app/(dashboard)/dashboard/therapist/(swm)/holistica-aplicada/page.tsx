@@ -12,6 +12,7 @@ import VibrationTable from '@/src/components/cabala/comprehensive-report/Vibrati
 import TreeWrapper from '@/src/components/cabala/comprehensive-report/TreeWrapper';
 import LetrasDelAlma from '@/src/components/cabala/comprehensive-report/LetrasDelAlma';
 import SacredGeometryLoader from '@/src/components/cabala/comprehensive-report/SacredGeometryLoader';
+import { getApiBaseUrl } from '@/lib/api-base';
 
 interface ComprehensiveReportData {
   status: string;
@@ -69,7 +70,7 @@ export default function CabalaReportPage() {
         console.log('[Phoenix] Fetching report for patient:', patientId);
 
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/swm/cabala/comprehensive-report/?patient_id=${patientId}`,
+          `${getApiBaseUrl()}/swm/cabala/comprehensive-report/?patient_id=${patientId}`,
           {
             headers: {
               'Authorization': `Token ${token}`,

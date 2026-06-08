@@ -1,1 +1,1 @@
-NEXT_PUBLIC_API_URL=https://analisis-cabalistico-alma.onrender.com/api
+NEXT_PUBLIC_API_URL=https://api.studios33.app/api

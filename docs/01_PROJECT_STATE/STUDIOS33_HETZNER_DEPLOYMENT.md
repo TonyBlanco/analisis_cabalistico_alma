@@ -34,7 +34,7 @@
 | **PIP2** Endpoints gobernados + prompts YAML | ✅ Prod: `/api/ai/status/`, kabbalah, bioemotional assist-draft, feedback |
 | **PIP** Tests PlanAI (35) + harness 50 casos | ✅ OK en servidor (`studio33_user CREATEDB`) |
 | **PIP** CI | ✅ `.github/workflows/pip-ai-tests.yml` |
-| **D** Corte tráfico / desactivar Render | ⏳ Pendiente |
+| **D** Corte tráfico / desactivar Render + Vercel | ✅ Repo (2026-06-08); borrar proyectos en dashboards |
 | **E** Deuda producto (registry, Tarot, etc.) | ⏳ Post-go-live |
 | **—** Scroll fixes admin Next (local, no desplegado) | ⏸️ Descartado por usuario |
 | **—** Commit / push `main` remoto | ⏳ Verificar `git push` local |

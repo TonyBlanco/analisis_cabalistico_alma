@@ -1,75 +1,13 @@
-# Configuración Final - Vercel + Render
+# ~~Configuración Vercel + Render~~ — RETIRADO
 
-## ✅ Backend está funcionando
-- ✅ Render: https://analisis-cabalistico-alma.onrender.com/api/
-- ✅ Usuarios creados: `supportadmin` y `supertony`
+**Fecha cierre:** 2026-06-08  
+**Reemplazo:** [STUDIOS33_HETZNER_DEPLOYMENT.md](../01_PROJECT_STATE/STUDIOS33_HETZNER_DEPLOYMENT.md) y [FASE_D_CORTE_VERCEL_RENDER.md](../01_PROJECT_STATE/FASE_D_CORTE_VERCEL_RENDER.md)
 
-## ✅ Frontend está funcionando  
-- ✅ Vercel: https://analisis-cabalistico-alma.vercel.app/
-- ✅ Código apunta al backend correcto
+Producción ya no usa:
 
-## ⚠️ PROBLEMA: CORS bloqueando el login
+- ~~`https://analisis-cabalistico-alma.onrender.com`~~
+- ~~`https://analisis-cabalistico-alma.vercel.app`~~
 
-El backend de Render necesita estas variables de entorno para aceptar peticiones de Vercel:
+**Producción actual:** `https://studios33.app` + `https://api.studios33.app`
 
-### 📋 Variables requeridas en Render Dashboard:
-
-1. **Ve a:** https://dashboard.render.com → Tu servicio backend → Environment
-
-2. **Añade estas variables:**
-
-```
-CORS_ALLOWED_ORIGINS=https://analisis-cabalistico-alma.vercel.app,https://analisis-cabalistico-alma-tonyblancos-projects.vercel.app,https://analisis-cabalistico-alma-tonyblanco-tonyblancos-projects.vercel.app
-
-CSRF_TRUSTED_ORIGINS=https://analisis-cabalistico-alma.vercel.app,https://analisis-cabalistico-alma-tonyblancos-projects.vercel.app,https://analisis-cabalistico-alma-tonyblanco-tonyblancos-projects.vercel.app
-```
-
-3. **Opcional - Define password segura:**
-```
-ADMIN_DEFAULT_PASSWORD=TuPasswordSegura123!
-```
-
-4. **Click "Save Changes"** - Render redeployará automáticamente.
-
----
-
-## 🧪 Después del redeploy:
-
-1. **Limpia cache del navegador:**
-   - Chrome: F12 → Application → Clear storage
-   - O abre ventana de incógnito
-
-2. **Prueba login en:**
-   - https://analisis-cabalistico-alma.vercel.app/login
-   - Usuario: `supportadmin` (o `supertony`)
-   - Password: La que definiste (o `TempAdmin123!` si no la definiste)
-
-3. **Si funciona:**
-   - ✅ Entra al admin de Django: https://analisis-cabalistico-alma.onrender.com/admin/
-   - ✅ Cambia la password por una segura
-   - ✅ Todo listo
-
----
-
-## 🔍 Si sigue sin funcionar:
-
-Ejecuta esto en tu navegador (F12 → Console):
-```javascript
-fetch('https://analisis-cabalistico-alma.onrender.com/api/', {
-  method: 'OPTIONS',
-  headers: { 'Origin': window.location.origin }
-}).then(r => console.log(r.headers.get('Access-Control-Allow-Origin')))
-```
-
-Si responde `null`, el CORS aún no está configurado. Verifica las variables en Render.
-
----
-
-## 📝 Resumen de lo que hicimos:
-
-1. ✅ Creamos usuarios admin (`supportadmin`, `supertony`) con migraciones
-2. ✅ Configuramos el frontend para apuntar al backend de Render
-3. ✅ Eliminamos el endpoint temporal de seguridad
-4. ⏳ **FALTA:** Añadir CORS en Render (hazlo manualmente arriba)
-
-**Después de esto, todo funcionará correctamente sin más cambios.**
+El contenido histórico de este documento se conservaba para debugging CORS 2025–2026; ya no aplicar esos pasos.

@@ -82,13 +82,13 @@ export default function GenericTest({ testId }: GenericTestProps) {
     setError(null);
 
     try {
-      // Usar variable de entorno de producción o fallback a Render
+      // Usar variable de entorno o fallback same-origin
       // La URL base puede incluir /api o no, manejamos ambos casos
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://analisis-cabalistico-alma.onrender.com';
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
       let API_URL = baseUrl;
       
       // Si la URL base no termina en /api, agregarlo
-      if (!baseUrl.endsWith('/api') && !baseUrl.endsWith('/api/')) {
+      if (baseUrl !== '/api' && !baseUrl.endsWith('/api') && !baseUrl.endsWith('/api/')) {
         API_URL = `${baseUrl}/api`;
       }
       
@@ -516,4 +516,3 @@ export default function GenericTest({ testId }: GenericTestProps) {
     </div>
   );
 }
-

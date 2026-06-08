@@ -10,6 +10,7 @@
 import { useEffect, useState } from 'react';
 import { Clock, CheckCircle, Loader2, ClipboardList } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { getApiBaseUrl } from '@/lib/api-base';
 
 interface Assignment {
   id: number;
@@ -62,8 +63,7 @@ export default function PendingAssignmentsSection() {
       setLoading(true);
       setError(null);
 
-      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
-      const response = await fetch(`${API_BASE}/assignments/`, {
+      const response = await fetch(`${getApiBaseUrl()}/assignments/`, {
         method: 'GET',
         headers: {
           'Authorization': `Token ${token}`,

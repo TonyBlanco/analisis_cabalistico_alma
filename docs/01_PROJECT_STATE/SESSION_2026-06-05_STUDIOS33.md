@@ -175,13 +175,21 @@ curl -s https://api.studios33.app/api/ai/status/
 
 ---
 
+## Incidente VoxTV (2026-06-05) — cerrado temporalmente ✅
+
+- **Causa:** deploy Studios33 añadió `:443` en `voxtv_nginx`; `tv.voxtv.win` en Bunny con hostname/SSL roto.
+- **Mitigación:** `tv.voxtv.win` → Cloudflare proxied A Hetzner (rollback Bunny). Doc: `VOXTVSERVER/docs/01_PROJECT_STATE/TEMP_DNS_TV_CLOUDFLARE_2026-06-05.md`
+- **Prevención:** `deploy.sh` ahora llama `VOXTVSERVER/scripts/setup-voxtv-origin-ssl.sh` tras cada deploy Studios33.
+
+---
+
 ## Pendiente ⏳
 
 ### Go-live / producto
 | Prioridad | Ítem |
 |-----------|------|
-| Alta | Smoke test completo HTTPS: login email, Google, registro, dashboard personal, carta/Tarot, API clínica |
-| Media | **Fase D:** desactivar o paralelizar Render/Vercel; backup `pg_dump studio33_db` |
+| ~~Alta~~ | ~~Smoke test completo HTTPS~~ ✅ probado por usuario (2026-06-08) |
+| ~~Media~~ | ~~**Fase D:** Render/Vercel~~ ✅ repo cerrado — [FASE_D_CORTE_VERCEL_RENDER.md](./FASE_D_CORTE_VERCEL_RENDER.md) |
 | Media | **Fase E:** registry tests, Tarot ruta única, ocultar “Próximamente” |
 | Media | **planai Fase 1 — siguiente:** wiring Tarot seal, Ollama `nomic-embed-text`, pgvector/Qdrant, similitud vectorial |
 | Alta | Smoke test invitación terapeuta + email Proton al destinatario real |
@@ -191,11 +199,9 @@ curl -s https://api.studios33.app/api/ai/status/
 ### Seguridad / ops
 | Ítem |
 |------|
-| Rotar **Google Client Secret** (expuesto en chat); actualizar `.env.studios33` + servidor |
-| Rotar **Proton SMTP token** (expuesto en chat); `patch-proton-smtp-env.sh` con nuevo valor |
-| Renovar `CF_API_TOKEN` en `VOXTVSERVER/.env.studios33` (~5 días desde 2026-06-05) |
+| ~~Rotar Google / Proton / CF token~~ ✅ hecho por usuario (2026-06-08) |
 | No commitear `deploy/studios33/.env.studios33` ni JSON `client_secret_*.json` |
-| Commitear código auth (Turnstile + Google) en `main` cuando el usuario quiera |
+| ~~Commit/push `main`~~ ✅ 2026-06-08 |
 
 ### Código local sin commitear (2026-06-05)
 - Cambios en `backend/`, `tonyblanco-app/`, `deploy/`, migraciones, admin-pro, etc. (ver `git status`)
@@ -214,8 +220,11 @@ curl -s https://api.studios33.app/api/ai/status/
 ## Comandos útiles
 
 ```bash
-# Deploy completo
+# Deploy completo (incluye TLS origen VoxTV post-Studios33)
 SSH_KEY=$HOME/.ssh/id_ed25519_hetzner bash deploy/studios33/scripts/deploy.sh
+
+# Backup DB Fase D
+bash deploy/studios33/scripts/backup-db.sh
 
 # Solo claves Turnstile / Google / Proton SMTP
 bash deploy/studios33/scripts/patch-turnstile-env.sh

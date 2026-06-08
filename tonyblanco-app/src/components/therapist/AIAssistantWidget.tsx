@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, X, Send, Loader2 } from 'lucide-react';
+import { getApiBaseUrl } from '../../../lib/api-base';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -27,7 +28,7 @@ export default function AIAssistantWidget() {
     try {
       const token = localStorage.getItem('authToken');
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/ai/holistic-query/`,
+        `${getApiBaseUrl()}/ai/holistic-query/`,
         {
           method: 'POST',
           headers: {

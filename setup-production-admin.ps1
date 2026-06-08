@@ -21,7 +21,7 @@ Write-Host "python manage.py shell -c ""from django.contrib.auth.models import U
 Write-Host "" -ForegroundColor White
 
 Write-Host "✅ Después de ejecutar estos comandos, podrás acceder a:" -ForegroundColor Green
-Write-Host "https://analisis-cabalistico-alma.onrender.com/admin/" -ForegroundColor White
+Write-Host "https://api.studios33.app/admin/" -ForegroundColor White
 Write-Host "Usuario: supertony" -ForegroundColor White
 Write-Host "Password: [la misma que usas localmente]" -ForegroundColor White
 Write-Host "" -ForegroundColor White

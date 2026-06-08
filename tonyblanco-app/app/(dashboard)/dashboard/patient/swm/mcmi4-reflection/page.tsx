@@ -5,8 +5,9 @@ import { useRouter } from 'next/navigation';
 import { Loader2, FileText, AlertCircle, Sparkles, ShieldAlert } from 'lucide-react';
 import Link from 'next/link';
 import { fetchSession } from '@/lib/session';
+import { getApiBaseUrl } from '@/lib/api-base';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+const API_BASE = getApiBaseUrl();
 
 /**
  * Patient Entrypoint for MCMI-4 Reflection

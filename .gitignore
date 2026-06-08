@@ -78,3 +78,6 @@ deploy/studios33/.env.studios33
 .vercel/
 .vercel
 .env*.local
+
+# DB backups (Fase D — local only)
+backups/studio33/

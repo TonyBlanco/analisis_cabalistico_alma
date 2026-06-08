@@ -19,7 +19,7 @@ import SCDFHelpModal from '@/components/SCDFHelpModal';
 import { scdf_es as t } from '@/lib/i18n/es/scdf';
 import { createTherapistNote } from '@/lib/therapist-notes-api';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://analisis-cabalistico-alma.onrender.com/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
 
 function computeAgeFromBirthDate(value: unknown): number {
   if (typeof value !== 'string') return 0;

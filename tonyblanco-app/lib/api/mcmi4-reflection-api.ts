@@ -4,7 +4,9 @@
  * Experiential reflection module for consultants (no scoring, pure human text)
  */
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+import { getApiBaseUrl } from '../api-base';
+
+const API_BASE = getApiBaseUrl();
 const REFLECTION_BASE = `${API_BASE}/swm/mcmi4-reflection`;
 
 // Types

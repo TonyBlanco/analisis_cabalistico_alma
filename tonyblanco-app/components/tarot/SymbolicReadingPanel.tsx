@@ -66,14 +66,24 @@ function extractSelectedReading(selectedCard: TarotCardDraw | null | undefined):
   const positionLabel = (pos?.nameSpanish || pos?.label || pos?.id || '').trim();
 
   const srContainer = selectedCard?.symbolic_reading;
-  const sr = srContainer && typeof srContainer === 'object' ? (srContainer as any).symbolic_reading : null;
+  const sr =
+    srContainer && typeof srContainer === 'object'
+      ? ((srContainer as { symbolic_reading?: unknown }).symbolic_reading ?? srContainer)
+      : null;
+  const srObj = sr && typeof sr === 'object' ? (sr as Record<string, unknown>) : null;
+  const posMeaning =
+    srObj && typeof srObj.position_meaning === 'string'
+      ? srObj.position_meaning
+      : pos?.meaning
+        ? `${positionLabel}: ${pos.meaning}`
+        : null;
   return {
     positionLabel,
-    core: sr && typeof sr.core_meaning === 'string' ? sr.core_meaning : null,
-    contextual: sr && typeof sr.contextual_meaning === 'string' ? sr.contextual_meaning : null,
-    context: sr && typeof sr.context_meaning === 'string' ? sr.context_meaning : null,
-    positionMeaning: sr && typeof sr.position_meaning === 'string' ? sr.position_meaning : null,
-    systemFrame: sr && typeof sr.system_frame === 'string' ? sr.system_frame : null,
+    core: srObj && typeof srObj.core_meaning === 'string' ? srObj.core_meaning : null,
+    contextual: srObj && typeof srObj.contextual_meaning === 'string' ? srObj.contextual_meaning : null,
+    context: srObj && typeof srObj.context_meaning === 'string' ? srObj.context_meaning : null,
+    positionMeaning: posMeaning,
+    systemFrame: srObj && typeof srObj.system_frame === 'string' ? srObj.system_frame : null,
   };
 }
 
@@ -174,6 +184,8 @@ export default function SymbolicReadingPanel({ systemLabel, selectedCard, contex
       Boolean(extracted.contextual?.trim()) ||
       Boolean(extracted.positionMeaning?.trim()) ||
       Boolean(extracted.systemFrame?.trim()) ||
+      keywords.length > 0 ||
+      Boolean(kabbalah) ||
       (isBota && Boolean(botaConsciousnessLine || botaMainText || botaPositionMeaning))
     );
   }, [
@@ -187,6 +199,8 @@ export default function SymbolicReadingPanel({ systemLabel, selectedCard, contex
     botaConsciousnessLine,
     botaMainText,
     botaPositionMeaning,
+    keywords.length,
+    kabbalah,
   ]);
 
   const editorialKey = useMemo(() => {

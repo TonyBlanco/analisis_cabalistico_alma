@@ -470,6 +470,114 @@ Responde SOLO este JSON (sin markdown):
         raise
 
 
+def extract_divinatory_text(card_data: Dict[str, Any], *, reversed: bool = False) -> Optional[str]:
+    """Pull upright/reversed interpretive text from deck JSON divinatory block."""
+    div = card_data.get("divinatory")
+    if not isinstance(div, dict):
+        return None
+    if reversed:
+        text = div.get("reversed") or div.get("traditional")
+    else:
+        text = div.get("upright") or div.get("modern") or div.get("traditional")
+    if isinstance(text, str) and text.strip():
+        return text.strip()
+    return None
+
+
+def build_frontend_symbols(
+    card_data: Dict[str, Any],
+    system_id: str,
+    kabbalistic: Dict[str, Any],
+    keywords: List[str],
+) -> Dict[str, Any]:
+    """Frontend-compatible symbols block (TarotDrawPanel / SymbolicReadingPanel)."""
+    upright = extract_divinatory_text(card_data, reversed=False)
+    reversed_text = extract_divinatory_text(card_data, reversed=True)
+    symbols = build_symbols_from_kabbalistic(kabbalistic) or {}
+    symbols.update({
+        "nameSpanish": card_data.get("nameSpanish") or card_data.get("name"),
+        "keywords": keywords,
+        "keywordsReversed": card_data.get("keywordsReversed") or keywords,
+        "system": system_id,
+    })
+    if upright:
+        symbols["upright"] = {"general": upright}
+    if reversed_text:
+        symbols["reversed"] = {"general": reversed_text}
+    return symbols
+
+
+def build_per_card_symbolic_reading(
+    card_data: Dict[str, Any],
+    card_payload: Dict[str, Any],
+    system_meta: Dict[str, Any],
+    *,
+    context_focus: Optional[str] = None,
+) -> Dict[str, Any]:
+    """Per-card symbolic reading for SymbolicReadingPanel (nested symbolic_reading)."""
+    card_name = card_payload.get("nameSpanish") or card_payload.get("name") or "Carta"
+    kabbalistic = card_data.get("kabbalistic") or card_payload.get("kabbalistic") or {}
+    keywords = card_payload.get("keywords") or []
+    symbolism = card_data.get("symbolism") or []
+    position = card_payload.get("position") or {}
+    reversed = bool(card_payload.get("reversed"))
+
+    system_name = system_meta.get("name", "Tarot")
+    system_frame = (
+        f"El sistema {system_name} ofrece una lectura educativa y observacional. "
+        f"{system_meta.get('description', '').strip()}".strip()
+    )
+
+    divinatory = extract_divinatory_text(card_data, reversed=reversed)
+    core_meaning = divinatory
+    if not core_meaning and keywords:
+        core_meaning = (
+            f"{card_name} expresa cualidades asociadas a {', '.join(keywords[:4])}."
+        )
+    if not core_meaning and symbolism:
+        core_meaning = f"{card_name}: {symbolism[0]}."
+    if not core_meaning:
+        core_meaning = f"{card_name} — significado simbólico en exploración."
+
+    contextual_parts: List[str] = []
+    if symbolism:
+        contextual_parts.append(" ".join(symbolism[:3]))
+    sefirot = kabbalistic.get("sefirot") or []
+    letter_name = kabbalistic.get("letterName") or kabbalistic.get("hebrewLetter", "")
+    if letter_name and sefirot:
+        contextual_parts.append(
+            f"Correspondencia cabalística: {letter_name}, sendero entre {' y '.join(sefirot)}."
+        )
+    elif letter_name:
+        contextual_parts.append(f"Letra asociada: {letter_name}.")
+    if context_focus and context_focus != "general":
+        focus_labels = {
+            "love": "vínculo y relación",
+            "career": "trabajo y vocación",
+            "spiritual": "dimensión espiritual",
+        }
+        contextual_parts.append(
+            f"Foco de observación: {focus_labels.get(context_focus, context_focus)}."
+        )
+    contextual_meaning = " ".join(contextual_parts) if contextual_parts else core_meaning
+
+    pos_name = position.get("name") or position.get("nameSpanish") or position.get("id") or "Posición"
+    pos_hint = position.get("meaning") or ""
+    position_meaning = f"En «{pos_name}»"
+    if pos_hint:
+        position_meaning += f": {pos_hint}"
+    position_meaning += "."
+
+    inner = {
+        "system_frame": system_frame,
+        "core_meaning": core_meaning,
+        "contextual_meaning": contextual_meaning,
+        "context_meaning": contextual_meaning,
+        "position_meaning": position_meaning,
+    }
+    return {"symbolic_reading": inner}
+
+
 def generate_fallback_symbolic_reading(
     cards: List[Dict[str, Any]],
     system_meta: Dict[str, Any],
@@ -614,36 +722,40 @@ def generate_educational_reading(
             correspondences = card_data.get("correspondences", {})
             keywords = card_data.get("keywordsSpanish") or card_data.get("keywords", [])
             
-            # Build symbols for frontend compatibility
-            symbols = build_symbols_from_kabbalistic(kabbalistic)
-            if symbols:
-                # Add tags from keywords and correspondences
-                tags = list(keywords)
-                if correspondences.get("astrology"):
-                    tags.append(correspondences["astrology"])
-                if correspondences.get("element"):
-                    tags.append(correspondences["element"])
+            reversed_flag = random.choice([True, False]) if i > 0 else False
+
+            # Build symbols for frontend compatibility (divinatory + kabbalistic)
+            symbols = build_frontend_symbols(card_data, system_id, kabbalistic, keywords)
+            tags = list(keywords)
+            if correspondences.get("astrology"):
+                tags.append(correspondences["astrology"])
+            if correspondences.get("element"):
+                tags.append(correspondences["element"])
+            if tags:
                 symbols["tags"] = tags
-            
-            # DEBUG log
-            logger.info(f"[SWM-v3] Card {card_data['id']}: kabbalistic={bool(kabbalistic)}, symbols={bool(symbols)}")
-            if symbols:
-                logger.info(f"[SWM-v3] symbols keys: {list(symbols.keys())}")
-            
-            cards.append({
+
+            card_entry: Dict[str, Any] = {
                 "draw_id": f"draw-{i+1}",
                 "id": card_data["id"],
                 "name": card_data["name"],
                 "nameSpanish": card_data.get("nameSpanish", card_data["name"]),
                 "keyNumber": card_data.get("keyNumber"),
-                "reversed": random.choice([True, False]) if i > 0 else False,  # First card upright
+                "reversed": reversed_flag,
                 "position": position,
                 "kabbalistic": kabbalistic,
-                "kabbalistic_details": symbols,  # Renamed from 'symbols' to avoid frontend conflict
+                "symbols": symbols,
+                "kabbalistic_details": build_symbols_from_kabbalistic(kabbalistic) or symbols,
                 "correspondences": correspondences,
                 "keywords": keywords,
                 "consciousness": card_data.get("consciousness", {}),
-            })
+            }
+            card_entry["symbolic_reading"] = build_per_card_symbolic_reading(
+                card_data,
+                card_entry,
+                system_meta,
+                context_focus=context_focus,
+            )
+            cards.append(card_entry)
         else:
             # Generate placeholder if card not found
             cards.append({

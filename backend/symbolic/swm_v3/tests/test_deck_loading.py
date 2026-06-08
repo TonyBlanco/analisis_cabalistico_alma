@@ -36,3 +36,16 @@ class SwmV3DeckLoadingTests(SimpleTestCase):
         )
         self.assertGreaterEqual(len(payload.get("cards", [])), 1)
         self.assertTrue(payload.get("system", {}).get("implemented"))
+
+    def test_per_card_symbolic_reading_has_core_meaning(self):
+        payload = generate_educational_reading(
+            system_id="marsella",
+            selected_cards=["the-star"],
+            spread_type="simple",
+        )
+        card = payload["cards"][0]
+        sr_wrap = card.get("symbolic_reading") or {}
+        inner = sr_wrap.get("symbolic_reading") or sr_wrap
+        self.assertTrue(inner.get("core_meaning"))
+        self.assertTrue(inner.get("system_frame"))
+        self.assertTrue(card.get("symbols"))

@@ -302,6 +302,10 @@ export default function TarotDrawPanel(props: {
       }
 
       const payload = json.payload && typeof json.payload === 'object' ? json.payload : null;
+      const readingSymbolic =
+        payload?.symbolic_reading && typeof payload.symbolic_reading === 'object'
+          ? payload.symbolic_reading
+          : null;
       const cardsRaw = Array.isArray(payload?.cards) ? payload.cards : [];
       const draws: TarotCardDraw[] = cardsRaw
         .filter((c: any) => c && typeof c === 'object')
@@ -324,7 +328,12 @@ export default function TarotDrawPanel(props: {
               : safeStringArray(c.keywordsReversed),
           },
           symbols: c.symbols && typeof c.symbols === 'object' ? c.symbols : null,
-          symbolic_reading: c.symbolic_reading && typeof c.symbolic_reading === 'object' ? c.symbolic_reading : null,
+          symbolic_reading:
+            c.symbolic_reading && typeof c.symbolic_reading === 'object'
+              ? c.symbolic_reading
+              : index === 0 && readingSymbolic
+                ? readingSymbolic
+                : null,
           kabbalistic_details:
             c.kabbalistic_details && typeof c.kabbalistic_details === 'object'
               ? (c.kabbalistic_details as Record<string, unknown>)

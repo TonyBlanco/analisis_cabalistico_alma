@@ -73,7 +73,18 @@ fi
 cd "$REMOTE_DIR"
 export NEXT_PUBLIC_API_URL=https://api.studios33.app/api
 docker compose -f "$COMPOSE_FILE" build studio33_api studio33_web
-docker compose -f "$COMPOSE_FILE" up -d studio33_api studio33_web
+# --force-recreate evita conflictos de nombre tras deploys fallidos parciales
+docker compose -f "$COMPOSE_FILE" up -d --force-recreate --remove-orphans studio33_api studio33_web
+
+echo "▶ Esperando arranque web/api (evita 502 en Cloudflare)..."
+for _ in $(seq 1 30); do
+  if docker exec voxtv_nginx wget -qO- --timeout=3 http://studio33_web:3000/ >/dev/null 2>&1 \
+     && docker exec studio33_api python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/', timeout=3)" >/dev/null 2>&1; then
+    echo "▶ Servicios listos"
+    break
+  fi
+  sleep 2
+done
 
 docker exec studio33_api python /app/deploy/studios33/scripts/ensure_admin_profiles.py 2>/dev/null || true
 

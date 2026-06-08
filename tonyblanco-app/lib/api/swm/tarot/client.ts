@@ -131,7 +131,7 @@ export const swmTarotApi = {
     if (Array.isArray(result)) {
       return result;
     }
-    return result.results ?? result.workspaces ?? [];
+    return result.results ?? [];
   },
 
   /**

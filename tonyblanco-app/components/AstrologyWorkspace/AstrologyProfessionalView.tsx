@@ -10,8 +10,6 @@ import PsychologicalHoroscopeAdvanced from './psychological/PsychologicalHorosco
 import AstrologyDoubleWheelSVG from './AstrologyDoubleWheelSVG';
 import AstroDoubleWheelAdvanced from '@/components/astrology/AstroDoubleWheelAdvanced';
 import InfoTooltip from '@/components/common/InfoTooltip';
-// ... existing imports ...
-import { InquiryWidget } from '@/components/inquiry/InquiryWidget';
 
 import { getTherapistPatients } from '@/lib/patient-api';
 import { computeSynastryAspects } from '@/components/astrology/astro-geometry';

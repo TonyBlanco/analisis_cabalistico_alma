@@ -275,11 +275,12 @@ export default function TarotDrawPanel(props: {
           system_id: systemId,
           reading_type: 'educational',
           selected_cards: [],
-          consent_mode: consent.mode,
+          consent_mode: consent?.mode ?? 'store_with_consent',
           spread_type: spreadId,
           context_focus: contextFocus,
           intention,
-          consultant_id: consent.mode === 'store_with_consent' ? props.consultantId ?? null : null,
+          consultant_id:
+            consent?.mode === 'store_with_consent' ? props.consultantId ?? null : null,
           // Astrology enrichment options
           astrology_enrichment: astrologyOptions.enabled ? {
             enabled: true,
@@ -288,13 +289,13 @@ export default function TarotDrawPanel(props: {
             include_progressions: astrologyOptions.includeProgressions,
             include_solar_return: astrologyOptions.includeSolarReturn,
           } : null,
-          ...(consent.mode === 'no_store'
+          ...(consent?.mode === 'no_store'
             ? {}
             : {
                 consent: {
                   explicit_opt_in: true,
-                  version: consent.version,
-                  accepted_at: consent.acceptedAt,
+                  version: consent?.version ?? '1.0',
+                  accepted_at: consent?.acceptedAt ?? new Date().toISOString(),
                 },
               }),
         }),
@@ -334,6 +335,10 @@ export default function TarotDrawPanel(props: {
           },
           symbols: c.symbols && typeof c.symbols === 'object' ? c.symbols : null,
           symbolic_reading: c.symbolic_reading && typeof c.symbolic_reading === 'object' ? c.symbolic_reading : null,
+          kabbalistic_details:
+            c.kabbalistic_details && typeof c.kabbalistic_details === 'object'
+              ? (c.kabbalistic_details as Record<string, unknown>)
+              : null,
         }));
 
       const nextReading: SymbolicReading = {

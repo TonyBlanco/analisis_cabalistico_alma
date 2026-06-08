@@ -28,6 +28,16 @@ const DIGNITIES: Record<string, { domicile: string[]; exaltation: string[]; detr
   pluto: { domicile: ['scorpio'], exaltation: ['leo'], detriment: ['taurus'], fall: ['aquarius'] },
 };
 
+const ZODIAC_SIGNS = [
+  'aries', 'taurus', 'gemini', 'cancer', 'leo', 'virgo',
+  'libra', 'scorpio', 'sagittarius', 'capricorn', 'aquarius', 'pisces',
+] as const;
+
+function signFromLongitude(lon: number): string {
+  const normalized = ((lon % 360) + 360) % 360;
+  return ZODIAC_SIGNS[Math.floor(normalized / 30)] ?? '';
+}
+
 // Regencias por signo (para calcular dispositor y recepciones mutuas)
 const RULERS: Record<string, string> = {
   aries: 'mars', taurus: 'venus', gemini: 'mercury', cancer: 'moon',
@@ -163,7 +173,8 @@ export function buildPsychProfile(input: AdvancedChartInput): PsychProfile {
   });
   
   // 5. REGENTE DEL ASCENDENTE: +6 puntos (identidad primaria)
-  const ascSign = input.houses[0]?.sign?.toLowerCase();
+  const ascLon = input.angles?.ascLon ?? input.houses[0]?.cuspLon;
+  const ascSign = ascLon != null ? signFromLongitude(ascLon) : undefined;
   if (ascSign) {
     const ascRuler = RULERS[ascSign];
     if (ascRuler && archetypeWeights[ascRuler]) {

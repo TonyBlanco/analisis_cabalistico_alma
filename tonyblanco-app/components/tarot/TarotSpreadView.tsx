@@ -23,6 +23,7 @@ export type TarotCardDraw = {
   card: TarotCardViewCard;
   symbols?: any;
   symbolic_reading?: any;
+  kabbalistic_details?: Record<string, unknown> | null;
 };
 
 type Props = {

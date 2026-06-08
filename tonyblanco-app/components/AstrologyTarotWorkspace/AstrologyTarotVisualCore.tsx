@@ -20,6 +20,11 @@ import type { TarotCard as SwmTarotCard } from '@/lib/api/swm/tarot/types';
 // Tarot Holístico AI Integration
 import { useTarotHolistic } from '@/lib/api/swm/tarot/hooks/useTarotHolistic';
 import { Sparkles, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
+import {
+  getTarotSystemEntry,
+  isTarotSystemUsable,
+  tarotSystemStatusLabel,
+} from '@/lib/tarotSystems.registry';
 
 interface AstrologyTarotVisualCoreProps {
   activeSection: AstrologyTarotSectionId;
@@ -190,7 +195,10 @@ export default function AstrologyTarotVisualCore({
 
   const activeConfig = sectionConfig[activeSection];
   const systemKey = selectedSystem ?? 'thoth';
-  const isSystemImplemented = true;
+  const systemEntry = getTarotSystemEntry(systemKey);
+  const isSystemUsable = isTarotSystemUsable(systemKey);
+  const hasSwmBackend = systemEntry?.swmV3Implemented ?? false;
+  const systemTier = systemEntry?.tier ?? 'preparing';
   const systemLabelMap: Partial<Record<TarotSystemId, string>> = {
     thoth: 'Thoth Tarot (Crowley)',
     'golden-dawn': 'Golden Dawn Tarot',
@@ -203,7 +211,7 @@ export default function AstrologyTarotVisualCore({
     hermetic: 'Hermetic Tarot',
     sephiroth: 'Tarot of the Sephiroth',
   };
-  const systemLabel = systemLabelMap[systemKey] ?? systemKey;
+  const systemLabel = systemEntry?.label ?? systemLabelMap[systemKey] ?? systemKey;
   const [selectedCard, setSelectedCard] = useState<TarotCardData | null>(null);
   const [analysisSources, setAnalysisSources] = useState({
     tarot: true,
@@ -294,7 +302,7 @@ export default function AstrologyTarotVisualCore({
 
   const handleDraftSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!isSystemImplemented) {
+    if (!isSystemUsable) {
       return;
     }
     const draftPayload = {
@@ -384,7 +392,7 @@ export default function AstrologyTarotVisualCore({
   };
 
   useEffect(() => {
-    if (!isSystemImplemented || !selectedCard) {
+    if (!hasSwmBackend || !selectedCard) {
       setSwmPayload(null);
       return;
     }
@@ -436,14 +444,14 @@ export default function AstrologyTarotVisualCore({
 
     fetchPayload();
     return () => controller.abort();
-  }, [isSystemImplemented, systemKey, selectedCard?.id]);
+  }, [hasSwmBackend, systemKey, selectedCard?.id]);
 
   useEffect(() => {
     if (!patientId || !selectedCard) {
       return;
     }
 
-    if (!isSystemImplemented) {
+    if (!isSystemUsable) {
       return;
     }
 
@@ -477,7 +485,7 @@ export default function AstrologyTarotVisualCore({
     patientId,
     selectedCard,
     systemKey,
-    isSystemImplemented,
+    isSystemUsable,
     thothMapping,
     goldenDawnMapping,
     botaMapping,
@@ -499,12 +507,12 @@ export default function AstrologyTarotVisualCore({
         </div>
       </div>
       <div className="grid gap-4">
-        {!isSystemImplemented && (
+        {!isSystemUsable && (
           <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
             <div className="flex items-center justify-between gap-2">
               <div>
                 <div className="text-[11px] uppercase tracking-wide text-amber-800">
-                  SISTEMA SIMBÓLICO · PRÓXIMAMENTE
+                  {tarotSystemStatusLabel(systemTier)}
                 </div>
                 <div className="mt-1 font-medium">{systemLabel}</div>
               </div>
@@ -515,6 +523,17 @@ export default function AstrologyTarotVisualCore({
             </p>
             <p className="mt-1 text-xs text-amber-800">
               No se ejecutará análisis en esta fase.
+            </p>
+          </div>
+        )}
+        {isSystemUsable && systemTier === 'educational' && (
+          <div className="rounded-lg border border-sky-200 bg-sky-50 p-4 text-sm text-sky-900">
+            <div className="text-[11px] uppercase tracking-wide text-sky-800">
+              {tarotSystemStatusLabel(systemTier)}
+            </div>
+            <p className="mt-2">
+              Correspondencias y mazo disponibles con mapeo local. La lectura IA backend
+              aplica solo a Thoth y B.O.T.A.
             </p>
           </div>
         )}
@@ -553,17 +572,51 @@ export default function AstrologyTarotVisualCore({
             onCardSelect={handleCardSelect}
           />
         )}
-        {activeSection === 'tarot-correspondences' && isSystemImplemented && (
+        {activeSection === 'tarot-correspondences' && isSystemUsable && (
           <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700">
-            Correspondencias simbolicas disponibles para consulta visual.
+            {selectedCard ? (
+              <div className="grid gap-2">
+                <div>
+                  <span className="font-medium">Carta:</span> {selectedCard.name}
+                </div>
+                {(() => {
+                  const mapping = resolveSystemMapping();
+                  if (!mapping) {
+                    return (
+                      <p className="text-xs text-gray-500">
+                        Selecciona una carta en otra sección para ver correspondencias.
+                      </p>
+                    );
+                  }
+                  return (
+                    <>
+                      <div>
+                        <span className="font-medium">Letras hebreas:</span>{' '}
+                        {mapping.letters.filter(Boolean).join(', ') || '—'}
+                      </div>
+                      <div>
+                        <span className="font-medium">Sefirot:</span>{' '}
+                        {mapping.sefirot?.join(', ') || '—'}
+                      </div>
+                      <div>
+                        <span className="font-medium">Senderos:</span>{' '}
+                        {mapping.paths.filter(Boolean).join(', ') || '—'}
+                      </div>
+                    </>
+                  );
+                })()}
+              </div>
+            ) : (
+              <p>Selecciona una carta para consultar correspondencias del sistema activo.</p>
+            )}
           </div>
         )}
-        {activeSection === 'tarot-correspondences' && !isSystemImplemented && (
+        {activeSection === 'tarot-correspondences' && !isSystemUsable && (
           <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700">
             Correspondencias no disponibles: sistema en preparación.
           </div>
         )}
-        {activeSection === 'tarot-ai-draft' && isSystemImplemented && (
+        {activeSection === 'tarot-ai-draft' && isSystemUsable && (
           <form
             className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-700 space-y-4"
             onSubmit={handleDraftSubmit}
@@ -791,7 +844,7 @@ export default function AstrologyTarotVisualCore({
           </form>
         )}
 
-        {activeSection === 'tarot-ai-draft' && !isSystemImplemented && (
+        {activeSection === 'tarot-ai-draft' && !isSystemUsable && (
           <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700">
             <div className="text-xs uppercase tracking-wide text-gray-500">
               Panel informativo (solo lectura)
@@ -805,14 +858,18 @@ export default function AstrologyTarotVisualCore({
           </div>
         )}
 
-        {isSystemImplemented && (
+        {isSystemUsable && (
           <div className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-700">
             <div className="flex items-center justify-between gap-2">
               <div className="text-xs uppercase tracking-wide text-gray-500">
                 Sistema simbólico activo
               </div>
-              <span className="text-[10px] uppercase tracking-wide text-emerald-700">
-                IMPLEMENTADO (MOCK EDUCATIVO)
+              <span
+                className={`text-[10px] uppercase tracking-wide ${
+                  systemTier === 'full' ? 'text-emerald-700' : 'text-sky-700'
+                }`}
+              >
+                {tarotSystemStatusLabel(systemTier)}
               </span>
             </div>
             <div className="mt-1 font-medium">{systemLabel}</div>
@@ -823,11 +880,41 @@ export default function AstrologyTarotVisualCore({
               </div>
             )}
 
-            {selectedCard && !swmPayload && (
+            {selectedCard && hasSwmBackend && !swmPayload && (
               <div className="mt-2 text-xs text-gray-500">
                 Cargando datos simbólicos...
               </div>
             )}
+
+            {selectedCard && !hasSwmBackend && (() => {
+              const mapping = resolveSystemMapping();
+              if (!mapping) {
+                return (
+                  <div className="mt-2 text-xs text-gray-500">
+                    Sin mapeo local para esta carta en el sistema seleccionado.
+                  </div>
+                );
+              }
+              return (
+                <div className="mt-2 grid gap-2 text-xs">
+                  <div>
+                    <span className="font-medium">Carta:</span> {selectedCard.name}
+                  </div>
+                  <div>
+                    <span className="font-medium">Letra hebrea:</span>{' '}
+                    {mapping.letters.filter(Boolean).join(', ') || '—'}
+                  </div>
+                  <div>
+                    <span className="font-medium">Sefirot:</span>{' '}
+                    {mapping.sefirot?.join(', ') || '—'}
+                  </div>
+                  <div>
+                    <span className="font-medium">Sendero:</span>{' '}
+                    {mapping.paths.filter(Boolean).join(', ') || '—'}
+                  </div>
+                </div>
+              );
+            })()}
 
             {selectedCard && swmPayload && (
               <div className="mt-2 grid gap-2">

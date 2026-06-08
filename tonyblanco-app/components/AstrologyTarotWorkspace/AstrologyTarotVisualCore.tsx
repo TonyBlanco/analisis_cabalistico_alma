@@ -224,6 +224,8 @@ export default function AstrologyTarotVisualCore({
   const [intention, setIntention] = useState('');
   const [draft, setDraft] = useState<Record<string, unknown> | null>(null);
   const [swmPayload, setSwmPayload] = useState<SwmV3Payload | null>(null);
+  const [swmLoading, setSwmLoading] = useState(false);
+  const [swmFetchFailed, setSwmFetchFailed] = useState(false);
   const lastSessionKey = useRef<string | null>(null);
 
   const activeSwmCard = swmPayload?.cards?.[0] ?? null;
@@ -394,11 +396,16 @@ export default function AstrologyTarotVisualCore({
   useEffect(() => {
     if (!hasSwmBackend || !selectedCard) {
       setSwmPayload(null);
+      setSwmLoading(false);
+      setSwmFetchFailed(false);
       return;
     }
 
     const controller = new AbortController();
     const fetchPayload = async () => {
+      setSwmLoading(true);
+      setSwmFetchFailed(false);
+      setSwmPayload(null);
       try {
         const token = getAuthToken();
         const headers: HeadersInit = {
@@ -406,7 +413,6 @@ export default function AstrologyTarotVisualCore({
           ...(token ? { Authorization: `Token ${token}` } : {}),
         };
 
-        console.log('📤 Sending card ID to SWM API:', selectedCard.id);
         const response = await fetch(`${API_BASE_URL}/swm-v3/symbolic-readings/`, {
           method: 'POST',
           headers,
@@ -420,24 +426,24 @@ export default function AstrologyTarotVisualCore({
         });
 
         if (!response.ok) {
-          setSwmPayload(null);
+          setSwmFetchFailed(true);
           return;
         }
 
         const data = (await response.json()) as SwmV3ApiResponse;
-        console.log('🔍 SWM API Response:', JSON.stringify(data, null, 2));
         if (!data?.success || !data?.payload) {
-          console.log('❌ SWM: No success or no payload');
-          setSwmPayload(null);
+          setSwmFetchFailed(true);
           return;
         }
-        console.log('✅ SWM Payload cards:', data.payload.cards);
-        console.log('✅ First card kabbalistic_details:', data.payload.cards?.[0]?.kabbalistic_details);
 
         setSwmPayload(data.payload);
       } catch (error) {
         if ((error as { name?: string }).name !== 'AbortError') {
-          setSwmPayload(null);
+          setSwmFetchFailed(true);
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setSwmLoading(false);
         }
       }
     };
@@ -870,13 +876,19 @@ export default function AstrologyTarotVisualCore({
               </div>
             )}
 
-            {selectedCard && hasSwmBackend && !swmPayload && (
+            {selectedCard && hasSwmBackend && swmLoading && (
               <div className="mt-2 text-xs text-gray-500">
                 Cargando datos simbólicos...
               </div>
             )}
 
-            {selectedCard && !hasSwmBackend && (() => {
+            {selectedCard && hasSwmBackend && !swmLoading && swmFetchFailed && (
+              <div className="mt-2 text-xs text-amber-700">
+                No se pudo cargar SWM v3. Mostrando correspondencias locales.
+              </div>
+            )}
+
+            {selectedCard && !swmLoading && !swmPayload && (() => {
               const mapping = resolveSystemMapping();
               if (!mapping) {
                 return (

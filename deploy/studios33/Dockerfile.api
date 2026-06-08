@@ -10,6 +10,8 @@ COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY backend/ .
+# BOTA/Thoth deck lives in repo-root packages/ (not under backend/)
+COPY packages/symbolic/tarot/bota ./packages/symbolic/tarot/bota
 
 EXPOSE 8000
 

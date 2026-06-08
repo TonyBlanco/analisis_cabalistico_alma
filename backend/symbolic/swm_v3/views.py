@@ -110,17 +110,26 @@ def build_symbols_from_kabbalistic(kabbalistic: Dict[str, Any]) -> Optional[Dict
         "cube_of_space": kabbalistic.get("cubeOfSpace", ""),
     }
 
-# Path to symbolic data (repo root + backend-local decks)
-SYMBOLIC_DATA_PATH = Path(settings.BASE_DIR).parent / "packages" / "symbolic"
-BACKEND_TAROT_PATH = Path(settings.BASE_DIR) / "packages" / "symbolic" / "tarot"
+def get_tarot_decks_root() -> Path:
+    """Resolve tarot deck directory — Docker (/app/packages) vs local dev (repo root/packages)."""
+    candidates = [
+        Path(settings.BASE_DIR) / "packages" / "symbolic" / "tarot",
+        Path(settings.BASE_DIR).parent / "packages" / "symbolic" / "tarot",
+    ]
+    for path in candidates:
+        if path.is_dir():
+            return path
+    return candidates[0]
 
-DECK_JSON_PATHS: Dict[str, Path] = {
-    "thoth": SYMBOLIC_DATA_PATH / "tarot" / "bota" / "bota_tableau_complete.json",
-    "bota": SYMBOLIC_DATA_PATH / "tarot" / "bota" / "bota_tableau_complete.json",
-    "tarot-cabalistico": SYMBOLIC_DATA_PATH / "tarot" / "bota" / "bota_tableau_complete.json",
-    "golden-dawn": BACKEND_TAROT_PATH / "golden-dawn" / "golden_dawn_complete.json",
-    "hermetic": BACKEND_TAROT_PATH / "hermetic" / "hermetic_complete.json",
-    "sephiroth": BACKEND_TAROT_PATH / "sephiroth" / "sephiroth_complete.json",
+
+# (subdir, filename) relative to get_tarot_decks_root()
+DECK_JSON_RELATIVE: Dict[str, tuple[str, str]] = {
+    "thoth": ("bota", "bota_tableau_complete.json"),
+    "bota": ("bota", "bota_tableau_complete.json"),
+    "tarot-cabalistico": ("bota", "bota_tableau_complete.json"),
+    "golden-dawn": ("golden-dawn", "golden_dawn_complete.json"),
+    "hermetic": ("hermetic", "hermetic_complete.json"),
+    "sephiroth": ("sephiroth", "sephiroth_complete.json"),
 }
 
 
@@ -137,9 +146,13 @@ def load_deck_json(path: Path, fallback_name: str) -> Dict[str, Any]:
 def load_deck_for_system(system_id: str) -> Dict[str, Any]:
     """Load major-arcana JSON for a tarot system."""
     meta = get_system_metadata(system_id)
-    path = DECK_JSON_PATHS.get(system_id)
-    if not path:
+    rel = DECK_JSON_RELATIVE.get(system_id)
+    if not rel:
         return {"deck": {"name": meta.get("name", system_id)}, "majorArcana": []}
+    subdir, filename = rel
+    path = get_tarot_decks_root() / subdir / filename
+    if not path.exists():
+        logger.warning(f"[SWM-v3] Deck JSON not found: {path}")
     return load_deck_json(path, meta.get("name", system_id))
 
 

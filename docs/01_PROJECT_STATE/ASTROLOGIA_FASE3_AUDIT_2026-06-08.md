@@ -50,7 +50,7 @@ El módulo de astrología tiene backend completo (14 endpoints activos) y fronte
 
 Añadir `KERYKEION_AI_SNIPPETS_ENABLED=True` a `backend/.env.gemini`. El desarrollador ya sourcea este archivo manualmente para tener la `GEMINI_API_KEY` activa.
 
-En **producción (Render/Hetzner)**: añadir las dos vars `GEMINI_API_KEY` y `KERYKEION_AI_SNIPPETS_ENABLED=True` al panel de env vars del hosting.
+En **producción (Hetzner)**: añadir las dos vars a `/opt/studio33/.env` (cargado por `docker-compose.studios33.yml` vía `env_file: .env`).
 
 ### Riesgo: BAJO
 El constructor de `AstrologyKabbalahSnippetAI` maneja todos los casos de error (sin key, sin SDK, etc.) con `self.error_message` sin romper nada.
@@ -140,18 +140,16 @@ fix(astrology): activate phase 3 — ai snippets flag, pdf export, timeline ui
 | **PDF export** | `exportComparativeAsPDF` con lazy `html2canvas` + `jspdf`, `scale: 2` | ✅ `AstrologyProfessionalView.tsx` ~683–697; botones en `compare-solar-return` y `compare-progressions` |
 | **Timeline UI** | `{false ? (` → condición real; texto fake → `solarReturnYearComparison` | ✅ Condición `(symbolicSolarReturnYear !== null \|\| symbolicLunarReturnDate !== null)` ~1593; hits A/B ~1662–1672 |
 
-### Producción (Render / Hetzner) — pendiente operativo
+### Producción (Hetzner) — pendiente operativo
 
-El commit **no** activa snippets en servidor por sí solo. Añadir en `/opt/studio33/.env` (o panel Render):
+El commit **no** activa snippets en servidor por sí solo. Añadir en `/opt/studio33/.env` (cargado por `docker-compose.studios33.yml` vía `env_file: .env`):
 
 ```bash
 GEMINI_API_KEY=<clave>
 KERYKEION_AI_SNIPPETS_ENABLED=True
 ```
 
-Plantilla actualizada: `deploy/studios33/env.example`.
-
-El `deploy.sh` copia `GEMINI_API_KEY` desde `/opt/voxtvserver/.env` al crear `.env` inicial, pero **no** inyecta `KERYKEION_AI_SNIPPETS_ENABLED` — hay que patch manual o script hasta automatizarlo.
+Plantilla actualizada: `deploy/studios33/env.example` (ya incluye ambas vars).
 
 ### Gaps menores post-fix
 

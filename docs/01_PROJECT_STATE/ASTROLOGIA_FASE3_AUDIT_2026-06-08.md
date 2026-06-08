@@ -147,11 +147,11 @@ fix(astrology): activate phase 3 — ai snippets flag, pdf export, timeline ui
 El commit **no** activa snippets en servidor por sí solo. Añadir en `/opt/studio33/.env` (cargado por `docker-compose.studios33.yml` vía `env_file: .env`):
 
 ```bash
-GEMINI_API_KEY=<clave>
 KERYKEION_AI_SNIPPETS_ENABLED=True
+# GROQ_API_KEY — ya en prod vía deploy; GEMINI solo como fallback de llm_bridge
 ```
 
-Plantilla actualizada: `deploy/studios33/env.example` (ya incluye ambas vars).
+Script: `bash deploy/studios33/scripts/patch-astrology-ai-env.sh`
 
 ### Gaps menores post-fix
 

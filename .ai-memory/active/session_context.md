@@ -1,15 +1,17 @@
 # Session Context — Análisis Cabalístico / Studios33
 
-**Última actualización:** 2026-06-08 14:59 UTC  
-**Rama:** `main` · **HEAD:** `0e709836` · **Working tree:** 1 archivo(s) sin commit  
+**Última actualización:** 2026-06-08 15:20 UTC  
+**Rama:** `main` · **HEAD:** `f73e43b1` · **Working tree:** 4 archivo(s) sin commit  
 **Prod:** Hetzner `studios33.app` + `api.studios33.app`
 
 ## Current Focus
 
-Coordinación multi-agente con AI Memory Layer; mantener wiring BD/API/FE de tests y módulo astrología Fase 3 en prod.
+Tarot PR-2 correspondencias UI; smoke E2E astrologia-tarot
 
 ## Completed (reciente)
 
+- Último commit: `f73e43b1` — fix(tarot): align system tiers via tarotSystems.registry
+- PR-1 registry wiring commit
 - sync-session automático en Stop hook y comando memory_manager
 - Último commit: `0e709836` — feat(memory): auto-sync session_context.md at session end
 - AI Memory Layer instalado y sync-session automático configurado
@@ -27,7 +29,7 @@ Coordinación multi-agente con AI Memory Layer; mantener wiring BD/API/FE de tes
 
 ## Next Steps
 
-1. Leer .ai-memory/active/session_context.md al abrir próximo chat
+1. Deploy + verify astrologia-tarot labels in prod
 
 ## Key Docs
 

@@ -1,8 +1,8 @@
 """
-Tarot Holístico - Oráculo Místico con Integración Psicológica
+Tarot Holístico - Interpretación simbólica para terapeutas
 
-Este módulo implementa un oráculo de tarot con voz mística (bruja amiga)
-que integra resultados del SCL-90 holístico con interpretaciones simbólicas.
+Este módulo genera lecturas de tarot orientadas al terapeuta (no al consultante),
+integrando exploraciones holísticas previas con arquetipos y correspondencias.
 
 CARACTERÍSTICAS:
 - Voz cálida y mística (no robótica)
@@ -191,117 +191,119 @@ SPREAD_TYPES = [
 
 
 # =============================================================================
-# PROMPTS MÍSTICOS (VOZ PROFESIONAL CÁLIDA)
+# PROMPTS — AUDIENCIA: TERAPEUTA (tercera persona sobre el consultante)
 # =============================================================================
 
-ORACLE_SYSTEM_PROMPT = """Eres un oráculo místico profesional con profundo conocimiento del Tarot y las tradiciones herméticas.
-Tu voz es cálida, sabia y accesible —nunca robótica, pero siempre respetuosa y profesional.
+ORACLE_SYSTEM_PROMPT = """Eres un especialista en Tarot hermético y lectura simbólica integrativa.
+Escribes EXCLUSIVAMENTE para el TERAPEUTA que acompaña al consultante — NUNCA para el consultante directamente.
 
-PERSONALIDAD:
-- Guía espiritual profesional que acompaña con respeto
-- Tono cálido pero apropiado para cualquier consultante (sin importar género)
-- Lenguaje poético y accesible, sin ser excesivamente informal
-- NUNCA uses: "mi amor", "papi", "mami", "cariño", "bebé" u otras expresiones románticas/familiares
-- SÍ puedes usar: "querido/a consultante", "alma viajera", "buscador/a", "tu ser interior"
-
-EXPRESIONES APROPIADAS:
-- "Veamos qué revelan las cartas para ti..."
-- "Tu alma está lista para esta revelación..."
-- "Las cartas hablan con claridad..."
-- "Este mensaje llega en el momento justo..."
-- "Confía en tu proceso..."
+AUDIENCIA Y VOZ (CRÍTICO):
+- Dirígete al terapeuta: "Para este consultante...", "En la sesión podrías explorar...", "Observa cómo..."
+- Habla del consultante en TERCERA PERSONA: "él/ella", "su proceso", "su campo simbólico"
+- PROHIBIDO: segunda persona al consultante ("tú", "te", "tu", "querido consultante", "confía en tu proceso")
+- PROHIBIDO: cerrar con mensajes motivacionales dirigidos al consultante
+- Tono: profesional, cálido, analítico, pedagógico — como un supervisor simbólico experimentado
 
 MODELO ORION (Integración Psicológica-Energética):
-Conectas los resultados del perfil holístico del consultante (si está disponible)
-con los arquetipos del tarot y el sistema de chakras:
-- Somatización → Muladhara (Raíz) → miedos de supervivencia
-- Depresión → Manipura (Plexo Solar) → fuego interior apagado
-- Ansiedad → Manipura + Anahata → sistema nervioso hiperalerta
-- Sensibilidad interpersonal → Anahata (Corazón) → heridas de rechazo
-- Obsesión-compulsión → Ajna (Tercer Ojo) → mente hiperactiva
-- Hostilidad → Manipura → fuego descontrolado
-- Ansiedad fóbica → Muladhara → traumas no integrados
-- Paranoia → Ajna → desconfianza extrema
-- Psicoticismo → Sahasrara → desconexión con realidad consensuada
+Conecta el perfil holístico del consultante (si existe) con arquetipos del tarot y chakras:
+- Somatización → Muladhara (Raíz)
+- Depresión → Manipura (Plexo Solar)
+- Ansiedad → Manipura + Anahata
+- Sensibilidad interpersonal → Anahata (Corazón)
+- Obsesión-compulsión → Ajna (Tercer Ojo)
+- Hostilidad → Manipura
+- Ansiedad fóbica → Muladhara
+- Paranoia → Ajna
+- Psicoticismo → Sahasrara
 
 REGLAS INQUEBRANTABLES:
 1. USA "consultante" NUNCA "paciente"
 2. USA "lectura simbólica" NUNCA "diagnóstico"
-3. Ofrece "reflexiones" y "prácticas holísticas", NUNCA "tratamiento"
-4. Esto es exploración del alma, NO consejo médico
-5. Máximo 300 palabras por interpretación
-6. SIEMPRE incluye: chakra a sanar, práctica recomendada, cierre empoderador
-7. Mantén un tono PROFESIONAL pero HUMANO
+3. Ofrece "orientaciones de exploración" y "hipótesis simbólicas", NUNCA "tratamiento"
+4. NO es consejo médico ni predicción
+5. Longitud: 700-1000 palabras — desarrolla CADA sección con profundidad y ejemplos concretos
+6. Incluye: resonancia con perfil, simbolismo, manifestaciones posibles, eje energético, orientaciones para sesión, práctica sugerida, preguntas de exploración
+7. Español profesional y claro
 
-Tu misión es que el consultante se sienta ACOMPAÑADO y EMPODERADO para su proceso de autodescubrimiento."""
+Tu misión: dar al terapeuta un mapa simbólico rico para comprender al consultante y orientar la conversación."""
 
-INTERPRET_CARD_MYSTIC_PROMPT = """🔮 LECTURA DE CARTA INDIVIDUAL
+INTERPRET_CARD_MYSTIC_PROMPT = """🔮 ANÁLISIS DE CARTA PARA EL TERAPEUTA
 
+**Consultante**: {consultant_name}
 **Carta**: {arcana_name} ({arcana_id})
 **Posición**: {position}
 **Invertida**: {reversed}
-**Sistema**: {tarot_system}
+**Sistema tarot**: {tarot_system}
 
-**PERFIL ENERGÉTICO DEL CONSULTANTE**:
+**PERFIL HOLÍSTICO DEL CONSULTANTE** (exploraciones previas):
 {psychological_profile}
 
-**NUMEROLOGÍA KÁRMICA**:
+**NUMEROLOGÍA SIMBÓLICA**:
 - Número del alma (fecha nacimiento): {soul_number}
 - Número de esta carta: {card_number}
 - Número kármico combinado: {karmic_number}
 
 ---
 
-Interpreta esta carta con tu voz de bruja amiga:
+Redacta un informe simbólico DETALLADO (700-1000 palabras) para el terapeuta. Estructura obligatoria:
 
-1. **MENSAJE PERSONAL**: ¿Qué le dice esta carta específicamente a ESTA persona según su perfil? (conecta con su chakra desbalanceado si aplica)
+1. **SÍNTESIS PARA EL TERAPEUTA**: Qué aporta esta carta al trabajo con {consultant_name} en este momento. Hipótesis simbólica central en 2-3 párrafos.
 
-2. **SIMBOLISMO PROFUNDO**: Significado arquetípico + cómo se manifiesta en su vida
+2. **RESONANCIA CON EL PERFIL**: Cómo dialoga la carta con las exploraciones previas del consultante (chakras, sefirot, patrones detectados). Si no hay perfil, indícalo y desarrolla igualmente la lectura arquetípica.
 
-3. **CHAKRA A TRABAJAR**: Basado en su perfil, ¿qué centro energético necesita atención?
+3. **SIMBOLISMO ARQUETÍPICO PROFUNDO**: Significado en el sistema {tarot_system}, correspondencias cabalísticas/herméticas, polaridad invertida/derecha según aplique.
 
-4. **PRÁCTICA HOLÍSTICA**: Una recomendación concreta (meditación, hierba, afirmación, etc.)
+4. **MANIFESTACIONES POSIBLES**: 3-5 formas concretas en que este arquetipo podría expresarse en la vida del consultante (relaciones, trabajo, cuerpo, espiritualidad).
 
-5. **CIERRE EMPODERADOR**: Frase cálida y accionable que lo deje con poder
+5. **EJE ENERGÉTICO**: Chakra y/o sefirá prioritarios a considerar; por qué, vinculados al perfil y a la carta.
 
-Recuerda: Máximo 300 palabras. Hazlo sentir VISTO."""
+6. **ORIENTACIONES PARA LA SESIÓN**: Qué temas conviene explorar, qué dinámicas vigilar, qué recursos internos parecen disponibles.
 
-INTERPRET_SPREAD_MYSTIC_PROMPT = """🔮 LECTURA DE TIRADA COMPLETA
+7. **PRÁCTICA SUGERIDA** (para que el terapeuta pueda recomendar): Meditación, ritual simbólico, afirmación o ejercicio — con instrucción breve y justificación terapéutica-holística.
 
+8. **PREGUNTAS DE EXPLORACIÓN**: 4-6 preguntas abiertas que el terapeuta puede usar en sesión.
+
+Recuerda: tercera persona sobre el consultante. NUNCA hables al consultante en segunda persona."""
+
+INTERPRET_SPREAD_MYSTIC_PROMPT = """🔮 ANÁLISIS DE TIRADA PARA EL TERAPEUTA
+
+**Consultante**: {consultant_name}
 **Tipo de tirada**: {spread_type}
-**Sistema**: {tarot_system}
+**Sistema tarot**: {tarot_system}
 
 **CARTAS EN LA TIRADA**:
 {cards_description}
 
-**PERFIL ENERGÉTICO DEL CONSULTANTE**:
+**PERFIL HOLÍSTICO DEL CONSULTANTE**:
 {psychological_profile}
 
-**NUMEROLOGÍA KÁRMICA**:
-- Número del alma (fecha nacimiento): {soul_number}
+**NUMEROLOGÍA SIMBÓLICA**:
+- Número del alma: {soul_number}
 - Suma de cartas: {cards_sum}
 - Número kármico de la tirada: {karmic_number}
 - Mensaje numerológico: {numerology_message}
 
 ---
 
-Interpreta esta tirada con tu voz de bruja amiga:
+Redacta un informe simbólico DETALLADO (800-1100 palabras) para el terapeuta. Estructura obligatoria:
 
-1. **NARRATIVA CONECTADA**: ¿Qué historia cuentan estas cartas juntas? Conecta pasado-presente-futuro (o las posiciones que sean) en una narrativa fluida.
+1. **SÍNTESIS NARRATIVA**: Historia que cuentan las cartas juntas para {consultant_name}; hilo conductor entre posiciones.
 
-2. **PATRÓN KÁRMICO ACTIVO**: ¿Qué lección del alma está emergiendo? ¿Qué ciclo está cerrando o abriendo?
+2. **PATRÓN SIMBÓLICO ACTIVO**: Qué ciclo, tensión o oportunidad emerge; lectura integrativa del conjunto.
 
-3. **CHAKRA PRIORITARIO**: Basado en el perfil Y las cartas, ¿qué centro energético necesita atención PRIMERO?
+3. **LECTURA POR POSICIÓN**: Breve análisis de cada carta en su posición (2-3 frases cada una, en tercera persona).
 
-4. **CONSEJO TERAPÉUTICO HOLÍSTICO**: 
-   - Una práctica específica (meditación, hierba, cristal, afirmación)
-   - Por qué esta práctica para ESTA persona
+4. **RESONANCIA CON EL PERFIL**: Conexión con exploraciones holísticas previas del consultante.
 
-5. **MENSAJE DEL NÚMERO KÁRMICO**: Usa el número {karmic_number} para un mensaje cifrado final
+5. **EJE ENERGÉTICO PRIORITARIO**: Chakra/sefirá central y secundarios.
 
-6. **CIERRE DE PODER**: Frase cálida, empoderadora y accionable que lo deje transformado
+6. **ORIENTACIONES PARA LA SESIÓN**: Temas a profundizar, dinámicas relacionales, recursos a potenciar.
 
-Recuerda: Máximo 300 palabras. Que se sienta VISTO y con camino claro."""
+7. **PRÁCTICA SUGERIDA**: Una práctica holística concreta con justificación para este consultante.
+
+8. **PREGUNTAS DE EXPLORACIÓN**: 5-7 preguntas abiertas para el terapeuta.
+
+Recuerda: audiencia = terapeuta. Tercera persona sobre el consultante. Sin segunda persona al consultante."""
 
 
 # =============================================================================
@@ -1087,8 +1089,47 @@ def format_profile_for_prompt(profile: Dict[str, Any]) -> str:
                 parts.append(f"  → Práctica: {dim['sanacion']}")
     
     return "\n".join(parts)
-    
-    return "\n".join(parts)
+
+
+def resolve_consultant_context(request, context: Dict[str, Any]) -> Dict[str, Any]:
+    """Resolve consultant (patient) data for therapist-scoped tarot interpretation."""
+    from .models import Patient
+
+    consultant_id = context.get('consultantId')
+    result: Dict[str, Any] = {
+        'consultant_name': (context.get('consultantName') or '').strip() or 'el consultante',
+        'profile_user_id': None,
+        'birth_date': None,
+    }
+
+    if context.get('birthDate'):
+        try:
+            result['birth_date'] = datetime.strptime(context['birthDate'], '%Y-%m-%d').date()
+        except (ValueError, TypeError):
+            pass
+
+    if not consultant_id:
+        return result
+
+    try:
+        patient = Patient.objects.get(id=int(consultant_id), therapist=request.user)
+        if not context.get('consultantName'):
+            name = (patient.full_name or '').strip()
+            if not name:
+                name = f"{patient.first_name} {patient.last_name}".strip()
+            result['consultant_name'] = name or 'el consultante'
+        if patient.birth_date and not result['birth_date']:
+            result['birth_date'] = patient.birth_date
+        if patient.user_id:
+            result['profile_user_id'] = patient.user_id
+    except (Patient.DoesNotExist, ValueError, TypeError):
+        logger.warning(
+            "Consultant %s not found for therapist %s",
+            consultant_id,
+            request.user.id,
+        )
+
+    return result
 
 
 def filter_clinical_terms(text: str) -> str:
@@ -1252,27 +1293,30 @@ class TarotInterpretCardView(APIView):
         context = data.get('context', {})
         options = data.get('options', {})
         
-        # Obtener perfil psicológico del consultante
-        user_id = request.user.id
-        profile = get_psychological_profile(user_id)
+        consultant_ctx = resolve_consultant_context(request, context)
+        profile_user_id = consultant_ctx['profile_user_id']
+        if profile_user_id:
+            profile = get_psychological_profile(profile_user_id)
+        else:
+            profile = {
+                'available': False,
+                'summary': (
+                    'Sin exploraciones holísticas previas vinculadas a este consultante. '
+                    'Desarrolla la lectura desde el arquetipo y la numerología.'
+                ),
+            }
         profile_text = format_profile_for_prompt(profile)
-        
-        # Calcular numerología
-        birth_date = None
-        if context.get('birthDate'):
-            try:
-                birth_date = datetime.strptime(context['birthDate'], '%Y-%m-%d').date()
-            except:
-                pass
+
+        birth_date = consultant_ctx.get('birth_date')
         if not birth_date and profile.get('birth_date'):
             birth_date = profile['birth_date']
-        
+
         soul_number = calculate_soul_number(birth_date) if birth_date else 7
         card_number = get_card_number(arcana_id)
         karmic_number = calculate_karmic_number(soul_number, [card_number])
-        
-        # Construir prompt místico
+
         user_prompt = INTERPRET_CARD_MYSTIC_PROMPT.format(
+            consultant_name=consultant_ctx['consultant_name'],
             arcana_name=arcana_name,
             arcana_id=arcana_id,
             position=position,
@@ -1283,10 +1327,9 @@ class TarotInterpretCardView(APIView):
             card_number=card_number,
             karmic_number=karmic_number,
         )
-        
-        # Agregar contexto adicional si hay pregunta
+
         if context.get('question'):
-            user_prompt += f"\n\n**Pregunta del consultante**: {context['question']}"
+            user_prompt += f"\n\n**Intención o pregunta simbólica del trabajo**: {context['question']}"
         
         # Generar interpretación
         ai_service = get_ai_service()
@@ -1297,13 +1340,13 @@ class TarotInterpretCardView(APIView):
                 "code": "AI_UNAVAILABLE",
             }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
-        temperature = options.get('temperature', 0.85)  # Un poco más alta para voz creativa
-        
+        temperature = options.get('temperature', 0.75)
+
         try:
             interpretation = ai_service._generate_content(
                 system_prompt=ORACLE_SYSTEM_PROMPT,
                 user_prompt=user_prompt,
-                max_tokens=1200,
+                max_tokens=4096,
                 temperature=temperature,
             )
             
@@ -1418,21 +1461,24 @@ class TarotInterpretSpreadView(APIView):
                 "code": "NO_CARDS"
             }, status=status.HTTP_400_BAD_REQUEST)
         
-        # Obtener perfil psicológico
-        user_id = request.user.id
-        profile = get_psychological_profile(user_id)
+        consultant_ctx = resolve_consultant_context(request, context)
+        profile_user_id = consultant_ctx['profile_user_id']
+        if profile_user_id:
+            profile = get_psychological_profile(profile_user_id)
+        else:
+            profile = {
+                'available': False,
+                'summary': (
+                    'Sin exploraciones holísticas previas vinculadas a este consultante. '
+                    'Desarrolla la lectura desde los arquetipos de la tirada.'
+                ),
+            }
         profile_text = format_profile_for_prompt(profile)
-        
-        # Calcular numerología
-        birth_date = None
-        if context.get('birthDate'):
-            try:
-                birth_date = datetime.strptime(context['birthDate'], '%Y-%m-%d').date()
-            except:
-                pass
+
+        birth_date = consultant_ctx.get('birth_date')
         if not birth_date and profile.get('birth_date'):
             birth_date = profile['birth_date']
-        
+
         soul_number = calculate_soul_number(birth_date) if birth_date else 7
         
         # Calcular números de todas las cartas
@@ -1452,8 +1498,8 @@ class TarotInterpretSpreadView(APIView):
                 f"   Posición: {position} | {reversed_text}"
             )
         
-        # Construir prompt místico
         user_prompt = INTERPRET_SPREAD_MYSTIC_PROMPT.format(
+            consultant_name=consultant_ctx['consultant_name'],
             spread_type=spread_type,
             tarot_system=tarot_system,
             cards_description="\n".join(cards_description),
@@ -1463,10 +1509,9 @@ class TarotInterpretSpreadView(APIView):
             karmic_number=karmic_number,
             numerology_message=numerology_message,
         )
-        
-        # Agregar pregunta si existe
+
         if context.get('question'):
-            user_prompt += f"\n\n**Pregunta del consultante**: {context['question']}"
+            user_prompt += f"\n\n**Intención o pregunta simbólica del trabajo**: {context['question']}"
         
         # Generar interpretación
         ai_service = get_ai_service()
@@ -1477,13 +1522,13 @@ class TarotInterpretSpreadView(APIView):
                 "code": "AI_UNAVAILABLE",
             }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
-        temperature = options.get('temperature', 0.85)
-        
+        temperature = options.get('temperature', 0.75)
+
         try:
             interpretation = ai_service._generate_content(
                 system_prompt=ORACLE_SYSTEM_PROMPT,
                 user_prompt=user_prompt,
-                max_tokens=2048,
+                max_tokens=4096,
                 temperature=temperature,
             )
 

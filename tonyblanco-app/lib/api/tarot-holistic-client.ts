@@ -66,6 +66,8 @@ export interface ProviderStatus {
 export interface CardContext {
   question?: string;
   consultantId?: number;
+  consultantName?: string;
+  birthDate?: string;
   instanceId?: string;
 }
 

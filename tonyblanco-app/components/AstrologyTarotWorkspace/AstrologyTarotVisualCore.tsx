@@ -821,19 +821,23 @@ export default function AstrologyTarotVisualCore({
                     e.preventDefault();
                     if (!selectedCard) return;
                     try {
-                      const result = await interpretCard({
-                        arcanaId: selectedCard.id,
-                        arcanaName: selectedCard.name,
-                        position: 'general',
-                        reversed: false,
-                        tarotSystem: systemKey,
-                        context: {
-                          question: intention || undefined,
-                          consultantId: patientId
-                            ? Number(patientId) || undefined
-                            : undefined,
-                        },
-                      });
+                        const result = await interpretCard({
+                          arcanaId: selectedCard.id,
+                          arcanaName: selectedCard.name,
+                          position: 'general',
+                          reversed: false,
+                          tarotSystem: systemKey,
+                          context: {
+                            question: intention || undefined,
+                            consultantId: patientId
+                              ? Number(patientId) || undefined
+                              : undefined,
+                            consultantName: patientName || undefined,
+                            birthDate: patientBirthDate
+                              ? patientBirthDate.toISOString().slice(0, 10)
+                              : undefined,
+                          },
+                        });
                       setAiInterpretation(result.text);
                       setAiThemes(result.themes);
                     } catch (err) {
@@ -862,7 +866,7 @@ export default function AstrologyTarotVisualCore({
               <div className="mt-4 rounded-lg border border-indigo-200 bg-indigo-50/50 p-4">
                 <div className="flex items-center gap-2 mb-2">
                   <Sparkles className="h-4 w-4 text-indigo-600" />
-                  <span className="text-sm font-medium text-indigo-900">Interpretación Simbólica Holística</span>
+                  <span className="text-sm font-medium text-indigo-900">Análisis simbólico para el terapeuta</span>
                   {providerUsed && (
                     <span className="text-[10px] bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-full">
                       {providerUsed.toUpperCase()}
@@ -880,7 +884,7 @@ export default function AstrologyTarotVisualCore({
                   </div>
                 )}
                 <div className="mt-3 text-[10px] text-gray-500 italic">
-                  Interpretación educativa y exploratoria. No constituye consejo profesional.
+                  Informe simbólico para el terapeuta (tercera persona). Educativo y exploratorio; no constituye consejo clínico ni predicción.
                 </div>
               </div>
             )}

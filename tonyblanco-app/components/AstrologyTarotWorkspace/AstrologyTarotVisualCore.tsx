@@ -23,8 +23,14 @@ import { Sparkles, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
 import {
   getTarotSystemEntry,
   isTarotSystemUsable,
+  normalizeTarotSystemId,
   tarotSystemStatusLabel,
 } from '@/lib/tarotSystems.registry';
+
+const SPREAD_SECTIONS: AstrologyTarotSectionId[] = [
+  'tarot-free-spread',
+  'tarot-tree-spread',
+];
 
 interface AstrologyTarotVisualCoreProps {
   activeSection: AstrologyTarotSectionId;
@@ -194,7 +200,8 @@ export default function AstrologyTarotVisualCore({
   };
 
   const activeConfig = sectionConfig[activeSection];
-  const systemKey = selectedSystem ?? 'thoth';
+  const systemKey = normalizeTarotSystemId(selectedSystem ?? 'thoth');
+  const isSpreadSection = SPREAD_SECTIONS.includes(activeSection);
   const systemEntry = getTarotSystemEntry(systemKey);
   const isSystemUsable = isTarotSystemUsable(systemKey);
   const hasSwmBackend = systemEntry?.swmV3Implemented ?? false;
@@ -514,7 +521,7 @@ export default function AstrologyTarotVisualCore({
         </div>
       </div>
       <div className="grid gap-4">
-        {!isSystemUsable && (
+        {!isSystemUsable && !isSpreadSection && (
           <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
             <div className="flex items-center justify-between gap-2">
               <div>
@@ -855,7 +862,7 @@ export default function AstrologyTarotVisualCore({
           </div>
         )}
 
-        {isSystemUsable && (
+        {isSystemUsable && !isSpreadSection && (
           <div className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-700">
             <div className="flex items-center justify-between gap-2">
               <div className="text-xs uppercase tracking-wide text-gray-500">

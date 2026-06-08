@@ -10,6 +10,7 @@ import AstrologyEnrichmentToggle, {
   DEFAULT_ASTROLOGY_OPTIONS 
 } from './AstrologyEnrichmentToggle';
 import { resolveBotaIdentity, buildBotaPositionMeaning, buildBotaSynthesis } from '@holistica/symbolic/tarot/bota';
+import { getActiveTarotSystems } from '@/lib/tarotSystems.registry';
 
 type ConsentState = {
   mode: SwmV3ConsentMode;
@@ -32,18 +33,7 @@ type SymbolicReading = {
   cards: TarotCardDraw[];
 };
 
-const SYSTEMS: Array<{ id: string; label: string }> = [
-  { id: 'thoth', label: 'Thoth Tarot (Crowley)' },
-  { id: 'golden-dawn', label: 'Golden Dawn Tarot' },
-  { id: 'rota', label: 'R.O.T.A. (tarot hermético)' },
-  { id: 'marsella', label: 'Tarot de Marsella (simbólico)' },
-  { id: 'rider-waite', label: 'Rider–Waite (simbólico)' },
-  { id: 'tarot-cabalistico', label: 'Tarot cabalístico (Árbol de la Vida)' },
-  { id: 'oracle-symbolic', label: 'Oráculo simbólico genérico' },
-  { id: 'bota', label: 'B.O.T.A. Tarot' },
-  { id: 'hermetic', label: 'Hermetic Tarot' },
-  { id: 'sephiroth', label: 'Tarot of the Sephiroth' },
-];
+const SYSTEMS = getActiveTarotSystems().map((s) => ({ id: s.id, label: s.label }));
 
 const SPREADS: Array<{ id: string; nameSpanish: string }> = [
   { id: 'simple', nameSpanish: 'Tirada simple' },

@@ -77,6 +77,18 @@ export function isTarotSystemUsable(id: TarotSystemId | null | undefined): boole
   return entry?.tier === 'full' || entry?.tier === 'educational';
 }
 
+/** Sistemas activos en sidebar + Tirada Libre / Árbol */
+export function getActiveTarotSystems(): TarotSystemRegistryEntry[] {
+  return TAROT_SYSTEMS_REGISTRY.filter((e) => e.tier === 'full' || e.tier === 'educational');
+}
+
+export function normalizeTarotSystemId(id: TarotSystemId | null | undefined): TarotSystemId {
+  if (id && getTarotSystemEntry(id)) {
+    return id;
+  }
+  return 'thoth';
+}
+
 export function tarotSystemStatusLabel(tier: TarotSystemTier): string {
   switch (tier) {
     case 'full':

@@ -20,12 +20,12 @@ if grep -q '^KERYKEION_AI_SNIPPETS_ENABLED=' "$REMOTE_ENV"; then
 else
   echo 'KERYKEION_AI_SNIPPETS_ENABLED=True' >> "$REMOTE_ENV"
 fi
-if ! grep -q '^GEMINI_API_KEY=.\+' "$REMOTE_ENV"; then
-  VOX_GEMINI=$(grep -m1 '^GEMINI_API_KEY=' /opt/voxtvserver/.env 2>/dev/null | cut -d= -f2- || true)
-  if [[ -n "$VOX_GEMINI" ]]; then
-    echo "GEMINI_API_KEY=${VOX_GEMINI}" >> "$REMOTE_ENV"
+if ! grep -q '^GROQ_API_KEY=.\+' "$REMOTE_ENV"; then
+  VOX_GROQ=$(grep -m1 '^GROQ_API_KEY=' /opt/voxtvserver/.env 2>/dev/null | cut -d= -f2- || true)
+  if [[ -n "$VOX_GROQ" ]]; then
+    echo "GROQ_API_KEY=${VOX_GROQ}" >> "$REMOTE_ENV"
   else
-    echo "⚠ GEMINI_API_KEY vacía — añádela manualmente en $REMOTE_ENV"
+    echo "⚠ GROQ_API_KEY vacía — snippets usan llm_bridge (free_first); configura en $REMOTE_ENV"
   fi
 fi
 cd /opt/studio33

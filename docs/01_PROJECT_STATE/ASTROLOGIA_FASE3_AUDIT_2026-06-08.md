@@ -48,9 +48,11 @@ El módulo de astrología tiene backend completo (14 endpoints activos) y fronte
 
 ### Fix
 
-Añadir `KERYKEION_AI_SNIPPETS_ENABLED=True` a `backend/.env.gemini`. El desarrollador ya sourcea este archivo manualmente para tener la `GEMINI_API_KEY` activa.
+Añadir `KERYKEION_AI_SNIPPETS_ENABLED=True` a `backend/.env.gemini` (desarrollo local).
 
-En **producción (Hetzner)**: añadir las dos vars a `/opt/studio33/.env` (cargado por `docker-compose.studios33.yml` vía `env_file: .env`).
+**Groq vs Gemini:** PlanAI, Tarot gobernado y `/api/ai/status/` usan `llm_bridge` con `AI_PROVIDER=free_first` → **Groq primero**. `22b26a5e` dejó snippets solo en Gemini; refactor posterior unifica `ai_snippets.py` con `llm_bridge`.
+
+En **producción (Hetzner)**: en `/opt/studio33/.env` basta `KERYKEION_AI_SNIPPETS_ENABLED=True` si `GROQ_API_KEY` ya está (deploy la copia desde VoxTV).
 
 ### Riesgo: BAJO
 El constructor de `AstrologyKabbalahSnippetAI` maneja todos los casos de error (sin key, sin SDK, etc.) con `self.error_message` sin romper nada.

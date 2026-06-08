@@ -12,14 +12,11 @@ This module is intentionally feature-flagged to avoid adding latency/cost unless
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Optional, Dict, Tuple, Any, cast
+from typing import Optional, Dict, Tuple
 
 from django.conf import settings
 
-try:
-    from google import genai  # type: ignore
-except Exception:  # pragma: no cover
-    genai = None
+from api.ai.llm_bridge import generate_text, is_llm_available, unavailable_message
 
 
 def _bool_setting(name: str, default: bool = False) -> bool:
@@ -189,11 +186,10 @@ def _fallback_snippet(*, planet: str, sign: str, letter_name: Optional[str]) -> 
 
 
 class AstrologyKabbalahSnippetAI:
-    """Gemini-backed generator for short therapeutic snippets."""
+    """LLM-backed generator for short therapeutic snippets (llm_bridge / free_first → Groq)."""
 
     def __init__(self) -> None:
         self.enabled: bool = False
-        self.model = None
         self.error_message: Optional[str] = None
         self._cache: Dict[Tuple[str, str, str, str, str, str, str, str, str], str] = {}
         self._cache_max = 256
@@ -202,28 +198,11 @@ class AstrologyKabbalahSnippetAI:
             self.error_message = "AI snippets disabled (KERYKEION_AI_SNIPPETS_ENABLED=0)"
             return
 
-        api_key = getattr(settings, "GEMINI_API_KEY", "")
-        if not api_key:
-            self.error_message = "GEMINI_API_KEY no configurada"
+        if not is_llm_available():
+            self.error_message = unavailable_message()
             return
 
-        if not genai:
-            self.error_message = "SDK google.genai no instalado"
-            return
-
-        model_name = getattr(settings, "KERYKEION_AI_SNIPPETS_MODEL", None) or getattr(
-            settings, "GEMINI_MODEL", "gemini-1.5-flash"
-        )
-
-        try:
-            genai_any = cast(Any, genai)
-            self.client = genai_any.Client(api_key=api_key)
-            self.model = self.client.models.generate_content
-            self.model_name = model_name
-            self.enabled = True
-        except Exception as exc:  # pragma: no cover
-            self.enabled = False
-            self.error_message = f"Error configurando Gemini: {exc}"
+        self.enabled = True
 
     def generate_snippet(
         self,
@@ -238,7 +217,7 @@ class AstrologyKabbalahSnippetAI:
         ref_title: str,
         ref_url: str,
     ) -> Optional[str]:
-        if not self.enabled or not self.model:
+        if not self.enabled:
             return None
 
         ctx = _SnippetContext(
@@ -291,17 +270,12 @@ SALIDA: devuelve solo las 3 líneas, sin encabezados.
 """
 
         try:
-            response = self.model(
-                model=self.model_name,
-                contents=prompt,
-                config={
-                    "temperature": 0.5,
-                    "top_p": 0.8,
-                    "top_k": 40,
-                    "max_output_tokens": 220,
-                }
-            )
-            raw_text = _sanitize_plain_text(_clean_model_text(getattr(response, "text", "") or ""))
+            result = generate_text(prompt, temperature=0.5, max_tokens=220, top_p=0.8)
+            if not result.get("success"):
+                return _fallback_snippet(
+                    planet=ctx.planet, sign=ctx.sign, letter_name=ctx.letter_name
+                )
+            raw_text = _sanitize_plain_text(_clean_model_text(result.get("text") or ""))
             raw = _coerce_three_lines(raw_text)
             text = _format_three_lines(raw)
         except Exception:

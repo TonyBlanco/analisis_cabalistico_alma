@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|Bash",
+        "command": ".venv/bin/python3 .claude/hooks/auto_memory.py 2>/dev/null || true",
+        "description": "Auto-capture explicit memory events from tool use"
+      }
+    ],
+    "Stop": [
+      {
+        "command": ".venv/bin/python3 memory_manager.py prune 2>/dev/null; .venv/bin/python3 memory_manager.py dump --out CODEX_CONTEXT.md 2>/dev/null || true",
+        "description": "Session end: prune duplicates + regenerate CODEX_CONTEXT.md"
+      }
+    ]
+  }
+}

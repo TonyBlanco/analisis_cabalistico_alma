@@ -13,12 +13,13 @@
 
 ## 2) Ritual de apertura de nuevo chat (al retomar)
 - Copiar/Pegar la **Frase clave** (exacta) en el primer mensaje del nuevo chat.
+- Leer **memoria compartida de agentes:** `AGENTS.md` y `.ai-memory/active/session_context.md` (y `CODEX_CONTEXT.md` si existe).
 - Añadir un enlace o referencia a los artefactos relevantes listados en el cierre (ej.: `docs/00_SOURCE_OF_TRUTH.md#...`, `Issue #123`).
 - Resumir brevemente (1–2 líneas) lo que se espera del nuevo chat (objetivo y resultado esperado).
 - Si se reanuda una acción técnica, incluir el estado del entorno: rama git, commit SHA, y si procede, el estado del entorno de ejecución (dev/staging).
 
 ## 3) Frase clave (usar exactamente, copy/paste)
-"REANUDAR CONTEXTO: repo=analisis_cabalistico_alma; doc=00_SOURCE_OF_TRUTH.md; last_action=DOCS_MOVE_2026-01-10; owner=TBD"
+"REANUDAR CONTEXTO: repo=analisis_cabalistico_alma; memory=AGENTS.md+.ai-memory/active/session_context.md; doc=01_PROJECT_STATE/PROJECT_STATE_CURRENT.md; prod=studios33.app; owner=TBD"
 
 > Uso: pegar la frase clave completa como primer mensaje permite al equipo/agent recuperar rápidamente el estado y los artefactos vinculados; además facilita búsquedas y trazabilidad.
 

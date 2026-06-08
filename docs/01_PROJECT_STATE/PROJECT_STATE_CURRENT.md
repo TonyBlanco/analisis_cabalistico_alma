@@ -73,6 +73,12 @@ Documento vinculante:
 - Zero regression
 - Fase siguiente: consumidores de AnalysisRecord
 
+## AI Memory Layer — coordinación multi-agente (2026-06-08)
+
+- **Estado:** instalado (`memory_manager.py`, `.ai-memory/`, hooks `.claude/`)
+- **Guía:** `AGENTS.md`, `docs/01_PROJECT_STATE/AI_MEMORY_LAYER.md`
+- **Sesión activa:** `.ai-memory/active/session_context.md`
+
 ## Catálogo de tests — wiring BD / API / FE (2026-06-08)
 
 - **Estado:** alineación aplicada (migración `0090`, registry FE, guards en catálogo terapeuta).

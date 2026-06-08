@@ -81,3 +81,13 @@ deploy/studios33/.env.studios33
 
 # DB backups (Fase D — local only)
 backups/studio33/
+
+# AI Memory Layer
+.venv/
+__pycache__/
+*.pyc
+agent_runtime/__pycache__/
+.ai-memory/.mem0_db/
+.ai-memory/agent_log.archive.md
+CODEX_CONTEXT.md
+grok.md

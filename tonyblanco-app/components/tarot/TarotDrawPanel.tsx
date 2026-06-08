@@ -183,8 +183,10 @@ export default function TarotDrawPanel(props: {
     props.onSystemChange?.(next);
   };
   const [spreadId, setSpreadId] = useState<string>('simple');
+  const [deckScope, setDeckScope] = useState<'major' | 'full'>('major');
   const [intention, setIntention] = useState<string>('');
   const [contextFocus, setContextFocus] = useState<string>('general');
+  const supportsFullDeck = systemId === 'rider-waite';
 
   // Astrology enrichment state
   const [astrologyOptions, setAstrologyOptions] = useState<AstrologyEnrichmentOptions>(DEFAULT_ASTROLOGY_OPTIONS);
@@ -267,6 +269,7 @@ export default function TarotDrawPanel(props: {
           selected_cards: [],
           consent_mode: consent?.mode ?? 'store_with_consent',
           spread_type: spreadId,
+          deck_scope: supportsFullDeck ? deckScope : 'major',
           context_focus: contextFocus,
           intention,
           consultant_id:
@@ -398,6 +401,23 @@ export default function TarotDrawPanel(props: {
               ))}
             </select>
           </div>
+
+          {supportsFullDeck ? (
+            <div>
+              <label className="block text-xs font-medium text-slate-700">Mazo</label>
+              <select
+                value={deckScope}
+                onChange={(e) => setDeckScope(e.target.value as 'major' | 'full')}
+                className="mt-1 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900"
+              >
+                <option value="major">Solo arcanos mayores (22)</option>
+                <option value="full">Mazo completo Rider–Waite (78)</option>
+              </select>
+              <p className="mt-1 text-[11px] text-slate-500">
+                Los menores incluyen Copas, Espadas, Bastos y Oros con ilustración Waite–Smith.
+              </p>
+            </div>
+          ) : null}
 
           <div>
             <label className="block text-xs font-medium text-slate-700">Contexto</label>

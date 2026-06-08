@@ -171,6 +171,8 @@ TAROT_IMAGE_SLUGS: Dict[int, str] = {
 }
 
 RIDER_WAITE_IMAGE_SYSTEMS = frozenset({"rider-waite"})
+FULL_DECK_SYSTEMS = frozenset({"rider-waite"})
+VALID_DECK_SCOPES = frozenset({"major", "full"})
 
 
 def resolve_card_image_url(system_id: str, card_data: Dict[str, Any]) -> Optional[str]:
@@ -217,8 +219,30 @@ def load_deck_json(path: Path, fallback_name: str) -> Dict[str, Any]:
     return {"deck": {"name": fallback_name}, "majorArcana": []}
 
 
+def load_minor_arcana_for_system(system_id: str) -> List[Dict[str, Any]]:
+    """Load minor arcana extension (currently Rider-Waite only)."""
+    system_id = normalize_system_id(system_id)
+    if system_id not in FULL_DECK_SYSTEMS:
+        return []
+    rel = DECK_JSON_RELATIVE.get(system_id)
+    if not rel:
+        return []
+    subdir, _ = rel
+    minors_path = get_tarot_decks_root() / subdir / "rider_waite_minors.json"
+    if not minors_path.exists():
+        logger.warning(f"[SWM-v3] Minor arcana JSON not found: {minors_path}")
+        return []
+    try:
+        with open(minors_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return list(data.get("minorArcana", []))
+    except Exception as e:
+        logger.error(f"[SWM-v3] Error loading minors {minors_path}: {e}")
+        return []
+
+
 def load_deck_for_system(system_id: str) -> Dict[str, Any]:
-    """Load major-arcana JSON for a tarot system."""
+    """Load deck JSON for a tarot system (major + optional minors)."""
     system_id = normalize_system_id(system_id)
     meta = get_system_metadata(system_id)
     rel = DECK_JSON_RELATIVE.get(system_id)
@@ -228,7 +252,38 @@ def load_deck_for_system(system_id: str) -> Dict[str, Any]:
     path = get_tarot_decks_root() / subdir / filename
     if not path.exists():
         logger.warning(f"[SWM-v3] Deck JSON not found: {path}")
-    return load_deck_json(path, meta.get("name", system_id))
+    deck = load_deck_json(path, meta.get("name", system_id))
+    minors = load_minor_arcana_for_system(system_id)
+    if minors:
+        deck["minorArcana"] = minors
+        deck.setdefault("deck", {})
+        if isinstance(deck["deck"], dict):
+            deck["deck"]["totalCards"] = len(deck.get("majorArcana", [])) + len(minors)
+            deck["deck"]["supportsFullDeck"] = True
+    return deck
+
+
+def resolve_deck_scope(system_id: str, deck_scope: Optional[str]) -> str:
+    """Normalize deck scope; full deck only when system supports it."""
+    scope = (deck_scope or "major").strip().lower()
+    if scope not in VALID_DECK_SCOPES:
+        scope = "major"
+    if scope == "full" and normalize_system_id(system_id) not in FULL_DECK_SYSTEMS:
+        scope = "major"
+    return scope
+
+
+def get_draw_pool(
+    deck_data: Dict[str, Any],
+    system_id: str,
+    deck_scope: str,
+) -> List[Dict[str, Any]]:
+    """Cards eligible for random draw / lookup in a reading."""
+    major = list(deck_data.get("majorArcana", []))
+    if deck_scope != "full":
+        return major
+    minors = list(deck_data.get("minorArcana", []))
+    return major + minors
 
 
 def load_bota_deck() -> Dict[str, Any]:
@@ -265,8 +320,10 @@ def get_system_metadata(system_id: str) -> Dict[str, Any]:
             "id": "rider-waite",
             "name": "Rider-Waite-Smith",
             "implemented": True,
-            "description": "Classic Rider-Waite-Smith imagery",
+            "description": "Classic Rider-Waite-Smith imagery (22 mayores + 56 menores)",
             "source": "Arthur Edward Waite & Pamela Colman Smith",
+            "supports_full_deck": True,
+            "total_cards": 78,
         },
         "marsella": {
             "id": "marsella",
@@ -715,6 +772,7 @@ def generate_educational_reading(
     intention: Optional[str] = None,
     astrology_enrichment: Optional[Dict[str, Any]] = None,
     include_ai: bool = False,
+    deck_scope: str = "major",
 ) -> Dict[str, Any]:
     """
     Generate an educational symbolic reading.
@@ -744,9 +802,9 @@ def generate_educational_reading(
     system_meta = apply_system_meta_es(system_id, get_system_metadata(system_id))
     
     deck_data = load_deck_for_system(system_id)
-    
-    major_arcana = deck_data.get("majorArcana", [])
-    
+    deck_scope = resolve_deck_scope(system_id, deck_scope)
+    draw_pool = get_draw_pool(deck_data, system_id, deck_scope)
+
     # If no cards selected, pick random cards based on spread
     num_cards = {
         "simple": 1,
@@ -757,18 +815,17 @@ def generate_educational_reading(
         "tree_of_life": 10,
     }.get(spread_type, 1)
     
-    if not selected_cards and major_arcana:
+    if not selected_cards and draw_pool:
         selected_cards = [
-            card["id"] for card in random.sample(major_arcana, min(num_cards, len(major_arcana)))
+            card["id"] for card in random.sample(draw_pool, min(num_cards, len(draw_pool)))
         ]
-    
+
     # Build cards data
     cards = []
     positions = SPREAD_POSITIONS_ES
-    
+
     for i, card_id in enumerate(selected_cards[:num_cards]):
-        # Find card in deck
-        card_data = next((c for c in major_arcana if c.get("id") == card_id), None)
+        card_data = next((c for c in draw_pool if c.get("id") == card_id), None)
         
         if card_data:
             position = positions[i] if i < len(positions) else {"id": f"pos_{i+1}", "name": f"Posición {i+1}"}
@@ -796,6 +853,8 @@ def generate_educational_reading(
                 "id": card_data["id"],
                 "name": card_data["name"],
                 "nameSpanish": card_data.get("nameSpanish", card_data["name"]),
+                "arcana": card_data.get("arcana", "major"),
+                "suit": card_data.get("suit"),
                 "keyNumber": key_num,
                 "imageUrl": image_url,
                 "reversed": reversed_flag,
@@ -872,6 +931,7 @@ def generate_educational_reading(
     return {
         "reading_id": f"swm3-{datetime.now().strftime('%Y%m%d%H%M%S')}-{random.randint(1000, 9999)}",
         "system": system_meta,
+        "deck_scope": deck_scope,
         "spread": spread_info,
         "cards": cards,
         "symbolic_reading": symbolic_reading,
@@ -940,7 +1000,8 @@ class SwmV3SymbolicReadingCreateView(APIView):
             consultant_id = data.get("consultant_id")
             consent_data = data.get("consent", {})
             include_ai = bool(data.get("include_ai", False))
-            
+            deck_scope = data.get("deck_scope", "major")
+
             # Validate consent mode
             if consent_mode not in ["no_store", "store_anonymized", "store_with_consent"]:
                 consent_mode = "no_store"
@@ -958,6 +1019,7 @@ class SwmV3SymbolicReadingCreateView(APIView):
                 context_focus=context_focus,
                 intention=intention,
                 include_ai=include_ai,
+                deck_scope=deck_scope,
             )
             
             # Determine if we should store

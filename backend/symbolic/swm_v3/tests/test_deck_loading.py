@@ -50,6 +50,22 @@ class SwmV3DeckLoadingTests(SimpleTestCase):
         self.assertTrue(inner.get("system_frame"))
         self.assertTrue(card.get("symbols"))
 
+    def test_rider_waite_loads_56_minors(self):
+        deck = load_deck_for_system("rider-waite")
+        self.assertEqual(len(deck.get("minorArcana", [])), 56)
+
+    def test_rider_waite_full_deck_resolves_minor_card(self):
+        payload = generate_educational_reading(
+            system_id="rider-waite",
+            selected_cards=["ace-of-cups"],
+            spread_type="simple",
+            deck_scope="full",
+        )
+        card = payload["cards"][0]
+        self.assertEqual(card.get("arcana"), "minor")
+        self.assertEqual(card.get("nameSpanish"), "As de Copas")
+        self.assertEqual(card.get("imageUrl"), "/tarot/rider-waite/c01.jpg")
+
     def test_rider_waite_reading_uses_rws_image_urls(self):
         payload = generate_educational_reading(
             system_id="rider-waite",

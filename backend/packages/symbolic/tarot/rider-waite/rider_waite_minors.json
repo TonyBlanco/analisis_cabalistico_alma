@@ -1,0 +1,1294 @@
+{
+  "source": "metabismuth/tarot-json",
+  "minorArcana": [
+    {
+      "id": "ace-of-cups",
+      "name": "Ace of Cups",
+      "nameSpanish": "As de Copas",
+      "arcana": "minor",
+      "suit": "cups",
+      "number": 1,
+      "court": null,
+      "keywords": [
+        "emoción",
+        "vínculo",
+        "intuición",
+        "corazón"
+      ],
+      "keywordsSpanish": [
+        "emoción",
+        "vínculo",
+        "intuición",
+        "corazón"
+      ],
+      "image": "c01.jpg",
+      "imageUrl": "/tarot/rider-waite/c01.jpg"
+    },
+    {
+      "id": "two-of-cups",
+      "name": "Two of Cups",
+      "nameSpanish": "Dos de Copas",
+      "arcana": "minor",
+      "suit": "cups",
+      "number": 2,
+      "court": null,
+      "keywords": [
+        "emoción",
+        "vínculo",
+        "intuición",
+        "corazón"
+      ],
+      "keywordsSpanish": [
+        "emoción",
+        "vínculo",
+        "intuición",
+        "corazón"
+      ],
+      "image": "c02.jpg",
+      "imageUrl": "/tarot/rider-waite/c02.jpg"
+    },
+    {
+      "id": "three-of-cups",
+      "name": "Three of Cups",
+      "nameSpanish": "Tres de Copas",
+      "arcana": "minor",
+      "suit": "cups",
+      "number": 3,
+      "court": null,
+      "keywords": [
+        "emoción",
+        "vínculo",
+        "intuición",
+        "corazón"
+      ],
+      "keywordsSpanish": [
+        "emoción",
+        "vínculo",
+        "intuición",
+        "corazón"
+      ],
+      "image": "c03.jpg",
+      "imageUrl": "/tarot/rider-waite/c03.jpg"
+    },
+    {
+      "id": "four-of-cups",
+      "name": "Four of Cups",
+      "nameSpanish": "Cuatro de Copas",
+      "arcana": "minor",
+      "suit": "cups",
+      "number": 4,
+      "court": null,
+      "keywords": [
+        "emoción",
+        "vínculo",
+        "intuición",
+        "corazón"
+      ],
+      "keywordsSpanish": [
+        "emoción",
+        "vínculo",
+        "intuición",
+        "corazón"
+      ],
+      "image": "c04.jpg",
+      "imageUrl": "/tarot/rider-waite/c04.jpg"
+    },
+    {
+      "id": "five-of-cups",
+      "name": "Five of Cups",
+      "nameSpanish": "Cinco de Copas",
+      "arcana": "minor",
+      "suit": "cups",
+      "number": 5,
+      "court": null,
+      "keywords": [
+        "emoción",
+        "vínculo",
+        "intuición",
+        "corazón"
+      ],
+      "keywordsSpanish": [
+        "emoción",
+        "vínculo",
+        "intuición",
+        "corazón"
+      ],
+      "image": "c05.jpg",
+      "imageUrl": "/tarot/rider-waite/c05.jpg"
+    },
+    {
+      "id": "six-of-cups",
+      "name": "Six of Cups",
+      "nameSpanish": "Seis de Copas",
+      "arcana": "minor",
+      "suit": "cups",
+      "number": 6,
+      "court": null,
+      "keywords": [
+        "emoción",
+        "vínculo",
+        "intuición",
+        "corazón"
+      ],
+      "keywordsSpanish": [
+        "emoción",
+        "vínculo",
+        "intuición",
+        "corazón"
+      ],
+      "image": "c06.jpg",
+      "imageUrl": "/tarot/rider-waite/c06.jpg"
+    },
+    {
+      "id": "seven-of-cups",
+      "name": "Seven of Cups",
+      "nameSpanish": "Siete de Copas",
+      "arcana": "minor",
+      "suit": "cups",
+      "number": 7,
+      "court": null,
+      "keywords": [
+        "emoción",
+        "vínculo",
+        "intuición",
+        "corazón"
+      ],
+      "keywordsSpanish": [
+        "emoción",
+        "vínculo",
+        "intuición",
+        "corazón"
+      ],
+      "image": "c07.jpg",
+      "imageUrl": "/tarot/rider-waite/c07.jpg"
+    },
+    {
+      "id": "eight-of-cups",
+      "name": "Eight of Cups",
+      "nameSpanish": "Ocho de Copas",
+      "arcana": "minor",
+      "suit": "cups",
+      "number": 8,
+      "court": null,
+      "keywords": [
+        "emoción",
+        "vínculo",
+        "intuición",
+        "corazón"
+      ],
+      "keywordsSpanish": [
+        "emoción",
+        "vínculo",
+        "intuición",
+        "corazón"
+      ],
+      "image": "c08.jpg",
+      "imageUrl": "/tarot/rider-waite/c08.jpg"
+    },
+    {
+      "id": "nine-of-cups",
+      "name": "Nine of Cups",
+      "nameSpanish": "Nueve de Copas",
+      "arcana": "minor",
+      "suit": "cups",
+      "number": 9,
+      "court": null,
+      "keywords": [
+        "emoción",
+        "vínculo",
+        "intuición",
+        "corazón"
+      ],
+      "keywordsSpanish": [
+        "emoción",
+        "vínculo",
+        "intuición",
+        "corazón"
+      ],
+      "image": "c09.jpg",
+      "imageUrl": "/tarot/rider-waite/c09.jpg"
+    },
+    {
+      "id": "ten-of-cups",
+      "name": "Ten of Cups",
+      "nameSpanish": "Diez de Copas",
+      "arcana": "minor",
+      "suit": "cups",
+      "number": 10,
+      "court": null,
+      "keywords": [
+        "emoción",
+        "vínculo",
+        "intuición",
+        "corazón"
+      ],
+      "keywordsSpanish": [
+        "emoción",
+        "vínculo",
+        "intuición",
+        "corazón"
+      ],
+      "image": "c10.jpg",
+      "imageUrl": "/tarot/rider-waite/c10.jpg"
+    },
+    {
+      "id": "page-of-cups",
+      "name": "Page of Cups",
+      "nameSpanish": "Sota de Copas",
+      "arcana": "minor",
+      "suit": "cups",
+      "number": 11,
+      "court": "page",
+      "keywords": [
+        "emoción",
+        "vínculo",
+        "intuición",
+        "corazón"
+      ],
+      "keywordsSpanish": [
+        "emoción",
+        "vínculo",
+        "intuición",
+        "corazón"
+      ],
+      "image": "c11.jpg",
+      "imageUrl": "/tarot/rider-waite/c11.jpg"
+    },
+    {
+      "id": "knight-of-cups",
+      "name": "Knight of Cups",
+      "nameSpanish": "Caballo de Copas",
+      "arcana": "minor",
+      "suit": "cups",
+      "number": 12,
+      "court": "knight",
+      "keywords": [
+        "emoción",
+        "vínculo",
+        "intuición",
+        "corazón"
+      ],
+      "keywordsSpanish": [
+        "emoción",
+        "vínculo",
+        "intuición",
+        "corazón"
+      ],
+      "image": "c12.jpg",
+      "imageUrl": "/tarot/rider-waite/c12.jpg"
+    },
+    {
+      "id": "queen-of-cups",
+      "name": "Queen of Cups",
+      "nameSpanish": "Reina de Copas",
+      "arcana": "minor",
+      "suit": "cups",
+      "number": 13,
+      "court": "queen",
+      "keywords": [
+        "emoción",
+        "vínculo",
+        "intuición",
+        "corazón"
+      ],
+      "keywordsSpanish": [
+        "emoción",
+        "vínculo",
+        "intuición",
+        "corazón"
+      ],
+      "image": "c13.jpg",
+      "imageUrl": "/tarot/rider-waite/c13.jpg"
+    },
+    {
+      "id": "king-of-cups",
+      "name": "King of Cups",
+      "nameSpanish": "Rey de Copas",
+      "arcana": "minor",
+      "suit": "cups",
+      "number": 14,
+      "court": "king",
+      "keywords": [
+        "emoción",
+        "vínculo",
+        "intuición",
+        "corazón"
+      ],
+      "keywordsSpanish": [
+        "emoción",
+        "vínculo",
+        "intuición",
+        "corazón"
+      ],
+      "image": "c14.jpg",
+      "imageUrl": "/tarot/rider-waite/c14.jpg"
+    },
+    {
+      "id": "ace-of-swords",
+      "name": "Ace of Swords",
+      "nameSpanish": "As de Espadas",
+      "arcana": "minor",
+      "suit": "swords",
+      "number": 1,
+      "court": null,
+      "keywords": [
+        "mente",
+        "verdad",
+        "conflicto",
+        "claridad"
+      ],
+      "keywordsSpanish": [
+        "mente",
+        "verdad",
+        "conflicto",
+        "claridad"
+      ],
+      "image": "s01.jpg",
+      "imageUrl": "/tarot/rider-waite/s01.jpg"
+    },
+    {
+      "id": "two-of-swords",
+      "name": "Two of Swords",
+      "nameSpanish": "Dos de Espadas",
+      "arcana": "minor",
+      "suit": "swords",
+      "number": 2,
+      "court": null,
+      "keywords": [
+        "mente",
+        "verdad",
+        "conflicto",
+        "claridad"
+      ],
+      "keywordsSpanish": [
+        "mente",
+        "verdad",
+        "conflicto",
+        "claridad"
+      ],
+      "image": "s02.jpg",
+      "imageUrl": "/tarot/rider-waite/s02.jpg"
+    },
+    {
+      "id": "three-of-swords",
+      "name": "Three of Swords",
+      "nameSpanish": "Tres de Espadas",
+      "arcana": "minor",
+      "suit": "swords",
+      "number": 3,
+      "court": null,
+      "keywords": [
+        "mente",
+        "verdad",
+        "conflicto",
+        "claridad"
+      ],
+      "keywordsSpanish": [
+        "mente",
+        "verdad",
+        "conflicto",
+        "claridad"
+      ],
+      "image": "s03.jpg",
+      "imageUrl": "/tarot/rider-waite/s03.jpg"
+    },
+    {
+      "id": "four-of-swords",
+      "name": "Four of Swords",
+      "nameSpanish": "Cuatro de Espadas",
+      "arcana": "minor",
+      "suit": "swords",
+      "number": 4,
+      "court": null,
+      "keywords": [
+        "mente",
+        "verdad",
+        "conflicto",
+        "claridad"
+      ],
+      "keywordsSpanish": [
+        "mente",
+        "verdad",
+        "conflicto",
+        "claridad"
+      ],
+      "image": "s04.jpg",
+      "imageUrl": "/tarot/rider-waite/s04.jpg"
+    },
+    {
+      "id": "five-of-swords",
+      "name": "Five of Swords",
+      "nameSpanish": "Cinco de Espadas",
+      "arcana": "minor",
+      "suit": "swords",
+      "number": 5,
+      "court": null,
+      "keywords": [
+        "mente",
+        "verdad",
+        "conflicto",
+        "claridad"
+      ],
+      "keywordsSpanish": [
+        "mente",
+        "verdad",
+        "conflicto",
+        "claridad"
+      ],
+      "image": "s05.jpg",
+      "imageUrl": "/tarot/rider-waite/s05.jpg"
+    },
+    {
+      "id": "six-of-swords",
+      "name": "Six of Swords",
+      "nameSpanish": "Seis de Espadas",
+      "arcana": "minor",
+      "suit": "swords",
+      "number": 6,
+      "court": null,
+      "keywords": [
+        "mente",
+        "verdad",
+        "conflicto",
+        "claridad"
+      ],
+      "keywordsSpanish": [
+        "mente",
+        "verdad",
+        "conflicto",
+        "claridad"
+      ],
+      "image": "s06.jpg",
+      "imageUrl": "/tarot/rider-waite/s06.jpg"
+    },
+    {
+      "id": "seven-of-swords",
+      "name": "Seven of Swords",
+      "nameSpanish": "Siete de Espadas",
+      "arcana": "minor",
+      "suit": "swords",
+      "number": 7,
+      "court": null,
+      "keywords": [
+        "mente",
+        "verdad",
+        "conflicto",
+        "claridad"
+      ],
+      "keywordsSpanish": [
+        "mente",
+        "verdad",
+        "conflicto",
+        "claridad"
+      ],
+      "image": "s07.jpg",
+      "imageUrl": "/tarot/rider-waite/s07.jpg"
+    },
+    {
+      "id": "eight-of-swords",
+      "name": "Eight of Swords",
+      "nameSpanish": "Ocho de Espadas",
+      "arcana": "minor",
+      "suit": "swords",
+      "number": 8,
+      "court": null,
+      "keywords": [
+        "mente",
+        "verdad",
+        "conflicto",
+        "claridad"
+      ],
+      "keywordsSpanish": [
+        "mente",
+        "verdad",
+        "conflicto",
+        "claridad"
+      ],
+      "image": "s08.jpg",
+      "imageUrl": "/tarot/rider-waite/s08.jpg"
+    },
+    {
+      "id": "nine-of-swords",
+      "name": "Nine of Swords",
+      "nameSpanish": "Nueve de Espadas",
+      "arcana": "minor",
+      "suit": "swords",
+      "number": 9,
+      "court": null,
+      "keywords": [
+        "mente",
+        "verdad",
+        "conflicto",
+        "claridad"
+      ],
+      "keywordsSpanish": [
+        "mente",
+        "verdad",
+        "conflicto",
+        "claridad"
+      ],
+      "image": "s09.jpg",
+      "imageUrl": "/tarot/rider-waite/s09.jpg"
+    },
+    {
+      "id": "ten-of-swords",
+      "name": "Ten of Swords",
+      "nameSpanish": "Diez de Espadas",
+      "arcana": "minor",
+      "suit": "swords",
+      "number": 10,
+      "court": null,
+      "keywords": [
+        "mente",
+        "verdad",
+        "conflicto",
+        "claridad"
+      ],
+      "keywordsSpanish": [
+        "mente",
+        "verdad",
+        "conflicto",
+        "claridad"
+      ],
+      "image": "s10.jpg",
+      "imageUrl": "/tarot/rider-waite/s10.jpg"
+    },
+    {
+      "id": "page-of-swords",
+      "name": "Page of Swords",
+      "nameSpanish": "Sota de Espadas",
+      "arcana": "minor",
+      "suit": "swords",
+      "number": 11,
+      "court": "page",
+      "keywords": [
+        "mente",
+        "verdad",
+        "conflicto",
+        "claridad"
+      ],
+      "keywordsSpanish": [
+        "mente",
+        "verdad",
+        "conflicto",
+        "claridad"
+      ],
+      "image": "s11.jpg",
+      "imageUrl": "/tarot/rider-waite/s11.jpg"
+    },
+    {
+      "id": "knight-of-swords",
+      "name": "Knight of Swords",
+      "nameSpanish": "Caballo de Espadas",
+      "arcana": "minor",
+      "suit": "swords",
+      "number": 12,
+      "court": "knight",
+      "keywords": [
+        "mente",
+        "verdad",
+        "conflicto",
+        "claridad"
+      ],
+      "keywordsSpanish": [
+        "mente",
+        "verdad",
+        "conflicto",
+        "claridad"
+      ],
+      "image": "s12.jpg",
+      "imageUrl": "/tarot/rider-waite/s12.jpg"
+    },
+    {
+      "id": "queen-of-swords",
+      "name": "Queen of Swords",
+      "nameSpanish": "Reina de Espadas",
+      "arcana": "minor",
+      "suit": "swords",
+      "number": 13,
+      "court": "queen",
+      "keywords": [
+        "mente",
+        "verdad",
+        "conflicto",
+        "claridad"
+      ],
+      "keywordsSpanish": [
+        "mente",
+        "verdad",
+        "conflicto",
+        "claridad"
+      ],
+      "image": "s13.jpg",
+      "imageUrl": "/tarot/rider-waite/s13.jpg"
+    },
+    {
+      "id": "king-of-swords",
+      "name": "King of Swords",
+      "nameSpanish": "Rey de Espadas",
+      "arcana": "minor",
+      "suit": "swords",
+      "number": 14,
+      "court": "king",
+      "keywords": [
+        "mente",
+        "verdad",
+        "conflicto",
+        "claridad"
+      ],
+      "keywordsSpanish": [
+        "mente",
+        "verdad",
+        "conflicto",
+        "claridad"
+      ],
+      "image": "s14.jpg",
+      "imageUrl": "/tarot/rider-waite/s14.jpg"
+    },
+    {
+      "id": "ace-of-wands",
+      "name": "Ace of Wands",
+      "nameSpanish": "As de Bastos",
+      "arcana": "minor",
+      "suit": "wands",
+      "number": 1,
+      "court": null,
+      "keywords": [
+        "impulso",
+        "creatividad",
+        "acción",
+        "voluntad"
+      ],
+      "keywordsSpanish": [
+        "impulso",
+        "creatividad",
+        "acción",
+        "voluntad"
+      ],
+      "image": "w01.jpg",
+      "imageUrl": "/tarot/rider-waite/w01.jpg"
+    },
+    {
+      "id": "two-of-wands",
+      "name": "Two of Wands",
+      "nameSpanish": "Dos de Bastos",
+      "arcana": "minor",
+      "suit": "wands",
+      "number": 2,
+      "court": null,
+      "keywords": [
+        "impulso",
+        "creatividad",
+        "acción",
+        "voluntad"
+      ],
+      "keywordsSpanish": [
+        "impulso",
+        "creatividad",
+        "acción",
+        "voluntad"
+      ],
+      "image": "w02.jpg",
+      "imageUrl": "/tarot/rider-waite/w02.jpg"
+    },
+    {
+      "id": "three-of-wands",
+      "name": "Three of Wands",
+      "nameSpanish": "Tres de Bastos",
+      "arcana": "minor",
+      "suit": "wands",
+      "number": 3,
+      "court": null,
+      "keywords": [
+        "impulso",
+        "creatividad",
+        "acción",
+        "voluntad"
+      ],
+      "keywordsSpanish": [
+        "impulso",
+        "creatividad",
+        "acción",
+        "voluntad"
+      ],
+      "image": "w03.jpg",
+      "imageUrl": "/tarot/rider-waite/w03.jpg"
+    },
+    {
+      "id": "four-of-wands",
+      "name": "Four of Wands",
+      "nameSpanish": "Cuatro de Bastos",
+      "arcana": "minor",
+      "suit": "wands",
+      "number": 4,
+      "court": null,
+      "keywords": [
+        "impulso",
+        "creatividad",
+        "acción",
+        "voluntad"
+      ],
+      "keywordsSpanish": [
+        "impulso",
+        "creatividad",
+        "acción",
+        "voluntad"
+      ],
+      "image": "w04.jpg",
+      "imageUrl": "/tarot/rider-waite/w04.jpg"
+    },
+    {
+      "id": "five-of-wands",
+      "name": "Five of Wands",
+      "nameSpanish": "Cinco de Bastos",
+      "arcana": "minor",
+      "suit": "wands",
+      "number": 5,
+      "court": null,
+      "keywords": [
+        "impulso",
+        "creatividad",
+        "acción",
+        "voluntad"
+      ],
+      "keywordsSpanish": [
+        "impulso",
+        "creatividad",
+        "acción",
+        "voluntad"
+      ],
+      "image": "w05.jpg",
+      "imageUrl": "/tarot/rider-waite/w05.jpg"
+    },
+    {
+      "id": "six-of-wands",
+      "name": "Six of Wands",
+      "nameSpanish": "Seis de Bastos",
+      "arcana": "minor",
+      "suit": "wands",
+      "number": 6,
+      "court": null,
+      "keywords": [
+        "impulso",
+        "creatividad",
+        "acción",
+        "voluntad"
+      ],
+      "keywordsSpanish": [
+        "impulso",
+        "creatividad",
+        "acción",
+        "voluntad"
+      ],
+      "image": "w06.jpg",
+      "imageUrl": "/tarot/rider-waite/w06.jpg"
+    },
+    {
+      "id": "seven-of-wands",
+      "name": "Seven of Wands",
+      "nameSpanish": "Siete de Bastos",
+      "arcana": "minor",
+      "suit": "wands",
+      "number": 7,
+      "court": null,
+      "keywords": [
+        "impulso",
+        "creatividad",
+        "acción",
+        "voluntad"
+      ],
+      "keywordsSpanish": [
+        "impulso",
+        "creatividad",
+        "acción",
+        "voluntad"
+      ],
+      "image": "w07.jpg",
+      "imageUrl": "/tarot/rider-waite/w07.jpg"
+    },
+    {
+      "id": "eight-of-wands",
+      "name": "Eight of Wands",
+      "nameSpanish": "Ocho de Bastos",
+      "arcana": "minor",
+      "suit": "wands",
+      "number": 8,
+      "court": null,
+      "keywords": [
+        "impulso",
+        "creatividad",
+        "acción",
+        "voluntad"
+      ],
+      "keywordsSpanish": [
+        "impulso",
+        "creatividad",
+        "acción",
+        "voluntad"
+      ],
+      "image": "w08.jpg",
+      "imageUrl": "/tarot/rider-waite/w08.jpg"
+    },
+    {
+      "id": "nine-of-wands",
+      "name": "Nine of Wands",
+      "nameSpanish": "Nueve de Bastos",
+      "arcana": "minor",
+      "suit": "wands",
+      "number": 9,
+      "court": null,
+      "keywords": [
+        "impulso",
+        "creatividad",
+        "acción",
+        "voluntad"
+      ],
+      "keywordsSpanish": [
+        "impulso",
+        "creatividad",
+        "acción",
+        "voluntad"
+      ],
+      "image": "w09.jpg",
+      "imageUrl": "/tarot/rider-waite/w09.jpg"
+    },
+    {
+      "id": "ten-of-wands",
+      "name": "Ten of Wands",
+      "nameSpanish": "Diez de Bastos",
+      "arcana": "minor",
+      "suit": "wands",
+      "number": 10,
+      "court": null,
+      "keywords": [
+        "impulso",
+        "creatividad",
+        "acción",
+        "voluntad"
+      ],
+      "keywordsSpanish": [
+        "impulso",
+        "creatividad",
+        "acción",
+        "voluntad"
+      ],
+      "image": "w10.jpg",
+      "imageUrl": "/tarot/rider-waite/w10.jpg"
+    },
+    {
+      "id": "page-of-wands",
+      "name": "Page of Wands",
+      "nameSpanish": "Sota de Bastos",
+      "arcana": "minor",
+      "suit": "wands",
+      "number": 11,
+      "court": "page",
+      "keywords": [
+        "impulso",
+        "creatividad",
+        "acción",
+        "voluntad"
+      ],
+      "keywordsSpanish": [
+        "impulso",
+        "creatividad",
+        "acción",
+        "voluntad"
+      ],
+      "image": "w11.jpg",
+      "imageUrl": "/tarot/rider-waite/w11.jpg"
+    },
+    {
+      "id": "knight-of-wands",
+      "name": "Knight of Wands",
+      "nameSpanish": "Caballo de Bastos",
+      "arcana": "minor",
+      "suit": "wands",
+      "number": 12,
+      "court": "knight",
+      "keywords": [
+        "impulso",
+        "creatividad",
+        "acción",
+        "voluntad"
+      ],
+      "keywordsSpanish": [
+        "impulso",
+        "creatividad",
+        "acción",
+        "voluntad"
+      ],
+      "image": "w12.jpg",
+      "imageUrl": "/tarot/rider-waite/w12.jpg"
+    },
+    {
+      "id": "queen-of-wands",
+      "name": "Queen of Wands",
+      "nameSpanish": "Reina de Bastos",
+      "arcana": "minor",
+      "suit": "wands",
+      "number": 13,
+      "court": "queen",
+      "keywords": [
+        "impulso",
+        "creatividad",
+        "acción",
+        "voluntad"
+      ],
+      "keywordsSpanish": [
+        "impulso",
+        "creatividad",
+        "acción",
+        "voluntad"
+      ],
+      "image": "w13.jpg",
+      "imageUrl": "/tarot/rider-waite/w13.jpg"
+    },
+    {
+      "id": "king-of-wands",
+      "name": "King of Wands",
+      "nameSpanish": "Rey de Bastos",
+      "arcana": "minor",
+      "suit": "wands",
+      "number": 14,
+      "court": "king",
+      "keywords": [
+        "impulso",
+        "creatividad",
+        "acción",
+        "voluntad"
+      ],
+      "keywordsSpanish": [
+        "impulso",
+        "creatividad",
+        "acción",
+        "voluntad"
+      ],
+      "image": "w14.jpg",
+      "imageUrl": "/tarot/rider-waite/w14.jpg"
+    },
+    {
+      "id": "ace-of-pentacles",
+      "name": "Ace of Pentacles",
+      "nameSpanish": "As de Oros",
+      "arcana": "minor",
+      "suit": "pentacles",
+      "number": 1,
+      "court": null,
+      "keywords": [
+        "cuerpo",
+        "recursos",
+        "trabajo",
+        "materialidad"
+      ],
+      "keywordsSpanish": [
+        "cuerpo",
+        "recursos",
+        "trabajo",
+        "materialidad"
+      ],
+      "image": "p01.jpg",
+      "imageUrl": "/tarot/rider-waite/p01.jpg"
+    },
+    {
+      "id": "two-of-pentacles",
+      "name": "Two of Pentacles",
+      "nameSpanish": "Dos de Oros",
+      "arcana": "minor",
+      "suit": "pentacles",
+      "number": 2,
+      "court": null,
+      "keywords": [
+        "cuerpo",
+        "recursos",
+        "trabajo",
+        "materialidad"
+      ],
+      "keywordsSpanish": [
+        "cuerpo",
+        "recursos",
+        "trabajo",
+        "materialidad"
+      ],
+      "image": "p02.jpg",
+      "imageUrl": "/tarot/rider-waite/p02.jpg"
+    },
+    {
+      "id": "three-of-pentacles",
+      "name": "Three of Pentacles",
+      "nameSpanish": "Tres de Oros",
+      "arcana": "minor",
+      "suit": "pentacles",
+      "number": 3,
+      "court": null,
+      "keywords": [
+        "cuerpo",
+        "recursos",
+        "trabajo",
+        "materialidad"
+      ],
+      "keywordsSpanish": [
+        "cuerpo",
+        "recursos",
+        "trabajo",
+        "materialidad"
+      ],
+      "image": "p03.jpg",
+      "imageUrl": "/tarot/rider-waite/p03.jpg"
+    },
+    {
+      "id": "four-of-pentacles",
+      "name": "Four of Pentacles",
+      "nameSpanish": "Cuatro de Oros",
+      "arcana": "minor",
+      "suit": "pentacles",
+      "number": 4,
+      "court": null,
+      "keywords": [
+        "cuerpo",
+        "recursos",
+        "trabajo",
+        "materialidad"
+      ],
+      "keywordsSpanish": [
+        "cuerpo",
+        "recursos",
+        "trabajo",
+        "materialidad"
+      ],
+      "image": "p04.jpg",
+      "imageUrl": "/tarot/rider-waite/p04.jpg"
+    },
+    {
+      "id": "five-of-pentacles",
+      "name": "Five of Pentacles",
+      "nameSpanish": "Cinco de Oros",
+      "arcana": "minor",
+      "suit": "pentacles",
+      "number": 5,
+      "court": null,
+      "keywords": [
+        "cuerpo",
+        "recursos",
+        "trabajo",
+        "materialidad"
+      ],
+      "keywordsSpanish": [
+        "cuerpo",
+        "recursos",
+        "trabajo",
+        "materialidad"
+      ],
+      "image": "p05.jpg",
+      "imageUrl": "/tarot/rider-waite/p05.jpg"
+    },
+    {
+      "id": "six-of-pentacles",
+      "name": "Six of Pentacles",
+      "nameSpanish": "Seis de Oros",
+      "arcana": "minor",
+      "suit": "pentacles",
+      "number": 6,
+      "court": null,
+      "keywords": [
+        "cuerpo",
+        "recursos",
+        "trabajo",
+        "materialidad"
+      ],
+      "keywordsSpanish": [
+        "cuerpo",
+        "recursos",
+        "trabajo",
+        "materialidad"
+      ],
+      "image": "p06.jpg",
+      "imageUrl": "/tarot/rider-waite/p06.jpg"
+    },
+    {
+      "id": "seven-of-pentacles",
+      "name": "Seven of Pentacles",
+      "nameSpanish": "Siete de Oros",
+      "arcana": "minor",
+      "suit": "pentacles",
+      "number": 7,
+      "court": null,
+      "keywords": [
+        "cuerpo",
+        "recursos",
+        "trabajo",
+        "materialidad"
+      ],
+      "keywordsSpanish": [
+        "cuerpo",
+        "recursos",
+        "trabajo",
+        "materialidad"
+      ],
+      "image": "p07.jpg",
+      "imageUrl": "/tarot/rider-waite/p07.jpg"
+    },
+    {
+      "id": "eight-of-pentacles",
+      "name": "Eight of Pentacles",
+      "nameSpanish": "Ocho de Oros",
+      "arcana": "minor",
+      "suit": "pentacles",
+      "number": 8,
+      "court": null,
+      "keywords": [
+        "cuerpo",
+        "recursos",
+        "trabajo",
+        "materialidad"
+      ],
+      "keywordsSpanish": [
+        "cuerpo",
+        "recursos",
+        "trabajo",
+        "materialidad"
+      ],
+      "image": "p08.jpg",
+      "imageUrl": "/tarot/rider-waite/p08.jpg"
+    },
+    {
+      "id": "nine-of-pentacles",
+      "name": "Nine of Pentacles",
+      "nameSpanish": "Nueve de Oros",
+      "arcana": "minor",
+      "suit": "pentacles",
+      "number": 9,
+      "court": null,
+      "keywords": [
+        "cuerpo",
+        "recursos",
+        "trabajo",
+        "materialidad"
+      ],
+      "keywordsSpanish": [
+        "cuerpo",
+        "recursos",
+        "trabajo",
+        "materialidad"
+      ],
+      "image": "p09.jpg",
+      "imageUrl": "/tarot/rider-waite/p09.jpg"
+    },
+    {
+      "id": "ten-of-pentacles",
+      "name": "Ten of Pentacles",
+      "nameSpanish": "Diez de Oros",
+      "arcana": "minor",
+      "suit": "pentacles",
+      "number": 10,
+      "court": null,
+      "keywords": [
+        "cuerpo",
+        "recursos",
+        "trabajo",
+        "materialidad"
+      ],
+      "keywordsSpanish": [
+        "cuerpo",
+        "recursos",
+        "trabajo",
+        "materialidad"
+      ],
+      "image": "p10.jpg",
+      "imageUrl": "/tarot/rider-waite/p10.jpg"
+    },
+    {
+      "id": "page-of-pentacles",
+      "name": "Page of Pentacles",
+      "nameSpanish": "Sota de Oros",
+      "arcana": "minor",
+      "suit": "pentacles",
+      "number": 11,
+      "court": "page",
+      "keywords": [
+        "cuerpo",
+        "recursos",
+        "trabajo",
+        "materialidad"
+      ],
+      "keywordsSpanish": [
+        "cuerpo",
+        "recursos",
+        "trabajo",
+        "materialidad"
+      ],
+      "image": "p11.jpg",
+      "imageUrl": "/tarot/rider-waite/p11.jpg"
+    },
+    {
+      "id": "knight-of-pentacles",
+      "name": "Knight of Pentacles",
+      "nameSpanish": "Caballo de Oros",
+      "arcana": "minor",
+      "suit": "pentacles",
+      "number": 12,
+      "court": "knight",
+      "keywords": [
+        "cuerpo",
+        "recursos",
+        "trabajo",
+        "materialidad"
+      ],
+      "keywordsSpanish": [
+        "cuerpo",
+        "recursos",
+        "trabajo",
+        "materialidad"
+      ],
+      "image": "p12.jpg",
+      "imageUrl": "/tarot/rider-waite/p12.jpg"
+    },
+    {
+      "id": "queen-of-pentacles",
+      "name": "Queen of Pentacles",
+      "nameSpanish": "Reina de Oros",
+      "arcana": "minor",
+      "suit": "pentacles",
+      "number": 13,
+      "court": "queen",
+      "keywords": [
+        "cuerpo",
+        "recursos",
+        "trabajo",
+        "materialidad"
+      ],
+      "keywordsSpanish": [
+        "cuerpo",
+        "recursos",
+        "trabajo",
+        "materialidad"
+      ],
+      "image": "p13.jpg",
+      "imageUrl": "/tarot/rider-waite/p13.jpg"
+    },
+    {
+      "id": "king-of-pentacles",
+      "name": "King of Pentacles",
+      "nameSpanish": "Rey de Oros",
+      "arcana": "minor",
+      "suit": "pentacles",
+      "number": 14,
+      "court": "king",
+      "keywords": [
+        "cuerpo",
+        "recursos",
+        "trabajo",
+        "materialidad"
+      ],
+      "keywordsSpanish": [
+        "cuerpo",
+        "recursos",
+        "trabajo",
+        "materialidad"
+      ],
+      "image": "p14.jpg",
+      "imageUrl": "/tarot/rider-waite/p14.jpg"
+    }
+  ],
+  "total": 56
+}

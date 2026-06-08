@@ -680,8 +680,21 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
     console.info('ASTRO_LOG', entry);
   };
 
-  // PDF export intentionally disabled in this phase.
-  const exportComparativeAsPDF = async (_elementId: string, _filename = 'comparativa.pdf') => { };
+  const exportComparativeAsPDF = async (elementId: string, filename = 'comparativa.pdf') => {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+    try {
+      const { default: html2canvas } = await import('html2canvas');
+      const { jsPDF } = await import('jspdf');
+      const canvas = await html2canvas(el, { useCORS: true, scale: 2, logging: false });
+      const pdf = new jsPDF({ orientation: 'landscape', unit: 'px', format: [canvas.width, canvas.height] });
+      pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, canvas.width, canvas.height);
+      pdf.save(filename);
+    } catch {
+      // eslint-disable-next-line no-console
+      console.error('PDF export failed for', elementId);
+    }
+  };
 
   // open modal via global event from sidebar button
   React.useEffect(() => {
@@ -1577,8 +1590,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
               </div>
             ) : null}
 
-            {/* Phase 3: timeline UI remains disabled until backend supports targeting specific years/months for returns. */}
-            {false ? (
+            {(symbolicSolarReturnYear !== null || symbolicLunarReturnDate !== null) ? (
               <div className="mb-4 bg-white border border-gray-200 rounded-lg p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div>
@@ -1647,10 +1659,18 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                         <div className="mt-3 rounded border border-gray-200 bg-white p-3">
                           <div className="text-[13px] font-semibold text-gray-900">Comparación anual simbólica</div>
                           <div className="mt-1 text-[12px] text-gray-600">Compara climas simbólicos anuales; no compara eventos ni predice resultados.</div>
-                          <ul className="mt-2 space-y-1 text-[12px] text-gray-700">
-                            <li title="Texto descriptivo y no predictivo.">Año A — énfasis simbólico: consolidación y centrado identitario.</li>
-                            <li title="Texto descriptivo y no predictivo.">Año B — énfasis simbólico: ajuste y reorientación de prioridades.</li>
-                          </ul>
+                          {solarReturnYearComparison ? (
+                            <ul className="mt-2 space-y-1 text-[12px] text-gray-700">
+                              {solarReturnYearComparison.hitsA.slice(0, 4).map((h, i) => (
+                                <li key={`a-${i}`}>Año A · {h.natalGlyph} — activación simbólica</li>
+                              ))}
+                              {solarReturnYearComparison.hitsB.slice(0, 4).map((h, i) => (
+                                <li key={`b-${i}`}>Año B · {h.natalGlyph} — activación simbólica</li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <div className="mt-2 text-[12px] text-gray-500">Activa los aspectos cruzados para ver la comparación simbólica.</div>
+                          )}
                         </div>
                       </div>
                     ) : null}

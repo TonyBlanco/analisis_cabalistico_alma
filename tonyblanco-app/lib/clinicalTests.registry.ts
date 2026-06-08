@@ -194,19 +194,29 @@ export const clinicalTestsRegistry: ClinicalTestRegistryEntry[] = [
 
   },
 
-  // Psicologicos no implementados
-
   {
 
-    test_code: "insomnia-index",
+    test_code: "insomnia",
 
-    display_name: "Insomnia Index",
+    display_name: "Insomnia — Descanso y hábitos",
 
     domain: "Sueño y ritmos",
 
     family: "psicologicos",
 
-    implemented: false,
+    implemented: true,
+
+    patient_route: "/dashboard/patient/tests/insomnia",
+
+    guidance: {
+
+      what: "Evaluación orientativa de hábitos de descanso y calidad del sueño (no médico).",
+
+      when: "Útil cuando hay dificultades para dormir, sueño no reparador o fatiga diurna.",
+
+      reminder: "No diagnóstico. Herramienta de acompañamiento wellness.",
+
+    },
 
   },
 
@@ -380,6 +390,32 @@ export const clinicalTestsRegistry: ClinicalTestRegistryEntry[] = [
 
   {
 
+    test_code: "stress",
+
+    display_name: "Estrés — Carga (PSS)",
+
+    domain: "Bienestar",
+
+    family: "psicologicos",
+
+    implemented: true,
+
+    patient_route: "/dashboard/patient/tests/stress",
+
+    guidance: {
+
+      what: "Screening orientativo de carga de estrés, regulación y recursos (3 dimensiones).",
+
+      when: "Útil cuando hay presión sostenida, agotamiento o dificultad para regular emociones.",
+
+      reminder: "No diagnóstico. Herramienta de acompañamiento wellness.",
+
+    },
+
+  },
+
+  {
+
     test_code: "stress-regulation",
 
     display_name: "Estrés — Carga y regulación",
@@ -406,6 +442,8 @@ export const clinicalTestsRegistry: ClinicalTestRegistryEntry[] = [
 
   {
 
+    // FE questionnaire not built — backend engine (scl90_bank + compute_scl90_wellness) available.
+    // Enable patient_route when form is ready.
     test_code: "scl90",
 
     display_name: "SCL-90 — Screening Holístico",
@@ -414,9 +452,7 @@ export const clinicalTestsRegistry: ClinicalTestRegistryEntry[] = [
 
     family: "psicologicos",
 
-    implemented: true,
-
-    patient_route: "/dashboard/patient/tests/scl90",
+    implemented: false,
 
     guidance: {
 

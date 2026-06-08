@@ -59,9 +59,11 @@ Clasificar tarea (opcional):
 python3 .claude/hooks/context_loader.py --dry-run "tu tarea"
 ```
 
-## Grok (Cursor)
+## Grok / Cursor Agent
 
-- Leer este archivo + `session_context.md` al inicio
+- **Regla automática:** `.cursor/rules/agent-memory.mdc` (`alwaysApply: true`) — Cursor inyecta lectura de memoria al inicio
+- Refuerzo manual si hace falta: `Lee AGENTS.md y .ai-memory/active/session_context.md`
+- Al cerrar: `python3 memory_manager.py sync-session`
 - No commitear `grok.md` (export de chat local)
 - Prod: `studios33.app` — deploy con `deploy/studios33/scripts/deploy.sh`
 

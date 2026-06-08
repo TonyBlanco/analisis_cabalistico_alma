@@ -1,0 +1,43 @@
+---
+description: Carga memoria compartida multi-agente al inicio y sincroniza al cerrar sesiones productivas
+alwaysApply: true
+---
+
+# Memoria compartida — Studios33 / Análisis Cabalístico
+
+## Al INICIAR cada sesión (antes de cualquier acción)
+
+1. Lee `AGENTS.md` (ritual multi-agente).
+2. Lee `.ai-memory/active/session_context.md` (estado actual: focus, HEAD, tareas, next steps).
+3. Si existe, consulta `CODEX_CONTEXT.md` como contexto extendido (opcional).
+4. Para trabajo técnico, abre el doc de dominio indicado en **Key Docs** de `session_context.md`.
+
+No empieces a implementar ni a editar hasta tener ese contexto.
+
+## Durante la sesión
+
+- Tras decisiones relevantes: `python3 memory_manager.py store "[DECISION] ..."` (o `[BUG]`, `[DEPLOY]`, `[ENDPOINT]`).
+- Prod: Hetzner `studios33.app` — deploy con `deploy/studios33/scripts/deploy.sh` (no scripts VoxTV legacy).
+
+## Al CERRAR sesión productiva (código, deploy o docs tocados)
+
+Ejecuta en el repo:
+
+```bash
+source .venv/bin/activate
+python3 memory_manager.py store "[DECISION] resumen breve — contexto"  # si hubo decisiones
+python3 memory_manager.py sync-session
+```
+
+`sync-session` actualiza `session_context.md` con HEAD, rama y entradas recientes de `agent_log.md`.
+
+Override opcional al cerrar tarea grande:
+
+```bash
+python3 memory_manager.py sync-session --focus "..." --completed "..." --next "..."
+```
+
+## Autoridad documental
+
+- Gobernanza canónica: `docs/00_SOURCE_OF_TRUTH/SOURCE_OF_TRUTH.md`
+- Setup memoria: `docs/01_PROJECT_STATE/AI_MEMORY_LAYER.md`

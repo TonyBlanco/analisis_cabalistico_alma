@@ -49,3 +49,11 @@ python3 memory_manager.py query "test catalog wiring"
 ```
 
 Sin key: modo offline (grep en markdown) — suficiente para coordinación básica.
+
+## Cursor / Grok — regla automática
+
+Archivo: `.cursor/rules/agent-memory.mdc` con `alwaysApply: true`.
+
+Cursor Agent incluye la regla en cada chat del proyecto: leer `AGENTS.md` + `session_context.md` al inicio y ejecutar `sync-session` al cerrar sesiones productivas.
+
+Verificar en **Cursor Settings → Rules** que la regla aparece como *Always Apply*.

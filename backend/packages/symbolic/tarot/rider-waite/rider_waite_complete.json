@@ -19,7 +19,10 @@
         "letterName": "Aleph",
         "letterValue": 1,
         "path": 11,
-        "sefirot": ["Kether", "Chokmah"]
+        "sefirot": [
+          "Kether",
+          "Chokmah"
+        ]
       },
       "astrology": {
         "planet": null,
@@ -35,12 +38,28 @@
         "Knapsack contains untapped potential",
         "Colorful clothing shows optimism and naivety"
       ],
-      "keywords": ["beginning", "innocence", "spontaneity", "leap of faith", "new journey", "unlimited potential"],
-      "keywordsSpanish": ["comienzo", "inocencia", "espontaneidad", "salto de fe", "nuevo viaje", "potencial ilimitado"],
+      "keywords": [
+        "beginning",
+        "innocence",
+        "spontaneity",
+        "leap of faith",
+        "new journey",
+        "unlimited potential"
+      ],
+      "keywordsSpanish": [
+        "comienzo",
+        "inocencia",
+        "espontaneidad",
+        "salto de fe",
+        "nuevo viaje",
+        "potencial ilimitado"
+      ],
       "divinatory": {
         "upright": "Folly, mania, extravagance, intoxication, delirium, frenzy, bewrayment. New beginnings, having faith in the future, being inexperienced, not knowing what to expect, having beginner's luck, improvisation and believing in the universe.",
         "reversed": "Negligence, absence, distribution, carelessness, apathy, nullity, vanity. Folly, recklessness, risk-taking, thoughtlessness."
-      }
+      },
+      "image": "m00.jpg",
+      "imageUrl": "/tarot/rider-waite/m00.jpg"
     },
     {
       "id": "the-magician",
@@ -52,7 +71,10 @@
         "letterName": "Beth",
         "letterValue": 2,
         "path": 12,
-        "sefirot": ["Kether", "Binah"]
+        "sefirot": [
+          "Kether",
+          "Binah"
+        ]
       },
       "astrology": {
         "planet": "Mercury",
@@ -68,12 +90,28 @@
         "Red roses and white lilies represent desire and pure thought",
         "Yellow background symbolizes conscious mind and intellect"
       ],
-      "keywords": ["manifestation", "resourcefulness", "power", "inspired action", "concentration", "skill"],
-      "keywordsSpanish": ["manifestación", "ingenio", "poder", "acción inspirada", "concentración", "habilidad"],
+      "keywords": [
+        "manifestation",
+        "resourcefulness",
+        "power",
+        "inspired action",
+        "concentration",
+        "skill"
+      ],
+      "keywordsSpanish": [
+        "manifestación",
+        "ingenio",
+        "poder",
+        "acción inspirada",
+        "concentración",
+        "habilidad"
+      ],
       "divinatory": {
         "upright": "Skill, diplomacy, address, subtlety; sickness, pain, loss, disaster, snares of enemies; self-confidence, will; the Querent, if male. Power, concentration, action, consciousness.",
         "reversed": "Physician, Magus, mental disease, disgrace, disquiet. Manipulation, poor planning, untapped talents."
-      }
+      },
+      "image": "m01.jpg",
+      "imageUrl": "/tarot/rider-waite/m01.jpg"
     },
     {
       "id": "the-high-priestess",
@@ -85,7 +123,10 @@
         "letterName": "Gimel",
         "letterValue": 3,
         "path": 13,
-        "sefirot": ["Kether", "Tiphareth"]
+        "sefirot": [
+          "Kether",
+          "Tiphareth"
+        ]
       },
       "astrology": {
         "planet": "Moon",
@@ -101,12 +142,28 @@
         "Cross on breast shows balance of masculine/feminine",
         "Crescent moon at feet connects to lunar mysteries"
       ],
-      "keywords": ["intuition", "sacred knowledge", "divine feminine", "subconscious mind", "mystery", "inner voice"],
-      "keywordsSpanish": ["intuición", "conocimiento sagrado", "femenino divino", "mente subconsciente", "misterio", "voz interior"],
+      "keywords": [
+        "intuition",
+        "sacred knowledge",
+        "divine feminine",
+        "subconscious mind",
+        "mystery",
+        "inner voice"
+      ],
+      "keywordsSpanish": [
+        "intuición",
+        "conocimiento sagrado",
+        "femenino divino",
+        "mente subconsciente",
+        "misterio",
+        "voz interior"
+      ],
       "divinatory": {
         "upright": "Secrets, mystery, the future as yet unrevealed; the woman who interests the Querent, if male; the Querent herself, if female; silence, tenacity; mystery, wisdom, science. Intuition, higher powers, the subconscious mind.",
         "reversed": "Passion, moral or physical ardor, conceit, surface knowledge. Secrets, disconnected from intuition, withdrawal."
-      }
+      },
+      "image": "m02.jpg",
+      "imageUrl": "/tarot/rider-waite/m02.jpg"
     },
     {
       "id": "the-empress",
@@ -118,7 +175,10 @@
         "letterName": "Daleth",
         "letterValue": 4,
         "path": 14,
-        "sefirot": ["Chokmah", "Binah"]
+        "sefirot": [
+          "Chokmah",
+          "Binah"
+        ]
       },
       "astrology": {
         "planet": "Venus",
@@ -135,12 +195,30 @@
         "Waterfall and trees represent fertility of nature",
         "Pomegranates on robe indicate fertility"
       ],
-      "keywords": ["fertility", "femininity", "beauty", "nature", "abundance", "nurturing", "motherhood"],
-      "keywordsSpanish": ["fertilidad", "feminidad", "belleza", "naturaleza", "abundancia", "nutrición", "maternidad"],
+      "keywords": [
+        "fertility",
+        "femininity",
+        "beauty",
+        "nature",
+        "abundance",
+        "nurturing",
+        "motherhood"
+      ],
+      "keywordsSpanish": [
+        "fertilidad",
+        "feminidad",
+        "belleza",
+        "naturaleza",
+        "abundancia",
+        "nutrición",
+        "maternidad"
+      ],
       "divinatory": {
         "upright": "Fruitfulness, action, initiative, length of days; the unknown, clandestine; also difficulty, doubt, ignorance. Abundance, nurturing, fertility, life creation.",
         "reversed": "Light, truth, the unraveling of involved matters, public rejoicings; according to another reading, vacillation. Creative block, dependence on others."
-      }
+      },
+      "image": "m03.jpg",
+      "imageUrl": "/tarot/rider-waite/m03.jpg"
     },
     {
       "id": "the-emperor",
@@ -152,7 +230,10 @@
         "letterName": "Heh",
         "letterValue": 5,
         "path": 15,
-        "sefirot": ["Chokmah", "Tiphareth"]
+        "sefirot": [
+          "Chokmah",
+          "Tiphareth"
+        ]
       },
       "astrology": {
         "planet": null,
@@ -169,12 +250,30 @@
         "Crown represents sovereignty and established power",
         "Armor suggests protection and defensive strength"
       ],
-      "keywords": ["authority", "establishment", "structure", "father figure", "control", "leadership", "stability"],
-      "keywordsSpanish": ["autoridad", "establecimiento", "estructura", "figura paterna", "control", "liderazgo", "estabilidad"],
+      "keywords": [
+        "authority",
+        "establishment",
+        "structure",
+        "father figure",
+        "control",
+        "leadership",
+        "stability"
+      ],
+      "keywordsSpanish": [
+        "autoridad",
+        "establecimiento",
+        "estructura",
+        "figura paterna",
+        "control",
+        "liderazgo",
+        "estabilidad"
+      ],
       "divinatory": {
         "upright": "Stability, power, protection, realization; a great person; aid, reason, conviction; also authority and will. Leadership, father figure, structure, solid foundation.",
         "reversed": "Benevolence, compassion, credit; also confusion to enemies, obstruction, immaturity. Domination, excessive control, rigidity, inflexibility."
-      }
+      },
+      "image": "m04.jpg",
+      "imageUrl": "/tarot/rider-waite/m04.jpg"
     },
     {
       "id": "the-hierophant",
@@ -186,7 +285,10 @@
         "letterName": "Vav",
         "letterValue": 6,
         "path": 16,
-        "sefirot": ["Chokmah", "Chesed"]
+        "sefirot": [
+          "Chokmah",
+          "Chesed"
+        ]
       },
       "astrology": {
         "planet": null,
@@ -202,12 +304,30 @@
         "Crossed keys at feet unlock spiritual mysteries",
         "Red and white roses on acolytes' robes show passion and purity"
       ],
-      "keywords": ["tradition", "conformity", "morality", "ethics", "spiritual wisdom", "religious beliefs", "institutions"],
-      "keywordsSpanish": ["tradición", "conformidad", "moralidad", "ética", "sabiduría espiritual", "creencias religiosas", "instituciones"],
+      "keywords": [
+        "tradition",
+        "conformity",
+        "morality",
+        "ethics",
+        "spiritual wisdom",
+        "religious beliefs",
+        "institutions"
+      ],
+      "keywordsSpanish": [
+        "tradición",
+        "conformidad",
+        "moralidad",
+        "ética",
+        "sabiduría espiritual",
+        "creencias religiosas",
+        "instituciones"
+      ],
       "divinatory": {
         "upright": "Marriage, alliance, captivity, servitude; by another account, mercy and goodness; inspiration; the man to whom the Querent has recourse. Spiritual wisdom, religious beliefs, conformity, tradition.",
         "reversed": "Society, good understanding, concord, overkindness, weakness. Personal beliefs, freedom, challenging the status quo."
-      }
+      },
+      "image": "m05.jpg",
+      "imageUrl": "/tarot/rider-waite/m05.jpg"
     },
     {
       "id": "the-lovers",
@@ -219,7 +339,10 @@
         "letterName": "Zain",
         "letterValue": 7,
         "path": 17,
-        "sefirot": ["Binah", "Tiphareth"]
+        "sefirot": [
+          "Binah",
+          "Tiphareth"
+        ]
       },
       "astrology": {
         "planet": null,
@@ -236,12 +359,30 @@
         "Purple robe of angel shows spirituality",
         "Clouds beneath angel suggest divine intervention"
       ],
-      "keywords": ["love", "harmony", "relationships", "choices", "values alignment", "union", "duality"],
-      "keywordsSpanish": ["amor", "armonía", "relaciones", "elecciones", "alineación de valores", "unión", "dualidad"],
+      "keywords": [
+        "love",
+        "harmony",
+        "relationships",
+        "choices",
+        "values alignment",
+        "union",
+        "duality"
+      ],
+      "keywordsSpanish": [
+        "amor",
+        "armonía",
+        "relaciones",
+        "elecciones",
+        "alineación de valores",
+        "unión",
+        "dualidad"
+      ],
       "divinatory": {
         "upright": "Attraction, love, beauty, trials overcome. Love, union, relationships, values alignment, choices.",
         "reversed": "Failure, foolish designs. Another account speaks of marriage frustrated and contrarieties of all kinds. Disharmony, imbalance, misalignment of values."
-      }
+      },
+      "image": "m06.jpg",
+      "imageUrl": "/tarot/rider-waite/m06.jpg"
     },
     {
       "id": "the-chariot",
@@ -253,7 +394,10 @@
         "letterName": "Cheth",
         "letterValue": 8,
         "path": 18,
-        "sefirot": ["Binah", "Geburah"]
+        "sefirot": [
+          "Binah",
+          "Geburah"
+        ]
       },
       "astrology": {
         "planet": null,
@@ -270,12 +414,30 @@
         "City behind represents civilization and accomplishment",
         "Blue background suggests emotional control"
       ],
-      "keywords": ["control", "willpower", "success", "action", "determination", "victory", "discipline"],
-      "keywordsSpanish": ["control", "fuerza de voluntad", "éxito", "acción", "determinación", "victoria", "disciplina"],
+      "keywords": [
+        "control",
+        "willpower",
+        "success",
+        "action",
+        "determination",
+        "victory",
+        "discipline"
+      ],
+      "keywordsSpanish": [
+        "control",
+        "fuerza de voluntad",
+        "éxito",
+        "acción",
+        "determinación",
+        "victoria",
+        "disciplina"
+      ],
       "divinatory": {
         "upright": "Succour, providence; also war, triumph, presumption, vengeance, trouble. Control, willpower, success, action, determination.",
         "reversed": "Riot, quarrel, dispute, litigation, defeat. Lack of control, lack of direction, aggression."
-      }
+      },
+      "image": "m07.jpg",
+      "imageUrl": "/tarot/rider-waite/m07.jpg"
     },
     {
       "id": "strength",
@@ -287,7 +449,10 @@
         "letterName": "Teth",
         "letterValue": 9,
         "path": 19,
-        "sefirot": ["Chesed", "Geburah"]
+        "sefirot": [
+          "Chesed",
+          "Geburah"
+        ]
       },
       "astrology": {
         "planet": null,
@@ -304,12 +469,30 @@
         "Calm expression shows mastery through compassion",
         "Gentle touch rather than force shows true power"
       ],
-      "keywords": ["strength", "courage", "patience", "compassion", "self-control", "inner power", "gentle influence"],
-      "keywordsSpanish": ["fuerza", "coraje", "paciencia", "compasión", "autocontrol", "poder interior", "influencia gentil"],
+      "keywords": [
+        "strength",
+        "courage",
+        "patience",
+        "compassion",
+        "self-control",
+        "inner power",
+        "gentle influence"
+      ],
+      "keywordsSpanish": [
+        "fuerza",
+        "coraje",
+        "paciencia",
+        "compasión",
+        "autocontrol",
+        "poder interior",
+        "influencia gentil"
+      ],
       "divinatory": {
         "upright": "Power, energy, action, courage, magnanimity; also complete success and honours. Strength, courage, persuasion, influence, compassion.",
         "reversed": "Despotism, abuse of power, weakness, discord, disgrace. Self-doubt, weakness, insecurity, low energy."
-      }
+      },
+      "image": "m08.jpg",
+      "imageUrl": "/tarot/rider-waite/m08.jpg"
     },
     {
       "id": "the-hermit",
@@ -321,7 +504,10 @@
         "letterName": "Yod",
         "letterValue": 10,
         "path": 20,
-        "sefirot": ["Chesed", "Tiphareth"]
+        "sefirot": [
+          "Chesed",
+          "Tiphareth"
+        ]
       },
       "astrology": {
         "planet": null,
@@ -338,12 +524,30 @@
         "Looking down implies sharing wisdom with those below",
         "Six-pointed star in lantern represents divine wisdom"
       ],
-      "keywords": ["introspection", "solitude", "inner guidance", "spiritual enlightenment", "wisdom", "contemplation", "soul searching"],
-      "keywordsSpanish": ["introspección", "soledad", "guía interior", "iluminación espiritual", "sabiduría", "contemplación", "búsqueda del alma"],
+      "keywords": [
+        "introspection",
+        "solitude",
+        "inner guidance",
+        "spiritual enlightenment",
+        "wisdom",
+        "contemplation",
+        "soul searching"
+      ],
+      "keywordsSpanish": [
+        "introspección",
+        "soledad",
+        "guía interior",
+        "iluminación espiritual",
+        "sabiduría",
+        "contemplación",
+        "búsqueda del alma"
+      ],
       "divinatory": {
         "upright": "Prudence, circumspection; also and especially treason, dissimulation, roguery, corruption. Soul searching, introspection, being alone, inner guidance.",
         "reversed": "Concealment, disguise, policy, fear, unreasoned caution. Isolation, loneliness, withdrawal."
-      }
+      },
+      "image": "m09.jpg",
+      "imageUrl": "/tarot/rider-waite/m09.jpg"
     },
     {
       "id": "wheel-of-fortune",
@@ -355,7 +559,10 @@
         "letterName": "Kaph",
         "letterValue": 20,
         "path": 21,
-        "sefirot": ["Chesed", "Netzach"]
+        "sefirot": [
+          "Chesed",
+          "Netzach"
+        ]
       },
       "astrology": {
         "planet": "Jupiter",
@@ -372,12 +579,30 @@
         "Alchemical symbols on wheel - mercury, sulfur, water, salt",
         "Books held by figures suggest learning and wisdom"
       ],
-      "keywords": ["destiny", "fortune", "cycles", "karma", "turning point", "life cycles", "fate"],
-      "keywordsSpanish": ["destino", "fortuna", "ciclos", "karma", "punto de inflexión", "ciclos de vida", "hado"],
+      "keywords": [
+        "destiny",
+        "fortune",
+        "cycles",
+        "karma",
+        "turning point",
+        "life cycles",
+        "fate"
+      ],
+      "keywordsSpanish": [
+        "destino",
+        "fortuna",
+        "ciclos",
+        "karma",
+        "punto de inflexión",
+        "ciclos de vida",
+        "hado"
+      ],
       "divinatory": {
         "upright": "Destiny, fortune, success, elevation, luck, felicity. Good luck, karma, life cycles, destiny, a turning point.",
         "reversed": "Increase, abundance, superfluity. Bad luck, negative external forces, out of control."
-      }
+      },
+      "image": "m10.jpg",
+      "imageUrl": "/tarot/rider-waite/m10.jpg"
     },
     {
       "id": "justice",
@@ -389,7 +614,10 @@
         "letterName": "Lamed",
         "letterValue": 30,
         "path": 22,
-        "sefirot": ["Geburah", "Tiphareth"]
+        "sefirot": [
+          "Geburah",
+          "Tiphareth"
+        ]
       },
       "astrology": {
         "planet": null,
@@ -406,12 +634,30 @@
         "Square on crown shows organized thought",
         "Stern expression indicates impartiality"
       ],
-      "keywords": ["justice", "fairness", "truth", "cause and effect", "law", "balance", "accountability"],
-      "keywordsSpanish": ["justicia", "equidad", "verdad", "causa y efecto", "ley", "equilibrio", "responsabilidad"],
+      "keywords": [
+        "justice",
+        "fairness",
+        "truth",
+        "cause and effect",
+        "law",
+        "balance",
+        "accountability"
+      ],
+      "keywordsSpanish": [
+        "justicia",
+        "equidad",
+        "verdad",
+        "causa y efecto",
+        "ley",
+        "equilibrio",
+        "responsabilidad"
+      ],
       "divinatory": {
         "upright": "Equity, rightness, probity, executive; triumph of the deserving side in law. Justice, fairness, truth, cause and effect, law.",
         "reversed": "Law in all its departments, legal complications, bigotry, bias, excessive severity. Unfairness, lack of accountability, dishonesty."
-      }
+      },
+      "image": "m11.jpg",
+      "imageUrl": "/tarot/rider-waite/m11.jpg"
     },
     {
       "id": "the-hanged-man",
@@ -423,7 +669,10 @@
         "letterName": "Mem",
         "letterValue": 40,
         "path": 23,
-        "sefirot": ["Geburah", "Hod"]
+        "sefirot": [
+          "Geburah",
+          "Hod"
+        ]
       },
       "astrology": {
         "planet": "Neptune",
@@ -440,12 +689,30 @@
         "Red pants/tights show passion and life force",
         "Yellow shoes and hair suggest mental and spiritual illumination"
       ],
-      "keywords": ["suspension", "restriction", "letting go", "sacrifice", "new perspective", "contemplation", "surrender"],
-      "keywordsSpanish": ["suspensión", "restricción", "soltar", "sacrificio", "nueva perspectiva", "contemplación", "rendición"],
+      "keywords": [
+        "suspension",
+        "restriction",
+        "letting go",
+        "sacrifice",
+        "new perspective",
+        "contemplation",
+        "surrender"
+      ],
+      "keywordsSpanish": [
+        "suspensión",
+        "restricción",
+        "soltar",
+        "sacrificio",
+        "nueva perspectiva",
+        "contemplación",
+        "rendición"
+      ],
       "divinatory": {
         "upright": "Wisdom, circumspection, discernment, trials, sacrifice, intuition, divination, prophecy. Suspension, restriction, letting go, sacrifice.",
         "reversed": "Selfishness, the crowd, body politic. Delays, resistance, stalling, indecision."
-      }
+      },
+      "image": "m12.jpg",
+      "imageUrl": "/tarot/rider-waite/m12.jpg"
     },
     {
       "id": "death",
@@ -457,7 +724,10 @@
         "letterName": "Nun",
         "letterValue": 50,
         "path": 24,
-        "sefirot": ["Tiphareth", "Netzach"]
+        "sefirot": [
+          "Tiphareth",
+          "Netzach"
+        ]
       },
       "astrology": {
         "planet": null,
@@ -474,12 +744,30 @@
         "River in background represents flow between life and death",
         "Five-petaled rose represents five senses transcended"
       ],
-      "keywords": ["endings", "change", "transformation", "transition", "new beginnings", "release", "metamorphosis"],
-      "keywordsSpanish": ["finales", "cambio", "transformación", "transición", "nuevos comienzos", "liberación", "metamorfosis"],
+      "keywords": [
+        "endings",
+        "change",
+        "transformation",
+        "transition",
+        "new beginnings",
+        "release",
+        "metamorphosis"
+      ],
+      "keywordsSpanish": [
+        "finales",
+        "cambio",
+        "transformación",
+        "transición",
+        "nuevos comienzos",
+        "liberación",
+        "metamorfosis"
+      ],
       "divinatory": {
         "upright": "End, mortality, destruction, corruption; also for a man, the loss of a benefactor; for a woman, many contrarieties; for a maid, failure of marriage projects. Endings, change, transformation, transition.",
         "reversed": "Inertia, sleep, lethargy, petrifaction, somnambulism; hope destroyed. Resistance to change, stagnation, decay."
-      }
+      },
+      "image": "m13.jpg",
+      "imageUrl": "/tarot/rider-waite/m13.jpg"
     },
     {
       "id": "temperance",
@@ -491,7 +779,10 @@
         "letterName": "Samekh",
         "letterValue": 60,
         "path": 25,
-        "sefirot": ["Tiphareth", "Yesod"]
+        "sefirot": [
+          "Tiphareth",
+          "Yesod"
+        ]
       },
       "astrology": {
         "planet": null,
@@ -508,12 +799,30 @@
         "Path leading to mountains represents spiritual journey",
         "Yellow background suggests conscious awareness"
       ],
-      "keywords": ["balance", "moderation", "patience", "purpose", "meaning", "alchemy", "harmony"],
-      "keywordsSpanish": ["equilibrio", "moderación", "paciencia", "propósito", "significado", "alquimia", "armonía"],
+      "keywords": [
+        "balance",
+        "moderation",
+        "patience",
+        "purpose",
+        "meaning",
+        "alchemy",
+        "harmony"
+      ],
+      "keywordsSpanish": [
+        "equilibrio",
+        "moderación",
+        "paciencia",
+        "propósito",
+        "significado",
+        "alquimia",
+        "armonía"
+      ],
       "divinatory": {
         "upright": "Economy, moderation, frugality, management, accommodation. Balance, moderation, patience, purpose.",
         "reversed": "Things connected with churches, religions, sects, the priesthood, sometimes even the priest who will marry the Querent; also disunion, unfortunate combinations, competing interests. Imbalance, excess, self-healing, re-alignment."
-      }
+      },
+      "image": "m14.jpg",
+      "imageUrl": "/tarot/rider-waite/m14.jpg"
     },
     {
       "id": "the-devil",
@@ -525,7 +834,10 @@
         "letterName": "Ayin",
         "letterValue": 70,
         "path": 26,
-        "sefirot": ["Tiphareth", "Hod"]
+        "sefirot": [
+          "Tiphareth",
+          "Hod"
+        ]
       },
       "astrology": {
         "planet": null,
@@ -542,12 +854,30 @@
         "Black background represents ignorance and unknowing",
         "Chains are loose enough to remove - slavery is self-imposed"
       ],
-      "keywords": ["bondage", "addiction", "sexuality", "materialism", "shadow self", "attachment", "restriction"],
-      "keywordsSpanish": ["esclavitud", "adicción", "sexualidad", "materialismo", "sombra", "apego", "restricción"],
+      "keywords": [
+        "bondage",
+        "addiction",
+        "sexuality",
+        "materialism",
+        "shadow self",
+        "attachment",
+        "restriction"
+      ],
+      "keywordsSpanish": [
+        "esclavitud",
+        "adicción",
+        "sexualidad",
+        "materialismo",
+        "sombra",
+        "apego",
+        "restricción"
+      ],
       "divinatory": {
         "upright": "Ravage, violence, vehemence, extraordinary efforts, force, fatality; that which is predestined but is not for this reason evil. Shadow self, attachment, addiction, restriction, sexuality.",
         "reversed": "Evil fatality, weakness, pettiness, blindness. Releasing limiting beliefs, exploring dark thoughts, detachment."
-      }
+      },
+      "image": "m15.jpg",
+      "imageUrl": "/tarot/rider-waite/m15.jpg"
     },
     {
       "id": "the-tower",
@@ -559,7 +889,10 @@
         "letterName": "Peh",
         "letterValue": 80,
         "path": 27,
-        "sefirot": ["Netzach", "Hod"]
+        "sefirot": [
+          "Netzach",
+          "Hod"
+        ]
       },
       "astrology": {
         "planet": "Mars",
@@ -576,12 +909,30 @@
         "Black background shows void and chaos",
         "White lightning reveals truth through shock"
       ],
-      "keywords": ["sudden change", "upheaval", "chaos", "revelation", "breakdown", "disaster", "awakening"],
-      "keywordsSpanish": ["cambio repentino", "trastorno", "caos", "revelación", "colapso", "desastre", "despertar"],
+      "keywords": [
+        "sudden change",
+        "upheaval",
+        "chaos",
+        "revelation",
+        "breakdown",
+        "disaster",
+        "awakening"
+      ],
+      "keywordsSpanish": [
+        "cambio repentino",
+        "trastorno",
+        "caos",
+        "revelación",
+        "colapso",
+        "desastre",
+        "despertar"
+      ],
       "divinatory": {
         "upright": "Misery, distress, indigence, adversity, calamity, disgrace, deception, ruin. It is a card in particular of unforeseen catastrophe. Sudden change, upheaval, chaos, revelation, awakening.",
         "reversed": "According to one account, the same in a lesser degree; also oppression, imprisonment, tyranny. Personal transformation, fear of change, averting disaster."
-      }
+      },
+      "image": "m16.jpg",
+      "imageUrl": "/tarot/rider-waite/m16.jpg"
     },
     {
       "id": "the-star",
@@ -593,7 +944,10 @@
         "letterName": "Tzaddi",
         "letterValue": 90,
         "path": 28,
-        "sefirot": ["Netzach", "Yesod"]
+        "sefirot": [
+          "Netzach",
+          "Yesod"
+        ]
       },
       "astrology": {
         "planet": null,
@@ -610,12 +964,30 @@
         "Mountains in background represent future achievements",
         "Nudity shows nothing to hide, spiritual nakedness"
       ],
-      "keywords": ["hope", "faith", "purpose", "renewal", "spirituality", "inspiration", "healing"],
-      "keywordsSpanish": ["esperanza", "fe", "propósito", "renovación", "espiritualidad", "inspiración", "sanación"],
+      "keywords": [
+        "hope",
+        "faith",
+        "purpose",
+        "renewal",
+        "spirituality",
+        "inspiration",
+        "healing"
+      ],
+      "keywordsSpanish": [
+        "esperanza",
+        "fe",
+        "propósito",
+        "renovación",
+        "espiritualidad",
+        "inspiración",
+        "sanación"
+      ],
       "divinatory": {
         "upright": "Loss, theft, privation, abandonment; another reading says: hope and bright prospects. Hope, faith, purpose, renewal, spirituality.",
         "reversed": "Arrogance, haughtiness, impotence. Lack of faith, despair, self-trust, disconnection."
-      }
+      },
+      "image": "m17.jpg",
+      "imageUrl": "/tarot/rider-waite/m17.jpg"
     },
     {
       "id": "the-moon",
@@ -627,7 +999,10 @@
         "letterName": "Qoph",
         "letterValue": 100,
         "path": 29,
-        "sefirot": ["Netzach", "Malkuth"]
+        "sefirot": [
+          "Netzach",
+          "Malkuth"
+        ]
       },
       "astrology": {
         "planet": null,
@@ -644,12 +1019,30 @@
         "Mountains in distance show challenges ahead",
         "Droplets falling represent manifestation from above"
       ],
-      "keywords": ["illusion", "fear", "anxiety", "subconscious", "intuition", "dreams", "confusion"],
-      "keywordsSpanish": ["ilusión", "miedo", "ansiedad", "subconsciente", "intuición", "sueños", "confusión"],
+      "keywords": [
+        "illusion",
+        "fear",
+        "anxiety",
+        "subconscious",
+        "intuition",
+        "dreams",
+        "confusion"
+      ],
+      "keywordsSpanish": [
+        "ilusión",
+        "miedo",
+        "ansiedad",
+        "subconsciente",
+        "intuición",
+        "sueños",
+        "confusión"
+      ],
       "divinatory": {
         "upright": "Hidden enemies, danger, calumny, darkness, terror, deception, occult forces, error. Illusion, fear, anxiety, subconscious, intuition.",
         "reversed": "Instability, inconstancy, silence, lesser degrees of deception and error. Release of fear, repressed emotion, inner confusion."
-      }
+      },
+      "image": "m18.jpg",
+      "imageUrl": "/tarot/rider-waite/m18.jpg"
     },
     {
       "id": "the-sun",
@@ -661,7 +1054,10 @@
         "letterName": "Resh",
         "letterValue": 200,
         "path": 30,
-        "sefirot": ["Hod", "Yesod"]
+        "sefirot": [
+          "Hod",
+          "Yesod"
+        ]
       },
       "astrology": {
         "planet": "Sun",
@@ -678,12 +1074,30 @@
         "Straight sunbeams alternate with wavy ones - direct and reflected light",
         "White horse symbolizes purity of thought"
       ],
-      "keywords": ["success", "positivity", "vitality", "joy", "confidence", "warmth", "optimism"],
-      "keywordsSpanish": ["éxito", "positividad", "vitalidad", "alegría", "confianza", "calidez", "optimismo"],
+      "keywords": [
+        "success",
+        "positivity",
+        "vitality",
+        "joy",
+        "confidence",
+        "warmth",
+        "optimism"
+      ],
+      "keywordsSpanish": [
+        "éxito",
+        "positividad",
+        "vitalidad",
+        "alegría",
+        "confianza",
+        "calidez",
+        "optimismo"
+      ],
       "divinatory": {
         "upright": "Material happiness, fortunate marriage, contentment. Success, positivity, fun, warmth, optimism, vitality.",
         "reversed": "The same in a lesser sense. Temporary depression, lack of success, sadness."
-      }
+      },
+      "image": "m19.jpg",
+      "imageUrl": "/tarot/rider-waite/m19.jpg"
     },
     {
       "id": "judgement",
@@ -695,7 +1109,10 @@
         "letterName": "Shin",
         "letterValue": 300,
         "path": 31,
-        "sefirot": ["Hod", "Malkuth"]
+        "sefirot": [
+          "Hod",
+          "Malkuth"
+        ]
       },
       "astrology": {
         "planet": "Pluto",
@@ -712,12 +1129,30 @@
         "Raised arms show receptivity to divine call",
         "Coffins floating on water represent emotional depths transcended"
       ],
-      "keywords": ["judgement", "rebirth", "inner calling", "absolution", "evaluation", "awakening", "renewal"],
-      "keywordsSpanish": ["juicio", "renacimiento", "llamado interior", "absolución", "evaluación", "despertar", "renovación"],
+      "keywords": [
+        "judgement",
+        "rebirth",
+        "inner calling",
+        "absolution",
+        "evaluation",
+        "awakening",
+        "renewal"
+      ],
+      "keywordsSpanish": [
+        "juicio",
+        "renacimiento",
+        "llamado interior",
+        "absolución",
+        "evaluación",
+        "despertar",
+        "renovación"
+      ],
       "divinatory": {
         "upright": "Change of position, renewal, outcome. Another account specifies total loss though lawsuit. Judgement, rebirth, inner calling, absolution.",
         "reversed": "Weakness, pusillanimity, simplicity; also deliberation, decision, sentence. Self-doubt, inner critic, ignoring the call."
-      }
+      },
+      "image": "m20.jpg",
+      "imageUrl": "/tarot/rider-waite/m20.jpg"
     },
     {
       "id": "the-world",
@@ -729,7 +1164,10 @@
         "letterName": "Tav",
         "letterValue": 400,
         "path": 32,
-        "sefirot": ["Yesod", "Malkuth"]
+        "sefirot": [
+          "Yesod",
+          "Malkuth"
+        ]
       },
       "astrology": {
         "planet": "Saturn",
@@ -746,12 +1184,30 @@
         "Androgynous figure represents wholeness and integration",
         "Green wreath indicates growth and natural cycles completed"
       ],
-      "keywords": ["completion", "accomplishment", "travel", "integration", "wholeness", "fulfillment", "success"],
-      "keywordsSpanish": ["completitud", "logro", "viaje", "integración", "totalidad", "plenitud", "éxito"],
+      "keywords": [
+        "completion",
+        "accomplishment",
+        "travel",
+        "integration",
+        "wholeness",
+        "fulfillment",
+        "success"
+      ],
+      "keywordsSpanish": [
+        "completitud",
+        "logro",
+        "viaje",
+        "integración",
+        "totalidad",
+        "plenitud",
+        "éxito"
+      ],
       "divinatory": {
         "upright": "Assured success, recompense, voyage, route, emigration, flight, change of place. Completion, integration, accomplishment, travel.",
         "reversed": "Inertia, fixity, stagnation, permanence. Seeking personal closure, shortcuts, delays."
-      }
+      },
+      "image": "m21.jpg",
+      "imageUrl": "/tarot/rider-waite/m21.jpg"
     }
   ]
 }

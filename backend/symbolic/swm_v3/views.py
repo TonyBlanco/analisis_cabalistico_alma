@@ -170,6 +170,29 @@ TAROT_IMAGE_SLUGS: Dict[int, str] = {
     21: "21-el-mundo",
 }
 
+RIDER_WAITE_IMAGE_SYSTEMS = frozenset({"rider-waite"})
+
+
+def resolve_card_image_url(system_id: str, card_data: Dict[str, Any]) -> Optional[str]:
+    """Resolve public image path for a drawn card (system-specific artwork)."""
+    system_id = normalize_system_id(system_id)
+    if system_id in RIDER_WAITE_IMAGE_SYSTEMS:
+        img = card_data.get("image") or card_data.get("imageUrl", "").split("/")[-1]
+        if not img:
+            key_num = card_data.get("keyNumber")
+            if key_num is not None and 0 <= int(key_num) <= 21:
+                img = f"m{int(key_num):02d}.jpg"
+        if img:
+            if str(img).startswith("/"):
+                return str(img)
+            return f"/tarot/rider-waite/{img}"
+        return None
+
+    key_num = card_data.get("keyNumber")
+    image_slug = TAROT_IMAGE_SLUGS.get(key_num) if key_num is not None else None
+    return f"/tarot/{image_slug}.png" if image_slug else None
+
+
 DECK_JSON_RELATIVE: Dict[str, tuple[str, str]] = {
     "thoth": ("bota", "bota_tableau_complete.json"),
     "bota": ("bota", "bota_tableau_complete.json"),
@@ -766,8 +789,7 @@ def generate_educational_reading(
                 symbols["tags"] = tags
 
             key_num = card_data.get("keyNumber")
-            image_slug = TAROT_IMAGE_SLUGS.get(key_num) if key_num is not None else None
-            image_url = f"/tarot/{image_slug}.png" if image_slug else None
+            image_url = resolve_card_image_url(system_id, card_data)
 
             card_entry: Dict[str, Any] = {
                 "draw_id": f"draw-{i+1}",

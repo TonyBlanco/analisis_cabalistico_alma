@@ -50,6 +50,15 @@ class SwmV3DeckLoadingTests(SimpleTestCase):
         self.assertTrue(inner.get("system_frame"))
         self.assertTrue(card.get("symbols"))
 
+    def test_rider_waite_reading_uses_rws_image_urls(self):
+        payload = generate_educational_reading(
+            system_id="rider-waite",
+            selected_cards=["the-star"],
+            spread_type="simple",
+        )
+        card = payload["cards"][0]
+        self.assertEqual(card.get("imageUrl"), "/tarot/rider-waite/m17.jpg")
+
     def test_thoth_reading_uses_spanish_keywords_and_position(self):
         payload = generate_educational_reading(
             system_id="thoth",

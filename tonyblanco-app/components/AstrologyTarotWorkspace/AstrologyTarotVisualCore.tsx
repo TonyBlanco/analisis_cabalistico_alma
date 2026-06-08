@@ -154,21 +154,6 @@ export default function AstrologyTarotVisualCore({
   const [aiInterpretation, setAiInterpretation] = useState<string | null>(null);
   const [aiThemes, setAiThemes] = useState<string[]>([]);
   
-  const deckCards = useMemo<TarotCardData[]>(
-    () =>
-      ARCANOS_MAYORES.map((card) => ({
-        id: card.id,
-        name: card.spanishName || card.name,
-        number: card.number,
-        arcana: 'major',
-        element: card.element,
-        keywords: card.keywords,
-        imageUrl: `/tarot/${card.id}.png`,
-        sefirahId: card.sefirah,
-      })),
-    []
-  );
-
   const sectionConfig: Record<
     AstrologyTarotSectionId,
     { title: string; description: string }
@@ -219,6 +204,23 @@ export default function AstrologyTarotVisualCore({
     sephiroth: 'Tarot of the Sephiroth',
   };
   const systemLabel = systemEntry?.label ?? systemLabelMap[systemKey] ?? systemKey;
+  const deckCards = useMemo<TarotCardData[]>(
+    () =>
+      ARCANOS_MAYORES.map((card) => ({
+        id: card.id,
+        name: card.spanishName || card.name,
+        number: card.number,
+        arcana: 'major',
+        element: card.element,
+        keywords: card.keywords,
+        imageUrl:
+          systemKey === 'rider-waite'
+            ? `/tarot/rider-waite/m${String(card.number).padStart(2, '0')}.jpg`
+            : `/tarot/${card.id}.png`,
+        sefirahId: card.sefirah,
+      })),
+    [systemKey]
+  );
   const [selectedCard, setSelectedCard] = useState<TarotCardData | null>(null);
   const [analysisSources, setAnalysisSources] = useState({
     tarot: true,

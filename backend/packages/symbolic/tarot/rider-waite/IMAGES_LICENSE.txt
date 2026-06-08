@@ -22,3 +22,9 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+---
+Card back + border + optional face scans:
+https://luciellaes.itch.io/rider-waite-smith-tarot-cards-cc0
+Luciella Elisabeth Scarlett — CC0 card back; RWS art public domain.
+Refresh: python3 scripts/fetch_luciellaes_rider_waite.py

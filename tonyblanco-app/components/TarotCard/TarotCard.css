@@ -297,6 +297,9 @@
     #1a0f0a 50%,
     #0a0502 100%
   );
+  background-image: url('/tarot/rider-waite/card-back.jpg');
+  background-size: cover;
+  background-position: center;
   border-radius: var(--border-radius);
   display: flex;
   align-items: center;
@@ -356,6 +359,7 @@
 }
 
 .back-text {
+  display: none;
   position: relative;
   font-family: 'Cinzel', serif;
   font-size: 1.5rem;

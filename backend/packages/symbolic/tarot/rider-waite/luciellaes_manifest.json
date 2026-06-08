@@ -1,0 +1,568 @@
+{
+  "source": "luciellaes.itch.io/rider-waite-smith-tarot-cards-cc0",
+  "author": "Luciella Elisabeth Scarlett (LuciellaES)",
+  "license": "CC0 (card back design); RWS illustrations public domain",
+  "fetchedAt": "2026-06-08",
+  "cards": [
+    {
+      "id": "m00",
+      "name": "The Fool",
+      "luciellaesFile": "00-TheFool.jpg",
+      "projectFile": "m00.jpg",
+      "imageUrl": "/tarot/rider-waite/m00.jpg"
+    },
+    {
+      "id": "m01",
+      "name": "The Magician",
+      "luciellaesFile": "01-TheMagician.jpg",
+      "projectFile": "m01.jpg",
+      "imageUrl": "/tarot/rider-waite/m01.jpg"
+    },
+    {
+      "id": "m02",
+      "name": "The High Priestess",
+      "luciellaesFile": "02-TheHighPriestess.jpg",
+      "projectFile": "m02.jpg",
+      "imageUrl": "/tarot/rider-waite/m02.jpg"
+    },
+    {
+      "id": "m03",
+      "name": "The Empress",
+      "luciellaesFile": "03-TheEmpress.jpg",
+      "projectFile": "m03.jpg",
+      "imageUrl": "/tarot/rider-waite/m03.jpg"
+    },
+    {
+      "id": "m04",
+      "name": "The Emperor",
+      "luciellaesFile": "04-TheEmperor.jpg",
+      "projectFile": "m04.jpg",
+      "imageUrl": "/tarot/rider-waite/m04.jpg"
+    },
+    {
+      "id": "m05",
+      "name": "The Hierophant",
+      "luciellaesFile": "05-TheHierophant.jpg",
+      "projectFile": "m05.jpg",
+      "imageUrl": "/tarot/rider-waite/m05.jpg"
+    },
+    {
+      "id": "m06",
+      "name": "The Lovers",
+      "luciellaesFile": "06-TheLovers.jpg",
+      "projectFile": "m06.jpg",
+      "imageUrl": "/tarot/rider-waite/m06.jpg"
+    },
+    {
+      "id": "m07",
+      "name": "The Chariot",
+      "luciellaesFile": "07-TheChariot.jpg",
+      "projectFile": "m07.jpg",
+      "imageUrl": "/tarot/rider-waite/m07.jpg"
+    },
+    {
+      "id": "m08",
+      "name": "Strength",
+      "luciellaesFile": "08-Strength.jpg",
+      "projectFile": "m08.jpg",
+      "imageUrl": "/tarot/rider-waite/m08.jpg"
+    },
+    {
+      "id": "m09",
+      "name": "The Hermit",
+      "luciellaesFile": "09-TheHermit.jpg",
+      "projectFile": "m09.jpg",
+      "imageUrl": "/tarot/rider-waite/m09.jpg"
+    },
+    {
+      "id": "m10",
+      "name": "Wheel of Fortune",
+      "luciellaesFile": "10-WheelOfFortune.jpg",
+      "projectFile": "m10.jpg",
+      "imageUrl": "/tarot/rider-waite/m10.jpg"
+    },
+    {
+      "id": "m11",
+      "name": "Justice",
+      "luciellaesFile": "11-Justice.jpg",
+      "projectFile": "m11.jpg",
+      "imageUrl": "/tarot/rider-waite/m11.jpg"
+    },
+    {
+      "id": "m12",
+      "name": "The Hanged Man",
+      "luciellaesFile": "12-TheHangedMan.jpg",
+      "projectFile": "m12.jpg",
+      "imageUrl": "/tarot/rider-waite/m12.jpg"
+    },
+    {
+      "id": "m13",
+      "name": "Death",
+      "luciellaesFile": "13-Death.jpg",
+      "projectFile": "m13.jpg",
+      "imageUrl": "/tarot/rider-waite/m13.jpg"
+    },
+    {
+      "id": "m14",
+      "name": "Temperance",
+      "luciellaesFile": "14-Temperance.jpg",
+      "projectFile": "m14.jpg",
+      "imageUrl": "/tarot/rider-waite/m14.jpg"
+    },
+    {
+      "id": "m15",
+      "name": "The Devil",
+      "luciellaesFile": "15-TheDevil.jpg",
+      "projectFile": "m15.jpg",
+      "imageUrl": "/tarot/rider-waite/m15.jpg"
+    },
+    {
+      "id": "m16",
+      "name": "The Tower",
+      "luciellaesFile": "16-TheTower.jpg",
+      "projectFile": "m16.jpg",
+      "imageUrl": "/tarot/rider-waite/m16.jpg"
+    },
+    {
+      "id": "m17",
+      "name": "The Star",
+      "luciellaesFile": "17-TheStar.jpg",
+      "projectFile": "m17.jpg",
+      "imageUrl": "/tarot/rider-waite/m17.jpg"
+    },
+    {
+      "id": "m18",
+      "name": "The Moon",
+      "luciellaesFile": "18-TheMoon.jpg",
+      "projectFile": "m18.jpg",
+      "imageUrl": "/tarot/rider-waite/m18.jpg"
+    },
+    {
+      "id": "m19",
+      "name": "The Sun",
+      "luciellaesFile": "19-TheSun.jpg",
+      "projectFile": "m19.jpg",
+      "imageUrl": "/tarot/rider-waite/m19.jpg"
+    },
+    {
+      "id": "m20",
+      "name": "Judgement",
+      "luciellaesFile": "20-Judgement.jpg",
+      "projectFile": "m20.jpg",
+      "imageUrl": "/tarot/rider-waite/m20.jpg"
+    },
+    {
+      "id": "m21",
+      "name": "The World",
+      "luciellaesFile": "21-TheWorld.jpg",
+      "projectFile": "m21.jpg",
+      "imageUrl": "/tarot/rider-waite/m21.jpg"
+    },
+    {
+      "id": "c01",
+      "name": "Ace of Cups",
+      "luciellaesFile": "Cups01.jpg",
+      "projectFile": "c01.jpg",
+      "imageUrl": "/tarot/rider-waite/c01.jpg"
+    },
+    {
+      "id": "c02",
+      "name": "Two of Cups",
+      "luciellaesFile": "Cups02.jpg",
+      "projectFile": "c02.jpg",
+      "imageUrl": "/tarot/rider-waite/c02.jpg"
+    },
+    {
+      "id": "c03",
+      "name": "Three of Cups",
+      "luciellaesFile": "Cups03.jpg",
+      "projectFile": "c03.jpg",
+      "imageUrl": "/tarot/rider-waite/c03.jpg"
+    },
+    {
+      "id": "c04",
+      "name": "Four of Cups",
+      "luciellaesFile": "Cups04.jpg",
+      "projectFile": "c04.jpg",
+      "imageUrl": "/tarot/rider-waite/c04.jpg"
+    },
+    {
+      "id": "c05",
+      "name": "Five of Cups",
+      "luciellaesFile": "Cups05.jpg",
+      "projectFile": "c05.jpg",
+      "imageUrl": "/tarot/rider-waite/c05.jpg"
+    },
+    {
+      "id": "c06",
+      "name": "Six of Cups",
+      "luciellaesFile": "Cups06.jpg",
+      "projectFile": "c06.jpg",
+      "imageUrl": "/tarot/rider-waite/c06.jpg"
+    },
+    {
+      "id": "c07",
+      "name": "Seven of Cups",
+      "luciellaesFile": "Cups07.jpg",
+      "projectFile": "c07.jpg",
+      "imageUrl": "/tarot/rider-waite/c07.jpg"
+    },
+    {
+      "id": "c08",
+      "name": "Eight of Cups",
+      "luciellaesFile": "Cups08.jpg",
+      "projectFile": "c08.jpg",
+      "imageUrl": "/tarot/rider-waite/c08.jpg"
+    },
+    {
+      "id": "c09",
+      "name": "Nine of Cups",
+      "luciellaesFile": "Cups09.jpg",
+      "projectFile": "c09.jpg",
+      "imageUrl": "/tarot/rider-waite/c09.jpg"
+    },
+    {
+      "id": "c10",
+      "name": "Ten of Cups",
+      "luciellaesFile": "Cups10.jpg",
+      "projectFile": "c10.jpg",
+      "imageUrl": "/tarot/rider-waite/c10.jpg"
+    },
+    {
+      "id": "c11",
+      "name": "Page of Cups",
+      "luciellaesFile": "Cups11.jpg",
+      "projectFile": "c11.jpg",
+      "imageUrl": "/tarot/rider-waite/c11.jpg"
+    },
+    {
+      "id": "c12",
+      "name": "Knight of Cups",
+      "luciellaesFile": "Cups12.jpg",
+      "projectFile": "c12.jpg",
+      "imageUrl": "/tarot/rider-waite/c12.jpg"
+    },
+    {
+      "id": "c13",
+      "name": "Queen of Cups",
+      "luciellaesFile": "Cups13.jpg",
+      "projectFile": "c13.jpg",
+      "imageUrl": "/tarot/rider-waite/c13.jpg"
+    },
+    {
+      "id": "c14",
+      "name": "King of Cups",
+      "luciellaesFile": "Cups14.jpg",
+      "projectFile": "c14.jpg",
+      "imageUrl": "/tarot/rider-waite/c14.jpg"
+    },
+    {
+      "id": "s01",
+      "name": "Ace of Swords",
+      "luciellaesFile": "Swords01.jpg",
+      "projectFile": "s01.jpg",
+      "imageUrl": "/tarot/rider-waite/s01.jpg"
+    },
+    {
+      "id": "s02",
+      "name": "Two of Swords",
+      "luciellaesFile": "Swords02.jpg",
+      "projectFile": "s02.jpg",
+      "imageUrl": "/tarot/rider-waite/s02.jpg"
+    },
+    {
+      "id": "s03",
+      "name": "Three of Swords",
+      "luciellaesFile": "Swords03.jpg",
+      "projectFile": "s03.jpg",
+      "imageUrl": "/tarot/rider-waite/s03.jpg"
+    },
+    {
+      "id": "s04",
+      "name": "Four of Swords",
+      "luciellaesFile": "Swords04.jpg",
+      "projectFile": "s04.jpg",
+      "imageUrl": "/tarot/rider-waite/s04.jpg"
+    },
+    {
+      "id": "s05",
+      "name": "Five of Swords",
+      "luciellaesFile": "Swords05.jpg",
+      "projectFile": "s05.jpg",
+      "imageUrl": "/tarot/rider-waite/s05.jpg"
+    },
+    {
+      "id": "s06",
+      "name": "Six of Swords",
+      "luciellaesFile": "Swords06.jpg",
+      "projectFile": "s06.jpg",
+      "imageUrl": "/tarot/rider-waite/s06.jpg"
+    },
+    {
+      "id": "s07",
+      "name": "Seven of Swords",
+      "luciellaesFile": "Swords07.jpg",
+      "projectFile": "s07.jpg",
+      "imageUrl": "/tarot/rider-waite/s07.jpg"
+    },
+    {
+      "id": "s08",
+      "name": "Eight of Swords",
+      "luciellaesFile": "Swords08.jpg",
+      "projectFile": "s08.jpg",
+      "imageUrl": "/tarot/rider-waite/s08.jpg"
+    },
+    {
+      "id": "s09",
+      "name": "Nine of Swords",
+      "luciellaesFile": "Swords09.jpg",
+      "projectFile": "s09.jpg",
+      "imageUrl": "/tarot/rider-waite/s09.jpg"
+    },
+    {
+      "id": "s10",
+      "name": "Ten of Swords",
+      "luciellaesFile": "Swords10.jpg",
+      "projectFile": "s10.jpg",
+      "imageUrl": "/tarot/rider-waite/s10.jpg"
+    },
+    {
+      "id": "s11",
+      "name": "Page of Swords",
+      "luciellaesFile": "Swords11.jpg",
+      "projectFile": "s11.jpg",
+      "imageUrl": "/tarot/rider-waite/s11.jpg"
+    },
+    {
+      "id": "s12",
+      "name": "Knight of Swords",
+      "luciellaesFile": "Swords12.jpg",
+      "projectFile": "s12.jpg",
+      "imageUrl": "/tarot/rider-waite/s12.jpg"
+    },
+    {
+      "id": "s13",
+      "name": "Queen of Swords",
+      "luciellaesFile": "Swords13.jpg",
+      "projectFile": "s13.jpg",
+      "imageUrl": "/tarot/rider-waite/s13.jpg"
+    },
+    {
+      "id": "s14",
+      "name": "King of Swords",
+      "luciellaesFile": "Swords14.jpg",
+      "projectFile": "s14.jpg",
+      "imageUrl": "/tarot/rider-waite/s14.jpg"
+    },
+    {
+      "id": "w01",
+      "name": "Ace of Wands",
+      "luciellaesFile": "Wands01.jpg",
+      "projectFile": "w01.jpg",
+      "imageUrl": "/tarot/rider-waite/w01.jpg"
+    },
+    {
+      "id": "w02",
+      "name": "Two of Wands",
+      "luciellaesFile": "Wands02.jpg",
+      "projectFile": "w02.jpg",
+      "imageUrl": "/tarot/rider-waite/w02.jpg"
+    },
+    {
+      "id": "w03",
+      "name": "Three of Wands",
+      "luciellaesFile": "Wands03.jpg",
+      "projectFile": "w03.jpg",
+      "imageUrl": "/tarot/rider-waite/w03.jpg"
+    },
+    {
+      "id": "w04",
+      "name": "Four of Wands",
+      "luciellaesFile": "Wands04.jpg",
+      "projectFile": "w04.jpg",
+      "imageUrl": "/tarot/rider-waite/w04.jpg"
+    },
+    {
+      "id": "w05",
+      "name": "Five of Wands",
+      "luciellaesFile": "Wands05.jpg",
+      "projectFile": "w05.jpg",
+      "imageUrl": "/tarot/rider-waite/w05.jpg"
+    },
+    {
+      "id": "w06",
+      "name": "Six of Wands",
+      "luciellaesFile": "Wands06.jpg",
+      "projectFile": "w06.jpg",
+      "imageUrl": "/tarot/rider-waite/w06.jpg"
+    },
+    {
+      "id": "w07",
+      "name": "Seven of Wands",
+      "luciellaesFile": "Wands07.jpg",
+      "projectFile": "w07.jpg",
+      "imageUrl": "/tarot/rider-waite/w07.jpg"
+    },
+    {
+      "id": "w08",
+      "name": "Eight of Wands",
+      "luciellaesFile": "Wands08.jpg",
+      "projectFile": "w08.jpg",
+      "imageUrl": "/tarot/rider-waite/w08.jpg"
+    },
+    {
+      "id": "w09",
+      "name": "Nine of Wands",
+      "luciellaesFile": "Wands09.jpg",
+      "projectFile": "w09.jpg",
+      "imageUrl": "/tarot/rider-waite/w09.jpg"
+    },
+    {
+      "id": "w10",
+      "name": "Ten of Wands",
+      "luciellaesFile": "Wands10.jpg",
+      "projectFile": "w10.jpg",
+      "imageUrl": "/tarot/rider-waite/w10.jpg"
+    },
+    {
+      "id": "w11",
+      "name": "Page of Wands",
+      "luciellaesFile": "Wands11.jpg",
+      "projectFile": "w11.jpg",
+      "imageUrl": "/tarot/rider-waite/w11.jpg"
+    },
+    {
+      "id": "w12",
+      "name": "Knight of Wands",
+      "luciellaesFile": "Wands12.jpg",
+      "projectFile": "w12.jpg",
+      "imageUrl": "/tarot/rider-waite/w12.jpg"
+    },
+    {
+      "id": "w13",
+      "name": "Queen of Wands",
+      "luciellaesFile": "Wands13.jpg",
+      "projectFile": "w13.jpg",
+      "imageUrl": "/tarot/rider-waite/w13.jpg"
+    },
+    {
+      "id": "w14",
+      "name": "King of Wands",
+      "luciellaesFile": "Wands14.jpg",
+      "projectFile": "w14.jpg",
+      "imageUrl": "/tarot/rider-waite/w14.jpg"
+    },
+    {
+      "id": "p01",
+      "name": "Ace of Pentacles",
+      "luciellaesFile": "Pentacles01.jpg",
+      "projectFile": "p01.jpg",
+      "imageUrl": "/tarot/rider-waite/p01.jpg"
+    },
+    {
+      "id": "p02",
+      "name": "Two of Pentacles",
+      "luciellaesFile": "Pentacles02.jpg",
+      "projectFile": "p02.jpg",
+      "imageUrl": "/tarot/rider-waite/p02.jpg"
+    },
+    {
+      "id": "p03",
+      "name": "Three of Pentacles",
+      "luciellaesFile": "Pentacles03.jpg",
+      "projectFile": "p03.jpg",
+      "imageUrl": "/tarot/rider-waite/p03.jpg"
+    },
+    {
+      "id": "p04",
+      "name": "Four of Pentacles",
+      "luciellaesFile": "Pentacles04.jpg",
+      "projectFile": "p04.jpg",
+      "imageUrl": "/tarot/rider-waite/p04.jpg"
+    },
+    {
+      "id": "p05",
+      "name": "Five of Pentacles",
+      "luciellaesFile": "Pentacles05.jpg",
+      "projectFile": "p05.jpg",
+      "imageUrl": "/tarot/rider-waite/p05.jpg"
+    },
+    {
+      "id": "p06",
+      "name": "Six of Pentacles",
+      "luciellaesFile": "Pentacles06.jpg",
+      "projectFile": "p06.jpg",
+      "imageUrl": "/tarot/rider-waite/p06.jpg"
+    },
+    {
+      "id": "p07",
+      "name": "Seven of Pentacles",
+      "luciellaesFile": "Pentacles07.jpg",
+      "projectFile": "p07.jpg",
+      "imageUrl": "/tarot/rider-waite/p07.jpg"
+    },
+    {
+      "id": "p08",
+      "name": "Eight of Pentacles",
+      "luciellaesFile": "Pentacles08.jpg",
+      "projectFile": "p08.jpg",
+      "imageUrl": "/tarot/rider-waite/p08.jpg"
+    },
+    {
+      "id": "p09",
+      "name": "Nine of Pentacles",
+      "luciellaesFile": "Pentacles09.jpg",
+      "projectFile": "p09.jpg",
+      "imageUrl": "/tarot/rider-waite/p09.jpg"
+    },
+    {
+      "id": "p10",
+      "name": "Ten of Pentacles",
+      "luciellaesFile": "Pentacles10.jpg",
+      "projectFile": "p10.jpg",
+      "imageUrl": "/tarot/rider-waite/p10.jpg"
+    },
+    {
+      "id": "p11",
+      "name": "Page of Pentacles",
+      "luciellaesFile": "Pentacles11.jpg",
+      "projectFile": "p11.jpg",
+      "imageUrl": "/tarot/rider-waite/p11.jpg"
+    },
+    {
+      "id": "p12",
+      "name": "Knight of Pentacles",
+      "luciellaesFile": "Pentacles12.jpg",
+      "projectFile": "p12.jpg",
+      "imageUrl": "/tarot/rider-waite/p12.jpg"
+    },
+    {
+      "id": "p13",
+      "name": "Queen of Pentacles",
+      "luciellaesFile": "Pentacles13.jpg",
+      "projectFile": "p13.jpg",
+      "imageUrl": "/tarot/rider-waite/p13.jpg"
+    },
+    {
+      "id": "p14",
+      "name": "King of Pentacles",
+      "luciellaesFile": "Pentacles14.jpg",
+      "projectFile": "p14.jpg",
+      "imageUrl": "/tarot/rider-waite/p14.jpg"
+    },
+    {
+      "id": "card-back",
+      "name": "Card back (CC0)",
+      "luciellaesFile": "CardBacks.jpg",
+      "projectFile": "card-back.jpg",
+      "imageUrl": "/tarot/rider-waite/card-back.jpg"
+    },
+    {
+      "id": "card-border",
+      "name": "Card border overlay",
+      "luciellaesFile": "cardBorder.png",
+      "projectFile": "card-border.png",
+      "imageUrl": "/tarot/rider-waite/card-border.png"
+    }
+  ]
+}

@@ -81,7 +81,9 @@ def build_symbols_from_kabbalistic(kabbalistic: Dict[str, Any]) -> Optional[Dict
     # Log the raw incoming data for debugging
     logger.info(f"[SWM-v3] build_symbols_from_kabbalistic RAW DATA: {kabbalistic}")
     
-    letter_name = kabbalistic.get("hebrewLetter", "")
+    letter_name = kabbalistic.get("letterName") or kabbalistic.get("hebrewLetter", "")
+    if "(" in letter_name:
+        letter_name = letter_name.split("(")[0].strip()
     if not letter_name:
         logger.warning(f"[SWM-v3] build_symbols_from_kabbalistic: no hebrewLetter in {kabbalistic}")
         logger.warning(f"[SWM-v3] Available keys in kabbalistic: {list(kabbalistic.keys())}")
@@ -108,20 +110,42 @@ def build_symbols_from_kabbalistic(kabbalistic: Dict[str, Any]) -> Optional[Dict
         "cube_of_space": kabbalistic.get("cubeOfSpace", ""),
     }
 
-# Path to symbolic data
+# Path to symbolic data (repo root + backend-local decks)
 SYMBOLIC_DATA_PATH = Path(settings.BASE_DIR).parent / "packages" / "symbolic"
+BACKEND_TAROT_PATH = Path(settings.BASE_DIR) / "packages" / "symbolic" / "tarot"
+
+DECK_JSON_PATHS: Dict[str, Path] = {
+    "thoth": SYMBOLIC_DATA_PATH / "tarot" / "bota" / "bota_tableau_complete.json",
+    "bota": SYMBOLIC_DATA_PATH / "tarot" / "bota" / "bota_tableau_complete.json",
+    "tarot-cabalistico": SYMBOLIC_DATA_PATH / "tarot" / "bota" / "bota_tableau_complete.json",
+    "golden-dawn": BACKEND_TAROT_PATH / "golden-dawn" / "golden_dawn_complete.json",
+    "hermetic": BACKEND_TAROT_PATH / "hermetic" / "hermetic_complete.json",
+    "sephiroth": BACKEND_TAROT_PATH / "sephiroth" / "sephiroth_complete.json",
+}
+
+
+def load_deck_json(path: Path, fallback_name: str) -> Dict[str, Any]:
+    try:
+        if path.exists():
+            with open(path, "r", encoding="utf-8") as f:
+                return json.load(f)
+    except Exception as e:
+        logger.error(f"Error loading deck {path}: {e}")
+    return {"deck": {"name": fallback_name}, "majorArcana": []}
+
+
+def load_deck_for_system(system_id: str) -> Dict[str, Any]:
+    """Load major-arcana JSON for a tarot system."""
+    meta = get_system_metadata(system_id)
+    path = DECK_JSON_PATHS.get(system_id)
+    if not path:
+        return {"deck": {"name": meta.get("name", system_id)}, "majorArcana": []}
+    return load_deck_json(path, meta.get("name", system_id))
 
 
 def load_bota_deck() -> Dict[str, Any]:
     """Load B.O.T.A. deck data from JSON."""
-    try:
-        bota_path = SYMBOLIC_DATA_PATH / "tarot" / "bota" / "bota_tableau_complete.json"
-        if bota_path.exists():
-            with open(bota_path, "r", encoding="utf-8") as f:
-                return json.load(f)
-    except Exception as e:
-        logger.error(f"Error loading BOTA deck: {e}")
-    return {"deck": {"name": "B.O.T.A. Tarot"}, "majorArcana": []}
+    return load_deck_for_system("bota")
 
 
 def get_system_metadata(system_id: str) -> Dict[str, Any]:
@@ -137,7 +161,7 @@ def get_system_metadata(system_id: str) -> Dict[str, Any]:
         "golden-dawn": {
             "id": "golden-dawn",
             "name": "Golden Dawn Tarot",
-            "implemented": False,
+            "implemented": True,
             "description": "Hermetic Order of the Golden Dawn tradition",
             "source": "Golden Dawn tradition",
         },
@@ -172,14 +196,14 @@ def get_system_metadata(system_id: str) -> Dict[str, Any]:
         "sephiroth": {
             "id": "sephiroth",
             "name": "Tarot of the Sephiroth",
-            "implemented": False,
+            "implemented": True,
             "description": "Sephirotic path working",
             "source": "Kabbalistic tradition",
         },
         "hermetic": {
             "id": "hermetic",
             "name": "Hermetic Tarot",
-            "implemented": False,
+            "implemented": True,
             "description": "Golden Dawn symbolism (Godfrey Dowson)",
             "source": "Godfrey Dowson",
         },
@@ -500,11 +524,7 @@ def generate_educational_reading(
     
     system_meta = get_system_metadata(system_id)
     
-    # Load deck data
-    if system_id in ["thoth", "bota", "tarot-cabalistico"]:
-        deck_data = load_bota_deck()
-    else:
-        deck_data = {"deck": {"name": system_meta["name"]}, "majorArcana": []}
+    deck_data = load_deck_for_system(system_id)
     
     major_arcana = deck_data.get("majorArcana", [])
     

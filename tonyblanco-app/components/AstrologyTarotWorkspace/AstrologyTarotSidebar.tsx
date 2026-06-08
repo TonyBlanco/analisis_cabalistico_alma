@@ -184,7 +184,7 @@ export default function AstrologyTarotSidebar({
                   )}
                   {system.tier === 'educational' && (
                     <p className="mt-1 text-[11px] text-gray-500">
-                      Mapeo local disponible; sin lectura IA backend.
+                      Mapeo local disponible; lectura IA parcial.
                     </p>
                   )}
                 </button>

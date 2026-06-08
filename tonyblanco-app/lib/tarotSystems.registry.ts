@@ -39,28 +39,28 @@ export const TAROT_SYSTEMS_REGISTRY: TarotSystemRegistryEntry[] = [
   {
     id: 'golden-dawn',
     label: 'Golden Dawn Tarot',
-    description: 'Sistema cabalístico hermético (correspondencias educativas)',
-    tier: 'educational',
+    description: 'Sistema cabalístico hermético (Book T · correspondencias GD)',
+    tier: 'full',
     backendSystem: 'golden-dawn',
-    swmV3Implemented: false,
+    swmV3Implemented: true,
     hasLocalDeckMapping: true,
   },
   {
     id: 'hermetic',
     label: 'Hermetic Tarot',
-    description: 'Simbolismo esotérico (mapeo local; backend usa golden-dawn)',
-    tier: 'educational',
+    description: 'Simbolismo Godfrey Dowson · tradición Golden Dawn',
+    tier: 'full',
     backendSystem: 'golden-dawn',
-    swmV3Implemented: false,
+    swmV3Implemented: true,
     hasLocalDeckMapping: true,
   },
   {
     id: 'sephiroth',
     label: 'Tarot of the Sephiroth',
-    description: 'Enfoque en el Árbol de la Vida (mapeo local)',
-    tier: 'educational',
+    description: 'Path working sefirótico · Árbol de la Vida',
+    tier: 'full',
     backendSystem: 'bota',
-    swmV3Implemented: false,
+    swmV3Implemented: true,
     hasLocalDeckMapping: true,
   },
 ];
@@ -82,7 +82,7 @@ export function tarotSystemStatusLabel(tier: TarotSystemTier): string {
     case 'full':
       return 'IMPLEMENTADO (LECTURA EDUCATIVA + IA)';
     case 'educational':
-      return 'EDUCATIVO LOCAL (SIN IA BACKEND)';
+      return 'EDUCATIVO LOCAL (MAPEO SIN SWM V3)';
     default:
       return 'SISTEMA SIMBÓLICO · EN PREPARACIÓN';
   }

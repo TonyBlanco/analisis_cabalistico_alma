@@ -526,17 +526,7 @@ export default function AstrologyTarotVisualCore({
             </p>
           </div>
         )}
-        {isSystemUsable && systemTier === 'educational' && (
-          <div className="rounded-lg border border-sky-200 bg-sky-50 p-4 text-sm text-sky-900">
-            <div className="text-[11px] uppercase tracking-wide text-sky-800">
-              {tarotSystemStatusLabel(systemTier)}
-            </div>
-            <p className="mt-2">
-              Correspondencias y mazo disponibles con mapeo local. La lectura IA backend
-              aplica solo a Thoth y B.O.T.A.
-            </p>
-          </div>
-        )}
+
         {activeSection === 'tarot-deck-view' && (
           <>
             <TarotDeck

@@ -173,6 +173,7 @@ CLINICAL_TERMS_BLACKLIST = [
 TAROT_SYSTEMS = [
     {"id": "thoth", "name": "Tarot de Thoth (Crowley)", "major_arcana": 22, "minor_arcana": 56},
     {"id": "golden-dawn", "name": "Golden Dawn", "major_arcana": 22, "minor_arcana": 56},
+    {"id": "hermetic", "name": "Hermetic Tarot (Dowson)", "major_arcana": 22, "minor_arcana": 56},
     {"id": "rider-waite", "name": "Rider-Waite-Smith", "major_arcana": 22, "minor_arcana": 56},
     {"id": "marseille", "name": "Tarot de Marsella", "major_arcana": 22, "minor_arcana": 56},
     {"id": "bota", "name": "B.O.T.A.", "major_arcana": 22, "minor_arcana": 56},

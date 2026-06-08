@@ -1,7 +1,7 @@
 # Session Context — Análisis Cabalístico / Studios33
 
 **Última actualización:** 2026-06-08 14:59 UTC  
-**Rama:** `main` · **HEAD:** `80206f43` · **Working tree:** 8 archivo(s) sin commit  
+**Rama:** `main` · **HEAD:** `0e709836` · **Working tree:** 1 archivo(s) sin commit  
 **Prod:** Hetzner `studios33.app` + `api.studios33.app`
 
 ## Current Focus
@@ -10,6 +10,8 @@ Coordinación multi-agente con AI Memory Layer; mantener wiring BD/API/FE de tes
 
 ## Completed (reciente)
 
+- sync-session automático en Stop hook y comando memory_manager
+- Último commit: `0e709836` — feat(memory): auto-sync session_context.md at session end
 - AI Memory Layer instalado y sync-session automático configurado
 - Último commit: `80206f43` — chore: install ai-memory-layer for multi-agent coordination
 - Test catalog: migración `0090`, registry FE, guards asignación (`TEST_CATALOG_WIRING.md`)
@@ -25,7 +27,7 @@ Coordinación multi-agente con AI Memory Layer; mantener wiring BD/API/FE de tes
 
 ## Next Steps
 
-1. Abrir sesión leyendo session_context.md actualizado
+1. Leer .ai-memory/active/session_context.md al abrir próximo chat
 
 ## Key Docs
 

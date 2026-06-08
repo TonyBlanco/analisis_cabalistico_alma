@@ -230,9 +230,9 @@ class TherapistUpdatePatientProfileView(APIView):
             if patient.birth_date:
                 user_profile.birth_date = patient.birth_date
                 update_fields.append('birth_date')
-            if patient.birth_time:
-                user_profile.birth_time = patient.birth_time
-                update_fields.append('birth_time')
+            # Always sync birth_time (including None, to clear stale values)
+            user_profile.birth_time = patient.birth_time
+            update_fields.append('birth_time')
 
             if biological_sex is not None:
                 user_profile.biological_sex = patient.biological_sex
@@ -243,7 +243,34 @@ class TherapistUpdatePatientProfileView(APIView):
                 update_fields.append('gender_identity')
 
             user_profile.save(update_fields=sorted(set(update_fields)))
-        
+
+        # === SYNC IdentityProfile (used by kabbalistic / astrological engines) ===
+        if patient.user and patient.birth_date:
+            from .models import IdentityProfile
+            ip, _ = IdentityProfile.objects.get_or_create(
+                user=patient.user,
+                defaults={'birth_date': patient.birth_date},
+            )
+            ip.birth_date = patient.birth_date
+            ip.birth_time = patient.birth_time
+            ip.birth_city = patient.birth_city or ''
+            ip.birth_country = patient.birth_country or ''
+            ip.birth_latitude = patient.birth_latitude
+            ip.birth_longitude = patient.birth_longitude
+            ip.birth_timezone = patient.birth_timezone or ''
+            ip.save(update_fields=[
+                'birth_date', 'birth_time', 'birth_city', 'birth_country',
+                'birth_latitude', 'birth_longitude', 'birth_timezone',
+            ])
+
+        # === INVALIDATE NatalChart so it gets recomputed on next request ===
+        if patient.user:
+            try:
+                from astrology.models import NatalChart
+                NatalChart.objects.filter(patient=patient).update(is_valid=False)
+            except Exception:
+                pass  # NatalChart may not exist yet — OK
+
         # Check if profile is now complete
         validation = {'is_complete': True, 'missing_fields': [], 'warnings': []}
         if birth_data:

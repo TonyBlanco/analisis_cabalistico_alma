@@ -124,11 +124,17 @@ export default function PatientProfileEditor({ profile, patientId, onSave, onClo
         return;
       }
 
+      // Django TimeField requires HH:MM:SS — pad seconds if needed
+      const rawTime = formData.birth_time;
+      const birthTime = rawTime
+        ? (rawTime.length === 5 ? `${rawTime}:00` : rawTime)
+        : undefined;
+
       const saved = await updatePatientProfile(id, {
         full_name: formData.full_name.trim(),
         legal_full_name: formData.full_name.trim(),
         birth_date: formData.birth_date,
-        birth_time: formData.birth_time || undefined,
+        birth_time: birthTime,
         birth_city: formData.birth_city || undefined,
         birth_country: formData.birth_country || undefined,
         biologicalSex: formData.biologicalSex || undefined,
@@ -173,10 +179,12 @@ export default function PatientProfileEditor({ profile, patientId, onSave, onClo
         <div className="flex justify-between items-center px-5 py-4 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900">Editar consultante</h2>
           <button
+            type="button"
             onClick={onClose}
+            aria-label="Cerrar"
             className="text-gray-400 hover:text-gray-600"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-6 h-6" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
@@ -191,8 +199,9 @@ export default function PatientProfileEditor({ profile, patientId, onSave, onClo
             )}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Sexo biológico</label>
+              <label htmlFor="biologicalSex" className="block text-sm font-medium text-gray-700">Sexo biológico</label>
               <select
+                id="biologicalSex"
                 value={formData.biologicalSex}
                 onChange={(e) => handleChange('biologicalSex', e.target.value)}
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
@@ -206,8 +215,9 @@ export default function PatientProfileEditor({ profile, patientId, onSave, onClo
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Identidad de género</label>
+              <label htmlFor="genderIdentity" className="block text-sm font-medium text-gray-700">Identidad de género</label>
               <select
+                id="genderIdentity"
                 value={formData.genderIdentity}
                 onChange={(e) => handleChange('genderIdentity', e.target.value)}
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
@@ -241,8 +251,9 @@ export default function PatientProfileEditor({ profile, patientId, onSave, onClo
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Fecha de nacimiento</label>
+                <label htmlFor="birthDate" className="block text-sm font-medium text-gray-700">Fecha de nacimiento</label>
                 <input
+                  id="birthDate"
                   ref={birthDateRef}
                   type="date"
                   value={formData.birth_date}
@@ -252,8 +263,9 @@ export default function PatientProfileEditor({ profile, patientId, onSave, onClo
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">Hora de nacimiento</label>
+                <label htmlFor="birthTime" className="block text-sm font-medium text-gray-700">Hora de nacimiento</label>
                 <input
+                  id="birthTime"
                   ref={birthTimeRef}
                   type="time"
                   value={formData.birth_time}

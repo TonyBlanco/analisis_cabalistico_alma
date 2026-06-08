@@ -49,3 +49,19 @@ class SwmV3DeckLoadingTests(SimpleTestCase):
         self.assertTrue(inner.get("core_meaning"))
         self.assertTrue(inner.get("system_frame"))
         self.assertTrue(card.get("symbols"))
+
+    def test_thoth_reading_uses_spanish_keywords_and_position(self):
+        payload = generate_educational_reading(
+            system_id="thoth",
+            selected_cards=["the-high-priestess"],
+            spread_type="simple",
+        )
+        card = payload["cards"][0]
+        self.assertIn("memoria", card.get("keywords", []))
+        inner = (card.get("symbolic_reading") or {}).get("symbolic_reading") or {}
+        frame = inner.get("system_frame", "")
+        self.assertNotIn("Crowley's Thoth", frame)
+        self.assertIn("Crowley", frame)
+        pos = inner.get("position_meaning", "")
+        self.assertIn("Representa al consultante", pos)
+        self.assertNotIn("Represents the querent", pos)

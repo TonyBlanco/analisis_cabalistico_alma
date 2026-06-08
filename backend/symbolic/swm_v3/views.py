@@ -33,6 +33,17 @@ except ImportError:
     AI_ENABLED = False
     logging.warning("[SWM-v3] multi_ai_service not available")
 
+from symbolic.swm_v3.tarot_es import (
+    BOTA_LIKE_SYSTEMS,
+    SPREAD_POSITIONS_ES,
+    apply_system_meta_es,
+    build_bota_core_spanish,
+    format_position_meaning_es,
+    resolve_spanish_keywords,
+    translate_term,
+    CONTEXT_FOCUS_ES,
+)
+
 logger = logging.getLogger(__name__)
 
 # Hebrew letter glyphs mapping (from cabala_py.arbol_vida)
@@ -512,31 +523,40 @@ def build_per_card_symbolic_reading(
     card_payload: Dict[str, Any],
     system_meta: Dict[str, Any],
     *,
+    system_id: str = "",
     context_focus: Optional[str] = None,
 ) -> Dict[str, Any]:
     """Per-card symbolic reading for SymbolicReadingPanel (nested symbolic_reading)."""
     card_name = card_payload.get("nameSpanish") or card_payload.get("name") or "Carta"
     kabbalistic = card_data.get("kabbalistic") or card_payload.get("kabbalistic") or {}
-    keywords = card_payload.get("keywords") or []
+    keywords = card_payload.get("keywords") or resolve_spanish_keywords(card_data)
     symbolism = card_data.get("symbolism") or []
     position = card_payload.get("position") or {}
     reversed = bool(card_payload.get("reversed"))
 
     system_name = system_meta.get("name", "Tarot")
+    description_es = (system_meta.get("description") or "").strip()
     system_frame = (
         f"El sistema {system_name} ofrece una lectura educativa y observacional. "
-        f"{system_meta.get('description', '').strip()}".strip()
-    )
+        f"{description_es}"
+    ).strip()
 
+    bota_core = (
+        build_bota_core_spanish(card_data)
+        if system_id in BOTA_LIKE_SYSTEMS
+        else None
+    )
     divinatory = extract_divinatory_text(card_data, reversed=reversed)
-    if symbolism:
+    if bota_core:
+        core_meaning = bota_core
+    elif symbolism:
         core_meaning = f"{card_name}: {'. '.join(symbolism[:2])}."
-    elif divinatory:
-        core_meaning = divinatory
     elif keywords:
         core_meaning = (
             f"{card_name} expresa cualidades asociadas a {', '.join(keywords[:4])}."
         )
+    elif divinatory:
+        core_meaning = divinatory
     else:
         core_meaning = f"{card_name} — significado simbólico en exploración."
 
@@ -544,30 +564,25 @@ def build_per_card_symbolic_reading(
     if symbolism:
         contextual_parts.append(" ".join(symbolism[:3]))
     sefirot = kabbalistic.get("sefirot") or []
-    letter_name = kabbalistic.get("letterName") or kabbalistic.get("hebrewLetter", "")
+    letter_name = translate_term(
+        kabbalistic.get("letterName") or kabbalistic.get("hebrewLetter", "")
+    )
+    letter_meaning = translate_term(kabbalistic.get("letterMeaning"))
     if letter_name and sefirot:
-        contextual_parts.append(
-            f"Correspondencia cabalística: {letter_name}, sendero entre {' y '.join(sefirot)}."
-        )
+        ctx = f"Correspondencia cabalística: letra {letter_name}"
+        if letter_meaning:
+            ctx += f" ({letter_meaning})"
+        ctx += f", sendero entre {' y '.join(sefirot)}."
+        contextual_parts.append(ctx)
     elif letter_name:
         contextual_parts.append(f"Letra asociada: {letter_name}.")
     if context_focus and context_focus != "general":
-        focus_labels = {
-            "love": "vínculo y relación",
-            "career": "trabajo y vocación",
-            "spiritual": "dimensión espiritual",
-        }
         contextual_parts.append(
-            f"Foco de observación: {focus_labels.get(context_focus, context_focus)}."
+            f"Foco de observación: {CONTEXT_FOCUS_ES.get(context_focus, context_focus)}."
         )
     contextual_meaning = " ".join(contextual_parts) if contextual_parts else core_meaning
 
-    pos_name = position.get("name") or position.get("nameSpanish") or position.get("id") or "Posición"
-    pos_hint = position.get("meaning") or ""
-    position_meaning = f"En «{pos_name}»"
-    if pos_hint:
-        position_meaning += f": {pos_hint}"
-    position_meaning += "."
+    position_meaning = format_position_meaning_es(position)
 
     inner = {
         "system_frame": system_frame,
@@ -677,7 +692,7 @@ def generate_educational_reading(
     selected_cards = [normalize_card_id(cid) for cid in selected_cards]
     logger.info(f"[SWM-v3] Normalized card IDs: {selected_cards}")
     
-    system_meta = get_system_metadata(system_id)
+    system_meta = apply_system_meta_es(system_id, get_system_metadata(system_id))
     
     deck_data = load_deck_for_system(system_id)
     
@@ -700,18 +715,7 @@ def generate_educational_reading(
     
     # Build cards data
     cards = []
-    positions = [
-        {"id": "significator", "name": "Significador", "meaning": "Represents the querent or situation"},
-        {"id": "crossing", "name": "Cruce", "meaning": "What crosses or challenges"},
-        {"id": "foundation", "name": "Fundamento", "meaning": "The foundation or root"},
-        {"id": "past", "name": "Pasado", "meaning": "Recent past influences"},
-        {"id": "crown", "name": "Corona", "meaning": "Possible outcome or aspiration"},
-        {"id": "future", "name": "Futuro", "meaning": "Near future influences"},
-        {"id": "self", "name": "El Yo", "meaning": "Your current position"},
-        {"id": "environment", "name": "Entorno", "meaning": "Environmental influences"},
-        {"id": "hopes_fears", "name": "Esperanzas/Temores", "meaning": "Hopes and fears"},
-        {"id": "outcome", "name": "Resultado", "meaning": "Final outcome"},
-    ]
+    positions = SPREAD_POSITIONS_ES
     
     for i, card_id in enumerate(selected_cards[:num_cards]):
         # Find card in deck
@@ -721,7 +725,7 @@ def generate_educational_reading(
             position = positions[i] if i < len(positions) else {"id": f"pos_{i+1}", "name": f"Posición {i+1}"}
             kabbalistic = card_data.get("kabbalistic", {})
             correspondences = card_data.get("correspondences", {})
-            keywords = card_data.get("keywordsSpanish") or card_data.get("keywords", [])
+            keywords = resolve_spanish_keywords(card_data)
             
             reversed_flag = random.choice([True, False]) if i > 0 else False
 
@@ -754,6 +758,7 @@ def generate_educational_reading(
                 card_data,
                 card_entry,
                 system_meta,
+                system_id=system_id,
                 context_focus=context_focus,
             )
             cards.append(card_entry)

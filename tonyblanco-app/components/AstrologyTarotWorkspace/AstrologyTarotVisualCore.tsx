@@ -249,6 +249,8 @@ export default function AstrologyTarotVisualCore({
 
   const handleCardSelect = (card: TarotCardData | null) => {
     setSelectedCard(card);
+    setAiInterpretation(null);
+    setAiThemes([]);
     onCardSelect?.(card);
   };
 
@@ -651,6 +653,55 @@ export default function AstrologyTarotVisualCore({
 
             <div>
               <div className="text-xs uppercase tracking-wide text-gray-500">
+                Carta observacional
+              </div>
+              <p className="mt-1 text-[11px] text-gray-500">
+                Selección manual para preparación simbólica. Sin tirada, sin predicción clínica.
+              </p>
+              <select
+                className="mt-2 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700"
+                value={selectedCard?.id ?? ''}
+                onChange={(event) => {
+                  const nextId = event.target.value;
+                  if (!nextId) {
+                    handleCardSelect(null);
+                    return;
+                  }
+                  const card = deckCards.find((entry) => entry.id === nextId) ?? null;
+                  handleCardSelect(card);
+                }}
+              >
+                <option value="">— Elegir arcano mayor —</option>
+                {deckCards.map((card) => (
+                  <option key={card.id} value={card.id}>
+                    {typeof card.number === 'number' ? `${card.number}. ` : ''}
+                    {card.name}
+                  </option>
+                ))}
+              </select>
+              {selectedCard && (
+                <div className="mt-2 flex items-center gap-3 rounded-md border border-gray-100 bg-gray-50 px-3 py-2 text-xs text-gray-700">
+                  {selectedCard.imageUrl ? (
+                    <img
+                      src={selectedCard.imageUrl}
+                      alt={selectedCard.name}
+                      className="h-14 w-9 rounded object-cover border border-gray-200"
+                    />
+                  ) : null}
+                  <div>
+                    <div className="font-medium">{selectedCard.name}</div>
+                    {Array.isArray(selectedCard.keywords) && selectedCard.keywords.length > 0 && (
+                      <div className="mt-0.5 text-[11px] text-gray-500">
+                        {selectedCard.keywords.slice(0, 4).join(' · ')}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div>
+              <div className="text-xs uppercase tracking-wide text-gray-500">
                 Fuentes simbolicas
               </div>
               <div className="mt-2 grid gap-2 text-xs">
@@ -758,49 +809,51 @@ export default function AstrologyTarotVisualCore({
                 >
                   Guardar borrador
                 </button>
-                {/* Botón de Interpretación AI Holística */}
-                {selectedCard && (
-                  <button
-                    type="button"
-                    disabled={isAiLoading || !selectedCard}
-                    onClick={async (e) => {
-                      e.preventDefault();
-                      if (!selectedCard) return;
-                      try {
-                        const result = await interpretCard({
-                          arcanaId: selectedCard.id,
-                          arcanaName: selectedCard.name,
-                          position: 'general',
-                          reversed: false,
-                          tarotSystem: systemKey,
-                          context: {
-                            question: intention || undefined,
-                            consultantId: patientId
-                              ? Number(patientId) || undefined
-                              : undefined,
-                          },
-                        });
-                        setAiInterpretation(result.text);
-                        setAiThemes(result.themes);
-                      } catch (err) {
-                        console.error('Error en interpretación AI:', err);
-                      }
-                    }}
-                    className="rounded-md border border-indigo-300 bg-indigo-50 px-3 py-2 text-xs text-indigo-700 hover:bg-indigo-100 flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isAiLoading ? (
-                      <>
-                        <Loader2 className="h-3 w-3 animate-spin" />
-                        Interpretando...
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="h-3 w-3" />
-                        Interpretar con IA
-                      </>
-                    )}
-                  </button>
-                )}
+                <button
+                  type="button"
+                  disabled={isAiLoading || !selectedCard}
+                  title={
+                    selectedCard
+                      ? 'Generar interpretación simbólica asistida'
+                      : 'Elige una carta observacional arriba'
+                  }
+                  onClick={async (e) => {
+                    e.preventDefault();
+                    if (!selectedCard) return;
+                    try {
+                      const result = await interpretCard({
+                        arcanaId: selectedCard.id,
+                        arcanaName: selectedCard.name,
+                        position: 'general',
+                        reversed: false,
+                        tarotSystem: systemKey,
+                        context: {
+                          question: intention || undefined,
+                          consultantId: patientId
+                            ? Number(patientId) || undefined
+                            : undefined,
+                        },
+                      });
+                      setAiInterpretation(result.text);
+                      setAiThemes(result.themes);
+                    } catch (err) {
+                      console.error('Error en interpretación AI:', err);
+                    }
+                  }}
+                  className="rounded-md border border-indigo-300 bg-indigo-50 px-3 py-2 text-xs text-indigo-700 hover:bg-indigo-100 flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isAiLoading ? (
+                    <>
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                      Interpretando...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-3 w-3" />
+                      Interpretar con IA
+                    </>
+                  )}
+                </button>
               </div>
             </div>
 
@@ -880,7 +933,9 @@ export default function AstrologyTarotVisualCore({
 
             {!selectedCard && (
               <div className="mt-2 text-xs text-gray-500">
-                Selecciona una carta en el mazo para visualizar datos simbólicos.
+                {activeSection === 'tarot-ai-draft'
+                  ? 'Elige una carta observacional en el formulario de preparación.'
+                  : 'Selecciona una carta en el mazo para visualizar datos simbólicos.'}
               </div>
             )}
 

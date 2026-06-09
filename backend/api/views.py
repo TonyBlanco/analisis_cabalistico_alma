@@ -2265,35 +2265,35 @@ class TherapistNoteListCreateView(generics.ListCreateAPIView):
 class TherapistDashboardView(APIView):
     """Dashboard con estadísticas para terapeutas"""
     permission_classes = [IsAuthenticated, IsTherapist]
-    
+
     def get(self, request):
         user = request.user
-        
+
         # Contar pacientes activos
         total_patients = Patient.objects.filter(therapist=user, is_active=True).count()
-        
+
         # Contar sesiones este mes
         from django.utils import timezone
         from datetime import timedelta
-        
+
         today = timezone.now()
         first_day_month = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
         sessions_this_month = Session.objects.filter(
             therapist=user,
             session_date__gte=first_day_month
         ).count()
-        
+
         # Contar fichas creadas este mes
         fichas_this_month = Ficha.objects.filter(
             usuario=user,
             creado_en__gte=first_day_month
         ).count()
-        
+
         # Últimas sesiones
         recent_sessions = Session.objects.filter(therapist=user)[:5]
         from .serializers import SessionSerializer
         recent_sessions_data = SessionSerializer(recent_sessions, many=True).data
-        
+
         return Response({
             'total_patients': total_patients,
             'sessions_this_month': sessions_this_month,
@@ -2301,6 +2301,104 @@ class TherapistDashboardView(APIView):
             'recent_sessions': recent_sessions_data,
             'subscription_status': user.profile.subscription_status,
             'subscription_end_date': user.profile.subscription_end_date
+        })
+
+
+class TherapistMetricsView(APIView):
+    """
+    Métricas agregadas de seguimiento para el terapeuta autenticado.
+    READ-ONLY. Devuelve SOLO conteos/agregados — nunca nombres ni datos
+    clínicos de pacientes individuales (sin PII en el cliente).
+    """
+    permission_classes = [IsAuthenticated, IsTherapist]
+
+    def get(self, request):
+        from datetime import timedelta
+        from django.db.models import Count
+        from django.db.models.functions import TruncMonth
+
+        user = request.user
+        now = timezone.now()
+        thirty_days_ago = now - timedelta(days=30)
+        first_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        twelve_months_ago = (now - timedelta(days=365)).replace(
+            day=1, hour=0, minute=0, second=0, microsecond=0
+        )
+
+        # ── KPI cards ────────────────────────────────────────────────────────
+        total_patients = Patient.objects.filter(therapist=user).count()
+
+        active_patients_30d = (
+            Session.objects.filter(therapist=user, session_date__gte=thirty_days_ago)
+            .values('patient')
+            .distinct()
+            .count()
+        )
+
+        sessions_this_month = Session.objects.filter(
+            therapist=user, session_date__gte=first_of_month
+        ).count()
+
+        fichas_this_month = Ficha.objects.filter(
+            usuario=user, creado_en__gte=first_of_month
+        ).count()
+
+        new_patients_30d = Patient.objects.filter(
+            therapist=user, created_at__gte=thirty_days_ago
+        ).count()
+
+        # ── Monthly series (last 12 months) ──────────────────────────────────
+        sessions_by_month_qs = (
+            Session.objects.filter(therapist=user, session_date__gte=twelve_months_ago)
+            .annotate(month=TruncMonth('session_date'))
+            .values('month')
+            .annotate(count=Count('id'))
+            .order_by('month')
+        )
+        fichas_by_month_qs = (
+            Ficha.objects.filter(usuario=user, creado_en__gte=twelve_months_ago)
+            .annotate(month=TruncMonth('creado_en'))
+            .values('month')
+            .annotate(count=Count('id'))
+            .order_by('month')
+        )
+
+        # ── Breakdowns ────────────────────────────────────────────────────────
+        status_counts = {
+            row['therapy_status']: row['count']
+            for row in Patient.objects.filter(therapist=user)
+            .values('therapy_status')
+            .annotate(count=Count('id'))
+        }
+
+        consent_with = Patient.objects.filter(
+            therapist=user, consent_federation=True
+        ).count()
+        consent_without = Patient.objects.filter(
+            therapist=user, consent_federation=False
+        ).count()
+
+        return Response({
+            'kpi': {
+                'total_patients': total_patients,
+                'active_patients_30d': active_patients_30d,
+                'sessions_this_month': sessions_this_month,
+                'fichas_this_month': fichas_this_month,
+                'new_patients_30d': new_patients_30d,
+            },
+            'sessions_by_month': [
+                {'month': row['month'].strftime('%Y-%m'), 'count': row['count']}
+                for row in sessions_by_month_qs
+            ],
+            'fichas_by_month': [
+                {'month': row['month'].strftime('%Y-%m'), 'count': row['count']}
+                for row in fichas_by_month_qs
+            ],
+            'therapy_status_breakdown': status_counts,
+            'consent_breakdown': {
+                'with_consent': consent_with,
+                'without_consent': consent_without,
+            },
         })
 
 

@@ -17,7 +17,14 @@ import type { TreeStructuralAnalysis } from '@holistica/symbolic/tree/tree-analy
 import TreeVisualPlaceholder from './TreeVisualPlaceholder';
 import { ejecutarMetodoPitagorico } from '@holistica/symbolic/methods/pitagoras';
 import type { PitagorasSymbolicState, PitagorasNumberMeaning } from '@holistica/symbolic/methods/pitagoras/pitagoras.types';
-import { adaptPitagorasToTree, type TreeStructuralState } from '@holistica/symbolic/tree';
+import {
+  adaptPitagorasToTree,
+  buildFormativeBrief,
+  methodContextFromSymbolicState,
+  type FormativeBrief,
+  type TreeStructuralState,
+} from '@holistica/symbolic/tree';
+import FormativeReadingPanel from './FormativeReadingPanel';
 
 // ============================================================================
 // CLINICAL CONTEXT TYPES (from Ghost Tests pipeline)
@@ -666,6 +673,7 @@ export default function CabalAppliedVisualCore({
   const [activePatientId, setActivePatientId] = useState<number | null>(null);
   const [patientProfile, setPatientProfile] = useState<PatientProfileSummary | null>(null);
   const [pitagorasState, setPitagorasState] = useState<PitagorasSymbolicState | null>(null);
+  const [methodSymbolicState, setMethodSymbolicState] = useState<Record<string, unknown> | null>(null);
   const [treeStructuralState, setTreeStructuralState] = useState<TreeStructuralState | null>(null);
   const [treeAnalysis, setTreeAnalysis] = useState<TreeStructuralAnalysis | null>(null);
   const [selectedMethod, setSelectedMethod] = useState<string>('gematria-standard');
@@ -777,6 +785,7 @@ export default function CabalAppliedVisualCore({
       };
 
       const estado = method.run(input);
+      setMethodSymbolicState(estado as Record<string, unknown>);
       setPitagorasState(selectedMethod === 'pitagoras' ? (estado as PitagorasSymbolicState) : null);
 
       const treeState = adaptMethodStateToTree(selectedMethod, estado);
@@ -814,6 +823,7 @@ export default function CabalAppliedVisualCore({
       );
       setTreeStructuralState(null);
       setTreeAnalysis(null);
+      setMethodSymbolicState(null);
     } finally {
       setExecuteLoading(false);
     }
@@ -900,6 +910,7 @@ export default function CabalAppliedVisualCore({
     if (!activePatientId) {
       setTreeStructuralState(null);
       setTreeAnalysis(null);
+      setMethodSymbolicState(null);
       return;
     }
 
@@ -954,6 +965,22 @@ export default function CabalAppliedVisualCore({
     () => buildPdfSummaryFromAnalysis(treeAnalysis, treeStructuralState),
     [treeAnalysis, treeStructuralState],
   );
+
+  const formativeBrief: FormativeBrief | null = useMemo(() => {
+    if (!treeAnalysis || !treeStructuralState) return null;
+    const ctx = methodSymbolicState
+      ? methodContextFromSymbolicState(methodSymbolicState as Parameters<typeof methodContextFromSymbolicState>[0])
+      : undefined;
+    const clinicalCtx = clinicalContext
+      ? {
+          ritmoState: clinicalContext.ritmo_state,
+          mundoPredominante: clinicalContext.mundo_predominante,
+          harmonyIndex: clinicalContext.harmony_index,
+          illuminatedSefirot: clinicalContext.illuminated_sefirot?.map((s) => s.name),
+        }
+      : undefined;
+    return buildFormativeBrief(treeStructuralState, treeAnalysis, ctx, clinicalCtx);
+  }, [treeAnalysis, treeStructuralState, methodSymbolicState, clinicalContext]);
 
   useEffect(() => {
     onWorkspaceStateChange?.({
@@ -1062,7 +1089,14 @@ export default function CabalAppliedVisualCore({
               {executeError}
             </div>
           )}
-          <div className="grid gap-4 md:grid-cols-2">
+
+          <FormativeReadingPanel brief={formativeBrief} loading={executeLoading} />
+
+          <details className="rounded-lg border border-slate-200 bg-slate-50/80">
+            <summary className="cursor-pointer px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Datos estructurales (avanzado)
+            </summary>
+          <div className="grid gap-4 md:grid-cols-2 p-4 pt-0">
             <div className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-700">
               <div className="text-xs uppercase tracking-wide text-gray-500">Sefirot activas</div>
               <div className="mt-2 text-xs">
@@ -1127,7 +1161,7 @@ export default function CabalAppliedVisualCore({
               </div>
             </div>
           </div>
-          <div className="mt-4 rounded-lg border border-dashed border-gray-200 bg-gray-50 p-3 text-xs text-gray-500">
+          <div className="mx-4 mb-4 rounded-lg border border-dashed border-gray-200 bg-white p-3 text-xs text-gray-500">
             <span className="font-medium">Ejes:</span>{' '}
             {treeAnalysis ? (
               <>
@@ -1155,6 +1189,7 @@ export default function CabalAppliedVisualCore({
               ? `${treeStructuralState.source.method} (${treeStructuralState.source.mode})`
               : 'No disponible'}
           </div>
+          </details>
 
           {/* Pitagoras Professional Report (solo UI, no persistencia) */}
           {pitagorasState && (

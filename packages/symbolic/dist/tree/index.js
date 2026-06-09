@@ -6,6 +6,7 @@
 export { SEFIROT_TOPOLOGY, TREE_PATHS, VALID_SEFIRA_IDS } from './tree-topology';
 export { TREE_STRUCTURAL_STATE_META } from './tree-structural-state.types';
 export { analyzeTreeState } from './tree-analysis';
+export { buildFormativeBrief, methodContextFromSymbolicState } from './formative-reading';
 // ─── Adapters (PR-5) ─────────────────────────────────────────────────────────
 export { adaptPitagorasToTree } from './pitagoras-tree-adapter';
 export { adaptGenericMethodToTree } from './generic-method-adapter';

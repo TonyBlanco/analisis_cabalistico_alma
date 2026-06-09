@@ -34,6 +34,18 @@ export type {
 } from './tree-analysis.types';
 export { analyzeTreeState } from './tree-analysis';
 
+// ─── Formative reading (deterministic therapist synthesis) ───────────────────
+export type {
+  FormativeBrief,
+  FormativeClinicalContext,
+  FormativeMethodContext,
+  FormativeMethodNumber,
+  FormativeSefirahFocus,
+  FormativePathProcess,
+  FormativeAxisReading,
+} from './formative-reading';
+export { buildFormativeBrief, methodContextFromSymbolicState } from './formative-reading';
+
 // ─── Adapters (PR-5) ─────────────────────────────────────────────────────────
 export { adaptPitagorasToTree } from './pitagoras-tree-adapter';
 export { adaptGenericMethodToTree } from './generic-method-adapter';

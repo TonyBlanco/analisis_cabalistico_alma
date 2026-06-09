@@ -1,7 +1,8 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
-import { Hash, Sparkles, Activity, Sun, Scale } from 'lucide-react';
+import { Hash, Sparkles, Activity, Sun, Scale, Loader2, AlertCircle, UserRound } from 'lucide-react';
 import type { CabalSectionId } from './types';
 import {
   getActivePatientId,
@@ -574,6 +575,8 @@ export default function CabalAppliedVisualCore({
 }: CabalAppliedVisualCoreProps) {
   const consultante = useActiveConsultante();
   const [activePatientId, setActivePatientId] = useState<number | null>(null);
+  const [patientLoading, setPatientLoading] = useState(true);
+  const [patientLoadError, setPatientLoadError] = useState<string | null>(null);
   const [patientProfile, setPatientProfile] = useState<PatientProfileSummary | null>(null);
   const [pitagorasState, setPitagorasState] = useState<PitagorasSymbolicState | null>(null);
   const [methodSymbolicState, setMethodSymbolicState] = useState<Record<string, unknown> | null>(null);
@@ -749,10 +752,13 @@ export default function CabalAppliedVisualCore({
     const loadPatient = async () => {
       const patientId = getActivePatientId();
       if (!isMounted) return;
+      setPatientLoading(true);
+      setPatientLoadError(null);
       setActivePatientId(patientId ?? null);
       if (!patientId) {
         setPatientProfile(null);
         setClinicalContext(null);
+        setPatientLoading(false);
         return;
       }
       try {
@@ -764,9 +770,14 @@ export default function CabalAppliedVisualCore({
             persistActivePatientId(patientId, resolvedName);
           }
         }
-      } catch (error) {
+      } catch {
         if (isMounted) {
           setPatientProfile(null);
+          setPatientLoadError('No se pudo cargar el perfil del consultante activo.');
+        }
+      } finally {
+        if (isMounted) {
+          setPatientLoading(false);
         }
       }
     };
@@ -970,9 +981,48 @@ export default function CabalAppliedVisualCore({
         </div>
       </div>
       {activeSection === 'tree' && <TreeVisualPlaceholder />}
-      {!activePatientId ? (
-        <div className="mt-6 rounded-lg border border-dashed border-gray-200 bg-gray-50 p-4 text-sm text-gray-600">
-          Seleccione un paciente para continuar.
+      {patientLoading ? (
+        <div
+          className="mt-6 flex items-center justify-center gap-2 rounded-lg border border-gray-200 bg-gray-50 p-6 text-sm text-gray-600"
+          role="status"
+          aria-live="polite"
+        >
+          <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+          Cargando consultante activo…
+        </div>
+      ) : patientLoadError ? (
+        <div
+          className="mt-6 flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700"
+          role="alert"
+        >
+          <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" aria-hidden="true" />
+          <div>
+            <p>{patientLoadError}</p>
+            <Link
+              href="/dashboard/therapist/patients"
+              className="mt-2 inline-block text-xs font-medium text-red-800 underline hover:no-underline"
+            >
+              Ir a consultantes
+            </Link>
+          </div>
+        </div>
+      ) : !activePatientId ? (
+        <div className="mt-6 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-5 text-sm text-gray-700">
+          <div className="flex items-start gap-3">
+            <UserRound className="h-5 w-5 text-gray-400 shrink-0 mt-0.5" aria-hidden="true" />
+            <div>
+              <p className="font-medium text-gray-900">Sin consultante activo</p>
+              <p className="mt-1 text-gray-600">
+                Selecciona un consultante en el panel superior o desde la lista de pacientes para ejecutar métodos y ver síntesis.
+              </p>
+              <Link
+                href="/dashboard/therapist/patients"
+                className="mt-3 inline-flex rounded-md bg-gray-900 px-3 py-2 text-xs font-medium text-white hover:bg-gray-800"
+              >
+                Elegir consultante
+              </Link>
+            </div>
+          </div>
         </div>
       ) : (
         <>

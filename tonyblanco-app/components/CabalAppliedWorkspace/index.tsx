@@ -1,8 +1,10 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useCallback, useState } from 'react';
 import { Sparkles } from 'lucide-react';
+import ActivePatientIndicator from '@/components/ActivePatientIndicator';
 import CabalAppliedSidebar from './CabalAppliedSidebar';
 import CabalAppliedVisualCore from './CabalAppliedVisualCore';
 import type { CabalSectionId } from './types';
@@ -10,6 +12,7 @@ import CabalAppliedToolsPanel, { type CabalaToolsTabId } from './CabalAppliedToo
 import type { CabalaAplicadaWorkspaceExportState } from './CabalAppliedVisualCore';
 
 export default function CabalAppliedWorkspace() {
+  const router = useRouter();
   const [activeSection, setActiveSection] = useState<CabalSectionId>('tree');
   const [activeTool, setActiveTool] = useState<CabalaToolsTabId>('history');
   const [workspaceState, setWorkspaceState] = useState<CabalaAplicadaWorkspaceExportState>({
@@ -43,7 +46,10 @@ export default function CabalAppliedWorkspace() {
             <h1 className="text-2xl font-semibold text-gray-900">Cabala Aplicada</h1>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center justify-end gap-3">
+          <ActivePatientIndicator
+            onSelectPatient={() => router.push('/dashboard/therapist/patients')}
+          />
           <button
             type="button"
             onClick={() => setActiveTool('history')}
@@ -85,8 +91,12 @@ export default function CabalAppliedWorkspace() {
       <div className="flex">
         <CabalAppliedSidebar activeSection={activeSection} onChange={setActiveSection} />
         <main className="flex-1 px-6 py-6">
-          <div className="mb-4 rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700">
-            Observacional. Sin interpretacion, sin automatizacion, sin diagnostico.
+          <div
+            className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900"
+            role="note"
+            aria-label="Aviso no clínico"
+          >
+            Observación estructural-simbólica con fines formativos. No es diagnóstico ni consejo clínico.
           </div>
           <div className="flex gap-6 items-start">
             <CabalAppliedVisualCore

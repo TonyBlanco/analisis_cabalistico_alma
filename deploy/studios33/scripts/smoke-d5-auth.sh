@@ -83,11 +83,11 @@ fi
 if [[ -n "$AUTH_CRED" ]]; then
   echo "▶ Sesión terapeuta (autenticado)"
   auth_hdr="Authorization: Token ${AUTH_CRED}"
-  me_code="$(curl -sS -o /tmp/smoke-me.json -w '%{http_code}' -H "$auth_hdr" "${API_BASE}/api/membership/status/")"
+  me_code="$(curl -sS -o /tmp/smoke-me.json -w '%{http_code}' -H "$auth_hdr" "${API_BASE}/api/check-membership/")"
   if [[ "$me_code" == "200" ]]; then
-    ok "membership/status → 200"
+    ok "check-membership → 200"
   else
-    bad "membership/status → ${me_code}"
+    bad "check-membership → ${me_code}"
   fi
   patients_code="$(curl -sS -o /tmp/smoke-patients.json -w '%{http_code}' -H "$auth_hdr" "${API_BASE}/api/therapist/patients/")"
   if [[ "$patients_code" == "200" ]]; then

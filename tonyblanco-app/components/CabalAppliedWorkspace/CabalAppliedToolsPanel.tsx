@@ -247,6 +247,15 @@ export default function CabalAppliedToolsPanel({
       )}
 
       <div className="flex-1 overflow-y-auto px-4 pb-4">
+        {!patientId && activeTab !== 'correspondences' && (
+          <div
+            className="mb-3 rounded-md border border-dashed border-gray-200 bg-gray-50 p-3 text-xs text-gray-600"
+            role="status"
+          >
+            Selecciona un consultante activo para usar esta herramienta.
+          </div>
+        )}
+
         {activeTab === 'history' && (
           <div className="space-y-2">
             <p className="text-xs text-gray-600">Registros del paciente activo (últimos 10).</p>

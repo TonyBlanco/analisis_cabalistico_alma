@@ -11,7 +11,8 @@
  * - Determinista: mismo input → mismo TreeStructuralState
  */
 import { TREE_STRUCTURAL_STATE_META } from './tree-structural-state.types';
-import { SEFIROT_TOPOLOGY, TREE_PATHS } from './tree-topology';
+import { SEFIROT_TOPOLOGY, TREE_PATHS, VALID_SEFIRA_IDS } from './tree-topology';
+const LATENT_BASELINE_ACTIVATION = 0.15;
 function enrichSefirah(s) {
     const topo = SEFIROT_TOPOLOGY[s.id];
     if (!topo)
@@ -113,18 +114,15 @@ export function adaptGenericMethodToTree(symbolicState) {
         const currentMalchut = sefirotMap['malchut'] || 0;
         sefirotMap['malchut'] = Math.max(currentMalchut, 0.75);
     }
-    // 4. Construir array de Sefirot
-    const sefirot = [];
-    for (const id in sefirotMap) {
-        if (!sefirotMap.hasOwnProperty(id))
-            continue;
-        const activation = sefirotMap[id];
-        sefirot.push({
-            id: id,
+    // 4. Construir las 10 Sefirot canónicas (inactivas = latent baseline)
+    const sefirot = VALID_SEFIRA_IDS.map((id) => {
+        const activation = sefirotMap[id] ?? LATENT_BASELINE_ACTIVATION;
+        return {
+            id,
             activation,
             role: determineRole(activation),
-        });
-    }
+        };
+    });
     // 5. Generar flujos entre Sefirot activas
     const flows = [];
     const activeSefirot = symbolicState.primaryNumbers

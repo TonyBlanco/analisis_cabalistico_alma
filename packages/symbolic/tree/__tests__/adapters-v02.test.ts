@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { adaptGenericMethodToTree } from '../generic-method-adapter';
 import type { GenericSymbolicState } from '../generic-method-adapter';
+import { validateTreeStateForInterpretation } from '../symbolic-interpreter';
 
 const sampleState: GenericSymbolicState = {
   methodId: 'test-method',
@@ -92,5 +93,11 @@ describe('adaptGenericMethodToTree — v0.2 topology enrichment', () => {
     expect(result.source.method).toBe('test-method');
     expect(Array.isArray(result.sefirot)).toBe(true);
     expect(Array.isArray(result.flows)).toBe(true);
+  });
+
+  it('always emits exactly 10 sefirot for API v1 validation', () => {
+    const result = adaptGenericMethodToTree(sampleState);
+    expect(result.sefirot).toHaveLength(10);
+    expect(validateTreeStateForInterpretation(result).valid).toBe(true);
   });
 });

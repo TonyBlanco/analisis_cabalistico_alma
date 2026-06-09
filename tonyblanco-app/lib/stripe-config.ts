@@ -4,7 +4,7 @@ export const STRIPE_PLANS = {
   personal: {
     name: 'Análisis Personal',
     price: 29,
-    priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_PERSONAL || '', // Configurar en Vercel
+    priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_PERSONAL || '', // Configurar en deploy/env
     features: [
       'Árbol de la Vida completo',
       'Análisis de todos los números',

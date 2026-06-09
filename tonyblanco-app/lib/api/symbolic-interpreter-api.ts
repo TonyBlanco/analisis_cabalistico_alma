@@ -10,6 +10,7 @@ import type {
 import { createFallbackInterpretation } from '@holistica/symbolic/tree/symbolic-interpreter';
 import type { TreeStructuralState } from '@holistica/symbolic/tree';
 import { getApiBaseUrl } from '../api-base';
+import { getAuthHeaders } from '../api';
 import { interpretViaApi } from './symbolic-api-client';
 
 const API_BASE_URL = getApiBaseUrl();
@@ -27,7 +28,7 @@ export async function checkSymbolicInterpreterStatus(): Promise<{
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Token ${getAuthToken()}`,
+        ...getAuthHeaders(),
       },
     });
     
@@ -75,23 +76,4 @@ export async function generateAISymbolicInterpretation(
   }
 }
 
-/**
- * Get auth token from localStorage or session
- * TODO: Replace with your actual auth token retrieval logic
- */
-function getAuthToken(): string {
-  if (typeof window === 'undefined') return '';
-  
-  // Try localStorage first
-  const token =
-    localStorage.getItem('authToken') ||
-    localStorage.getItem('auth_token') ||
-    sessionStorage.getItem('auth_token');
-  
-  if (!token) {
-    console.warn('No auth token found, API request may fail');
-    return '';
-  }
-  
-  return token;
-}
+

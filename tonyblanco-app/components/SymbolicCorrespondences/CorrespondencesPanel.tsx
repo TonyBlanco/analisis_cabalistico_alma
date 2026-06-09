@@ -3,12 +3,155 @@
 import { useCallback, useEffect, useState } from 'react';
 import { BookOpen, Loader2, AlertCircle } from 'lucide-react';
 import type { SystemId } from '@holistica/symbolic/tree/symbolic-interpreter.types';
-import type { CorrespondencesResponseV1 } from '@holistica/symbolic/api';
+import type {
+  CorrespondenceEntryV1,
+  CorrespondencesResponseV1,
+  CorrespondencePathDataV1,
+  CorrespondenceSefirahDataV1,
+} from '@holistica/symbolic/api';
 import { fetchCorrespondencesViaApi } from '@/lib/api/symbolic-api-client';
 
 interface CorrespondencesPanelProps {
   systemId: SystemId;
   onSystemChange: (systemId: SystemId) => void;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function formatValue(value: unknown): string | null {
+  if (value === null || value === undefined || value === '') return null;
+  if (Array.isArray(value)) {
+    if (value.length === 0) return null;
+    return value.join(', ');
+  }
+  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+    return String(value);
+  }
+  return null;
+}
+
+function labeledRows(
+  rows: Array<{ label: string; value: unknown }>,
+): Array<{ label: string; value: string }> {
+  return rows
+    .map((row) => {
+      const value = formatValue(row.value);
+      return value ? { label: row.label, value } : null;
+    })
+    .filter((row): row is { label: string; value: string } => row !== null);
+}
+
+function renderHermeticSefirah(data: Record<string, unknown>) {
+  return labeledRows([
+    { label: 'Planeta', value: data.planet },
+    { label: 'Elemento', value: data.element },
+    { label: 'Color (King Scale)', value: data.kingScaleColor },
+    { label: 'Arcanos mayores', value: data.tarotArcanaNumbers },
+  ]);
+}
+
+function renderJewishSefirah(data: Record<string, unknown>) {
+  return labeledRows([
+    { label: 'Nombre divino (hebreo)', value: data.divineNameHebrew },
+    { label: 'Nombre divino (translit.)', value: data.divineNameTranslit },
+    { label: 'Arcángel', value: data.archangel },
+    { label: 'Coro angélico', value: data.angelicChoir },
+    { label: 'Olam', value: data.olam },
+  ]);
+}
+
+function renderSefirahFields(
+  systemId: SystemId,
+  data: CorrespondenceSefirahDataV1,
+): Array<{ label: string; value: string }> {
+  if (!isRecord(data)) return [];
+  if (systemId === 'jewish-traditional') {
+    return renderJewishSefirah(data);
+  }
+  return renderHermeticSefirah(data);
+}
+
+function renderHermeticPath(data: Record<string, unknown>) {
+  return labeledRows([
+    { label: 'Letra hebrea', value: data.hebrewLetter },
+    { label: 'Nº sendero', value: data.pathNumber },
+    { label: 'Arcano mayor', value: data.tarotArcanum },
+    { label: 'Planeta', value: data.planet },
+    { label: 'Elemento', value: data.element },
+  ]);
+}
+
+function renderJewishPath(data: Record<string, unknown>) {
+  return labeledRows([
+    { label: 'Letra hebrea', value: data.hebrewLetter },
+    { label: 'Clase (Yetzirah)', value: data.letterClass },
+    { label: 'Atribución', value: data.attribution },
+  ]);
+}
+
+function renderPathFields(
+  systemId: SystemId,
+  data: CorrespondencePathDataV1,
+): Array<{ label: string; value: string }> {
+  if (!isRecord(data)) return [];
+  if (systemId === 'jewish-traditional') {
+    return renderJewishPath(data);
+  }
+  return renderHermeticPath(data);
+}
+
+function CorrespondenceFieldList({
+  fields,
+}: {
+  fields: Array<{ label: string; value: string }>;
+}) {
+  if (fields.length === 0) {
+    return <p className="mt-1 text-[10px] text-gray-400">Sin datos para este sistema.</p>;
+  }
+  return (
+    <dl className="mt-1 grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5 text-[10px] text-gray-600">
+      {fields.map((field) => (
+        <div key={field.label} className="contents">
+          <dt className="font-medium text-gray-500">{field.label}</dt>
+          <dd className="text-gray-700">{field.value}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
+function SefirahEntry({
+  entry,
+  systemId,
+}: {
+  entry: CorrespondenceEntryV1<CorrespondenceSefirahDataV1>;
+  systemId: SystemId;
+}) {
+  const fields = renderSefirahFields(systemId, entry.data);
+  return (
+    <div className="rounded-md border border-gray-100 bg-white px-3 py-2 text-xs text-gray-700">
+      <span className="font-semibold capitalize">{entry.id}</span>
+      <CorrespondenceFieldList fields={fields} />
+    </div>
+  );
+}
+
+function PathEntry({
+  entry,
+  systemId,
+}: {
+  entry: CorrespondenceEntryV1<CorrespondencePathDataV1>;
+  systemId: SystemId;
+}) {
+  const fields = renderPathFields(systemId, entry.data);
+  return (
+    <div className="rounded-md border border-gray-100 bg-gray-50 px-2 py-1.5 text-[10px] text-gray-600">
+      <span className="font-semibold text-gray-700">{entry.id}</span>
+      <CorrespondenceFieldList fields={fields} />
+    </div>
+  );
 }
 
 export function CorrespondencesPanel({
@@ -96,15 +239,7 @@ export function CorrespondencesPanel({
             </h4>
             <div className="space-y-1">
               {data.sefirot.map((entry) => (
-                <div
-                  key={entry.id}
-                  className="rounded-md border border-gray-100 bg-white px-3 py-2 text-xs text-gray-700"
-                >
-                  <span className="font-semibold capitalize">{entry.id}</span>
-                  <pre className="mt-1 whitespace-pre-wrap font-mono text-[10px] text-gray-600">
-                    {JSON.stringify(entry.data, null, 0)}
-                  </pre>
-                </div>
+                <SefirahEntry key={entry.id} entry={entry} systemId={data.systemId} />
               ))}
             </div>
           </section>
@@ -114,12 +249,7 @@ export function CorrespondencesPanel({
             </h4>
             <div className="grid gap-1">
               {data.paths.slice(0, 8).map((entry) => (
-                <div
-                  key={entry.id}
-                  className="rounded-md border border-gray-100 bg-gray-50 px-2 py-1 text-[10px] font-mono text-gray-600"
-                >
-                  {entry.id}
-                </div>
+                <PathEntry key={entry.id} entry={entry} systemId={data.systemId} />
               ))}
               {data.paths.length > 8 && (
                 <p className="text-[10px] text-gray-400 px-1">

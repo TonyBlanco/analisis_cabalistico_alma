@@ -14,7 +14,7 @@ import {
   ChevronUp,
 } from 'lucide-react';
 import { getApiBaseUrl } from '@/lib/api-base';
-import { getAuthToken } from '@/lib/auth';
+import { getAuthHeaders } from '@/lib/api';
 
 /**
  * AISituationChat - Chat interactivo para consultas astrológicas
@@ -103,9 +103,7 @@ export default function AISituationChat({ patientId, hasChart, patientName }: Pr
     const checkAIStatus = async () => {
       try {
         const response = await fetch(`${getApiBaseUrl()}/api/astrology/ai-status/`, {
-          headers: {
-            Authorization: `Bearer ${getAuthToken()}`,
-          },
+          headers: getAuthHeaders(),
         });
         const data = await response.json();
         setAiEnabled(data.enabled);
@@ -159,7 +157,7 @@ export default function AISituationChat({ patientId, hasChart, patientName }: Pr
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${getAuthToken()}`,
+            ...getAuthHeaders(),
           },
           body: JSON.stringify({
             patient_id: patientId,

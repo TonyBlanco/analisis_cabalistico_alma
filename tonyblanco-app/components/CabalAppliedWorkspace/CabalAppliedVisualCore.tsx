@@ -10,7 +10,7 @@ import {
 } from '@/lib/active-patient';
 import { getPatientProfileSummary, type PatientProfileSummary } from '@/lib/patient-api';
 import useActiveConsultante from '@/hooks/useActiveConsultante';
-import { API_BASE_URL, getAuthToken } from '@/lib/api';
+import { API_BASE_URL, getAuthHeaders, getAuthToken } from '@/lib/api';
 import { analyzeTreeViaApi } from '@/lib/api/symbolic-api-client';
 import { TreeWithFlows } from '@/components/Tree';
 import type { TreeStructuralAnalysis } from '@holistica/symbolic/tree/tree-analysis.types';
@@ -869,8 +869,8 @@ export default function CabalAppliedVisualCore({
         // This endpoint should be implemented in swm/cabala/views.py
         const response = await fetch(`/api/swm/cabala/clinical-summary/${activePatientId}/`, {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`,
             'Content-Type': 'application/json',
+            ...getAuthHeaders(),
           },
         });
         
@@ -991,19 +991,19 @@ export default function CabalAppliedVisualCore({
     <section className="flex-1 bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
       <div className="flex items-start justify-between gap-4 mb-4">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900">Arbol de la Vida</h3>
+          <h3 className="text-lg font-semibold text-gray-900">Árbol de la Vida</h3>
           <p className="text-xs text-gray-500">
-            Estado estructural observacional (v0.1).
+            Estado estructural observacional (motor v1).
           </p>
         </div>
         <div className="text-right text-xs text-gray-500">
-          Seccion activa: <span className="font-medium text-gray-700">{activeSection}</span>
+          Sección activa: <span className="font-medium text-gray-700">{activeSection}</span>
         </div>
       </div>
       <TreeVisualPlaceholder />
       {!activePatientId ? (
         <div className="mt-6 rounded-lg border border-dashed border-gray-200 bg-gray-50 p-4 text-sm text-gray-600">
-          Seleccione un paciente para ver el Arbol de la Vida.
+          Seleccione un paciente para ver el Árbol de la Vida.
         </div>
       ) : (
         <>
@@ -1095,7 +1095,7 @@ export default function CabalAppliedVisualCore({
               </div>
             </div>
             <div className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-700">
-              <div className="text-xs uppercase tracking-wide text-gray-500">Repeticiones</div>
+              <div className="text-xs uppercase tracking-wide text-gray-500">Intensidad relativa</div>
               <div className="mt-2 text-xs">
                 {executeLoading ? (
                   <span>Cargando...</span>
@@ -1128,9 +1128,32 @@ export default function CabalAppliedVisualCore({
             </div>
           </div>
           <div className="mt-4 rounded-lg border border-dashed border-gray-200 bg-gray-50 p-3 text-xs text-gray-500">
-            <span className="font-medium">Ejes:</span> No disponible -{' '}
-            <span className="font-medium">Polaridades:</span> No disponible -{' '}
-            <span className="font-medium">Fuentes:</span> No disponible
+            <span className="font-medium">Ejes:</span>{' '}
+            {treeAnalysis ? (
+              <>
+                Severidad {treeAnalysis.pillarBalance.severity.toFixed(2)} · Misericordia{' '}
+                {treeAnalysis.pillarBalance.mercy.toFixed(2)} · Equilibrio{' '}
+                {treeAnalysis.pillarBalance.equilibrium.toFixed(2)}
+              </>
+            ) : (
+              'No disponible'
+            )}
+            {' · '}
+            <span className="font-medium">Polaridades:</span>{' '}
+            {treeAnalysis ? (
+              <>
+                Armónica {treeAnalysis.polarityDistribution.harmonic.toFixed(2)} · Integrativa{' '}
+                {treeAnalysis.polarityDistribution.integrative.toFixed(2)} · Tensional{' '}
+                {treeAnalysis.polarityDistribution.tensional.toFixed(2)}
+              </>
+            ) : (
+              'No disponible'
+            )}
+            {' · '}
+            <span className="font-medium">Fuentes:</span>{' '}
+            {treeStructuralState?.source.method
+              ? `${treeStructuralState.source.method} (${treeStructuralState.source.mode})`
+              : 'No disponible'}
           </div>
 
           {/* Pitagoras Professional Report (solo UI, no persistencia) */}

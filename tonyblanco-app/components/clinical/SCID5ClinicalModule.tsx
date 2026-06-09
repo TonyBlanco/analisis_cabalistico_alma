@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { getActivePatient } from '@/lib/active-patient';
-import { API_BASE_URL, getAuthToken } from '@/lib/api';
+import { API_BASE_URL, getAuthHeaders } from '@/lib/api';
 import { Brain, Lightbulb, AlertTriangle, CheckCircle, Activity, MapPin } from 'lucide-react';
 import { correlateSCID5AllSections, SCID5CorrelationResult } from '@/lib/api/bioemotional-clinical';
 
@@ -166,7 +166,7 @@ export default function SCID5ClinicalModule() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${getAuthToken()}`,
+          ...getAuthHeaders(),
         },
         body: JSON.stringify({
           scid5_data: data,
@@ -203,7 +203,7 @@ export default function SCID5ClinicalModule() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${getAuthToken()}`,
+          ...getAuthHeaders(),
         },
         body: JSON.stringify({
           kind: 'holistic_exploration',

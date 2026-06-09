@@ -8,9 +8,9 @@ interface CabalAppliedSidebarProps {
 }
 
 const sections: Array<{ id: CabalSectionId; label: string; description: string }> = [
-  { id: 'tree', label: 'Arbol', description: 'Vista simbolica del Arbol de la Vida.' },
-  { id: 'gematria', label: 'Gematria', description: 'Espacio observacional sin calculos.' },
-  { id: 'synthesis', label: 'Sintesis', description: 'Notas humanas de integracion.' },
+  { id: 'tree', label: 'Árbol', description: 'Vista simbólica del Árbol de la Vida.' },
+  { id: 'gematria', label: 'Gematría', description: 'Espacio observacional sin cálculos.' },
+  { id: 'synthesis', label: 'Síntesis', description: 'Notas humanas de integración.' },
   { id: 'resources', label: 'Recursos', description: 'Material consultivo de apoyo.' },
 ];
 
@@ -21,7 +21,7 @@ export default function CabalAppliedSidebar({
   return (
     <aside className="w-64 border-r border-gray-200 bg-white flex flex-col">
       <div className="px-4 py-4 border-b border-gray-200">
-        <p className="text-xs uppercase tracking-wide text-gray-500">Workspace simbolico</p>
+        <p className="text-xs uppercase tracking-wide text-gray-500">Workspace simbólico</p>
         <h2 className="text-lg font-semibold text-gray-900">Cabala Aplicada</h2>
       </div>
       <div className="flex-1 px-3 py-4 space-y-2">
@@ -45,7 +45,7 @@ export default function CabalAppliedSidebar({
         })}
       </div>
       <div className="px-4 py-3 border-t border-gray-200 text-[11px] text-gray-500">
-        Sin interpretacion ni automatizacion.
+        Sin interpretación ni automatización.
       </div>
     </aside>
   );

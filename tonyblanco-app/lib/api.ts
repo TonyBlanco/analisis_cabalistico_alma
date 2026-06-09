@@ -134,6 +134,12 @@ export const getAuthToken = (): string | null => {
   return null;
 };
 
+/** Canonical DRF TokenAuthentication headers for manual fetch calls. */
+export const getAuthHeaders = (): Record<string, string> => {
+  const token = getAuthToken();
+  return token ? { Authorization: `Token ${token}` } : {};
+};
+
 // Helper function to set auth token
 export const setAuthToken = (token: string): void => {
   if (typeof window !== 'undefined') {

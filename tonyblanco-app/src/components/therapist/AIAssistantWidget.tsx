@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, X, Send, Loader2 } from 'lucide-react';
 import { getApiBaseUrl } from '../../../lib/api-base';
+import { getAuthHeaders } from '../../../lib/api';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -26,14 +27,13 @@ export default function AIAssistantWidget() {
     setLoading(true);
 
     try {
-      const token = localStorage.getItem('authToken');
       const response = await fetch(
         `${getApiBaseUrl()}/ai/holistic-query/`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
+            ...getAuthHeaders(),
           },
           body: JSON.stringify({ query: userMessage }),
         }

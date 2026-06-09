@@ -14,15 +14,7 @@ import type {
   SymbolicSafetyLevel,
 } from '@holistica/symbolic/tree/symbolic-interpreter.types';
 import type { TreeStructuralState } from '@holistica/symbolic/tree';
-
-function getAuthHeaders(): HeadersInit {
-  if (typeof window === 'undefined') return {};
-  const token =
-    localStorage.getItem('authToken') ||
-    localStorage.getItem('auth_token') ||
-    sessionStorage.getItem('auth_token');
-  return token ? { Authorization: `Token ${token}` } : {};
-}
+import { getAuthHeaders } from '@/lib/api';
 
 async function parseEnvelope<T>(response: Response): Promise<T> {
   const json = (await response.json()) as SymbolicApiEnvelope<T> | { error?: string };

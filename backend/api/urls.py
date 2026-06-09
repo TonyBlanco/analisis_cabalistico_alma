@@ -32,6 +32,7 @@ from .views import (
     SessionDetailView,
     TherapistNoteListCreateView,
     TherapistDashboardView,
+    TherapistMetricsView,
     TherapistPatientProfileView,
     # Vistas de servicios
     ServiceCategoryListView,
@@ -235,6 +236,7 @@ urlpatterns = [
         name='therapist_patient_invitation_cancel',
     ),
     path('therapist/dashboard/', TherapistDashboardView.as_view(), name='therapist_dashboard'),
+    path('therapist/metrics/', TherapistMetricsView.as_view(), name='therapist_metrics'),
     path('therapist/patients/', PatientListCreateView.as_view(), name='patient_list_create'),
     path('therapist/patients/<int:pk>/', PatientDetailView.as_view(), name='patient_detail'),
     path('therapist/patients/<int:pk>/profile/', TherapistPatientProfileView.as_view(), name='therapist_patient_profile'),

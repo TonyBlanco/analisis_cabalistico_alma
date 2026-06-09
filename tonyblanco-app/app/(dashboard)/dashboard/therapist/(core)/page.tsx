@@ -1,135 +1,114 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
-import { 
-  Users, Calendar, FileText, 
-  Plus, TrendingUp, Clock,
-  UserPlus, ClipboardList, BarChart3,
-  Microscope, Flower2, Stars
-} from 'lucide-react';
+import { AlertCircle, BarChart3, Calendar, ClipboardList, FileText, Plus, UserPlus } from 'lucide-react';
+import { useTherapistMetrics } from '@/hooks/useTherapistMetrics';
 
-export default function TherapistDashboard() {
+// Lazy-load chart bundle — avoids SSR issues with Chart.js canvas
+const MetricsDashboard = dynamic(() => import('@/components/dashboard/MetricsDashboard'), {
+  ssr: false,
+  loading: () => <ChartSkeleton />,
+});
+
+export default function TherapistDashboardPage() {
   const router = useRouter();
+  const { data, status, error, refetch } = useTherapistMetrics();
 
   return (
-    <div>
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-blue-100 rounded-lg">
-              <Users className="h-6 w-6 text-blue-600" />
-            </div>
-            <span className="text-sm font-medium text-green-600">+12%</span>
-          </div>
-          <h3 className="text-2xl font-bold text-gray-900 mb-1">0</h3>
-          <p className="text-sm text-gray-600">Pacientes Activos</p>
-        </div>
+    <div className="space-y-8">
+      {/* Metrics section */}
+      {status === 'loading' && <ChartSkeleton />}
 
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-green-100 rounded-lg">
-              <Calendar className="h-6 w-6 text-green-600" />
-            </div>
-            <span className="text-sm font-medium text-green-600">+8%</span>
-          </div>
-          <h3 className="text-2xl font-bold text-gray-900 mb-1">0</h3>
-          <p className="text-sm text-gray-600">Sesiones este mes</p>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-purple-100 rounded-lg">
-              <FileText className="h-6 w-6 text-purple-600" />
-            </div>
-            <span className="text-sm font-medium text-green-600">+5%</span>
-          </div>
-          <h3 className="text-2xl font-bold text-gray-900 mb-1">0</h3>
-          <p className="text-sm text-gray-600">Fichas Creadas</p>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-3 bg-orange-100 rounded-lg">
-              <TrendingUp className="h-6 w-6 text-orange-600" />
-            </div>
-            <span className="text-sm font-medium text-gray-500">0%</span>
-          </div>
-          <h3 className="text-2xl font-bold text-gray-900 mb-1">0%</h3>
-          <p className="text-sm text-gray-600">Tasa de Retención</p>
-        </div>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
-        <div className="p-6 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">Acciones Rápidas</h2>
-        </div>
-        <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      {status === 'error' && (
+        <div
+          role="alert"
+          className="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700"
+        >
+          <AlertCircle className="h-5 w-5 shrink-0" aria-hidden="true" />
+          <span>No se pudieron cargar las métricas: {error}</span>
           <button
+            type="button"
+            onClick={refetch}
+            className="ml-auto rounded-md border border-red-300 px-3 py-1 text-xs hover:bg-red-100"
+          >
+            Reintentar
+          </button>
+        </div>
+      )}
+
+      {status === 'success' && data && <MetricsDashboard metrics={data} />}
+
+      {/* Quick actions */}
+      <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
+        <div className="border-b border-gray-200 px-6 py-4">
+          <h2 className="text-base font-semibold text-gray-900">Acciones rápidas</h2>
+        </div>
+        <div className="grid grid-cols-1 gap-3 p-6 sm:grid-cols-2 lg:grid-cols-4">
+          <QuickAction
+            label="Tests modulares"
+            icon={<ClipboardList className="h-5 w-5" />}
+            colorClass="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white"
             onClick={() => router.push('/tests')}
-            className="flex items-center justify-center px-4 py-3 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-medium rounded-lg shadow-sm transition-all"
-          >
-            <ClipboardList className="h-5 w-5 mr-2" />
-            📊 Tests Modulares
-          </button>
-          <button
-            onClick={() => router.push('/therapist/patients/new')}
-            className="flex items-center justify-center px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium rounded-lg shadow-sm transition-all"
-          >
-            <UserPlus className="h-5 w-5 mr-2" />
-            + Nuevo Paciente
-          </button>
-          <button
-            onClick={() => router.push('/therapist/sessions/new')}
-            className="flex items-center justify-center px-4 py-3 bg-white hover:bg-gray-50 text-gray-700 font-medium rounded-lg border-2 border-gray-300 transition-all"
-          >
-            <Plus className="h-5 w-5 mr-2" />
-            + Registrar Sesión
-          </button>
-          <button
+          />
+          <QuickAction
+            label="Nuevo paciente"
+            icon={<UserPlus className="h-5 w-5" />}
+            colorClass="bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white"
+            onClick={() => router.push('/dashboard/therapist/patients/new')}
+          />
+          <QuickAction
+            label="Registrar sesión"
+            icon={<Plus className="h-5 w-5" />}
+            colorClass="border-2 border-gray-300 bg-white hover:bg-gray-50 text-gray-700"
+            onClick={() => router.push('/dashboard/therapist/sessions/new')}
+          />
+          <QuickAction
+            label="Nuevo análisis"
+            icon={<FileText className="h-5 w-5" />}
+            colorClass="border-2 border-gray-300 bg-white hover:bg-gray-50 text-gray-700"
             onClick={() => router.push('/calcular')}
-            className="flex items-center justify-center px-4 py-3 bg-white hover:bg-gray-50 text-gray-700 font-medium rounded-lg border-2 border-gray-300 transition-all"
-          >
-            <FileText className="h-5 w-5 mr-2" />
-            + Nuevo Análisis
-          </button>
+          />
         </div>
       </div>
+    </div>
+  );
+}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Recent Activity */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-          <div className="p-6 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">Actividad Reciente</h2>
-          </div>
-          <div className="p-6">
-            <div className="text-center py-12">
-              <Clock className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600 font-medium">No hay actividad reciente</p>
-              <p className="text-sm text-gray-500 mt-2">
-                Comienza agregando tu primer paciente
-              </p>
-            </div>
-          </div>
-        </div>
+// ── sub-components ────────────────────────────────────────────────────────────
 
-        {/* Upcoming Sessions */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-          <div className="p-6 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">Próximas Sesiones</h2>
-          </div>
-          <div className="p-6">
-            <div className="text-center py-12">
-              <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600 font-medium">No hay sesiones programadas</p>
-              <p className="text-sm text-gray-500 mt-2">
-                Las sesiones aparecerán aquí
-              </p>
-            </div>
-          </div>
-        </div>
+interface QuickActionProps {
+  label: string;
+  icon: React.ReactNode;
+  colorClass: string;
+  onClick: () => void;
+}
+
+function QuickAction({ label, icon, colorClass, onClick }: QuickActionProps) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`flex items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-medium shadow-sm transition-all ${colorClass}`}
+    >
+      {icon}
+      {label}
+    </button>
+  );
+}
+
+function ChartSkeleton() {
+  return (
+    <div className="space-y-6 animate-pulse" aria-busy="true" aria-label="Cargando métricas">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="h-24 rounded-xl bg-gray-100" />
+        ))}
+      </div>
+      <div className="h-64 rounded-xl bg-gray-100" />
+      <div className="grid grid-cols-2 gap-6">
+        <div className="h-56 rounded-xl bg-gray-100" />
+        <div className="h-56 rounded-xl bg-gray-100" />
       </div>
     </div>
   );

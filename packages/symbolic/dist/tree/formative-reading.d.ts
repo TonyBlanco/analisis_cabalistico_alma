@@ -4,9 +4,10 @@
  */
 import type { TreeStructuralState } from './tree-structural-state.types';
 import type { TreeStructuralAnalysis } from './tree-analysis.types';
-import type { FormativeBrief, FormativeClinicalContext, FormativeMethodContext } from './formative-reading.types';
-export type { FormativeBrief, FormativeClinicalContext, FormativeMethodContext, FormativeMethodNumber, FormativeSefirahFocus, FormativePathProcess, FormativeAxisReading, } from './formative-reading.types';
-export declare function buildFormativeBrief(treeState: TreeStructuralState, analysis: TreeStructuralAnalysis, methodContext?: FormativeMethodContext, clinicalContext?: FormativeClinicalContext): FormativeBrief;
+import type { BuildFormativeBriefOptions, FormativeBrief, FormativeClinicalContext, FormativeMethodContext } from './formative-reading.types';
+export type { BuildFormativeBriefOptions, FormativeBrief, FormativeClinicalContext, FormativeMethodContext, FormativeMethodNumber, FormativeSefirahFocus, FormativePathProcess, FormativeAxisReading, } from './formative-reading.types';
+export { validateSafetyContent, FormativeBriefSafetyGateError, applyFormativeBriefSafetyGate, } from './formative-safety';
+export declare function buildFormativeBrief(treeState: TreeStructuralState, analysis: TreeStructuralAnalysis, methodContext?: FormativeMethodContext, clinicalContext?: FormativeClinicalContext, options?: BuildFormativeBriefOptions): FormativeBrief;
 export declare function methodContextFromSymbolicState(state: {
     methodId: string;
     methodName?: string;

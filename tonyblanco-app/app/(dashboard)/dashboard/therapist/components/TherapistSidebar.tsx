@@ -138,6 +138,14 @@ const swmLaunchers = [
     enabled: true,
   },
   {
+    id: 'correspondencias',
+    title: 'Correspondencias',
+    description: 'Tablas Hermetico / Judío tradicional (solo lectura).',
+    href: '/dashboard/therapist/correspondencias',
+    icon: Layers,
+    enabled: true,
+  },
+  {
     id: 'transgeneracional-profundo',
     title: 'Transgeneracional Profundo',
     description: 'Workspace relacional sin inferencia.',

@@ -3,7 +3,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ChevronDown, ChevronUp, BookOpen, Hash, Sparkles, Activity, Sun, Scale } from 'lucide-react';
 import type { CabalSectionId } from './types';
-import { getActivePatientId } from '@/lib/active-patient';
+import {
+  getActivePatientId,
+  getActivePatientName,
+  setActivePatientId as persistActivePatientId,
+} from '@/lib/active-patient';
 import { getPatientProfileSummary, type PatientProfileSummary } from '@/lib/patient-api';
 import useActiveConsultante from '@/hooks/useActiveConsultante';
 import { API_BASE_URL, getAuthToken } from '@/lib/api';
@@ -210,6 +214,60 @@ function parsePathEndpoints(pathId: string): { from: string; to: string } | null
   const to = pathId.slice(idx + 1);
   if (!from || !to) return null;
   return { from, to };
+}
+
+function resolvePatientDisplayName(
+  profile: PatientProfileSummary | null,
+  consultanteName?: string | null,
+  storedName?: string | null,
+): string | null {
+  const candidates = [
+    profile?.legal_full_name,
+    profile?.full_name,
+    consultanteName,
+    storedName,
+  ];
+  for (const value of candidates) {
+    if (typeof value === 'string' && value.trim()) {
+      return value.trim();
+    }
+  }
+  return null;
+}
+
+function resolvePatientBirthDate(
+  profile: PatientProfileSummary | null,
+  consultanteBirthDate?: string | null,
+): string | null {
+  const candidates = [profile?.birth_date, consultanteBirthDate];
+  for (const value of candidates) {
+    if (typeof value === 'string' && value.trim()) {
+      return value.trim();
+    }
+  }
+  return null;
+}
+
+function parseBirthDateParts(
+  birthDate: string,
+): { dia: number; mes: number; anio: number } | null {
+  const isoMatch = /^(\d{4})-(\d{2})-(\d{2})/.exec(birthDate.trim());
+  if (isoMatch) {
+    return {
+      anio: Number(isoMatch[1]),
+      mes: Number(isoMatch[2]),
+      dia: Number(isoMatch[3]),
+    };
+  }
+  const parsed = new Date(birthDate);
+  if (Number.isNaN(parsed.getTime())) {
+    return null;
+  }
+  return {
+    dia: parsed.getUTCDate(),
+    mes: parsed.getUTCMonth() + 1,
+    anio: parsed.getUTCFullYear(),
+  };
 }
 
 function buildPdfSummaryFromAnalysis(
@@ -671,13 +729,37 @@ export default function CabalAppliedVisualCore({
   async function runSelectedMethodForPatient() {
     setExecuteError(null);
 
-    const patientName =
-      patientProfile?.legal_full_name ?? consultante?.nombre_completo ?? null;
-    const patientBirthDate =
-      patientProfile?.birth_date ?? consultante?.fecha_nacimiento ?? null;
+    let profile = patientProfile;
+    const needsProfileRefresh =
+      activePatientId &&
+      (!resolvePatientDisplayName(profile, consultante?.nombre_completo, getActivePatientName()) ||
+        !resolvePatientBirthDate(profile, consultante?.fecha_nacimiento));
+    if (needsProfileRefresh) {
+      try {
+        profile = await getPatientProfileSummary(activePatientId);
+        setPatientProfile(profile);
+      } catch {
+        // keep best-effort fallbacks below
+      }
+    }
 
-    if (!patientName || !patientBirthDate) {
-      setExecuteError('Paciente sin nombre o fecha de nacimiento.');
+    const patientName = resolvePatientDisplayName(
+      profile,
+      consultante?.nombre_completo,
+      getActivePatientName(),
+    );
+    const patientBirthDate = resolvePatientBirthDate(
+      profile,
+      consultante?.fecha_nacimiento,
+    );
+    const birthParts = patientBirthDate ? parseBirthDateParts(patientBirthDate) : null;
+
+    if (!patientName || !birthParts) {
+      setExecuteError(
+        !patientName
+          ? 'Paciente sin nombre (usa full_name o legal_full_name en el perfil).'
+          : 'Paciente sin fecha de nacimiento válida.',
+      );
       return;
     }
 
@@ -689,14 +771,9 @@ export default function CabalAppliedVisualCore({
 
     setExecuteLoading(true);
     try {
-      const date = new Date(patientBirthDate);
       const input = {
         nombreCompleto: patientName,
-        fechaNacimiento: {
-          dia: date.getUTCDate(),
-          mes: date.getUTCMonth() + 1,
-          anio: date.getUTCFullYear(),
-        },
+        fechaNacimiento: birthParts,
       };
 
       const estado = method.run(input);
@@ -757,6 +834,10 @@ export default function CabalAppliedVisualCore({
         const profile = await getPatientProfileSummary(patientId);
         if (isMounted) {
           setPatientProfile(profile);
+          const resolvedName = resolvePatientDisplayName(profile);
+          if (resolvedName) {
+            persistActivePatientId(patientId, resolvedName);
+          }
         }
       } catch (error) {
         if (isMounted) {
@@ -877,10 +958,15 @@ export default function CabalAppliedVisualCore({
   useEffect(() => {
     onWorkspaceStateChange?.({
       patientId: activePatientId ?? null,
-      patientName:
-        patientProfile?.legal_full_name ?? consultante?.nombre_completo ?? null,
-      patientBirthDate:
-        patientProfile?.birth_date ?? consultante?.fecha_nacimiento ?? null,
+      patientName: resolvePatientDisplayName(
+        patientProfile,
+        consultante?.nombre_completo,
+        getActivePatientName(),
+      ),
+      patientBirthDate: resolvePatientBirthDate(
+        patientProfile,
+        consultante?.fecha_nacimiento,
+      ),
       selectedMethodId: selectedMethod ?? null,
       treeState: treeStructuralState ?? null,
       backendStructuralState: treeAnalysis

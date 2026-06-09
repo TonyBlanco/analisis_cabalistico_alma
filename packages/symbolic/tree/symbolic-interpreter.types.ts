@@ -12,8 +12,11 @@
  * It NEVER accesses personal data directly.
  */
 
+import type { SystemId } from '../correspondences/system';
 import type { TreeStructuralState } from './tree-structural-state.types';
 import type { TreeStructuralAnalysis } from './tree-analysis.types';
+
+export type { SystemId };
 
 /**
  * Safety level for AI interpretation
@@ -96,6 +99,11 @@ export interface SymbolicInterpretationRequest {
    * Optional focus areas (e.g., 'flows', 'sefirot-roles')
    */
   focusAreas?: string[];
+  /**
+   * Optional correspondence system for read-only reference data in the prompt.
+   * When omitted, no correspondence tables are injected.
+   */
+  correspondenceSystem?: SystemId;
 }
 
 /**

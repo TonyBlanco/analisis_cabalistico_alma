@@ -9,6 +9,11 @@
  * - Educational and formative language only
  */
 
+import { getCorrespondenceSystem, type SystemId } from '../correspondences/system';
+import { resolvePartzuf } from '../kabbalah-traditional/resolve';
+import type { PathCorrespondence, SefirahCorrespondence } from '../correspondences/types';
+import type { TraditionalSefirahData } from '../kabbalah-traditional/traditional-correspondences.types';
+import type { SeferYetzirahLetter } from '../kabbalah-traditional/sefer-yetzirah';
 import type {
   SymbolicInterpretation,
   SymbolicInterpretationRequest,
@@ -17,7 +22,7 @@ import type {
   SymbolicSafetyLevel,
 } from './symbolic-interpreter.types';
 import { SYMBOLIC_INTERPRETER_META } from './symbolic-interpreter.types';
-import type { TreeStructuralState, TreeFlow, TreeSefirah } from './tree-structural-state.types';
+import type { TreeStructuralState } from './tree-structural-state.types';
 import type { TreeStructuralAnalysis } from './tree-analysis.types';
 
 /**
@@ -37,6 +42,84 @@ function validateSafetyContent(content: string): { passed: boolean; warnings: st
     passed: warnings.length === 0,
     warnings,
   };
+}
+
+function formatHermeticSefirahLine(data: SefirahCorrespondence): string {
+  const element = data.element ?? 'none';
+  return `- ${data.id}: planet=${data.planet} element=${element} kingScaleColor=${data.kingScaleColor}`;
+}
+
+function formatTraditionalSefirahLine(data: TraditionalSefirahData): string {
+  const partzuf = resolvePartzuf(data.id);
+  return `- ${data.id}: divineName=${data.divineNameTranslit} archangel=${data.archangel} choir=${data.angelicChoir} olam=${data.olam} partzuf=${partzuf ?? 'n/a'}`;
+}
+
+function formatHermeticPathLine(data: PathCorrespondence): string {
+  const planet = data.planet ?? 'none';
+  const element = data.element ?? 'none';
+  const zodiac = data.zodiacSign ?? 'none';
+  return `- ${data.id}: letter=${data.hebrewLetter} pathNumber=${data.pathNumber} planet=${planet} element=${element} zodiac=${zodiac}`;
+}
+
+function formatTraditionalPathLine(data: SeferYetzirahLetter): string {
+  return `- ${data.pathId}: letter=${data.hebrewLetter} class=${data.letterClass} attribution=${data.attribution}`;
+}
+
+function formatCorrespondenceReferenceSection(
+  treeState: TreeStructuralState,
+  systemId: SystemId,
+): string {
+  const activeSefirot = treeState.sefirot.filter((s) => s.role !== 'latent');
+  const activePaths = treeState.flows
+    .map((f) => f.pathId)
+    .filter((pathId): pathId is string => typeof pathId === 'string');
+
+  const sefirahLines =
+    systemId === 'jewish-traditional'
+      ? activeSefirot
+          .map((s) => {
+            const data = getCorrespondenceSystem('jewish-traditional').sefirah(s.id);
+            return data ? formatTraditionalSefirahLine(data) : null;
+          })
+          .filter((line): line is string => line !== null)
+      : activeSefirot
+          .map((s) => {
+            const data = getCorrespondenceSystem('hermetic-golden-dawn').sefirah(s.id);
+            return data ? formatHermeticSefirahLine(data) : null;
+          })
+          .filter((line): line is string => line !== null);
+
+  const pathLines =
+    systemId === 'jewish-traditional'
+      ? [...new Set(activePaths)]
+          .map((pathId) => {
+            const data = getCorrespondenceSystem('jewish-traditional').path(pathId);
+            return data ? formatTraditionalPathLine(data) : null;
+          })
+          .filter((line): line is string => line !== null)
+      : [...new Set(activePaths)]
+          .map((pathId) => {
+            const data = getCorrespondenceSystem('hermetic-golden-dawn').path(pathId);
+            return data ? formatHermeticPathLine(data) : null;
+          })
+          .filter((line): line is string => line !== null);
+
+  const section = `
+## CORRESPONDENCE REFERENCE (${systemId} — read-only tables, not interpretive)
+
+**Sefirot in current structure** (${sefirahLines.length}):
+${sefirahLines.join('\n')}
+
+**Paths in current structure** (${pathLines.length}):
+${pathLines.length > 0 ? pathLines.join('\n') : '- none with pathId'}
+`.trim();
+
+  const safety = validateSafetyContent(section);
+  if (!safety.passed) {
+    return '';
+  }
+
+  return section;
 }
 
 function formatAnalysisSection(analysis: TreeStructuralAnalysis): string {
@@ -68,6 +151,7 @@ function generateSymbolicPrompt(
   treeState: TreeStructuralState,
   safetyLevel: SymbolicSafetyLevel,
   analysis?: TreeStructuralAnalysis,
+  correspondenceSystem?: SystemId,
 ): string {
   const { source, sefirot, flows } = treeState;
 
@@ -118,6 +202,8 @@ ${sefiraData.map(s => `- ${s.id}: role=${s.role}, activation=${s.activation.toFi
 ${flowData.map(f => `- ${f.from}→${f.to}: polarity=${f.polarity}, intensity=${f.intensity.toFixed(2)}`).join('\n')}
 
 ${analysis ? formatAnalysisSection(analysis) : ''}
+
+${correspondenceSystem ? formatCorrespondenceReferenceSection(treeState, correspondenceSystem) : ''}
 
 ---
 
@@ -249,9 +335,14 @@ export async function generateSymbolicInterpretation(
   request: SymbolicInterpretationRequest,
   aiCallback: (prompt: string) => Promise<string>
 ): Promise<SymbolicInterpretation> {
-  const { treeState, safetyLevel, structuralAnalysis } = request;
+  const { treeState, safetyLevel, structuralAnalysis, correspondenceSystem } = request;
 
-  const prompt = generateSymbolicPrompt(treeState, safetyLevel, structuralAnalysis);
+  const prompt = generateSymbolicPrompt(
+    treeState,
+    safetyLevel,
+    structuralAnalysis,
+    correspondenceSystem,
+  );
   
   // Call AI (external dependency)
   let rawResponse: string;

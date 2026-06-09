@@ -1,6 +1,6 @@
 # Tree of Life Module — Arquitectura v0.2
 
-**Fecha:** 2026-06-09 · **Fase:** 1 completada · **Alcance:** TypeScript only, sin backend
+**Fecha:** 2026-06-09 · **Fase:** 1+2 completadas · **Alcance:** TypeScript only, sin backend
 
 ---
 
@@ -24,20 +24,20 @@
            ┌─────────────┴──────────────┐
            ▼                            ▼
 ┌──────────────────┐       ┌────────────────────────────┐
-│ tree-analysis.ts │       │  correspondences/           │
-│ (métricas)       │       │  golden-dawn-data.ts        │
-│ • pillarBalance  │       │  • SefirahCorrespondence    │
-│ • triadActivation│       │  • PathCorrespondence       │
-│ • graph BFS/DFS  │       │  • planeta, elemento, tarot │
-│ Determinista     │       │  resolve.ts (API única)     │
-│ Puro, memoizado  │       └────────────────────────────┘
-└────────┬─────────┘
+│ tree-analysis.ts │       │  correspondences/ (hermética) │
+│ (métricas)       │       │  golden-dawn-data.ts          │
+│ • pillarBalance  │       │  resolve.ts + system.ts       │
+│ • triadActivation│       ├───────────────────────────────┤
+│ • graph BFS/DFS  │       │  kabbalah-traditional/ (Fase 2)│
+│ Determinista     │       │  nombres divinos, Sefer Yetzirah│
+│ Puro, memoizado  │       │  lurianic (referencia neutra)  │
+└────────┬─────────┘       └───────────────────────────────┘
          │ consumido por (read-only)
 ┌────────▼─────────────────────────────────────────────┐
 │  symbolic-interpreter.ts  (IA, safety-gated)         │
-│  • Recibe TreeStructuralState + TreeStructuralAnalysis│
+│  • TreeStructuralState + TreeStructuralAnalysis    │
+│  • correspondenceSystem? (hermetic | traditional)  │
 │  • SYMBOLIC_INTERPRETER_META.prohibitedTerms activo  │
-│  • Observaciones estructurales únicamente            │
 └──────────────────────────────────────────────────────┘
 ```
 
@@ -125,6 +125,11 @@ interface PathCorrespondence {
 | Arcanos Mayores únicos (0–21) en las 22 vías | `golden-dawn.test.ts` |
 | Adaptadores pueblan `pillar`, `triad`, `olam`, `pathId` | `adapters-v02.test.ts` |
 | Intérprete filtra `prohibitedTerms` en output con análisis | `interpreter-with-analysis.test.ts` |
+| `resolveTraditionalSefirah` cubre las 10 Sefirot | `kabbalah-traditional.test.ts` |
+| `resolveTraditionalPath` cubre los 22 senderos | `kabbalah-traditional.test.ts` |
+| Sefer Yetzirah: 3+7+12 letras = `TREE_PATHS` | `kabbalah-traditional.test.ts` |
+| `CorrespondenceSystem` resuelve ambos sistemas | `system.test.ts` |
+| Intérprete inyecta correspondencias tradicionales | `interpreter-with-analysis.test.ts` |
 
 ---
 
@@ -195,14 +200,33 @@ export { adaptPitagorasToTree, adaptGenericMethodToTree }
 // Intérprete
 export { generateSymbolicInterpretation, validateTreeStateForInterpretation, createFallbackInterpretation }
 export { SYMBOLIC_INTERPRETER_META }
+export type { SystemId }  // correspondenceSystem en SymbolicInterpretationRequest
 ```
+
+### Cábala tradicional (`packages/symbolic/kabbalah-traditional`)
+
+```ts
+export { resolveTraditionalSefirah, resolveTraditionalPath, resolvePartzuf, resolveSoulLevels }
+export { TRADITIONAL_SEFIRAH_CORRESPONDENCES, SEFER_YETZIRAH_BY_PATH, PARTZUFIM, DAAT_OVERLAY }
+```
+
+### Selector de correspondencias
+
+```ts
+import { getCorrespondenceSystem } from '@holistica/symbolic/correspondences';
+
+getCorrespondenceSystem('jewish-traditional').sefirah('keter');
+getCorrespondenceSystem('hermetic-golden-dawn').path('keter-tiferet');
+```
+
+Ver documentación completa: `KABBALAH_TRADITIONAL_MODULE.md`.
 
 ---
 
-## Fuera de alcance (Fase 1)
+## Fuera de alcance
 
-- Cábala Judía Tradicional (Tikkun, Shevirah, Ein Sof, Qliphoth)
+- Aplicar Tikkun / Shevirat haKelim a lecturas de personas (interpretación → prohibido)
 - Migración a Python / `backend/cabala_py/`
 - Endpoints DRF/FastAPI nuevos
 - Render del Árbol (frontend — consume el contrato, no lo produce)
-- Texto interpretativo adicional fuera del intérprete existente
+- Mezclar hermética y tradicional en una sola tabla

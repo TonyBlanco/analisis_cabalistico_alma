@@ -85,7 +85,12 @@ const analysis = analyzeTreeState(state);
 
 // 3. Interpretar (requiere callback de IA)
 const interpretation = await generateSymbolicInterpretation(
-  { treeState: state, safetyLevel: 'observational', structuralAnalysis: analysis },
+  {
+    treeState: state,
+    safetyLevel: 'observational',
+    structuralAnalysis: analysis,
+    correspondenceSystem: 'jewish-traditional',  // opcional: hermetic-golden-dawn | jewish-traditional
+  },
   myAICallback,
 );
 ```
@@ -108,7 +113,7 @@ const interpretation = await generateSymbolicInterpretation(
 
 ```bash
 cd packages/symbolic
-npm test               # 60 tests, todos en verde
+npm test               # 81 tests
 npm run typecheck      # tsc --noEmit sin errores
 ```
 
@@ -117,15 +122,30 @@ npm run typecheck      # tsc --noEmit sin errores
 | `tree-topology.test.ts` | 12 | invariantes 10+22, unicidad |
 | `tree-structural-state-compat.test.ts` | 4 | retrocompatibilidad v0.1 |
 | `tree-analysis.test.ts` | 18 | golden tests, determinismo, lint prohibitedTerms |
-| `golden-dawn.test.ts` | 16 | correspondencias 10 Sefirot + 22 senderos |
+| `golden-dawn.test.ts` | 16 | correspondencias herméticas 10+22 |
+| `kabbalah-traditional.test.ts` | 15 | correspondencias tradicionales, Sefer Yetzirah, lurianic |
+| `system.test.ts` | 4 | selector hermetic-golden-dawn / jewish-traditional |
 | `adapters-v02.test.ts` | 5 | campos v0.2 en sefirot + flows |
-| `interpreter-with-analysis.test.ts` | 5 | integración análisis → intérprete, safety |
+| `interpreter-with-analysis.test.ts` | 7 | análisis + correspondencias en prompt, safety |
 
 ---
 
-## Fuera de alcance (Fase 1)
+## Correspondencias (Fase 2)
 
-- Cábala Judía Tradicional (Tikkun, Shevirah, Ein Sof) → fase posterior
+Dos sistemas paralelos, mismo `SefiraId` / `TreePath.id`:
+
+| Sistema | Módulo | Uso |
+|---|---|---|
+| Hermético Golden Dawn | `correspondences/` | planeta, elemento, tarot, colores |
+| Judío tradicional | `kabbalah-traditional/` | nombres divinos, arcángeles, Sefer Yetzirah |
+
+Docs: `docs/04_SYMBOLIC_SYSTEM/KABBALAH_TRADITIONAL_MODULE.md`
+
+---
+
+## Fuera de alcance
+
+- Aplicar conceptos luriánicos a lecturas de personas
 - Migración a Python / `backend/cabala_py/`
 - Endpoints nuevos DRF/FastAPI
-- Texto interpretativo adicional fuera del intérprete existente
+- Mezclar hermética y tradicional en una sola tabla

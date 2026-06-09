@@ -85,6 +85,69 @@ describe('generateSymbolicInterpretation — with structural analysis', () => {
     expect(result.safetyValidation.warnings.length).toBeGreaterThan(0);
   });
 
+  it('injects jewish-traditional correspondence reference without prohibited terms', async () => {
+    const analysis = analyzeTreeState(sampleState);
+
+    let capturedPrompt = '';
+    const mockAI = async (prompt: string): Promise<string> => {
+      capturedPrompt = prompt;
+      return JSON.stringify({
+        observations: [
+          { type: 'structural-analysis', title: 'Reference context', content: 'Structural observation with traditional tables available.' },
+        ],
+      });
+    };
+
+    const result = await generateSymbolicInterpretation(
+      {
+        treeState: sampleState,
+        safetyLevel: 'observational',
+        structuralAnalysis: analysis,
+        correspondenceSystem: 'jewish-traditional',
+      },
+      mockAI,
+    );
+
+    expect(result.safetyValidation.passed).toBe(true);
+    expect(capturedPrompt).toContain('CORRESPONDENCE REFERENCE (jewish-traditional');
+    expect(capturedPrompt).toContain('divineName=Eheieh');
+    expect(capturedPrompt).toContain('class=double');
+    expect(capturedPrompt).not.toContain('Tzimtzum');
+    expect(capturedPrompt).not.toContain('Tikkun');
+
+    const correspondenceSection = capturedPrompt
+      .split('## CORRESPONDENCE REFERENCE')[1]
+      ?.split('---')[0]
+      ?.toLowerCase() ?? '';
+    for (const term of SYMBOLIC_INTERPRETER_META.prohibitedTerms) {
+      expect(correspondenceSection).not.toContain(term.toLowerCase());
+    }
+  });
+
+  it('injects hermetic-golden-dawn correspondence reference when selected', async () => {
+    let capturedPrompt = '';
+    const mockAI = async (prompt: string): Promise<string> => {
+      capturedPrompt = prompt;
+      return JSON.stringify({
+        observations: [
+          { type: 'structural-analysis', title: 'Hermetic ref', content: 'Structural observation.' },
+        ],
+      });
+    };
+
+    await generateSymbolicInterpretation(
+      {
+        treeState: sampleState,
+        safetyLevel: 'educational',
+        correspondenceSystem: 'hermetic-golden-dawn',
+      },
+      mockAI,
+    );
+
+    expect(capturedPrompt).toContain('CORRESPONDENCE REFERENCE (hermetic-golden-dawn');
+    expect(capturedPrompt).toContain('kingScaleColor=');
+  });
+
   it('works without structuralAnalysis (backwards compatible)', async () => {
     const mockAI = async (_prompt: string): Promise<string> =>
       JSON.stringify({

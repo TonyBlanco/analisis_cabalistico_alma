@@ -60,6 +60,19 @@ export interface FormativeClinicalContext {
   illuminatedSefirot?: string[];
 }
 
+export interface BuildFormativeBriefOptions {
+  /**
+   * ISO timestamp for UI/audit. Omit for fully deterministic output (empty string).
+   * Does not affect symbolic synthesis — only metadata.
+   */
+  generatedAt?: string;
+  /**
+   * When true, throws FormativeBriefSafetyGateError if any field required sanitization.
+   * Default false: degrade to neutral fallback and return safe brief.
+   */
+  throwOnSafetyViolation?: boolean;
+}
+
 export interface FormativeBrief {
   version: '1.0';
   generatedAt: string;

@@ -3,6 +3,8 @@
  * READ-ONLY · no diagnosis · consultive language only.
  */
 import { SEFIROT_TOPOLOGY, TREE_PATHS } from './tree-topology';
+import { applyFormativeBriefSafetyGate, FORMATIVE_SAFE_DISCLAIMER, } from './formative-safety';
+export { validateSafetyContent, FormativeBriefSafetyGateError, applyFormativeBriefSafetyGate, } from './formative-safety';
 const NUMBER_TO_SEFIRAH = {
     1: 'keter', 2: 'chokmah', 3: 'binah', 4: 'chesed', 5: 'gevurah',
     6: 'tiferet', 7: 'netzach', 8: 'hod', 9: 'yesod',
@@ -14,7 +16,7 @@ const SEFIRA_CATALOG = {
         light: 'Sentido de origen, fe, unidad y dirección espiritual.',
         shadow: 'Desconexión de sentido, rigidez idealista, negación del misterio.',
         tikkun: 'Reconectar con un eje de sentido sin imponerlo.',
-        therapistNote: 'Explorar qué da coherencia existencial sin convertirlo en mandato.',
+        therapistNote: 'Polo Keter (sentido/origen): podría explorarse qué eje de coherencia aparece sin fijarlo como mandato.',
     },
     chokmah: {
         displayName: 'Sabiduría (Jojmá)',
@@ -22,7 +24,7 @@ const SEFIRA_CATALOG = {
         light: 'Intuición, visión, impulso creativo inicial.',
         shadow: 'Impulsividad, dogma, exceso de certeza sin forma.',
         tikkun: 'Dar espacio a la chispa sin saltar la elaboración.',
-        therapistNote: 'Observar ideas o impulsos que llegan antes de poder integrarlos.',
+        therapistNote: 'Polo Jojmá (chispa visionaria): podría notarse intuición o impulso creativo antes de la elaboración en Biná.',
     },
     binah: {
         displayName: 'Comprensión (Biná)',
@@ -30,7 +32,7 @@ const SEFIRA_CATALOG = {
         light: 'Forma, contención madre, capacidad de dar estructura.',
         shadow: 'Cierre mental, frialdad, dificultad para nutrir.',
         tikkun: 'Comprender sin asfixiar; dar forma con ternura.',
-        therapistNote: 'Revisar cómo la persona organiza afecto y límites a la vez.',
+        therapistNote: 'Polo Biná (forma/contención): podría explorarse cómo se articula ternura y límite en el relato.',
     },
     chesed: {
         displayName: 'Misericordia (Jésed)',
@@ -38,7 +40,7 @@ const SEFIRA_CATALOG = {
         light: 'Expansión, vocación de servicio, generosidad simbólica.',
         shadow: 'Complacencia, sobre-adaptación, dar sin límites.',
         tikkun: 'Amar y servir con discernimiento.',
-        therapistNote: 'Preguntar dónde la bondad se vuelve auto-descuido.',
+        therapistNote: 'Polo Jésed (expansión): podría vigilarse si la generosidad simbólica pierde discernimiento en sesión.',
     },
     gevurah: {
         displayName: 'Rigor (Gevurá)',
@@ -46,7 +48,7 @@ const SEFIRA_CATALOG = {
         light: 'Límite claro, valentía, ética y poder consciente.',
         shadow: 'Dureza, crítica excesiva, control por miedo.',
         tikkun: 'Decir no con dignidad, no con castigo.',
-        therapistNote: 'Explorar cómo se ejercen límites sin perder vínculo.',
+        therapistNote: 'Polo Gevurá (límite/rigor): podría explorarse cómo se nombran fronteras sin romper el vínculo.',
     },
     tiferet: {
         displayName: 'Belleza (Tiferet)',
@@ -54,7 +56,7 @@ const SEFIRA_CATALOG = {
         light: 'Centro identitario, autoestima simbólica, corazón integrador.',
         shadow: 'Confusión de roles, vivir para la mirada del otro.',
         tikkun: 'Reconocerse sin necesidad de performance.',
-        therapistNote: 'Trabajar identidad como eje, no como máscara.',
+        therapistNote: 'Polo Tiferet (centro): podría diferenciarse coherencia interior de performance ante el otro.',
     },
     netzach: {
         displayName: 'Victoria (Netsaj)',
@@ -62,7 +64,7 @@ const SEFIRA_CATALOG = {
         light: 'Persistencia emocional, deseo, impulso vital.',
         shadow: 'Repetición compulsiva, drama afectivo, dispersión.',
         tikkun: 'Sostener el deseo sin secuestrar la vida.',
-        therapistNote: 'Observar qué emociones se repiten y qué sostienen.',
+        therapistNote: 'Polo Netsaj (deseo/persistencia): podría mapearse qué impulsos emocionales recurren en el relato.',
     },
     hod: {
         displayName: 'Esplendor (Hod)',
@@ -70,7 +72,7 @@ const SEFIRA_CATALOG = {
         light: 'Mente al servicio, comunicación, ética intelectual.',
         shadow: 'Intelectualización, exhibición, poder por la palabra.',
         tikkun: 'Mostrarse con verdad, no solo con brillantez.',
-        therapistNote: 'Foco alto: revisar si el discurso protege o revela.',
+        therapistNote: 'Polo Hod (mente/palabra): podría explorarse si el discurso protege o revela en el intercambio.',
     },
     yesod: {
         displayName: 'Fundamento (Yesod)',
@@ -78,7 +80,7 @@ const SEFIRA_CATALOG = {
         light: 'Subconsciente, imaginación, puente entre idea y vida.',
         shadow: 'Máscaras, creencias ocultas, fantasías no elaboradas.',
         tikkun: 'Limpiar el fundamento sin negar la imaginación.',
-        therapistNote: 'Explorar qué sostiene por debajo del relato consciente.',
+        therapistNote: 'Polo Yesod (fundamento psíquico): podría invitarse a imaginar qué sostiene el relato visible.',
     },
     malchut: {
         displayName: 'Reino (Malkut)',
@@ -86,7 +88,7 @@ const SEFIRA_CATALOG = {
         light: 'Encarnación, hábitos, cuerpo, hechos concretos.',
         shadow: 'Estancamiento, comodidad, negación de la acción.',
         tikkun: 'Bajar el insight a gesto real y sostenido.',
-        therapistNote: 'Preguntar qué parte del insight ya toca la vida diaria.',
+        therapistNote: 'Polo Malkut (encarnación): podría anclarse qué parte del insight llega a gesto concreto.',
     },
 };
 const PILLAR_LABELS = {
@@ -343,7 +345,7 @@ function buildSessionQuestions(dominants, paths, pillarAxes) {
 }
 function buildSupervisionPrompts(dominants, analysis) {
     return [
-        `¿Estoy leyendo estructura simbólica o proyectando diagnóstico? Recuerda: ${analysis.graph.activeNodes.length} nodos y ${analysis.graph.activePaths.length} senderos activos.`,
+        `¿Estoy leyendo estructura simbólica o proyectando conclusión clínica? Recuerda: ${analysis.graph.activeNodes.length} nodos y ${analysis.graph.activePaths.length} senderos activos.`,
         dominants[0]
             ? `¿Mi contra-transferencia con ${dominants[0].displayName} (tema de ${dominants[0].tikkun.toLowerCase()}) está coloreando la lectura?`
             : '¿Qué parte del árbol estoy ignorando por preferencia teórica?',
@@ -503,7 +505,7 @@ function buildCoherenceNote(analysis) {
     }
     return `Estructura moderada: ${activePaths.length} senderos, ${analysis.graph.activeNodes.length} nodos activos.`;
 }
-export function buildFormativeBrief(treeState, analysis, methodContext, clinicalContext) {
+export function buildFormativeBrief(treeState, analysis, methodContext, clinicalContext, options) {
     const dominantSefirot = buildDominantFocus(treeState);
     const pathProcesses = buildPathProcesses(treeState, analysis);
     const pillarAxes = topEntries(analysis.pillarBalance, PILLAR_LABELS);
@@ -513,9 +515,9 @@ export function buildFormativeBrief(treeState, analysis, methodContext, clinical
     const polarityReading = buildPolarityReading(analysis);
     const processArc = detectProcessArc(pathProcesses, dominantSefirot);
     const methodId = methodContext?.methodId ?? treeState.source.method;
-    return {
+    const draft = {
         version: '1.0',
-        generatedAt: new Date().toISOString(),
+        generatedAt: options?.generatedAt ?? '',
         methodId,
         headline: buildHeadline(dominantSefirot, pillarAxes),
         workingHypothesis: buildWorkingHypothesis(dominantSefirot, processArc, polarityReading, pillarAxes),
@@ -535,8 +537,11 @@ export function buildFormativeBrief(treeState, analysis, methodContext, clinical
         sessionQuestions: buildSessionQuestions(dominantSefirot, pathProcesses, pillarAxes),
         supervisionPrompts: buildSupervisionPrompts(dominantSefirot, analysis),
         coherenceNote: buildCoherenceNote(analysis),
-        disclaimer: 'Lectura formativa y simbólica. No constituye diagnóstico, evaluación clínica ni recomendación terapéutica automática. El terapeuta integra con su marco y el relato del consultante.',
+        disclaimer: FORMATIVE_SAFE_DISCLAIMER,
     };
+    return applyFormativeBriefSafetyGate(draft, {
+        throwOnViolation: options?.throwOnSafetyViolation ?? false,
+    });
 }
 export function methodContextFromSymbolicState(state) {
     const inclusionDominants = [];

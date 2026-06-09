@@ -109,6 +109,18 @@
     "./tree/symbolic-interpreter.types": {
       "types": "./dist/tree/symbolic-interpreter.types.d.ts",
       "import": "./dist/tree/symbolic-interpreter.types.js"
+    },
+    "./correspondences": {
+      "types": "./dist/correspondences/index.d.ts",
+      "import": "./dist/correspondences/index.js"
+    },
+    "./kabbalah-traditional": {
+      "types": "./dist/kabbalah-traditional/index.d.ts",
+      "import": "./dist/kabbalah-traditional/index.js"
+    },
+    "./api": {
+      "types": "./dist/api/index.d.ts",
+      "import": "./dist/api/index.js"
     }
   },
   "scripts": {

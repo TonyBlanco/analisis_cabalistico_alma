@@ -1,8 +1,9 @@
 /**
- * TreeStructuralState v0.1 — Contract Definition
+ * TreeStructuralState v0.2 — Contract Definition
  *
- * Este contrato define el estado estructural exacto que el Árbol puede renderizar.
- * El Árbol NO INTERPRETA. SOLO RENDERIZA este estado.
+ * Evolution from v0.1: adds OPTIONAL fields (pillar, triad, olam, pathId).
+ * All v0.1 objects remain valid — new fields are never required.
+ * The invariant "the Tree does not interpret" is unchanged.
  *
  * USO:
  * - Métodos simbólicos → generan TreeStructuralState
@@ -13,7 +14,7 @@
  * Metadata fija del contrato
  */
 export const TREE_STRUCTURAL_STATE_META = {
-    version: '0.1',
+    version: '0.2',
     contract: 'TreeStructuralState',
     disclaimer: 'Representación simbólica estructural. No constituye interpretación automática ni diagnóstico.',
 };

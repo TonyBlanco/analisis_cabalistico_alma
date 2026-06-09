@@ -55,6 +55,38 @@ describe('adaptGenericMethodToTree — v0.2 topology enrichment', () => {
     }
   });
 
+  it('canonical vertical chain keter→tiferet→yesod receives pathId on each flow', () => {
+    const verticalState: GenericSymbolicState = {
+      methodId: 'vertical-chain',
+      methodName: 'Vertical Chain',
+      primaryNumbers: [
+        { key: 'k', label: 'Keter', value: 1, weight: 0.9 },
+        { key: 't', label: 'Tiferet', value: 6, weight: 0.85 },
+        { key: 'y', label: 'Yesod', value: 9, weight: 0.8 },
+      ],
+      inclusionMap: {
+        1: { frequency: 2, isAbsent: false, isDominant: true },
+        6: { frequency: 2, isAbsent: false, isDominant: true },
+        9: { frequency: 2, isAbsent: false, isDominant: true },
+      },
+    };
+
+    const result = adaptGenericMethodToTree(verticalState);
+    const keterTiferet = result.flows.find(
+      (f) =>
+        (f.from === 'keter' && f.to === 'tiferet') ||
+        (f.from === 'tiferet' && f.to === 'keter'),
+    );
+    const tiferetYesod = result.flows.find(
+      (f) =>
+        (f.from === 'tiferet' && f.to === 'yesod') ||
+        (f.from === 'yesod' && f.to === 'tiferet'),
+    );
+
+    expect(keterTiferet?.pathId).toBe('keter-tiferet');
+    expect(tiferetYesod?.pathId).toBe('tiferet-yesod');
+  });
+
   it('state is still a valid TreeStructuralState (has source, sefirot, flows)', () => {
     const result = adaptGenericMethodToTree(sampleState);
     expect(result.source.method).toBe('test-method');

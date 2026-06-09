@@ -11,7 +11,10 @@
  * This module ONLY reads TreeStructuralState.
  * It NEVER accesses personal data directly.
  */
+import type { SystemId } from '../correspondences/system';
 import type { TreeStructuralState } from './tree-structural-state.types';
+import type { TreeStructuralAnalysis } from './tree-analysis.types';
+export type { SystemId };
 /**
  * Safety level for AI interpretation
  */
@@ -71,9 +74,20 @@ export interface SymbolicInterpretationRequest {
     treeState: TreeStructuralState;
     safetyLevel: SymbolicSafetyLevel;
     /**
+     * Optional pre-computed structural analysis (read-only).
+     * When provided, the interpreter can ground observations in metrics
+     * without re-computing them and without exceeding its safety scope.
+     */
+    structuralAnalysis?: TreeStructuralAnalysis;
+    /**
      * Optional focus areas (e.g., 'flows', 'sefirot-roles')
      */
     focusAreas?: string[];
+    /**
+     * Optional correspondence system for read-only reference data in the prompt.
+     * When omitted, no correspondence tables are injected.
+     */
+    correspondenceSystem?: SystemId;
 }
 /**
  * Metadata about interpreter configuration

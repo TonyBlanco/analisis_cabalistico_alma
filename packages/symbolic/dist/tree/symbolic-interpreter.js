@@ -8,6 +8,8 @@
  * - Content filtering for prohibited terms
  * - Educational and formative language only
  */
+import { getCorrespondenceSystem } from '../correspondences/system';
+import { resolvePartzuf } from '../kabbalah-traditional/resolve';
 import { SYMBOLIC_INTERPRETER_META } from './symbolic-interpreter.types';
 /**
  * Validates that content does not contain prohibited terms
@@ -25,13 +27,94 @@ function validateSafetyContent(content) {
         warnings,
     };
 }
-/**
- * Generates prompt for AI symbolic interpretation
- * CRITICAL: Prompt must enforce safety rules
- */
-function generateSymbolicPrompt(treeState, safetyLevel) {
-    const { source, sefirot, flows, notes } = treeState;
-    // Serialize structural data (NO personal info)
+function formatHermeticSefirahLine(data) {
+    const element = data.element ?? 'none';
+    return `- ${data.id}: planet=${data.planet} element=${element} kingScaleColor=${data.kingScaleColor}`;
+}
+function formatTraditionalSefirahLine(data) {
+    const partzuf = resolvePartzuf(data.id);
+    return `- ${data.id}: divineName=${data.divineNameTranslit} archangel=${data.archangel} choir=${data.angelicChoir} olam=${data.olam} partzuf=${partzuf ?? 'n/a'}`;
+}
+function formatHermeticPathLine(data) {
+    const planet = data.planet ?? 'none';
+    const element = data.element ?? 'none';
+    const zodiac = data.zodiacSign ?? 'none';
+    return `- ${data.id}: letter=${data.hebrewLetter} pathNumber=${data.pathNumber} planet=${planet} element=${element} zodiac=${zodiac}`;
+}
+function formatTraditionalPathLine(data) {
+    return `- ${data.pathId}: letter=${data.hebrewLetter} class=${data.letterClass} attribution=${data.attribution}`;
+}
+function formatCorrespondenceReferenceSection(treeState, systemId) {
+    const activeSefirot = treeState.sefirot.filter((s) => s.role !== 'latent');
+    const activePaths = treeState.flows
+        .map((f) => f.pathId)
+        .filter((pathId) => typeof pathId === 'string');
+    const sefirahLines = systemId === 'jewish-traditional'
+        ? activeSefirot
+            .map((s) => {
+            const data = getCorrespondenceSystem('jewish-traditional').sefirah(s.id);
+            return data ? formatTraditionalSefirahLine(data) : null;
+        })
+            .filter((line) => line !== null)
+        : activeSefirot
+            .map((s) => {
+            const data = getCorrespondenceSystem('hermetic-golden-dawn').sefirah(s.id);
+            return data ? formatHermeticSefirahLine(data) : null;
+        })
+            .filter((line) => line !== null);
+    const pathLines = systemId === 'jewish-traditional'
+        ? [...new Set(activePaths)]
+            .map((pathId) => {
+            const data = getCorrespondenceSystem('jewish-traditional').path(pathId);
+            return data ? formatTraditionalPathLine(data) : null;
+        })
+            .filter((line) => line !== null)
+        : [...new Set(activePaths)]
+            .map((pathId) => {
+            const data = getCorrespondenceSystem('hermetic-golden-dawn').path(pathId);
+            return data ? formatHermeticPathLine(data) : null;
+        })
+            .filter((line) => line !== null);
+    const section = `
+## CORRESPONDENCE REFERENCE (${systemId} — read-only tables, not interpretive)
+
+**Sefirot in current structure** (${sefirahLines.length}):
+${sefirahLines.join('\n')}
+
+**Paths in current structure** (${pathLines.length}):
+${pathLines.length > 0 ? pathLines.join('\n') : '- none with pathId'}
+`.trim();
+    const safety = validateSafetyContent(section);
+    if (!safety.passed) {
+        return '';
+    }
+    return section;
+}
+function formatAnalysisSection(analysis) {
+    const pb = analysis.pillarBalance;
+    const ta = analysis.triadActivation;
+    const pd = analysis.polarityDistribution;
+    const g = analysis.graph;
+    return `
+## STRUCTURAL ANALYSIS (v${analysis.sourceVersion} — deterministic metrics, read-only)
+
+**Pillar balance** (fraction of total activation):
+  severity=${pb.severity.toFixed(3)}  mercy=${pb.mercy.toFixed(3)}  equilibrium=${pb.equilibrium.toFixed(3)}
+
+**Triad activation** (average activation per triad):
+  supernal=${ta.supernal.toFixed(3)}  ethical=${ta.ethical.toFixed(3)}  astral=${ta.astral.toFixed(3)}  receptacle=${ta.receptacle.toFixed(3)}
+
+**Polarity distribution** (fraction of flows):
+  harmonic=${pd.harmonic.toFixed(3)}  integrative=${pd.integrative.toFixed(3)}  tensional=${pd.tensional.toFixed(3)}
+
+**Graph**: activeNodes=${g.activeNodes.length}  activePaths=${g.activePaths.length}  components=${g.connectedComponents}  longestPath=${g.longestActivePath.length} nodes
+
+**Ranking** (top 3 by activation):
+${analysis.ranking.slice(0, 3).map((r, i) => `  ${i + 1}. ${r.id} activation=${r.activation.toFixed(3)} role=${r.role}`).join('\n')}
+`.trim();
+}
+function generateSymbolicPrompt(treeState, safetyLevel, analysis, correspondenceSystem) {
+    const { source, sefirot, flows } = treeState;
     const sefiraData = sefirot.map(s => ({
         id: s.id,
         role: s.role,
@@ -66,7 +149,7 @@ useful for trainers and professional practitioners of Kabbalah.
 
 ---
 
-## INPUT DATA (TreeStructuralState v0.1)
+## INPUT DATA (TreeStructuralState v0.2)
 
 **Method Applied**: ${source.method}
 
@@ -75,6 +158,10 @@ ${sefiraData.map(s => `- ${s.id}: role=${s.role}, activation=${s.activation.toFi
 
 **FLOWS** (${flows.length} connections):
 ${flowData.map(f => `- ${f.from}→${f.to}: polarity=${f.polarity}, intensity=${f.intensity.toFixed(2)}`).join('\n')}
+
+${analysis ? formatAnalysisSection(analysis) : ''}
+
+${correspondenceSystem ? formatCorrespondenceReferenceSection(treeState, correspondenceSystem) : ''}
 
 ---
 
@@ -195,9 +282,8 @@ function parseAIResponse(rawResponse) {
  * @returns SymbolicInterpretation with observations
  */
 export async function generateSymbolicInterpretation(request, aiCallback) {
-    const { treeState, safetyLevel } = request;
-    // Generate safe prompt
-    const prompt = generateSymbolicPrompt(treeState, safetyLevel);
+    const { treeState, safetyLevel, structuralAnalysis, correspondenceSystem } = request;
+    const prompt = generateSymbolicPrompt(treeState, safetyLevel, structuralAnalysis, correspondenceSystem);
     // Call AI (external dependency)
     let rawResponse;
     try {

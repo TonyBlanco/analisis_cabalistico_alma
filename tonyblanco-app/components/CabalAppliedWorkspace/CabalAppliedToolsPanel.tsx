@@ -5,8 +5,9 @@ import CabalaAplicadaHistoryList from './CabalaAplicadaHistoryList';
 import { saveCabalaAplicadaMethodRecord } from '@/lib/cabala-aplicada-api';
 import { generateCabalaAplicadaGraphicPDF } from './cabalaAplicadaPdf';
 import { SymbolicInterpretationPanel } from '@/components/SymbolicInterpretation';
+import { CorrespondencesPanel } from '@/components/SymbolicCorrespondences';
 import { generateAISymbolicInterpretation } from '@/lib/api/symbolic-interpreter-api';
-import type { SymbolicInterpretation } from '@holistica/symbolic/tree/symbolic-interpreter.types';
+import type { SymbolicInterpretation, SystemId } from '@holistica/symbolic/tree/symbolic-interpreter.types';
 import type { CabalaAplicadaWorkspaceExportState } from './CabalAppliedVisualCore';
 
 function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
@@ -26,7 +27,12 @@ function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise
   });
 }
 
-export type CabalaToolsTabId = 'history' | 'snapshot' | 'pdf' | 'interpretation';
+export type CabalaToolsTabId =
+  | 'history'
+  | 'snapshot'
+  | 'correspondences'
+  | 'pdf'
+  | 'interpretation';
 
 export default function CabalAppliedToolsPanel({
   activeTab,
@@ -50,6 +56,9 @@ export default function CabalAppliedToolsPanel({
 
   const [interpretation, setInterpretation] = useState<SymbolicInterpretation | null>(null);
   const [interpretationLoading, setInterpretationLoading] = useState(false);
+  const [correspondenceSystem, setCorrespondenceSystem] =
+    useState<SystemId>('jewish-traditional');
+  const [swmV3Consent, setSwmV3Consent] = useState(false);
 
   const canSnapshot = useMemo(() => Boolean(patientId && (treeState || backendStructuralState)), [patientId, treeState, backendStructuralState]);
   const canInterpret = useMemo(() => Boolean(treeState), [treeState]);
@@ -58,6 +67,7 @@ export default function CabalAppliedToolsPanel({
   const tabs: Array<{ id: CabalaToolsTabId; label: string }> = [
     { id: 'history', label: 'Historial' },
     { id: 'snapshot', label: 'Snapshot' },
+    { id: 'correspondences', label: 'Corresp.' },
     { id: 'interpretation', label: 'Interpretación' },
     { id: 'pdf', label: 'PDF' },
   ];
@@ -108,12 +118,18 @@ export default function CabalAppliedToolsPanel({
     setOk(null);
 
     if (!treeState) return;
+    if (!swmV3Consent) {
+      setError('Activa el consentimiento SWM v3 antes de solicitar interpretación con IA.');
+      return;
+    }
     setInterpretationLoading(true);
     try {
       const result = await generateAISymbolicInterpretation({
         treeState,
         safetyLevel: 'educational',
         focusAreas: ['flows', 'sefirot-roles'],
+        correspondenceSystem,
+        swmV3Consent: true,
       });
       setInterpretation(result);
       setOk('Interpretación generada (educativa).');
@@ -196,7 +212,7 @@ export default function CabalAppliedToolsPanel({
       </div>
 
       <div className="px-3 py-3">
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-3 gap-2">
           {tabs.map((t) => {
             const active = t.id === activeTab;
             return (
@@ -254,6 +270,13 @@ export default function CabalAppliedToolsPanel({
           </div>
         )}
 
+        {activeTab === 'correspondences' && (
+          <CorrespondencesPanel
+            systemId={correspondenceSystem}
+            onSystemChange={setCorrespondenceSystem}
+          />
+        )}
+
         {activeTab === 'interpretation' && (
           <div className="space-y-3">
             {!canInterpret ? (
@@ -262,10 +285,22 @@ export default function CabalAppliedToolsPanel({
               </div>
             ) : (
               <>
+                <label className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+                  <input
+                    type="checkbox"
+                    checked={swmV3Consent}
+                    onChange={(e) => setSwmV3Consent(e.target.checked)}
+                    className="mt-0.5"
+                  />
+                  <span>
+                    Consentimiento SWM v3: autorizo la lectura simbólica asistida por IA con fines
+                    formativos (no clínica).
+                  </span>
+                </label>
                 <button
                   type="button"
                   onClick={() => void requestInterpretation()}
-                  disabled={interpretationLoading}
+                  disabled={interpretationLoading || !swmV3Consent}
                   className="w-full rounded-md bg-gray-900 px-3 py-2 text-xs font-medium text-white hover:bg-gray-800 disabled:cursor-not-allowed disabled:bg-gray-300"
                 >
                   {interpretationLoading ? 'Generando…' : 'Generar interpretación (educativa)'}

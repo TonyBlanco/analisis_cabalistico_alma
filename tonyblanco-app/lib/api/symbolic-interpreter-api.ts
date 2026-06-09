@@ -7,9 +7,10 @@ import type {
   SymbolicInterpretation,
   SymbolicInterpretationRequest,
 } from '@holistica/symbolic/tree/symbolic-interpreter.types';
-import { generateSymbolicInterpretation, createFallbackInterpretation } from '@holistica/symbolic/tree/symbolic-interpreter';
+import { createFallbackInterpretation } from '@holistica/symbolic/tree/symbolic-interpreter';
 import type { TreeStructuralState } from '@holistica/symbolic/tree';
 import { getApiBaseUrl } from '../api-base';
+import { interpretViaApi } from './symbolic-api-client';
 
 const API_BASE_URL = getApiBaseUrl();
 
@@ -48,57 +49,28 @@ export async function checkSymbolicInterpreterStatus(): Promise<{
  * @returns SymbolicInterpretation or fallback interpretation
  */
 export async function generateAISymbolicInterpretation(
-  request: SymbolicInterpretationRequest
+  request: SymbolicInterpretationRequest & { swmV3Consent?: boolean },
 ): Promise<SymbolicInterpretation> {
-  const { treeState, safetyLevel, focusAreas } = request;
-  
-  // First, check service availability
+  const { treeState } = request;
+
+  if (!request.swmV3Consent) {
+    throw new Error('Se requiere consentimiento SWM v3 para la interpretación simbólica con IA.');
+  }
+
   const status = await checkSymbolicInterpreterStatus();
   if (!status.enabled) {
     console.warn('AI service not available, using fallback interpretation');
     return createFallbackInterpretation(treeState);
   }
-  
+
   try {
-    // Use frontend symbolic-interpreter module to generate prompt
-    const aiCallback = async (prompt: string): Promise<string> => {
-      const response = await fetch(`${API_BASE_URL}/symbolic-interpreter/generate/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Token ${getAuthToken()}`,
-        },
-        body: JSON.stringify({
-          treeState,
-          safetyLevel,
-          focusAreas,
-          prompt,
-        }),
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'AI request failed');
-      }
-      
-      const data = await response.json();
-      
-      if (!data.success) {
-        throw new Error(data.error || 'AI response unsuccessful');
-      }
-      
-      return data.aiResponse;
-    };
-    
-    // Call frontend interpretation module with backend AI callback
-    const interpretation = await generateSymbolicInterpretation(request, aiCallback);
-    
-    return interpretation;
-    
+    const result = await interpretViaApi({
+      ...request,
+      swmV3Consent: true,
+    });
+    return result.interpretation;
   } catch (error) {
     console.error('Error generating AI symbolic interpretation:', error);
-    
-    // Fallback to non-AI interpretation
     return createFallbackInterpretation(treeState);
   }
 }

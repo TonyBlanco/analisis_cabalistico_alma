@@ -1,10 +1,14 @@
 /**
  * Tree Structural State — Public Exports
  *
- * Contrato TreeStructuralState v0.1 y adaptadores
+ * Contrato TreeStructuralState v0.2 + topología canónica + análisis + adaptadores
  */
+export type { PillarId, TriadId, OlamId, TreePath, SefirotTopoEntry, } from './tree-topology';
+export { SEFIROT_TOPOLOGY, TREE_PATHS, VALID_SEFIRA_IDS } from './tree-topology';
 export type { TreeStructuralState, TreeSefirah, TreeFlow, TreeNotes, SefiraId, SefiraRole, FlowPolarity, FlowDirection, } from './tree-structural-state.types';
 export { TREE_STRUCTURAL_STATE_META } from './tree-structural-state.types';
+export type { TreeStructuralAnalysis, GraphMetrics, } from './tree-analysis.types';
+export { analyzeTreeState } from './tree-analysis';
 export { adaptPitagorasToTree } from './pitagoras-tree-adapter';
 export { adaptGenericMethodToTree } from './generic-method-adapter';
 export type { GenericSymbolicState } from './generic-method-adapter';

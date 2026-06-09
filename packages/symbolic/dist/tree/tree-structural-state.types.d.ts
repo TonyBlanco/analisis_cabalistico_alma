@@ -1,14 +1,16 @@
 /**
- * TreeStructuralState v0.1 — Contract Definition
+ * TreeStructuralState v0.2 — Contract Definition
  *
- * Este contrato define el estado estructural exacto que el Árbol puede renderizar.
- * El Árbol NO INTERPRETA. SOLO RENDERIZA este estado.
+ * Evolution from v0.1: adds OPTIONAL fields (pillar, triad, olam, pathId).
+ * All v0.1 objects remain valid — new fields are never required.
+ * The invariant "the Tree does not interpret" is unchanged.
  *
  * USO:
  * - Métodos simbólicos → generan TreeStructuralState
  * - Árbol de la Vida → recibe y renderiza TreeStructuralState
  * - NO backend, NO persistencia, NO interpretación automática
  */
+import type { PillarId, TriadId, OlamId } from './tree-topology';
 /**
  * ID canónicos de Sefirot (10 emanaciones del Árbol)
  */
@@ -29,7 +31,7 @@ export type FlowPolarity = 'harmonic' | 'integrative' | 'tensional';
  */
 export type FlowDirection = 'down' | 'up' | 'lateral';
 /**
- * Estado de una Sefirá
+ * Estado de una Sefirá (v0.2 — campos opcionales nuevos son retrocompatibles)
  */
 export interface TreeSefirah {
     /** ID canónico de la Sefirá */
@@ -38,9 +40,12 @@ export interface TreeSefirah {
     activation: number;
     /** Rol en el análisis actual */
     role: SefiraRole;
+    pillar?: PillarId;
+    triad?: TriadId | 'receptacle';
+    olam?: OlamId;
 }
 /**
- * Flujo entre dos Sefirot
+ * Flujo entre dos Sefirot (v0.2 — pathId opcional y retrocompatible)
  */
 export interface TreeFlow {
     /** Sefirá de origen */
@@ -53,6 +58,7 @@ export interface TreeFlow {
     intensity: number;
     /** Dirección del flujo */
     direction: FlowDirection;
+    pathId?: string;
 }
 /**
  * Notas estructurales opcionales
@@ -96,7 +102,7 @@ export interface TreeStructuralState {
  * Metadata fija del contrato
  */
 export declare const TREE_STRUCTURAL_STATE_META: {
-    readonly version: "0.1";
+    readonly version: "0.2";
     readonly contract: "TreeStructuralState";
     readonly disclaimer: "Representación simbólica estructural. No constituye interpretación automática ni diagnóstico.";
 };

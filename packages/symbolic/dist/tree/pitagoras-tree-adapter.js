@@ -10,6 +10,7 @@
  * - Determinista: mismo input → mismo TreeStructuralState
  */
 import { TREE_STRUCTURAL_STATE_META } from './tree-structural-state.types';
+import { SEFIROT_TOPOLOGY, TREE_PATHS } from './tree-topology';
 /**
  * Mapeo canónico: Número (1-9) → Sefirá primaria
  *
@@ -37,9 +38,21 @@ const NUMBER_TO_SEFIRAH = {
     8: 'hod',
     9: 'yesod',
 };
-/**
- * Determinar rol de una Sefirá según su peso de activación
- */
+function enrichSefirah(s) {
+    const topo = SEFIROT_TOPOLOGY[s.id];
+    if (!topo)
+        return s;
+    return { ...s, pillar: topo.pillar, triad: topo.triad, olam: topo.olam };
+}
+function enrichFlow(f) {
+    for (const path of TREE_PATHS) {
+        if ((path.from === f.from && path.to === f.to) ||
+            (path.from === f.to && path.to === f.from)) {
+            return { ...f, pathId: path.id };
+        }
+    }
+    return f;
+}
 function determineRole(activation) {
     if (activation >= 0.7)
         return 'dominant';
@@ -175,15 +188,15 @@ export function adaptPitagorasToTree(pitagorasState) {
             }
         });
     }
-    // 7. Retornar TreeStructuralState completo
+    // 7. Enrich with v0.2 topology fields and return
     return {
         source: {
             method: 'pitagoras',
             mode: 'manual',
             timestamp: new Date().toISOString(),
         },
-        sefirot,
-        flows,
+        sefirot: sefirot.map(enrichSefirah),
+        flows: flows.map(enrichFlow),
         notes: {
             scope: 'symbolic-structural',
             disclaimer: TREE_STRUCTURAL_STATE_META.disclaimer,

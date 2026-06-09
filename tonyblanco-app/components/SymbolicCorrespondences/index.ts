@@ -1,0 +1,1 @@
+export { CorrespondencesPanel } from './CorrespondencesPanel';

@@ -5,7 +5,14 @@ import type {
   HebrewLetterId,
   ResolvedCorrespondence,
   TreePathId,
+  SefirahId,
+  SefirahCorrespondence,
+  PathCorrespondence,
 } from './types';
+import {
+  SEFIRAH_CORRESPONDENCES,
+  PATH_CORRESPONDENCES,
+} from './golden-dawn-data';
 
 function buildResolved(letterId: HebrewLetterId): ResolvedCorrespondence | null {
   const letter = HEBREW_LETTERS.find((item) => item.id === letterId);
@@ -44,4 +51,12 @@ export function resolveByPath(pathId: TreePathId): ResolvedCorrespondence | null
   }
 
   return buildResolved(path.letterId);
+}
+
+export function resolveSefirahCorrespondences(id: SefirahId): SefirahCorrespondence | null {
+  return SEFIRAH_CORRESPONDENCES[id] ?? null;
+}
+
+export function resolvePathCorrespondences(pathId: TreePathId): PathCorrespondence | null {
+  return PATH_CORRESPONDENCES[pathId] ?? null;
 }

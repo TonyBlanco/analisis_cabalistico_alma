@@ -13,6 +13,7 @@
  */
 
 import type { TreeStructuralState } from './tree-structural-state.types';
+import type { TreeStructuralAnalysis } from './tree-analysis.types';
 
 /**
  * Safety level for AI interpretation
@@ -85,6 +86,12 @@ export interface SymbolicInterpretation {
 export interface SymbolicInterpretationRequest {
   treeState: TreeStructuralState;
   safetyLevel: SymbolicSafetyLevel;
+  /**
+   * Optional pre-computed structural analysis (read-only).
+   * When provided, the interpreter can ground observations in metrics
+   * without re-computing them and without exceeding its safety scope.
+   */
+  structuralAnalysis?: TreeStructuralAnalysis;
   /**
    * Optional focus areas (e.g., 'flows', 'sefirot-roles')
    */

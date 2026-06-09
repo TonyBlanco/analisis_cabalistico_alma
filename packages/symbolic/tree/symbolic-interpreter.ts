@@ -18,6 +18,7 @@ import type {
 } from './symbolic-interpreter.types';
 import { SYMBOLIC_INTERPRETER_META } from './symbolic-interpreter.types';
 import type { TreeStructuralState, TreeFlow, TreeSefirah } from './tree-structural-state.types';
+import type { TreeStructuralAnalysis } from './tree-analysis.types';
 
 /**
  * Validates that content does not contain prohibited terms
@@ -38,20 +39,44 @@ function validateSafetyContent(content: string): { passed: boolean; warnings: st
   };
 }
 
-/**
- * Generates prompt for AI symbolic interpretation
- * CRITICAL: Prompt must enforce safety rules
- */
-function generateSymbolicPrompt(treeState: TreeStructuralState, safetyLevel: SymbolicSafetyLevel): string {
-  const { source, sefirot, flows, notes } = treeState;
-  
-  // Serialize structural data (NO personal info)
+function formatAnalysisSection(analysis: TreeStructuralAnalysis): string {
+  const pb = analysis.pillarBalance;
+  const ta = analysis.triadActivation;
+  const pd = analysis.polarityDistribution;
+  const g  = analysis.graph;
+
+  return `
+## STRUCTURAL ANALYSIS (v${analysis.sourceVersion} — deterministic metrics, read-only)
+
+**Pillar balance** (fraction of total activation):
+  severity=${pb.severity.toFixed(3)}  mercy=${pb.mercy.toFixed(3)}  equilibrium=${pb.equilibrium.toFixed(3)}
+
+**Triad activation** (average activation per triad):
+  supernal=${ta.supernal.toFixed(3)}  ethical=${ta.ethical.toFixed(3)}  astral=${ta.astral.toFixed(3)}  receptacle=${ta.receptacle.toFixed(3)}
+
+**Polarity distribution** (fraction of flows):
+  harmonic=${pd.harmonic.toFixed(3)}  integrative=${pd.integrative.toFixed(3)}  tensional=${pd.tensional.toFixed(3)}
+
+**Graph**: activeNodes=${g.activeNodes.length}  activePaths=${g.activePaths.length}  components=${g.connectedComponents}  longestPath=${g.longestActivePath.length} nodes
+
+**Ranking** (top 3 by activation):
+${analysis.ranking.slice(0, 3).map((r, i) => `  ${i + 1}. ${r.id} activation=${r.activation.toFixed(3)} role=${r.role}`).join('\n')}
+`.trim();
+}
+
+function generateSymbolicPrompt(
+  treeState: TreeStructuralState,
+  safetyLevel: SymbolicSafetyLevel,
+  analysis?: TreeStructuralAnalysis,
+): string {
+  const { source, sefirot, flows } = treeState;
+
   const sefiraData = sefirot.map(s => ({
     id: s.id,
     role: s.role,
     activation: s.activation,
   }));
-  
+
   const flowData = flows.map(f => ({
     from: f.from,
     to: f.to,
@@ -82,7 +107,7 @@ useful for trainers and professional practitioners of Kabbalah.
 
 ---
 
-## INPUT DATA (TreeStructuralState v0.1)
+## INPUT DATA (TreeStructuralState v0.2)
 
 **Method Applied**: ${source.method}
 
@@ -91,6 +116,8 @@ ${sefiraData.map(s => `- ${s.id}: role=${s.role}, activation=${s.activation.toFi
 
 **FLOWS** (${flows.length} connections):
 ${flowData.map(f => `- ${f.from}→${f.to}: polarity=${f.polarity}, intensity=${f.intensity.toFixed(2)}`).join('\n')}
+
+${analysis ? formatAnalysisSection(analysis) : ''}
 
 ---
 
@@ -222,10 +249,9 @@ export async function generateSymbolicInterpretation(
   request: SymbolicInterpretationRequest,
   aiCallback: (prompt: string) => Promise<string>
 ): Promise<SymbolicInterpretation> {
-  const { treeState, safetyLevel } = request;
-  
-  // Generate safe prompt
-  const prompt = generateSymbolicPrompt(treeState, safetyLevel);
+  const { treeState, safetyLevel, structuralAnalysis } = request;
+
+  const prompt = generateSymbolicPrompt(treeState, safetyLevel, structuralAnalysis);
   
   // Call AI (external dependency)
   let rawResponse: string;

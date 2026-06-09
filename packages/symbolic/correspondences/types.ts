@@ -10,6 +10,48 @@ export type SefirahId =
   | 'yesod'
   | 'malkuth';
 
+// ─── Golden Dawn Correspondence Types ───────────────────────────────────────
+
+export type GoldenDawnPlanet =
+  | 'primum_mobile'
+  | 'zodiac'
+  | 'saturn'
+  | 'jupiter'
+  | 'mars'
+  | 'sun'
+  | 'venus'
+  | 'mercury'
+  | 'moon'
+  | 'earth';
+
+export type GoldenDawnElement = 'fire' | 'water' | 'air' | 'earth' | 'spirit';
+
+/**
+ * Correspondence data for a Sefira (Golden Dawn / Hermetic tradition).
+ * DATA ONLY — no interpretive labels.
+ */
+export interface SefirahCorrespondence {
+  id: SefirahId;
+  planet: GoldenDawnPlanet;
+  element: GoldenDawnElement | null;
+  kingScaleColor: string;
+  tarotArcanaNumbers: number[];
+}
+
+/**
+ * Correspondence data for a Tree Path (Golden Dawn).
+ * tarotArcanum: Major Arcana number (0–21); null if unassigned.
+ */
+export interface PathCorrespondence {
+  id: TreePathId;
+  hebrewLetter: string;
+  pathNumber: number;
+  tarotArcanum: number;
+  planet: GoldenDawnPlanet | null;
+  element: GoldenDawnElement | null;
+  zodiacSign: string | null;
+}
+
 export type HebrewLetterId =
   | 'aleph'
   | 'beth'

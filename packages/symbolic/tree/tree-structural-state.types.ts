@@ -1,14 +1,17 @@
 /**
- * TreeStructuralState v0.1 — Contract Definition
- * 
- * Este contrato define el estado estructural exacto que el Árbol puede renderizar.
- * El Árbol NO INTERPRETA. SOLO RENDERIZA este estado.
- * 
+ * TreeStructuralState v0.2 — Contract Definition
+ *
+ * Evolution from v0.1: adds OPTIONAL fields (pillar, triad, olam, pathId).
+ * All v0.1 objects remain valid — new fields are never required.
+ * The invariant "the Tree does not interpret" is unchanged.
+ *
  * USO:
  * - Métodos simbólicos → generan TreeStructuralState
  * - Árbol de la Vida → recibe y renderiza TreeStructuralState
  * - NO backend, NO persistencia, NO interpretación automática
  */
+
+import type { PillarId, TriadId, OlamId } from './tree-topology';
 
 /**
  * ID canónicos de Sefirot (10 emanaciones del Árbol)
@@ -44,37 +47,45 @@ export type FlowPolarity = 'harmonic' | 'integrative' | 'tensional';
 export type FlowDirection = 'down' | 'up' | 'lateral';
 
 /**
- * Estado de una Sefirá
+ * Estado de una Sefirá (v0.2 — campos opcionales nuevos son retrocompatibles)
  */
 export interface TreeSefirah {
   /** ID canónico de la Sefirá */
   id: SefiraId;
-  
+
   /** Nivel de activación relativo (0..1) */
   activation: number;
-  
+
   /** Rol en el análisis actual */
   role: SefiraRole;
+
+  // v0.2 — optional, populated by adapters when topology is available:
+  pillar?: PillarId;
+  triad?: TriadId | 'receptacle';
+  olam?: OlamId;
 }
 
 /**
- * Flujo entre dos Sefirot
+ * Flujo entre dos Sefirot (v0.2 — pathId opcional y retrocompatible)
  */
 export interface TreeFlow {
   /** Sefirá de origen */
   from: SefiraId;
-  
+
   /** Sefirá de destino */
   to: SefiraId;
-  
+
   /** Polaridad del flujo (determina color) */
   polarity: FlowPolarity;
-  
+
   /** Intensidad del flujo (0..1) — determina grosor y opacidad */
   intensity: number;
-  
+
   /** Dirección del flujo */
   direction: FlowDirection;
+
+  // v0.2 — links this flow to a canonical TreePath id when one exists:
+  pathId?: string;
 }
 
 /**
@@ -127,7 +138,7 @@ export interface TreeStructuralState {
  * Metadata fija del contrato
  */
 export const TREE_STRUCTURAL_STATE_META = {
-  version: '0.1',
+  version: '0.2',
   contract: 'TreeStructuralState',
   disclaimer: 'Representación simbólica estructural. No constituye interpretación automática ni diagnóstico.',
 } as const;

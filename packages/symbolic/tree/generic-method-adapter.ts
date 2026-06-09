@@ -21,6 +21,7 @@ import type {
   FlowDirection,
 } from './tree-structural-state.types';
 import { TREE_STRUCTURAL_STATE_META } from './tree-structural-state.types';
+import { SEFIROT_TOPOLOGY, TREE_PATHS } from './tree-topology';
 
 /**
  * Interface genérica para métodos simbólicos compatibles
@@ -42,9 +43,24 @@ export interface GenericSymbolicState {
   }>;
 }
 
-/**
- * Mapeo canónico: Número (1-9) → Sefirá primaria
- */
+function enrichSefirah(s: TreeSefirah): TreeSefirah {
+  const topo = SEFIROT_TOPOLOGY[s.id];
+  if (!topo) return s;
+  return { ...s, pillar: topo.pillar, triad: topo.triad, olam: topo.olam };
+}
+
+function enrichFlow(f: TreeFlow): TreeFlow {
+  for (const path of TREE_PATHS) {
+    if (
+      (path.from === f.from && path.to === f.to) ||
+      (path.from === f.to   && path.to === f.from)
+    ) {
+      return { ...f, pathId: path.id };
+    }
+  }
+  return f;
+}
+
 const NUMBER_TO_SEFIRAH: Record<number, SefiraId> = {
   1: 'keter',
   2: 'chokmah',
@@ -192,15 +208,15 @@ export function adaptGenericMethodToTree(symbolicState: GenericSymbolicState): T
     });
   }
 
-  // 7. Retornar TreeStructuralState completo
+  // 7. Enrich with v0.2 topology fields and return
   return {
     source: {
       method: symbolicState.methodId,
       mode: 'manual',
       timestamp: new Date().toISOString(),
     },
-    sefirot,
-    flows,
+    sefirot: sefirot.map(enrichSefirah),
+    flows: flows.map(enrichFlow),
     notes: {
       scope: 'symbolic-structural',
       disclaimer: TREE_STRUCTURAL_STATE_META.disclaimer,

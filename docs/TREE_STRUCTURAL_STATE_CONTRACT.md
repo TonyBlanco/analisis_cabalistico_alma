@@ -1,8 +1,14 @@
-# TreeStructuralState v0.1 — Contrato de Estado Estructural
+# TreeStructuralState v0.2 — Contrato de Estado Estructural
 
-## 📋 RESUMEN EJECUTIVO
+> **Actualizado 2026-06-09 — Fase 1 completada.**
+> v0.1 sigue siendo válido (retrocompatible). Nuevos campos son todos opcionales.
+> Arquitectura completa: [docs/04_SYMBOLIC_SYSTEM/TREE_MODULE_V02.md](04_SYMBOLIC_SYSTEM/TREE_MODULE_V02.md)
 
-**TreeStructuralState v0.1** es el contrato que define qué puede renderizar el Árbol de la Vida.
+## RESUMEN EJECUTIVO
+
+**TreeStructuralState v0.2** es el contrato que define qué puede renderizar el Árbol de la Vida.
+Extiende v0.1 con campos opcionales de topología (`pillar`, `triad`, `olam`, `pathId`)
+y un objeto de análisis estructural separado (`TreeStructuralAnalysis`).
 
 ### Regla de Oro
 > **El Árbol NO INTERPRETA. SOLO RENDERIZA este estado.**

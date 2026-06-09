@@ -100,4 +100,48 @@ describe('adaptGenericMethodToTree — v0.2 topology enrichment', () => {
     expect(result.sefirot).toHaveLength(10);
     expect(validateTreeStateForInterpretation(result).valid).toBe(true);
   });
+
+  it('uses graduated activations instead of only 1.0 and 0.15 buckets', () => {
+    const result = adaptGenericMethodToTree(sampleState);
+    const values = result.sefirot.map((s) => s.activation);
+    const midRange = values.filter((v) => v > 0.2 && v < 0.95);
+    expect(midRange.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('connects malchut via canonical yesod-malchut when manifestation rule fires', () => {
+    const manifestState: GenericSymbolicState = {
+      methodId: 'manifest',
+      methodName: 'Manifest',
+      primaryNumbers: [
+        { key: 'a', label: 'A', value: 1, weight: 1 },
+        { key: 'b', label: 'B', value: 2, weight: 0.95 },
+        { key: 'c', label: 'C', value: 3, weight: 0.9 },
+        { key: 'd', label: 'D', value: 4, weight: 0.88 },
+      ],
+      inclusionMap: {
+        1: { frequency: 3, isAbsent: false, isDominant: true },
+        2: { frequency: 3, isAbsent: false, isDominant: true },
+        3: { frequency: 3, isAbsent: false, isDominant: true },
+        4: { frequency: 2, isAbsent: false, isDominant: false },
+      },
+    };
+
+    const result = adaptGenericMethodToTree(manifestState);
+    const malchut = result.sefirot.find((s) => s.id === 'malchut');
+    expect(malchut?.activation).toBeGreaterThanOrEqual(0.4);
+
+    const yesodMalchut = result.flows.find(
+      (f) =>
+        (f.from === 'yesod' && f.to === 'malchut') ||
+        (f.from === 'malchut' && f.to === 'yesod'),
+    );
+    expect(yesodMalchut?.pathId).toBe('yesod-malchut');
+  });
+
+  it('only emits flows along canonical TREE_PATHS', () => {
+    const result = adaptGenericMethodToTree(sampleState);
+    for (const flow of result.flows) {
+      expect(flow.pathId).toBeDefined();
+    }
+  });
 });

@@ -3,12 +3,6 @@
  *
  * Adaptador genérico reutilizable para cualquier método simbólico
  * que siga la estructura PitagorasSymbolicState (primaryNumbers + inclusionMap).
- *
- * REGLAS:
- * - NO interpretación textual
- * - NO diagnóstico
- * - Solo mapeo estructural: números → sefirot + flujos
- * - Determinista: mismo input → mismo TreeStructuralState
  */
 import type { TreeStructuralState } from './tree-structural-state.types';
 /**
@@ -32,9 +26,6 @@ export interface GenericSymbolicState {
 }
 /**
  * Adaptar estado simbólico genérico a TreeStructuralState
- *
- * @param symbolicState - Estado de cualquier método compatible
- * @returns TreeStructuralState v0.1
  */
 export declare function adaptGenericMethodToTree(symbolicState: GenericSymbolicState): TreeStructuralState;
 //# sourceMappingURL=generic-method-adapter.d.ts.map

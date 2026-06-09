@@ -1,22 +1,23 @@
 import { describe, it, expect } from 'vitest';
 import { resolveSefirahCorrespondences, resolvePathCorrespondences } from '../resolve';
 import { SEFIRAH_CORRESPONDENCES, PATH_CORRESPONDENCES } from '../golden-dawn-data';
-import type { SefirahId, TreePathId } from '../types';
+import type { SefiraId } from '../../tree/tree-structural-state.types';
+import type { TopologyPathId } from '../types';
 
-const ALL_SEFIROT: SefirahId[] = [
-  'kether', 'chokmah', 'binah', 'chesed', 'gevurah',
-  'tiferet', 'netzach', 'hod', 'yesod', 'malkuth',
+const ALL_SEFIROT: SefiraId[] = [
+  'keter', 'chokmah', 'binah', 'chesed', 'gevurah',
+  'tiferet', 'netzach', 'hod', 'yesod', 'malchut',
 ];
 
-const ALL_PATHS: TreePathId[] = [
-  'kether-chokmah', 'kether-binah', 'kether-tiferet',
+const ALL_PATHS: TopologyPathId[] = [
+  'keter-chokmah', 'keter-binah', 'keter-tiferet',
   'chokmah-binah', 'chokmah-tiferet', 'chokmah-chesed',
   'binah-tiferet', 'binah-gevurah',
   'chesed-gevurah', 'chesed-tiferet', 'chesed-netzach',
   'gevurah-tiferet', 'gevurah-hod',
   'tiferet-netzach', 'tiferet-yesod', 'tiferet-hod',
-  'netzach-hod', 'netzach-yesod', 'netzach-malkuth',
-  'hod-yesod', 'hod-malkuth', 'yesod-malkuth',
+  'netzach-hod', 'netzach-yesod', 'netzach-malchut',
+  'hod-yesod', 'hod-malchut', 'yesod-malchut',
 ];
 
 describe('resolveSefirahCorrespondences', () => {
@@ -42,16 +43,16 @@ describe('resolveSefirahCorrespondences', () => {
     }
   });
 
-  it('malkuth has earth element', () => {
-    expect(resolveSefirahCorrespondences('malkuth')!.element).toBe('earth');
+  it('malchut has earth element', () => {
+    expect(resolveSefirahCorrespondences('malchut')!.element).toBe('earth');
   });
 
-  it('kether has spirit element', () => {
-    expect(resolveSefirahCorrespondences('kether')!.element).toBe('spirit');
+  it('keter has spirit element', () => {
+    expect(resolveSefirahCorrespondences('keter')!.element).toBe('spirit');
   });
 
   it('returns null for unknown id', () => {
-    expect(resolveSefirahCorrespondences('unknown' as SefirahId)).toBeNull();
+    expect(resolveSefirahCorrespondences('unknown' as SefiraId)).toBeNull();
   });
 });
 
@@ -94,23 +95,23 @@ describe('resolvePathCorrespondences', () => {
     }
   });
 
-  it('kether-chokmah maps to The Fool (arcanum 0, aleph, air)', () => {
-    const c = resolvePathCorrespondences('kether-chokmah')!;
+  it('keter-chokmah maps to The Fool (arcanum 0, aleph, air)', () => {
+    const c = resolvePathCorrespondences('keter-chokmah')!;
     expect(c.tarotArcanum).toBe(0);
     expect(c.hebrewLetter).toBe('א');
     expect(c.element).toBe('air');
     expect(c.planet).toBeNull();
   });
 
-  it('yesod-malkuth maps to The World (arcanum 21, tav, saturn)', () => {
-    const c = resolvePathCorrespondences('yesod-malkuth')!;
+  it('yesod-malchut maps to The World (arcanum 21, tav, saturn)', () => {
+    const c = resolvePathCorrespondences('yesod-malchut')!;
     expect(c.tarotArcanum).toBe(21);
     expect(c.hebrewLetter).toBe('ת');
     expect(c.planet).toBe('saturn');
   });
 
   it('returns null for unknown path', () => {
-    expect(resolvePathCorrespondences('unknown-path' as TreePathId)).toBeNull();
+    expect(resolvePathCorrespondences('unknown-path' as TopologyPathId)).toBeNull();
   });
 });
 

@@ -9,9 +9,9 @@ Este documento es **arquitectura + asignación de trabajo**. La ejecución (cód
 
 </aside>
 
-> **Estado 2026-06-09 · main `0bd3c1c0` · prod Hetzner activa**
-> C ✅ cerrado · A ✅ cerrado en main · B 🟡 parcial · D 🟡 prod viva, falta D5 smoke auth
-> Pendiente merge: `191a6a4e` (B7), `b3e7d135` (FIX-3), `a42e45d0` (C2)
+> **Estado 2026-06-09 · main `7e68d1ae` · prod Hetzner activa**
+> C ✅ cerrado · A ✅ cerrado · B ✅ cerrado (B2–B7) · D 🟡 prod viva, D5/D6 scripts en main
+> DoD-B: pendiente confirmación B6 en prod
 
 ## 0. Estado de partida y alcance
 
@@ -100,13 +100,13 @@ flowchart LR
 
 **Meta:** paneles que consumen el wiring de A. Visual primero (SWM v1), interpretación bajo consentimiento (SWM v3).
 
-- [ ]  **B1 — Inventario.** Contrastar dashboards existentes vs `docs/02_CORE_WORKSPACES/` y marcar los que faltan.
-- [x]  **B2 — Dashboard del Árbol.** `2b7b7e8f` árbol + ejecución + síntesis wired. Parcialmente completo.
-- [ ]  **B3 — Panel de Correspondencias.** Toggle Hermético ↔ Judío tradicional; tablas read-only pendiente.
-- [ ]  **B4 — Panel de Interpretación.** Banner no-clínico + disclaimer SWM v3 pendiente.
-- [ ]  **B5 — Consolidar `DASHBOARD-PROFESIONAL-NUEVO.tsx`.** Pendiente — no debe quedar suelto en raíz.
-- [ ]  **B6 — UX.** Estados loading/error/empty, i18n ES, accesibilidad pendiente.
-- [x]  **B7 — Síntesis formativa avanzada.** `191a6a4e` (rama, pendiente merge a main).
+- [x]  **B1 — Inventario (✅ `fcd59142`).** `docs/02_CORE_WORKSPACES/B1_DASHBOARD_INVENTORY.md`.
+- [x]  **B2 — Dashboard del Árbol (✅ `0bd3c1c0`).** Árbol + ejecución + síntesis wired.
+- [x]  **B3 — Panel de Correspondencias (✅ `6eb1b032`).** Toggle Hermético ↔ Judío + ruta `/correspondencias`.
+- [x]  **B4 — Panel de Interpretación (✅ `7e68d1ae`).** ConsentModal SWM v3 + trazabilidad mode/version/timestamp.
+- [x]  **B5 — Consolidar `DASHBOARD-PROFESIONAL-NUEVO.tsx` (✅ `12307d1d`).** Eliminado de raíz.
+- [x]  **B6 — UX (✅ `219cd6b8`).** Loading/error/empty, copy ES, a11y básica.
+- [x]  **B7 — Metrics Dashboard terapeuta (✅ `48d6f802`).** Datos reales backend.
 
 ## 5. Workstream C — RETIRO de Vercel
 

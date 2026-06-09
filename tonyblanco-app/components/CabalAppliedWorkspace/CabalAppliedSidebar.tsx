@@ -19,12 +19,17 @@ export default function CabalAppliedSidebar({
   onChange,
 }: CabalAppliedSidebarProps) {
   return (
-    <aside className="w-64 border-r border-gray-200 bg-white flex flex-col">
+    <aside className="w-64 border-r border-gray-200 bg-white flex flex-col" aria-label="Secciones del workspace">
       <div className="px-4 py-4 border-b border-gray-200">
         <p className="text-xs uppercase tracking-wide text-gray-500">Workspace simbólico</p>
-        <h2 className="text-lg font-semibold text-gray-900">Cabala Aplicada</h2>
+        <h2 id="cabala-sidebar-title" className="text-lg font-semibold text-gray-900">
+          Cabala Aplicada
+        </h2>
       </div>
-      <div className="flex-1 px-3 py-4 space-y-2">
+      <nav
+        className="flex-1 px-3 py-4 space-y-2"
+        aria-labelledby="cabala-sidebar-title"
+      >
         {sections.map((section) => {
           const isActive = section.id === activeSection;
           return (
@@ -32,6 +37,8 @@ export default function CabalAppliedSidebar({
               key={section.id}
               type="button"
               onClick={() => onChange(section.id)}
+              aria-current={isActive ? 'page' : undefined}
+              aria-label={`${section.label}: ${section.description}`}
               className={`w-full text-left rounded-md border px-3 py-2 text-sm transition-colors ${
                 isActive
                   ? 'border-gray-300 bg-gray-100 text-gray-900'
@@ -43,9 +50,9 @@ export default function CabalAppliedSidebar({
             </button>
           );
         })}
-      </div>
-      <div className="px-4 py-3 border-t border-gray-200 text-[11px] text-gray-500">
-        Sin interpretación ni automatización.
+      </nav>
+      <div className="px-4 py-3 border-t border-gray-200 text-[11px] text-gray-500" role="note">
+        Observación antes de actuar · sin diagnóstico automático.
       </div>
     </aside>
   );

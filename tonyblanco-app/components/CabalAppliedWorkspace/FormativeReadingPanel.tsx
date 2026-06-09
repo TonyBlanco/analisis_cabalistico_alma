@@ -54,20 +54,31 @@ function Section({
   defaultOpen?: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen);
+  const sectionId = `formative-section-${title.replace(/\s+/g, '-').toLowerCase()}`;
   return (
     <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
       <button
         type="button"
         onClick={() => setOpen(!open)}
+        aria-expanded={open}
+        aria-controls={sectionId}
         className="flex w-full items-center justify-between gap-2 px-4 py-3 text-left hover:bg-slate-50"
       >
         <span className="flex items-center gap-2 text-sm font-semibold text-slate-800">
-          {icon}
+          <span aria-hidden="true">{icon}</span>
           {title}
         </span>
-        {open ? <ChevronUp className="h-4 w-4 text-slate-400" /> : <ChevronDown className="h-4 w-4 text-slate-400" />}
+        {open ? (
+          <ChevronUp className="h-4 w-4 text-slate-400" aria-hidden="true" />
+        ) : (
+          <ChevronDown className="h-4 w-4 text-slate-400" aria-hidden="true" />
+        )}
       </button>
-      {open && <div className="border-t border-slate-100 px-4 py-3">{children}</div>}
+      {open && (
+        <div id={sectionId} className="border-t border-slate-100 px-4 py-3">
+          {children}
+        </div>
+      )}
     </div>
   );
 }
@@ -108,7 +119,12 @@ export default function FormativeReadingPanel({
 
   if (loading) {
     return (
-      <div className="rounded-xl border border-indigo-100 bg-indigo-50/40 p-6 text-sm text-indigo-800">
+      <div
+        className="rounded-xl border border-indigo-100 bg-indigo-50/40 p-6 text-sm text-indigo-800"
+        role="status"
+        aria-live="polite"
+        aria-busy="true"
+      >
         Generando síntesis formativa…
       </div>
     );
@@ -116,7 +132,10 @@ export default function FormativeReadingPanel({
 
   if (!brief) {
     return (
-      <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-4 text-xs text-slate-500">
+      <div
+        className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-4 text-xs text-slate-500"
+        role="status"
+      >
         Ejecuta un método para generar la síntesis formativa avanzada.
       </div>
     );

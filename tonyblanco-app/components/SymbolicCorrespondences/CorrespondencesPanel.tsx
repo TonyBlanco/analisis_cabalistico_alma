@@ -187,10 +187,15 @@ export function CorrespondencesPanel({
           <BookOpen className="h-4 w-4 text-indigo-600" />
           <h3 className="text-sm font-semibold text-gray-900">Correspondencias (solo lectura)</h3>
         </div>
-        <div className="inline-flex rounded-lg border border-gray-200 bg-white p-0.5 text-xs">
+        <div
+          className="inline-flex rounded-lg border border-gray-200 bg-white p-0.5 text-xs"
+          role="group"
+          aria-label="Sistema de correspondencias"
+        >
           <button
             type="button"
             onClick={() => onSystemChange('hermetic-golden-dawn')}
+            aria-pressed={systemId === 'hermetic-golden-dawn'}
             className={`rounded-md px-3 py-1.5 font-medium transition-colors ${
               systemId === 'hermetic-golden-dawn'
                 ? 'bg-indigo-600 text-white'
@@ -202,6 +207,7 @@ export function CorrespondencesPanel({
           <button
             type="button"
             onClick={() => onSystemChange('jewish-traditional')}
+            aria-pressed={systemId === 'jewish-traditional'}
             className={`rounded-md px-3 py-1.5 font-medium transition-colors ${
               systemId === 'jewish-traditional'
                 ? 'bg-indigo-600 text-white'
@@ -218,16 +224,40 @@ export function CorrespondencesPanel({
       </p>
 
       {loading && (
-        <div className="flex items-center gap-2 text-sm text-gray-600 py-6 justify-center">
-          <Loader2 className="h-4 w-4 animate-spin" />
+        <div
+          className="flex items-center gap-2 text-sm text-gray-600 py-6 justify-center"
+          role="status"
+          aria-live="polite"
+          aria-busy="true"
+        >
+          <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
           Cargando correspondencias…
         </div>
       )}
 
       {error && !loading && (
-        <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
-          <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
-          <span>{error}</span>
+        <div
+          className="flex flex-col gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700"
+          role="alert"
+          aria-live="assertive"
+        >
+          <div className="flex items-start gap-2">
+            <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" aria-hidden="true" />
+            <span>{error}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => void load()}
+            className="self-start rounded-md border border-red-200 bg-white px-2 py-1 text-[11px] font-medium text-red-700 hover:bg-red-50"
+          >
+            Reintentar
+          </button>
+        </div>
+      )}
+
+      {!loading && !error && !data && (
+        <div className="rounded-lg border border-dashed border-gray-200 bg-gray-50 px-3 py-4 text-xs text-gray-500" role="status">
+          No hay correspondencias disponibles para este sistema.
         </div>
       )}
 

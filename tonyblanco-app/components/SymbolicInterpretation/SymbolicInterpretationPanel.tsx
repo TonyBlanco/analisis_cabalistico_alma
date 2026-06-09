@@ -31,20 +31,27 @@ export function SymbolicInterpretationPanel({
   const [isExpanded, setIsExpanded] = useState(false);
   
   return (
-    <div className="rounded-xl border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-indigo-50 p-5 shadow-lg">
+    <div
+      className="rounded-xl border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-indigo-50 p-5 shadow-lg"
+      aria-labelledby="symbolic-interpretation-title"
+    >
       {/* Header with disclaimer */}
       <div className="mb-4 flex items-start justify-between">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
             <Sparkles className="h-5 w-5 text-purple-600" />
-            <h3 className="text-lg font-semibold text-purple-900">
+            <h3 id="symbolic-interpretation-title" className="text-lg font-semibold text-purple-900">
               Lectura Simbólica Asistida (IA)
             </h3>
           </div>
           
           {/* Prominent disclaimer */}
-          <div className="flex items-start gap-2 rounded-lg bg-amber-50 border border-amber-300 px-3 py-2">
-            <AlertCircle className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
+          <div
+            className="flex items-start gap-2 rounded-lg bg-amber-50 border border-amber-300 px-3 py-2"
+            role="note"
+            aria-label="Aviso de seguridad"
+          >
+            <AlertCircle className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" aria-hidden="true" />
             <p className="text-xs text-amber-800 leading-relaxed">
               {SYMBOLIC_INTERPRETER_META.disclaimerText}
             </p>
@@ -87,11 +94,25 @@ export function SymbolicInterpretationPanel({
       
       {/* Loading state */}
       {isLoading && (
-        <div className="flex flex-col items-center justify-center py-8 space-y-3">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+        <div
+          className="flex flex-col items-center justify-center py-8 space-y-3"
+          role="status"
+          aria-live="polite"
+          aria-busy="true"
+        >
+          <div
+            className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"
+            aria-hidden="true"
+          />
           <p className="text-sm text-purple-700 font-medium">
-            Generando lectura simbólica...
+            Generando lectura simbólica…
           </p>
+        </div>
+      )}
+
+      {!interpretation && !isLoading && (
+        <div className="sr-only" role="status">
+          Aún no hay lectura simbólica generada.
         </div>
       )}
       
@@ -100,13 +121,17 @@ export function SymbolicInterpretationPanel({
         <div className="space-y-4 mt-4">
           {/* Safety validation warnings */}
           {interpretation.safetyValidation.warnings.length > 0 && (
-            <div className="rounded-lg bg-red-50 border border-red-300 px-3 py-2">
+            <div
+              className="rounded-lg bg-red-50 border border-red-300 px-3 py-2"
+              role="alert"
+              aria-live="assertive"
+            >
               <p className="text-xs font-medium text-red-800 mb-1">
-                ⚠️ Advertencias de seguridad:
+                Advertencias de seguridad:
               </p>
-              <ul className="text-xs text-red-700 space-y-1 ml-4">
+              <ul className="text-xs text-red-700 space-y-1 ml-4 list-disc">
                 {interpretation.safetyValidation.warnings.map((warning, idx) => (
-                  <li key={idx}>• {warning}</li>
+                  <li key={idx}>{warning}</li>
                 ))}
               </ul>
             </div>
@@ -177,17 +202,23 @@ export function SymbolicInterpretationPanel({
       {/* Safety rules toggle */}
       <div className="mt-4 pt-4 border-t border-purple-200">
         <button
+          type="button"
           onClick={() => setIsExpanded(!isExpanded)}
+          aria-expanded={isExpanded}
+          aria-controls="symbolic-safety-rules"
           className="flex items-center gap-2 text-xs font-medium text-purple-700 hover:text-purple-900 transition-colors"
         >
-          <Info className="h-3 w-3" />
+          <Info className="h-3 w-3" aria-hidden="true" />
           {isExpanded ? 'Ocultar' : 'Ver'} reglas de seguridad ({SYMBOLIC_INTERPRETER_META.safetyRules.length})
         </button>
         
         {isExpanded && (
-          <ul className="mt-2 space-y-1 text-[11px] text-purple-600 ml-5">
+          <ul
+            id="symbolic-safety-rules"
+            className="mt-2 space-y-1 text-[11px] text-purple-600 ml-5 list-disc"
+          >
             {SYMBOLIC_INTERPRETER_META.safetyRules.map((rule, idx) => (
-              <li key={idx}>• {rule}</li>
+              <li key={idx}>{rule}</li>
             ))}
           </ul>
         )}

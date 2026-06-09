@@ -962,6 +962,8 @@ export default function CabalAppliedVisualCore({
         className="rounded-md bg-indigo-600 px-3 py-2 text-sm text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-indigo-300"
         onClick={() => void runSelectedMethodForPatient()}
         disabled={executeLoading}
+        aria-busy={executeLoading}
+        aria-label={executeLoading ? 'Ejecutando método cabalístico' : 'Ejecutar método cabalístico'}
       >
         {executeLoading ? 'Ejecutando…' : 'Ejecutar'}
       </button>
@@ -1029,7 +1031,11 @@ export default function CabalAppliedVisualCore({
           <ClinicalContextBadges context={clinicalContext} />
 
           {executeError && (
-            <div className="mt-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+            <div
+              className="mt-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700"
+              role="alert"
+              aria-live="assertive"
+            >
               {executeError}
             </div>
           )}
@@ -1065,7 +1071,12 @@ export default function CabalAppliedVisualCore({
             <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
               <div id="cabala-aplicada-export-tree" className="relative w-full h-72">
                 {executeLoading ? (
-                  <div className="flex h-full items-center justify-center text-sm text-gray-500">
+                  <div
+                    className="flex h-full items-center justify-center text-sm text-gray-500"
+                    role="status"
+                    aria-live="polite"
+                    aria-busy="true"
+                  >
                     Analizando estructura simbólica…
                   </div>
                 ) : treeStructuralState ? (
@@ -1075,8 +1086,14 @@ export default function CabalAppliedVisualCore({
                     className="absolute inset-0 h-full w-full"
                   />
                 ) : (
-                  <div className="flex h-full items-center justify-center text-sm text-gray-500">
-                    Ejecuta un método para poblar el Árbol (motor v1).
+                  <div
+                    className="flex h-full flex-col items-center justify-center gap-2 text-center text-sm text-gray-500"
+                    role="status"
+                  >
+                    <p>Aún no hay análisis en el Árbol.</p>
+                    <p className="text-xs text-gray-400">
+                      Elige un método y pulsa <strong>Ejecutar</strong> para generar la estructura simbólica.
+                    </p>
                   </div>
                 )}
               </div>

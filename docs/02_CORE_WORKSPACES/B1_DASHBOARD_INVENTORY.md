@@ -12,7 +12,7 @@
 | **B3** Panel Correspondencias | ✅ Operativo (wired) | `SymbolicCorrespondences/CorrespondencesPanel.tsx` | Toggle **hermetic-golden-dawn ↔ jewish-traditional** implementado. Da'at: renderizado condicionalmente. Wired en `CabalAppliedToolsPanel`. **Gap:** no expuesto en ruta standalone `/dashboard/therapist/.../correspondencias`. |
 | **B4** Panel Interpretación | ✅ Operativo (wired) | `SymbolicInterpretation/SymbolicInterpretationPanel.tsx` | Disclaimer prominente siempre visible. Opt-in explícito. Lenguaje educativo. Wired en `CabalAppliedToolsPanel`. **Gap:** sin estado de consentimiento SWM v3 formal (solo disclaimer estático). |
 | **B5** DASHBOARD-PROFESIONAL-NUEVO.tsx | ✅ Eliminado | — | Commit `12307d1d`. |
-| **B6** UX (loading/error/empty/a11y) | 🟡 Parcial | Varios | Loading/error presentes en `CorrespondencesPanel` y `SymbolicInterpretationPanel`. Empty state básico. i18n ES: textos en español pero sin sistema de traducciones formal. Accesibilidad: no auditada. |
+| **B6** UX (loading/error/empty/a11y) | ✅ Operativo | `CabalAppliedWorkspace/*` · `CorrespondencesPanel` · `SymbolicInterpretationPanel` | Estados loading/error/empty en árbol, historial, síntesis y paneles. Copy ES unificado. A11y básica: `nav`/`tablist`, `aria-current`/`aria-selected`/`aria-pressed`, `aria-live`/`role="alert"`, reintentos en errores. Sin i18n framework (textos hardcoded ES). |
 | **B7** Metrics Dashboard (terapeuta) | ✅ Operativo | `components/dashboard/MetricsDashboard.tsx` · `hooks/useTherapistMetrics.ts` | Datos reales desde backend Django. Commit `191a6a4e`. |
 
 ---
@@ -36,10 +36,10 @@
 ### B4 — Gap: consentimiento SWM v3 formal
 El panel tiene disclaimer estático permanente pero no implementa el flujo de consentimiento SWM v3 (registro de aceptación, trazabilidad). Requerido antes de DoD.
 
-### B6 — Gap: accesibilidad y i18n formal
-- Sin auditoría de accesibilidad (aria-labels, keyboard nav, contraste)
-- Textos en español hardcoded; sin sistema de traducciones
-- Empty state: presente en correspondencias, ausente en árbol cuando no hay análisis
+### B6 — Resuelto (auditoría básica)
+- A11y: landmarks, tabs, estados vivos, botones con `aria-pressed`/`aria-busy`, reintentos
+- i18n: copy ES en componentes del workspace (sin framework de traducciones)
+- Empty state en árbol, historial, síntesis, correspondencias e interpretación
 
 ---
 
@@ -59,5 +59,5 @@ El panel tiene disclaimer estático permanente pero no implementa el flujo de co
 ## Conclusión
 
 - **B2, B3, B4, B5, B7**: implementados. B3 y B4 wired dentro de `cabala-aplicada`.
-- **Bloqueante real para DoD-B**: gap SWM v3 consentimiento formal (B4) + auditoría accesibilidad básica (B6).
+- **Bloqueante real para DoD-B**: gap SWM v3 consentimiento formal (B4). B6 a11y básica cerrado.
 - **docs/02_CORE_WORKSPACES**: directorio creado en este commit (B1).

@@ -204,21 +204,36 @@ export default function CabalAppliedToolsPanel({
     }
   };
 
+  const tabPanelId = `cabala-tools-panel-${activeTab}`;
+
   return (
-    <aside className="w-96 border-l border-gray-200 bg-white flex flex-col">
+    <aside
+      className="w-96 border-l border-gray-200 bg-white flex flex-col"
+      aria-label="Panel de herramientas de Cábala Aplicada"
+    >
       <div className="border-b border-gray-200 px-4 py-3">
         <p className="text-xs uppercase tracking-wide text-gray-500">Panel interno</p>
-        <h3 className="text-sm font-semibold text-gray-900">Cábala Aplicada</h3>
+        <h3 id="cabala-tools-title" className="text-sm font-semibold text-gray-900">
+          Cábala Aplicada
+        </h3>
       </div>
 
       <div className="px-3 py-3">
-        <div className="grid grid-cols-3 gap-2">
+        <div
+          className="grid grid-cols-3 gap-2"
+          role="tablist"
+          aria-labelledby="cabala-tools-title"
+        >
           {tabs.map((t) => {
             const active = t.id === activeTab;
             return (
               <button
                 key={t.id}
                 type="button"
+                role="tab"
+                id={`cabala-tools-tab-${t.id}`}
+                aria-selected={active}
+                aria-controls={`cabala-tools-panel-${t.id}`}
                 onClick={() => onChangeTab(t.id)}
                 className={`rounded-md border px-3 py-2 text-xs font-medium transition-colors ${
                   active
@@ -240,13 +255,26 @@ export default function CabalAppliedToolsPanel({
       </div>
 
       {(error || ok) && (
-        <div className="px-4 pb-2">
-          {error && <div className="text-xs text-red-600">{error}</div>}
-          {ok && <div className="text-xs text-emerald-700">{ok}</div>}
+        <div className="px-4 pb-2" aria-live="polite">
+          {error && (
+            <div className="text-xs text-red-600" role="alert">
+              {error}
+            </div>
+          )}
+          {ok && (
+            <div className="text-xs text-emerald-700" role="status">
+              {ok}
+            </div>
+          )}
         </div>
       )}
 
-      <div className="flex-1 overflow-y-auto px-4 pb-4">
+      <div
+        id={tabPanelId}
+        role="tabpanel"
+        aria-labelledby={`cabala-tools-tab-${activeTab}`}
+        className="flex-1 overflow-y-auto px-4 pb-4"
+      >
         {!patientId && activeTab !== 'correspondences' && (
           <div
             className="mb-3 rounded-md border border-dashed border-gray-200 bg-gray-50 p-3 text-xs text-gray-600"

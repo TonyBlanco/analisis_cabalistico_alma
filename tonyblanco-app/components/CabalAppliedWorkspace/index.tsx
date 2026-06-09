@@ -46,44 +46,42 @@ export default function CabalAppliedWorkspace() {
             <h1 className="text-2xl font-semibold text-gray-900">Cabala Aplicada</h1>
           </div>
         </div>
-        <div className="flex flex-wrap items-center justify-end gap-3">
+        <div
+          className="flex flex-wrap items-center justify-end gap-3"
+          role="toolbar"
+          aria-label="Herramientas del panel lateral"
+        >
           <ActivePatientIndicator
             onSelectPatient={() => router.push('/dashboard/therapist/patients')}
           />
-          <button
-            type="button"
-            onClick={() => setActiveTool('history')}
-            className="rounded-md border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-          >
-            Historial
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTool('snapshot')}
-            className="rounded-md border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-          >
-            Snapshot
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTool('interpretation')}
-            className="rounded-md border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-          >
-            Interpretación
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTool('pdf')}
-            className="rounded-md border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-          >
-            PDF
-          </button>
+          {(
+            [
+              { id: 'history' as const, label: 'Historial' },
+              { id: 'snapshot' as const, label: 'Snapshot' },
+              { id: 'interpretation' as const, label: 'Interpretación' },
+              { id: 'pdf' as const, label: 'PDF' },
+            ] as const
+          ).map((tool) => (
+            <button
+              key={tool.id}
+              type="button"
+              onClick={() => setActiveTool(tool.id)}
+              aria-pressed={activeTool === tool.id}
+              className={`rounded-md border px-3 py-2 text-sm font-medium transition-colors ${
+                activeTool === tool.id
+                  ? 'border-gray-300 bg-gray-100 text-gray-900'
+                  : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              {tool.label}
+            </button>
+          ))}
 
           <Link
             href="/dashboard/therapist"
             className="ml-3 text-sm font-medium text-gray-700 bg-gray-100 rounded-md px-3 py-2 hover:bg-gray-200"
           >
-            Volver al espacio clinico
+            Volver al espacio clínico
           </Link>
         </div>
       </header>

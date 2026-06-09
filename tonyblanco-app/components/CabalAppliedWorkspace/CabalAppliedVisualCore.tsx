@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { ChevronDown, ChevronUp, BookOpen, Hash, Sparkles, Activity, Sun, Scale } from 'lucide-react';
+import { Hash, Sparkles, Activity, Sun, Scale } from 'lucide-react';
 import type { CabalSectionId } from './types';
 import {
   getActivePatientId,
@@ -19,6 +19,7 @@ import { ejecutarMetodoPitagorico } from '@holistica/symbolic/methods/pitagoras'
 import type { PitagorasSymbolicState, PitagorasNumberMeaning } from '@holistica/symbolic/methods/pitagoras/pitagoras.types';
 import {
   adaptPitagorasToTree,
+  analyzeTreeState,
   buildFormativeBrief,
   methodContextFromSymbolicState,
   type FormativeBrief,
@@ -471,86 +472,33 @@ function PitagorasBarChart({
   );
 }
 
-/** Collapsible Pedagogical Block */
-function PitagorasPedagogicalBlock({
-  inclusionMap,
-  primaryNumbers,
-}: {
-  inclusionMap: PitagorasSymbolicState['inclusionMap'];
-  primaryNumbers: PitagorasSymbolicState['primaryNumbers'];
-}) {
-  const [isOpen, setIsOpen] = useState(false);
+const SECTION_META: Record<
+  CabalSectionId,
+  { title: string; subtitle: string }
+> = {
+  tree: {
+    title: 'Árbol de la Vida',
+    subtitle: 'Visualización estructural y ejecución del método.',
+  },
+  synthesis: {
+    title: 'Síntesis formativa',
+    subtitle: 'Lectura terapéutica avanzada (determinística, sin IA).',
+  },
+  gematria: {
+    title: 'Datos numéricos del método',
+    subtitle: 'Gráficos y números del cálculo (sin lectura interpretativa).',
+  },
+  resources: {
+    title: 'Recursos',
+    subtitle: 'Material consultivo de apoyo.',
+  },
+};
 
-  const dominantes = Object.entries(inclusionMap)
-    .filter(([, v]) => v.isDominant)
-    .map(([k]) => k);
-  const ausencias = Object.entries(inclusionMap)
-    .filter(([, v]) => v.isAbsent)
-    .map(([k]) => k);
-
-  return (
-    <div className="rounded-xl border border-amber-200 bg-amber-50 shadow-sm">
-      <button
-        type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        className="flex w-full items-center justify-between px-4 py-3 text-left"
-      >
-        <div className="flex items-center gap-2">
-          <BookOpen className="h-4 w-4 text-amber-600" />
-          <span className="text-sm font-semibold text-amber-900">
-            Lectura simbólica orientativa (formación)
-          </span>
-        </div>
-        {isOpen ? (
-          <ChevronUp className="h-4 w-4 text-amber-600" />
-        ) : (
-          <ChevronDown className="h-4 w-4 text-amber-600" />
-        )}
-      </button>
-      {isOpen && (
-        <div className="border-t border-amber-200 px-4 py-3 text-xs text-amber-900 space-y-3">
-          <div>
-            <p className="font-medium">Números dominantes:</p>
-            <p className="text-amber-700">
-              {dominantes.length > 0
-                ? `Casas ${dominantes.join(', ')} muestran mayor frecuencia. Energías predominantes en el perfil.`
-                : 'No hay dominancias marcadas.'}
-            </p>
-          </div>
-          <div>
-            <p className="font-medium">Ausencias:</p>
-            <p className="text-amber-700">
-              {ausencias.length > 0
-                ? `Casas ${ausencias.join(', ')} están vacías. Áreas de menor expresión natural.`
-                : 'Todas las casas tienen presencia.'}
-            </p>
-          </div>
-          <div>
-            <p className="font-medium">Números fundamentales:</p>
-            <ul className="mt-1 space-y-1 text-amber-700">
-              {primaryNumbers.map((n) => (
-                <li key={n.key}>
-                  <strong>{n.label}:</strong> {n.value} — {n.meaning?.titulo ?? 'N/A'}
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="pt-2 border-t border-amber-200 text-[10px] text-amber-600">
-            ⚠ Este contenido es puramente estructural y formativo. No constituye diagnóstico ni interpretación automática.
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-/** Main Pitagoras Professional Report */
+/** Main Pitagoras numeric report (charts only — synthesis lives in Síntesis tab) */
 function PitagorasReport({
   pitagorasState,
-  treeAnalysis,
 }: {
   pitagorasState: PitagorasSymbolicState;
-  treeAnalysis: TreeStructuralAnalysis | null;
 }) {
   const cardColors = [
     'bg-gradient-to-br from-rose-50 to-rose-100 border-rose-200',
@@ -566,14 +514,11 @@ function PitagorasReport({
         <div className="flex items-start justify-between">
           <div>
             <div className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-indigo-600" />
-              <h3 className="text-lg font-bold text-gray-900">Informe Pitagórico Simbólico</h3>
+              <Hash className="h-5 w-5 text-indigo-600" />
+              <h3 className="text-lg font-bold text-gray-900">Perfil numérico Pitagórico</h3>
             </div>
             <p className="mt-1 text-xs text-gray-500">
-              Lectura manual · Uso formativo y de consulta · No automática
-            </p>
-            <p className="mt-1 text-[10px] text-gray-400 italic">
-              Los gráficos representan estructuras simbólicas, no escalas clínicas.
+              Solo datos y gráficos · La lectura terapéutica está en la pestaña Síntesis
             </p>
           </div>
           <span className="rounded-full bg-gray-200 px-2 py-1 text-[10px] font-medium text-gray-600">
@@ -610,62 +555,20 @@ function PitagorasReport({
         <PitagorasBarChart inclusionMap={pitagorasState.inclusionMap} />
       </div>
 
-      {/* Tree of Life Correspondence */}
-      <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-        <h4 className="mb-3 text-sm font-semibold text-gray-900">Correspondencia con el Árbol de la Vida</h4>
-        {treeAnalysis?.ranking.length ? (
-          <div className="space-y-2">
-            {treeAnalysis.ranking.slice(0, 10).map((sefira) => {
-              const maxPeso = Math.max(0.01, ...treeAnalysis.ranking.map((s) => s.activation));
-              const widthPercent = (sefira.activation / maxPeso) * 100;
-              return (
-                <div key={sefira.id} className="flex items-center gap-3">
-                  <span className="w-20 text-xs font-medium text-gray-700 truncate">
-                    {sefira.id}
-                  </span>
-                  <div className="flex-1 h-4 bg-gray-100 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-indigo-400 rounded-full transition-all"
-                      style={{ width: `${widthPercent}%` }}
-                    />
-                  </div>
-                  <span className="w-8 text-right text-[10px] text-gray-500">
-                    {sefira.activation.toFixed(2)}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          <p className="text-xs text-gray-500">No hay sefirot activas disponibles.</p>
-        )}
-        {treeAnalysis?.graph.activePaths.length ? (
-          <div className="mt-3 pt-3 border-t border-gray-100">
-            <p className="text-xs text-gray-600">
-              <span className="font-medium">Senderos activos:</span>{' '}
-              {treeAnalysis.graph.activePaths.join(', ')}
-            </p>
-          </div>
-        ) : null}
-      </div>
-
-      {/* Pedagogical Block */}
-      <PitagorasPedagogicalBlock
-        inclusionMap={pitagorasState.inclusionMap}
-        primaryNumbers={pitagorasState.primaryNumbers}
-      />
     </div>
   );
 }
 
 interface CabalAppliedVisualCoreProps {
   activeSection: CabalSectionId;
+  onSectionChange?: (section: CabalSectionId) => void;
   onWorkspaceStateChange?: (state: CabalaAplicadaWorkspaceExportState) => void;
   onSnapshotSaved?: (id: string) => void;
 }
 
 export default function CabalAppliedVisualCore({
   activeSection,
+  onSectionChange,
   onWorkspaceStateChange,
   onSnapshotSaved,
 }: CabalAppliedVisualCoreProps) {
@@ -725,13 +628,24 @@ export default function CabalAppliedVisualCore({
   }
 
   async function applyTreeState(treeState: TreeStructuralState, methodId?: string) {
-    const analyzed = await analyzeTreeViaApi(treeState);
-    setTreeStructuralState(analyzed.treeState);
-    setTreeAnalysis(analyzed.analysis);
-    if (methodId) {
-      setSelectedMethod(methodId);
+    try {
+      const analyzed = await analyzeTreeViaApi(treeState);
+      setTreeStructuralState(analyzed.treeState);
+      setTreeAnalysis(analyzed.analysis);
+      if (methodId) {
+        setSelectedMethod(methodId);
+      }
+      return analyzed;
+    } catch (apiErr) {
+      console.warn('Analyze API no disponible, usando motor local:', apiErr);
+      const analysis = analyzeTreeState(treeState);
+      setTreeStructuralState(treeState);
+      setTreeAnalysis(analysis);
+      if (methodId) {
+        setSelectedMethod(methodId);
+      }
+      return { treeState, analysis };
     }
-    return analyzed;
   }
 
   async function runSelectedMethodForPatient() {
@@ -794,6 +708,7 @@ export default function CabalAppliedVisualCore({
       }
 
       const analyzed = await applyTreeState(treeState);
+      onSectionChange?.('synthesis');
 
       if (activePatientId) {
         try {
@@ -1014,29 +929,88 @@ export default function CabalAppliedVisualCore({
     onWorkspaceStateChange,
   ]);
 
+  const sectionMeta = SECTION_META[activeSection];
+
+  const methodRunner = activePatientId ? (
+    <div className="mt-4 flex flex-wrap items-center gap-3">
+      <label className="sr-only">Método cabalístico</label>
+      <select
+        value={selectedMethod}
+        onChange={(e) => setSelectedMethod(e.target.value)}
+        className="rounded-md border-gray-200 bg-white px-3 py-2 text-sm text-gray-700"
+      >
+        {METHODS.map((m: { id: string; name: string }) => (
+          <option key={m.id} value={m.id}>
+            {m.name}
+          </option>
+        ))}
+      </select>
+
+      <button
+        type="button"
+        className="rounded-md bg-indigo-600 px-3 py-2 text-sm text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-indigo-300"
+        onClick={() => void runSelectedMethodForPatient()}
+        disabled={executeLoading}
+      >
+        {executeLoading ? 'Ejecutando…' : 'Ejecutar'}
+      </button>
+
+      <span className="text-xs text-gray-500">
+        Tras ejecutar, abre la pestaña <strong>Síntesis</strong> para la lectura terapéutica.
+      </span>
+    </div>
+  ) : null;
+
   return (
     <section className="flex-1 bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
       <div className="flex items-start justify-between gap-4 mb-4">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900">Árbol de la Vida</h3>
-          <p className="text-xs text-gray-500">
-            Estado estructural observacional (motor v1).
-          </p>
-        </div>
-        <div className="text-right text-xs text-gray-500">
-          Sección activa: <span className="font-medium text-gray-700">{activeSection}</span>
+          <h3 className="text-lg font-semibold text-gray-900">{sectionMeta.title}</h3>
+          <p className="text-xs text-gray-500">{sectionMeta.subtitle}</p>
         </div>
       </div>
-      <TreeVisualPlaceholder />
+      {activeSection === 'tree' && <TreeVisualPlaceholder />}
       {!activePatientId ? (
         <div className="mt-6 rounded-lg border border-dashed border-gray-200 bg-gray-50 p-4 text-sm text-gray-600">
-          Seleccione un paciente para ver el Árbol de la Vida.
+          Seleccione un paciente para continuar.
         </div>
       ) : (
         <>
-          {/* Clinical Context Integration Badges */}
           <ClinicalContextBadges context={clinicalContext} />
-          
+
+          {executeError && (
+            <div className="mt-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+              {executeError}
+            </div>
+          )}
+
+          {activeSection === 'synthesis' && (
+            <div className="mt-4">
+              {methodRunner}
+              <FormativeReadingPanel brief={formativeBrief} loading={executeLoading} />
+            </div>
+          )}
+
+          {activeSection === 'gematria' && (
+            <div className="mt-4 space-y-4">
+              {methodRunner}
+              {pitagorasState ? (
+                <PitagorasReport pitagorasState={pitagorasState} />
+              ) : (
+                <div className="rounded-lg border border-dashed border-gray-200 bg-gray-50 p-4 text-sm text-gray-600">
+                  Ejecuta <strong>Pitágoras</strong> para ver gráficos numéricos. Otros métodos muestran sus datos en el Árbol y la Síntesis.
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeSection === 'resources' && (
+            <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-600">
+              Material de apoyo en preparación. Usa la pestaña Síntesis para la lectura formativa del caso activo.
+            </div>
+          )}
+
+          {activeSection === 'tree' && (
           <div id="cabala-aplicada-export-visual" className="mt-6 space-y-4">
             <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
               <div id="cabala-aplicada-export-tree" className="relative w-full h-72">
@@ -1057,40 +1031,18 @@ export default function CabalAppliedVisualCore({
                 )}
               </div>
             </div>
-          {activePatientId && (
-            <div className="mt-4 flex items-center gap-3">
-              <label className="sr-only">Método cabalístico</label>
-              <select
-                value={selectedMethod}
-                onChange={(e) => setSelectedMethod(e.target.value)}
-                className="rounded-md border-gray-200 bg-white px-3 py-2 text-sm text-gray-700"
-              >
-                {METHODS.map((m: any) => (
-                  <option key={m.id} value={m.id}>
-                    {m.name}
-                  </option>
-                ))}
-              </select>
+          {methodRunner}
 
-              <button
-                type="button"
-                className="rounded-md bg-indigo-600 px-3 py-2 text-sm text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-indigo-300"
-                onClick={() => void runSelectedMethodForPatient()}
-                disabled={executeLoading}
-              >
-                {executeLoading ? 'Ejecutando…' : 'Ejecutar'}
-              </button>
-
-              <span className="text-xs text-gray-500">Ejecutar manualmente el método seleccionado (solo lectura, formativo)</span>
-            </div>
+          {formativeBrief && (
+            <button
+              type="button"
+              onClick={() => onSectionChange?.('synthesis')}
+              className="w-full rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-3 text-left text-sm text-indigo-900 hover:bg-indigo-100"
+            >
+              <span className="font-semibold">Síntesis disponible</span>
+              <span className="block text-xs text-indigo-700 mt-1">{formativeBrief.headline}</span>
+            </button>
           )}
-          {executeError && (
-            <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
-              {executeError}
-            </div>
-          )}
-
-          <FormativeReadingPanel brief={formativeBrief} loading={executeLoading} />
 
           <details className="rounded-lg border border-slate-200 bg-slate-50/80">
             <summary className="cursor-pointer px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
@@ -1190,15 +1142,8 @@ export default function CabalAppliedVisualCore({
               : 'No disponible'}
           </div>
           </details>
-
-          {/* Pitagoras Professional Report (solo UI, no persistencia) */}
-          {pitagorasState && (
-            <PitagorasReport
-              pitagorasState={pitagorasState}
-              treeAnalysis={treeAnalysis}
-            />
-          )}
           </div>
+          )}
         </>
       )}
     </section>

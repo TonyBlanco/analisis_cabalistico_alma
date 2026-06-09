@@ -10,7 +10,7 @@ interface CabalAppliedSidebarProps {
 const sections: Array<{ id: CabalSectionId; label: string; description: string }> = [
   { id: 'tree', label: 'Árbol', description: 'Vista simbólica del Árbol de la Vida.' },
   { id: 'gematria', label: 'Gematría', description: 'Espacio observacional sin cálculos.' },
-  { id: 'synthesis', label: 'Síntesis', description: 'Notas humanas de integración.' },
+  { id: 'synthesis', label: 'Síntesis', description: 'Lectura formativa avanzada (terapeuta).' },
   { id: 'resources', label: 'Recursos', description: 'Material consultivo de apoyo.' },
 ];
 

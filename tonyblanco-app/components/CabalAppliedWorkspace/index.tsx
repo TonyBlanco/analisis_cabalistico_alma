@@ -91,6 +91,7 @@ export default function CabalAppliedWorkspace() {
           <div className="flex gap-6 items-start">
             <CabalAppliedVisualCore
               activeSection={activeSection}
+              onSectionChange={setActiveSection}
               onWorkspaceStateChange={handleWorkspaceStateChange}
               onSnapshotSaved={(id) => setLastSnapshotRecordId(id)}
             />

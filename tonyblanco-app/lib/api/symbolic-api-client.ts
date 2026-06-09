@@ -18,7 +18,9 @@ import type { TreeStructuralState } from '@holistica/symbolic/tree';
 function getAuthHeaders(): HeadersInit {
   if (typeof window === 'undefined') return {};
   const token =
-    localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+    localStorage.getItem('authToken') ||
+    localStorage.getItem('auth_token') ||
+    sessionStorage.getItem('auth_token');
   return token ? { Authorization: `Token ${token}` } : {};
 }
 

@@ -83,7 +83,10 @@ function getAuthToken(): string {
   if (typeof window === 'undefined') return '';
   
   // Try localStorage first
-  const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+  const token =
+    localStorage.getItem('authToken') ||
+    localStorage.getItem('auth_token') ||
+    sessionStorage.getItem('auth_token');
   
   if (!token) {
     console.warn('No auth token found, API request may fail');

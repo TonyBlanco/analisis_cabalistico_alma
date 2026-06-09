@@ -336,7 +336,9 @@ export default function CabalAppliedToolsPanel({
       </div>
 
       <div className="border-t border-gray-200 px-4 py-3 text-[11px] text-gray-500">
-        Workspace cerrado: sin tools globales.
+        {treeState
+          ? 'Workspace activo: snapshot, correspondencias e interpretación habilitados.'
+          : 'Ejecuta un método en el Árbol para habilitar las herramientas del panel.'}
       </div>
     </aside>
   );

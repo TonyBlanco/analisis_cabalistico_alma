@@ -92,6 +92,7 @@ export default function CabalAppliedWorkspace() {
             <CabalAppliedVisualCore
               activeSection={activeSection}
               onWorkspaceStateChange={handleWorkspaceStateChange}
+              onSnapshotSaved={(id) => setLastSnapshotRecordId(id)}
             />
             <CabalAppliedToolsPanel
               activeTab={activeTool}

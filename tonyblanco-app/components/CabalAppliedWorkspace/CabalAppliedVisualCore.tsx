@@ -5,9 +5,11 @@ import { ChevronDown, ChevronUp, BookOpen, Hash, Sparkles, Activity, Sun, Scale 
 import type { CabalSectionId } from './types';
 import { getActivePatientId } from '@/lib/active-patient';
 import { getPatientProfileSummary, type PatientProfileSummary } from '@/lib/patient-api';
-import { useTreeStructuralState } from '@/lib/tree-structural-state';
-import TreeOfLifeSVG from '@/components/Tree/TreeOfLifeSVG';
+import useActiveConsultante from '@/hooks/useActiveConsultante';
+import { API_BASE_URL, getAuthToken } from '@/lib/api';
+import { analyzeTreeViaApi } from '@/lib/api/symbolic-api-client';
 import { TreeWithFlows } from '@/components/Tree';
+import type { TreeStructuralAnalysis } from '@holistica/symbolic/tree/tree-analysis.types';
 import TreeVisualPlaceholder from './TreeVisualPlaceholder';
 import { ejecutarMetodoPitagorico } from '@holistica/symbolic/methods/pitagoras';
 import type { PitagorasSymbolicState, PitagorasNumberMeaning } from '@holistica/symbolic/methods/pitagoras/pitagoras.types';
@@ -200,6 +202,58 @@ export type CabalaAplicadaWorkspaceExportState = {
     repeticiones: Array<{ id: string; tipo?: string | null; veces?: number | null }>;
   };
 };
+
+function parsePathEndpoints(pathId: string): { from: string; to: string } | null {
+  const idx = pathId.indexOf('-');
+  if (idx <= 0) return null;
+  const from = pathId.slice(0, idx);
+  const to = pathId.slice(idx + 1);
+  if (!from || !to) return null;
+  return { from, to };
+}
+
+function buildPdfSummaryFromAnalysis(
+  analysis: TreeStructuralAnalysis | null,
+  treeState: TreeStructuralState | null,
+): CabalaAplicadaWorkspaceExportState['pdfSummary'] {
+  const sefirotActivas =
+    analysis?.ranking
+      ?.filter((item) => item.role !== 'latent')
+      .map((item, index) => ({
+        id: item.id,
+        indice: index + 1,
+        peso: item.activation,
+      })) ?? [];
+
+  const senderosActivos =
+    analysis?.graph.activePaths
+      ?.map((pathId) => {
+        const endpoints = parsePathEndpoints(pathId);
+        if (!endpoints) return null;
+        const flow = treeState?.flows.find(
+          (f) =>
+            (f.from === endpoints.from && f.to === endpoints.to) ||
+            (f.from === endpoints.to && f.to === endpoints.from),
+        );
+        return {
+          from: endpoints.from,
+          to: endpoints.to,
+          peso: flow?.intensity ?? null,
+        };
+      })
+      .filter((x): x is { from: string; to: string; peso: number | null } => x !== null) ?? [];
+
+  const repeticiones =
+    treeState?.sefirot
+      .filter((s) => s.role === 'dominant')
+      .map((s) => ({
+        id: s.id,
+        tipo: 'dominant',
+        veces: Math.round(s.activation * 10),
+      })) ?? [];
+
+  return { sefirotActivas, senderosActivos, repeticiones };
+}
 
 // ============================================================================
 // PITAGORAS PROFESSIONAL REPORT COMPONENTS (UI ONLY)
@@ -428,12 +482,10 @@ function PitagorasPedagogicalBlock({
 /** Main Pitagoras Professional Report */
 function PitagorasReport({
   pitagorasState,
-  treeState,
-  treeLoading,
+  treeAnalysis,
 }: {
   pitagorasState: PitagorasSymbolicState;
-  treeState: ReturnType<typeof useTreeStructuralState>['state'];
-  treeLoading: boolean;
+  treeAnalysis: TreeStructuralAnalysis | null;
 }) {
   const cardColors = [
     'bg-gradient-to-br from-rose-50 to-rose-100 border-rose-200',
@@ -496,17 +548,15 @@ function PitagorasReport({
       {/* Tree of Life Correspondence */}
       <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
         <h4 className="mb-3 text-sm font-semibold text-gray-900">Correspondencia con el Árbol de la Vida</h4>
-        {treeLoading ? (
-          <p className="text-xs text-gray-500">Cargando correspondencias...</p>
-        ) : treeState?.sefirot_activas.length ? (
+        {treeAnalysis?.ranking.length ? (
           <div className="space-y-2">
-            {treeState.sefirot_activas.slice(0, 10).map((sefira) => {
-              const maxPeso = Math.max(1, ...treeState.sefirot_activas.map((s) => s.peso));
-              const widthPercent = (sefira.peso / maxPeso) * 100;
+            {treeAnalysis.ranking.slice(0, 10).map((sefira) => {
+              const maxPeso = Math.max(0.01, ...treeAnalysis.ranking.map((s) => s.activation));
+              const widthPercent = (sefira.activation / maxPeso) * 100;
               return (
-                <div key={sefira.id_canonico} className="flex items-center gap-3">
+                <div key={sefira.id} className="flex items-center gap-3">
                   <span className="w-20 text-xs font-medium text-gray-700 truncate">
-                    {sefira.id_canonico}
+                    {sefira.id}
                   </span>
                   <div className="flex-1 h-4 bg-gray-100 rounded-full overflow-hidden">
                     <div
@@ -515,7 +565,7 @@ function PitagorasReport({
                     />
                   </div>
                   <span className="w-8 text-right text-[10px] text-gray-500">
-                    {sefira.peso.toFixed(1)}
+                    {sefira.activation.toFixed(2)}
                   </span>
                 </div>
               );
@@ -524,11 +574,11 @@ function PitagorasReport({
         ) : (
           <p className="text-xs text-gray-500">No hay sefirot activas disponibles.</p>
         )}
-        {treeState?.repeticiones.length ? (
+        {treeAnalysis?.graph.activePaths.length ? (
           <div className="mt-3 pt-3 border-t border-gray-100">
             <p className="text-xs text-gray-600">
-              <span className="font-medium">Repeticiones:</span>{' '}
-              {treeState.repeticiones.map((r) => `${r.simbolo_id} (×${r.conteo})`).join(', ')}
+              <span className="font-medium">Senderos activos:</span>{' '}
+              {treeAnalysis.graph.activePaths.join(', ')}
             </p>
           </div>
         ) : null}
@@ -546,18 +596,24 @@ function PitagorasReport({
 interface CabalAppliedVisualCoreProps {
   activeSection: CabalSectionId;
   onWorkspaceStateChange?: (state: CabalaAplicadaWorkspaceExportState) => void;
+  onSnapshotSaved?: (id: string) => void;
 }
 
 export default function CabalAppliedVisualCore({
   activeSection,
   onWorkspaceStateChange,
+  onSnapshotSaved,
 }: CabalAppliedVisualCoreProps) {
+  const consultante = useActiveConsultante();
   const [activePatientId, setActivePatientId] = useState<number | null>(null);
   const [patientProfile, setPatientProfile] = useState<PatientProfileSummary | null>(null);
   const [pitagorasState, setPitagorasState] = useState<PitagorasSymbolicState | null>(null);
   const [treeStructuralState, setTreeStructuralState] = useState<TreeStructuralState | null>(null);
-  const [selectedMethod, setSelectedMethod] = useState<string>('pitagoras');
+  const [treeAnalysis, setTreeAnalysis] = useState<TreeStructuralAnalysis | null>(null);
+  const [selectedMethod, setSelectedMethod] = useState<string>('gematria-standard');
   const [clinicalContext, setClinicalContext] = useState<ClinicalContextSummary | null>(null);
+  const [executeLoading, setExecuteLoading] = useState(false);
+  const [executeError, setExecuteError] = useState<string | null>(null);
 
   const METHODS = useMemo(() => [
     { id: 'pitagoras', name: 'Pitágoras', run: (input: any) => ejecutarMetodoPitagorico(input as any) },
@@ -573,79 +629,116 @@ export default function CabalAppliedVisualCore({
     { id: 'notarikon', name: 'Notarikon', run: (input: any) => ejecutarMetodoNotarikon(input as any) },
   ], [] as any);
 
-  function runSelectedMethodForPatient() {
-    if (!patientProfile?.legal_full_name || !patientProfile?.birth_date) return;
+  function adaptMethodStateToTree(methodId: string, estado: unknown): TreeStructuralState | null {
+    switch (methodId) {
+      case 'pitagoras':
+        return adaptPitagorasToTree(estado as PitagorasSymbolicState);
+      case 'gematria-standard':
+        return adaptGematriaStandardToTree(estado);
+      case 'gematria-katan':
+        return adaptGematriaKatanToTree(estado);
+      case 'mispar-gadol':
+        return adaptMisparGadolToTree(estado);
+      case 'mispar-siduri':
+        return adaptMisparSiduriToTree(estado);
+      case 'milui':
+        return adaptMiluiToTree(estado);
+      case 'atbash':
+        return adaptAtbashToTree(estado);
+      case 'albam':
+        return adaptAlbamToTree(estado);
+      case 'avgad':
+        return adaptAvgadToTree(estado);
+      case 'temurah':
+        return adaptTemurahToTree(estado);
+      case 'notarikon':
+        return adaptNotarikonToTree(estado);
+      default:
+        return null;
+    }
+  }
+
+  async function applyTreeState(treeState: TreeStructuralState, methodId?: string) {
+    const analyzed = await analyzeTreeViaApi(treeState);
+    setTreeStructuralState(analyzed.treeState);
+    setTreeAnalysis(analyzed.analysis);
+    if (methodId) {
+      setSelectedMethod(methodId);
+    }
+    return analyzed;
+  }
+
+  async function runSelectedMethodForPatient() {
+    setExecuteError(null);
+
+    const patientName =
+      patientProfile?.legal_full_name ?? consultante?.nombre_completo ?? null;
+    const patientBirthDate =
+      patientProfile?.birth_date ?? consultante?.fecha_nacimiento ?? null;
+
+    if (!patientName || !patientBirthDate) {
+      setExecuteError('Paciente sin nombre o fecha de nacimiento.');
+      return;
+    }
+
+    const method = METHODS.find((m: { id: string }) => m.id === selectedMethod);
+    if (!method) {
+      setExecuteError('Método no disponible.');
+      return;
+    }
+
+    setExecuteLoading(true);
     try {
-      const date = new Date(patientProfile.birth_date);
+      const date = new Date(patientBirthDate);
       const input = {
-        nombreCompleto: patientProfile.legal_full_name,
+        nombreCompleto: patientName,
         fechaNacimiento: {
           dia: date.getUTCDate(),
           mes: date.getUTCMonth() + 1,
           anio: date.getUTCFullYear(),
         },
       };
-      const method = METHODS.find((m: any) => m.id === selectedMethod) as any;
-      if (!method) return;
-      const estado: PitagorasSymbolicState = method.run(input);
-      setPitagorasState(estado);
-      
-      // Generar TreeStructuralState según el método seleccionado
-      let treeState: TreeStructuralState | null = null;
-      switch (selectedMethod) {
-        case 'pitagoras':
-          treeState = adaptPitagorasToTree(estado);
-          break;
-        case 'gematria-standard':
-          treeState = adaptGematriaStandardToTree(estado);
-          break;
-        case 'gematria-katan':
-          treeState = adaptGematriaKatanToTree(estado);
-          break;
-        case 'mispar-gadol':
-          treeState = adaptMisparGadolToTree(estado);
-          break;
-        case 'mispar-siduri':
-          treeState = adaptMisparSiduriToTree(estado);
-          break;
-        case 'milui':
-          treeState = adaptMiluiToTree(estado);
-          break;
-        case 'atbash':
-          treeState = adaptAtbashToTree(estado);
-          break;
-        case 'albam':
-          treeState = adaptAlbamToTree(estado);
-          break;
-        case 'avgad':
-          treeState = adaptAvgadToTree(estado);
-          break;
-        case 'temurah':
-          treeState = adaptTemurahToTree(estado);
-          break;
-        case 'notarikon':
-          treeState = adaptNotarikonToTree(estado);
-          break;
-      }
-      
-      setTreeStructuralState(treeState);
 
-      // Persistir ejecución como artefacto longitudinal (best-effort; no bloquea UX)
+      const estado = method.run(input);
+      setPitagorasState(selectedMethod === 'pitagoras' ? (estado as PitagorasSymbolicState) : null);
+
+      const treeState = adaptMethodStateToTree(selectedMethod, estado);
+      if (!treeState) {
+        throw new Error('No se pudo adaptar el método al Árbol.');
+      }
+
+      const analyzed = await applyTreeState(treeState);
+
       if (activePatientId) {
-        void saveCabalaAplicadaMethodRecord(activePatientId, {
-          method_id: selectedMethod,
-          method_name: method?.name ?? null,
-          input: input as unknown as Record<string, unknown>,
-          method_output: (estado as unknown as Record<string, unknown>) ?? null,
-          tree_state: (treeState as unknown as Record<string, unknown>) ?? null,
-          backend_structural_state: (state as unknown as Record<string, unknown>) ?? null,
-          symbolic_interpretation: null,
-        }).catch((e) => {
+        try {
+          const res = await saveCabalaAplicadaMethodRecord(activePatientId, {
+            method_id: selectedMethod,
+            method_name: method.name ?? null,
+            input: input as unknown as Record<string, unknown>,
+            method_output: (estado as unknown as Record<string, unknown>) ?? null,
+            tree_state: (treeState as unknown as Record<string, unknown>) ?? null,
+            backend_structural_state: {
+              source: 'symbolic-api-v1',
+              analysis: analyzed.analysis,
+            },
+            symbolic_interpretation: null,
+          });
+          if (res.id) {
+            onSnapshotSaved?.(res.id);
+          }
+        } catch (e) {
           console.warn('No se pudo guardar Cabala Aplicada en historial:', e);
-        });
+        }
       }
     } catch (err) {
       console.error('Error ejecutando método simbólico:', err);
+      setExecuteError(
+        err instanceof Error ? err.message : 'Error al ejecutar el método simbólico.',
+      );
+      setTreeStructuralState(null);
+      setTreeAnalysis(null);
+    } finally {
+      setExecuteLoading(false);
     }
   }
 
@@ -722,143 +815,91 @@ export default function CabalAppliedVisualCore({
     };
   }, [activePatientId]);
 
-  const emptyTarotCards = useMemo(() => [], []);
-  const treeInput = useMemo(
-    () => ({
-      fullName: patientProfile?.legal_full_name ?? null,
-      birthDate: patientProfile?.birth_date ?? null,
-      tarotCards: emptyTarotCards,
-    }),
-    [patientProfile?.legal_full_name, patientProfile?.birth_date, emptyTarotCards]
+  useEffect(() => {
+    if (!activePatientId) {
+      setTreeStructuralState(null);
+      setTreeAnalysis(null);
+      return;
+    }
+
+    let cancelled = false;
+
+    const restoreLastExecution = async () => {
+      const token = getAuthToken();
+      if (!token) return;
+
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/analysis-records/?patient_id=${encodeURIComponent(String(activePatientId))}`,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Token ${token}`,
+            },
+          },
+        );
+        if (!response.ok || cancelled) return;
+
+        const data = (await response.json()) as { results?: Array<{ computed_result?: unknown }> };
+        const results = Array.isArray(data.results) ? data.results : [];
+        const latest = results.find((record) => {
+          const cr = record.computed_result as { cabala_aplicada?: { tree_state?: unknown } } | null;
+          return Boolean(cr?.cabala_aplicada?.tree_state);
+        });
+        if (!latest || cancelled) return;
+
+        const cabala = (latest.computed_result as { cabala_aplicada?: Record<string, unknown> })
+          ?.cabala_aplicada;
+        const savedTree = cabala?.tree_state as TreeStructuralState | undefined;
+        const savedMethodId =
+          typeof cabala?.method_id === 'string' ? cabala.method_id : undefined;
+
+        if (savedTree?.sefirot?.length) {
+          await applyTreeState(savedTree, savedMethodId);
+        }
+      } catch (error) {
+        console.warn('No se pudo restaurar la última ejecución de Cabala Aplicada:', error);
+      }
+    };
+
+    void restoreLastExecution();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activePatientId]);
+
+  const pdfSummary = useMemo(
+    () => buildPdfSummaryFromAnalysis(treeAnalysis, treeStructuralState),
+    [treeAnalysis, treeStructuralState],
   );
 
-  const { state, loading } = useTreeStructuralState(treeInput);
-
   useEffect(() => {
-    const sefirotActivas =
-      state?.sefirot_activas?.map((item: any) => ({
-        id: String(item?.id_canonico ?? ''),
-        indice: item?.indice ?? null,
-        peso: item?.peso ?? null,
-      }))?.filter((x: any) => x.id) ?? [];
-
-    const senderosActivosRaw: Array<{ from: string; to: string; peso?: number | null } | null> =
-      state?.senderos_activos?.map((item: any) => {
-        const from = item?.endpoints?.from_sefira;
-        const to = item?.endpoints?.to_sefira;
-        if (!from || !to) return null;
-        return {
-          from: String(from),
-          to: String(to),
-          peso: item?.peso ?? null,
-        };
-      }) ?? [];
-
-    const senderosActivos: Array<{ from: string; to: string; peso?: number | null }> = senderosActivosRaw.filter(
-      (x): x is { from: string; to: string; peso?: number | null } => x !== null
-    );
-
-    const repeticiones =
-      state?.repeticiones
-        ?.map((item: any) => ({
-          id: String(item?.simbolo_id ?? ''),
-          tipo: item?.tipo ?? null,
-          veces: item?.veces ?? null,
-        }))
-        ?.filter((x: any) => x.id) ?? [];
-
     onWorkspaceStateChange?.({
       patientId: activePatientId ?? null,
-      patientName: patientProfile?.legal_full_name ?? null,
-      patientBirthDate: patientProfile?.birth_date ?? null,
+      patientName:
+        patientProfile?.legal_full_name ?? consultante?.nombre_completo ?? null,
+      patientBirthDate:
+        patientProfile?.birth_date ?? consultante?.fecha_nacimiento ?? null,
       selectedMethodId: selectedMethod ?? null,
       treeState: treeStructuralState ?? null,
-      backendStructuralState: (state as unknown as Record<string, unknown>) ?? null,
-      pdfSummary: {
-        sefirotActivas,
-        senderosActivos,
-        repeticiones,
-      },
+      backendStructuralState: treeAnalysis
+        ? ({ source: 'symbolic-api-v1', analysis: treeAnalysis } as Record<string, unknown>)
+        : null,
+      pdfSummary,
     });
-  }, [activePatientId, patientProfile?.legal_full_name, selectedMethod, treeStructuralState, state, onWorkspaceStateChange]);
-
-  // Ensure typed arrays matching Tree types
-  const highlightedSefirot = useMemo(() => {
-    if (!state?.sefirot_activas.length) return [] as import('../Tree/tree.types').TreeSefirahId[];
-    return state.sefirot_activas.map((item) => item.id_canonico as import('../Tree/tree.types').TreeSefirahId);
-  }, [state?.sefirot_activas]);
-
-  const highlightedPaths = useMemo(() => {
-    if (!state?.senderos_activos.length) return [] as import('../Tree/tree.types').TreePathId[];
-    return state.senderos_activos
-      .map((sendero) => {
-        const from = sendero.endpoints.from_sefira;
-        const to = sendero.endpoints.to_sefira;
-        return from && to ? `${from}-${to}` : null;
-      })
-      .filter((value): value is string => Boolean(value)) as import('../Tree/tree.types').TreePathId[];
-  }, [state?.senderos_activos]);
-
-  const repeatedSefirot = useMemo(() => {
-    if (!state?.repeticiones.length) return [] as import('../Tree/tree.types').TreeSefirahId[];
-    return state.repeticiones
-      .map((item) => item.simbolo_id)
-      .filter((id) => !id.includes('-')) as import('../Tree/tree.types').TreeSefirahId[];
-  }, [state?.repeticiones]);
-
-  const repeatedPaths = useMemo(() => {
-    if (!state?.repeticiones.length) return [] as import('../Tree/tree.types').TreePathId[];
-    return state.repeticiones
-      .map((item) => item.simbolo_id)
-      .filter((id) => id.includes('-')) as import('../Tree/tree.types').TreePathId[];
-  }, [state?.repeticiones]);
-
-  const mapWeightsToOpacity = (items: Array<{ id: string; weight: number }>) => {
-    if (!items.length) {
-      return {};
-    }
-    const weights = items.map((item) => item.weight);
-    const minWeight = Math.min(...weights);
-    const maxWeight = Math.max(...weights);
-    const minOpacity = 0.45;
-    const maxOpacity = 1;
-    return items.reduce<Record<string, number>>((acc, item) => {
-      if (maxWeight === minWeight) {
-        acc[item.id] = maxOpacity;
-      } else {
-        const ratio = (item.weight - minWeight) / (maxWeight - minWeight);
-        acc[item.id] = minOpacity + ratio * (maxOpacity - minOpacity);
-      }
-      return acc;
-    }, {});
-  };
-
-  const highlightedSefirotOpacity = useMemo(() => {
-    const items =
-      state?.sefirot_activas.map((item) => ({
-        id: item.id_canonico,
-        weight: item.peso,
-      })) ?? [];
-    return mapWeightsToOpacity(items);
-  }, [state?.sefirot_activas]);
-
-  const highlightedPathOpacity = useMemo(() => {
-    const items =
-      state?.senderos_activos
-        .map((item) => {
-          const from = item.endpoints.from_sefira;
-          const to = item.endpoints.to_sefira;
-          if (!from || !to) {
-            return null;
-          }
-          return {
-            id: `${from}-${to}`,
-            weight: item.peso,
-          };
-        })
-        .filter((value): value is { id: string; weight: number } => Boolean(value)) ?? [];
-    return mapWeightsToOpacity(items);
-  }, [state?.senderos_activos]);
+  }, [
+    activePatientId,
+    patientProfile?.legal_full_name,
+    patientProfile?.birth_date,
+    consultante?.nombre_completo,
+    consultante?.fecha_nacimiento,
+    selectedMethod,
+    treeStructuralState,
+    treeAnalysis,
+    pdfSummary,
+    onWorkspaceStateChange,
+  ]);
 
   return (
     <section className="flex-1 bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
@@ -886,36 +927,20 @@ export default function CabalAppliedVisualCore({
           <div id="cabala-aplicada-export-visual" className="mt-6 space-y-4">
             <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
               <div id="cabala-aplicada-export-tree" className="relative w-full h-72">
-                {treeStructuralState ? (
-                  // TreeStructuralState v0.1 con flechas (Pitágoras ejecutado)
+                {executeLoading ? (
+                  <div className="flex h-full items-center justify-center text-sm text-gray-500">
+                    Analizando estructura simbólica…
+                  </div>
+                ) : treeStructuralState ? (
                   <TreeWithFlows
                     treeState={treeStructuralState}
                     size="responsive"
                     className="absolute inset-0 h-full w-full"
                   />
                 ) : (
-                  // Fallback: árbol legacy con backend highlights
-                  <>
-                    <TreeOfLifeSVG
-                      highlightedSefirot={[]}
-                      highlightedPaths={[]}
-                      emphasis="soft"
-                      size="responsive"
-                      className="absolute inset-0 h-full w-full opacity-40 pointer-events-none"
-                    />
-                    <TreeOfLifeSVG
-                      highlightedSefirot={highlightedSefirot}
-                      highlightedPaths={highlightedPaths}
-                      highlightedSefirotOpacity={highlightedSefirotOpacity}
-                      highlightedPathOpacity={highlightedPathOpacity}
-                      repeatedSefirot={repeatedSefirot}
-                      repeatedPaths={repeatedPaths}
-                      emphasis="strong"
-                      dimUnrelated={true}
-                      size="responsive"
-                      className="absolute inset-0 h-full w-full"
-                    />
-                  </>
+                  <div className="flex h-full items-center justify-center text-sm text-gray-500">
+                    Ejecuta un método para poblar el Árbol (motor v1).
+                  </div>
                 )}
               </div>
             </div>
@@ -936,25 +961,34 @@ export default function CabalAppliedVisualCore({
 
               <button
                 type="button"
-                className="rounded-md bg-indigo-600 px-3 py-2 text-sm text-white hover:bg-indigo-700"
-                onClick={() => runSelectedMethodForPatient()}
+                className="rounded-md bg-indigo-600 px-3 py-2 text-sm text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-indigo-300"
+                onClick={() => void runSelectedMethodForPatient()}
+                disabled={executeLoading}
               >
-                Ejecutar
+                {executeLoading ? 'Ejecutando…' : 'Ejecutar'}
               </button>
 
               <span className="text-xs text-gray-500">Ejecutar manualmente el método seleccionado (solo lectura, formativo)</span>
+            </div>
+          )}
+          {executeError && (
+            <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+              {executeError}
             </div>
           )}
           <div className="grid gap-4 md:grid-cols-2">
             <div className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-700">
               <div className="text-xs uppercase tracking-wide text-gray-500">Sefirot activas</div>
               <div className="mt-2 text-xs">
-                {loading ? (
+                {executeLoading ? (
                   <span>Cargando...</span>
-                ) : state?.sefirot_activas.length ? (
+                ) : treeAnalysis?.graph.activeNodes.length ? (
                   <span>
-                    {state.sefirot_activas
-                      .map((item) => `${item.id_canonico} (${item.indice ?? '-'}, ${item.peso})`)
+                    {treeAnalysis.graph.activeNodes
+                      .map((id) => {
+                        const rank = treeAnalysis.ranking.find((r) => r.id === id);
+                        return `${id} (${rank?.role ?? '-'}, ${rank?.activation.toFixed(2) ?? '-'})`;
+                      })
                       .join(', ')}
                   </span>
                 ) : (
@@ -965,14 +999,10 @@ export default function CabalAppliedVisualCore({
             <div className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-700">
               <div className="text-xs uppercase tracking-wide text-gray-500">Senderos activos</div>
               <div className="mt-2 text-xs">
-                {loading ? (
+                {executeLoading ? (
                   <span>Cargando...</span>
-                ) : state?.senderos_activos.length ? (
-                  <span>
-                    {state.senderos_activos
-                      .map((item) => `${item.id_canonico} (${item.numero ?? '-'}, ${item.peso})`)
-                      .join(', ')}
-                  </span>
+                ) : treeAnalysis?.graph.activePaths.length ? (
+                  <span>{treeAnalysis.graph.activePaths.join(', ')}</span>
                 ) : (
                   <span>No disponible</span>
                 )}
@@ -981,12 +1011,12 @@ export default function CabalAppliedVisualCore({
             <div className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-700">
               <div className="text-xs uppercase tracking-wide text-gray-500">Repeticiones</div>
               <div className="mt-2 text-xs">
-                {loading ? (
+                {executeLoading ? (
                   <span>Cargando...</span>
-                ) : state?.repeticiones.length ? (
+                ) : pdfSummary.repeticiones.length ? (
                   <span>
-                    {state.repeticiones
-                      .map((item) => `${item.simbolo_id} (${item.conteo})`)
+                    {pdfSummary.repeticiones
+                      .map((item) => `${item.id} (${item.veces ?? '-'})`)
                       .join(', ')}
                   </span>
                 ) : (
@@ -997,12 +1027,12 @@ export default function CabalAppliedVisualCore({
             <div className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-700">
               <div className="text-xs uppercase tracking-wide text-gray-500">Pesos</div>
               <div className="mt-2 text-xs">
-                {loading ? (
+                {executeLoading ? (
                   <span>Cargando...</span>
-                ) : state && Object.keys(state.pesos).length ? (
+                ) : treeAnalysis ? (
                   <span>
-                    {Object.entries(state.pesos)
-                      .map(([key, value]) => `${key} (${value})`)
+                    {Object.entries(treeAnalysis.pillarBalance)
+                      .map(([key, value]) => `${key} (${value.toFixed(2)})`)
                       .join(', ')}
                   </span>
                 ) : (
@@ -1021,8 +1051,7 @@ export default function CabalAppliedVisualCore({
           {pitagorasState && (
             <PitagorasReport
               pitagorasState={pitagorasState}
-              treeState={state}
-              treeLoading={loading}
+              treeAnalysis={treeAnalysis}
             />
           )}
           </div>

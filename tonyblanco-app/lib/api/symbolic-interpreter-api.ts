@@ -49,8 +49,14 @@ export async function checkSymbolicInterpreterStatus(): Promise<{
  * @param request - Interpretation request with TreeStructuralState
  * @returns SymbolicInterpretation or fallback interpretation
  */
+export type SwmV3ConsentState = {
+  mode: 'no_store' | 'store_anonymized' | 'store_with_consent';
+  acceptedAt: string;
+  version: string;
+};
+
 export async function generateAISymbolicInterpretation(
-  request: SymbolicInterpretationRequest & { swmV3Consent?: boolean },
+  request: SymbolicInterpretationRequest & { swmV3Consent?: SwmV3ConsentState | boolean },
 ): Promise<SymbolicInterpretation> {
   const { treeState } = request;
 
@@ -60,18 +66,22 @@ export async function generateAISymbolicInterpretation(
 
   const status = await checkSymbolicInterpreterStatus();
   if (!status.enabled) {
-    console.warn('AI service not available, using fallback interpretation');
     return createFallbackInterpretation(treeState);
   }
 
+  const consentPayload = typeof request.swmV3Consent === 'object'
+    ? {
+        swmV3Consent: true,
+        swmV3ConsentMode: request.swmV3Consent.mode,
+        swmV3ConsentVersion: request.swmV3Consent.version,
+        swmV3ConsentAcceptedAt: request.swmV3Consent.acceptedAt,
+      }
+    : { swmV3Consent: true };
+
   try {
-    const result = await interpretViaApi({
-      ...request,
-      swmV3Consent: true,
-    });
+    const result = await interpretViaApi({ ...request, ...consentPayload });
     return result.interpretation;
-  } catch (error) {
-    console.error('Error generating AI symbolic interpretation:', error);
+  } catch {
     return createFallbackInterpretation(treeState);
   }
 }

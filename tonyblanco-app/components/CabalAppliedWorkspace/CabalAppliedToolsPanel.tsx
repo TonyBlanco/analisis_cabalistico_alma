@@ -7,6 +7,9 @@ import { generateCabalaAplicadaGraphicPDF } from './cabalaAplicadaPdf';
 import { SymbolicInterpretationPanel } from '@/components/SymbolicInterpretation';
 import { CorrespondencesPanel } from '@/components/SymbolicCorrespondences';
 import { generateAISymbolicInterpretation } from '@/lib/api/symbolic-interpreter-api';
+import type { SwmV3ConsentState } from '@/lib/api/symbolic-interpreter-api';
+import ConsentModal from '@/components/SWMV3/ConsentModal';
+import type { SwmV3ConsentMode } from '@/components/SWMV3/ConsentModal';
 import type { SymbolicInterpretation, SystemId } from '@holistica/symbolic/tree/symbolic-interpreter.types';
 import type { CabalaAplicadaWorkspaceExportState } from './CabalAppliedVisualCore';
 
@@ -58,7 +61,8 @@ export default function CabalAppliedToolsPanel({
   const [interpretationLoading, setInterpretationLoading] = useState(false);
   const [correspondenceSystem, setCorrespondenceSystem] =
     useState<SystemId>('jewish-traditional');
-  const [swmV3Consent, setSwmV3Consent] = useState(false);
+  const [swmV3Consent, setSwmV3Consent] = useState<SwmV3ConsentState | null>(null);
+  const [showConsentModal, setShowConsentModal] = useState(false);
 
   const canSnapshot = useMemo(() => Boolean(patientId && (treeState || backendStructuralState)), [patientId, treeState, backendStructuralState]);
   const canInterpret = useMemo(() => Boolean(treeState), [treeState]);
@@ -119,7 +123,7 @@ export default function CabalAppliedToolsPanel({
 
     if (!treeState) return;
     if (!swmV3Consent) {
-      setError('Activa el consentimiento SWM v3 antes de solicitar interpretación con IA.');
+      setShowConsentModal(true);
       return;
     }
     setInterpretationLoading(true);
@@ -129,7 +133,7 @@ export default function CabalAppliedToolsPanel({
         safetyLevel: 'educational',
         focusAreas: ['flows', 'sefirot-roles'],
         correspondenceSystem,
-        swmV3Consent: true,
+        swmV3Consent,
       });
       setInterpretation(result);
       setOk('Interpretación generada (educativa).');
@@ -322,18 +326,31 @@ export default function CabalAppliedToolsPanel({
               </div>
             ) : (
               <>
-                <label className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
-                  <input
-                    type="checkbox"
-                    checked={swmV3Consent}
-                    onChange={(e) => setSwmV3Consent(e.target.checked)}
-                    className="mt-0.5"
-                  />
-                  <span>
-                    Consentimiento SWM v3: autorizo la lectura simbólica asistida por IA con fines
-                    formativos (no clínica).
-                  </span>
-                </label>
+                {swmV3Consent ? (
+                  <div className="flex items-center justify-between rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-800">
+                    <span>
+                      ✓ Consentimiento SWM v3 activo
+                      <span className="ml-1 text-emerald-600">
+                        ({swmV3Consent.mode === 'no_store' ? 'sin almacenar' : swmV3Consent.mode === 'store_anonymized' ? 'anon.' : 'con consentimiento'})
+                      </span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setSwmV3Consent(null)}
+                      className="text-emerald-500 hover:text-emerald-700 underline"
+                    >
+                      Cambiar
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setShowConsentModal(true)}
+                    className="w-full rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-900 hover:bg-amber-100"
+                  >
+                    Configurar consentimiento SWM v3 (requerido)
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={() => void requestInterpretation()}
@@ -342,10 +359,19 @@ export default function CabalAppliedToolsPanel({
                 >
                   {interpretationLoading ? 'Generando…' : 'Generar interpretación (educativa)'}
                 </button>
+                <ConsentModal
+                  open={showConsentModal}
+                  onClose={() => setShowConsentModal(false)}
+                  onConfirm={(payload) => {
+                    setSwmV3Consent(payload);
+                    setShowConsentModal(false);
+                  }}
+                />
                 <SymbolicInterpretationPanel
                   interpretation={interpretation}
                   isLoading={interpretationLoading}
                   onRequestInterpretation={requestInterpretation}
+                  consentState={swmV3Consent ?? undefined}
                 />
               </>
             )}

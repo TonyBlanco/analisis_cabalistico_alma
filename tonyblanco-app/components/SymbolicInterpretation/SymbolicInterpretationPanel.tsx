@@ -20,13 +20,21 @@ interface SymbolicInterpretationPanelProps {
   isLoading: boolean;
   onRequestInterpretation: () => void;
   onClose?: () => void;
+  consentState?: { mode: string; acceptedAt: string; version: string };
 }
+
+const CONSENT_MODE_LABELS: Record<string, string> = {
+  no_store: 'sin almacenar',
+  store_anonymized: 'anon.',
+  store_with_consent: 'con consentimiento',
+};
 
 export function SymbolicInterpretationPanel({
   interpretation,
   isLoading,
   onRequestInterpretation,
   onClose,
+  consentState,
 }: SymbolicInterpretationPanelProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   
@@ -186,6 +194,18 @@ export function SymbolicInterpretationPanel({
               })}
             </span>
           </div>
+          {/* SWM v3 consent traceability badge */}
+          {consentState && (
+            <div className="flex items-center gap-1.5 rounded bg-emerald-50 border border-emerald-200 px-2 py-1 text-[10px] text-emerald-700">
+              <span className="font-medium">SWM v3</span>
+              <span>·</span>
+              <span>{CONSENT_MODE_LABELS[consentState.mode] ?? consentState.mode}</span>
+              <span>·</span>
+              <span>{consentState.version}</span>
+              <span>·</span>
+              <span>{new Date(consentState.acceptedAt).toLocaleString('es-ES', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>
+            </div>
+          )}
           
           {/* Action to regenerate */}
           <button

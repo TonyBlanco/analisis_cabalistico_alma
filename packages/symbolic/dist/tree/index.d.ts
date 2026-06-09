@@ -9,8 +9,8 @@ export type { TreeStructuralState, TreeSefirah, TreeFlow, TreeNotes, SefiraId, S
 export { TREE_STRUCTURAL_STATE_META } from './tree-structural-state.types';
 export type { TreeStructuralAnalysis, GraphMetrics, } from './tree-analysis.types';
 export { analyzeTreeState } from './tree-analysis';
-export type { FormativeBrief, FormativeClinicalContext, FormativeMethodContext, FormativeMethodNumber, FormativeSefirahFocus, FormativePathProcess, FormativeAxisReading, } from './formative-reading';
-export { buildFormativeBrief, methodContextFromSymbolicState } from './formative-reading';
+export type { BuildFormativeBriefOptions, FormativeBrief, FormativeClinicalContext, FormativeMethodContext, FormativeMethodNumber, FormativeSefirahFocus, FormativePathProcess, FormativeAxisReading, } from './formative-reading';
+export { buildFormativeBrief, methodContextFromSymbolicState, validateSafetyContent, FormativeBriefSafetyGateError, } from './formative-reading';
 export { adaptPitagorasToTree } from './pitagoras-tree-adapter';
 export { adaptGenericMethodToTree } from './generic-method-adapter';
 export type { GenericSymbolicState } from './generic-method-adapter';

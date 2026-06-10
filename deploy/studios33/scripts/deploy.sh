@@ -97,6 +97,9 @@ docker exec studio33_api python manage.py test api.tests.test_therapist_patient_
 echo "▶ Tests process memory + tarot seal:"
 docker exec studio33_api python manage.py test api.tests.test_process_memory api.tests.test_process_memory_embeddings swm.tarot.tests.test_api.ProcessMemoryTarotSealTest -v 1 --keepdb 2>&1 | tail -25
 
+echo "▶ Tests astrología API (kerykeion + AI):"
+docker exec studio33_api python manage.py test api.tests.test_astrology_kerykeion_api api.tests.test_astrology_ai_api -v 1 --keepdb 2>&1 | tail -25
+
 docker exec voxtv_nginx nginx -t
 docker exec voxtv_nginx nginx -s reload
 

@@ -73,6 +73,11 @@ echo "▶ Astrología — AI status (URL canónica, sin doble /api)"
 astro_ai_code="$(curl -sS -o /tmp/smoke-astro-ai.json -w '%{http_code}' "${API_BASE}/api/astrology/ai-status/")"
 if [[ "$astro_ai_code" == "200" ]] && grep -q '"enabled"' /tmp/smoke-astro-ai.json; then
   ok "GET /api/astrology/ai-status/ → 200"
+  if grep -q '"model"' /tmp/smoke-astro-ai.json; then
+    bad "ai-status anónimo no debe exponer model (hardening Fase 3)"
+  else
+    ok "ai-status anónimo solo expone enabled"
+  fi
 else
   bad "GET /api/astrology/ai-status/ → ${astro_ai_code}"
 fi

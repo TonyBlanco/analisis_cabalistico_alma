@@ -472,12 +472,16 @@ class AstrologyAIStatusView(APIView):
     def get(self, request):
         # Trigger lazy initialization
         astrology_ai_service._ensure_initialized()
-        
-        return Response({
-            'enabled': astrology_ai_service.enabled,
-            'model': astrology_ai_service.model_name if astrology_ai_service.enabled else None,
-            'error': astrology_ai_service.error_message if not astrology_ai_service.enabled else None,
-        })
+
+        payload = {'enabled': astrology_ai_service.enabled}
+        if request.user and request.user.is_authenticated:
+            payload['model'] = (
+                astrology_ai_service.model_name if astrology_ai_service.enabled else None
+            )
+            payload['error'] = (
+                astrology_ai_service.error_message if not astrology_ai_service.enabled else None
+            )
+        return Response(payload)
 
 
 @method_decorator(csrf_exempt, name='dispatch')

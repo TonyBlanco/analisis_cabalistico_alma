@@ -23,6 +23,7 @@ import CalculationStatusPanel from './CalculationStatusPanel';
 import AstrologySidebar from './AstrologySidebar';
 import AIInterpretationPanel from './AIInterpretationPanel';
 import AISituationChat from './AISituationChat';
+import AstrologyReportPanel from './AstrologyReportPanel';
 
 interface Props {
   consultante: ActiveConsultante;
@@ -249,7 +250,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
   const [solarReturnCompareYearB, setSolarReturnCompareYearB] = useState<number | null>(null);
   const [visualStyle, setVisualStyle] = useState<ChartVisualStyle>('classic');
 
-  const [activeTab, setActiveTab] = useState<'visual' | 'psych'>('visual');
+  const [activeTab, setActiveTab] = useState<'visual' | 'psych' | 'report'>('visual');
 
   const handleLayerToggle = (layer: string) => {
     setActiveLayers((prev) => {
@@ -1708,6 +1709,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                 <div className="flex items-center gap-3">
                   <button className={`px-3 py-1 rounded text-sm ${activeTab === 'visual' ? 'bg-gray-100' : 'bg-white'}`} onClick={() => setActiveTab('visual')}>Visual</button>
                   <button className={`px-3 py-1 rounded text-sm ${activeTab === 'psych' ? 'bg-gray-100' : 'bg-white'}`} onClick={() => setActiveTab('psych')}>Psicológico</button>
+                  <button className={`px-3 py-1 rounded text-sm ${activeTab === 'report' ? 'bg-gray-100' : 'bg-white'}`} onClick={() => setActiveTab('report')}>Informe</button>
                 </div>
               </div>
 
@@ -2497,18 +2499,27 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                     ))
                   )}
                 </>
-              ) : (
-                // Advanced psychological panel uses deterministic psychEngine
-                (hasChart && natal ? (
-                  <PsychologicalHoroscopeAdvanced 
-                    advanced={buildAdvancedInputFromPayload(natal)!} 
+              ) : activeTab === 'psych' ? (
+                hasChart && natal ? (
+                  <PsychologicalHoroscopeAdvanced
+                    advanced={buildAdvancedInputFromPayload(natal)!}
                     patientId={consultante?.id}
                   />
                 ) : (
                   <div className="p-6 text-center text-sm text-gray-600">
                     Datos psicológicos pendientes — completa los datos de nacimiento para generar la lectura.
                   </div>
-                ))
+                )
+              ) : consultante?.id ? (
+                <AstrologyReportPanel
+                  patientId={Number(consultante.id)}
+                  hasChart={hasChart}
+                  activeLayers={activeLayers}
+                />
+              ) : (
+                <div className="p-6 text-center text-sm text-gray-600">
+                  Selecciona un consultante para gestionar informes.
+                </div>
               )}
             </div>
           </div>

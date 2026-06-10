@@ -150,6 +150,10 @@ from .patient_status_views import (
 )
 from .patient_symbolic_overview_views import PatientSymbolicOverviewView
 from .patient_holistic_export_views import PatientHolisticExportsView
+from .astrology_report_views import (
+    PatientAstrologyReportsView,
+    PatientAstrologyReportDetailView,
+)
 from .therapist_patient_invitation_views import (
     TherapistPatientLookupView,
     TherapistPatientInviteView,
@@ -265,6 +269,8 @@ urlpatterns = [
     path('therapist/patients/<int:id>/cabalistic-analysis/', SaveCabalisticAnalysisView.as_view(), name='save_cabalistic_analysis'),
     path('therapist/patients/<int:id>/cabalistic-analyses/', ListCabalisticAnalysesView.as_view(), name='list_cabalistic_analyses'),
     path('therapist/patients/<int:id>/astrology-kerykeion/', KerykeionAnalysisView.as_view(), name='kerykeion_analysis'),
+    path('therapist/patients/<int:id>/astrology-reports/', PatientAstrologyReportsView.as_view(), name='patient_astrology_reports'),
+    path('therapist/patients/<int:id>/astrology-reports/<uuid:report_id>/', PatientAstrologyReportDetailView.as_view(), name='patient_astrology_report_detail'),
     path('therapist/patients/<int:id>/interpretation/kabbalah/', KabbalahInterpretationView.as_view(), name='kabbalah_interpretation'),
     path('therapist/patients/<int:id>/cabala-aplicada/records/', CabalaAplicadaMethodRecordView.as_view(), name='cabala_aplicada_records'),
     path('therapist/patients/<int:id>/crossover/generate-and-save/', CrossoverSynthesisView.as_view(), name='crossover_synthesis'),

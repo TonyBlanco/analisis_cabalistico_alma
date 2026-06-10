@@ -97,6 +97,21 @@ docker exec studio33_api python manage.py test api.tests.test_therapist_patient_
 echo "▶ Tests process memory + tarot seal:"
 docker exec studio33_api python manage.py test api.tests.test_process_memory api.tests.test_process_memory_embeddings swm.tarot.tests.test_api.ProcessMemoryTarotSealTest -v 1 --keepdb 2>&1 | tail -25
 
+echo "▶ Swiss Ephemeris (swisseph + efemérides):"
+docker exec studio33_api python -c "
+import os
+import swisseph as swe
+from pathlib import Path
+p = os.environ.get('SWISSEPH_PATH', '/app/astrology/ephemeris')
+swe.set_ephe_path(p)
+se = list(Path(p).glob('*.se1'))
+if not se:
+    raise SystemExit(f'No .se1 files in {p}')
+jd = swe.julday(2026, 6, 10, 12)
+lon = swe.calc_ut(jd, swe.SUN)[0][0]
+print(f'swisseph {swe.version} ephe={p} files={len(se)} sun_lon={lon:.2f}')
+"
+
 echo "▶ Tests astrología API (kerykeion + AI):"
 docker exec studio33_api python manage.py test api.tests.test_astrology_kerykeion_api api.tests.test_astrology_ai_api -v 1 --keepdb 2>&1 | tail -25
 

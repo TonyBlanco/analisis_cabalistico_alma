@@ -27,6 +27,37 @@ from django.utils import timezone
 logger = logging.getLogger(__name__)
 
 
+def _layer_chart_payload(natal_chart: AstrologyNatalChart, layer: str):
+    """Resolve multitech layer data for AI interpret endpoints."""
+    fallback = natal_chart.chart_payload
+    input_snapshot = natal_chart.input_snapshot
+    if not isinstance(natal_chart.chart_payload, dict) or not isinstance(input_snapshot, dict):
+        return fallback
+
+    try:
+        from api.astrology_kerykeion.multi_tech import build_multitech_payload, multitech_enabled
+
+        if not multitech_enabled():
+            return fallback
+
+        payload = build_multitech_payload(
+            natal_chart=natal_chart.chart_payload,
+            input_data=input_snapshot,
+        )
+        if layer == 'transits':
+            return payload.get('transits') or fallback
+        if layer == 'progressions':
+            progressions = payload.get('progressions') or {}
+            return progressions.get('chart') or fallback
+        if layer == 'solar_return':
+            solar_return = payload.get('solarReturn') or {}
+            return solar_return.get('chart') or fallback
+    except Exception as exc:
+        logger.warning('multitech layer %s fallback to natal: %s', layer, exc)
+
+    return fallback
+
+
 @method_decorator(csrf_exempt, name='dispatch')
 class AstrologyInterpretNatalView(APIView):
     """
@@ -189,13 +220,7 @@ class AstrologyInterpretTransitsView(APIView):
                 status=status.HTTP_503_SERVICE_UNAVAILABLE
             )
         
-        # Obtener tránsitos del input_snapshot si existe, o usar natal como fallback
-        input_snapshot = natal_chart.input_snapshot or {}
-        
-        # Para tránsitos necesitamos calcular las posiciones actuales
-        # Por ahora usamos el chart_payload como referencia
-        # TODO: Integrar con multi_tech para tránsitos reales
-        transits_data = natal_chart.chart_payload  # Fallback temporal
+        transits_data = _layer_chart_payload(natal_chart, 'transits')
         
         result = astrology_ai_service.interpret_transits(
             natal_data=natal_chart.chart_payload,
@@ -266,8 +291,7 @@ class AstrologyInterpretProgressionsView(APIView):
                 status=status.HTTP_503_SERVICE_UNAVAILABLE
             )
         
-        # TODO: Obtener progresiones reales de multi_tech
-        progressions_data = natal_chart.chart_payload  # Fallback temporal
+        progressions_data = _layer_chart_payload(natal_chart, 'progressions')
         
         result = astrology_ai_service.interpret_progressions(
             natal_data=natal_chart.chart_payload,
@@ -337,8 +361,7 @@ class AstrologyInterpretSolarReturnView(APIView):
                 status=status.HTTP_503_SERVICE_UNAVAILABLE
             )
         
-        # TODO: Obtener retorno solar real de multi_tech
-        solar_return_data = natal_chart.chart_payload  # Fallback temporal
+        solar_return_data = _layer_chart_payload(natal_chart, 'solar_return')
         
         result = astrology_ai_service.interpret_solar_return(
             natal_data=natal_chart.chart_payload,

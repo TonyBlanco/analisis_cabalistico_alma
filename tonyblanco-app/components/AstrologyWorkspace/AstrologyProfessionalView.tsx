@@ -497,6 +497,73 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
     }
   }, [davisonEnabled]);
 
+  const fetchSynastryCompositeChart = async () => {
+    if (!consultante?.id || !selectedPartnerId) return;
+    const partner = partnerList.find((p) => String(p.id) === String(selectedPartnerId));
+    if (!partner?.birth_date) {
+      setDavisonError('La pareja seleccionada no tiene fecha de nacimiento.');
+      return;
+    }
+    const snap = (partnerChart as any)?.metadatos?.input_snapshot;
+    try {
+      setDavisonGenerating(true);
+      setDavisonError(null);
+      const token = getAuthToken();
+      if (!token) throw new Error('No auth');
+      const apiUrl = getApiBaseUrl();
+      const response = await fetch(
+        `${apiUrl}/therapist/patients/${consultante.id}/composite-chart/`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Token ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            person2_birth_date: partner.birth_date,
+            person2_birth_time: partner.birth_time || snap?.birth_time || '12:00',
+            person2_latitude: Number(partner.latitude ?? partner.lat ?? snap?.birth_latitude ?? 0),
+            person2_longitude: Number(partner.longitude ?? partner.long ?? snap?.birth_longitude ?? 0),
+            person2_name: partner.full_name || partner.first_name || 'Pareja',
+          }),
+        }
+      );
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Error desconocido' }));
+        throw new Error(errorData.error || `Error ${response.status}`);
+      }
+      const data = await response.json();
+      setCompositeChart(data.composite_chart ?? data);
+    } catch (err: any) {
+      setDavisonError(err?.message || 'Error generando Carta Compuesta');
+      setCompositeChart(null);
+    } finally {
+      setDavisonGenerating(false);
+    }
+  };
+
+  const handleOpenOnDemandPanel = (panel: 'advancedTransits' | 'secondaryProgressions' | 'solarReturn' | 'compareSolarReturn' | 'compareProgressions') => {
+    switch (panel) {
+      case 'advancedTransits':
+        setShowAdvancedTransits(true);
+        break;
+      case 'secondaryProgressions':
+        setShowSecondaryProgressions(true);
+        break;
+      case 'solarReturn':
+        setShowSolarReturn(true);
+        break;
+      case 'compareSolarReturn':
+        setShowCompareSolarReturn(true);
+        break;
+      case 'compareProgressions':
+        setShowCompareProgressions(true);
+        break;
+      default:
+        break;
+    }
+  };
+
   useEffect(() => {
     // Harmonics are symbolic-only and require identity; keep activeLayers in sync
     if (!hasIdentity) {
@@ -760,9 +827,12 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
       setSolarReturnCompareYearB(null);
       return;
     }
-    // Comparison by year requires backend support for targeting a specific return year (not enabled in this phase).
-    setSolarReturnCompareYearB(null);
-  }, [solarReturnCompareEnabled]);
+    setSolarReturnCompareYearB((prev) => {
+      if (prev !== null) return prev;
+      const baseYear = symbolicSolarReturnYear ?? new Date().getFullYear();
+      return baseYear + 1;
+    });
+  }, [solarReturnCompareEnabled, symbolicSolarReturnYear]);
 
   const secondaryLayer = useMemo(() => {
     const order = ['transits', 'progressions', 'return_solar'] as const;
@@ -1129,6 +1199,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
           }}
           patientId={consultante?.id}
           hasNatalChart={hasChart}
+          onOpenOnDemandPanel={handleOpenOnDemandPanel}
         />
       </aside>
 
@@ -1769,15 +1840,16 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                       ))}
                     </select>
                   </div>
-                  {false && (
+                  {synastryEnabled && partnerChart && (
                     <>
                       <div className="mt-2 flex items-center gap-2">
-                        <button className="px-2 py-1 rounded border bg-white text-sm" onClick={() => {
-                          // compute composite from loaded partnerChart
-                          if (!partnerChart) return;
-                          // const cmp = computeCompositeFromTwoNatal(natal, partnerChart);
-                          // setCompositeChart(cmp);
-                        }}>Generar Carta Compuesta</button>
+                        <button
+                          className="px-2 py-1 rounded border bg-white text-sm disabled:opacity-50"
+                          disabled={davisonGenerating}
+                          onClick={() => { void fetchSynastryCompositeChart(); }}
+                        >
+                          {davisonGenerating ? 'Calculando…' : 'Generar Carta Compuesta'}
+                        </button>
                         <button className="px-2 py-1 rounded border bg-white text-sm" onClick={async () => {
                           // Generate Carta Davison using midpoint of time & space and Swiss Ephemeris via existing endpoint
                           // Only allow when a persisted partner is selected/loaded from therapist patients

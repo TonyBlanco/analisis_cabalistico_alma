@@ -102,7 +102,7 @@ export default function AISituationChat({ patientId, hasChart, patientName }: Pr
   useEffect(() => {
     const checkAIStatus = async () => {
       try {
-        const response = await fetch(`${getApiBaseUrl()}/api/astrology/ai-status/`, {
+        const response = await fetch(`${getApiBaseUrl()}/astrology/ai-status/`, {
           headers: getAuthHeaders(),
         });
         const data = await response.json();
@@ -153,7 +153,7 @@ export default function AISituationChat({ patientId, hasChart, patientName }: Pr
       setIsLoading(true);
 
       try {
-        const response = await fetch(`${getApiBaseUrl()}/api/astrology/interpret/situation/`, {
+        const response = await fetch(`${getApiBaseUrl()}/astrology/interpret/situation/`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

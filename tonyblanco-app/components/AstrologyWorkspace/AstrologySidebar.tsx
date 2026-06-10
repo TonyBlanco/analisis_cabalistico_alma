@@ -146,7 +146,18 @@ interface AstrologySidebarProps {
   setLunarReturnMonth?: (m: string) => void;
   patientId?: string | number;
   hasNatalChart?: boolean;
+  onOpenOnDemandPanel?: (
+    panel: 'advancedTransits' | 'secondaryProgressions' | 'solarReturn' | 'compareSolarReturn' | 'compareProgressions'
+  ) => void;
 }
+
+const ON_DEMAND_PANELS = [
+  { key: 'advancedTransits' as const, label: 'Tránsitos on-demand' },
+  { key: 'secondaryProgressions' as const, label: 'Progresiones on-demand' },
+  { key: 'solarReturn' as const, label: 'Retorno solar on-demand' },
+  { key: 'compareSolarReturn' as const, label: 'Comparar Natal ↔ Retorno' },
+  { key: 'compareProgressions' as const, label: 'Comparar Natal ↔ Progresiones' },
+];
 
 const HOUSE_OPTIONS: Array<{ code: string; name: string; desc?: string }> = [
   { code: 'P', name: 'Placidus', desc: 'Predeterminado (actualmente activo).' },
@@ -210,6 +221,7 @@ export default function AstrologySidebar({
   setLunarReturnMonth,
   patientId,
   hasNatalChart = false,
+  onOpenOnDemandPanel,
 }: AstrologySidebarProps) {
   const isRealMode = mode === 'real';
   const canUseForecast = Boolean(hasIdentity);
@@ -348,6 +360,26 @@ export default function AstrologySidebar({
       )}
 
       <div className="flex-1 px-3 py-3 space-y-4 overflow-y-auto">
+        {onOpenOnDemandPanel && (
+          <div className="px-4 py-3 border-t border-gray-200">
+            <div className="text-[12px] font-semibold text-gray-800 mb-2">Observación on-demand</div>
+            <div className="grid grid-cols-1 gap-1">
+              {ON_DEMAND_PANELS.map((panel) => (
+                <button
+                  key={panel.key}
+                  type="button"
+                  disabled={!hasNatalChart}
+                  onClick={() => onOpenOnDemandPanel(panel.key)}
+                  className="text-left text-[11px] px-2 py-1.5 rounded border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  title={!hasNatalChart ? 'Requiere carta natal calculada' : panel.label}
+                >
+                  {panel.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {patientId && (
           <AdvancedTechniquesSidebarSection
             patientId={patientId}
@@ -916,7 +948,7 @@ export default function AstrologySidebar({
       </div>
 
       <div className="px-4 py-3 border-t border-gray-200 text-[11px] text-gray-500">
-        Visualización profesional del consultante con datos reales. Próximas fases activarán cálculos avanzados.
+        Visualización profesional con datos reales. Técnicas avanzadas y paneles on-demand disponibles con carta natal calculada.
       </div>
 
       {/* Recalcular control (UI only triggers modal in parent) */}

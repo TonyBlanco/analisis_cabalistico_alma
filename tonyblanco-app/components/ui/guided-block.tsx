@@ -1,181 +1,160 @@
 'use client';
 
 import Link from 'next/link';
-import type { ReactNode } from 'react';
-import { AlertTriangle, ShieldCheck, Info, Lock, type LucideIcon } from 'lucide-react';
+import { type LucideIcon, AlertCircle, Info, Lock, HelpCircle } from 'lucide-react';
 
 export type GuidedBlockVariant = 'missing' | 'consent' | 'info' | 'locked';
-export type GuidedBlockRole = 'therapist' | 'patient' | 'admin' | 'system';
+export type GuidedBlockRole = 'therapist' | 'patient' | 'both';
 
-export interface GuidedBlockStep {
-  label: string;
-}
-
-export interface GuidedBlockAction {
+export interface GuidedAction {
   label: string;
   href?: string;
   onClick?: () => void;
-  variant?: 'primary' | 'secondary';
+  variant?: 'primary' | 'secondary' | 'ghost';
+}
+
+export interface GuidedStep {
+  label: string;
+  description?: string;
 }
 
 export interface GuidedBlockProps {
-  variant: GuidedBlockVariant;
   title: string;
-  description?: ReactNode;
+  description: string;
+  steps?: GuidedStep[];
+  actions?: GuidedAction[];
+  variant?: GuidedBlockVariant;
   role?: GuidedBlockRole;
-  steps?: GuidedBlockStep[];
-  actions?: GuidedBlockAction[];
+  icon?: LucideIcon;
   compact?: boolean;
   className?: string;
-  icon?: ReactNode;
 }
 
-interface VariantStyle {
-  container: string;
-  iconWrap: string;
-  title: string;
-  badge: string;
-  Icon: LucideIcon;
-}
-
-const VARIANT_STYLES: Record<GuidedBlockVariant, VariantStyle> = {
+const VARIANT_STYLES: Record<GuidedBlockVariant, {
+  wrapper: string;
+  iconWrapper: string;
+  iconColor: string;
+  DefaultIcon: LucideIcon;
+  roleBg: string;
+}> = {
   missing: {
-    container: 'border-amber-200 bg-amber-50',
-    iconWrap: 'bg-amber-100 text-amber-700',
-    title: 'text-amber-900',
-    badge: 'bg-amber-100 text-amber-700',
-    Icon: AlertTriangle,
+    wrapper: 'border-amber-200 bg-amber-50',
+    iconWrapper: 'bg-amber-100',
+    iconColor: 'text-amber-600',
+    DefaultIcon: AlertCircle,
+    roleBg: 'bg-amber-100 text-amber-700',
   },
   consent: {
-    container: 'border-purple-200 bg-purple-50',
-    iconWrap: 'bg-purple-100 text-purple-700',
-    title: 'text-purple-900',
-    badge: 'bg-purple-100 text-purple-700',
-    Icon: ShieldCheck,
+    wrapper: 'border-purple-200 bg-purple-50',
+    iconWrapper: 'bg-purple-100',
+    iconColor: 'text-purple-600',
+    DefaultIcon: Lock,
+    roleBg: 'bg-purple-100 text-purple-700',
   },
   info: {
-    container: 'border-blue-200 bg-blue-50',
-    iconWrap: 'bg-blue-100 text-blue-700',
-    title: 'text-blue-900',
-    badge: 'bg-blue-100 text-blue-700',
-    Icon: Info,
+    wrapper: 'border-blue-200 bg-blue-50',
+    iconWrapper: 'bg-blue-100',
+    iconColor: 'text-blue-600',
+    DefaultIcon: Info,
+    roleBg: 'bg-blue-100 text-blue-700',
   },
   locked: {
-    container: 'border-gray-200 bg-gray-50',
-    iconWrap: 'bg-gray-200 text-gray-600',
-    title: 'text-gray-900',
-    badge: 'bg-gray-200 text-gray-600',
-    Icon: Lock,
+    wrapper: 'border-gray-200 bg-gray-50',
+    iconWrapper: 'bg-gray-100',
+    iconColor: 'text-gray-500',
+    DefaultIcon: HelpCircle,
+    roleBg: 'bg-gray-100 text-gray-600',
   },
 };
 
 const ROLE_LABELS: Record<GuidedBlockRole, string> = {
   therapist: 'Terapeuta',
   patient: 'Consultante',
-  admin: 'Administrador',
-  system: 'Sistema',
+  both: 'Terapeuta · Consultante',
 };
 
-function ActionButton({ action }: { action: GuidedBlockAction }) {
-  const base =
-    'inline-flex items-center justify-center rounded-lg px-3 py-1.5 text-xs font-medium transition-colors';
-  const styles =
-    action.variant === 'secondary'
-      ? 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
-      : 'bg-gray-900 text-white hover:bg-gray-800';
-  const className = `${base} ${styles}`;
+const ACTION_STYLES: Record<NonNullable<GuidedAction['variant']>, string> = {
+  primary: 'bg-gray-900 text-white hover:bg-gray-700',
+  secondary: 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50',
+  ghost: 'text-gray-600 hover:text-gray-900 hover:bg-gray-100',
+};
 
-  if (action.href) {
-    return (
-      <Link href={action.href} className={className}>
-        {action.label}
-      </Link>
-    );
-  }
-  return (
-    <button type="button" onClick={action.onClick} className={className}>
-      {action.label}
-    </button>
-  );
-}
-
-/**
- * GuidedBlock — bloque universal de guia para estados que requieren accion del
- * usuario en los workspaces simbolicos del Modo Interactivo Asistido.
- *
- * Variantes:
- * - missing  (ambar):  falta configuracion / dato requerido.
- * - consent  (purpura): se requiere consentimiento del consultante.
- * - info     (azul):   informacion / estado neutro.
- * - locked   (gris):   acceso restringido (p. ej. rol clinico no verificado).
- */
 export function GuidedBlock({
-  variant,
   title,
   description,
-  role,
   steps,
   actions,
+  variant = 'missing',
+  role,
+  icon,
   compact = false,
   className = '',
-  icon,
 }: GuidedBlockProps) {
-  const style = VARIANT_STYLES[variant];
-  const Icon = style.Icon;
+  const styles = VARIANT_STYLES[variant];
+  const Icon = icon ?? styles.DefaultIcon;
 
   return (
     <div
-      className={`rounded-xl border ${style.container} ${compact ? 'p-4' : 'p-5'} shadow-sm ${className}`}
+      className={`rounded-xl border p-5 ${styles.wrapper} ${className}`}
       role="status"
-      aria-label={title}
+      aria-live="polite"
     >
-      <div className="flex items-start gap-3">
-        <span
-          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${style.iconWrap}`}
-        >
-          {icon ?? <Icon className="h-5 w-5" aria-hidden="true" />}
+      <div className="flex items-start gap-4">
+        <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${styles.iconWrapper}`}>
+          <Icon className={`h-5 w-5 ${styles.iconColor}`} aria-hidden="true" />
         </span>
 
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <h3 className={`text-sm font-semibold ${style.title}`}>{title}</h3>
-            {role ? (
-              <span
-                className={`rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide ${style.badge}`}
-              >
-                {ROLE_LABELS[role] ?? role}
+        <div className="flex-1 min-w-0">
+          <div className="flex flex-wrap items-center gap-2 mb-1">
+            <h3 className="text-sm font-semibold text-gray-900">{title}</h3>
+            {role && (
+              <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${styles.roleBg}`}>
+                {ROLE_LABELS[role]}
               </span>
-            ) : null}
+            )}
           </div>
 
-          {description ? (
-            <div className="mt-1 text-xs leading-relaxed text-gray-600">{description}</div>
-          ) : null}
+          <p className="text-sm text-gray-600">{description}</p>
 
-          {steps && steps.length > 0 ? (
+          {!compact && steps && steps.length > 0 && (
             <ol className="mt-3 space-y-1.5">
-              {steps.map((step, index) => (
-                <li key={index} className="flex items-start gap-2 text-xs text-gray-600">
-                  <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-white/80 text-[10px] font-semibold text-gray-500 ring-1 ring-inset ring-gray-300">
-                    {index + 1}
+              {steps.map((step, i) => (
+                <li key={i} className="flex items-start gap-2">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white border border-gray-300 text-[11px] font-semibold text-gray-600">
+                    {i + 1}
                   </span>
-                  <span>{step.label}</span>
+                  <div>
+                    <span className="text-sm text-gray-700 font-medium">{step.label}</span>
+                    {step.description && (
+                      <p className="text-xs text-gray-500 mt-0.5">{step.description}</p>
+                    )}
+                  </div>
                 </li>
               ))}
             </ol>
-          ) : null}
+          )}
 
-          {actions && actions.length > 0 ? (
-            <div className="mt-3 flex flex-wrap gap-2">
-              {actions.map((action, index) => (
-                <ActionButton key={index} action={action} />
-              ))}
+          {actions && actions.length > 0 && (
+            <div className="mt-4 flex flex-wrap gap-2">
+              {actions.map((action, i) => {
+                const cls = `inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${ACTION_STYLES[action.variant ?? (i === 0 ? 'primary' : 'secondary')]}`;
+                if (action.href) {
+                  return (
+                    <Link key={i} href={action.href} className={cls}>
+                      {action.label}
+                    </Link>
+                  );
+                }
+                return (
+                  <button key={i} type="button" onClick={action.onClick} className={cls}>
+                    {action.label}
+                  </button>
+                );
+              })}
             </div>
-          ) : null}
+          )}
         </div>
       </div>
     </div>
   );
 }
-
-export default GuidedBlock;

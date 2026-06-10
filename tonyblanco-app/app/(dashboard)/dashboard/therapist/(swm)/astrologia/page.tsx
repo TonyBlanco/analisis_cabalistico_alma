@@ -1,10 +1,10 @@
 "use client";
 
-import Link from 'next/link';
 import useActiveConsultante from '@/hooks/useActiveConsultante';
 import AstrologyProfessionalView from '@/components/AstrologyWorkspace/AstrologyProfessionalView';
 import { useNatalChart } from '@/hooks/useNatalChart';
 import { getCanonicalConsultantIdentity, getMissingCanonicalFields } from '@/hooks/getCanonicalConsultantIdentity';
+import { GuidedBlock } from '@/components/ui/guided-block';
 
 const FIELD_LABELS: Record<string, string> = {
   birth_time: 'Hora de nacimiento',
@@ -45,37 +45,42 @@ export default function AstrologyPage() {
       .filter(([, absent]) => absent)
       .map(([key]) => FIELD_LABELS[key] ?? key);
 
+    if (!consultante) {
+      return (
+        <div className="max-w-lg mx-auto mt-10">
+          <GuidedBlock
+            variant="info"
+            role="therapist"
+            title="Selecciona un consultante"
+            description="Para calcular la carta natal, selecciona primero un consultante activo desde el panel clínico."
+            steps={[
+              { label: 'Abre el selector de pacientes en la barra lateral' },
+              { label: 'Elige el consultante' },
+              { label: 'La carta natal calculará automáticamente' },
+            ]}
+            actions={[{ label: 'Ir a Pacientes', href: '/dashboard/therapist/patients' }]}
+          />
+        </div>
+      );
+    }
+
+    const missingSteps = missingFields.map((label) => ({ label }));
+
     return (
-      <div className="min-h-90 bg-white border border-gray-200 rounded-xl p-6 max-w-md mx-auto mt-10">
-        <h2 className="text-lg font-semibold text-gray-900">Datos de nacimiento incompletos</h2>
-        {!consultante ? (
-          <p className="mt-2 text-sm text-gray-600">
-            No hay un consultante activo seleccionado.
-          </p>
-        ) : (
-          <>
-            <p className="mt-2 text-sm text-gray-600">
-              <span className="font-medium">{consultante.nombre_completo}</span> no tiene todos los datos
-              requeridos para el cálculo de carta natal.
-            </p>
-            {missingFields.length > 0 && (
-              <ul className="mt-3 space-y-1">
-                {missingFields.map((label) => (
-                  <li key={label} className="flex items-center gap-2 text-sm text-amber-700">
-                    <span className="h-1.5 w-1.5 rounded-full bg-amber-500 shrink-0" />
-                    {label}
-                  </li>
-                ))}
-              </ul>
-            )}
-            <Link
-              href={`/dashboard/therapist/patients/${consultante.id}`}
-              className="mt-4 inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
-            >
-              Completar perfil del consultante
-            </Link>
-          </>
-        )}
+      <div className="max-w-lg mx-auto mt-10">
+        <GuidedBlock
+          variant="missing"
+          role="therapist"
+          title="Datos de nacimiento incompletos"
+          description={`${consultante.nombre_completo} no tiene todos los datos requeridos para calcular la carta natal.`}
+          steps={missingSteps.length > 0 ? missingSteps : undefined}
+          actions={[
+            {
+              label: 'Completar perfil del consultante',
+              href: `/dashboard/therapist/patients/${consultante.id}`,
+            },
+          ]}
+        />
       </div>
     );
   }

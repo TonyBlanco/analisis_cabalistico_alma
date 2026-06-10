@@ -14,6 +14,8 @@ export type AspectLine = {
   angle: number;         // normalized 0..180
 };
 
+export type WheelLayoutMode = 'single' | 'double';
+
 export type WheelOptions = {
   size: number;                 // svg width/height
   ascendantDeg: number;         // 0..360
@@ -21,6 +23,7 @@ export type WheelOptions = {
   showDegreeTicks?: boolean;
   majorTickEveryDeg?: number;   // e.g. 10
   minorTickEveryDeg?: number;   // e.g. 1
+  layoutMode?: WheelLayoutMode; // 'double' reserva banda exterior para overlay
 };
 
 export type WheelRings = {
@@ -65,10 +68,12 @@ export function degToPoint(
   };
 }
 
-export function buildDefaultRings(size: number): WheelRings {
+export function buildDefaultRings(size: number, layoutMode: WheelLayoutMode = 'single'): WheelRings {
   // Proporción clásica, compacta, “tipo Astro”
   const center = size / 2;
-  const outer = center - 24;
+  // En doble rueda, contraemos el núcleo natal para dejar ~52px de banda exterior visible.
+  const edgeReserve = layoutMode === 'double' ? 56 : 24;
+  const outer = center - edgeReserve;
 
   return {
     outer,
@@ -85,7 +90,7 @@ export function buildDefaultRings(size: number): WheelRings {
 
 export function createWheelGeometry(opts: WheelOptions): WheelGeometry {
   const center = opts.size / 2;
-  const rings = buildDefaultRings(opts.size);
+  const rings = buildDefaultRings(opts.size, opts.layoutMode ?? 'single');
 
   // Rotación: queremos que ASC quede “a la izquierda” (como muchas cartas) o a 9h.
   // En Astro.com suele quedar en horizontal izquierda (ASC), DC a la derecha.

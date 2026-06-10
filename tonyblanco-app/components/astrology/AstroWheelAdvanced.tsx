@@ -96,6 +96,15 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
 }) => {
   const isPlaceholder = visualMode === "placeholder";
   const isHuber = visualStyle === "huber";
+  const comparisonEnabled = Boolean(comparisonWheel?.enabled);
+  const hasSecondaryData = Boolean(
+    secondaryLayer && (
+      (secondaryPlanets && secondaryPlanets.length > 0)
+      || (transitPlanets && transitPlanets.length > 0)
+    )
+  );
+  const layoutMode = (hasSecondaryData || comparisonEnabled) ? 'double' as const : 'single' as const;
+  const viewPadding = layoutMode === 'double' ? 28 : 0;
   const persona = (typeof personaMode === "string") ? personaMode : (personaMode ? "social" : "off");
   const relocationRotation = relocation?.rotationDeg ?? 0;
   const advObjects = advancedObjects ?? { nodes: showMathPoints, fortune: false, symbolicPoints: showMathPoints };
@@ -103,7 +112,6 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
   const relMode = relationshipMode;
   const relRole = relationshipRole;
   const devStage = developmentStage;
-  const comparisonEnabled = Boolean(comparisonWheel?.enabled);
   const opts: WheelOptions = useMemo(() => ({
     size,
     ascendantDeg: normalizeDeg(ascendantDeg),
@@ -111,7 +119,8 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
     showDegreeTicks: !isPlaceholder,
     majorTickEveryDeg: 10,
     minorTickEveryDeg: 1,
-  }), [size, ascendantDeg, isPlaceholder]);
+    layoutMode,
+  }), [size, ascendantDeg, isPlaceholder, layoutMode]);
 
   const geo = useMemo(() => createWheelGeometry(opts), [opts]);
 
@@ -1585,18 +1594,21 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
   const renderSecondaryWheel = () => {
     if (!secondaryLayer) return null;
 
-    const tooltip = `Modo Doble Rueda activo — Natal + ${secondaryLayer.label}. La rueda externa representa una capa simbólica sin cálculo astronómico real.`;
-    const maxR = cx - 8 - (comparisonEnabled ? 46 : 0);
-    const innerR = Math.min(maxR - 22, rings.outer + 18);
-    const outerR = Math.min(maxR, innerR + 26);
-    const glyphR = Math.min(maxR - 10, outerR - 10);
+    const tooltip = secondaryLayer.mode === 'real'
+      ? `Modo Doble Rueda activo — Natal + ${secondaryLayer.label}. Capa calculada por el motor (Swiss Ephemeris).`
+      : `Modo Doble Rueda activo — Natal + ${secondaryLayer.label}. La rueda externa representa una capa simbólica sin cálculo astronómico real.`;
 
-    const styles: Record<string, { stroke: string; opacity: number; width: number; dash?: string; glyphSize: number }> = {
-      transits: { stroke: "#94a3b8", opacity: 0.55, width: 1.5, dash: "7 6", glyphSize: 14 },
-      progressions: { stroke: "#64748b", opacity: 0.5, width: 1.6, glyphSize: 14 },
-      solarArc: { stroke: "#475569", opacity: 0.46, width: 1.6, dash: "1 6", glyphSize: 14 },
-      return_solar: { stroke: "#a78bfa", opacity: 0.48, width: 1.8, glyphSize: 14 },
-      return_lunar: { stroke: "#f59e0b", opacity: 0.46, width: 1.7, dash: "4 6", glyphSize: 14 },
+    const edge = cx - 10 - (comparisonEnabled ? 40 : 0);
+    const bandInner = rings.outer + 10;
+    const bandOuter = edge;
+    const glyphR = (bandInner + bandOuter) / 2;
+
+    const styles: Record<string, { stroke: string; fill: string; opacity: number; width: number; dash?: string; glyphSize: number }> = {
+      transits: { stroke: "#2563eb", fill: "rgba(37,99,235,0.10)", opacity: 0.82, width: 2.4, dash: "8 5", glyphSize: 17 },
+      progressions: { stroke: "#0f766e", fill: "rgba(15,118,110,0.10)", opacity: 0.8, width: 2.4, glyphSize: 17 },
+      solarArc: { stroke: "#475569", fill: "rgba(71,85,105,0.08)", opacity: 0.76, width: 2.2, dash: "1 6", glyphSize: 16 },
+      return_solar: { stroke: "#7c3aed", fill: "rgba(124,58,237,0.12)", opacity: 0.84, width: 2.6, glyphSize: 17 },
+      return_lunar: { stroke: "#d97706", fill: "rgba(217,119,6,0.10)", opacity: 0.8, width: 2.4, dash: "4 6", glyphSize: 16 },
     };
 
     const st = styles[secondaryLayer.key] ?? styles.transits;
@@ -1604,13 +1616,16 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
 
     const renderPlanetsSecondary = () => {
       if (!pts || pts.length === 0) return null;
-      const priority = new Set(["sun", "moon", "mercury", "venus", "mars"]);
+      const personal = new Set(["sun", "moon", "mercury", "venus", "mars"]);
+      const ordered = [
+        ...pts.filter((p) => personal.has(String(p.key).toLowerCase())),
+        ...pts.filter((p) => !personal.has(String(p.key).toLowerCase())),
+      ];
       return (
         <g>
-          {pts
-            .filter((p) => priority.has(String(p.key).toLowerCase()))
-            .map((p) => {
+          {ordered.map((p) => {
               const pt = degToPoint(p.degree, glyphR, cx);
+              const isPersonal = personal.has(String(p.key).toLowerCase());
               return (
                 <g key={`sec-pl-${p.key}`}>
                   {harmonicHighlight && harmonicHighlight.secondaryKeys.has(p.key) ? (
@@ -1621,8 +1636,8 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
                       </text>
                     </>
                   ) : null}
-                  {isHuber ? (
-                    <circle cx={pt.x} cy={pt.y} r={14} fill="rgba(255,255,255,0.88)" stroke={st.stroke} strokeWidth={1.3} opacity={0.75} />
+                  {(isHuber || isPersonal) ? (
+                    <circle cx={pt.x} cy={pt.y} r={isPersonal ? 15 : 12} fill="rgba(255,255,255,0.92)" stroke={st.stroke} strokeWidth={1.4} opacity={0.9} />
                   ) : null}
                   {crossAspectSecondaryKeys && crossAspectSecondaryKeys.has(p.key) ? (
                     <>
@@ -1635,9 +1650,10 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
                     y={pt.y}
                     textAnchor="middle"
                     dominantBaseline="middle"
-                    fontSize={isHuber ? st.glyphSize + 2 : st.glyphSize}
+                    fontSize={isPersonal ? st.glyphSize : st.glyphSize - 2}
                     fill={st.stroke}
-                    opacity={Math.min(0.85, st.opacity + 0.25)}
+                    fontWeight={isPersonal ? 600 : 500}
+                    opacity={Math.min(0.95, st.opacity + 0.1)}
                     style={{ fontFamily: 'Inter, ui-sans-serif, system-ui' }}
                   >
                     {p.glyph}
@@ -1650,8 +1666,8 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
     };
 
     const marker = (deg: number, id: string) => {
-      const a = degToPoint(deg, outerR - 4, cx);
-      const b = degToPoint(deg, outerR + 4, cx);
+      const a = degToPoint(deg, bandOuter - 4, cx);
+      const b = degToPoint(deg, bandOuter + 4, cx);
       return (
         <line
           key={`sec-${id}`}
@@ -1664,11 +1680,28 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
       );
     };
 
+    const labelPos = degToPoint(0, bandOuter + 14, cx);
+
     return (
       <g>
         <title>{tooltip}</title>
-        <circle cx={cx} cy={cx} r={innerR} fill="none" stroke="#e5e7eb" strokeWidth={1.1} opacity={0.9} />
-        <circle cx={cx} cy={cx} r={outerR} fill="none" stroke={st.stroke} strokeWidth={st.width} opacity={st.opacity} strokeDasharray={st.dash || undefined} />
+        <circle cx={cx} cy={cx} r={bandOuter} fill={st.fill} stroke="none" />
+        <circle cx={cx} cy={cx} r={bandInner} fill="#ffffff" stroke="none" />
+        <circle cx={cx} cy={cx} r={bandInner} fill="none" stroke="#cbd5e1" strokeWidth={1.4} opacity={0.95} />
+        <circle cx={cx} cy={cx} r={bandOuter} fill="none" stroke={st.stroke} strokeWidth={st.width} opacity={st.opacity} strokeDasharray={st.dash || undefined} />
+        <text
+          x={labelPos.x}
+          y={labelPos.y}
+          textAnchor="middle"
+          dominantBaseline="middle"
+          fontSize={11}
+          fontWeight={600}
+          fill={st.stroke}
+          opacity={0.9}
+          style={{ fontFamily: 'Inter, ui-sans-serif, system-ui' }}
+        >
+          {secondaryLayer.label}
+        </text>
         {marker(0, "north")}
         {marker(90, "east")}
         {marker(180, "south")}
@@ -2039,9 +2072,14 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
         {titleRight ? <div className="text-sm text-gray-500">{titleRight}</div> : null}
       </div>
 
-      <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
-        <div className="w-full overflow-auto">
-          <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+      <div className={`rounded-xl border border-gray-200 bg-white ${layoutMode === 'double' ? 'overflow-visible' : 'overflow-hidden'}`}>
+        <div className={`w-full ${layoutMode === 'double' ? 'overflow-visible p-2' : 'overflow-auto'}`}>
+          <svg
+            width={size}
+            height={size}
+            viewBox={`${-viewPadding} ${-viewPadding} ${size + viewPadding * 2} ${size + viewPadding * 2}`}
+            className={layoutMode === 'double' ? 'mx-auto max-w-full h-auto' : undefined}
+          >
             {/* Rotación global por ASC */}
             <g transform={`rotate(${geo.rotationDeg + relocationRotation} ${cx} ${cx})`}>
               {renderComparisonAspects()}

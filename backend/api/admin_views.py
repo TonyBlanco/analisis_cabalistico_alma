@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.models import User
 from django.db.models import Count, Q
+from django.utils import timezone
 from datetime import datetime, timedelta
 from .models import UserProfile, Ficha
 from .test_models import TestModule, TestResult, UserTestAccess
@@ -103,6 +104,8 @@ class EnhancedAdminUsersView(APIView):
                     'membership_expires': profile.membership_expires,
                     'subscription_plan': profile.subscription_plan,
                     'subscription_status': profile.subscription_status,
+                    'clinical_mode_requested': profile.clinical_mode_requested,
+                    'clinical_mode_enabled': profile.clinical_mode_enabled,
                 }
             })
         
@@ -146,6 +149,9 @@ class AdminUserManagementView(APIView):
                     'subscription_status': user.profile.subscription_status,
                     'phone': user.profile.phone,
                     'birth_date': user.profile.birth_date,
+                    'clinical_mode_requested': user.profile.clinical_mode_requested,
+                    'clinical_mode_enabled': user.profile.clinical_mode_enabled,
+                    'clinical_credential_verified_at': user.profile.clinical_credential_verified_at,
                 },
                 'stats': {
                     'fichas_count': fichas_count,
@@ -268,3 +274,88 @@ class AdminUserManagementView(APIView):
                 {'error': 'Usuario no encontrado'},
                 status=status.HTTP_404_NOT_FOUND
             )
+
+
+class ClinicalCredentialVerificationView(APIView):
+    """Verificación admin de credencial clínica para terapeutas médicos/psiquiatras.
+
+    Activa el modo clínico (clinical_mode_enabled) SOLO tras verificación humana
+    de la credencial profesional. El cliente NUNCA puede auto-otorgarse este modo:
+    clinical_mode_requested es únicamente una solicitud hecha en el alta.
+    El rail anti-fraude permanece SIEMPRE activo, con o sin modo clínico.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, user_id):
+        """Verificar credencial y habilitar el vocabulario clínico completo."""
+        if not user_is_platform_admin(request.user):
+            return _admin_forbidden()
+
+        try:
+            user = User.objects.select_related('profile').get(id=user_id)
+        except User.DoesNotExist:
+            return Response(
+                {'error': 'Usuario no encontrado'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        profile = user.profile
+
+        if profile.user_type != 'therapist':
+            return Response(
+                {'error': 'Solo los perfiles de terapeuta pueden acceder al modo clínico.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        profile.clinical_mode_enabled = True
+        profile.clinical_mode_requested = True
+        profile.clinical_credential_verified_at = timezone.now()
+        profile.clinical_credential_verified_by = request.user
+        profile.save(update_fields=[
+            'clinical_mode_enabled',
+            'clinical_mode_requested',
+            'clinical_credential_verified_at',
+            'clinical_credential_verified_by',
+        ])
+
+        return Response({
+            'success': True,
+            'message': 'Credencial clínica verificada. Vocabulario clínico habilitado.',
+            'user_id': user.id,
+            'clinical_mode_enabled': profile.clinical_mode_enabled,
+            'clinical_mode_requested': profile.clinical_mode_requested,
+            'clinical_credential_verified_at': profile.clinical_credential_verified_at,
+            'clinical_credential_verified_by': request.user.id,
+            'can_use_clinical_lexicon': profile.can_use_clinical_lexicon(),
+        })
+
+    def delete(self, request, user_id):
+        """Revocar el modo clínico (el rail anti-fraude sigue activo siempre)."""
+        if not user_is_platform_admin(request.user):
+            return _admin_forbidden()
+
+        try:
+            user = User.objects.select_related('profile').get(id=user_id)
+        except User.DoesNotExist:
+            return Response(
+                {'error': 'Usuario no encontrado'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        profile = user.profile
+        profile.clinical_mode_enabled = False
+        profile.clinical_credential_verified_at = None
+        profile.clinical_credential_verified_by = None
+        profile.save(update_fields=[
+            'clinical_mode_enabled',
+            'clinical_credential_verified_at',
+            'clinical_credential_verified_by',
+        ])
+
+        return Response({
+            'success': True,
+            'message': 'Modo clínico revocado.',
+            'user_id': user.id,
+            'clinical_mode_enabled': profile.clinical_mode_enabled,
+            'can_use_clinical_lexicon': profile.can_use_clinical_lexicon(),
+        })

@@ -72,3 +72,16 @@ export {
   validateTreeStateForInterpretation,
   createFallbackInterpretation,
 } from './symbolic-interpreter';
+
+// ─── Role-aware safety (Modo Híbrido) ────────────────────────────────────────
+// Clinical-lexicon block lifted only for the verified clinical role; anti-fraud
+// rail always enforced. Role is resolved in Django, never trusted from client.
+export type { SafetyRole, SafetyValidationResult } from './clinical-lexicon';
+export {
+  CLINICAL_LEXICON_TERMS,
+  ANTI_FRAUD_TERMS,
+  enforceAntiFraudRail,
+  validateSafetyContentForRole,
+} from './clinical-lexicon';
+export type { InterpretationSweepResult } from './interpretation-safety';
+export { sweepInterpretationForRole } from './interpretation-safety';

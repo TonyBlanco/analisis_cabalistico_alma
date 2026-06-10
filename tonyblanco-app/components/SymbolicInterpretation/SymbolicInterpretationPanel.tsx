@@ -1,19 +1,29 @@
 /**
  * Symbolic Interpretation Panel — AI-Assisted Symbolic Reading UI
- * 
+ *
  * SAFETY-FIRST DESIGN:
  * - Prominent disclaimer always visible
  * - Clear separation from Tree visualization
  * - Explicit opt-in (disabled by default)
  * - Educational language only
+ *
+ * Modo Híbrido (Step 5):
+ * - Optional `role` badge shows whether the clinical lexicon is unlocked.
+ * - Optional editable mode lets a verified therapist refine observations with
+ *   role-aware safety re-validation before saving (`onSaveEdits`).
  */
 
 'use client';
 
 import { useState } from 'react';
-import { Sparkles, AlertCircle, Info, BookOpen, X } from 'lucide-react';
-import type { SymbolicInterpretation } from '@holistica/symbolic/tree/symbolic-interpreter.types';
+import { Sparkles, AlertCircle, Info, BookOpen, X, Pencil, Stethoscope, Eye } from 'lucide-react';
+import type {
+  SymbolicInterpretation,
+  SymbolicObservation,
+} from '@holistica/symbolic/tree/symbolic-interpreter.types';
 import { SYMBOLIC_INTERPRETER_META } from '@holistica/symbolic/tree/symbolic-interpreter.types';
+import type { SafetyRole } from '@holistica/symbolic/tree';
+import { EditableObservationList } from './EditableObservationList';
 
 interface SymbolicInterpretationPanelProps {
   interpretation: SymbolicInterpretation | null;
@@ -21,6 +31,12 @@ interface SymbolicInterpretationPanelProps {
   onRequestInterpretation: () => void;
   onClose?: () => void;
   consentState?: { mode: string; acceptedAt: string; version: string };
+  /** Active safety role (display-only; the authoritative gate is server-side). */
+  role?: SafetyRole;
+  /** When true and an interpretation exists, the therapist can edit observations. */
+  editable?: boolean;
+  /** Called with the edited (and re-validated) observations when the user saves. */
+  onSaveEdits?: (observations: SymbolicObservation[]) => void;
 }
 
 const CONSENT_MODE_LABELS: Record<string, string> = {
@@ -35,9 +51,13 @@ export function SymbolicInterpretationPanel({
   onRequestInterpretation,
   onClose,
   consentState,
+  role,
+  editable = false,
+  onSaveEdits,
 }: SymbolicInterpretationPanelProps) {
   const [isExpanded, setIsExpanded] = useState(false);
-  
+  const [isEditing, setIsEditing] = useState(false);
+
   return (
     <div
       className="rounded-xl border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-indigo-50 p-5 shadow-lg"
@@ -51,8 +71,29 @@ export function SymbolicInterpretationPanel({
             <h3 id="symbolic-interpretation-title" className="text-lg font-semibold text-purple-900">
               Lectura Simbólica Asistida (IA)
             </h3>
+            {role && (
+              <span
+                className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                  role === 'clinical'
+                    ? 'bg-teal-100 text-teal-800'
+                    : 'bg-slate-100 text-slate-600'
+                }`}
+                title={
+                  role === 'clinical'
+                    ? 'Perfil clínico verificado: vocabulario clínico habilitado'
+                    : 'Modo observacional: vocabulario clínico bloqueado'
+                }
+              >
+                {role === 'clinical' ? (
+                  <Stethoscope className="h-3 w-3" aria-hidden="true" />
+                ) : (
+                  <Eye className="h-3 w-3" aria-hidden="true" />
+                )}
+                {role === 'clinical' ? 'Modo clínico' : 'Modo observacional'}
+              </span>
+            )}
           </div>
-          
+
           {/* Prominent disclaimer */}
           <div
             className="flex items-start gap-2 rounded-lg bg-amber-50 border border-amber-300 px-3 py-2"
@@ -65,7 +106,7 @@ export function SymbolicInterpretationPanel({
             </p>
           </div>
         </div>
-        
+
         {onClose && (
           <button
             onClick={onClose}
@@ -76,7 +117,7 @@ export function SymbolicInterpretationPanel({
           </button>
         )}
       </div>
-      
+
       {/* Action button */}
       {!interpretation && !isLoading && (
         <div className="space-y-3">
@@ -88,7 +129,7 @@ export function SymbolicInterpretationPanel({
             <Sparkles className="h-4 w-4" />
             Generar Lectura Simbólica con IA
           </button>
-          
+
           {/* Educational info */}
           <div className="flex items-start gap-2 rounded-lg bg-blue-50 border border-blue-200 px-3 py-2">
             <Info className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
@@ -99,7 +140,7 @@ export function SymbolicInterpretationPanel({
           </div>
         </div>
       )}
-      
+
       {/* Loading state */}
       {isLoading && (
         <div
@@ -123,7 +164,7 @@ export function SymbolicInterpretationPanel({
           Aún no hay lectura simbólica generada.
         </div>
       )}
-      
+
       {/* Interpretation results */}
       {interpretation && !isLoading && (
         <div className="space-y-4 mt-4">
@@ -144,32 +185,59 @@ export function SymbolicInterpretationPanel({
               </ul>
             </div>
           )}
-          
-          {/* Observations */}
-          <div className="space-y-3">
-            {interpretation.observations.map((obs, idx) => (
-              <div
-                key={idx}
-                className="rounded-lg border border-purple-200 bg-white p-4 shadow-sm"
-              >
-                <div className="flex items-start gap-2 mb-2">
-                  <BookOpen className="h-4 w-4 text-purple-600 mt-0.5 flex-shrink-0" />
-                  <h4 className="text-sm font-semibold text-purple-900">
-                    {obs.title}
-                  </h4>
-                </div>
-                <p className="text-sm text-gray-700 leading-relaxed ml-6">
-                  {obs.content}
-                </p>
-                <div className="mt-2 ml-6">
-                  <span className="inline-block px-2 py-0.5 rounded text-[10px] font-medium bg-purple-100 text-purple-700">
-                    {obs.type}
-                  </span>
-                </div>
+
+          {/* Editable mode */}
+          {editable && isEditing ? (
+            <EditableObservationList
+              observations={interpretation.observations}
+              role={role ?? 'observational'}
+              onCancel={() => setIsEditing(false)}
+              onSave={(obs) => {
+                onSaveEdits?.(obs);
+                setIsEditing(false);
+              }}
+            />
+          ) : (
+            <>
+              {/* Observations (read-only) */}
+              <div className="space-y-3">
+                {interpretation.observations.map((obs, idx) => (
+                  <div
+                    key={idx}
+                    className="rounded-lg border border-purple-200 bg-white p-4 shadow-sm"
+                  >
+                    <div className="flex items-start gap-2 mb-2">
+                      <BookOpen className="h-4 w-4 text-purple-600 mt-0.5 flex-shrink-0" />
+                      <h4 className="text-sm font-semibold text-purple-900">
+                        {obs.title}
+                      </h4>
+                    </div>
+                    <p className="text-sm text-gray-700 leading-relaxed ml-6">
+                      {obs.content}
+                    </p>
+                    <div className="mt-2 ml-6">
+                      <span className="inline-block px-2 py-0.5 rounded text-[10px] font-medium bg-purple-100 text-purple-700">
+                        {obs.type}
+                      </span>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-          
+
+              {/* Edit action (only when editable) */}
+              {editable && onSaveEdits && (
+                <button
+                  type="button"
+                  onClick={() => setIsEditing(true)}
+                  className="w-full rounded-lg bg-white border border-purple-300 px-3 py-2 text-xs font-medium text-purple-700 hover:bg-purple-50 transition-colors flex items-center justify-center gap-2"
+                >
+                  <Pencil className="h-3 w-3" />
+                  Editar observaciones
+                </button>
+              )}
+            </>
+          )}
+
           {/* Educational context */}
           {interpretation.educationalContext && (
             <div className="rounded-lg bg-indigo-50 border border-indigo-200 px-3 py-2">
@@ -178,7 +246,7 @@ export function SymbolicInterpretationPanel({
               </p>
             </div>
           )}
-          
+
           {/* Metadata */}
           <div className="flex items-center justify-between text-[10px] text-gray-500 pt-2 border-t border-gray-200">
             <span>
@@ -206,19 +274,21 @@ export function SymbolicInterpretationPanel({
               <span>{new Date(consentState.acceptedAt).toLocaleString('es-ES', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>
             </div>
           )}
-          
+
           {/* Action to regenerate */}
-          <button
-            onClick={onRequestInterpretation}
-            disabled={isLoading}
-            className="w-full rounded-lg bg-purple-100 px-3 py-2 text-xs font-medium text-purple-700 hover:bg-purple-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
-          >
-            <Sparkles className="h-3 w-3" />
-            Regenerar Lectura Simbólica
-          </button>
+          {!isEditing && (
+            <button
+              onClick={onRequestInterpretation}
+              disabled={isLoading}
+              className="w-full rounded-lg bg-purple-100 px-3 py-2 text-xs font-medium text-purple-700 hover:bg-purple-200 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+            >
+              <Sparkles className="h-3 w-3" />
+              Regenerar Lectura Simbólica
+            </button>
+          )}
         </div>
       )}
-      
+
       {/* Safety rules toggle */}
       <div className="mt-4 pt-4 border-t border-purple-200">
         <button
@@ -231,7 +301,7 @@ export function SymbolicInterpretationPanel({
           <Info className="h-3 w-3" aria-hidden="true" />
           {isExpanded ? 'Ocultar' : 'Ver'} reglas de seguridad ({SYMBOLIC_INTERPRETER_META.safetyRules.length})
         </button>
-        
+
         {isExpanded && (
           <ul
             id="symbolic-safety-rules"

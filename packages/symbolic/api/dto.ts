@@ -10,6 +10,7 @@ import type {
   SymbolicInterpretation,
   SymbolicSafetyLevel,
 } from '../tree/symbolic-interpreter.types';
+import type { SafetyRole } from '../tree/clinical-lexicon';
 import type { SefirahCorrespondence, PathCorrespondence } from '../correspondences/types';
 import type { TraditionalSefirahData } from '../kabbalah-traditional/traditional-correspondences.types';
 import type { SeferYetzirahLetter } from '../kabbalah-traditional/sefer-yetzirah';
@@ -65,4 +66,10 @@ export interface InterpretResponseV1 {
   interpretation: SymbolicInterpretation;
   analysis: TreeStructuralAnalysis;
   correspondenceSystem: SystemId;
+  /**
+   * Safety role applied to this interpretation, resolved server-side from the
+   * Django profile (UserProfile.clinical_mode_enabled). Display-only for the UI;
+   * the authoritative gate is enforced on the server. Defaults to 'observational'.
+   */
+  role?: SafetyRole;
 }

@@ -233,7 +233,7 @@ class PersistenceService:
             'house_number': h.house_number,
             'longitude': float(h.longitude),
             'sign': h.sign,
-            'degree': float(h.degree)
+            'sign_degree': float(h.sign_degree),
         } for h in houses]
 
     def _aspects_to_dict(self, aspects):

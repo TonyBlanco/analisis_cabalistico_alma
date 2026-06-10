@@ -590,9 +590,16 @@ class ArabicPartsEngine:
         """Build house number -> cusp longitude lookup"""
         lookup = {}
         for house in natal_houses:
-            num = house.get('number', house.get('house_number', house.get('house', 0)))
-            cusp = float(house.get('cusp_longitude', house.get('cusp', 0)))
-            lookup[num] = cusp
+            if hasattr(house, 'house_number'):
+                num = house.house_number
+                cusp = float(getattr(house, 'cusp_longitude', house.longitude))
+            else:
+                num = house.get('number', house.get('house_number', house.get('house', 0)))
+                cusp = float(
+                    house.get('cusp_longitude', house.get('longitude', house.get('cusp', 0)))
+                )
+            if num:
+                lookup[int(num)] = cusp
         return lookup
 
     def _is_nocturnal_chart(self, sun_longitude: float, asc_longitude: float) -> bool:

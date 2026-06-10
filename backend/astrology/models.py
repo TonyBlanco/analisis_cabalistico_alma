@@ -110,7 +110,9 @@ class NatalChart(models.Model):
                 house_number=house_data['house_number'],
                 longitude=Decimal(str(house_data['longitude'])),
                 sign=house_data['sign'],
-                degree=Decimal(str(house_data['degree']))
+                sign_degree=Decimal(str(
+                    house_data.get('sign_degree', house_data.get('degree', 0))
+                )),
             ))
 
         # Convert aspects data
@@ -166,7 +168,7 @@ class NatalChart(models.Model):
                 'house_number': house.house_number,
                 'longitude': float(house.longitude),
                 'sign': house.sign,
-                'degree': float(house.degree)
+                'sign_degree': float(house.sign_degree),
             })
 
         # Convert aspects to dict

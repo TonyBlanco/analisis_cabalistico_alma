@@ -11,7 +11,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api', '0093_symbolicsessionnote'),
+        ('api', '0090_align_test_catalog_wiring'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

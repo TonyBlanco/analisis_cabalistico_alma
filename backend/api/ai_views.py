@@ -11,6 +11,7 @@ from rest_framework import status
 import logging
 
 from api.ai.llm_bridge import generate_text, is_llm_available, unavailable_message
+from api.ai.usage_meter import UsageContext
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +59,14 @@ Pregunta del terapeuta: {query}
 
 Responde en español, máximo 200 palabras, tono profesional."""
 
-            result = generate_text(prompt, temperature=0.6, max_tokens=512)
+            usage_context = UsageContext(
+                therapist=request.user,
+                task_type='ai.holistic_query',
+                source_type='holistic_query',
+            )
+            result = generate_text(
+                prompt, temperature=0.6, max_tokens=512, usage_context=usage_context
+            )
             if not result.get('success'):
                 return Response(
                     {'error': result.get('error') or 'Error de IA'},

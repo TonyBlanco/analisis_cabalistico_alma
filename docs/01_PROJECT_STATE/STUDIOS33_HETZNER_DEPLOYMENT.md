@@ -207,12 +207,18 @@ DATABASE_URL=postgresql://studio33_user:PASSWORD@postgres:5432/studio33_db
 SWISSEPH_PATH=/app/astrology/ephemeris
 
 GEMINI_API_KEY=
-GEMINI_MODEL=gemini-1.5-flash
-GROQ_API_KEY=
+GEMINI_MODEL=gemini-2.5-flash
+AI_PROVIDER=gemini       # prod; free_first solo dev
+GROQ_API_KEY=            # fallback / dev (TPD limitado en free)
 GROQ_MODEL=llama-3.3-70b-versatile
-OPENAI_API_KEY=          # opcional
-OLLAMA_BASE_URL=         # opcional, ej. http://host.docker.internal:11434
-OLLAMA_MODEL=llama3.2
+OPENAI_API_KEY=          # fallback
+OPENAI_MODEL=gpt-4o-mini
+OLLAMA_BASE_URL=         # opcional, ej. http://ollama:11434
+OLLAMA_MODEL=llama3.1
+AI_METERING_ENABLED=true
+AI_METERING_ENFORCED=false
+AI_DEFAULT_INCLUDED_CREDIT_EUR=8.00
+# Spec: docs/01_PROJECT_STATE/AI_USAGE_METERING_IMPLEMENTATION.md
 
 ADMIN_DEFAULT_PASSWORD=  # migraciones admin
 ```

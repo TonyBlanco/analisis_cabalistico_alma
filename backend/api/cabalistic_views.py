@@ -505,7 +505,9 @@ class KerykeionAnalysisView(APIView):
                 'zodiac_type': params.zodiac_type,
                 'ayanamsha': params.ayanamsha,
                 'engine': 'kerykeion',
-                'engine_version': '1.0.0'
+                'engine_version': '1.0.0',
+                'therapist_id': request.user.id,
+                'patient_id': patient.id,
             }
             
             # Validar con schema

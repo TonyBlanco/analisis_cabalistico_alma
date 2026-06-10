@@ -2,7 +2,8 @@
 
 **Estado**: ✅ COMPLETADO (Fase 1) + Mejoras Multi-Proveedor  
 **Fecha de aprobación**: 2026-01-25  
-**Última actualización**: 2026-01-26 (Soporte Groq/Ollama/Gemini)
+**Última actualización**: 2026-06-10 — AI Usage Metering spec; prod → Gemini primario  
+**Metering:** [AI_USAGE_METERING_IMPLEMENTATION.md](01_PROJECT_STATE/AI_USAGE_METERING_IMPLEMENTATION.md)
 **Responsable**: AGENTE_ARQ → CODE  
 
 ---

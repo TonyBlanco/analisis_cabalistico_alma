@@ -269,6 +269,13 @@ PROCESS_MEMORY_EMBEDDINGS = config('PROCESS_MEMORY_EMBEDDINGS', default='lexical
 # AI Provider Priority: free_first = groq → gemini → openai → ollama (PIP Phase 0)
 AI_PROVIDER = config('AI_PROVIDER', default='free_first')  # free_first, auto, gemini, groq, openai, ollama
 
+# AI Usage Metering (Fase 1) — docs/01_PROJECT_STATE/AI_USAGE_METERING_IMPLEMENTATION.md
+AI_METERING_ENABLED = config('AI_METERING_ENABLED', default=True, cast=bool)
+AI_METERING_ENFORCED = config('AI_METERING_ENFORCED', default=False, cast=bool)
+AI_DEFAULT_INCLUDED_CREDIT_EUR = config('AI_DEFAULT_INCLUDED_CREDIT_EUR', default='8.00')
+AI_EUR_USD_RATE = config('AI_EUR_USD_RATE', default='0.92')
+AI_OVERAGE_ALLOWED = config('AI_OVERAGE_ALLOWED', default=True, cast=bool)
+
 # =============================================================================
 # FEATURE FLAGS - AI MODULES
 # =============================================================================

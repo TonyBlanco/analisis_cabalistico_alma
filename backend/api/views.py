@@ -1772,7 +1772,12 @@ class GenerateAIPlanView(APIView):
                     status=status.HTTP_503_SERVICE_UNAVAILABLE
                 )
             
-            ai_plan = holistic_ai.generate_report(patient_data, test_history)
+            ai_plan = holistic_ai.generate_report(
+                patient_data,
+                test_history,
+                therapist=request.user,
+                patient_id=patient.id,
+            )
             
             # Verificar si hay error en la respuesta
             if 'error' in ai_plan:

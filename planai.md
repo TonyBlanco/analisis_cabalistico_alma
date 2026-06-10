@@ -25,7 +25,8 @@ Construir una **Plataforma de Inteligencia de Proceso (PIP)** que:
 
 | Capacidad | Existe | Gap |
 |-----------|--------|-----|
-| Multi-proveedor IA | `multi_ai_service.py` | No usado en holistic, MSHE, tarot legacy |
+| Multi-proveedor IA | `multi_ai_service.py` + `llm_bridge` | Astrología/tarot holístico aún Direct |
+| **Metering / billing IA** | Spec 2026-06-10 | [AI_USAGE_METERING_IMPLEMENTATION.md](docs/01_PROJECT_STATE/AI_USAGE_METERING_IMPLEMENTATION.md) — código pendiente |
 | Persistencia proceso | SWM artifacts, bioemotional DB, AnalysisRecord | Sin índice unificado ni embeddings |
 | Gobernanza simbólica | SWM v3 docs, contratos | No aplicada a todos los endpoints IA |
 | Aprendizaje | — | Cero feedback loop |

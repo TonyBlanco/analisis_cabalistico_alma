@@ -17,14 +17,81 @@ from rest_framework import status
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 
-from .astrology_ai_service import astrology_ai_service, is_rate_limit_error
+from .astrology_ai_service import AIInterpretationResult, astrology_ai_service, is_rate_limit_error
 from .models import Patient
 from .models_astrology import AstrologyNatalChart
 from .models_astrology_ai import AstrologyAIInterpretation
 from .permissions import IsTherapist
 from django.utils import timezone
+from api.ai.usage_meter import UsageRecordInput, record_usage
 
 logger = logging.getLogger(__name__)
+
+ASTROLOGY_TASK_TYPES = {
+    'natal': 'astrology.natal',
+    'transits': 'astrology.transits',
+    'progressions': 'astrology.progressions',
+    'solar_return': 'astrology.solar_return',
+    'situation': 'astrology.situation',
+}
+
+
+def _task_type_for_layer(layer: str) -> str:
+    if layer.startswith('psychological_'):
+        return 'astrology.psychological'
+    return ASTROLOGY_TASK_TYPES.get(layer, f'astrology.{layer}')
+
+
+def _record_astrology_usage(
+    *,
+    therapist,
+    patient: Patient,
+    result: AIInterpretationResult,
+    source_id: str = '',
+) -> None:
+    if not result.success:
+        return
+    record_usage(
+        UsageRecordInput(
+            therapist=therapist,
+            task_type=_task_type_for_layer(result.layer),
+            provider=result.provider or 'unknown',
+            model=result.model or '',
+            prompt_tokens=result.prompt_tokens,
+            completion_tokens=result.completion_tokens,
+            patient_id=patient.id,
+            source_type='astrology_ai_interpretation',
+            source_id=source_id,
+        )
+    )
+
+
+def _save_astrology_interpretation(
+    *,
+    patient: Patient,
+    therapist,
+    result: AIInterpretationResult,
+    interpretation_type: str,
+    input_context: dict,
+    source_id: str = '',
+) -> AstrologyAIInterpretation:
+    model_version = result.model or astrology_ai_service.model_name or 'unknown'
+    interpretation = AstrologyAIInterpretation.objects.create(
+        patient=patient,
+        created_by=therapist,
+        interpretation_type=interpretation_type,
+        interpretation_text=result.interpretation,
+        input_context=input_context,
+        model_version=model_version,
+        token_count=result.tokens_used,
+    )
+    _record_astrology_usage(
+        therapist=therapist,
+        patient=patient,
+        result=result,
+        source_id=source_id or str(interpretation.id),
+    )
+    return interpretation
 
 
 def _ai_error_response(error: str):
@@ -161,16 +228,14 @@ class AstrologyInterpretNatalView(APIView):
         result = astrology_ai_service.interpret_natal(natal_chart.chart_payload)
         
         if result.success:
-            # Save interpretation to database
-            interpretation = AstrologyAIInterpretation.objects.create(
+            interpretation = _save_astrology_interpretation(
                 patient=patient,
-                created_by=request.user,
+                therapist=request.user,
+                result=result,
                 interpretation_type='natal',
-                interpretation_text=result.interpretation,
                 input_context={'chart_id': natal_chart.id},
-                model_version='gemini-2.5-flash',
             )
-            
+
             logger.info(f"Saved new natal interpretation {interpretation.id} for patient {patient_id}")
             
             return Response({
@@ -245,12 +310,18 @@ class AstrologyInterpretTransitsView(APIView):
         )
         
         if result.success:
+            _record_astrology_usage(
+                therapist=request.user,
+                patient=patient,
+                result=result,
+            )
             return Response({
                 'success': True,
                 'interpretation': result.interpretation,
                 'layer': result.layer,
                 'patient_id': patient_id,
                 'transit_date': transit_date,
+                'tokens_used': result.tokens_used,
             })
         else:
             return _ai_error_response(result.error or 'Error generando interpretación')
@@ -313,11 +384,17 @@ class AstrologyInterpretProgressionsView(APIView):
         )
         
         if result.success:
+            _record_astrology_usage(
+                therapist=request.user,
+                patient=patient,
+                result=result,
+            )
             return Response({
                 'success': True,
                 'interpretation': result.interpretation,
                 'layer': result.layer,
                 'patient_id': patient_id,
+                'tokens_used': result.tokens_used,
             })
         else:
             return _ai_error_response(result.error or 'Error generando interpretación')
@@ -380,12 +457,18 @@ class AstrologyInterpretSolarReturnView(APIView):
         )
         
         if result.success:
+            _record_astrology_usage(
+                therapist=request.user,
+                patient=patient,
+                result=result,
+            )
             return Response({
                 'success': True,
                 'interpretation': result.interpretation,
                 'layer': result.layer,
                 'patient_id': patient_id,
                 'year': year,
+                'tokens_used': result.tokens_used,
             })
         else:
             return _ai_error_response(result.error or 'Error generando interpretación')
@@ -452,12 +535,18 @@ class AstrologyQuerySituationView(APIView):
         )
         
         if result.success:
+            _record_astrology_usage(
+                therapist=request.user,
+                patient=patient,
+                result=result,
+            )
             return Response({
                 'success': True,
                 'interpretation': result.interpretation,
                 'layer': result.layer,
                 'patient_id': patient_id,
                 'question': question,
+                'tokens_used': result.tokens_used,
             })
         else:
             return _ai_error_response(result.error or 'Error generando respuesta')
@@ -790,41 +879,43 @@ Tu objetivo es proporcionar interpretaciones que:
 
 Escribe en español, con un tono profesional pero cálido."""
 
-        # Generate interpretation using the AI service
         try:
-            result = astrology_ai_service._generate_content(
+            generated = astrology_ai_service._generate_content(
                 system_prompt=system_instruction,
                 user_prompt=prompt,
                 max_tokens=4096,
                 temperature=0.7,
             )
-            
-            if result and not result.startswith('Error'):
-                # Save to database
-                interpretation = AstrologyAIInterpretation.objects.create(
+            ai_result = astrology_ai_service._finalize_interpretation(
+                generated,
+                f'psychological_{section}',
+            )
+
+            if ai_result.success:
+                interpretation = _save_astrology_interpretation(
                     patient=patient,
-                    created_by=request.user,
+                    therapist=request.user,
+                    result=ai_result,
                     interpretation_type=f'psychological_{section}',
-                    interpretation_text=result,
                     input_context={
                         'section': section,
                         'data': data,
-                        'profile_summary': profile_summary
+                        'profile_summary': profile_summary,
                     },
-                    model_version='gemini-2.5-flash',
                 )
-                
+
                 logger.info(f"Saved psychological interpretation ({section}) for patient {patient_id}")
-                
+
                 return Response({
                     'success': True,
-                    'interpretation': result,
+                    'interpretation': ai_result.interpretation,
                     'section': section,
                     'patient_id': patient_id,
                     'interpretation_id': interpretation.id,
+                    'tokens_used': ai_result.tokens_used,
                 })
             else:
-                error_msg = result if result and result.startswith('Error') else 'No se pudo generar la interpretación'
+                error_msg = ai_result.error or 'No se pudo generar la interpretación'
                 return Response(
                     {'error': error_msg},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR

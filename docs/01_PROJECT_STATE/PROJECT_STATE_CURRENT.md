@@ -450,12 +450,14 @@ Cualquier modificación futura requiere actualización explícita de este docume
 - ✅ Turnstile en login + registro (widget Studios33, prod enforced)
 - ✅ Google Sign-In Gmail en `/login` (OAuth `studio33-app`, cuenta personal trial verificada)
 
-### IA y módulos (2026-06-05)
+### IA y módulos (2026-06-05 / actualizado 2026-06-10)
 - 📋 Auditoría wiring + IA: [AUDIT_MODULOS_IA_2026-06-05.md](./AUDIT_MODULOS_IA_2026-06-05.md)
 - 📋 Plan arquitectura LLM / memoria de proceso: [planai.md](../../planai.md)
 - ✅ **PIP Fase 0–2 desplegado en prod** (`studio33_api` rebuild): router `free_first`, `/api/ai/status/`, kabbalah interpret, bioemotional assist-draft, feedback, guardrails
 - ✅ Tests: 35 + harness 50 casos (OK servidor); CI `pip-ai-tests.yml`
 - 📋 Specs: [planai/PHASE_0_UNIFIED_LLM_ROUTER.md](./planai/PHASE_0_UNIFIED_LLM_ROUTER.md), [PHASE_2_GOVERNED_ASSISTANCE.md](./planai/PHASE_2_GOVERNED_ASSISTANCE.md)
+- 📋 **AI Usage Metering (nuevo):** [AI_USAGE_METERING_IMPLEMENTATION.md](./AI_USAGE_METERING_IMPLEMENTATION.md) — ledger por terapeuta, todos los módulos IA, base + créditos + overage; código Fase 1 pendiente
+- ⏳ **Prod AI:** migrar `AI_PROVIDER=gemini` (Groq free agotado en uso real)
 - ⏳ **PIP Fase 1:** Process Memory + RAG (pendiente)
 
 ### Pendiente

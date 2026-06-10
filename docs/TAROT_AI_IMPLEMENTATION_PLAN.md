@@ -1,6 +1,7 @@
 # AGENTE_ARQ > Plan de Implementación: Activación Tarot IA Holístico
 
-**Skills applied**: `ai-agents-architect`, `systematic-debugging`, `django-drf-patterns`
+**Skills applied**: `ai-agents-architect`, `systematic-debugging`, `django-drf-patterns`  
+**2026-06-10:** Tarot holístico entra en catálogo `task_type` del [AI Usage Metering](01_PROJECT_STATE/AI_USAGE_METERING_IMPLEMENTATION.md) (`tarot.holistic_card`, `tarot.holistic_spread`). Prod: Gemini primario.
 
 ## Context
 

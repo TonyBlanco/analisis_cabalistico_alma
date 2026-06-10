@@ -4,9 +4,10 @@ Integra Psicología, Cábala y Astrología en un solo reporte vía router unific
 """
 import json
 import re
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 
 from api.ai.llm_bridge import generate_text, is_llm_available, unavailable_message
+from api.ai.usage_meter import UsageContext
 
 
 class HolisticTherapistAI:
@@ -75,6 +76,9 @@ class HolisticTherapistAI:
         self,
         patient_data: Dict[str, Any],
         test_history: List[Dict[str, Any]],
+        *,
+        therapist=None,
+        patient_id: Optional[int] = None,
     ) -> Dict[str, Any]:
         if not self.enabled:
             return {"error": self.error_message or unavailable_message()}
@@ -105,7 +109,17 @@ Genera un Plan de Tratamiento Holístico en JSON estricto con: sintesis_diagnost
 receta_cabalistica (objeto), receta_natural (objeto), biodecodificacion.
 Responde SOLO JSON válido, sin markdown."""
 
-        result = generate_text(prompt, temperature=0.7, max_tokens=2048)
+        usage_context = None
+        if therapist is not None:
+            usage_context = UsageContext(
+                therapist=therapist,
+                task_type='holistic.therapist_plan',
+                patient_id=patient_id,
+                source_type='treatment_plan',
+            )
+        result = generate_text(
+            prompt, temperature=0.7, max_tokens=2048, usage_context=usage_context
+        )
         if not result.get('success'):
             return {"error": result.get('error') or 'Error de IA'}
 

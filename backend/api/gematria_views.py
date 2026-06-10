@@ -50,7 +50,8 @@ class GematriaInterpretationView(APIView):
                 katan=katan or ragil,
                 gadol=gadol or ragil,
                 atbash_value=atbash_value or 0,
-                resonances=resonances
+                resonances=resonances,
+                therapist=request.user,
             )
             
             # Verificar si hay error en la respuesta

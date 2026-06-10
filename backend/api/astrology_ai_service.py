@@ -36,6 +36,12 @@ from .astrology_ai_prompts import (
     build_situation_prompt,
 )
 from .utils.genai_response import extract_text
+from api.ai.llm_usage import (
+    extract_gemini_usage,
+    extract_openai_style_usage,
+    extract_ollama_usage,
+    normalize_token_usage,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -51,6 +57,31 @@ def is_failed_generation_text(text: str) -> bool:
 
 
 @dataclass
+class GenerationResult:
+    """Salida de _generate_content con métricas de tokens."""
+
+    text: str
+    prompt_tokens: int = 0
+    completion_tokens: int = 0
+    total_tokens: int = 0
+
+    @classmethod
+    def from_usage(cls, text: str, usage: Dict[str, int]) -> 'GenerationResult':
+        tokens = normalize_token_usage(
+            prompt_tokens=usage.get('prompt_tokens', 0),
+            completion_tokens=usage.get('completion_tokens', 0),
+            total_tokens=usage.get('total_tokens', 0),
+            fallback_texts=(text,) if not usage.get('total_tokens') else None,
+        )
+        return cls(
+            text=text,
+            prompt_tokens=tokens['prompt_tokens'],
+            completion_tokens=tokens['completion_tokens'],
+            total_tokens=tokens['total_tokens'],
+        )
+
+
+@dataclass
 class AIInterpretationResult:
     """Resultado de una interpretación AI."""
     success: bool
@@ -58,6 +89,10 @@ class AIInterpretationResult:
     layer: str
     error: Optional[str] = None
     tokens_used: Optional[int] = None
+    prompt_tokens: int = 0
+    completion_tokens: int = 0
+    provider: Optional[str] = None
+    model: Optional[str] = None
 
 
 class AstrologyAIService:
@@ -232,32 +267,34 @@ class AstrologyAIService:
         user_prompt: str,
         max_tokens: int = 1024,
         temperature: float = 0.7,
-    ) -> str:
+    ) -> GenerationResult:
         """
         Genera contenido usando el proveedor AI configurado.
         Soporta: Gemini, Groq, Ollama
         """
         self._ensure_initialized()
-        
+
         if not self.enabled:
-            return f"Error: {self.error_message or 'Servicio AI no disponible'}"
-        
+            return GenerationResult(
+                text=f"Error: {self.error_message or 'Servicio AI no disponible'}",
+            )
+
         print(f"[AI DEBUG] Provider: {self.provider}, Model: {self.model_name}, max_tokens={max_tokens}")
-        
+
         try:
             if self.provider == 'gemini':
                 return self._generate_gemini(system_prompt, user_prompt, max_tokens, temperature)
-            elif self.provider == 'groq':
+            if self.provider == 'groq':
                 return self._generate_groq(system_prompt, user_prompt, max_tokens, temperature)
-            elif self.provider == 'ollama':
+            if self.provider == 'ollama':
                 return self._generate_ollama(system_prompt, user_prompt, max_tokens, temperature)
-            else:
-                return "Error: Proveedor AI no configurado"
+            return GenerationResult(text="Error: Proveedor AI no configurado")
         except Exception as e:
             logger.error(f"Error generando contenido AI: {str(e)}", exc_info=True)
             raise
 
-    def _finalize_interpretation(self, interpretation: str, layer: str) -> AIInterpretationResult:
+    def _finalize_interpretation(self, generated: GenerationResult, layer: str) -> AIInterpretationResult:
+        interpretation = generated.text
         if is_failed_generation_text(interpretation):
             return AIInterpretationResult(
                 success=False,
@@ -271,9 +308,14 @@ class AstrologyAIService:
             success=True,
             interpretation=interpretation,
             layer=layer,
+            tokens_used=generated.total_tokens,
+            prompt_tokens=generated.prompt_tokens,
+            completion_tokens=generated.completion_tokens,
+            provider=self.provider,
+            model=self.model_name,
         )
-    
-    def _generate_gemini(self, system_prompt: str, user_prompt: str, max_tokens: int, temperature: float) -> str:
+
+    def _generate_gemini(self, system_prompt: str, user_prompt: str, max_tokens: int, temperature: float) -> GenerationResult:
         """Generate content using Gemini API."""
         from google.genai import types
         
@@ -289,17 +331,20 @@ class AstrologyAIService:
             config=config,
         )
         
-        # Extract text from response
         if hasattr(response, 'text'):
-            return response.text
+            text = response.text
         elif hasattr(response, 'candidates') and response.candidates:
             candidate = response.candidates[0]
             if hasattr(candidate, 'content') and hasattr(candidate.content, 'parts'):
-                return ''.join(part.text for part in candidate.content.parts if hasattr(part, 'text'))
-        
-        return extract_text(response) if response else "Sin respuesta del modelo"
-    
-    def _generate_groq(self, system_prompt: str, user_prompt: str, max_tokens: int, temperature: float) -> str:
+                text = ''.join(part.text for part in candidate.content.parts if hasattr(part, 'text'))
+            else:
+                text = extract_text(response) if response else "Sin respuesta del modelo"
+        else:
+            text = extract_text(response) if response else "Sin respuesta del modelo"
+
+        return GenerationResult.from_usage(text, extract_gemini_usage(response))
+
+    def _generate_groq(self, system_prompt: str, user_prompt: str, max_tokens: int, temperature: float) -> GenerationResult:
         """Generate content using Groq API."""
         response = self._groq_client.chat.completions.create(
             model=self.model_name,
@@ -310,9 +355,10 @@ class AstrologyAIService:
             max_tokens=max_tokens,
             temperature=temperature,
         )
-        return response.choices[0].message.content
-    
-    def _generate_ollama(self, system_prompt: str, user_prompt: str, max_tokens: int, temperature: float) -> str:
+        text = response.choices[0].message.content
+        return GenerationResult.from_usage(text, extract_openai_style_usage(response))
+
+    def _generate_ollama(self, system_prompt: str, user_prompt: str, max_tokens: int, temperature: float) -> GenerationResult:
         """Generate content using local Ollama."""
         import requests
         
@@ -331,7 +377,10 @@ class AstrologyAIService:
             timeout=120,  # Ollama can be slow
         )
         response.raise_for_status()
-        return response.json().get('response', '')
+        payload = response.json()
+        text = payload.get('response', '')
+        usage = extract_ollama_usage(payload, user_prompt, text)
+        return GenerationResult.from_usage(text, usage)
     
     def interpret_natal(self, chart_data: Dict[str, Any]) -> AIInterpretationResult:
         """

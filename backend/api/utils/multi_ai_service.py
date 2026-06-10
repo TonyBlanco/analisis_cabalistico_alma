@@ -11,7 +11,15 @@ If one provider fails (503, rate limit, etc.), automatically tries the next.
 """
 import logging
 from typing import Optional, Dict, Any, List
+
 from django.conf import settings
+
+from api.ai.llm_usage import (
+    extract_gemini_usage,
+    extract_openai_style_usage,
+    extract_ollama_usage,
+    normalize_token_usage,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -72,12 +80,32 @@ def _get_groq_client():
     return _groq_client
 
 
-def _call_gemini(prompt: str, config: Dict[str, Any]) -> Optional[str]:
+def _llm_payload(
+    text: str,
+    provider: str,
+    model: str,
+    usage: Dict[str, int],
+) -> Dict[str, Any]:
+    tokens = normalize_token_usage(
+        prompt_tokens=usage.get('prompt_tokens', 0),
+        completion_tokens=usage.get('completion_tokens', 0),
+        total_tokens=usage.get('total_tokens', 0),
+        fallback_texts=(text,) if not usage.get('total_tokens') else None,
+    )
+    return {
+        'text': text,
+        'provider': provider,
+        'model': model,
+        **tokens,
+    }
+
+
+def _call_gemini(prompt: str, config: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     """Call Gemini API"""
     client = _get_gemini_client()
     if not client:
         return None
-    
+
     model = getattr(settings, 'GEMINI_MODEL', 'gemini-1.5-flash')
     try:
         response = client.models.generate_content(
@@ -89,27 +117,28 @@ def _call_gemini(prompt: str, config: Dict[str, Any]) -> Optional[str]:
                 'max_output_tokens': config.get('max_tokens', 1024),
             }
         )
-        # Extract text from response
         if hasattr(response, 'text'):
-            return response.text
+            text = response.text
         elif hasattr(response, 'candidates') and response.candidates:
-            return response.candidates[0].content.parts[0].text
-        return str(response)
+            text = response.candidates[0].content.parts[0].text
+        else:
+            text = str(response)
+        return _llm_payload(text, 'gemini', model, extract_gemini_usage(response))
     except Exception as e:
         error_str = str(e)
         if '503' in error_str or 'overloaded' in error_str.lower():
-            logger.warning(f"[MultiAI] Gemini 503 - trying fallback")
+            logger.warning("[MultiAI] Gemini 503 - trying fallback")
         else:
             logger.error(f"[MultiAI] Gemini error: {e}")
         return None
 
 
-def _call_openai(prompt: str, config: Dict[str, Any]) -> Optional[str]:
+def _call_openai(prompt: str, config: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     """Call OpenAI API"""
     client = _get_openai_client()
     if not client:
         return None
-    
+
     model = getattr(settings, 'OPENAI_MODEL', 'gpt-4o-mini')
     try:
         response = client.chat.completions.create(
@@ -121,22 +150,23 @@ def _call_openai(prompt: str, config: Dict[str, Any]) -> Optional[str]:
             temperature=config.get('temperature', 0.7),
             max_tokens=config.get('max_tokens', 1024),
         )
-        return response.choices[0].message.content
+        text = response.choices[0].message.content
+        return _llm_payload(text, 'openai', model, extract_openai_style_usage(response))
     except Exception as e:
         error_str = str(e)
         if '429' in error_str or 'rate' in error_str.lower():
-            logger.warning(f"[MultiAI] OpenAI rate limited - trying fallback")
+            logger.warning("[MultiAI] OpenAI rate limited - trying fallback")
         else:
             logger.error(f"[MultiAI] OpenAI error: {e}")
         return None
 
 
-def _call_groq(prompt: str, config: Dict[str, Any]) -> Optional[str]:
+def _call_groq(prompt: str, config: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     """Call Groq API"""
     client = _get_groq_client()
     if not client:
         return None
-    
+
     model = getattr(settings, 'GROQ_MODEL', 'llama-3.3-70b-versatile')
     try:
         response = client.chat.completions.create(
@@ -148,13 +178,14 @@ def _call_groq(prompt: str, config: Dict[str, Any]) -> Optional[str]:
             temperature=config.get('temperature', 0.7),
             max_tokens=config.get('max_tokens', 1024),
         )
-        return response.choices[0].message.content
+        text = response.choices[0].message.content
+        return _llm_payload(text, 'groq', model, extract_openai_style_usage(response))
     except Exception as e:
         logger.error(f"[MultiAI] Groq error: {e}")
         return None
 
 
-def _call_ollama(prompt: str, config: Dict[str, Any]) -> Optional[str]:
+def _call_ollama(prompt: str, config: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     """Call local Ollama API (server-side, http://ollama:11434 in Docker network)."""
     import requests
 
@@ -182,7 +213,10 @@ def _call_ollama(prompt: str, config: Dict[str, Any]) -> Optional[str]:
             timeout=120,
         )
         if response.status_code == 200:
-            return response.json().get('response', '')
+            payload = response.json()
+            text = payload.get('response', '')
+            usage = extract_ollama_usage(payload, prompt, text)
+            return _llm_payload(text, 'ollama', model, usage)
     except Exception as e:
         logger.warning(f"[MultiAI] Ollama not available: {e}")
     return None
@@ -289,8 +323,12 @@ class MultiAIService:
                 logger.info(f"[MultiAI] Success with provider: {provider}")
                 return {
                     "success": True,
-                    "text": result,
+                    "text": result["text"],
                     "provider": provider,
+                    "model": result.get("model", ""),
+                    "prompt_tokens": result.get("prompt_tokens", 0),
+                    "completion_tokens": result.get("completion_tokens", 0),
+                    "total_tokens": result.get("total_tokens", 0),
                     "error": None,
                 }
             else:
@@ -311,15 +349,21 @@ class MultiAIService:
 multi_ai = MultiAIService()
 
 
-def generate_with_fallback(prompt: str, **kwargs) -> Dict[str, Any]:
+def generate_with_fallback(prompt: str, usage_context=None, **kwargs) -> Dict[str, Any]:
     """
     Convenience function for generating AI text with fallback.
     
     Args:
         prompt: The prompt to send to the AI
+        usage_context: Optional UsageContext for AI usage metering
         **kwargs: Optional config (temperature, max_tokens, top_p)
     
     Returns:
         Dict with success, text, provider, and error fields
     """
-    return multi_ai.generate(prompt, **kwargs)
+    result = multi_ai.generate(prompt, **kwargs)
+    if usage_context and result.get('success'):
+        from api.ai.usage_meter import record_from_llm_result
+
+        record_from_llm_result(usage_context, result)
+    return result

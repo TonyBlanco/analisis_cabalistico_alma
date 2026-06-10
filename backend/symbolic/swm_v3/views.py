@@ -456,6 +456,7 @@ def generate_ai_symbolic_reading(
     system_meta: Dict[str, Any],
     context_focus: Optional[str] = None,
     intention: Optional[str] = None,
+    usage_context=None,
 ) -> Dict[str, Any]:
     """
     Generate symbolic reading using AI (Gemini).
@@ -489,7 +490,9 @@ Responde SOLO este JSON (sin markdown):
 
     try:
         # Use multi-provider AI service with automatic fallback
-        ai_result = generate_with_fallback(prompt, temperature=0.7, max_tokens=512)
+        ai_result = generate_with_fallback(
+            prompt, temperature=0.7, max_tokens=512, usage_context=usage_context
+        )
         
         if not ai_result.get("success"):
             raise ValueError(ai_result.get("error", "AI generation failed"))
@@ -773,6 +776,7 @@ def generate_educational_reading(
     astrology_enrichment: Optional[Dict[str, Any]] = None,
     include_ai: bool = False,
     deck_scope: str = "major",
+    usage_context=None,
 ) -> Dict[str, Any]:
     """
     Generate an educational symbolic reading.
@@ -920,6 +924,7 @@ def generate_educational_reading(
                 system_meta=system_meta,
                 context_focus=enriched_context,
                 intention=intention,
+                usage_context=usage_context,
             )
             logger.info(f"[SWM-v3] AI symbolic reading generated successfully")
         except Exception as e:
@@ -1011,6 +1016,17 @@ class SwmV3SymbolicReadingCreateView(APIView):
             if not system_meta.get("implemented", False):
                 logger.info(f"[SWM-v3] System '{system_id}' not implemented, using fallback")
             
+            usage_context = None
+            if include_ai:
+                from api.ai.usage_meter import UsageContext
+
+                usage_context = UsageContext(
+                    therapist=request.user,
+                    task_type='swm_v3.symbolic_reading',
+                    patient_id=int(consultant_id) if consultant_id else None,
+                    source_type='swm_v3_reading',
+                )
+
             # Generate educational reading
             reading_payload = generate_educational_reading(
                 system_id=system_id,
@@ -1020,6 +1036,7 @@ class SwmV3SymbolicReadingCreateView(APIView):
                 intention=intention,
                 include_ai=include_ai,
                 deck_scope=deck_scope,
+                usage_context=usage_context,
             )
             
             # Determine if we should store

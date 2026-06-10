@@ -1,5 +1,7 @@
 # 🤖 Documentación de Integración con IA - Análisis Cabalístico
 
+> **2026-06-10:** Documentación operativa actualizada en [AI_INTEGRATION_GUIDE.md](../AI_INTEGRATION_GUIDE.md) y [AI_USAGE_METERING_IMPLEMENTATION.md](../01_PROJECT_STATE/AI_USAGE_METERING_IMPLEMENTATION.md). Este archivo es referencia legacy (Gemini-centric frontend). Nuevos módulos: usar `llm_bridge` + metering.
+
 ## 📋 Índice
 1. [Resumen del Proyecto](#resumen-del-proyecto)
 2. [Configuración de Gemini AI](#configuración-de-gemini-ai)

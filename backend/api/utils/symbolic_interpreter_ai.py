@@ -75,14 +75,16 @@ class SymbolicInterpreterAI:
         
         return True, None
     
-    def generate_symbolic_interpretation(self, prompt: str) -> str:
+    def generate_symbolic_interpretation(self, prompt: str, *, usage_context=None) -> str:
         """Generates symbolic interpretation via unified LLM router."""
         from api.ai.llm_bridge import generate_text, unavailable_message
 
         if not self.enabled:
             raise Exception(self.error_message or unavailable_message())
 
-        result = generate_text(prompt, temperature=0.7, max_tokens=1024)
+        result = generate_text(
+            prompt, temperature=0.7, max_tokens=1024, usage_context=usage_context
+        )
         if not result.get('success'):
             raise Exception(result.get('error') or 'AI generation failed')
         return result.get('text') or ''
@@ -148,7 +150,16 @@ def generate_symbolic_interpretation_view(request):
     
     # Generate interpretation
     try:
-        ai_response = symbolic_ai_service.generate_symbolic_interpretation(prompt)
+        from api.ai.usage_meter import UsageContext
+
+        usage_context = UsageContext(
+            therapist=request.user,
+            task_type='symbolic.tree_interpret',
+            source_type='symbolic_interpreter',
+        )
+        ai_response = symbolic_ai_service.generate_symbolic_interpretation(
+            prompt, usage_context=usage_context
+        )
         
         return Response({
             'success': True,

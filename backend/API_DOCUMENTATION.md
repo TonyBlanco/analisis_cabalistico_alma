@@ -529,6 +529,40 @@ Webhook para recibir eventos de Stripe (configuración del lado de Stripe).
 
 ---
 
+### 🤖 AI Usage Metering (Terapeuta) — 📋 Planificado (2026-06-10)
+
+Especificación: `docs/01_PROJECT_STATE/AI_USAGE_METERING_IMPLEMENTATION.md`
+
+Modelo de facturación: **cuota base + créditos AI incluidos + overage** por consumo real de tokens (todos los módulos IA server-side).
+
+#### GET `/api/therapist/ai-usage/` *(pendiente Fase 2)*
+Resumen de consumo del mes actual.
+
+**Response (ejemplo):**
+```json
+{
+  "billing_period": "2026-06",
+  "included_credit_eur": "8.00",
+  "consumed_eur": "3.42",
+  "remaining_eur": "4.58",
+  "overage_eur": "0.00",
+  "total_tokens": 412000,
+  "by_task_type": {
+    "astrology.natal": { "count": 12, "cost_eur": "0.09" }
+  }
+}
+```
+
+#### GET `/api/therapist/ai-usage/history/` *(pendiente)*
+Últimos eventos `AIUsageEvent`.
+
+#### POST `/api/therapist/ai-credits/purchase/` *(pendiente Fase 4)*
+Compra pack de créditos AI vía Stripe.
+
+**Códigos:** `402` crédito agotado (cuando `AI_METERING_ENFORCED=true`).
+
+---
+
 ### 👨‍💼 Administración (Solo Administradores)
 
 #### GET `/api/admin/check/`

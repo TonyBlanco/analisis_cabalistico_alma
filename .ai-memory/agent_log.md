@@ -18,3 +18,18 @@
 
 ## [2026-06-08 15:20 UTC] Claude
 [DEPLOY] Tarot PR-1 f73e43b1 — Hetzner studios33.app; nginx reload manual tras test embeddings fallido
+
+## [2026-06-10 17:22 UTC] Claude
+[DEPLOY] PR1 informes astrología en prod studios33.app — main 91363fcb (feat 75ef02f9 + fix migración 91363fcb); migración 0094 aplicada
+
+## [2026-06-10 17:40 UTC] Claude
+[BUG] Pestaña Informe enterrada bajo scroll — movida a barra sticky bajo header; desplegado 8faee262
+
+## [2026-06-10 18:34 UTC] Claude
+[DECISION] AI Usage Metering spec — ledger AIUsageEvent por terapeuta, todos módulos IA, base+créditos+overage; doc canónico docs/01_PROJECT_STATE/AI_USAGE_METERING_IMPLEMENTATION.md; código Fase 1 pendiente
+
+## [2026-06-10 18:37 UTC] Claude
+[ENDPOINT] AI Usage Metering Fase 1 — AIUsageEvent + usage_meter + llm_bridge usage_context + astrología token_count + GET /api/therapist/ai-usage/
+
+## [2026-06-10 18:47 UTC] Claude
+[DEPLOY] Metering Fase 2 + cableado snippets/gematria/tarot — deploy Hetzner 2026-06-10, migración 0096 OK, patch-ai-metering-env

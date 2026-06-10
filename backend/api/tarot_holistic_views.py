@@ -1100,6 +1100,7 @@ def resolve_consultant_context(request, context: Dict[str, Any]) -> Dict[str, An
         'consultant_name': (context.get('consultantName') or '').strip() or 'el consultante',
         'profile_user_id': None,
         'birth_date': None,
+        'patient_id': None,
     }
 
     if context.get('birthDate'):
@@ -1113,6 +1114,7 @@ def resolve_consultant_context(request, context: Dict[str, Any]) -> Dict[str, An
 
     try:
         patient = Patient.objects.get(id=int(consultant_id), therapist=request.user)
+        result['patient_id'] = patient.id
         if not context.get('consultantName'):
             name = (patient.full_name or '').strip()
             if not name:
@@ -1154,6 +1156,32 @@ def filter_clinical_terms(text: str) -> str:
 def get_ai_service():
     """Obtiene la instancia del servicio AI multi-provider."""
     return AstrologyAIService()
+
+
+def _record_tarot_holistic_usage(
+    *,
+    therapist,
+    task_type: str,
+    generated,
+    ai_service,
+    patient_id: Optional[int] = None,
+    source_id: str = '',
+) -> None:
+    from api.ai.usage_meter import UsageRecordInput, record_usage
+
+    record_usage(
+        UsageRecordInput(
+            therapist=therapist,
+            task_type=task_type,
+            provider=ai_service.provider or 'unknown',
+            model=ai_service.model_name or '',
+            prompt_tokens=getattr(generated, 'prompt_tokens', 0),
+            completion_tokens=getattr(generated, 'completion_tokens', 0),
+            patient_id=patient_id,
+            source_type='tarot_holistic',
+            source_id=source_id,
+        )
+    )
 
 
 # =============================================================================
@@ -1343,18 +1371,28 @@ class TarotInterpretCardView(APIView):
         temperature = options.get('temperature', 0.75)
 
         try:
-            interpretation = ai_service._generate_content(
+            generated = ai_service._generate_content(
                 system_prompt=ORACLE_SYSTEM_PROMPT,
                 user_prompt=user_prompt,
                 max_tokens=4096,
                 temperature=temperature,
             )
-            
+            interpretation = generated.text
+
             if not interpretation or interpretation.startswith("Error:"):
                 return Response({
                     "error": interpretation.replace("Error:", "", 1).strip() or "Servicio AI no disponible",
                     "code": "AI_GENERATION_FAILED",
                 }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+
+            _record_tarot_holistic_usage(
+                therapist=request.user,
+                task_type='tarot.holistic_card',
+                generated=generated,
+                ai_service=ai_service,
+                patient_id=consultant_ctx.get('patient_id'),
+                source_id=arcana_id,
+            )
 
             # Filtrar términos clínicos (capa de seguridad)
             interpretation = filter_clinical_terms(interpretation)
@@ -1525,18 +1563,28 @@ class TarotInterpretSpreadView(APIView):
         temperature = options.get('temperature', 0.75)
 
         try:
-            interpretation = ai_service._generate_content(
+            generated = ai_service._generate_content(
                 system_prompt=ORACLE_SYSTEM_PROMPT,
                 user_prompt=user_prompt,
                 max_tokens=4096,
                 temperature=temperature,
             )
+            interpretation = generated.text
 
             if not interpretation or interpretation.startswith("Error:"):
                 return Response({
                     "error": interpretation.replace("Error:", "", 1).strip() or "Servicio AI no disponible",
                     "code": "AI_GENERATION_FAILED",
                 }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+
+            _record_tarot_holistic_usage(
+                therapist=request.user,
+                task_type='tarot.holistic_spread',
+                generated=generated,
+                ai_service=ai_service,
+                patient_id=consultant_ctx.get('patient_id'),
+                source_id=spread_type,
+            )
             
             # Filtrar términos clínicos
             interpretation = filter_clinical_terms(interpretation)

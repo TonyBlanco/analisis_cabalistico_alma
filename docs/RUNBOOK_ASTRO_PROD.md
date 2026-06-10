@@ -51,7 +51,14 @@ Variables de entorno requeridas en `/opt/studio33/.env`:
 ```bash
 ASTRO_MULTITECH_ENABLED=True
 KERYKEION_AI_SNIPPETS_ENABLED=True
-GROQ_API_KEY=<key>   # o GEMINI_API_KEY como fallback
+AI_PROVIDER=gemini
+GEMINI_API_KEY=<key>
+GEMINI_MODEL=gemini-2.5-flash
+OPENAI_API_KEY=<optional-fallback>
+# Groq solo dev / último fallback (free tier TPD limitado)
+GROQ_API_KEY=<optional>
+AI_METERING_ENABLED=true
+# Ver docs/01_PROJECT_STATE/AI_USAGE_METERING_IMPLEMENTATION.md
 ```
 
 Script integrado en D5 (público + autenticado):

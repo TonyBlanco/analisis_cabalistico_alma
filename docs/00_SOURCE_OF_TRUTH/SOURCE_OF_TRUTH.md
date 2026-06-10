@@ -78,3 +78,13 @@ Se reconoce formalmente la introducción de SWM v3: una capa interpretativa simb
 - Cualquier implementación de SWM v3 deberá respetar las reglas de seguridad y auditoría descritas en la fuente de la verdad y en la auditoría vigente.
 
 Este añadido amplía la documentación sin reescribir la fuente de la verdad existente.
+
+### Actualización (2026-06-10) — AI Usage Metering
+
+La facturación de inferencia IA para terapeutas deja el modelo plano (“ilimitado”) hacia **cuota base + créditos de API incluidos + overage por consumo**, con ledger auditable por llamada (`AIUsageEvent`).
+
+- **Especificación:** `../01_PROJECT_STATE/AI_USAGE_METERING_IMPLEMENTATION.md`
+- **Alcance:** todos los módulos server-side que llaman LLM (astrología, tarot, SWM v3, holistic, gematria, etc.)
+- **Excluido del cómputo:** informe sesión astrología PR1 (snapshot sin LLM)
+- **Gobernanza:** el metering registra tokens y coste; no almacena contenido de prompts (minimización PHI)
+- **Implementación:** Fase 1 medición → Fase 4 cobro Stripe; `AI_METERING_ENFORCED=false` hasta calibrar créditos

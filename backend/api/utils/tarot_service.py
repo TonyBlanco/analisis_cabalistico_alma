@@ -99,7 +99,10 @@ class TarotTherapeuticAI:
         hebrew_letter: str,
         test_name: str,
         clinical_severity: str,
-        patient_name: Optional[str] = None
+        patient_name: Optional[str] = None,
+        *,
+        therapist=None,
+        patient_id: Optional[int] = None,
     ) -> Dict[str, Any]:
         """
         Analiza cómo el arquetipo del Tarot está afectando negativamente (Sombra)
@@ -166,8 +169,19 @@ IMPORTANTE:
         
         try:
             from api.ai.llm_bridge import generate_text
+            from api.ai.usage_meter import UsageContext
 
-            ai_result = generate_text(prompt, temperature=0.8, max_tokens=2048)
+            usage_context = None
+            if therapist is not None:
+                usage_context = UsageContext(
+                    therapist=therapist,
+                    task_type='tarot.swm_reading',
+                    patient_id=patient_id,
+                    source_type='tarot_therapeutic',
+                )
+            ai_result = generate_text(
+                prompt, temperature=0.8, max_tokens=2048, usage_context=usage_context
+            )
             if not ai_result.get('success'):
                 return {"error": ai_result.get('error') or 'Error de IA'}
 
@@ -275,7 +289,9 @@ def analyze_archetype_vs_clinical(patient, birth_date: str) -> Dict[str, Any]:
         hebrew_letter=arcana_info['hebrew'],
         test_name=test_name,
         clinical_severity=clinical_severity,
-        patient_name=patient.full_name or patient.first_name
+        patient_name=patient.full_name or patient.first_name,
+        therapist=patient.therapist,
+        patient_id=patient.id,
     )
     
     if 'error' in analysis:

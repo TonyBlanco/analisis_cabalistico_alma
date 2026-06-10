@@ -15,6 +15,7 @@ from rest_framework.views import APIView
 
 from api.ai.guardrails import check_output
 from api.ai.llm_bridge import generate_text, is_llm_available, unavailable_message
+from api.ai.usage_meter import UsageContext
 from api.ai.prompts import bioemotion_synthesis_draft_prompt, kabbalah_interpret_prompt
 from api.bioemotional.models import (
     BioEmotionalHypothesis,
@@ -71,7 +72,17 @@ class KabbalahInterpretView(APIView):
             rag_context=rag_context,
             patient_history_summary=patient_history,
         )
-        result = generate_text(prompt, temperature=temperature, max_tokens=max_tokens)
+        usage_context = UsageContext(
+            therapist=request.user,
+            task_type='ai.kabbalah_interpret',
+            source_type='kabbalah_interpret',
+        )
+        result = generate_text(
+            prompt,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            usage_context=usage_context,
+        )
         if not result.get("success"):
             return Response(
                 {
@@ -151,7 +162,19 @@ class BioEmotionalSynthesisAssistDraftView(APIView):
             current_text=synthesis.text,
             rag_context=rag_context,
         )
-        result = generate_text(prompt, temperature=temperature, max_tokens=max_tokens)
+        usage_context = UsageContext(
+            therapist=request.user,
+            task_type='bioemotional.assist_draft',
+            patient_id=patient.id,
+            source_type='bioemotional_synthesis',
+            source_id=str(synthesis.pk),
+        )
+        result = generate_text(
+            prompt,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            usage_context=usage_context,
+        )
         if not result.get("success"):
             return Response(
                 {

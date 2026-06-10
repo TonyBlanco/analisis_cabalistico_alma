@@ -161,6 +161,7 @@ from .therapist_patient_invitation_views import (
 from .symbolic_views import TreeStructuralStateView
 from .symbolic_session_notes_views import SymbolicSessionNoteView
 from .symbolic_session_metrics_views import SymbolicSessionEventView, HybridModeMetricsView
+from .clinical_onboarding_views import ClinicalModeRequestView, BetaFeedbackView
 from .utils.symbolic_interpreter_ai import (
     generate_symbolic_interpretation_view,
     symbolic_interpreter_status_view,
@@ -192,6 +193,9 @@ urlpatterns = [
     path('me/profile/', UpdateProfileView.as_view(), name='update_profile'),
     path('profile/me/', UserProfileMeView.as_view(), name='profile_me'),
     path('profile/me/consent/', UserProfileConsentView.as_view(), name='profile_me_consent'),
+    # Onboarding beta tester médica (Modo Híbrido — Step 9)
+    path('profile/clinical-mode-request/', ClinicalModeRequestView.as_view(), name='clinical_mode_request'),
+    path('beta-feedback/', BetaFeedbackView.as_view(), name='beta_feedback'),
     path('personal/therapist-invitations/', PersonalTherapistInvitationListView.as_view(), name='personal_therapist_invitations'),
     path(
         'personal/therapist-invitations/<int:invitation_id>/accept/',

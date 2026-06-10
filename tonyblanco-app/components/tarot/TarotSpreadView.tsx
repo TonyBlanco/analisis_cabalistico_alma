@@ -8,6 +8,7 @@ export type TarotSpreadPosition = {
   id: string;
   nameSpanish?: string | null;
   label?: string | null;
+  meaning?: string | null;
 };
 
 export type TarotSpread = {

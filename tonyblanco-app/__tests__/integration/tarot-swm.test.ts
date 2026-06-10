@@ -10,14 +10,14 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { swmTarotApi } from '../lib/api/swm/tarot/client';
-import type { 
-  CreateInstanceRequest, 
+import { swmTarotApi } from '../../lib/api/swm/tarot/client';
+import type {
+  CreateInstanceRequest,
   SaveSpreadRequest,
   WorkspaceInstance,
   WorkspaceSession,
   WorkspaceArtifact,
-} from '../lib/api/swm/tarot/types';
+} from '../../lib/api/swm/tarot/types';
 
 // Mock fetch
 const mockFetch = vi.fn();

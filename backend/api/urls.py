@@ -160,6 +160,7 @@ from .therapist_patient_invitation_views import (
 )
 from .symbolic_views import TreeStructuralStateView
 from .symbolic_session_notes_views import SymbolicSessionNoteView
+from .symbolic_session_metrics_views import SymbolicSessionEventView, HybridModeMetricsView
 from .utils.symbolic_interpreter_ai import (
     generate_symbolic_interpretation_view,
     symbolic_interpreter_status_view,
@@ -239,6 +240,7 @@ urlpatterns = [
     ),
     path('therapist/dashboard/', TherapistDashboardView.as_view(), name='therapist_dashboard'),
     path('therapist/metrics/', TherapistMetricsView.as_view(), name='therapist_metrics'),
+    path('therapist/hybrid-metrics/', HybridModeMetricsView.as_view(), name='therapist_hybrid_metrics'),
     path('therapist/patients/', PatientListCreateView.as_view(), name='patient_list_create'),
     path('therapist/patients/<int:pk>/', PatientDetailView.as_view(), name='patient_detail'),
     path('therapist/patients/<int:pk>/profile/', TherapistPatientProfileView.as_view(), name='therapist_patient_profile'),
@@ -385,6 +387,8 @@ urlpatterns = [
     path('symbolic/tree-structural-state/', TreeStructuralStateView.as_view(), name='tree_structural_state'),
     # Notas/resumen de sesión simbólica asistida (Modo Híbrido — Step 7)
     path('symbolic/session-notes/', SymbolicSessionNoteView.as_view(), name='symbolic_session_notes'),
+    # Observabilidad D6 del Modo Híbrido (Step 9): registro de eventos agregables
+    path('symbolic/session-events/', SymbolicSessionEventView.as_view(), name='symbolic_session_events'),
     
     # Astrology Core (astronomical calculations only)
     path('therapist/', include('astrology.api.urls')),

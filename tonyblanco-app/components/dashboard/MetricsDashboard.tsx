@@ -14,6 +14,7 @@ import {
 } from 'chart.js';
 import { Line, Bar, Doughnut } from 'react-chartjs-2';
 import type { TherapistMetrics, MonthlyCount } from '@/lib/types/metrics';
+import HybridMetricsPanel from './HybridMetricsPanel';
 
 ChartJS.register(
   CategoryScale,
@@ -162,7 +163,7 @@ export default function MetricsDashboard({ metrics }: MetricsDashboardProps) {
   const hasBarSeries = sessions_by_month.length > 0 || fichas_by_month.length > 0;
 
   return (
-    <section aria-label="Panel de métricas del terapeuta" className="space-y-6">
+    <section aria-label="Panel de metricas del terapeuta" className="space-y-6">
       {/* KPI cards */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
         <KpiCard label="Pacientes totales"    value={kpi.total_patients}       color="text-indigo-600" />
@@ -183,11 +184,11 @@ export default function MetricsDashboard({ metrics }: MetricsDashboardProps) {
                 ...CHART_OPTS_BASE,
                 plugins: { legend: { display: false }, tooltip: { mode: 'index' } },
               }}
-              aria-label="Gráfica de sesiones por mes"
+              aria-label="Grafica de sesiones por mes"
             />
           </div>
         ) : (
-          <EmptyState message="Sin sesiones en los últimos 12 meses" />
+          <EmptyState message="Sin sesiones en los ultimos 12 meses" />
         )}
       </div>
 
@@ -215,18 +216,18 @@ export default function MetricsDashboard({ metrics }: MetricsDashboardProps) {
                   tooltip: { mode: 'index' },
                 },
               }}
-              aria-label="Gráfica de sesiones y fichas por mes"
+              aria-label="Grafica de sesiones y fichas por mes"
             />
           </div>
         ) : (
-          <EmptyState message="Sin datos en los últimos 12 meses" />
+          <EmptyState message="Sin datos en los ultimos 12 meses" />
         )}
       </div>
 
       {/* Breakdowns */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
         <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-          <h2 className="mb-4 text-sm font-semibold text-gray-700">Estado terapéutico</h2>
+          <h2 className="mb-4 text-sm font-semibold text-gray-700">Estado terapeutico</h2>
           {statusKeys.length > 0 ? (
             <div className="mx-auto h-44 w-44">
               <Doughnut
@@ -236,7 +237,7 @@ export default function MetricsDashboard({ metrics }: MetricsDashboardProps) {
                   maintainAspectRatio: false,
                   plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } },
                 }}
-                aria-label="Distribución por estado terapéutico"
+                aria-label="Distribucion por estado terapeutico"
               />
             </div>
           ) : (
@@ -255,13 +256,18 @@ export default function MetricsDashboard({ metrics }: MetricsDashboardProps) {
                   maintainAspectRatio: false,
                   plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } },
                 }}
-                aria-label="Distribución de consentimiento de pacientes"
+                aria-label="Distribucion de consentimiento de pacientes"
               />
             </div>
           ) : (
             <EmptyState message="Sin datos de consentimiento" />
           )}
         </div>
+      </div>
+
+      {/* Modo Interactivo Asistido (Hibrido) — observabilidad D6 */}
+      <div className="border-t border-gray-100 pt-6">
+        <HybridMetricsPanel />
       </div>
     </section>
   );

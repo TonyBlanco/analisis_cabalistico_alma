@@ -120,7 +120,8 @@ from .admin_views import (
     AdminCheckView,
     EnhancedAdminStatsView,
     EnhancedAdminUsersView,
-    AdminUserManagementView
+    AdminUserManagementView,
+    ClinicalCredentialVerificationView
 )
 from .federation_views import FederationHubFeedView
 from .views import (
@@ -301,6 +302,7 @@ urlpatterns = [
     path('admin/stats/', EnhancedAdminStatsView.as_view(), name='enhanced_admin_stats'),
     path('admin/users/', EnhancedAdminUsersView.as_view(), name='enhanced_admin_users'),
     path('admin/users/<int:user_id>/', AdminUserManagementView.as_view(), name='admin_user_management'),
+    path('admin/users/<int:user_id>/clinical-credential/', ClinicalCredentialVerificationView.as_view(), name='clinical_credential_verification'),
     
     # Gematria AI
     path('gematria/interpret/', GematriaInterpretationView.as_view(), name='gematria_interpret'),

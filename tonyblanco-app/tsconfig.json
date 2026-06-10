@@ -53,6 +53,7 @@
     "_legacy_components_backup",
     "data",
     "components/admin",
-    "lib/kerykeion-engine.ts"
+    "lib/kerykeion-engine.ts",
+    "__tests__"
   ]
 }

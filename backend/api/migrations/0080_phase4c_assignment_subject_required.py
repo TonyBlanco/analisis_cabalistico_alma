@@ -64,7 +64,7 @@ class Migration(migrations.Migration):
         migrations.AddConstraint(
             model_name='assignment',
             constraint=models.CheckConstraint(
-                check=models.Q(subject_user__isnull=False),
+                condition=models.Q(subject_user__isnull=False),
                 name='assignment_subject_user_required',
                 violation_error_message='subject_user_id is required'
             ),

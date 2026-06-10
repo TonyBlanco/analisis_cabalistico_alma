@@ -178,7 +178,7 @@ export default function PatientReflectionEntrypoint() {
           </p>
           <div className="space-y-3">
             <Link
-              href="/dashboard/therapist/tools/mcmi4"
+              href="/dashboard/therapist"
               className="block w-full px-4 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700 text-center"
             >
               Ir al Panel de Terapeuta

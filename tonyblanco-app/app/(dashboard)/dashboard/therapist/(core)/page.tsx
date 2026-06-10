@@ -91,7 +91,7 @@ export default function TherapistDashboardPage() {
             label="Nuevo paciente"
             icon={<UserPlus className="h-5 w-5" />}
             colorClass="bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white"
-            onClick={() => router.push('/dashboard/therapist/patients/new')}
+            onClick={() => router.push('/dashboard/therapist/patients')}
           />
           <QuickAction
             label="Registrar sesión"

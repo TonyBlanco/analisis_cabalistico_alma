@@ -1,5 +1,6 @@
 import { validateSafetyContentForRole } from '@holistica/symbolic/tree';
 import { resolveSafetyRole } from '@/lib/symbolic-api/role';
+import { recordSessionEvent, hasAntiFraudViolation } from '@/lib/symbolic-api/events';
 import { errorResponse, jsonResponse } from '@/lib/symbolic-api/server';
 
 /**
@@ -63,6 +64,17 @@ export async function POST(request: Request): Promise<Response> {
     .filter((s) => s.prompt.length > 0);
 
   const safeSuggestions = evaluated.filter((s) => s.safe);
+
+  // Observability (D6): count only suggestions blocked by the always-on
+  // anti-fraud rail (not role-dependent clinical-lexicon drops).
+  const antiFraudBlocked = evaluated.filter((s) => hasAntiFraudViolation(s.safety)).length;
+  if (antiFraudBlocked > 0) {
+    await recordSessionEvent(authorization, {
+      eventType: 'anti_fraud_block',
+      workspace: 'generic',
+      metadata: { surface: 'exploration_suggestions', blocked_count: antiFraudBlocked },
+    });
+  }
 
   return jsonResponse({ role, suggestions: evaluated, safeSuggestions });
 }

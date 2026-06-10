@@ -1,5 +1,6 @@
 import { validateSafetyContentForRole } from '@holistica/symbolic/tree';
 import { resolveSafetyRole } from '@/lib/symbolic-api/role';
+import { recordSessionEvent, hasAntiFraudViolation } from '@/lib/symbolic-api/events';
 import { errorResponse, jsonResponse } from '@/lib/symbolic-api/server';
 
 /**
@@ -68,6 +69,17 @@ export async function POST(request: Request): Promise<Response> {
     .filter((e) => e.title.length > 0);
 
   const safeExercises = evaluated.filter((e) => e.safe);
+
+  // Observability (D6): count only exercises blocked by the always-on
+  // anti-fraud rail (not role-dependent clinical-lexicon drops).
+  const antiFraudBlocked = evaluated.filter((e) => hasAntiFraudViolation(e.safety)).length;
+  if (antiFraudBlocked > 0) {
+    await recordSessionEvent(authorization, {
+      eventType: 'anti_fraud_block',
+      workspace: 'generic',
+      metadata: { surface: 'session_exercises', blocked_count: antiFraudBlocked },
+    });
+  }
 
   return jsonResponse({ role, exercises: evaluated, safeExercises });
 }

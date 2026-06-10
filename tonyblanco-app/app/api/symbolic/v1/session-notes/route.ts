@@ -1,5 +1,6 @@
 import { validateSafetyContentForRole } from '@holistica/symbolic/tree';
 import { resolveSafetyRole } from '@/lib/symbolic-api/role';
+import { recordSessionEvent, hasAntiFraudViolation } from '@/lib/symbolic-api/events';
 import {
   errorResponse,
   getDjangoApiBase,
@@ -66,6 +67,16 @@ export async function POST(request: Request): Promise<Response> {
   // Defense-in-depth: re-run the role-aware safety policy before persisting.
   const safety = validateSafetyContentForRole(`${summary}\n${fullText}`, role);
   if (!safety.passed) {
+    // Observability (D6): only count an anti-fraud_block when the always-on
+    // anti-fraud rail tripped — not for role-dependent clinical-lexicon drops.
+    if (hasAntiFraudViolation(safety)) {
+      await recordSessionEvent(authorization, {
+        eventType: 'anti_fraud_block',
+        workspace: body.workspace ?? 'generic',
+        patientId: body.patientId,
+        metadata: { surface: 'session_notes', warning_count: safety.warnings.length },
+      });
+    }
     return jsonResponse({ persisted: false, role, safety }, 422);
   }
 

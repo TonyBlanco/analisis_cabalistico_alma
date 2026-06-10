@@ -9,6 +9,7 @@ import type {
 } from '@holistica/symbolic/api';
 import { callDjangoSymbolicLLM } from '@/lib/symbolic-api/django-llm';
 import { resolveSafetyRole } from '@/lib/symbolic-api/role';
+import { recordSessionEvent } from '@/lib/symbolic-api/events';
 import { isValidSystemId } from '@holistica/symbolic/api';
 import {
   DEFAULT_CORRESPONDENCE_SYSTEM,
@@ -90,6 +91,14 @@ export async function POST(request: Request): Promise<Response> {
     correspondenceSystem,
     role,
   };
+
+  // Observability (D6): best-effort, fire-and-forget. Therapist-only and
+  // role-resolved server-side; never blocks or breaks this response.
+  await recordSessionEvent(authorization, {
+    eventType: 'interpretation_generated',
+    workspace: 'generic',
+    metadata: { correspondence_system: correspondenceSystem },
+  });
 
   return jsonResponse(data);
 }

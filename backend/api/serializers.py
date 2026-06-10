@@ -41,13 +41,16 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "specialization",
             "license_number",
             "years_of_experience",
+            "clinical_mode_requested",
+            "clinical_mode_enabled",
+            "clinical_credential_verified_at",
             "subscription_status",
             "subscription_start_date",
             "subscription_end_date",
             "max_fichas_per_month",
             "fichas_created_this_month",
         ]
-        read_only_fields = ["subscription_status", "subscription_start_date", "subscription_end_date"]
+        read_only_fields = ["subscription_status", "subscription_start_date", "subscription_end_date", "clinical_mode_enabled", "clinical_credential_verified_at"]
 
 
 class UserProfileDetailSerializer(serializers.ModelSerializer):
@@ -94,6 +97,8 @@ class UserProfileDetailSerializer(serializers.ModelSerializer):
             "consent_accepted_at",
             "user_type",
             "email",
+            "clinical_mode_requested",
+            "clinical_mode_enabled",
         ]
         read_only_fields = [
             "profile_version",
@@ -101,6 +106,8 @@ class UserProfileDetailSerializer(serializers.ModelSerializer):
             "consent_accepted_at",
             "user_type",
             "email",
+            "clinical_mode_requested",
+            "clinical_mode_enabled",
             # birth_timezone es manejado por geo-resolución, no por el usuario
         ]
 
@@ -284,11 +291,15 @@ class RegisterTherapistSerializer(serializers.ModelSerializer):
     specialization = serializers.CharField(required=False, allow_blank=True)
     license_number = serializers.CharField(required=False, allow_blank=True)
     years_of_experience = serializers.IntegerField(required=True)
+    # Check del alta: solicita el modo clínico (médico/psiquiatra). NO lo activa;
+    # la activación requiere verificación de credencial por un administrador.
+    clinical_mode_requested = serializers.BooleanField(required=False, default=False)
     
     class Meta:
         model = User
         fields = ['username', 'email', 'password', 'full_name', 'phone', 
-                  'profession', 'specialization', 'license_number', 'years_of_experience']
+                  'profession', 'specialization', 'license_number', 'years_of_experience',
+                  'clinical_mode_requested']
     
     def validate_email(self, value):
         if User.objects.filter(email=value).exists():
@@ -309,6 +320,7 @@ class RegisterTherapistSerializer(serializers.ModelSerializer):
             'specialization': validated_data.pop('specialization', ''),
             'license_number': validated_data.pop('license_number', ''),
             'years_of_experience': validated_data.pop('years_of_experience'),
+            'clinical_mode_requested': validated_data.pop('clinical_mode_requested', False),
         }
         
         # Crear usuario
@@ -327,6 +339,10 @@ class RegisterTherapistSerializer(serializers.ModelSerializer):
         profile.specialization = profile_data['specialization']
         profile.license_number = profile_data['license_number']
         profile.years_of_experience = profile_data['years_of_experience']
+        # Modo clínico: el alta solo REGISTRA la solicitud. La activación
+        # (clinical_mode_enabled) la realiza un administrador tras verificar la
+        # credencial médica/psiquiátrica. El rail anti-fraude nunca se levanta.
+        profile.clinical_mode_requested = profile_data['clinical_mode_requested']
         
         # Período de prueba de 14 días
         profile.subscription_status = 'trial'

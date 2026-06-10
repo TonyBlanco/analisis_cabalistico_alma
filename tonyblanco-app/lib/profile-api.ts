@@ -25,6 +25,23 @@ function getAuthHeaders(): HeadersInit {
   };
 }
 
+export interface MyProfile {
+  clinical_mode_requested: boolean;
+  clinical_mode_enabled: boolean;
+  can_use_clinical_lexicon: boolean;
+  [key: string]: unknown;
+}
+
+export async function fetchMyProfile(): Promise<MyProfile> {
+  const response = await fetch(`${API_BASE_URL}/profile/me/`, {
+    headers: getAuthHeaders(),
+  });
+  if (!response.ok) {
+    throw new Error('No se pudo cargar el perfil');
+  }
+  return response.json() as Promise<MyProfile>;
+}
+
 export interface ProfileUpdateData {
   full_name?: string;
   birth_date?: string;

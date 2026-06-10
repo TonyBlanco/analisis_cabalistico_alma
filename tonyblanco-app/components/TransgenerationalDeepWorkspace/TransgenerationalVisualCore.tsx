@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import type { TransgenerationalSectionId } from './types';
+import { GuidedBlock } from '@/components/ui/guided-block';
 import TreeOfLifeSVG from '@/components/Tree/TreeOfLifeSVG';
 import type { TreePathId, TreeSefirahId } from '@/components/Tree/tree.types';
 import { getActivePatientId } from '@/lib/active-patient';
@@ -197,6 +198,20 @@ export default function TransgenerationalVisualCore({
           Seccion activa: <span className="font-medium text-gray-700">{activeSection}</span>
         </div>
       </div>
+      {!patientProfile && !loading && (
+        <GuidedBlock
+          variant="info"
+          role="therapist"
+          title="Sin consultante activo"
+          description="Selecciona un consultante para ver el árbol genealógico transgeneracional."
+          steps={[
+            { label: 'Selecciona un consultante en el indicador superior' },
+            { label: 'El árbol se calculará automáticamente con los datos del perfil' },
+          ]}
+          actions={[{ label: 'Elegir consultante', href: '/dashboard/therapist/patients' }]}
+          className="mb-4"
+        />
+      )}
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
           <div className="relative w-full h-72">

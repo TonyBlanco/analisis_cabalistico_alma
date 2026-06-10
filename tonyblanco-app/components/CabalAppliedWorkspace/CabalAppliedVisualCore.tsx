@@ -1,8 +1,7 @@
 'use client';
 
-import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
-import { Hash, Sparkles, Activity, Sun, Scale, Loader2, AlertCircle, UserRound } from 'lucide-react';
+import { Hash, Sparkles, Activity, Sun, Scale, Loader2 } from 'lucide-react';
 import type { CabalSectionId } from './types';
 import {
   getActivePatientId,
@@ -27,6 +26,7 @@ import {
   type TreeStructuralState,
 } from '@holistica/symbolic/tree';
 import FormativeReadingPanel from './FormativeReadingPanel';
+import { GuidedBlock } from '@/components/ui/guided-block';
 
 // ============================================================================
 // CLINICAL CONTEXT TYPES (from Ghost Tests pipeline)
@@ -993,51 +993,42 @@ export default function CabalAppliedVisualCore({
           Cargando consultante activo…
         </div>
       ) : patientLoadError ? (
-        <div
-          className="mt-6 flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700"
-          role="alert"
-        >
-          <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" aria-hidden="true" />
-          <div>
-            <p>{patientLoadError}</p>
-            <Link
-              href="/dashboard/therapist/patients"
-              className="mt-2 inline-block text-xs font-medium text-red-800 underline hover:no-underline"
-            >
-              Ir a consultantes
-            </Link>
-          </div>
-        </div>
+        <GuidedBlock
+          variant="missing"
+          role="therapist"
+          title="Error cargando consultante"
+          description={patientLoadError}
+          actions={[{ label: 'Ir a consultantes', href: '/dashboard/therapist/patients' }]}
+          compact
+          className="mt-6"
+        />
       ) : !activePatientId ? (
-        <div className="mt-6 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-5 text-sm text-gray-700">
-          <div className="flex items-start gap-3">
-            <UserRound className="h-5 w-5 text-gray-400 shrink-0 mt-0.5" aria-hidden="true" />
-            <div>
-              <p className="font-medium text-gray-900">Sin consultante activo</p>
-              <p className="mt-1 text-gray-600">
-                Selecciona un consultante en el panel superior o desde la lista de pacientes para ejecutar métodos y ver síntesis.
-              </p>
-              <Link
-                href="/dashboard/therapist/patients"
-                className="mt-3 inline-flex rounded-md bg-gray-900 px-3 py-2 text-xs font-medium text-white hover:bg-gray-800"
-              >
-                Elegir consultante
-              </Link>
-            </div>
-          </div>
-        </div>
+        <GuidedBlock
+          variant="info"
+          role="therapist"
+          title="Sin consultante activo"
+          description="Selecciona un consultante para ejecutar métodos simbólicos y ver síntesis."
+          steps={[
+            { label: 'Selecciona un consultante en el indicador superior' },
+            { label: 'O elige desde la lista de consultantes' },
+          ]}
+          actions={[{ label: 'Elegir consultante', href: '/dashboard/therapist/patients' }]}
+          className="mt-6"
+        />
       ) : (
         <>
           <ClinicalContextBadges context={clinicalContext} />
 
           {executeError && (
-            <div
-              className="mt-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700"
-              role="alert"
-              aria-live="assertive"
-            >
-              {executeError}
-            </div>
+            <GuidedBlock
+              variant="missing"
+              role="therapist"
+              title="Error al ejecutar método"
+              description={executeError}
+              actions={[{ label: 'Reintentar', onClick: () => setExecuteError(null), variant: 'secondary' }]}
+              compact
+              className="mt-4"
+            />
           )}
 
           {activeSection === 'synthesis' && (

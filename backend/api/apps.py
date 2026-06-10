@@ -10,6 +10,8 @@ class ApiConfig(AppConfig):
         try:
             from . import bioemotional  # noqa: F401
             from .process_memory import signals  # noqa: F401
+            # Modo Híbrido (Step 7): registrar modelo de notas de sesión simbólica
+            from . import symbolic_session_notes_models  # noqa: F401
         except Exception:
             # En entornos donde el submódulo no exista aún (p.ej. migraciones antiguas),
             # ignoramos el error para no romper el arranque.

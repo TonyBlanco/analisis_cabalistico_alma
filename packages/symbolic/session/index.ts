@@ -3,3 +3,4 @@
  */
 export * from './types';
 export * from './session-orchestrator';
+export * from './notes-generator';

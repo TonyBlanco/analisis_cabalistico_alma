@@ -159,6 +159,7 @@ from .therapist_patient_invitation_views import (
     PersonalTherapistInvitationRespondView,
 )
 from .symbolic_views import TreeStructuralStateView
+from .symbolic_session_notes_views import SymbolicSessionNoteView
 from .utils.symbolic_interpreter_ai import (
     generate_symbolic_interpretation_view,
     symbolic_interpreter_status_view,
@@ -382,6 +383,8 @@ urlpatterns = [
 
     # Estado simbolico estructural (TreeStructuralState v0.1)
     path('symbolic/tree-structural-state/', TreeStructuralStateView.as_view(), name='tree_structural_state'),
+    # Notas/resumen de sesión simbólica asistida (Modo Híbrido — Step 7)
+    path('symbolic/session-notes/', SymbolicSessionNoteView.as_view(), name='symbolic_session_notes'),
     
     # Astrology Core (astronomical calculations only)
     path('therapist/', include('astrology.api.urls')),

@@ -69,6 +69,20 @@ class AstrologyAIAPITestCase(TestCase):
             input_snapshot=_input_snapshot(),
         )
 
+    @override_settings(AI_PROVIDER='gemini', GEMINI_API_KEY='', GROQ_API_KEY='gsk-test')
+    def test_gemini_provider_falls_back_to_groq_when_gemini_key_missing(self):
+        svc = astrology_ai_service.__class__()
+        svc._init_attempted = False
+        svc.enabled = False
+        svc.provider = None
+        svc.model_name = None
+        svc.error_message = None
+        with patch.object(svc, '_try_init_groq', return_value=True) as mock_groq:
+            with patch.object(svc, '_try_init_gemini', return_value=False):
+                svc._ensure_initialized()
+        mock_groq.assert_called_once()
+        self.assertTrue(svc.enabled)
+
     def test_ai_status_anonymous_returns_enabled_only(self):
         with patch.object(astrology_ai_service, 'enabled', True), patch.object(
             astrology_ai_service, 'model_name', 'llama-test'

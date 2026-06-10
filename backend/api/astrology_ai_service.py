@@ -162,8 +162,24 @@ class AstrologyAIService:
                 return [p for p in order if p != 'ollama']
             return order
 
-        if ai_provider in ('gemini', 'groq', 'ollama'):
-            return [ai_provider]
+        if ai_provider == 'gemini':
+            order = ['gemini']
+            if getattr(settings, 'GROQ_API_KEY', None):
+                order.append('groq')
+            if not is_production:
+                order.append('ollama')
+            return order
+
+        if ai_provider == 'groq':
+            order = ['groq']
+            if getattr(settings, 'GEMINI_API_KEY', None):
+                order.append('gemini')
+            if not is_production:
+                order.append('ollama')
+            return order
+
+        if ai_provider == 'ollama':
+            return ['ollama', 'groq', 'gemini'] if not is_production else ['groq', 'gemini']
 
         # Modo desconocido: mismo fallback que free_first en prod
         logger.warning("[AI] AI_PROVIDER=%s no reconocido; usando groq → gemini", ai_provider)

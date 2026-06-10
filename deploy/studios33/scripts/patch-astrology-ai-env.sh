@@ -20,6 +20,11 @@ if grep -q '^KERYKEION_AI_SNIPPETS_ENABLED=' "$REMOTE_ENV"; then
 else
   echo 'KERYKEION_AI_SNIPPETS_ENABLED=True' >> "$REMOTE_ENV"
 fi
+if grep -q '^AI_PROVIDER=' "$REMOTE_ENV"; then
+  sed -i 's|^AI_PROVIDER=.*|AI_PROVIDER=free_first|' "$REMOTE_ENV"
+else
+  echo 'AI_PROVIDER=free_first' >> "$REMOTE_ENV"
+fi
 if ! grep -q '^GROQ_API_KEY=.\+' "$REMOTE_ENV"; then
   VOX_GROQ=$(grep -m1 '^GROQ_API_KEY=' /opt/voxtvserver/.env 2>/dev/null | cut -d= -f2- || true)
   if [[ -n "$VOX_GROQ" ]]; then

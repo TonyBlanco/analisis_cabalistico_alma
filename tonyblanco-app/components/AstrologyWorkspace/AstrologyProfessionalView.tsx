@@ -1163,6 +1163,66 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
             ) : null}
           </header>
 
+          <nav
+            className="mb-6 sticky top-0 z-20 -mx-6 px-6 py-3 bg-gray-50/95 backdrop-blur border-b border-gray-200"
+            aria-label="Vista del workspace astrológico"
+          >
+            <div className="inline-flex rounded-lg border border-gray-200 bg-white p-1 shadow-sm" role="tablist">
+              {(
+                [
+                  { id: 'visual' as const, label: 'Visual' },
+                  { id: 'psych' as const, label: 'Psicológico' },
+                  { id: 'report' as const, label: 'Informe' },
+                ] as const
+              ).map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={activeTab === tab.id}
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                    activeTab === tab.id
+                      ? 'bg-indigo-600 text-white shadow-sm'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  }`}
+                  onClick={() => setActiveTab(tab.id)}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </nav>
+
+          {activeTab === 'report' ? (
+            consultante?.id ? (
+              <AstrologyReportPanel
+                patientId={Number(consultante.id)}
+                hasChart={hasChart}
+                activeLayers={activeLayers}
+              />
+            ) : (
+              <div className="mb-6 p-6 text-center text-sm text-gray-600 rounded-lg border border-gray-200 bg-white">
+                Selecciona un consultante para gestionar informes.
+              </div>
+            )
+          ) : null}
+
+          {activeTab === 'psych' ? (
+            hasChart && natal ? (
+              <PsychologicalHoroscopeAdvanced
+                advanced={buildAdvancedInputFromPayload(natal)!}
+                patientId={consultante?.id}
+              />
+            ) : (
+              <div className="mb-6 p-6 text-center text-sm text-gray-600 rounded-lg border border-gray-200 bg-white">
+                Datos psicológicos pendientes — completa los datos de nacimiento para generar la lectura.
+              </div>
+            )
+          ) : null}
+
+          {activeTab === 'visual' ? (
+          <>
+
           {!hasChart ? (
             <div className="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6">
               <div className="flex items-start gap-4">
@@ -1703,16 +1763,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
               </div>
             ) : null}
 
-            {/* Tabs: Visual / Psicológico */}
             <div>
-              <div className="mb-4">
-                <div className="flex items-center gap-3">
-                  <button className={`px-3 py-1 rounded text-sm ${activeTab === 'visual' ? 'bg-gray-100' : 'bg-white'}`} onClick={() => setActiveTab('visual')}>Visual</button>
-                  <button className={`px-3 py-1 rounded text-sm ${activeTab === 'psych' ? 'bg-gray-100' : 'bg-white'}`} onClick={() => setActiveTab('psych')}>Psicológico</button>
-                  <button className={`px-3 py-1 rounded text-sm ${activeTab === 'report' ? 'bg-gray-100' : 'bg-white'}`} onClick={() => setActiveTab('report')}>Informe</button>
-                </div>
-              </div>
-
               {/* Synastry partner selector if enabled */}
               {synastryEnabled ? (
                 <div className="mb-4 p-3 border rounded-md bg-amber-50">
@@ -2187,8 +2238,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                 </div>
               ) : null}
 
-              {activeTab === 'visual' ? (
-                <>
+              <>
                   {/* Calculation status panel - UI only, read-only */}
                   <CalculationStatusPanel
                     mode="real"
@@ -2499,28 +2549,6 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                     ))
                   )}
                 </>
-              ) : activeTab === 'psych' ? (
-                hasChart && natal ? (
-                  <PsychologicalHoroscopeAdvanced
-                    advanced={buildAdvancedInputFromPayload(natal)!}
-                    patientId={consultante?.id}
-                  />
-                ) : (
-                  <div className="p-6 text-center text-sm text-gray-600">
-                    Datos psicológicos pendientes — completa los datos de nacimiento para generar la lectura.
-                  </div>
-                )
-              ) : consultante?.id ? (
-                <AstrologyReportPanel
-                  patientId={Number(consultante.id)}
-                  hasChart={hasChart}
-                  activeLayers={activeLayers}
-                />
-              ) : (
-                <div className="p-6 text-center text-sm text-gray-600">
-                  Selecciona un consultante para gestionar informes.
-                </div>
-              )}
             </div>
           </div>
 
@@ -2689,6 +2717,8 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
               <div><strong>Calculada:</strong> {meta.calculated_at ? new Date(meta.calculated_at).toLocaleDateString('es-ES') : '-'}</div>
             </div>
           </div>
+          </>
+          ) : null}
         </div>
       </div>
 

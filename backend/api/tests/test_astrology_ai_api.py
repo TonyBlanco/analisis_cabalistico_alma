@@ -12,7 +12,7 @@ from rest_framework.test import APIClient
 
 from api.astrology_ai_service import AIInterpretationResult, astrology_ai_service
 from api.astrology_ai_views import _layer_chart_payload
-from api.models import Patient, UserProfile
+from api.models import Patient
 from api.models_astrology import AstrologyNatalChart
 
 
@@ -43,9 +43,8 @@ class AstrologyAIAPITestCase(TestCase):
             email='astroai@test.com',
             password='testpass123',
         )
-        profile, _ = UserProfile.objects.get_or_create(user=self.therapist)
-        profile.user_type = 'therapist'
-        profile.save()
+        self.therapist.profile.user_type = 'therapist'
+        self.therapist.profile.save()
 
         self.patient = Patient.objects.create(
             therapist=self.therapist,
@@ -97,7 +96,7 @@ class AstrologyAIAPITestCase(TestCase):
     @patch('api.astrology_ai_views.astrology_ai_service.enabled', True)
     @patch('api.astrology_ai_views.astrology_ai_service.interpret_natal')
     @patch('api.astrology_ai_views.astrology_ai_service._ensure_initialized')
-    def test_interpret_natal_success_shape(self, _mock_init, mock_interpret, _enabled):
+    def test_interpret_natal_success_shape(self, _mock_init, mock_interpret):
         mock_interpret.return_value = AIInterpretationResult(
             success=True,
             interpretation='Lectura simbólica de prueba.',

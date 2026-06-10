@@ -10,7 +10,7 @@ from django.test import TestCase, override_settings
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from api.models import Patient, UserProfile
+from api.models import Patient
 from api.models_astrology import AstrologyNatalChart
 
 
@@ -77,9 +77,8 @@ class AstrologyKerykeionAPITestCase(TestCase):
             email='astro@test.com',
             password='testpass123',
         )
-        profile, _ = UserProfile.objects.get_or_create(user=self.therapist)
-        profile.user_type = 'therapist'
-        profile.save()
+        self.therapist.profile.user_type = 'therapist'
+        self.therapist.profile.save()
 
         self.patient = Patient.objects.create(
             therapist=self.therapist,

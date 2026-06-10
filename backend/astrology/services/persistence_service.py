@@ -8,6 +8,7 @@ import pytz
 
 from ..models import NatalChart
 from ..domain.chart import NatalChart as DomainNatalChart
+from ..config.astrology_settings import normalize_house_system, normalize_zodiac_type
 
 
 class PersistenceService:
@@ -89,48 +90,96 @@ class PersistenceService:
         longitude = float(location.get('lng', snapshot.get('lng', snapshot.get('longitude', 0))))
         timezone = location.get('timezone', snapshot.get('timezone', 'UTC'))
         
-        # Convert planets - simplified for Solar Arc which just needs basic birth info
+        metadata = payload.get('metadatos') or {}
+
+        # Convert planets — normalized payload (planetas) or raw kerykeion (planets)
         planets = []
-        planets_data = payload.get('planets', {})
-        planet_id = 0
-        for name, data in planets_data.items():
-            if isinstance(data, dict):
-                planet_id += 1
+        planetas = payload.get('planetas') or []
+        if planetas:
+            for planet_id, planet_data in enumerate(planetas, start=1):
+                if not isinstance(planet_data, dict):
+                    continue
                 try:
                     planets.append(PlanetPosition(
                         planet_id=planet_id,
-                        planet_name=name,
-                        longitude=Decimal(str(data.get('abs_pos', data.get('degree', 0)))),
+                        planet_name=str(planet_data.get('nombre', '')),
+                        longitude=Decimal(str(
+                            planet_data.get('longitud_ecliptica', planet_data.get('abs_pos', 0))
+                        )),
                         latitude=Decimal('0'),
                         distance=Decimal('1'),
                         speed_longitude=Decimal('0'),
                         speed_latitude=Decimal('0'),
                         speed_distance=Decimal('0'),
-                        sign=data.get('sign', ''),
-                        sign_degree=Decimal(str(data.get('degree', 0))),
-                        house=int(data.get('house', 1)),
-                        retrograde=data.get('retrograde', False)
+                        sign=planet_data.get('signo', planet_data.get('sign', '')),
+                        sign_degree=Decimal(str(
+                            planet_data.get('grados', planet_data.get('degree', 0))
+                        )),
+                        house=int(planet_data.get('casa', planet_data.get('house', 1)) or 1),
+                        retrograde=bool(planet_data.get('es_retrogrado', planet_data.get('retrograde', False))),
                     ))
-                except:
+                except Exception:
                     pass
-        
-        # Convert houses
-        houses = []
-        houses_data = payload.get('houses', {})
-        for i in range(1, 13):
-            house_key = str(i)
-            if house_key in houses_data:
-                house_data = houses_data[house_key]
-                if isinstance(house_data, dict):
+        else:
+            planets_data = payload.get('planets', {})
+            planet_id = 0
+            for name, data in planets_data.items():
+                if isinstance(data, dict):
+                    planet_id += 1
                     try:
-                        houses.append(HousePosition(
-                            house_number=i,
-                            longitude=Decimal(str(house_data.get('abs_pos', house_data.get('degree', 0)))),
-                            sign=house_data.get('sign', ''),
-                            sign_degree=Decimal(str(house_data.get('degree', 0)))
+                        planets.append(PlanetPosition(
+                            planet_id=planet_id,
+                            planet_name=name,
+                            longitude=Decimal(str(data.get('abs_pos', data.get('degree', 0)))),
+                            latitude=Decimal('0'),
+                            distance=Decimal('1'),
+                            speed_longitude=Decimal('0'),
+                            speed_latitude=Decimal('0'),
+                            speed_distance=Decimal('0'),
+                            sign=data.get('sign', ''),
+                            sign_degree=Decimal(str(data.get('degree', 0))),
+                            house=int(data.get('house', 1)),
+                            retrograde=data.get('retrograde', False)
                         ))
-                    except:
+                    except Exception:
                         pass
+
+        # Convert houses — normalized payload (casas) or raw kerykeion (houses)
+        houses = []
+        casas = payload.get('casas') or []
+        if casas:
+            for house_data in casas:
+                if not isinstance(house_data, dict):
+                    continue
+                try:
+                    houses.append(HousePosition(
+                        house_number=int(house_data.get('numero', house_data.get('number', 0))),
+                        longitude=Decimal(str(
+                            house_data.get('cuspide_longitud', house_data.get('abs_pos', 0))
+                        )),
+                        sign=house_data.get('signo', house_data.get('sign', '')),
+                        sign_degree=Decimal(str(
+                            house_data.get('cuspide_grados', house_data.get('degree', 0))
+                        )),
+                    ))
+                except Exception:
+                    pass
+        else:
+            houses_data = payload.get('houses', {})
+            for i in range(1, 13):
+                house_key = str(i)
+                if house_key in houses_data:
+                    house_data = houses_data[house_key]
+                    if isinstance(house_data, dict):
+                        try:
+                            houses.append(HousePosition(
+                                house_number=i,
+                                longitude=Decimal(str(house_data.get('abs_pos', house_data.get('degree', 0)))),
+                                sign=house_data.get('sign', ''),
+                                sign_degree=Decimal(str(house_data.get('degree', 0)))
+                            ))
+                        except Exception:
+                            pass
         
         # Convert aspects
         aspects = []
@@ -153,14 +202,26 @@ class PersistenceService:
                     except:
                         pass
         
+        house_system = normalize_house_system(
+            api_chart.house_system
+            or metadata.get('sistema_casas')
+            or metadata.get('house_system')
+            or snapshot.get('house_system')
+        )
+        zodiac_type = normalize_zodiac_type(
+            metadata.get('zodiac_type')
+            or snapshot.get('zodiac_type')
+            or 'tropical'
+        )
+
         return DomainNatalChart(
             patient_id=api_chart.patient_id,
             birth_datetime=birth_dt,
             latitude=Decimal(str(latitude)),
             longitude=Decimal(str(longitude)),
             timezone=timezone,
-            house_system=api_chart.house_system or 'placidus',
-            zodiac_type='tropical',
+            house_system=house_system,
+            zodiac_type=zodiac_type,
             planets=planets,
             houses=houses,
             aspects=aspects
@@ -181,8 +242,8 @@ class PersistenceService:
             existing_chart.latitude = chart.latitude
             existing_chart.longitude = chart.longitude
             existing_chart.timezone = chart.timezone
-            existing_chart.house_system = chart.house_system
-            existing_chart.zodiac_type = chart.zodiac_type
+            existing_chart.house_system = normalize_house_system(chart.house_system)
+            existing_chart.zodiac_type = normalize_zodiac_type(chart.zodiac_type)
             existing_chart.planets_data = self._planets_to_dict(chart.planets)
             existing_chart.houses_data = self._houses_to_dict(chart.houses)
             existing_chart.aspects_data = self._aspects_to_dict(chart.aspects)

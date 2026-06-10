@@ -8,6 +8,7 @@ import json
 from datetime import datetime
 
 from api.models import Patient
+from .config.astrology_settings import normalize_house_system, normalize_zodiac_type
 
 
 class NatalChart(models.Model):
@@ -189,8 +190,8 @@ class NatalChart(models.Model):
             latitude=domain_chart.latitude,
             longitude=domain_chart.longitude,
             timezone=domain_chart.timezone,
-            house_system=domain_chart.house_system,
-            zodiac_type=domain_chart.zodiac_type,
+            house_system=normalize_house_system(domain_chart.house_system),
+            zodiac_type=normalize_zodiac_type(domain_chart.zodiac_type),
             planets_data=planets_data,
             houses_data=houses_data,
             aspects_data=aspects_data

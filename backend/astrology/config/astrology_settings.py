@@ -109,6 +109,51 @@ ZODIAC_SYMBOLS = {
     "pisces": "♓",
 }
 
+HOUSE_SYSTEM_ALIASES = {
+    "placidus": "P",
+    "koch": "K",
+    "equal": "E",
+    "equal_house": "E",
+    "whole_sign": "W",
+    "whole sign": "W",
+    "campanus": "C",
+    "regiomontanus": "R",
+    "alcabitius": "B",
+    "vehlow": "V",
+    "polich_page": "T",
+    "polich/page": "T",
+}
+
+ZODIAC_TYPE_ALIASES = {
+    "tropical": "T",
+    "tropico": "T",
+    "trop": "T",
+    "sidereal": "S",
+    "sideral": "S",
+    "sid": "S",
+}
+
+
+def normalize_house_system(value: str | None) -> str:
+    """Map house system names/codes to a single-letter Swiss Ephemeris code."""
+    if not value:
+        return DEFAULT_HOUSE_SYSTEM
+    raw = str(value).strip()
+    if len(raw) == 1 and raw.upper() in HOUSE_SYSTEMS:
+        return raw.upper()
+    return HOUSE_SYSTEM_ALIASES.get(raw.lower(), DEFAULT_HOUSE_SYSTEM)
+
+
+def normalize_zodiac_type(value: str | None) -> str:
+    """Map zodiac labels to DB/engine code: T (tropical) or S (sidereal)."""
+    if not value:
+        return DEFAULT_ZODIAC_TYPE
+    raw = str(value).strip()
+    if len(raw) == 1 and raw.upper() in ZODIAC_TYPES:
+        return raw.upper()
+    return ZODIAC_TYPE_ALIASES.get(raw.lower(), DEFAULT_ZODIAC_TYPE)
+
+
 # House names
 HOUSE_NAMES = {
     1: "Ascendant",

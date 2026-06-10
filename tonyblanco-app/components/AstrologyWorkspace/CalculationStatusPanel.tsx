@@ -28,6 +28,9 @@ type Props = {
   houseSystem: string;
   zodiacType: string;
   canRecalculate: boolean; // whether UI has ability to trigger recalculation (we will NOT trigger)
+  hasNatalChart?: boolean;
+  solarArcCalculated?: boolean;
+  lunarReturnCalculated?: boolean;
   secondaryLayerKey?: string | null;
   comparisonEnabled?: boolean;
   comparisonAspectsEnabled?: boolean;
@@ -42,7 +45,7 @@ const Dot: React.FC<{ type: DotType }> = ({ type }) => {
   return <span className="inline-block w-3 h-3 rounded-full bg-rose-400 mr-2 opacity-70" />;
 };
 
-export default function CalculationStatusPanel({ overlays, activeLayers, mode, symbolicLayers, harmonicMode = 'off', personaMode = 'off', relocationMode = 'off', advancedObjects = { nodes: false, fortune: false, symbolicPoints: false }, fixedStars = { primary: false, secondary: false }, relationshipMode = 'off', relationshipRole = 'active', developmentStage = 'off', houseSystem, zodiacType, canRecalculate, secondaryLayerKey = null, comparisonEnabled = false, comparisonAspectsEnabled = false }: Props) {
+export default function CalculationStatusPanel({ overlays, activeLayers, mode, symbolicLayers, harmonicMode = 'off', personaMode = 'off', relocationMode = 'off', advancedObjects = { nodes: false, fortune: false, symbolicPoints: false }, fixedStars = { primary: false, secondary: false }, relationshipMode = 'off', relationshipRole = 'active', developmentStage = 'off', houseSystem, zodiacType, canRecalculate, hasNatalChart = false, solarArcCalculated = false, lunarReturnCalculated = false, secondaryLayerKey = null, comparisonEnabled = false, comparisonAspectsEnabled = false }: Props) {
   const [helper, setHelper] = useState<string | null>(null);
   const effectiveMode: 'symbolic' | 'real' = mode ?? (symbolicLayers ? 'symbolic' : 'real');
   const symbolicTooltip = 'Capa simbólica activa. No corresponde a un cálculo astronómico real.';
@@ -51,7 +54,8 @@ export default function CalculationStatusPanel({ overlays, activeLayers, mode, s
 
   if (effectiveMode === 'real') {
     const calcTooltip = 'Capa activa (cálculo real). No se recalcula automáticamente desde el toggle; use “Recalcular carta” para regenerar.';
-    const lockedTooltip = 'Disponible si el backend soporta esta técnica. Requiere configuración avanzada.';
+    const apiTooltip = 'Motor Swiss Ephemeris activo. Calcúlalo desde el panel lateral (Técnicas Avanzadas API) o desde los controles de capa.';
+    const symbolicOnlyTooltip = 'Solo lectura simbólica en esta vista. El cálculo astronómico real no está expuesto aún como capa.';
 
     const isActive = (key: 'natal' | 'transits' | 'progressions' | 'return_solar') => activeLayers.has(key);
     const layerAvailable = (key: 'natal' | 'transits' | 'progressions' | 'return_solar') => {
@@ -111,18 +115,22 @@ export default function CalculationStatusPanel({ overlays, activeLayers, mode, s
           </li>
 
           <li className="flex items-center">
-            <button onClick={() => setHelper(lockedTooltip)} className="flex items-center w-full text-left" title={lockedTooltip}>
-              <Dot type="available" />
+            <button onClick={() => setHelper(apiTooltip)} className="flex items-center w-full text-left" title={apiTooltip}>
+              <Dot type={hasNatalChart ? (lunarReturnCalculated ? 'active' : 'available') : 'locked'} />
               <span className="flex-1">Retorno Lunar</span>
-              <span className="text-xs text-gray-400">pendiente</span>
+              <span className="text-xs text-gray-400">
+                {!hasNatalChart ? 'pendiente' : (lunarReturnCalculated ? 'calculado' : 'disponible (API)')}
+              </span>
             </button>
           </li>
 
           <li className="flex items-center">
-            <button onClick={() => setHelper(lockedTooltip)} className="flex items-center w-full text-left" title={lockedTooltip}>
-              <Dot type="available" />
+            <button onClick={() => setHelper(apiTooltip)} className="flex items-center w-full text-left" title={apiTooltip}>
+              <Dot type={hasNatalChart ? (solarArcCalculated ? 'active' : 'available') : 'locked'} />
               <span className="flex-1">Arco Solar</span>
-              <span className="text-xs text-gray-400">pendiente</span>
+              <span className="text-xs text-gray-400">
+                {!hasNatalChart ? 'pendiente' : (solarArcCalculated ? 'calculado' : 'disponible (API)')}
+              </span>
             </button>
           </li>
 
@@ -135,10 +143,34 @@ export default function CalculationStatusPanel({ overlays, activeLayers, mode, s
           </li>
 
           <li className="flex items-center">
-            <button onClick={() => setHelper(lockedTooltip)} className="flex items-center w-full text-left" title={lockedTooltip}>
+            <button onClick={() => setHelper(apiTooltip)} className="flex items-center w-full text-left" title={apiTooltip}>
+              <Dot type={hasNatalChart ? 'available' : 'locked'} />
+              <span className="flex-1">Armónicos</span>
+              <span className="text-xs text-gray-400">{hasNatalChart ? 'disponible (API)' : 'pendiente'}</span>
+            </button>
+          </li>
+
+          <li className="flex items-center">
+            <button onClick={() => setHelper(apiTooltip)} className="flex items-center w-full text-left" title={apiTooltip}>
+              <Dot type={hasNatalChart ? 'available' : 'locked'} />
+              <span className="flex-1">Estrellas fijas</span>
+              <span className="text-xs text-gray-400">{hasNatalChart ? 'disponible (API)' : 'pendiente'}</span>
+            </button>
+          </li>
+
+          <li className="flex items-center">
+            <button onClick={() => setHelper(apiTooltip)} className="flex items-center w-full text-left" title={apiTooltip}>
+              <Dot type={hasNatalChart ? 'available' : 'locked'} />
+              <span className="flex-1">Partes Árabes</span>
+              <span className="text-xs text-gray-400">{hasNatalChart ? 'disponible (API)' : 'pendiente'}</span>
+            </button>
+          </li>
+
+          <li className="flex items-center">
+            <button onClick={() => setHelper(symbolicOnlyTooltip)} className="flex items-center w-full text-left" title={symbolicOnlyTooltip}>
               <Dot type="available" />
-              <span className="flex-1">Armónicos / Persona / Relocación / HUBER / Estrellas fijas</span>
-              <span className="text-xs text-gray-400">próximamente</span>
+              <span className="flex-1">Persona / Relocación / HUBER</span>
+              <span className="text-xs text-gray-400">solo simbólico</span>
             </button>
           </li>
         </ul>

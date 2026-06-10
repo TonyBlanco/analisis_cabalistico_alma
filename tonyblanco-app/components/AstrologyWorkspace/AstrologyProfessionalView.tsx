@@ -2296,6 +2296,9 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                     houseSystem={houseSystem}
                     zodiacType={zodiacType}
                     canRecalculate={Boolean(calculateChart)}
+                    hasNatalChart={hasChart}
+                    solarArcCalculated={Boolean(solarArcData)}
+                    lunarReturnCalculated={Boolean(lunarReturnData)}
                   />
                   {/* Recalculation modal (confirmation) */}
                   {showRecalcModal ? (

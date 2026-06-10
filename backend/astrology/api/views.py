@@ -1567,8 +1567,8 @@ class ArabicPartsView(APIView):
                         return p
                 return None
 
-            sun_planet = _find_planet(natal_planets, {'sun', 'sol'})
-            moon_planet = _find_planet(natal_planets, {'moon', 'luna'})
+            sun_planet = _find_planet(natal_planets, {'sun', 'sol', '☉'})
+            moon_planet = _find_planet(natal_planets, {'moon', 'luna', '☽'})
 
             # Fallback: recalculate in-memory if Sun/Moon missing (no legacy DB write)
             if (not sun_planet or not moon_planet) and patient.birth_date and patient.birth_latitude is not None and patient.birth_longitude is not None:
@@ -1609,13 +1609,22 @@ class ArabicPartsView(APIView):
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-            # Get ASC and MC from houses
-            asc_house = next((h for h in natal_houses if h['house'] == 1), None)
-            mc_house = next((h for h in natal_houses if h['house'] == 10), None)
+            # Get ASC and MC from house cusps (fallback: sorted cusps 1 and 10)
+            asc_house = next((h for h in natal_houses if h.get('house') == 1), None)
+            mc_house = next((h for h in natal_houses if h.get('house') == 10), None)
+            if natal_houses and (not asc_house or not mc_house):
+                by_house = sorted(
+                    (h for h in natal_houses if h.get('house')),
+                    key=lambda item: int(item['house']),
+                )
+                if not asc_house and by_house:
+                    asc_house = by_house[0]
+                if not mc_house:
+                    mc_house = next((h for h in by_house if int(h['house']) == 10), None)
 
             if not asc_house or not mc_house:
                 return Response(
-                    {"error": "House cusps required for Arabic Parts"},
+                    {"error": "House cusps required for Arabic Parts (houses 1 and 10)"},
                     status=status.HTTP_400_BAD_REQUEST
                 )
 

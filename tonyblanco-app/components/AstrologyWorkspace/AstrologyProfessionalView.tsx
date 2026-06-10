@@ -7,7 +7,6 @@ import type { MultiTechAnalysisResult, NatalChartPayload } from '@/hooks/useNata
 import NatalChartSVGPro from './chart/NatalChartSVGAdvanced';
 import { buildAdvancedInputFromPayload } from './chart/chartLayoutEngine';
 import PsychologicalHoroscopeAdvanced from './psychological/PsychologicalHoroscopeAdvanced';
-import AstrologyDoubleWheelSVG from './AstrologyDoubleWheelSVG';
 import AstroDoubleWheelAdvanced from '@/components/astrology/AstroDoubleWheelAdvanced';
 import InfoTooltip from '@/components/common/InfoTooltip';
 
@@ -23,7 +22,12 @@ import CalculationStatusPanel from './CalculationStatusPanel';
 import AstrologySidebar from './AstrologySidebar';
 import AIInterpretationPanel from './AIInterpretationPanel';
 import AISituationChat from './AISituationChat';
-import { HOUSE_OPTIONS, ZODIAC_OPTIONS } from '@/lib/astrologyChartOptions';
+import {
+  HOUSE_OPTIONS,
+  ZODIAC_OPTIONS,
+  formatChartParamsLabel,
+  normalizeHouseSystemCode,
+} from '@/lib/astrologyChartOptions';
 
 interface Props {
   consultante: ActiveConsultante;
@@ -781,6 +785,20 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
 
   const meta = (natal?.metadatos as any) || {};
 
+  const wheelTitleRight = useMemo(
+    () => formatChartParamsLabel(meta.sistema_casas, meta.zodiac_type),
+    [meta.sistema_casas, meta.zodiac_type],
+  );
+
+  const chartParamsPending = useMemo(() => {
+    if (!hasChart) return false;
+    const chartHouse = normalizeHouseSystemCode(meta.sistema_casas);
+    const uiHouse = normalizeHouseSystemCode(houseSystem);
+    const chartZodiac = String(meta.zodiac_type ?? 'tropical').toLowerCase();
+    const uiZodiac = String(zodiacType ?? 'tropical').toLowerCase();
+    return chartHouse !== uiHouse || chartZodiac !== uiZodiac;
+  }, [hasChart, meta.sistema_casas, meta.zodiac_type, houseSystem, zodiacType]);
+
   // Prepare filtered data
   const planetsFiltered = (natal?.planetas || []).filter((p) => (visiblePlanets[String(p.nombre).toLowerCase().trim()] ?? true));
   const aspectosWithKey = (natal?.aspectos || []).map((a, idx) => ({ ...a, _key: `${String(a.planeta1).toLowerCase().trim()}-${String(a.planeta2).toLowerCase().trim()}-${a.tipo}-${idx}` }));
@@ -910,6 +928,13 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
       return null;
     }
   }, [secondaryLayer, transitsSnapshot, transitBaseType, analysis_result, progressionsSnapshot, solarReturnSnapshot]);
+
+  const secondaryLayerMode = useMemo<'real' | 'symbolic'>(() => {
+    if (!secondaryLayer) return 'symbolic';
+    if (secondaryPlanets && secondaryPlanets.length > 0) return 'real';
+    if (secondaryLayer === 'transits' && transitsSnapshot?.planets?.length) return 'real';
+    return 'symbolic';
+  }, [secondaryLayer, secondaryPlanets, transitsSnapshot]);
 
   type CrossAspectKind = 'CONJ' | 'OPP' | 'SQR' | 'TRI' | 'SEXT';
   type CrossAspectHit = {
@@ -2366,13 +2391,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                     </div>
                   ) : null}
 
-                  {!synastryEnabled && hasChart && activeLayers.has('transits') && analysis_result?.transits ? (
-                    <AstrologyDoubleWheelSVG natal={natal!} overlay={analysis_result.transits} overlayLabel="Tránsitos" orbDegrees={orb} consultante={consultante} />
-                  ) : !synastryEnabled && hasChart && activeLayers.has('progressions') && analysis_result?.progressions?.chart ? (
-                    <AstrologyDoubleWheelSVG natal={natal!} overlay={analysis_result.progressions.chart} overlayLabel="Progresiones (Secundarias)" orbDegrees={orb} consultante={consultante} />
-                  ) : !synastryEnabled && hasChart && activeLayers.has('return_solar') && analysis_result?.solarReturn?.chart ? (
-                    <AstrologyDoubleWheelSVG natal={natal!} overlay={analysis_result.solarReturn.chart} overlayLabel="Retorno Solar" orbDegrees={orb} consultante={consultante} />
-                  ) : hasChart && synastryEnabled && partnerChart ? (
+                  {hasChart && synastryEnabled && partnerChart ? (
                     <div>
                       {/* Hero info for sinastry */}
                       <div className="mb-3 p-3 bg-white border rounded">
@@ -2455,6 +2474,12 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
 
                         return (
                           <div>
+                            {chartParamsPending ? (
+                              <div className="mb-2 rounded border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+                                Parámetros del sidebar ({formatChartParamsLabel(houseSystem, zodiacType)}) distintos a la carta calculada ({wheelTitleRight}).
+                                Pulsa <strong>Recalcular carta</strong> para aplicar el cambio.
+                              </div>
+                            ) : null}
                             {secondaryLayer && secondaryLayerLabel ? (
                               <div className="mb-2 text-xs text-gray-700">
                                 <span className="inline-block bg-slate-50 border border-slate-200 text-slate-700 px-2 py-1 rounded">
@@ -2529,7 +2554,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                               temporalLayers={temporalLayers}
                               annualLayers={annualLayers}
                               symbolicDoubleWheel={symbolicDoubleWheel}
-                              secondaryLayer={effectiveSecondaryLayer && effectiveSecondaryLayerLabel ? { key: effectiveSecondaryLayer, label: effectiveSecondaryLayerLabel, mode: 'symbolic' } : null}
+                              secondaryLayer={effectiveSecondaryLayer && effectiveSecondaryLayerLabel ? { key: effectiveSecondaryLayer, label: effectiveSecondaryLayerLabel, mode: secondaryLayerMode } : null}
                               secondaryPlanets={secondaryPlanets ?? undefined}
                               crossAspectNatalKeys={crossAspectNatalKeysToPass}
                               crossAspectSecondaryKeys={showCrossAspects ? crossAspects.secondaryKeys : undefined}
@@ -2545,7 +2570,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                               relationshipMode={relationshipMode}
                               relationshipRole={relationshipRole}
                               developmentStage={developmentStage}
-                              titleRight={`${meta.sistema_casas || 'placidus'} · ${meta.zodiac_type || 'tropical'}`}
+                              titleRight={wheelTitleRight}
                               transitPlanets={transitsSnapshot && transitBaseType === 'natal' ? transitsSnapshot.planets : undefined}
                             />
                           </div>

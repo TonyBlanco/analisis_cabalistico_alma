@@ -1585,7 +1585,9 @@ export const AstroWheelAdvanced: React.FC<Props> = ({
   const renderSecondaryWheel = () => {
     if (!secondaryLayer) return null;
 
-    const tooltip = `Modo Doble Rueda activo — Natal + ${secondaryLayer.label}. La rueda externa representa una capa simbólica sin cálculo astronómico real.`;
+    const tooltip = secondaryLayer.mode === 'real'
+      ? `Modo Doble Rueda activo — Natal + ${secondaryLayer.label}. Capa calculada por el motor (Swiss Ephemeris).`
+      : `Modo Doble Rueda activo — Natal + ${secondaryLayer.label}. La rueda externa representa una capa simbólica sin cálculo astronómico real.`;
     const maxR = cx - 8 - (comparisonEnabled ? 46 : 0);
     const innerR = Math.min(maxR - 22, rings.outer + 18);
     const outerR = Math.min(maxR, innerR + 26);

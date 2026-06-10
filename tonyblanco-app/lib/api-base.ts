@@ -33,3 +33,10 @@ export function getApiBaseUrl(): string {
 
   return base;
 }
+
+/** Join API base with a relative path (e.g. `therapist/metrics/` or `/therapist/metrics/`). */
+export function apiUrl(path: string): string {
+  const base = getApiBaseUrl().replace(/\/+$/, '');
+  const normalized = path.startsWith('/') ? path : `/${path}`;
+  return `${base}${normalized}`;
+}

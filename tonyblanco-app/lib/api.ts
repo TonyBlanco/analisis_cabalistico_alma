@@ -1,6 +1,8 @@
 // API Configuration and Utilities
 import { getApiBaseUrl } from './api-base';
 
+export { apiUrl, getApiBaseUrl } from './api-base';
+
 const API_URL = getApiBaseUrl();
 
 // Exportar como API_BASE_URL para compatibilidad

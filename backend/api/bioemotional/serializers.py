@@ -380,7 +380,7 @@ class RegionRankingSerializer(serializers.Serializer):
 
 class EmotionalTrendSerializer(serializers.Serializer):
     """Tendencia emocional a lo largo de sesiones."""
-    date = serializers.DateTimeField()
+    date = serializers.DateField()
     state = serializers.CharField()
     feeling_score = serializers.IntegerField(allow_null=True)
 
@@ -388,7 +388,7 @@ class EmotionalTrendSerializer(serializers.Serializer):
 class SessionSummarySerializer(serializers.Serializer):
     """Resumen de sesión para exportación."""
     id = serializers.UUIDField()
-    date = serializers.DateTimeField()
+    date = serializers.DateField()
     emotional_state = serializers.CharField()
     observations_count = serializers.IntegerField()
     hypotheses_count = serializers.IntegerField()

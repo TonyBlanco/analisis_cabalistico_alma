@@ -67,7 +67,13 @@ export default function FederationHubFeedBlock({
       if (status === 400) {
         setFeedError('Parámetros inválidos.');
       } else if (status === 403) {
-        setFeedError('Acceso no autorizado (ownership/consentimiento).');
+        const backendMsg = apiError.message;
+        const isConsentIssue = backendMsg?.toLowerCase().includes('consent');
+        setFeedError(
+          isConsentIssue
+            ? 'El consultante no ha dado consentimiento para lectura federada. Obtenga su consentimiento explícito antes de generar síntesis holística.'
+            : 'Sin acceso: el consultante no está asignado a este terapeuta.'
+        );
       } else if (status === 401) {
         setFeedError('Sesión no válida. Inicia sesión para continuar.');
       } else {

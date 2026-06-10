@@ -11,6 +11,11 @@
  *    authoritative clinical unlock is enforced server-side at the BFF.
  *  - Notes / summary / exercises are validated with the role-aware policy by the
  *    orchestrator; rejected text surfaces inline warnings and is not stored.
+ *
+ * Observability (D6):
+ *  - The optional onEvent prop is a fire-and-forget hook for interaction events
+ *    (session_started / interpretation_accepted / exercise_completed). It must
+ *    never block or break the flow; the caller decides where to send them.
  */
 
 'use client';
@@ -38,12 +43,26 @@ import { resolveClientSafetyRole } from '@/lib/clinical-role';
 import { useSymbolicSession } from '@/lib/hooks/useSymbolicSession';
 import { SymbolicInterpretationPanel } from '@/components/SymbolicInterpretation/SymbolicInterpretationPanel';
 
+/** Interaction events emitted by the stepper for D6 observability. */
+export type SessionInteractionEvent =
+  | 'session_started'
+  | 'interpretation_accepted'
+  | 'exercise_completed';
+
 export interface SessionStepperProps {
   /** Structural state of the Tree, built elsewhere in the app. */
   treeState?: TreeStructuralState;
   therapistId?: string;
   consultantRef?: string;
   correspondenceSystem?: string;
+  /**
+   * Optional fire-and-forget emitter for D6 interaction events. The stepper
+   * never awaits it; emission must not block or break the session flow.
+   */
+  onEvent?: (
+    event: SessionInteractionEvent,
+    metadata?: Record<string, string | number | boolean>,
+  ) => void;
 }
 
 const STAGE_META: Record<
@@ -100,6 +119,7 @@ function SessionStepperInner({
   therapistId,
   consultantRef,
   correspondenceSystem,
+  onEvent,
 }: SessionStepperProps & { role: SafetyRole }) {
   const s = useSymbolicSession({ role, therapistId, consultantRef });
   const state = s.session;
@@ -120,6 +140,12 @@ function SessionStepperInner({
         version: 'swm-v3',
       }
     : undefined;
+
+  function handleGrantConsent() {
+    if (state.consent.granted) return;
+    s.grantConsent({ grantedBy: therapistId ?? 'terapeuta' });
+    onEvent?.('session_started');
+  }
 
   function handleAddNote() {
     if (!noteText.trim()) return;
@@ -148,6 +174,12 @@ function SessionStepperInner({
     } else {
       setWarnings(res.warnings);
     }
+  }
+
+  function handleCompleteExercise(ex: { id: string; completed?: boolean }) {
+    if (ex.completed) return;
+    s.completeExercise(ex.id);
+    onEvent?.('exercise_completed');
   }
 
   return (
@@ -225,9 +257,7 @@ function SessionStepperInner({
             <button
               type="button"
               disabled={!consentChecked || state.consent.granted}
-              onClick={() =>
-                s.grantConsent({ grantedBy: therapistId ?? 'terapeuta' })
-              }
+              onClick={handleGrantConsent}
               className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 disabled:bg-slate-300 disabled:cursor-not-allowed"
             >
               Registrar consentimiento
@@ -297,7 +327,12 @@ function SessionStepperInner({
                 }
                 role={role}
                 editable
-                onSaveEdits={s.saveInterpretationEdits}
+                onSaveEdits={(observations) => {
+                  s.saveInterpretationEdits(observations);
+                  onEvent?.('interpretation_accepted', {
+                    observations: observations.length,
+                  });
+                }}
                 consentState={consentState}
               />
             )}
@@ -414,7 +449,7 @@ function SessionStepperInner({
                     </div>
                     <button
                       type="button"
-                      onClick={() => s.completeExercise(ex.id)}
+                      onClick={() => handleCompleteExercise(ex)}
                       className={`shrink-0 rounded px-2 py-1 text-[10px] font-medium ${
                         ex.completed
                           ? 'bg-emerald-100 text-emerald-700'

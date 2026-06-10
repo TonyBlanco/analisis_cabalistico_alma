@@ -23,6 +23,9 @@ Tarot no vive aqui — Tarot tiene su propio workspace en `/dashboard/therapist/
 El launcher combinado "Astrologia | Tarot" se mantiene **Proximamente** para evitar mezclar flujos; usa los workspaces por separado.
 IA futura sera simbolica, no clinica.
 
+Componentes deprecados:
+- `PsychologicalAnalysisPanel.tsx` — huérfano, sin imports; usar `PsychologicalHoroscopeAdvanced`.
+
 Sistemas de Casas soportados (códigos usados en la UI):
 - P: Placidus (predeterminado)
 - K: Koch

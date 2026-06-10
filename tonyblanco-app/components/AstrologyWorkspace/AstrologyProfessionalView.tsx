@@ -23,6 +23,7 @@ import CalculationStatusPanel from './CalculationStatusPanel';
 import AstrologySidebar from './AstrologySidebar';
 import AIInterpretationPanel from './AIInterpretationPanel';
 import AISituationChat from './AISituationChat';
+import { HOUSE_OPTIONS, ZODIAC_OPTIONS } from '@/lib/astrologyChartOptions';
 
 interface Props {
   consultante: ActiveConsultante;
@@ -738,6 +739,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
 
   const [showRecalcModal, setShowRecalcModal] = useState(false);
   const [recalcMethod, setRecalcMethod] = useState<{ houses: string; zodiac: string }>({ houses: houseSystem, zodiac: zodiacType });
+  const [pdfExportError, setPdfExportError] = useState<string | null>(null);
 
   // simple frontend audit log
   const pushLog = (entry: Record<string, any>) => {
@@ -749,7 +751,11 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
 
   const exportComparativeAsPDF = async (elementId: string, filename = 'comparativa.pdf') => {
     const el = document.getElementById(elementId);
-    if (!el) return;
+    if (!el) {
+      setPdfExportError('No se encontró el panel comparativo para exportar.');
+      return;
+    }
+    setPdfExportError(null);
     try {
       const { default: html2canvas } = await import('html2canvas');
       const { jsPDF } = await import('jspdf');
@@ -758,8 +764,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
       pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, canvas.width, canvas.height);
       pdf.save(filename);
     } catch {
-      // eslint-disable-next-line no-console
-      console.error('PDF export failed for', elementId);
+      setPdfExportError('No se pudo exportar el PDF. Inténtalo de nuevo.');
     }
   };
 
@@ -2175,6 +2180,19 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                     </div>
                   ) : null}
 
+                  {pdfExportError ? (
+                    <div className="mt-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded p-2 flex items-center justify-between gap-2">
+                      <span>{pdfExportError}</span>
+                      <button
+                        type="button"
+                        className="text-xs text-red-700 underline"
+                        onClick={() => setPdfExportError(null)}
+                      >
+                        Cerrar
+                      </button>
+                    </div>
+                  ) : null}
+
                   {/* A18: Comparative Panels */}
                   {showCompareSolarReturn ? (
                     <div id="compare-solar-return" className="mt-4 bg-white border rounded p-3">
@@ -2311,16 +2329,17 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                           <div>
                             <label className="block text-xs text-gray-600">Sistema de casas</label>
                             <select value={recalcMethod.houses} onChange={(e) => setRecalcMethod((r) => ({ ...r, houses: e.target.value }))} className="mt-1 w-full rounded border px-2 py-2">
-                              <option value="P">Placidus (P)</option>
-                              <option value="K">Koch (K)</option>
-                              <option value="W">Whole Sign (W)</option>
+                              {HOUSE_OPTIONS.map((opt) => (
+                                <option key={opt.code} value={opt.code}>{opt.name} ({opt.code})</option>
+                              ))}
                             </select>
                           </div>
                           <div>
                             <label className="block text-xs text-gray-600">Zodiaco</label>
                             <select value={recalcMethod.zodiac} onChange={(e) => setRecalcMethod((r) => ({ ...r, zodiac: e.target.value }))} className="mt-1 w-full rounded border px-2 py-2">
-                              <option value="tropical">Tropical</option>
-                              <option value="sidereal">Sidéreo (Lahiri)</option>
+                              {ZODIAC_OPTIONS.map((opt) => (
+                                <option key={opt.code} value={opt.code}>{opt.name}</option>
+                              ))}
                             </select>
                           </div>
                         </div>

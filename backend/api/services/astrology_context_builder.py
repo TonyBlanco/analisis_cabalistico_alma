@@ -98,7 +98,7 @@ class AstrologyContextBuilder:
             }
         """
         try:
-            url = f"{self.base_url}/api/therapist/patients/{patient_id}/astrology/context-summary/"
+            url = f"{self.base_url}/api/therapist/patients/{patient_id}/context-summary/"
             params = {
                 'include_transits': str(include_transits).lower(),
                 'include_progressions': str(include_progressions).lower(),

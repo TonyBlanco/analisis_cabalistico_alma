@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState, useCallback } from 'react';
-import { Sparkles, Loader2, AlertCircle, ChevronDown, ChevronUp, Copy, Check, Save, Share2, History } from 'lucide-react';
+import { Sparkles, Loader2, AlertCircle, ChevronDown, ChevronUp, Copy, Check, Save, Share2, History, X } from 'lucide-react';
 import { getApiBaseUrl } from '@/lib/api-base';
 import { getAuthToken } from '@/lib/auth';
+import { useToast } from '@/components/ui/toast';
 import InfoTooltip from '../common/InfoTooltip';
 
 type InterpretationLayer = 'natal' | 'transits' | 'progressions' | 'solar_return';
@@ -98,6 +99,15 @@ interface InterpretationResult {
   interpretation_id?: number;
 }
 
+interface HistoryItem {
+  id: number;
+  interpretation_type: InterpretationLayer;
+  interpretation_type_display: string;
+  interpretation_text: string;
+  created_at: string;
+  is_shared_with_patient: boolean;
+}
+
 interface Props {
   patientId: string | number | null;
   hasChart: boolean;
@@ -124,8 +134,22 @@ export default function AIInterpretationPanel({
   const [savingLayer, setSavingLayer] = useState<InterpretationLayer | null>(null);
   const [sharingLayer, setSharingLayer] = useState<InterpretationLayer | null>(null);
   const [aiEnabled, setAiEnabled] = useState<boolean | null>(null);
+  const [historyModal, setHistoryModal] = useState<{
+    open: boolean;
+    layer: InterpretationLayer | null;
+    loading: boolean;
+    items: HistoryItem[];
+    error: string | null;
+  }>({
+    open: false,
+    layer: null,
+    loading: false,
+    items: [],
+    error: null,
+  });
 
   const apiURL = getApiBaseUrl();
+  const toast = useToast();
 
   // Check AI status on mount
   React.useEffect(() => {
@@ -287,19 +311,28 @@ export default function AIInterpretationPanel({
         throw new Error('Error al compartir interpretación');
       }
 
-      // TODO: Show success notification
-      console.log('Interpretation shared successfully');
+      toast.success('Interpretación compartida', 'El consultante podrá ver esta interpretación en su panel.');
 
     } catch (err) {
-      console.error('Error sharing interpretation:', err);
-      // TODO: Show error notification
+      toast.error(
+        'No se pudo compartir',
+        err instanceof Error ? err.message : 'Error desconocido al compartir la interpretación.'
+      );
     } finally {
       setSharingLayer(null);
     }
-  }, [apiURL]);
+  }, [apiURL, toast]);
 
   const viewHistory = useCallback(async (layer: InterpretationLayer) => {
     if (!patientId) return;
+
+    setHistoryModal({
+      open: true,
+      layer,
+      loading: true,
+      items: [],
+      error: null,
+    });
 
     try {
       const token = getAuthToken();
@@ -317,13 +350,34 @@ export default function AIInterpretationPanel({
       }
 
       const data = await response.json();
-      console.log('Interpretation history:', data);
-      // TODO: Show history modal with data.interpretations
+      setHistoryModal({
+        open: true,
+        layer,
+        loading: false,
+        items: data.interpretations || [],
+        error: null,
+      });
 
     } catch (err) {
-      console.error('Error loading history:', err);
+      setHistoryModal({
+        open: true,
+        layer,
+        loading: false,
+        items: [],
+        error: err instanceof Error ? err.message : 'Error desconocido',
+      });
     }
   }, [patientId, apiURL]);
+
+  const closeHistoryModal = useCallback(() => {
+    setHistoryModal({
+      open: false,
+      layer: null,
+      loading: false,
+      items: [],
+      error: null,
+    });
+  }, []);
 
   if (aiEnabled === false) {
     return (
@@ -563,6 +617,72 @@ export default function AIInterpretationPanel({
       <div className="mt-4 text-xs text-gray-500 italic">
         * Lectura simbólica orientativa generada por IA. No constituye diagnóstico.
       </div>
+
+      {historyModal.open ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black opacity-30" onClick={closeHistoryModal} />
+          <div className="bg-white rounded-lg shadow-lg p-5 z-10 w-full max-w-lg max-h-[80vh] overflow-hidden flex flex-col">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Historial de interpretaciones</h3>
+                <p className="text-sm text-gray-600">
+                  {LAYER_CONFIGS.find((c) => c.key === historyModal.layer)?.label || 'Capa'}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={closeHistoryModal}
+                className="p-1 rounded hover:bg-gray-100 text-gray-500"
+                aria-label="Cerrar historial"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="mt-4 overflow-y-auto flex-1 space-y-3">
+              {historyModal.loading ? (
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Cargando historial...
+                </div>
+              ) : historyModal.error ? (
+                <div className="p-3 bg-red-50 border border-red-200 rounded text-sm text-red-700">
+                  {historyModal.error}
+                </div>
+              ) : historyModal.items.length === 0 ? (
+                <div className="p-3 bg-gray-50 border border-gray-200 rounded text-sm text-gray-600">
+                  No hay interpretaciones guardadas para esta capa.
+                </div>
+              ) : (
+                historyModal.items.map((item) => (
+                  <div key={item.id} className="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                    <div className="flex items-center justify-between gap-2 text-xs text-gray-500">
+                      <span>
+                        {new Date(item.created_at).toLocaleString('es-ES', {
+                          dateStyle: 'short',
+                          timeStyle: 'short',
+                        })}
+                      </span>
+                      <span
+                        className={`px-2 py-0.5 rounded-full ${
+                          item.is_shared_with_patient
+                            ? 'bg-purple-100 text-purple-700'
+                            : 'bg-gray-200 text-gray-600'
+                        }`}
+                      >
+                        {item.is_shared_with_patient ? 'Compartida' : 'Solo terapeuta'}
+                      </span>
+                    </div>
+                    <p className="mt-2 text-sm text-gray-700 line-clamp-3 whitespace-pre-wrap">
+                      {item.interpretation_text}
+                    </p>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

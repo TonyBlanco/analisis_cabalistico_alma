@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react';
 import { HelpCircle, ChevronDown, ChevronUp, X, Orbit, Sparkles, Sun, Music, Star, Moon, Loader2 } from 'lucide-react';
 import ASTRO_METHODS from '@/lib/astrologyMethods';
+import { HOUSE_OPTIONS, ZODIAC_OPTIONS } from '@/lib/astrologyChartOptions';
 import { getAuthToken } from '@/lib/auth';
 import { getApiBaseUrl } from '@/lib/api-base';
 
@@ -157,20 +158,6 @@ const ON_DEMAND_PANELS = [
   { key: 'solarReturn' as const, label: 'Retorno solar on-demand' },
   { key: 'compareSolarReturn' as const, label: 'Comparar Natal ↔ Retorno' },
   { key: 'compareProgressions' as const, label: 'Comparar Natal ↔ Progresiones' },
-];
-
-const HOUSE_OPTIONS: Array<{ code: string; name: string; desc?: string }> = [
-  { code: 'P', name: 'Placidus', desc: 'Predeterminado (actualmente activo).' },
-  { code: 'K', name: 'Koch', desc: 'Mayor sensibilidad a latitud/tiempo en la cúspide.' },
-  { code: 'E', name: 'Equal (Casas Iguales)', desc: 'Simplificación estructural (útil para lectura simbólica).' },
-  { code: 'W', name: 'Whole Sign', desc: 'Cada casa = un signo completo.' },
-  { code: 'R', name: 'Regiomontanus', desc: 'Tradicional/horaria.' },
-];
-
-const ZODIAC_OPTIONS: Array<{ code: string; name: string; desc?: string }> = [
-  { code: 'tropical', name: 'Tropical', desc: 'Estándar occidental.' },
-  { code: 'sidereal', name: 'Sideral', desc: 'Usa ayanamsha (backend).' },
-  { code: 'draconic', name: 'Dracónico', desc: 'Rotación por Nodo Norte (lectura simbólica).' },
 ];
 
 export default function AstrologySidebar({

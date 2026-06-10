@@ -17,7 +17,7 @@ from rest_framework import status
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 
-from .astrology_ai_service import astrology_ai_service
+from .astrology_ai_service import astrology_ai_service, is_rate_limit_error
 from .models import Patient
 from .models_astrology import AstrologyNatalChart
 from .models_astrology_ai import AstrologyAIInterpretation
@@ -25,6 +25,25 @@ from .permissions import IsTherapist
 from django.utils import timezone
 
 logger = logging.getLogger(__name__)
+
+
+def _ai_error_response(error: str):
+    if is_rate_limit_error(error):
+        return Response(
+            {
+                'error': (
+                    'Límite diario del proveedor AI alcanzado. '
+                    'Espera unos minutos o usa interpretaciones ya guardadas.'
+                ),
+                'code': 'rate_limit_exceeded',
+                'retry_after_hint': error,
+            },
+            status=status.HTTP_429_TOO_MANY_REQUESTS,
+        )
+    return Response(
+        {'error': error or 'Error generando interpretación'},
+        status=status.HTTP_503_SERVICE_UNAVAILABLE,
+    )
 
 
 def _layer_chart_payload(natal_chart: AstrologyNatalChart, layer: str):
@@ -163,10 +182,7 @@ class AstrologyInterpretNatalView(APIView):
                 'interpretation_id': interpretation.id,
             })
         else:
-            return Response(
-                {'error': result.error or 'Error generando interpretación'},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            return _ai_error_response(result.error or 'Error generando interpretación')
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -237,10 +253,7 @@ class AstrologyInterpretTransitsView(APIView):
                 'transit_date': transit_date,
             })
         else:
-            return Response(
-                {'error': result.error or 'Error generando interpretación'},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            return _ai_error_response(result.error or 'Error generando interpretación')
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -307,10 +320,7 @@ class AstrologyInterpretProgressionsView(APIView):
                 'patient_id': patient_id,
             })
         else:
-            return Response(
-                {'error': result.error or 'Error generando interpretación'},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            return _ai_error_response(result.error or 'Error generando interpretación')
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -378,10 +388,7 @@ class AstrologyInterpretSolarReturnView(APIView):
                 'year': year,
             })
         else:
-            return Response(
-                {'error': result.error or 'Error generando interpretación'},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            return _ai_error_response(result.error or 'Error generando interpretación')
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -453,10 +460,7 @@ class AstrologyQuerySituationView(APIView):
                 'question': question,
             })
         else:
-            return Response(
-                {'error': result.error or 'Error generando respuesta'},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            return _ai_error_response(result.error or 'Error generando respuesta')
 
 
 @method_decorator(csrf_exempt, name='dispatch')

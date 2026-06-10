@@ -40,6 +40,16 @@ from .utils.genai_response import extract_text
 logger = logging.getLogger(__name__)
 
 
+def is_rate_limit_error(message: str) -> bool:
+    lower = (message or '').lower()
+    return 'rate limit' in lower or 'rate_limit' in lower or '429' in lower
+
+
+def is_failed_generation_text(text: str) -> bool:
+    stripped = (text or '').strip()
+    return stripped.startswith('Error:') or stripped.startswith('Error al generar')
+
+
 @dataclass
 class AIInterpretationResult:
     """Resultado de una interpretación AI."""
@@ -245,7 +255,23 @@ class AstrologyAIService:
                 return "Error: Proveedor AI no configurado"
         except Exception as e:
             logger.error(f"Error generando contenido AI: {str(e)}", exc_info=True)
-            return f"Error al generar interpretación: {str(e)}"
+            raise
+
+    def _finalize_interpretation(self, interpretation: str, layer: str) -> AIInterpretationResult:
+        if is_failed_generation_text(interpretation):
+            return AIInterpretationResult(
+                success=False,
+                interpretation='',
+                layer=layer,
+                error=interpretation,
+            )
+        if DISCLAIMER.strip() not in interpretation:
+            interpretation += DISCLAIMER
+        return AIInterpretationResult(
+            success=True,
+            interpretation=interpretation,
+            layer=layer,
+        )
     
     def _generate_gemini(self, system_prompt: str, user_prompt: str, max_tokens: int, temperature: float) -> str:
         """Generate content using Gemini API."""
@@ -338,16 +364,7 @@ class AstrologyAIService:
                 max_tokens=prompt_config.max_tokens,
                 temperature=prompt_config.temperature,
             )
-            
-            # Asegurar disclaimer
-            if DISCLAIMER.strip() not in interpretation:
-                interpretation += DISCLAIMER
-            
-            return AIInterpretationResult(
-                success=True,
-                interpretation=interpretation,
-                layer="natal",
-            )
+            return self._finalize_interpretation(interpretation, 'natal')
             
         except Exception as e:
             logger.error(f"Error en interpret_natal: {str(e)}", exc_info=True)
@@ -397,14 +414,7 @@ class AstrologyAIService:
                 temperature=prompt_config.temperature,
             )
             
-            if DISCLAIMER.strip() not in interpretation:
-                interpretation += DISCLAIMER
-            
-            return AIInterpretationResult(
-                success=True,
-                interpretation=interpretation,
-                layer="transits",
-            )
+            return self._finalize_interpretation(interpretation, 'transits')
             
         except Exception as e:
             logger.error(f"Error en interpret_transits: {str(e)}", exc_info=True)
@@ -456,14 +466,7 @@ class AstrologyAIService:
                 temperature=prompt_config.temperature,
             )
             
-            if DISCLAIMER.strip() not in interpretation:
-                interpretation += DISCLAIMER
-            
-            return AIInterpretationResult(
-                success=True,
-                interpretation=interpretation,
-                layer="progressions",
-            )
+            return self._finalize_interpretation(interpretation, 'progressions')
             
         except Exception as e:
             logger.error(f"Error en interpret_progressions: {str(e)}", exc_info=True)
@@ -515,14 +518,7 @@ class AstrologyAIService:
                 temperature=prompt_config.temperature,
             )
             
-            if DISCLAIMER.strip() not in interpretation:
-                interpretation += DISCLAIMER
-            
-            return AIInterpretationResult(
-                success=True,
-                interpretation=interpretation,
-                layer="solar_return",
-            )
+            return self._finalize_interpretation(interpretation, 'solar_return')
             
         except Exception as e:
             logger.error(f"Error en interpret_solar_return: {str(e)}", exc_info=True)
@@ -581,14 +577,7 @@ class AstrologyAIService:
                 temperature=prompt_config.temperature,
             )
             
-            if DISCLAIMER.strip() not in interpretation:
-                interpretation += DISCLAIMER
-            
-            return AIInterpretationResult(
-                success=True,
-                interpretation=interpretation,
-                layer="situation",
-            )
+            return self._finalize_interpretation(interpretation, 'situation')
             
         except Exception as e:
             logger.error(f"Error en query_situation: {str(e)}", exc_info=True)

@@ -224,7 +224,20 @@ export default function AIInterpretationPanel({
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Error en la interpretación');
+        const msg = data.error || data.retry_after_hint || 'Error en la interpretación';
+        if (response.status === 429 || data.code === 'rate_limit_exceeded') {
+          throw new Error(
+            'Límite diario del proveedor AI alcanzado. Espera unos minutos o genera el informe sin interpretaciones nuevas.',
+          );
+        }
+        throw new Error(msg);
+      }
+
+      if (
+        typeof data.interpretation === 'string'
+        && (data.interpretation.startsWith('Error al generar') || data.interpretation.startsWith('Error:'))
+      ) {
+        throw new Error(data.interpretation);
       }
 
       setInterpretations((prev) => ({

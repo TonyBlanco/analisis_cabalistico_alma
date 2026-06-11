@@ -60,7 +60,7 @@ export const GEMINI_GENERATION_CONFIG = {
 **Archivo:** `.env.local`
 
 ```env
-NEXT_PUBLIC_GEMINI_API_KEY=AIzaSyBGP6CzfM4rlaBPvCtrHbAbkLPcJmeFBgQ
+NEXT_PUBLIC_GEMINI_API_KEY=your-gemini-api-key-here
 ```
 
 ⚠️ **IMPORTANTE:** 

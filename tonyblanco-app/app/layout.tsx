@@ -23,6 +23,9 @@ export const metadata: Metadata = {
     capable: true,
     statusBarStyle: 'black-translucent',
   },
+  other: {
+    'facebook-domain-verification': 'mohq5ipwjh2k8yy3igm81y3ah8dcpa',
+  },
 };
 
 export const viewport: Viewport = {

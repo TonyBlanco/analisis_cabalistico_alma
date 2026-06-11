@@ -2299,13 +2299,18 @@ class TherapistDashboardView(APIView):
         from .serializers import SessionSerializer
         recent_sessions_data = SessionSerializer(recent_sessions, many=True).data
 
+        from .therapist_workload import build_therapist_workload
+
+        workload = build_therapist_workload(user)
+
         return Response({
             'total_patients': total_patients,
             'sessions_this_month': sessions_this_month,
             'fichas_this_month': fichas_this_month,
             'recent_sessions': recent_sessions_data,
             'subscription_status': user.profile.subscription_status,
-            'subscription_end_date': user.profile.subscription_end_date
+            'subscription_end_date': user.profile.subscription_end_date,
+            'workload': workload,
         })
 
 

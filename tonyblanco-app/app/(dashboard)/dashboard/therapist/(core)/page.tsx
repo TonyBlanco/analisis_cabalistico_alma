@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { AlertCircle, BarChart3, Calendar, ClipboardList, FileText, Plus, UserPlus } from 'lucide-react';
 import { useTherapistMetrics } from '@/hooks/useTherapistMetrics';
 import { useTherapistAIUsage } from '@/hooks/useTherapistAIUsage';
+import { useTherapistWorkload } from '@/hooks/useTherapistWorkload';
+import TherapistWorkloadSection from '@/components/dashboard/TherapistWorkloadSection';
 
 // Lazy-load chart bundle — avoids SSR issues with Chart.js canvas
 const MetricsDashboard = dynamic(() => import('@/components/dashboard/MetricsDashboard'), {
@@ -26,9 +28,25 @@ export default function TherapistDashboardPage() {
     error: aiUsageError,
     refetch: refetchAIUsage,
   } = useTherapistAIUsage();
+  const {
+    workload,
+    status: workloadStatus,
+    error: workloadError,
+    isEmpty: workloadEmpty,
+    refetch: refetchWorkload,
+  } = useTherapistWorkload();
 
   return (
     <div className="space-y-8">
+      {/* Operational workload */}
+      <TherapistWorkloadSection
+        workload={workload}
+        status={workloadStatus}
+        error={workloadError}
+        isEmpty={workloadEmpty}
+        onRetry={refetchWorkload}
+      />
+
       {/* AI usage */}
       {aiUsageStatus === 'loading' && <AIUsageSkeleton />}
 

@@ -18,3 +18,20 @@
 ---
 
 <!-- Add entries below this line -->
+
+## [2026-06-11] Therapist Dashboard Workload — ampliación
+**Method:** GET
+**Path:** /api/therapist/dashboard/
+**Auth:** Token + IsTherapist
+**Request:** N/A
+**Response:** Legacy fields + `workload` (ver `.ai-memory/therapist_dashboard_contract.md`)
+**Change:** MODIFIED
+**Agent:** grok (orquestador D1)
+
+## [2026-06-11] Therapist sessions/notes — consumo dashboard
+**Method:** GET/POST
+**Path:** /api/therapist/sessions/ | /api/therapist/notes/
+**Auth:** Token + IsTherapist
+**Decision:** Mantener; avance agregado en dashboard/workload; consumo directo solo en ficha paciente
+**Change:** DOCUMENTED (no deprecate)
+**Agent:** grok (D4)

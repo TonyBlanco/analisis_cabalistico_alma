@@ -10,6 +10,7 @@ import type { AstrologyTarotSectionId, TarotSystemId } from './types';
 import { getActivePatientId, getActivePatientName } from '@/lib/active-patient';
 import { API_BASE_URL, getAuthToken } from '@/lib/api';
 import { treeStructuralStateFromTarotDraws } from '@/lib/symbolic-session/tarot-tree-state';
+import { DEFAULT_CORRESPONDENCE_SYSTEM } from '@/lib/symbolic-api/server';
 import type { TarotCardDraw } from '@/components/tarot/TarotSpreadView';
 import { SessionStepper } from '@/components/SymbolicSession';
 
@@ -358,7 +359,7 @@ export default function AstrologyTarotWorkspace({
               <SessionStepper
                 treeState={treeState}
                 consultantRef={patientId}
-                correspondenceSystem={selectedSystem}
+                correspondenceSystem={DEFAULT_CORRESPONDENCE_SYSTEM}
                 onEvent={emitSessionEvent}
               />
             </div>

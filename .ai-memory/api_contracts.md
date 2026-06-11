@@ -28,6 +28,16 @@
 **Change:** MODIFIED
 **Agent:** grok (orquestador D1)
 
+## [2026-06-11] Help Assistant — product usage RAG
+**Method:** POST
+**Path:** /api/help/ask
+**Auth:** Token + IsAuthenticated
+**Request:** `{ query: string, route?: string, screen?: string, locale?: string }` — sin PHI
+**Response:** `{ success, answer, citations[], fallback_guide?, grounding, provider?, usage? }` — ver `docs/01_PROJECT_STATE/HELP_ASSISTANT_CONTRACT.md`
+**Metering:** `task_type=help.ask`
+**Change:** NEW
+**Agent:** grok
+
 ## [2026-06-11] Therapist sessions/notes — consumo dashboard
 **Method:** GET/POST
 **Path:** /api/therapist/sessions/ | /api/therapist/notes/

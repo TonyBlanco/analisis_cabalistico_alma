@@ -37,6 +37,32 @@ python3 memory_manager.py sync-session \
 
 **Grok:** ejecutar `sync-session` antes del último mensaje si la sesión tocó código, deploy o docs.
 
+## Prevención de agotamiento de contexto
+
+Las sesiones largas pierden el contexto cuando se acumula demasiado output de herramientas en una sola conversación. Reglas obligatorias:
+
+### Durante la sesión
+
+1. **Commit frecuente** — hacer commit al terminar cada workstream, no al final de la sesión. Un diff acumulado grande consume tokens en cada tool call posterior.
+2. **Una feature, una sesión** — si la tarea toca >3 áreas distintas (backend + frontend + tests + docs), abrir una conversación nueva por área o por fase. No mezclar todo en el mismo chat.
+3. **Checkpoint tras workstream completado** — usar `/save-session` o ejecutar manualmente:
+   ```bash
+   python3 memory_manager.py sync-session --focus "qué queda" --completed "qué se hizo" --next "primer paso"
+   python3 memory_manager.py dump --out CODEX_CONTEXT.md
+   ```
+   Luego abrir chat nuevo y pegar la frase clave de `docs/CHAT_CONTINUITY_PROTOCOL.md`.
+
+### Señales de alerta (actuar antes de quedarse sin contexto)
+
+- Llevas >10 herramientas ejecutadas en la sesión
+- Has leído >5 archivos distintos
+- El working tree tiene >10 archivos modificados sin commit
+- La tarea saltó de dominio (ej: empezaste en backend y ahora estás en FE+tests)
+
+### Resumen de causas documentadas (2026-06-11)
+
+La sesión anterior agotó contexto por: lectura de 6+ archivos de help assistant + learning center + dashboard + tests + rebase en dos ramas, todo sin commits intermedios. Working tree llegó a 22 archivos sucios.
+
 ## Etiquetas de memoria
 
 | Prefijo | Cuándo |

@@ -1,15 +1,17 @@
 # Session Context — Análisis Cabalístico / Studios33
 
-**Última actualización:** 2026-06-11 18:08 UTC  
-**Rama:** `main` · **HEAD:** `cb13d7ce` · **Working tree:** 22 archivo(s) sin commit  
+**Última actualización:** 2026-06-11 19:22 UTC  
+**Rama:** `chore/security-gemini-key-and-help-consolidation` · **HEAD:** `3c90cfbf` · **Working tree:** 7 archivo(s) sin commit  
 **Prod:** Hetzner `studios33.app` + `api.studios33.app`
 
 ## Current Focus
 
-Centro Aprendizaje + Help Assistant — tests verdes, pendiente commit/deploy
+Fase 2 Learning Center: rate-limit help/ask, analytics AN1, GIFs guías
 
 ## Completed (reciente)
 
+- Centro /learn + POST /api/help/ask desplegados; tests 8/8; docs/plan/memoria sincronizados
+- Último commit: `3c90cfbf` — chore(security+help): rotar GEMINI_API_KEY + consolidar help_assistant
 - Fix classify_help_scope acentos; fallback desde citas; catálogo learning-center; widget envía route
 - Último commit: `cb13d7ce` — fix(hybrid-metrics): usar apiUrl() — faltaba / entre base y path (404)
 - Merge feat/therapist-dashboard-revamp; plan DoD checklist [x]; smoke prod OK
@@ -20,8 +22,6 @@ Centro Aprendizaje + Help Assistant — tests verdes, pendiente commit/deploy
 - TherapistAIUsagePanel en dashboard; usage_context en holistic_ai, synthesis, governed, tarot_holistic, swm_v3
 - Fase 1 metering: modelo, bridge, astrología, API usage, tests 11 OK, migración 0096
 - Spec metering + actualización docs IA (14 archivos)
-- Cherry-pick PR1 a main, fix dep migración 0094→0090, deploy verde, API+web 200
-- Último commit: `91363fcb` — fix(migrations): 0094 depende de 0090 en main (0093 no desplegada aún)
 
 ## Active Tasks
 
@@ -31,7 +31,7 @@ Centro Aprendizaje + Help Assistant — tests verdes, pendiente commit/deploy
 
 ## Next Steps
 
-1. Commit feat learning-center+help-assistant y smoke en navegador /learn
+1. Smoke autenticado widget help/ask en prod; opcional rate-limit AI5
 
 ## Key Docs
 

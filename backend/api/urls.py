@@ -47,7 +47,7 @@ from .views import (
     service_stats,
 )
 from .ai_views import AIHolisticQueryView, AIGenerateView
-from .help_assistant_views import HelpAskView
+from .help_assistant.views import HelpAskView
 from .ai_usage_views import TherapistAIUsageView, TherapistAIUsageHistoryView
 from api.ai.status_views import AIStatusView
 from api.ai.governed_views import KabbalahInterpretView, AIInteractionFeedbackView

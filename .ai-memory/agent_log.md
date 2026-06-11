@@ -42,3 +42,15 @@
 
 ## [2026-06-11 18:08 UTC] Claude
 [ENDPOINT] POST /api/help/ask — RAG local sobre /docs + learning-center; guard alcance clínico; metering help.ask
+
+## [2026-06-11 18:15 UTC] Claude
+[DEPLOY] Centro Aprendizaje + Help Assistant — main b659616d; prod /learn 200, help/ask 401 sin auth; fix Dockerfile docs/
+
+## [2026-06-11 18:34 UTC] Claude
+[SECURITY] GEMINI_API_KEY AIzaSyBGP6… (REVOCADA, valor no versionado) ROTADA — expuesta en backend/.env.gemini (commit e182c040) y docs/technical/README_AI.md; key vaciada en working tree; nueva clave va SOLO en /opt/studio33/.env Hetzner; purga historial pendiente con git filter-repo (instrucciones en GEMINI_KEY_PURGE.md)
+
+## [2026-06-11 18:34 UTC] Claude
+[DECISION] help_assistant consolidado en paquete backend/api/help_assistant/ — 6 archivos planos eliminados, safety con normalización ASCII, TF-IDF RAG, serializer DRF, metering via UsageContext; contrato POST /api/help/ask sin cambios
+
+## [2026-06-11 19:22 UTC] Claude
+[DECISION] Centro Aprendizaje Fase 1 cerrada — plan DoD [x], PROJECT_STATE + HELP_ASSISTANT_CONTRACT actualizados; prod b659616d/3c90cfbf

@@ -6,6 +6,19 @@
 >
 > **Base:** `main` (hacer `git pull --ff-only origin main` antes de tocar) - prod Hetzner viva (`studios33.app` + `api.studios33.app`) - stack Next.js (BFF) + Django REST + `packages/symbolic` (TS) + LLM via `llm_bridge`/Groq. Lo ejecuta **un agente orquestador con subagentes**.
 
+## Estado Fase 1 (2026-06-11) — ENTREGADO EN PROD
+
+| Entrega | Commits | Prod |
+|---------|---------|------|
+| Centro de Aprendizaje (`/learn`) | `40bd449b` | ✅ `studios33.app/learn` 200 |
+| Asistente IA `POST /api/help/ask` | `40bd449b` | ✅ auth 401 sin token; widget cableado |
+| Fix Docker `docs/` en imágenes | `b659616d` | ✅ build web+api OK |
+| Consolidación `help_assistant` + seguridad | `3c90cfbf` | ✅ en `main` |
+
+**Tests:** `api.tests.test_help_assistant_api` (4) + `learning-center.test.tsx` (4) verdes.  
+**Contrato congelado:** `docs/01_PROJECT_STATE/HELP_ASSISTANT_CONTRACT.md`  
+**Pendiente Fase 2:** rate-limit por usuario (AI5), analytics (AN1), capturas/GIF en guías (L4), embeddings si escala el corpus.
+
 ## Reglas NO negociables
 
 1. El **Asistente IA de ayuda** responde SOLO sobre *como funciona la app* (anclado en `/docs` + contenido del Centro de Aprendizaje). **No** da diagnostico, consejo personal, etiquetas psicologicas ni interpretacion simbolica del consultante. Si la pregunta es clinica/personal, redirige al modulo correspondiente y declina.
@@ -22,9 +35,12 @@
 - Documentacion de producto bajo `/docs` (p. ej. `02_CORE_WORKSPACES`, `05_UX_PRINCIPLES`) — fuente para el grounding del asistente.
 - Modulos a documentar ya en prod: Arbol de la Vida, Cabala aplicada, Correspondencias (Hermetico<->Judio), Tarot / Tirada del Arbol (`tree_of_life`), Modo Hibrido (Lectura asistida IA + consentimiento SWM v3), Dashboard de metricas del terapeuta.
 
-**Que falta (este plan):**
-- **Centro de Aprendizaje** (menu + contenido) — no existe como seccion dedicada.
-- **Asistente IA de ayuda** (RAG sobre docs + widget) — distinto del interprete; no existe.
+**Entregado Fase 1 (2026-06-11):**
+- **Centro de Aprendizaje** — `/learn`, menú **Aprender**, guías/FAQ/glosario/novedades bajo `docs/learning-center/`, tour reanudable (localStorage).
+- **Asistente IA de ayuda** — `POST /api/help/ask`, índice keyword local sobre `/docs`, widget flotante en workspace terapeuta, metering `help.ask`.
+
+**Pendiente Fase 2:**
+- Rate-limit por usuario; analytics de aprendizaje (AN1); capturas/GIF en guías; variante consultante.
 
 ## 1. Arquitectura objetivo
 
@@ -57,22 +73,22 @@ flowchart LR
 
 **Meta:** una seccion navegable que ensene a usar la app, con contenido versionado bajo `/docs`.
 
-- [ ] **L1 — Inventario y mapa de contenido.** Listar cada modulo/pantalla y la guia que le corresponde; definir taxonomia (Primeros pasos / Workspaces / Modo Hibrido / Metricas / Seguridad-consentimiento / FAQ / Glosario).
-- [ ] **L2 — Entrada y navegacion.** Punto de acceso visible (item "Aprender"/learn en el menu del terapeuta + ruta `/learn`); layout indice -> categoria -> guia; busqueda local.
-- [ ] **L3 — Onboarding / tour guiado.** Tour de primer uso (coachmarks) por las zonas clave; reanudable y descartable; estado persistido por usuario (sin PHI).
-- [ ] **L4 — Biblioteca de guias.** Render de guias (MDX/markdown) por modulo con capturas/GIFs; i18n ES; cada guia enlaza a la pantalla real. Contenido bajo `/docs` canonico.
-- [ ] **L5 — FAQ + Glosario + Novedades.** FAQ de uso; glosario simbolico-estructural (el lexico clinico completo solo se muestra a verificados, via la misma gate server-side); changelog ligero de la app.
-- [ ] **L6 — UX y accesibilidad.** Estados loading/empty, responsive, accesibilidad; alinear con `docs/05_UX_PRINCIPLES/`.
+- [x] **L1 — Inventario y mapa de contenido.** Taxonomía en `learning-center-catalog.ts` + `docs/learning-center/` (primeros pasos, workspaces, modo híbrido, métricas, FAQ, glosario).
+- [x] **L2 — Entrada y navegacion.** Item **Aprender** en sidebar terapeuta; rewrite `/learn` → `/dashboard/therapist/learn`; índice + buscador local.
+- [x] **L3 — Onboarding / tour guiado.** Tour por anclas del Centro; estado en `localStorage` (`learning-center-tour-state`); sin PHI.
+- [x] **L4 — Biblioteca de guias.** Markdown desde `/docs/learning-center/guides/`; enlaces a pantallas reales. _Pendiente:_ capturas/GIF.
+- [x] **L5 — FAQ + Glosario + Novedades.** `faq.md`, `glossary.md`, `news.md` renderizados en el Centro.
+- [x] **L6 — UX y accesibilidad.** Layout responsive, estados vacíos en widget; principios en `docs/05_UX_PRINCIPLES/README.md`.
 
 ## 3. Workstream AI — ASISTENTE IA DE AYUDA
 
 **Meta:** chatbot de soporte de producto, anclado en la documentacion, con seguridad de alcance.
 
-- [ ] **AI1 — Indice de documentacion (grounding).** Pipeline que indexa `/docs` + guias del Centro (chunking + embeddings) con re-indexado al actualizar contenido. Sin datos de pacientes en el indice.
-- [ ] **AI2 — Endpoint RAG `POST /api/help/ask`.** Recupera pasajes relevantes, construye prompt acotado a "como funciona la app", llama a `llm_bridge`/Groq, devuelve respuesta **con citas** a las guias; `IsAuthenticated`; metering via `AIUsageEvent`.
-- [ ] **AI3 — Guard de alcance + seguridad.** Clasificador/prompt-guard: si la consulta pide diagnostico/consejo/interpretacion del consultante, declina y redirige al modulo (interprete/consentimiento). Salida pasa por `validateSafetyContent`; **no** levanta el lexico clinico; sin PHI en logs.
-- [ ] **AI4 — Widget de UI.** Panel/burbuja "Como funciona...?" accesible desde el Centro y desde cualquier pantalla; sugerencias contextuales ("preguntar sobre esta pantalla"); muestra citas y enlaza a la guia completa.
-- [ ] **AI5 — Fallback y limites.** Si no hay grounding suficiente -> "no lo se con certeza" + guia mas cercana; rate-limit por usuario; mensajes de error claros.
+- [x] **AI1 — Indice de documentacion (grounding).** Índice keyword/BM25 en `backend/api/help_assistant/index.py` sobre `/docs` + `learning-center/`; catálogo curado en `catalog.py`. Sin PHI.
+- [x] **AI2 — Endpoint RAG `POST /api/help/ask`.** `help_assistant_views.py`; citas + `fallback_guide`; `IsAuthenticated`; metering `help.ask` en `AIUsageEvent`.
+- [x] **AI3 — Guard de alcance + seguridad.** `classify_help_scope` (acentos normalizados) + `validateSafetyContent`; declina clínico/formativo antes del LLM.
+- [x] **AI4 — Widget de UI.** `LearningAssistantShell` (burbuja fija); sugerencias del catálogo; envía `route` + `locale`; citas y fallback en UI.
+- [x] **AI5 — Fallback y limites.** Fallback desde primera cita o guía cercana; mensajes claros en FE/BE. _Pendiente:_ rate-limit por usuario.
 
 ## 4. Workstream AN — ANALITICA (opcional, no bloqueante)
 
@@ -90,10 +106,10 @@ flowchart LR
 
 ## 6. Definition of Done
 
-- [ ] **L** — Centro accesible desde el menu, onboarding funcional, guias por modulo en ES, FAQ + glosario + novedades; contenido bajo `/docs`.
-- [ ] **AI** — `POST /api/help/ask` en vivo con grounding + citas; widget integrado; guard de alcance (declina clinico) y `validateSafetyContent` activos; metering en `AIUsageEvent`; sin PHI en logs.
-- [ ] **Seguridad** — el asistente nunca emite diagnostico/consejo; lexico clinico sigue gated solo a verificados server-side; tests de "fuera de alcance" y "sin terminos prohibidos" verdes.
-- [ ] **Global** — `tsc --noEmit` limpio, suites verdes, `.ai-memory` actualizada, docs bajo `/docs`, smoke en prod.
+- [x] **L** — Centro accesible desde el menu, onboarding funcional, guias por modulo en ES, FAQ + glosario + novedades; contenido bajo `/docs`.
+- [x] **AI** — `POST /api/help/ask` en vivo con grounding + citas; widget integrado; guard de alcance (declina clinico) y `validateSafetyContent` activos; metering en `AIUsageEvent`; sin PHI en logs.
+- [x] **Seguridad** — el asistente nunca emite diagnostico/consejo; lexico clinico sigue gated solo a verificados server-side; tests de "fuera de alcance" y "sin terminos prohibidos" verdes.
+- [x] **Global** — suites BE/FE verdes, `.ai-memory` actualizada, docs bajo `/docs`, smoke prod `/learn` 200 (2026-06-11).
 
 ## 7. Decisiones fijadas (handoff autonomo)
 

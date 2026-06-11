@@ -456,7 +456,8 @@ Cualquier modificación futura requiere actualización explícita de este docume
 - ✅ **PIP Fase 0–2 desplegado en prod** (`studio33_api` rebuild): router `free_first`, `/api/ai/status/`, kabbalah interpret, bioemotional assist-draft, feedback, guardrails
 - ✅ Tests: 35 + harness 50 casos (OK servidor); CI `pip-ai-tests.yml`
 - 📋 Specs: [planai/PHASE_0_UNIFIED_LLM_ROUTER.md](./planai/PHASE_0_UNIFIED_LLM_ROUTER.md), [PHASE_2_GOVERNED_ASSISTANCE.md](./planai/PHASE_2_GOVERNED_ASSISTANCE.md)
-- 📋 **AI Usage Metering (nuevo):** [AI_USAGE_METERING_IMPLEMENTATION.md](./AI_USAGE_METERING_IMPLEMENTATION.md) — ledger por terapeuta, todos los módulos IA, base + créditos + overage; código Fase 1 pendiente
+- ✅ **AI Usage Metering Fase 1–2:** [AI_USAGE_METERING_IMPLEMENTATION.md](./AI_USAGE_METERING_IMPLEMENTATION.md) — `AIUsageEvent`, `GET /api/therapist/ai-usage/`, incluye `help.ask`
+- ✅ **Centro de Aprendizaje + Help Assistant (2026-06-11):** `/learn`, menú Aprender, guías en `docs/learning-center/`; `POST /api/help/ask` RAG local; contrato [HELP_ASSISTANT_CONTRACT.md](./HELP_ASSISTANT_CONTRACT.md); plan [PLAN-centro-aprendizaje-asistente-ia.md](../plans/PLAN-centro-aprendizaje-asistente-ia.md)
 - ⏳ **Prod AI:** migrar `AI_PROVIDER=gemini` (Groq free agotado en uso real)
 - ⏳ **PIP Fase 1:** Process Memory + RAG (pendiente)
 

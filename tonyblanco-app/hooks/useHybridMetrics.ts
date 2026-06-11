@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { API_BASE_URL, getAuthHeaders } from '@/lib/api';
+import { apiUrl, getAuthHeaders } from '@/lib/api';
 import type { HybridModeMetrics } from '@/lib/types/hybrid-metrics';
 
 type Status = 'idle' | 'loading' | 'success' | 'error';
@@ -25,7 +25,7 @@ export function useHybridMetrics(): UseHybridMetricsResult {
     setStatus('loading');
     setError(null);
 
-    fetch(`${API_BASE_URL}therapist/hybrid-metrics/`, {
+    fetch(apiUrl('therapist/hybrid-metrics/'), {
       headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
     })
       .then(async (res) => {

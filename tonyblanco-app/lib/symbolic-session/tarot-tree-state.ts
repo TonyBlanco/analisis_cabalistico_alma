@@ -116,3 +116,30 @@ export function buildTreeStateFromTarotReading(
     inclusionMap,
   });
 }
+
+/** Carta de tirada con posición Sefirótica (shape mínimo de TarotCardDraw). */
+export interface TarotDrawForTree {
+  position?: { id?: string } | null;
+  card: { id: string; nameSpanish?: string | null; name?: string | null };
+  reversed?: boolean;
+}
+
+/**
+ * Puente index.tsx → buildTreeStateFromTarotReading a partir de onReadingChange.
+ * Requiere position.id ∈ SefiraId (p. ej. tree_of_life en SWM v3).
+ */
+export function treeStructuralStateFromTarotDraws(
+  cards: TarotDrawForTree[],
+  system: string,
+): TreeStructuralState | null {
+  if (cards.length === 0) return null;
+  const positions: TarotTreePosition[] = cards
+    .filter((draw) => draw.position?.id)
+    .map((draw) => ({
+      sefira: draw.position!.id as SefiraId,
+      cardId: draw.card.id,
+      cardLabel: draw.card.nameSpanish ?? draw.card.name ?? undefined,
+      reversed: draw.reversed ?? false,
+    }));
+  return buildTreeStateFromTarotReading({ system, positions });
+}

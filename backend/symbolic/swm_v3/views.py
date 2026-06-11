@@ -35,7 +35,7 @@ except ImportError:
 
 from symbolic.swm_v3.tarot_es import (
     BOTA_LIKE_SYSTEMS,
-    SPREAD_POSITIONS_ES,
+    spread_positions_for,
     apply_system_meta_es,
     build_bota_core_spanish,
     format_position_meaning_es,
@@ -826,7 +826,7 @@ def generate_educational_reading(
 
     # Build cards data
     cards = []
-    positions = SPREAD_POSITIONS_ES
+    positions = spread_positions_for(spread_type)
 
     for i, card_id in enumerate(selected_cards[:num_cards]):
         card_data = next((c for c in draw_pool if c.get("id") == card_id), None)

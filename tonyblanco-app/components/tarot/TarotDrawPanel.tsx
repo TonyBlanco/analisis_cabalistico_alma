@@ -41,6 +41,11 @@ const SPREADS: Array<{ id: string; nameSpanish: string }> = [
   { id: 'observation', nameSpanish: 'Tirada de observación' },
 ];
 
+const TREE_OF_LIFE_SPREAD = {
+  id: 'tree_of_life',
+  nameSpanish: 'Árbol de la Vida (10 Sefirot)',
+} as const;
+
 const CONTEXTS: Array<{ id: string; label: string }> = [
   { id: 'general', label: 'General' },
   { id: 'love', label: 'Vínculo' },
@@ -175,6 +180,8 @@ export default function TarotDrawPanel(props: {
   systemId?: string;
   onSystemChange?: (systemId: string) => void;
   useBotaSvg?: boolean;
+  /** Fija el spread (p. ej. tree_of_life en Tirada del Árbol); oculta el selector. */
+  forcedSpreadId?: string;
   /** Emitido cuando se completa una tirada con las cartas resultantes. */
   onReadingChange?: (cards: TarotCardDraw[]) => void;
 }) {
@@ -184,7 +191,12 @@ export default function TarotDrawPanel(props: {
     setSystemIdState(next);
     props.onSystemChange?.(next);
   };
-  const [spreadId, setSpreadId] = useState<string>('simple');
+  const forcedSpreadId = props.forcedSpreadId;
+  const [spreadId, setSpreadId] = useState<string>(forcedSpreadId ?? 'simple');
+
+  useEffect(() => {
+    if (forcedSpreadId) setSpreadId(forcedSpreadId);
+  }, [forcedSpreadId]);
   const [deckScope, setDeckScope] = useState<'major' | 'full'>('major');
   const [intention, setIntention] = useState<string>('');
   const [contextFocus, setContextFocus] = useState<string>('general');
@@ -244,6 +256,11 @@ export default function TarotDrawPanel(props: {
   const [selectedCard, setSelectedCard] = useState<TarotCardDraw | null>(null);
 
   const systemLabel = useMemo(() => SYSTEMS.find((s) => s.id === systemId)?.label ?? systemId, [systemId]);
+
+  const spreadOptions = useMemo(() => {
+    if (forcedSpreadId === TREE_OF_LIFE_SPREAD.id) return [TREE_OF_LIFE_SPREAD];
+    return SPREADS;
+  }, [forcedSpreadId]);
 
   const handleRun = async () => {
     setError(null);
@@ -392,17 +409,23 @@ export default function TarotDrawPanel(props: {
 
           <div>
             <label className="block text-xs font-medium text-slate-700">Spread</label>
-            <select
-              value={spreadId}
-              onChange={(e) => setSpreadId(e.target.value)}
-              className="mt-1 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900"
-            >
-              {SPREADS.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.nameSpanish}
-                </option>
-              ))}
-            </select>
+            {forcedSpreadId ? (
+              <p className="mt-1 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-800">
+                {spreadOptions[0]?.nameSpanish ?? forcedSpreadId}
+              </p>
+            ) : (
+              <select
+                value={spreadId}
+                onChange={(e) => setSpreadId(e.target.value)}
+                className="mt-1 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900"
+              >
+                {spreadOptions.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.nameSpanish}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
 
           {supportsFullDeck ? (

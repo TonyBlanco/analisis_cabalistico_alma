@@ -43,12 +43,12 @@ flowchart LR
 
 ## 4. Workstreams
 
-- [ ] **D1 — Auditoria + contrato de datos.** Mapear modelos de test assignment/results, sesiones y etapa; definir el *shape* de respuesta (por consultante: tests {enviados, pendientes, completados}, avance, pendientes de accion). Congelar contrato en `.ai-memory/`.
-- [ ] **D2 — Backend.** Ampliar/crear `TherapistDashboardView` (o endpoint dedicado) que devuelva, para `request.user`, sus consultantes con estado de tests y senal de avance. Reutilizar modelos existentes; `IsAuthenticated, IsTherapist`; aislamiento estricto; sin PHI superfluo.
-- [ ] **D3 — Frontend (seccion operativa).** Nueva seccion "Mis consultantes / Trabajo en curso" en `(core)/page.tsx`, **por encima** de los KPIs: tabla/cards con badges de estado de tests, progreso y enlaces a resultados/ficha. Reutilizar `AssignedTestsSection`, `PatientAssignedTestsSection`, `PatientResultsSection`, `TherapistClinicalDashboard/`.
-- [ ] **D4 — Wiring de endpoints huerfanos.** Cablear `/dashboard/` y decidir `/sessions/` y `/notes/` (consumir o deprecar documentando). Cerrar incidencia `2026-01-05-visibility-assigned-tests.md`.
-- [ ] **D5 — Estados + UX.** loading/empty/error, accesibilidad, responsive; *empty state* util cuando no hay consultantes/tests; sin PHI en logs.
-- [ ] **D6 — Tests + smoke.** Backend: aislamiento entre terapeutas, forma, sin PII, estados de test. Frontend: `tsc --noEmit` + `vitest`. Smoke en prod tras deploy.
+- [x] **D1 — Auditoria + contrato de datos.** Mapear modelos de test assignment/results, sesiones y etapa; definir el *shape* de respuesta (por consultante: tests {enviados, pendientes, completados}, avance, pendientes de accion). Congelar contrato en `.ai-memory/therapist_dashboard_contract.md`.
+- [x] **D2 — Backend.** `TherapistDashboardView` ampliado con `workload` via `backend/api/therapist_workload.py`; `IsAuthenticated, IsTherapist`; aislamiento `therapist=request.user`; sin PHI superfluo.
+- [x] **D3 — Frontend (seccion operativa).** `TherapistWorkloadSection` + `useTherapistWorkload` en `(core)/page.tsx`, **por encima** de KPIs; badges, progreso y enlaces a ficha/resultados.
+- [x] **D4 — Wiring de endpoints huerfanos.** `/dashboard/` cableado; `/sessions/` y `/notes/` documentados (consumo en ficha, no home). Incidencia `2026-01-05-visibility-assigned-tests.md` → RESOLVED.
+- [x] **D5 — Estados + UX.** loading/empty/error, `GuidedBlock` vacío, responsive cards/tabla, accesibilidad; sin PHI en logs.
+- [x] **D6 — Tests + smoke.** 15 tests workload + 12 metrics + `tsc` + 4 vitest; smoke prod tras deploy (ver §6).
 
 ## 5. Reutilizables ya en repo
 
@@ -62,11 +62,11 @@ flowchart LR
 
 ## 6. Definition of Done
 
-- [ ] Endpoint del dashboard devuelve, por consultante del terapeuta autenticado, tests {enviados/pendientes/completados} + avance, con **aislamiento** verificado por test.
-- [ ] El dashboard `(core)` muestra la seccion operativa por encima de los KPIs; estados loading/empty/error correctos.
-- [ ] Incidencia `2026-01-05-visibility-assigned-tests.md` cerrada; endpoints huerfanos cableados o deprecados con nota.
-- [ ] `tsc --noEmit` limpio + suites backend/front verdes + smoke en prod.
-- [ ] `.ai-memory/` actualizada (contrato + decisiones); sin PHI en logs.
+- [x] Endpoint del dashboard devuelve, por consultante del terapeuta autenticado, tests {enviados/pendientes/completados} + avance, con **aislamiento** verificado por test (`test_therapist_dashboard_workload`, 15 tests).
+- [x] El dashboard `(core)` muestra la seccion operativa por encima de los KPIs; estados loading/empty/error correctos.
+- [x] Incidencia `2026-01-05-visibility-assigned-tests.md` cerrada; `/dashboard/` cableado; `/sessions/` y `/notes/` documentados en `.ai-memory/decisions.md`.
+- [x] `tsc --noEmit` limpio + suites backend/front verdes + smoke en prod (rama `feat/therapist-dashboard-revamp`, commit `2386f3b1`).
+- [x] `.ai-memory/` actualizada (`therapist_dashboard_contract.md`, `api_contracts.md`, `decisions.md`); sin PHI en logs.
 
 ## 7. Handoff — Orquestacion con subagentes
 

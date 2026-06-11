@@ -29,3 +29,17 @@
 **Decision:** Stack aislado en `/opt/studio33`, dominio `studios33.app`, Postgres compartido VoxTV.  
 **Consequences:** Deploy solo vía `deploy/studios33/scripts/deploy.sh`.  
 **Agent:** manual
+
+## [2026-06-11] [ENDPOINT] GET /api/therapist/dashboard/ — bloque workload (D1/D6)
+
+**Context:** El dashboard terapeuta necesitaba vista operativa de consultantes, tests y acciones sin ampliar superficie PHI ni cablear endpoints huérfanos de sesiones/notas en home.  
+**Decision:** Ampliar `GET /api/therapist/dashboard/` con bloque backward-compatible `workload` (`summary`, `patients[]`, `action_items[]`). Agregación en `backend/api/therapist_workload.py`; FE consume vía `useTherapistWorkload` + `TherapistWorkloadSection`.  
+**Consequences:** Contrato congelado en `.ai-memory/therapist_dashboard_contract.md`. `/api/therapist/sessions/` y `/api/therapist/notes/` quedan para ficha de paciente. Incidencia `2026-01-05-visibility-assigned-tests.md` cerrada (RESOLVED 2026-06-11).  
+**Agent:** sub-qa
+
+## [2026-06-11] Therapist dashboard — sessions/notes no cableados en home (D4)
+
+**Context:** `GET /api/therapist/dashboard/` se amplía con bloque `workload`; existen endpoints huérfanos `/api/therapist/sessions/` y `/api/therapist/notes/` sin consumo en dashboard home.  
+**Decision:** NO cablear sessions/notes en el dashboard principal. Señales de avance agregadas en `workload.patients[].progress`, `last_session_at` y `sessions_count`. Endpoints `/sessions/` y `/notes/` se mantienen para ficha de paciente y sesión nueva (consumo diferido).  
+**Consequences:** SUB-FRONTEND usa solo `workload` del dashboard ampliado; incidencia `2026-01-05-visibility-assigned-tests.md` se cierra al cablear UI operativa. Contrato congelado en `.ai-memory/therapist_dashboard_contract.md`.  
+**Agent:** sub-backend

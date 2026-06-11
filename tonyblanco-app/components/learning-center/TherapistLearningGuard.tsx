@@ -35,6 +35,7 @@ export default function TherapistLearningGuard() {
       }
 
       if (pathname.startsWith('/dashboard/therapist')) {
+        markTherapistLearningLandingSeen();
         queueTherapistLearningAutotour();
         router.replace('/learn');
       }

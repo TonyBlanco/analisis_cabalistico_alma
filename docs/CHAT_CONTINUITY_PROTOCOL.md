@@ -25,7 +25,26 @@
 
 ---
 
-## 4) Notas operativas
+## 4) Prevención de agotamiento de contexto
+
+El agotamiento ocurre cuando una sola sesión acumula demasiado output de herramientas. Lecciones del incidente 2026-06-11 (sesión perdida: working tree 22 archivos + 2 ramas + 6 features en paralelo sin commits intermedios):
+
+| Regla | Por qué |
+|-------|---------|
+| Commit al terminar cada workstream, no al final | El diff acumulado consume tokens en cada tool call posterior |
+| Una feature principal por sesión | Saltar backend→FE→tests→docs en el mismo chat multiplica el contexto |
+| Abrir sesión nueva tras cada checkpoint | El contexto no se reutiliza entre conversaciones; empezar limpio es gratis |
+| Ejecutar `sync-session` + pegar frase clave antes de abrir nueva sesión | Garantiza continuidad sin reexplicar el estado |
+
+**Señales de que debes abrir sesión nueva ya:**
+- Llevas >10 tool calls ejecutadas
+- Has leído >5 archivos distintos
+- Working tree con >10 archivos modificados sin commit
+- La tarea saltó de dominio (backend→FE, tests→docs, etc.)
+
+---
+
+## 5) Notas operativas
 - Este protocolo es **VINCULANTE** para el flujo de trabajo con agentes y debe usarse en cualquier interacción formalizada que requiera continuidad de contexto.
 - No cambia políticas existentes de gobernanza; solo estandariza la forma de cerrar/reabrir sesiones con trazabilidad.
 - Cualquier cambio al protocolo debe registrarse en un PR referenciado y aprobado por el comité de gobernanza.

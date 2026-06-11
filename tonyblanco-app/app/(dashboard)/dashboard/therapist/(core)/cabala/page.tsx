@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { getUserRole } from '@/lib/getUserRole';
 import { getActivePatientId, getActivePatientName } from '@/lib/active-patient';
 import { getPatientDetail } from '@/lib/assignment-api';
-import { validateProfileForAnalysis } from '@/lib/profile-validation';
+
 import ProfileCompletionModal from '@/components/ProfileCompletionModal';
 import { executeTest } from '@/lib/test-api';
 import { ExecuteTestRequest } from '@/lib/test-types';
@@ -147,20 +147,11 @@ export default function CabalisticCatalogPage() {
       return;
     }
 
-    // Validate therapist profile
-    const profileValidation = await validateProfileForAnalysis();
-    if (!profileValidation.isValid) {
-      setProfileValidationResult({ missingFields: profileValidation.missingFields });
-      setShowProfileModal(true);
-      return;
-    }
-
-    // Validate patient data
+    // Validate consultante data — never the therapist's own profile
     const patientValidation = validatePatientData(module);
     if (!patientValidation.isValid) {
-      setError(
-        `El consultante no tiene la información requerida: ${patientValidation.missingFields.join(', ')}. Por favor, completa los datos del consultante antes de ejecutar este análisis.`
-      );
+      setProfileValidationResult({ missingFields: patientValidation.missingFields });
+      setShowProfileModal(true);
       return;
     }
 
@@ -345,6 +336,9 @@ export default function CabalisticCatalogPage() {
           setProfileValidationResult(null);
         }}
         missingFields={profileValidationResult?.missingFields}
+        subject="patient"
+        patientId={activePatientId}
+        patientName={activePatientName}
       />
     </div>
   );

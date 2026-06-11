@@ -134,3 +134,56 @@ export function validateProfileFromUser(user: any): ProfileValidationResult {
       : undefined,
   };
 }
+
+/**
+ * Validates a consultante/patient record for therapist-clinical analysis execution.
+ * Uses patient fields from therapist/patients API — NOT the logged-in therapist session.
+ */
+export function validatePatientForAnalysis(patient: {
+  full_name?: string | null;
+  first_name?: string | null;
+  birth_date?: string | null;
+  birth_city?: string | null;
+  birth_country?: string | null;
+} | null | undefined): ProfileValidationResult {
+  if (!patient) {
+    return {
+      isValid: false,
+      missingFields: ['Datos del consultante no disponibles'],
+      message: 'Selecciona un consultante activo antes de ejecutar el análisis.',
+    };
+  }
+
+  const missingFields: string[] = [];
+  const fullName = patient.full_name || patient.first_name || '';
+
+  if (!fullName.trim()) {
+    missingFields.push('nombre completo');
+  } else {
+    const nameWords = fullName.trim().split(/\s+/).filter((w) => w.length > 0);
+    if (nameWords.length < 2) {
+      missingFields.push('nombre completo (debe contener al menos nombre y apellido)');
+    }
+  }
+
+  if (!patient.birth_date) {
+    missingFields.push('fecha de nacimiento');
+  }
+
+  if (!patient.birth_city?.trim()) {
+    missingFields.push('ciudad de nacimiento');
+  }
+
+  if (!patient.birth_country?.trim()) {
+    missingFields.push('país de nacimiento');
+  }
+
+  return {
+    isValid: missingFields.length === 0,
+    missingFields,
+    message:
+      missingFields.length > 0
+        ? 'El consultante necesita información adicional para ejecutar análisis precisos'
+        : undefined,
+  };
+}

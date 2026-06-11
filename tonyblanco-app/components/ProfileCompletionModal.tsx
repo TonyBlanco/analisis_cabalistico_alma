@@ -6,6 +6,10 @@ interface ProfileCompletionModalProps {
   open: boolean;
   onClose: () => void;
   missingFields?: string[];
+  /** Whose profile is incomplete — defaults to logged-in user (personal/self-serve). */
+  subject?: 'self' | 'patient';
+  patientId?: number | null;
+  patientName?: string | null;
 }
 
 /**
@@ -18,13 +22,23 @@ export default function ProfileCompletionModal({
   open,
   onClose,
   missingFields = [],
+  subject = 'self',
+  patientId = null,
+  patientName = null,
 }: ProfileCompletionModalProps) {
   const router = useRouter();
 
   if (!open) return null;
 
+  const isPatient = subject === 'patient';
+  const displayName = patientName?.trim() || 'el consultante';
+
   const handleGoToProfile = () => {
-    router.push('/dashboard/profile');
+    if (isPatient && patientId) {
+      router.push(`/dashboard/therapist/patients/${patientId}`);
+    } else {
+      router.push('/dashboard/profile');
+    }
     onClose();
   };
 
@@ -35,10 +49,12 @@ export default function ProfileCompletionModal({
           {/* Header */}
           <div className="mb-4">
             <h2 className="text-xl font-semibold text-gray-900 mb-2">
-              Información personal requerida
+              {isPatient ? 'Datos del consultante requeridos' : 'Información personal requerida'}
             </h2>
             <p className="text-sm text-gray-600">
-              Antes de continuar, necesitamos completar tu información personal para garantizar la precisión del análisis.
+              {isPatient
+                ? `Antes de continuar, completa la información de nacimiento de ${displayName}. Los análisis clínicos usan los datos del consultante, no los del terapeuta.`
+                : 'Antes de continuar, necesitamos completar tu información personal para garantizar la precisión del análisis.'}
             </p>
           </div>
 
@@ -79,7 +95,7 @@ export default function ProfileCompletionModal({
               className="px-6 py-2 text-sm font-medium text-white rounded-md hover:opacity-90 transition-opacity"
               style={{ backgroundColor: 'var(--accent-color)' }}
             >
-              Completar perfil
+              {isPatient ? 'Completar datos del consultante' : 'Completar perfil'}
             </button>
           </div>
         </div>

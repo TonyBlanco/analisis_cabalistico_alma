@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { API_BASE_URL, getAuthHeaders } from '@/lib/api';
+import { apiUrl, getAuthHeaders } from '@/lib/api';
 import type { HybridModeMetrics } from '@/lib/types/hybrid-metrics';
 
 type Status = 'idle' | 'loading' | 'success' | 'error';
@@ -25,13 +25,17 @@ export function useHybridMetrics(): UseHybridMetricsResult {
     setStatus('loading');
     setError(null);
 
-    fetch(`${API_BASE_URL}therapist/hybrid-metrics/`, {
+    fetch(apiUrl('therapist/hybrid-metrics/'), {
       headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
     })
       .then(async (res) => {
         if (!res.ok) {
           const text = await res.text().catch(() => res.statusText);
-          throw new Error(`Error ${res.status}: ${text}`);
+          const brief =
+            text.trimStart().startsWith('<!')
+              ? 'recurso no encontrado en el servidor'
+              : text.slice(0, 200);
+          throw new Error(`Error ${res.status}: ${brief}`);
         }
         return res.json() as Promise<HybridModeMetrics>;
       })

@@ -11,25 +11,6 @@ function authHeaders(): HeadersInit {
   };
 }
 
-async function fetchWithTimeout(
-  url: string,
-  options: RequestInit,
-  timeoutMs = 45000,
-): Promise<Response> {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    return await fetch(url, { ...options, signal: controller.signal });
-  } catch (err) {
-    if (err instanceof Error && err.name === 'AbortError') {
-      throw new Error('La solicitud tardó demasiado. El informe no llama a AI; inténtalo de nuevo.');
-    }
-    throw err;
-  } finally {
-    clearTimeout(timer);
-  }
-}
-
 async function parseError(res: Response): Promise<string> {
   const body = await res.json().catch(() => ({}));
   return body.error || body.detail || body.message || `Error ${res.status}`;
@@ -110,7 +91,7 @@ export async function createAstrologyReport(
   patientId: number,
   input: CreateAstrologyReportInput,
 ): Promise<AstrologyReportDetail> {
-  const res = await fetchWithTimeout(
+  const res = await fetch(
     `${API_BASE_URL}/therapist/patients/${patientId}/astrology-reports/`,
     {
       method: 'POST',

@@ -8,6 +8,7 @@ from typing import Any, Dict, List, Optional
 
 from django.utils import timezone
 
+from .astrology_kerykeion.multi_tech import build_multitech_payload, multitech_enabled
 from .models import Patient
 from .models_astrology import AstrologyNatalChart
 from .models_astrology_ai import AstrologyAIInterpretation
@@ -118,8 +119,15 @@ def build_astrology_session_report_payload(
     input_snapshot = natal_chart.input_snapshot if isinstance(natal_chart.input_snapshot, dict) else {}
     meta = chart_payload.get('metadatos') or {}
 
-    # PR1: el informe es snapshot ligero; no recalcula multitech ni llama a AI.
     analysis_result = None
+    if multitech_enabled():
+        try:
+            analysis_result = build_multitech_payload(
+                natal_chart=chart_payload,
+                input_data=input_snapshot,
+            )
+        except Exception:
+            analysis_result = None
 
     layers = _normalize_active_layers(active_layers)
     interpretations, interpretation_ids = _load_interpretations(patient, include_interpretations)

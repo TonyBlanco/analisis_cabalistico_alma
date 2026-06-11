@@ -192,6 +192,32 @@ class UserProfile(models.Model):
     specialization = models.CharField(max_length=200, blank=True)
     license_number = models.CharField(max_length=100, blank=True)
     years_of_experience = models.IntegerField(null=True, blank=True)
+
+    # ===== MODO CLÍNICO (vocabulario clínico completo) =====
+    # Solo terapeutas médicos/psiquiatras con credencial verificada.
+    # NOTA: el rail anti-fraude (no fármacos/dosis/curas mágicas) NUNCA se levanta,
+    # independientemente de este flag (ver clinical-lexicon.ts / formative-safety.ts).
+    clinical_mode_requested = models.BooleanField(
+        default=False,
+        help_text='El terapeuta marcó el check de modo clínico en el alta. No habilita nada por sí solo; requiere verificación de credencial por un administrador.'
+    )
+    clinical_mode_enabled = models.BooleanField(
+        default=False,
+        help_text='Modo clínico activo: levanta el bloqueo del léxico clínico (diagnóstico, trastorno, patología…). Solo lo activa un administrador tras verificar la credencial.'
+    )
+    clinical_credential_verified_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text='Fecha de verificación de la credencial profesional que habilita el modo clínico.'
+    )
+    clinical_credential_verified_by = models.ForeignKey(
+        User,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='clinical_verifications_done',
+        help_text='Administrador que verificó la credencial y activó el modo clínico.'
+    )
     
     # Sistema de pagos y membresías
     membership_active = models.BooleanField(default=True)  # Trial activo por defecto
@@ -267,6 +293,11 @@ class UserProfile(models.Model):
             return max(0, self.max_patients - self.current_patients_count)
         else:
             return max(0, self.max_fichas_per_month - self.fichas_created_this_month)
+    
+    def can_use_clinical_lexicon(self):
+        """El vocabulario clínico solo está disponible para terapeutas con modo clínico verificado.
+        El rail anti-fraude (no fármacos/dosis/curas) NUNCA se levanta, independientemente de esto."""
+        return self.user_type == 'therapist' and self.clinical_mode_enabled
     
     class Meta:
         verbose_name = 'Perfil de Usuario'

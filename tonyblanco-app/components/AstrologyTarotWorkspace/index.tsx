@@ -1,14 +1,18 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useCallback, useEffect } from 'react';
-import { Star, Play, Lock } from 'lucide-react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
+import { Star, Play, Lock, Sparkles, Eye } from 'lucide-react';
 import AstrologyTarotSidebar from './AstrologyTarotSidebar';
 import AstrologyTarotVisualCore from './AstrologyTarotVisualCore';
 import TarotHistoryPanel from './TarotHistoryPanel';
 import type { AstrologyTarotSectionId, TarotSystemId } from './types';
 import { getActivePatientId, getActivePatientName } from '@/lib/active-patient';
 import { API_BASE_URL, getAuthToken } from '@/lib/api';
+import { buildTreeStateFromTarotReading, type TarotTreePosition } from '@/lib/symbolic-session/tarot-tree-state';
+import type { TarotCardDraw } from '@/components/tarot/TarotSpreadView';
+import type { SefiraId } from '@holistica/symbolic/tree';
+import { SessionStepper } from '@/components/SymbolicSession';
 
 // SWM Tarot hooks
 import { useCreateTarotInstance } from '@/lib/api/swm/tarot/hooks/useCreateTarotInstance';
@@ -47,6 +51,8 @@ const sectionToSpreadType: Partial<Record<AstrologyTarotSectionId, SpreadType>> 
   'tarot-correspondences': 'free', // Correspondences uses free spread
 };
 
+type WorkspaceView = 'lectura' | 'sesion';
+
 export default function AstrologyTarotWorkspace({
   patientId: patientIdProp,
   patientBirthDate: patientBirthDateProp,
@@ -55,7 +61,11 @@ export default function AstrologyTarotWorkspace({
     useState<AstrologyTarotSectionId>('tarot-natal');
   const [selectedSystem, setSelectedSystem] = useState<TarotSystemId>('thoth');
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
-  
+  const [activeView, setActiveView] = useState<WorkspaceView>('lectura');
+
+  // Cards from the tree-of-life spread — lifted from AstrologyTarotVisualCore
+  const [treeReadingCards, setTreeReadingCards] = useState<TarotCardDraw[]>([]);
+
   // Load active patient from global context
   const [patientId, setPatientId] = useState<string | undefined>(patientIdProp);
   const [patientName, setPatientName] = useState<string | undefined>(undefined);
@@ -118,6 +128,58 @@ export default function AstrologyTarotWorkspace({
   const { createInstance, isLoading: isCreating } = useCreateTarotInstance();
   const { startSession, isLoading: isStarting } = useStartTarotSession();
   const { sealWorkspace, isLoading: isSealing } = useSealTarotWorkspace();
+
+  // D6 observability — fire-and-forget emission of interaction events.
+  // Mirrors lib/symbolic-api/events.ts but runs client-side using the same
+  // API_BASE_URL + Token pattern already used across this workspace. The Django
+  // endpoint is therapist-only and resolves the safety role server-side; we omit
+  // patient_id so a non-resolved id never drops the (aggregate) KPI event.
+  const emitSessionEvent = useCallback(
+    (
+      eventType: string,
+      metadata?: Record<string, string | number | boolean>,
+    ) => {
+      const token = getAuthToken();
+      if (!token) return;
+      const body: Record<string, unknown> = {
+        event_type: eventType,
+        workspace: 'astrology-tarot',
+      };
+      if (metadata && Object.keys(metadata).length > 0) {
+        body.metadata = metadata;
+      }
+      // Never block or break the UI: fire-and-forget, swallow all errors.
+      fetch(`${API_BASE_URL}/symbolic/session-events/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Token ${token}`,
+        },
+        cache: 'no-store',
+        body: JSON.stringify(body),
+      }).catch(() => {});
+    },
+    [],
+  );
+
+  const handleTreeReadingChange = useCallback((cards: TarotCardDraw[]) => {
+    setTreeReadingCards(cards);
+  }, []);
+
+  // Builds a structural Tree state from the placed cards when in tree-spread mode.
+  // Undefined when section is not tree-spread or no cards have been placed yet.
+  const treeState = useMemo(() => {
+    if (activeSection !== 'tarot-tree-spread' || treeReadingCards.length === 0) return undefined;
+    const positions: TarotTreePosition[] = treeReadingCards
+      .filter((draw) => draw.position?.id)
+      .map((draw) => ({
+        sefira: draw.position!.id as SefiraId,
+        cardId: draw.card.id,
+        cardLabel: draw.card.nameSpanish ?? draw.card.name ?? undefined,
+        reversed: draw.reversed ?? false,
+      }));
+    return buildTreeStateFromTarotReading({ system: selectedSystem, positions }) ?? undefined;
+  }, [activeSection, treeReadingCards, selectedSystem]);
 
   // Auto-load active workspace when patientUserId is available
   useEffect(() => {
@@ -255,118 +317,169 @@ export default function AstrologyTarotWorkspace({
         <AstrologyTarotSidebar
           activeSection={activeSection}
           onChange={setActiveSection}
-          selectedSystem={selectedSystem}
-          onSelectSystem={setSelectedSystem}
         />
         <main className="flex-1 px-6 py-6">
           <div className="mb-4 rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700">
             Observacional. Con interpretación asistida, sin predicción clínica, sin automatización decisoria.
           </div>
-          
-          {/* Start Workspace Button */}
-          {workspaceStatus === 'none' && !patientId && (
-            <GuidedBlock
-              variant="missing"
-              role="therapist"
-              title="Consultante no seleccionado"
-              description="Selecciona un consultante para iniciar una lectura de Tarot."
-              steps={[
-                { label: 'Selecciona un consultante en el indicador superior' },
-                { label: 'Haz clic en «Iniciar Lectura de Tarot»' },
-              ]}
-              actions={[{ label: 'Elegir consultante', href: '/dashboard/therapist/patients' }]}
-              compact
-              className="mb-4"
-            />
-          )}
-          {workspaceStatus === 'none' && patientId && (
-            <div className="mb-4">
-              <button
-                onClick={handleStartWorkspace}
-                disabled={isCreating || isStarting || isLoadingPatient || isLoadingWorkspace || !patientUserId}
-                className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isLoadingPatient || isLoadingWorkspace ? (
-                  <>
-                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                    {isLoadingWorkspace ? 'Verificando workspace...' : 'Cargando consultante...'}
-                  </>
-                ) : (isCreating || isStarting) ? (
-                  <>
-                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                    Iniciando...
-                  </>
-                ) : (
-                  <>
-                    <Play className="h-4 w-4" />
-                    Iniciar Lectura de Tarot
-                  </>
-                )}
-              </button>
-            </div>
-          )}
-          
-          {/* Active Workspace Indicator */}
-          {workspaceStatus === 'active' && currentInstanceId && (
-            <div className="mb-4 flex items-center gap-3">
-              <div className="flex items-center gap-2 rounded-lg bg-green-50 border border-green-200 px-3 py-2">
-                <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-                <span className="text-sm font-medium text-green-700">Workspace activo</span>
-              </div>
-              <button
-                onClick={handleSealWorkspace}
-                disabled={isSealing}
-                className="flex items-center gap-2 rounded-lg border border-amber-600 bg-white px-4 py-2 text-sm font-medium text-amber-700 shadow-sm hover:bg-amber-50 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isSealing ? (
-                  <>
-                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-amber-600 border-t-transparent" />
-                    Sellando...
-                  </>
-                ) : (
-                  <>
-                    <Lock className="h-4 w-4" />
-                    Sellar Sesión
-                  </>
-                )}
-              </button>
-            </div>
-          )}
-          
-          <div className="flex gap-6 items-start">
-            <AstrologyTarotVisualCore
-              activeSection={activeSection}
-              patientId={patientId}
-              patientName={patientName}
-              patientBirthDate={patientBirthDate}
-              selectedSystem={selectedSystem}
-              onSystemChange={setSelectedSystem}
-              onCardSelect={(card) => setSelectedCardId((card as { id?: string } | null)?.id ?? null)}
-              instanceId={currentInstanceId}
-              sessionId={currentSessionId}
-              isWorkspaceActive={workspaceStatus === 'active'}
-            />
-            <aside className="w-72 space-y-4">
-              {/* Historial de Lecturas */}
-              <TarotHistoryPanel
-                patientId={patientId ? parseInt(patientId, 10) : undefined}
-                onLoadInstance={handleLoadInstance}
-              />
-              
-              <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-                <h3 className="text-sm font-semibold text-gray-900">Panel interno</h3>
-                <p className="text-xs text-gray-600">
-                  Espacio reservado para notas humanas y observaciones narrativas.
-                </p>
-              </div>
-              <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-                <h3 className="text-sm font-semibold text-gray-900">Seccion activa</h3>
-                <p className="text-xs text-gray-600">
-                  {sectionLabelMap[activeSection]}
-                </p>
-              </div>
-            </aside>
+
+          {/* View switcher: Lectura visual / Sesión asistida */}
+          <div className="mb-5 inline-flex rounded-lg border border-gray-200 bg-white p-1 shadow-sm">
+            <button
+              type="button"
+              onClick={() => setActiveView('lectura')}
+              className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                activeView === 'lectura'
+                  ? 'bg-indigo-600 text-white'
+                  : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              <Eye className="h-4 w-4" />
+              Lectura visual
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveView('sesion')}
+              className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                activeView === 'sesion'
+                  ? 'bg-indigo-600 text-white'
+                  : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              <Sparkles className="h-4 w-4" />
+              Sesión asistida
+            </button>
           </div>
+
+          {activeView === 'sesion' ? (
+            <div className="max-w-3xl">
+              {!patientId && (
+                <GuidedBlock
+                  variant="info"
+                  role="therapist"
+                  title="Sesión sin consultante"
+                  description="Puedes registrar el flujo asistido, pero selecciona un consultante para asociar la sesión a su ficha."
+                  actions={[{ label: 'Elegir consultante', href: '/dashboard/therapist/patients' }]}
+                  compact
+                  className="mb-4"
+                />
+              )}
+              <SessionStepper
+                treeState={treeState}
+                consultantRef={patientId}
+                correspondenceSystem={selectedSystem}
+                onEvent={emitSessionEvent}
+              />
+            </div>
+          ) : (
+            <>
+              {/* Start Workspace Button */}
+              {workspaceStatus === 'none' && !patientId && (
+                <GuidedBlock
+                  variant="missing"
+                  role="therapist"
+                  title="Consultante no seleccionado"
+                  description="Selecciona un consultante para iniciar una lectura de Tarot."
+                  steps={[
+                    { label: 'Selecciona un consultante en el indicador superior' },
+                    { label: 'Haz clic en «Iniciar Lectura de Tarot»' },
+                  ]}
+                  actions={[{ label: 'Elegir consultante', href: '/dashboard/therapist/patients' }]}
+                  compact
+                  className="mb-4"
+                />
+              )}
+              {workspaceStatus === 'none' && patientId && (
+                <div className="mb-4">
+                  <button
+                    onClick={handleStartWorkspace}
+                    disabled={isCreating || isStarting || isLoadingPatient || isLoadingWorkspace || !patientUserId}
+                    className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isLoadingPatient || isLoadingWorkspace ? (
+                      <>
+                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                        {isLoadingWorkspace ? 'Verificando workspace...' : 'Cargando consultante...'}
+                      </>
+                    ) : (isCreating || isStarting) ? (
+                      <>
+                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                        Iniciando...
+                      </>
+                    ) : (
+                      <>
+                        <Play className="h-4 w-4" />
+                        Iniciar Lectura de Tarot
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
+              
+              {/* Active Workspace Indicator */}
+              {workspaceStatus === 'active' && currentInstanceId && (
+                <div className="mb-4 flex items-center gap-3">
+                  <div className="flex items-center gap-2 rounded-lg bg-green-50 border border-green-200 px-3 py-2">
+                    <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+                    <span className="text-sm font-medium text-green-700">Workspace activo</span>
+                  </div>
+                  <button
+                    onClick={handleSealWorkspace}
+                    disabled={isSealing}
+                    className="flex items-center gap-2 rounded-lg border border-amber-600 bg-white px-4 py-2 text-sm font-medium text-amber-700 shadow-sm hover:bg-amber-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isSealing ? (
+                      <>
+                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-amber-600 border-t-transparent" />
+                        Sellando...
+                      </>
+                    ) : (
+                      <>
+                        <Lock className="h-4 w-4" />
+                        Sellar Sesión
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
+              
+              <div className="flex gap-6 items-start">
+                <AstrologyTarotVisualCore
+                  activeSection={activeSection}
+                  patientId={patientId}
+                  patientName={patientName}
+                  patientBirthDate={patientBirthDate}
+                  selectedSystem={selectedSystem}
+                  onSystemChange={setSelectedSystem}
+                  onCardSelect={(card) => setSelectedCardId((card as { id?: string } | null)?.id ?? null)}
+                  onReadingChange={handleTreeReadingChange}
+                  instanceId={currentInstanceId}
+                  sessionId={currentSessionId}
+                  isWorkspaceActive={workspaceStatus === 'active'}
+                />
+                <aside className="w-72 space-y-4">
+                  {/* Historial de Lecturas */}
+                  <TarotHistoryPanel
+                    patientId={patientId ? parseInt(patientId, 10) : undefined}
+                    onLoadInstance={handleLoadInstance}
+                  />
+                  
+                  <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+                    <h3 className="text-sm font-semibold text-gray-900">Panel interno</h3>
+                    <p className="text-xs text-gray-600">
+                      Espacio reservado para notas humanas y observaciones narrativas.
+                    </p>
+                  </div>
+                  <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+                    <h3 className="text-sm font-semibold text-gray-900">Seccion activa</h3>
+                    <p className="text-xs text-gray-600">
+                      {sectionLabelMap[activeSection]}
+                    </p>
+                  </div>
+                </aside>
+              </div>
+            </>
+          )}
         </main>
       </div>
     </div>

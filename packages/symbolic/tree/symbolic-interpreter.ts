@@ -21,27 +21,23 @@ import type {
   SymbolicObservationType,
   SymbolicSafetyLevel,
 } from './symbolic-interpreter.types';
-import { SYMBOLIC_INTERPRETER_META } from './symbolic-interpreter.types';
 import type { TreeStructuralState } from './tree-structural-state.types';
 import type { TreeStructuralAnalysis } from './tree-analysis.types';
+import { validateSafetyContentForRole, type SafetyRole } from './clinical-lexicon';
 
 /**
- * Validates that content does not contain prohibited terms
+ * Validates that content does not contain prohibited terms.
+ *
+ * Role-aware (Modo Híbrido): delegates to the shared role-aware validator. The
+ * clinical-lexicon block is lifted only for the verified clinical role; the
+ * anti-fraud rail is ALWAYS enforced. Default 'observational' preserves the
+ * historical behavior of this module. See ./clinical-lexicon.ts.
  */
-function validateSafetyContent(content: string): { passed: boolean; warnings: string[] } {
-  const warnings: string[] = [];
-  const lowercaseContent = content.toLowerCase();
-  
-  for (const term of SYMBOLIC_INTERPRETER_META.prohibitedTerms) {
-    if (lowercaseContent.includes(term.toLowerCase())) {
-      warnings.push(`Prohibited term detected: "${term}"`);
-    }
-  }
-  
-  return {
-    passed: warnings.length === 0,
-    warnings,
-  };
+function validateSafetyContent(
+  content: string,
+  role: SafetyRole = 'observational',
+): { passed: boolean; warnings: string[] } {
+  return validateSafetyContentForRole(content, role);
 }
 
 function formatHermeticSefirahLine(data: SefirahCorrespondence): string {
@@ -289,7 +285,10 @@ Return ONLY this JSON structure, no additional text:
 /**
  * Parses AI response and validates safety
  */
-function parseAIResponse(rawResponse: string): SymbolicObservation[] {
+function parseAIResponse(
+  rawResponse: string,
+  role: SafetyRole = 'observational',
+): SymbolicObservation[] {
   try {
     // Extract JSON from response (AI might add markdown)
     const jsonMatch = rawResponse.match(/\{[\s\S]*\}/);
@@ -307,7 +306,7 @@ function parseAIResponse(rawResponse: string): SymbolicObservation[] {
     const validObservations: SymbolicObservation[] = [];
     
     for (const obs of parsed.observations) {
-      const validation = validateSafetyContent(obs.content);
+      const validation = validateSafetyContent(obs.content, role);
       
       validObservations.push({
         type: obs.type as SymbolicObservationType,
@@ -329,11 +328,16 @@ function parseAIResponse(rawResponse: string): SymbolicObservation[] {
  * 
  * @param request - Interpretation request with TreeStructuralState
  * @param aiCallback - Async function that calls AI API (injected)
+ * @param role - Safety role (Modo Híbrido). 'clinical' (verified) lifts the
+ *   clinical-lexicon block; the anti-fraud rail is always enforced. Resolved in
+ *   Django (UserProfile.clinical_mode_enabled), never trusted from the client.
+ *   Default 'observational'.
  * @returns SymbolicInterpretation with observations
  */
 export async function generateSymbolicInterpretation(
   request: SymbolicInterpretationRequest,
-  aiCallback: (prompt: string) => Promise<string>
+  aiCallback: (prompt: string) => Promise<string>,
+  role: SafetyRole = 'observational',
 ): Promise<SymbolicInterpretation> {
   const { treeState, safetyLevel, structuralAnalysis, correspondenceSystem } = request;
 
@@ -354,13 +358,13 @@ export async function generateSymbolicInterpretation(
   }
   
   // Parse and validate response
-  const observations = parseAIResponse(rawResponse);
+  const observations = parseAIResponse(rawResponse, role);
   
   // Overall safety validation
   const allWarnings: string[] = [];
   for (const obs of observations) {
     if (obs.containsProhibitedContent) {
-      const validation = validateSafetyContent(obs.content);
+      const validation = validateSafetyContent(obs.content, role);
       allWarnings.push(...validation.warnings);
     }
   }

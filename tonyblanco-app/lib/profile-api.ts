@@ -1,6 +1,6 @@
 /**
  * Profile API Client
- * 
+ *
  * Functions to interact with profile-related endpoints.
  */
 
@@ -25,23 +25,6 @@ function getAuthHeaders(): HeadersInit {
   };
 }
 
-export interface MyProfile {
-  clinical_mode_requested: boolean;
-  clinical_mode_enabled: boolean;
-  can_use_clinical_lexicon: boolean;
-  [key: string]: unknown;
-}
-
-export async function fetchMyProfile(): Promise<MyProfile> {
-  const response = await fetch(`${API_BASE_URL}/profile/me/`, {
-    headers: getAuthHeaders(),
-  });
-  if (!response.ok) {
-    throw new Error('No se pudo cargar el perfil');
-  }
-  return response.json() as Promise<MyProfile>;
-}
-
 export interface ProfileUpdateData {
   full_name?: string;
   birth_date?: string;
@@ -53,8 +36,39 @@ export interface ProfileUpdateData {
 }
 
 /**
+ * Subset of /api/profile/me/ fields relevant to the Modo Híbrido clinical gate.
+ * The clinical flags are read-only from the client's perspective (managed by
+ * admins after credential verification).
+ */
+export interface MyProfile {
+  user_type?: string | null;
+  clinical_mode_requested?: boolean | null;
+  clinical_mode_enabled?: boolean | null;
+  can_use_clinical_lexicon?: boolean | null;
+  [key: string]: unknown;
+}
+
+export async function fetchMyProfile(): Promise<MyProfile> {
+  const response = await fetch(`${API_BASE_URL}/profile/me/`, {
+    method: 'GET',
+    headers: getAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(
+      (errorData as { error?: string; message?: string }).error ||
+        (errorData as { message?: string }).message ||
+        'Error al obtener el perfil',
+    );
+  }
+
+  return response.json();
+}
+
+/**
  * Update user profile
- * 
+ *
  * @param data Profile data to update
  * @returns Updated profile response
  * @throws Error if request fails

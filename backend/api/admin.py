@@ -20,10 +20,45 @@ from .mcmi4_models import MCMI4MysticQuestionBank, MCMI4MysticTestInstance, Dime
 
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
-    list_display = ['full_name', 'user', 'user_type', 'subscription_status', 'created_at']
-    list_filter = ['user_type', 'subscription_status']
+    list_display = ['full_name', 'user', 'user_type', 'subscription_status', 'clinical_mode_enabled', 'clinical_mode_requested', 'created_at']
+    list_filter = ['user_type', 'subscription_status', 'clinical_mode_enabled', 'clinical_mode_requested']
     search_fields = ['full_name', 'user__username', 'user__email']
-    readonly_fields = ['created_at', 'updated_at']
+    readonly_fields = ['created_at', 'updated_at', 'clinical_credential_verified_at', 'clinical_credential_verified_by']
+    actions = ['verify_clinical_credential', 'revoke_clinical_credential']
+
+    @admin.action(description='Verificar credencial clínica (habilita vocabulario clínico)')
+    def verify_clinical_credential(self, request, queryset):
+        from django.utils import timezone
+        verified = 0
+        skipped = 0
+        for profile in queryset:
+            if profile.user_type != 'therapist':
+                skipped += 1
+                continue
+            profile.clinical_mode_enabled = True
+            profile.clinical_mode_requested = True
+            profile.clinical_credential_verified_at = timezone.now()
+            profile.clinical_credential_verified_by = request.user
+            profile.save(update_fields=[
+                'clinical_mode_enabled',
+                'clinical_mode_requested',
+                'clinical_credential_verified_at',
+                'clinical_credential_verified_by',
+            ])
+            verified += 1
+        msg = f'{verified} perfil(es) verificado(s) y con modo clínico habilitado.'
+        if skipped:
+            msg += f' {skipped} omitido(s) por no ser terapeutas.'
+        self.message_user(request, msg)
+
+    @admin.action(description='Revocar modo clínico')
+    def revoke_clinical_credential(self, request, queryset):
+        updated = queryset.update(
+            clinical_mode_enabled=False,
+            clinical_credential_verified_at=None,
+            clinical_credential_verified_by=None,
+        )
+        self.message_user(request, f'{updated} perfil(es) con modo clínico revocado.')
 
 
 @admin.register(Calculo)

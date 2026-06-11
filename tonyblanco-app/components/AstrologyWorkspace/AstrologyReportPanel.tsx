@@ -295,7 +295,7 @@ export default function AstrologyReportPanel({ patientId, hasChart, activeLayers
           <div>
             <h3 className="text-base font-semibold text-gray-900">Informe de sesión</h3>
             <p className="mt-1 text-sm text-gray-600">
-              Guarda un snapshot en base de datos (carta, capas, tablas). No genera texto nuevo con AI.
+              Guarda un snapshot de la carta, capas activas e interpretaciones AI para revisión posterior.
             </p>
           </div>
           <FileText className="h-5 w-5 text-indigo-600 shrink-0" />
@@ -320,7 +320,7 @@ export default function AstrologyReportPanel({ patientId, hasChart, activeLayers
                 checked={includeInterpretations}
                 onChange={(e) => setIncludeInterpretations(e.target.checked)}
               />
-              Adjuntar interpretaciones AI ya guardadas (no llama a Groq/Gemini)
+              Incluir interpretaciones AI más recientes
             </label>
             <button
               type="button"

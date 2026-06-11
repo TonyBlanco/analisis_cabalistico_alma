@@ -13,6 +13,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './'),
+      '@holistica/symbolic': path.resolve(__dirname, '../packages/symbolic'),
     },
   },
 });

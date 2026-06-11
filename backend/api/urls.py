@@ -121,7 +121,8 @@ from .admin_views import (
     AdminCheckView,
     EnhancedAdminStatsView,
     EnhancedAdminUsersView,
-    AdminUserManagementView
+    AdminUserManagementView,
+    ClinicalCredentialVerificationView
 )
 from .federation_views import FederationHubFeedView
 from .views import (
@@ -163,6 +164,9 @@ from .therapist_patient_invitation_views import (
     PersonalTherapistInvitationRespondView,
 )
 from .symbolic_views import TreeStructuralStateView
+from .symbolic_session_notes_views import SymbolicSessionNoteView
+from .symbolic_session_metrics_views import SymbolicSessionEventView, HybridModeMetricsView
+from .clinical_onboarding_views import ClinicalModeRequestView, BetaFeedbackView
 from .utils.symbolic_interpreter_ai import (
     generate_symbolic_interpretation_view,
     symbolic_interpreter_status_view,
@@ -194,6 +198,9 @@ urlpatterns = [
     path('me/profile/', UpdateProfileView.as_view(), name='update_profile'),
     path('profile/me/', UserProfileMeView.as_view(), name='profile_me'),
     path('profile/me/consent/', UserProfileConsentView.as_view(), name='profile_me_consent'),
+    # Onboarding beta tester médica (Modo Híbrido — Step 9)
+    path('profile/clinical-mode-request/', ClinicalModeRequestView.as_view(), name='clinical_mode_request'),
+    path('beta-feedback/', BetaFeedbackView.as_view(), name='beta_feedback'),
     path('personal/therapist-invitations/', PersonalTherapistInvitationListView.as_view(), name='personal_therapist_invitations'),
     path(
         'personal/therapist-invitations/<int:invitation_id>/accept/',
@@ -242,6 +249,7 @@ urlpatterns = [
     ),
     path('therapist/dashboard/', TherapistDashboardView.as_view(), name='therapist_dashboard'),
     path('therapist/metrics/', TherapistMetricsView.as_view(), name='therapist_metrics'),
+    path('therapist/hybrid-metrics/', HybridModeMetricsView.as_view(), name='therapist_hybrid_metrics'),
     path('therapist/ai-usage/', TherapistAIUsageView.as_view(), name='therapist_ai_usage'),
     path('therapist/ai-usage/history/', TherapistAIUsageHistoryView.as_view(), name='therapist_ai_usage_history'),
     path('therapist/patients/', PatientListCreateView.as_view(), name='patient_list_create'),
@@ -310,6 +318,7 @@ urlpatterns = [
     path('admin/stats/', EnhancedAdminStatsView.as_view(), name='enhanced_admin_stats'),
     path('admin/users/', EnhancedAdminUsersView.as_view(), name='enhanced_admin_users'),
     path('admin/users/<int:user_id>/', AdminUserManagementView.as_view(), name='admin_user_management'),
+    path('admin/users/<int:user_id>/clinical-credential/', ClinicalCredentialVerificationView.as_view(), name='clinical_credential_verification'),
     
     # Gematria AI
     path('gematria/interpret/', GematriaInterpretationView.as_view(), name='gematria_interpret'),
@@ -389,6 +398,10 @@ urlpatterns = [
 
     # Estado simbolico estructural (TreeStructuralState v0.1)
     path('symbolic/tree-structural-state/', TreeStructuralStateView.as_view(), name='tree_structural_state'),
+    # Notas/resumen de sesión simbólica asistida (Modo Híbrido — Step 7)
+    path('symbolic/session-notes/', SymbolicSessionNoteView.as_view(), name='symbolic_session_notes'),
+    # Observabilidad D6 del Modo Híbrido (Step 9): registro de eventos agregables
+    path('symbolic/session-events/', SymbolicSessionEventView.as_view(), name='symbolic_session_events'),
     
     # Astrology Core (astronomical calculations only)
     path('therapist/', include('astrology.api.urls')),

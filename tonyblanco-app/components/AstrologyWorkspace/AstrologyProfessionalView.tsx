@@ -7,6 +7,7 @@ import type { MultiTechAnalysisResult, NatalChartPayload } from '@/hooks/useNata
 import NatalChartSVGPro from './chart/NatalChartSVGAdvanced';
 import { buildAdvancedInputFromPayload } from './chart/chartLayoutEngine';
 import PsychologicalHoroscopeAdvanced from './psychological/PsychologicalHoroscopeAdvanced';
+import AstrologyDoubleWheelSVG from './AstrologyDoubleWheelSVG';
 import AstroDoubleWheelAdvanced from '@/components/astrology/AstroDoubleWheelAdvanced';
 import InfoTooltip from '@/components/common/InfoTooltip';
 
@@ -22,12 +23,6 @@ import CalculationStatusPanel from './CalculationStatusPanel';
 import AstrologySidebar from './AstrologySidebar';
 import AIInterpretationPanel from './AIInterpretationPanel';
 import AISituationChat from './AISituationChat';
-import {
-  HOUSE_OPTIONS,
-  ZODIAC_OPTIONS,
-  formatChartParamsLabel,
-  normalizeHouseSystemCode,
-} from '@/lib/astrologyChartOptions';
 import AstrologyReportPanel from './AstrologyReportPanel';
 
 interface Props {
@@ -503,73 +498,6 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
     }
   }, [davisonEnabled]);
 
-  const fetchSynastryCompositeChart = async () => {
-    if (!consultante?.id || !selectedPartnerId) return;
-    const partner = partnerList.find((p) => String(p.id) === String(selectedPartnerId));
-    if (!partner?.birth_date) {
-      setDavisonError('La pareja seleccionada no tiene fecha de nacimiento.');
-      return;
-    }
-    const snap = (partnerChart as any)?.metadatos?.input_snapshot;
-    try {
-      setDavisonGenerating(true);
-      setDavisonError(null);
-      const token = getAuthToken();
-      if (!token) throw new Error('No auth');
-      const apiUrl = getApiBaseUrl();
-      const response = await fetch(
-        `${apiUrl}/therapist/patients/${consultante.id}/composite-chart/`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Token ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            person2_birth_date: partner.birth_date,
-            person2_birth_time: partner.birth_time || snap?.birth_time || '12:00',
-            person2_latitude: Number(partner.latitude ?? partner.lat ?? snap?.birth_latitude ?? 0),
-            person2_longitude: Number(partner.longitude ?? partner.long ?? snap?.birth_longitude ?? 0),
-            person2_name: partner.full_name || partner.first_name || 'Pareja',
-          }),
-        }
-      );
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Error desconocido' }));
-        throw new Error(errorData.error || `Error ${response.status}`);
-      }
-      const data = await response.json();
-      setCompositeChart(data.composite_chart ?? data);
-    } catch (err: any) {
-      setDavisonError(err?.message || 'Error generando Carta Compuesta');
-      setCompositeChart(null);
-    } finally {
-      setDavisonGenerating(false);
-    }
-  };
-
-  const handleOpenOnDemandPanel = (panel: 'advancedTransits' | 'secondaryProgressions' | 'solarReturn' | 'compareSolarReturn' | 'compareProgressions') => {
-    switch (panel) {
-      case 'advancedTransits':
-        setShowAdvancedTransits(true);
-        break;
-      case 'secondaryProgressions':
-        setShowSecondaryProgressions(true);
-        break;
-      case 'solarReturn':
-        setShowSolarReturn(true);
-        break;
-      case 'compareSolarReturn':
-        setShowCompareSolarReturn(true);
-        break;
-      case 'compareProgressions':
-        setShowCompareProgressions(true);
-        break;
-      default:
-        break;
-    }
-  };
-
   useEffect(() => {
     // Harmonics are symbolic-only and require identity; keep activeLayers in sync
     if (!hasIdentity) {
@@ -744,7 +672,6 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
 
   const [showRecalcModal, setShowRecalcModal] = useState(false);
   const [recalcMethod, setRecalcMethod] = useState<{ houses: string; zodiac: string }>({ houses: houseSystem, zodiac: zodiacType });
-  const [pdfExportError, setPdfExportError] = useState<string | null>(null);
 
   // simple frontend audit log
   const pushLog = (entry: Record<string, any>) => {
@@ -756,11 +683,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
 
   const exportComparativeAsPDF = async (elementId: string, filename = 'comparativa.pdf') => {
     const el = document.getElementById(elementId);
-    if (!el) {
-      setPdfExportError('No se encontró el panel comparativo para exportar.');
-      return;
-    }
-    setPdfExportError(null);
+    if (!el) return;
     try {
       const { default: html2canvas } = await import('html2canvas');
       const { jsPDF } = await import('jspdf');
@@ -769,7 +692,8 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
       pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, canvas.width, canvas.height);
       pdf.save(filename);
     } catch {
-      setPdfExportError('No se pudo exportar el PDF. Inténtalo de nuevo.');
+      // eslint-disable-next-line no-console
+      console.error('PDF export failed for', elementId);
     }
   };
 
@@ -785,20 +709,6 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
 
 
   const meta = (natal?.metadatos as any) || {};
-
-  const wheelTitleRight = useMemo(
-    () => formatChartParamsLabel(meta.sistema_casas, meta.zodiac_type),
-    [meta.sistema_casas, meta.zodiac_type],
-  );
-
-  const chartParamsPending = useMemo(() => {
-    if (!hasChart) return false;
-    const chartHouse = normalizeHouseSystemCode(meta.sistema_casas);
-    const uiHouse = normalizeHouseSystemCode(houseSystem);
-    const chartZodiac = String(meta.zodiac_type ?? 'tropical').toLowerCase();
-    const uiZodiac = String(zodiacType ?? 'tropical').toLowerCase();
-    return chartHouse !== uiHouse || chartZodiac !== uiZodiac;
-  }, [hasChart, meta.sistema_casas, meta.zodiac_type, houseSystem, zodiacType]);
 
   // Prepare filtered data
   const planetsFiltered = (natal?.planetas || []).filter((p) => (visiblePlanets[String(p.nombre).toLowerCase().trim()] ?? true));
@@ -851,12 +761,9 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
       setSolarReturnCompareYearB(null);
       return;
     }
-    setSolarReturnCompareYearB((prev) => {
-      if (prev !== null) return prev;
-      const baseYear = symbolicSolarReturnYear ?? new Date().getFullYear();
-      return baseYear + 1;
-    });
-  }, [solarReturnCompareEnabled, symbolicSolarReturnYear]);
+    // Comparison by year requires backend support for targeting a specific return year (not enabled in this phase).
+    setSolarReturnCompareYearB(null);
+  }, [solarReturnCompareEnabled]);
 
   const secondaryLayer = useMemo(() => {
     const order = ['transits', 'progressions', 'return_solar'] as const;
@@ -929,13 +836,6 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
       return null;
     }
   }, [secondaryLayer, transitsSnapshot, transitBaseType, analysis_result, progressionsSnapshot, solarReturnSnapshot]);
-
-  const secondaryLayerMode = useMemo<'real' | 'symbolic'>(() => {
-    if (!secondaryLayer) return 'symbolic';
-    if (secondaryPlanets && secondaryPlanets.length > 0) return 'real';
-    if (secondaryLayer === 'transits' && transitsSnapshot?.planets?.length) return 'real';
-    return 'symbolic';
-  }, [secondaryLayer, secondaryPlanets, transitsSnapshot]);
 
   type CrossAspectKind = 'CONJ' | 'OPP' | 'SQR' | 'TRI' | 'SEXT';
   type CrossAspectHit = {
@@ -1230,7 +1130,6 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
           }}
           patientId={consultante?.id}
           hasNatalChart={hasChart}
-          onOpenOnDemandPanel={handleOpenOnDemandPanel}
         />
       </aside>
 
@@ -1923,16 +1822,15 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                       ))}
                     </select>
                   </div>
-                  {synastryEnabled && partnerChart && (
+                  {false && (
                     <>
                       <div className="mt-2 flex items-center gap-2">
-                        <button
-                          className="px-2 py-1 rounded border bg-white text-sm disabled:opacity-50"
-                          disabled={davisonGenerating}
-                          onClick={() => { void fetchSynastryCompositeChart(); }}
-                        >
-                          {davisonGenerating ? 'Calculando…' : 'Generar Carta Compuesta'}
-                        </button>
+                        <button className="px-2 py-1 rounded border bg-white text-sm" onClick={() => {
+                          // compute composite from loaded partnerChart
+                          if (!partnerChart) return;
+                          // const cmp = computeCompositeFromTwoNatal(natal, partnerChart);
+                          // setCompositeChart(cmp);
+                        }}>Generar Carta Compuesta</button>
                         <button className="px-2 py-1 rounded border bg-white text-sm" onClick={async () => {
                           // Generate Carta Davison using midpoint of time & space and Swiss Ephemeris via existing endpoint
                           // Only allow when a persisted partner is selected/loaded from therapist patients
@@ -2258,19 +2156,6 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                     </div>
                   ) : null}
 
-                  {pdfExportError ? (
-                    <div className="mt-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded p-2 flex items-center justify-between gap-2">
-                      <span>{pdfExportError}</span>
-                      <button
-                        type="button"
-                        className="text-xs text-red-700 underline"
-                        onClick={() => setPdfExportError(null)}
-                      >
-                        Cerrar
-                      </button>
-                    </div>
-                  ) : null}
-
                   {/* A18: Comparative Panels */}
                   {showCompareSolarReturn ? (
                     <div id="compare-solar-return" className="mt-4 bg-white border rounded p-3">
@@ -2373,9 +2258,6 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                     houseSystem={houseSystem}
                     zodiacType={zodiacType}
                     canRecalculate={Boolean(calculateChart)}
-                    hasNatalChart={hasChart}
-                    solarArcCalculated={Boolean(solarArcData)}
-                    lunarReturnCalculated={Boolean(lunarReturnData)}
                   />
                   {/* Recalculation modal (confirmation) */}
                   {showRecalcModal ? (
@@ -2409,17 +2291,16 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                           <div>
                             <label className="block text-xs text-gray-600">Sistema de casas</label>
                             <select value={recalcMethod.houses} onChange={(e) => setRecalcMethod((r) => ({ ...r, houses: e.target.value }))} className="mt-1 w-full rounded border px-2 py-2">
-                              {HOUSE_OPTIONS.map((opt) => (
-                                <option key={opt.code} value={opt.code}>{opt.name} ({opt.code})</option>
-                              ))}
+                              <option value="P">Placidus (P)</option>
+                              <option value="K">Koch (K)</option>
+                              <option value="W">Whole Sign (W)</option>
                             </select>
                           </div>
                           <div>
                             <label className="block text-xs text-gray-600">Zodiaco</label>
                             <select value={recalcMethod.zodiac} onChange={(e) => setRecalcMethod((r) => ({ ...r, zodiac: e.target.value }))} className="mt-1 w-full rounded border px-2 py-2">
-                              {ZODIAC_OPTIONS.map((opt) => (
-                                <option key={opt.code} value={opt.code}>{opt.name}</option>
-                              ))}
+                              <option value="tropical">Tropical</option>
+                              <option value="sidereal">Sidéreo (Lahiri)</option>
                             </select>
                           </div>
                         </div>
@@ -2443,7 +2324,13 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                     </div>
                   ) : null}
 
-                  {hasChart && synastryEnabled && partnerChart ? (
+                  {!synastryEnabled && hasChart && activeLayers.has('transits') && analysis_result?.transits ? (
+                    <AstrologyDoubleWheelSVG natal={natal!} overlay={analysis_result.transits} overlayLabel="Tránsitos" orbDegrees={orb} consultante={consultante} />
+                  ) : !synastryEnabled && hasChart && activeLayers.has('progressions') && analysis_result?.progressions?.chart ? (
+                    <AstrologyDoubleWheelSVG natal={natal!} overlay={analysis_result.progressions.chart} overlayLabel="Progresiones (Secundarias)" orbDegrees={orb} consultante={consultante} />
+                  ) : !synastryEnabled && hasChart && activeLayers.has('return_solar') && analysis_result?.solarReturn?.chart ? (
+                    <AstrologyDoubleWheelSVG natal={natal!} overlay={analysis_result.solarReturn.chart} overlayLabel="Retorno Solar" orbDegrees={orb} consultante={consultante} />
+                  ) : hasChart && synastryEnabled && partnerChart ? (
                     <div>
                       {/* Hero info for sinastry */}
                       <div className="mb-3 p-3 bg-white border rounded">
@@ -2526,12 +2413,6 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
 
                         return (
                           <div>
-                            {chartParamsPending ? (
-                              <div className="mb-2 rounded border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
-                                Parámetros del sidebar ({formatChartParamsLabel(houseSystem, zodiacType)}) distintos a la carta calculada ({wheelTitleRight}).
-                                Pulsa <strong>Recalcular carta</strong> para aplicar el cambio.
-                              </div>
-                            ) : null}
                             {secondaryLayer && secondaryLayerLabel ? (
                               <div className="mb-2 text-xs text-gray-700">
                                 <span className="inline-block bg-slate-50 border border-slate-200 text-slate-700 px-2 py-1 rounded">
@@ -2606,7 +2487,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                               temporalLayers={temporalLayers}
                               annualLayers={annualLayers}
                               symbolicDoubleWheel={symbolicDoubleWheel}
-                              secondaryLayer={effectiveSecondaryLayer && effectiveSecondaryLayerLabel ? { key: effectiveSecondaryLayer, label: effectiveSecondaryLayerLabel, mode: secondaryLayerMode } : null}
+                              secondaryLayer={effectiveSecondaryLayer && effectiveSecondaryLayerLabel ? { key: effectiveSecondaryLayer, label: effectiveSecondaryLayerLabel, mode: 'symbolic' } : null}
                               secondaryPlanets={secondaryPlanets ?? undefined}
                               crossAspectNatalKeys={crossAspectNatalKeysToPass}
                               crossAspectSecondaryKeys={showCrossAspects ? crossAspects.secondaryKeys : undefined}
@@ -2622,7 +2503,7 @@ export default function AstrologyProfessionalView({ consultante, chart, analysis
                               relationshipMode={relationshipMode}
                               relationshipRole={relationshipRole}
                               developmentStage={developmentStage}
-                              titleRight={wheelTitleRight}
+                              titleRight={`${meta.sistema_casas || 'placidus'} · ${meta.zodiac_type || 'tropical'}`}
                               transitPlanets={transitsSnapshot && transitBaseType === 'natal' ? transitsSnapshot.planets : undefined}
                             />
                           </div>

@@ -121,6 +121,10 @@
     "./api": {
       "types": "./dist/api/index.d.ts",
       "import": "./dist/api/index.js"
+    },
+    "./session": {
+      "types": "./dist/session/index.d.ts",
+      "import": "./dist/session/index.js"
     }
   },
   "scripts": {

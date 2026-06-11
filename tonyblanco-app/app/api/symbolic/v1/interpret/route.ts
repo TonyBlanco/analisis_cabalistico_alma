@@ -1,4 +1,4 @@
-import { analyzeTreeState } from '@holistica/symbolic/tree';
+import { analyzeTreeState, sweepInterpretationForRole } from '@holistica/symbolic/tree';
 import {
   generateSymbolicInterpretation,
   createFallbackInterpretation,
@@ -8,6 +8,8 @@ import type {
   InterpretResponseV1,
 } from '@holistica/symbolic/api';
 import { callDjangoSymbolicLLM } from '@/lib/symbolic-api/django-llm';
+import { resolveSafetyRole } from '@/lib/symbolic-api/role';
+import { recordSessionEvent } from '@/lib/symbolic-api/events';
 import { isValidSystemId } from '@holistica/symbolic/api';
 import {
   DEFAULT_CORRESPONDENCE_SYSTEM,
@@ -25,6 +27,7 @@ export async function POST(request: Request): Promise<Response> {
     return errorResponse('Invalid JSON body', 400);
   }
 
+  // Consent gate: SWM v3 explicit consent is required before any AI interpretation.
   if (!body.swmV3Consent) {
     return errorResponse(
       'SWM v3 consent required before symbolic AI interpretation.',
@@ -50,6 +53,10 @@ export async function POST(request: Request): Promise<Response> {
   const analysis = analyzeTreeState(validation.state);
   const authorization = request.headers.get('authorization');
 
+  // Modo Híbrido: the safety role is resolved server-side from the Django profile
+  // (clinical_mode_enabled). It is NEVER taken from the request body.
+  const role = await resolveSafetyRole(authorization);
+
   let interpretation;
   try {
     interpretation = await generateSymbolicInterpretation(
@@ -67,16 +74,31 @@ export async function POST(request: Request): Promise<Response> {
           body.safetyLevel ?? 'educational',
           authorization,
         ),
+      role,
     );
   } catch {
     interpretation = createFallbackInterpretation(validation.state);
   }
 
+  // Defense-in-depth: re-run the role-aware safety sweep before the payload
+  // leaves the server (anti-fraud rail always enforced; clinical lexicon only
+  // for the verified clinical role).
+  const swept = sweepInterpretationForRole(interpretation, role);
+
   const data: InterpretResponseV1 = {
-    interpretation,
+    interpretation: swept.interpretation,
     analysis,
     correspondenceSystem,
+    role,
   };
+
+  // Observability (D6): best-effort, fire-and-forget. Therapist-only and
+  // role-resolved server-side; never blocks or breaks this response.
+  await recordSessionEvent(authorization, {
+    eventType: 'interpretation_generated',
+    workspace: 'generic',
+    metadata: { correspondence_system: correspondenceSystem },
+  });
 
   return jsonResponse(data);
 }

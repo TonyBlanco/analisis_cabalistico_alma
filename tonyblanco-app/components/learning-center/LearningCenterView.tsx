@@ -13,6 +13,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 
+import { consumeTherapistLearningAutotour } from '@/lib/therapistOnboarding';
 import type { LearningCenterTourStep } from './learning-center-catalog';
 import type { LearningCenterCatalog, LearningCenterGuideWithContent } from './learning-center-content';
 import { MarkdownRenderer } from './MarkdownRenderer';
@@ -250,6 +251,20 @@ export function LearningCenterView({ catalog }: LearningCenterViewProps) {
   useEffect(() => {
     setTourState(readTourState());
   }, []);
+
+  useEffect(() => {
+    if (!catalog.tourSteps.length) {
+      return;
+    }
+
+    if (!consumeTherapistLearningAutotour()) {
+      return;
+    }
+
+    const nextState: TourState = { status: 'running', step: 0 };
+    setTourState(nextState);
+    writeTourState(nextState);
+  }, [catalog.tourSteps.length]);
 
   useEffect(() => {
     if (tourState.status === 'idle') {

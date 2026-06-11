@@ -37,6 +37,7 @@ export default function LoginPage() {
   const [showResetForm, setShowResetForm] = useState(false);
   const [resetSent, setResetSent] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
+  const [turnstileReady, setTurnstileReady] = useState(false);
   const turnstileRef = useRef<TurnstileFieldHandle>(null);
   const [googleSignInKey, setGoogleSignInKey] = useState(0);
 
@@ -67,14 +68,6 @@ export default function LoginPage() {
     
     try {
       const ts = turnstileRef.current;
-      if (ts?.isEnforced() && !ts.isReady()) {
-        setError({
-          type: 'turnstile',
-          message: 'La verificación de seguridad aún está cargando. Espera un momento.',
-        });
-        setLoading(false);
-        return;
-      }
       if (ts?.isEnforced() && !ts.getToken()) {
         setError({
           type: 'turnstile',
@@ -366,13 +359,14 @@ export default function LoginPage() {
               <TurnstileField
                 ref={turnstileRef}
                 theme="light"
+                onReadyChange={setTurnstileReady}
                 onError={(msg) => setError({ type: 'turnstile', message: msg })}
               />
-              
+
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || (Boolean(turnstileRef.current?.isEnforced()) && !turnstileReady)}
                 className="w-full py-3 px-4 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-xl font-semibold shadow-lg shadow-violet-500/30 hover:shadow-xl hover:shadow-violet-500/40 hover:from-violet-700 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
               >
                 {loading ? (

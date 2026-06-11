@@ -70,6 +70,7 @@ export default function TherapistRegistrationPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [turnstileReady, setTurnstileReady] = useState(false);
   const turnstileRef = useRef<TurnstileFieldHandle>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -139,10 +140,6 @@ export default function TherapistRegistrationPage() {
     }
 
     const ts = turnstileRef.current;
-    if (ts?.isEnforced() && !ts.isReady()) {
-      setError('La verificación de seguridad aún está cargando. Espera un momento.');
-      return;
-    }
     if (ts?.isEnforced() && !ts.getToken()) {
       setError('Completa la verificación de seguridad antes de continuar.');
       return;
@@ -486,13 +483,14 @@ export default function TherapistRegistrationPage() {
           <TurnstileField
             ref={turnstileRef}
             theme="light"
+            onReadyChange={setTurnstileReady}
             onError={(msg) => setError(msg)}
           />
 
           <div className="pt-4">
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || (Boolean(turnstileRef.current?.isEnforced()) && !turnstileReady)}
               className="w-full px-4 py-2 rounded-md text-white font-medium transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
               style={{
                 backgroundColor: loading ? undefined : 'var(--accent-color)',

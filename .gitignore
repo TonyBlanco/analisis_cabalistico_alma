@@ -50,9 +50,8 @@ dist/
 .fusebox/
 .dynamodb/
 .tern-port
-
-!packages/symbolic/dist/
-!packages/symbolic/dist/**
+.tmp/
+packages/symbolic/dist/
 
 # IDE
 .vscode/

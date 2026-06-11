@@ -92,15 +92,15 @@ class UsageMeterUnitTests(TestCase):
 class LLMBridgeMeteringTests(TestCase):
     @override_settings(AI_METERING_ENABLED=True)
     @patch('api.ai.llm_bridge.generate_with_fallback')
-    def test_generate_text_records_usage_with_context(self, mock_fallback):
+    def test_generate_text_records_effective_fallback_provider(self, mock_fallback):
         from api.ai.llm_bridge import generate_text
 
         user = User.objects.create_user('bridge', password='x')
         mock_fallback.return_value = {
             'success': True,
             'text': 'ok',
-            'provider': 'gemini',
-            'model': 'gemini-2.5-flash',
+            'provider': 'groq',
+            'model': 'llama-3.1-8b-instant',
             'prompt_tokens': 10,
             'completion_tokens': 20,
             'total_tokens': 30,
@@ -109,7 +109,11 @@ class LLMBridgeMeteringTests(TestCase):
         ctx = UsageContext(therapist=user, task_type='ai.generate')
         result = generate_text('prompt', usage_context=ctx)
         self.assertTrue(result['success'])
-        self.assertEqual(AIUsageEvent.objects.filter(therapist=user).count(), 1)
+        self.assertEqual(result['provider'], 'groq')
+
+        event = AIUsageEvent.objects.get(therapist=user)
+        self.assertEqual(event.provider, 'groq')
+        self.assertEqual(event.model, 'llama-3.1-8b-instant')
 
 
 class TherapistAIUsageAPITests(TestCase):

@@ -1,17 +1,10 @@
 /**
  * Formative brief safety gate — shared prohibited-term validation.
  * Policy: degrade field to neutral fallback on violation; never emit prohibited terms.
- *
- * Role-aware (Modo Híbrido): the clinical-lexicon block is lifted only for the
- * verified clinical role (resolved in Django, never trusted from the client).
- * The anti-fraud rail is ALWAYS enforced, for every role. See
- * docs/01_PROJECT_STATE/MODO_HIBRIDO_GOVERNANCE.md and ./clinical-lexicon.ts.
  */
 
+import { SYMBOLIC_INTERPRETER_META } from './symbolic-interpreter.types';
 import type { FormativeBrief } from './formative-reading.types';
-import { validateSafetyContentForRole, type SafetyRole } from './clinical-lexicon';
-
-export type { SafetyRole };
 
 export interface SafetyValidationResult {
   passed: boolean;
@@ -23,16 +16,21 @@ export interface FormativeSafetyViolation {
   warnings: string[];
 }
 
-/**
- * Same rules as symbolic-interpreter validateSafetyContent (substring, case-insensitive),
- * now role-aware. Default role 'observational' preserves historical behavior. The
- * anti-fraud rail is always enforced regardless of role.
- */
-export function validateSafetyContent(
-  content: string,
-  role: SafetyRole = 'observational',
-): SafetyValidationResult {
-  return validateSafetyContentForRole(content, role);
+/** Same rules as symbolic-interpreter validateSafetyContent (substring, case-insensitive). */
+export function validateSafetyContent(content: string): SafetyValidationResult {
+  const warnings: string[] = [];
+  const lowercaseContent = content.toLowerCase();
+
+  for (const term of SYMBOLIC_INTERPRETER_META.prohibitedTerms) {
+    if (lowercaseContent.includes(term.toLowerCase())) {
+      warnings.push(`Prohibited term detected: "${term}"`);
+    }
+  }
+
+  return {
+    passed: warnings.length === 0,
+    warnings,
+  };
 }
 
 export const FORMATIVE_SAFE_DISCLAIMER =
@@ -61,9 +59,8 @@ export function fallbackForFormativeField(fieldPath: string): string {
 export function sanitizeFormativeField(
   fieldPath: string,
   text: string,
-  role: SafetyRole = 'observational',
 ): { text: string; violation: FormativeSafetyViolation | null } {
-  const validation = validateSafetyContent(text, role);
+  const validation = validateSafetyContent(text);
   if (validation.passed) {
     return { text, violation: null };
   }
@@ -90,9 +87,6 @@ export class FormativeBriefSafetyGateError extends Error {
 export interface ApplyFormativeSafetyGateOptions {
   /** When true, throws after sanitization so callers/tests can detect degraded fields. Default false. */
   throwOnViolation?: boolean;
-  /** Safety role. 'clinical' (verified) lifts the clinical-lexicon block; the
-   *  anti-fraud rail is always enforced. Default 'observational'. */
-  role?: SafetyRole;
 }
 
 export function applyFormativeBriefSafetyGate(
@@ -101,10 +95,9 @@ export function applyFormativeBriefSafetyGate(
 ): FormativeBrief {
   const violations: FormativeSafetyViolation[] = [];
   const out = structuredClone(brief) as FormativeBrief;
-  const role: SafetyRole = options.role ?? 'observational';
 
   const gate = (fieldPath: string, value: string): string => {
-    const { text, violation } = sanitizeFormativeField(fieldPath, value, role);
+    const { text, violation } = sanitizeFormativeField(fieldPath, value);
     if (violation) violations.push(violation);
     return text;
   };

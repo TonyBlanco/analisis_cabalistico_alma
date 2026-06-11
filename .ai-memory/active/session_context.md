@@ -1,15 +1,20 @@
 # Session Context — Análisis Cabalístico / Studios33
 
-**Última actualización:** 2026-06-10 18:47 UTC  
-**Rama:** `main` · **HEAD:** `4fac3ffa` · **Working tree:** 74 archivo(s) sin commit  
+**Última actualización:** 2026-06-11 18:08 UTC  
+**Rama:** `main` · **HEAD:** `cb13d7ce` · **Working tree:** 22 archivo(s) sin commit  
 **Prod:** Hetzner `studios33.app` + `api.studios33.app`
 
 ## Current Focus
 
-Metering en prod
+Centro Aprendizaje + Help Assistant — tests verdes, pendiente commit/deploy
 
 ## Completed (reciente)
 
+- Fix classify_help_scope acentos; fallback desde citas; catálogo learning-center; widget envía route
+- Último commit: `cb13d7ce` — fix(hybrid-metrics): usar apiUrl() — faltaba / entre base y path (404)
+- Merge feat/therapist-dashboard-revamp; plan DoD checklist [x]; smoke prod OK
+- Último commit: `ad5b50f6` — docs(plans): add Therapist Dashboard revamp + Learning Center/Help-AI plans (orchestrator handoff)
+- Dashboard terapeuta: workload BE+FE+tests+incidencia cerrada en rama feat/therapist-dashboard-revamp
 - Deploy verde, 0096 aplicada, AI_METERING_ENABLED=true, panel FE + cableado completo
 - Último commit: `4fac3ffa` — fix(astrologia): 429 Groq no bloquea informe ni guarda errores como interpretación
 - TherapistAIUsagePanel en dashboard; usage_context en holistic_ai, synthesis, governed, tarot_holistic, swm_v3
@@ -17,11 +22,6 @@ Metering en prod
 - Spec metering + actualización docs IA (14 archivos)
 - Cherry-pick PR1 a main, fix dep migración 0094→0090, deploy verde, API+web 200
 - Último commit: `91363fcb` — fix(migrations): 0094 depende de 0090 en main (0093 no desplegada aún)
-- Último commit: `f73e43b1` — fix(tarot): align system tiers via tarotSystems.registry
-- PR-1 registry wiring commit
-- sync-session automático en Stop hook y comando memory_manager
-- Último commit: `0e709836` — feat(memory): auto-sync session_context.md at session end
-- AI Memory Layer instalado y sync-session automático configurado
 
 ## Active Tasks
 
@@ -31,7 +31,7 @@ Metering en prod
 
 ## Next Steps
 
-1. Smoke login terapeuta → panel Consumo IA; commit cambios locales
+1. Commit feat learning-center+help-assistant y smoke en navegador /learn
 
 ## Key Docs
 

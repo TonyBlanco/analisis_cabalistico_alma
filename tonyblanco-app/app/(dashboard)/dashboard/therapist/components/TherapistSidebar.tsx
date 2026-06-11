@@ -24,6 +24,7 @@ import {
   Microscope,
   BarChart3,
   Settings,
+  GraduationCap,
 } from 'lucide-react';
 import { usePanelManager } from '@/components/TherapistWorkspace/PanelManagerContext';
 import { toolRegistry } from '@/components/TherapistWorkspace/panelRegistry';
@@ -98,6 +99,12 @@ const mainNavLinks = [
     label: 'Tests Modulares',
     href: '/dashboard/therapist/tests',
     icon: Microscope,
+  },
+  {
+    id: 'learn',
+    label: 'Aprender',
+    href: '/learn',
+    icon: GraduationCap,
   },
   {
     id: 'reports',

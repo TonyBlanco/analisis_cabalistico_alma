@@ -12,6 +12,7 @@ from api.ai.usage_meter import (
     UsageRecordInput,
     estimate_cost_eur,
     get_therapist_usage_summary,
+    record_from_llm_result,
     record_usage,
 )
 from api.models import Patient, UserProfile
@@ -112,6 +113,25 @@ class LLMBridgeMeteringTests(TestCase):
         self.assertEqual(result['provider'], 'groq')
 
         event = AIUsageEvent.objects.get(therapist=user)
+        self.assertEqual(event.provider, 'groq')
+        self.assertEqual(event.model, 'llama-3.1-8b-instant')
+
+    @override_settings(AI_METERING_ENABLED=True)
+    def test_record_from_llm_result_persists_effective_groq_provider(self):
+        user = User.objects.create_user('bridge-record', password='x')
+        ctx = UsageContext(therapist=user, task_type='help.ask', source_type='help_assistant')
+        event = record_from_llm_result(
+            ctx,
+            {
+                'success': True,
+                'provider': 'groq',
+                'model': 'llama-3.1-8b-instant',
+                'prompt_tokens': 11,
+                'completion_tokens': 22,
+                'total_tokens': 33,
+            },
+        )
+        self.assertIsNotNone(event)
         self.assertEqual(event.provider, 'groq')
         self.assertEqual(event.model, 'llama-3.1-8b-instant')
 

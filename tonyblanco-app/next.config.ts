@@ -10,6 +10,15 @@ const nextConfig: NextConfig = {
     externalDir: true,
   },
   transpilePackages: ["@holistica/symbolic"],
+
+  async rewrites() {
+    return [
+      {
+        source: '/learn',
+        destination: '/dashboard/therapist/learn',
+      },
+    ];
+  },
   
   // TypeScript validation (we validate before commit)
   typescript: {

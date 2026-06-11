@@ -157,6 +157,7 @@ export default function DashboardLayout({
   // Patient and Therapist have their own layouts with sidebars - skip main layout wrapper
   const isPatientRoute = pathname?.startsWith('/dashboard/patient');
   const isTherapistRoute = pathname?.startsWith('/dashboard/therapist');
+  const isLearningRoute = pathname === '/learn';
   const isAdminRoute = pathname?.startsWith('/dashboard/admin');
 
   // Admin workspace must live in its own isolated space (no global dashboard sidebar/header).
@@ -181,13 +182,13 @@ export default function DashboardLayout({
     );
   }
 
-  if (isTherapistRoute && (realUserRole === 'therapist' || platformAdmin)) {
+  if ((isTherapistRoute || isLearningRoute) && (realUserRole === 'therapist' || platformAdmin)) {
     // Therapist route: let therapist/layout.tsx handle everything
     return (
       <div className={`${themeRole ? `role-${themeRole}` : ''}`}>
         <Header 
           realUserRole={realUserRole} 
-          activeDashboardRole={getActiveDashboardRole(pathname)}
+          activeDashboardRole={isLearningRoute ? 'therapist' : getActiveDashboardRole(pathname)}
         />
         {children}
       </div>
@@ -208,4 +209,3 @@ export default function DashboardLayout({
     </div>
   );
 }
-

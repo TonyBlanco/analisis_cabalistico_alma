@@ -33,3 +33,12 @@
 
 ## [2026-06-10 18:47 UTC] Claude
 [DEPLOY] Metering Fase 2 + cableado snippets/gematria/tarot — deploy Hetzner 2026-06-10, migración 0096 OK, patch-ai-metering-env
+
+## [2026-06-11 17:50 UTC] Claude
+[ENDPOINT] GET /api/therapist/dashboard/ workload block — consultantes, tests, avance; D1-D6 feat/therapist-dashboard-revamp
+
+## [2026-06-11 17:56 UTC] Claude
+[DEPLOY] dashboard terapeuta workload — prod smoke OK workload+web 200; merge main f079f7a8
+
+## [2026-06-11 18:08 UTC] Claude
+[ENDPOINT] POST /api/help/ask — RAG local sobre /docs + learning-center; guard alcance clínico; metering help.ask

@@ -47,6 +47,7 @@ from .views import (
     service_stats,
 )
 from .ai_views import AIHolisticQueryView, AIGenerateView
+from .help_assistant_views import HelpAskView
 from .ai_usage_views import TherapistAIUsageView, TherapistAIUsageHistoryView
 from api.ai.status_views import AIStatusView
 from api.ai.governed_views import KabbalahInterpretView, AIInteractionFeedbackView
@@ -232,6 +233,7 @@ urlpatterns = [
     path('ai/holistic-query/', AIHolisticQueryView.as_view(), name='ai_holistic_query'),
     path('ai/kabbalah/interpret/', KabbalahInterpretView.as_view(), name='ai_kabbalah_interpret'),
     path('ai/feedback/', AIInteractionFeedbackView.as_view(), name='ai_feedback'),
+    path('help/ask', HelpAskView.as_view(), name='help_ask'),
     
     # Fichas
     path('fichas/', FichaListCreateView.as_view(), name='ficha_list_create'),

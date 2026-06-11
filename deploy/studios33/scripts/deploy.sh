@@ -97,6 +97,9 @@ docker exec studio33_api python /app/deploy/studios33/scripts/ensure_admin_profi
 echo "▶ Migraciones API:"
 docker exec studio33_api python manage.py migrate api --noinput
 
+echo "▶ Catálogo de tests (initialize_tests.py):"
+docker exec studio33_api python /app/initialize_tests.py 2>&1 | tail -8
+
 echo "▶ Tests vinculación terapeuta-consultante (beta):"
 docker exec studio33_api python manage.py test api.tests.test_therapist_patient_invitation -v 1 --keepdb 2>&1 | tail -20
 

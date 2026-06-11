@@ -103,7 +103,7 @@ export default function TherapistDashboardPage() {
             label="Nuevo análisis"
             icon={<FileText className="h-5 w-5" />}
             colorClass="border-2 border-gray-300 bg-white hover:bg-gray-50 text-gray-700"
-            onClick={() => router.push('/calcular')}
+            onClick={() => router.push('/dashboard/therapist/cabala')}
           />
         </div>
       </div>

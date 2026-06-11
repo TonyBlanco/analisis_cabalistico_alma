@@ -9,9 +9,9 @@ import TarotHistoryPanel from './TarotHistoryPanel';
 import type { AstrologyTarotSectionId, TarotSystemId } from './types';
 import { getActivePatientId, getActivePatientName } from '@/lib/active-patient';
 import { API_BASE_URL, getAuthToken } from '@/lib/api';
-import { buildTreeStateFromTarotReading, type TarotTreePosition } from '@/lib/symbolic-session/tarot-tree-state';
+import { treeStructuralStateFromTarotDraws } from '@/lib/symbolic-session/tarot-tree-state';
+import { DEFAULT_CORRESPONDENCE_SYSTEM } from '@/lib/symbolic-api/server';
 import type { TarotCardDraw } from '@/components/tarot/TarotSpreadView';
-import type { SefiraId } from '@holistica/symbolic/tree';
 import { SessionStepper } from '@/components/SymbolicSession';
 
 // SWM Tarot hooks
@@ -170,15 +170,7 @@ export default function AstrologyTarotWorkspace({
   // Undefined when section is not tree-spread or no cards have been placed yet.
   const treeState = useMemo(() => {
     if (activeSection !== 'tarot-tree-spread' || treeReadingCards.length === 0) return undefined;
-    const positions: TarotTreePosition[] = treeReadingCards
-      .filter((draw) => draw.position?.id)
-      .map((draw) => ({
-        sefira: draw.position!.id as SefiraId,
-        cardId: draw.card.id,
-        cardLabel: draw.card.nameSpanish ?? draw.card.name ?? undefined,
-        reversed: draw.reversed ?? false,
-      }));
-    return buildTreeStateFromTarotReading({ system: selectedSystem, positions }) ?? undefined;
+    return treeStructuralStateFromTarotDraws(treeReadingCards, selectedSystem) ?? undefined;
   }, [activeSection, treeReadingCards, selectedSystem]);
 
   // Auto-load active workspace when patientUserId is available
@@ -367,7 +359,7 @@ export default function AstrologyTarotWorkspace({
               <SessionStepper
                 treeState={treeState}
                 consultantRef={patientId}
-                correspondenceSystem={selectedSystem}
+                correspondenceSystem={DEFAULT_CORRESPONDENCE_SYSTEM}
                 onEvent={emitSessionEvent}
               />
             </div>

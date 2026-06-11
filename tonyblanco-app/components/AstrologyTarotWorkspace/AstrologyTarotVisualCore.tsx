@@ -566,6 +566,7 @@ export default function AstrologyTarotVisualCore({
             systemId={systemKey}
             onSystemChange={(next) => onSystemChange?.(next as TarotSystemId)}
             useBotaSvg={systemKey === 'bota'}
+            forcedSpreadId="tree_of_life"
             onReadingChange={onReadingChange}
           />
         )}

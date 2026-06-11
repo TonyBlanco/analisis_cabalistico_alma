@@ -6,6 +6,70 @@ from typing import Any, Dict, List, Optional
 # Sistemas que usan mazo B.O.T.A. (keywords/consciousness en inglés en JSON)
 BOTA_LIKE_SYSTEMS = frozenset({"bota", "thoth", "tarot-cabalistico"})
 
+# Tirada del Árbol (10 Sefirot) — ids alineados con SefiraId / SEFIRA_TO_NUMBER (FE).
+TREE_OF_LIFE_POSITIONS_ES: List[Dict[str, str]] = [
+    {
+        "id": "keter",
+        "name": "Keter",
+        "nameSpanish": "Keter",
+        "meaning": "Corona — voluntad superior y origen del impulso.",
+    },
+    {
+        "id": "chokmah",
+        "name": "Chokmah",
+        "nameSpanish": "Jojmá",
+        "meaning": "Sabiduría — impulso expansivo y fuerza iniciadora.",
+    },
+    {
+        "id": "binah",
+        "name": "Binah",
+        "nameSpanish": "Biná",
+        "meaning": "Comprensión — forma, límite y estructuración.",
+    },
+    {
+        "id": "chesed",
+        "name": "Chesed",
+        "nameSpanish": "Jesed",
+        "meaning": "Misericordia — amor, generosidad y cohesión.",
+    },
+    {
+        "id": "gevurah",
+        "name": "Gevurah",
+        "nameSpanish": "Geburá",
+        "meaning": "Fuerza — discernimiento, límite y contención.",
+    },
+    {
+        "id": "tiferet",
+        "name": "Tiferet",
+        "nameSpanish": "Tiferet",
+        "meaning": "Belleza — equilibrio, corazón y síntesis.",
+    },
+    {
+        "id": "netzach",
+        "name": "Netzach",
+        "nameSpanish": "Netsaj",
+        "meaning": "Victoria — deseo, vitalidad y persistencia.",
+    },
+    {
+        "id": "hod",
+        "name": "Hod",
+        "nameSpanish": "Hod",
+        "meaning": "Esplendor — mente, comunicación y análisis.",
+    },
+    {
+        "id": "yesod",
+        "name": "Yesod",
+        "nameSpanish": "Jesod",
+        "meaning": "Fundamento — imaginación, puente y memoria.",
+    },
+    {
+        "id": "malchut",
+        "name": "Malchut",
+        "nameSpanish": "Malkut",
+        "meaning": "Reino — manifestación, cuerpo y presencia.",
+    },
+]
+
 SPREAD_POSITIONS_ES: List[Dict[str, str]] = [
     {
         "id": "significator",
@@ -68,6 +132,14 @@ SPREAD_POSITIONS_ES: List[Dict[str, str]] = [
         "meaning": "Síntesis orientativa del proceso observado.",
     },
 ]
+
+
+def spread_positions_for(spread_type: str) -> List[Dict[str, str]]:
+    """Posiciones por tipo de tirada (tree_of_life → Sefirot; resto → cruz genérica)."""
+    if spread_type == "tree_of_life":
+        return TREE_OF_LIFE_POSITIONS_ES
+    return SPREAD_POSITIONS_ES
+
 
 SYSTEM_META_ES: Dict[str, Dict[str, str]] = {
     "thoth": {

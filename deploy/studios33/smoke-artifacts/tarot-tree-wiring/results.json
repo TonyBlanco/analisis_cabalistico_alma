@@ -1,0 +1,18 @@
+{
+  "points": {
+    "p1_tree_to_assisted": {
+      "pass": true,
+      "detail": "{\"patientId\":null,\"hasTreeSpread\":true,\"drawCardCount\":10,\"drawPositions\":[\"keter\",\"chokmah\",\"binah\",\"chesed\",\"gevurah\",\"tiferet\",\"netzach\",\"hod\",\"yesod\",\"malchut\"],\"sefiraHints\":7,\"attachVisible\":true,\"attachClicked\":true,\"gateOpen\":true,\"assistedVisible\":true}"
+    },
+    "p2_disclaimer_and_role": {
+      "pass": true,
+      "detail": "{\"gateOpen\":true,\"disclaimer\":true,\"roleBanner\":true}"
+    },
+    "p3_interpret_clinical": {
+      "pass": true,
+      "detail": "{\"http\":200,\"role\":\"clinical\"}"
+    }
+  },
+  "blocked_without_consent": true,
+  "url": "https://studios33.app/dashboard/therapist/astrologia-tarot"
+}

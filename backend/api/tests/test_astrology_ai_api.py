@@ -71,17 +71,28 @@ class AstrologyAIAPITestCase(TestCase):
 
     @override_settings(AI_PROVIDER='gemini', GEMINI_API_KEY='', GROQ_API_KEY='gsk-test')
     def test_gemini_provider_falls_back_to_groq_when_gemini_key_missing(self):
+        """Gemini sin clave debe intentar Groq y quedar habilitado con provider=groq."""
         svc = astrology_ai_service.__class__()
         svc._init_attempted = False
         svc.enabled = False
         svc.provider = None
         svc.model_name = None
         svc.error_message = None
-        with patch.object(svc, '_try_init_groq', return_value=True) as mock_groq:
-            with patch.object(svc, '_try_init_gemini', return_value=False):
+        def _groq_init_sets_provider():
+            svc.provider = 'groq'
+            svc.model_name = 'llama-3.3-70b-versatile'
+            svc.enabled = True
+            return True
+
+        with patch.object(svc, '_try_init_gemini', return_value=False) as mock_gemini:
+            with patch.object(
+                svc, '_try_init_groq', side_effect=_groq_init_sets_provider
+            ) as mock_groq:
                 svc._ensure_initialized()
+        mock_gemini.assert_called_once()
         mock_groq.assert_called_once()
         self.assertTrue(svc.enabled)
+        self.assertEqual(svc.provider, 'groq')
 
     def test_ai_status_anonymous_returns_enabled_only(self):
         with patch.object(astrology_ai_service, 'enabled', True), patch.object(

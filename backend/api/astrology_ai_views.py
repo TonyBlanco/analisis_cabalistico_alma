@@ -17,14 +17,131 @@ from rest_framework import status
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 
-from .astrology_ai_service import astrology_ai_service
+from .astrology_ai_service import AIInterpretationResult, astrology_ai_service, is_rate_limit_error
 from .models import Patient
 from .models_astrology import AstrologyNatalChart
 from .models_astrology_ai import AstrologyAIInterpretation
 from .permissions import IsTherapist
 from django.utils import timezone
+from api.ai.usage_meter import UsageRecordInput, record_usage
 
 logger = logging.getLogger(__name__)
+
+ASTROLOGY_TASK_TYPES = {
+    'natal': 'astrology.natal',
+    'transits': 'astrology.transits',
+    'progressions': 'astrology.progressions',
+    'solar_return': 'astrology.solar_return',
+    'situation': 'astrology.situation',
+}
+
+
+def _task_type_for_layer(layer: str) -> str:
+    if layer.startswith('psychological_'):
+        return 'astrology.psychological'
+    return ASTROLOGY_TASK_TYPES.get(layer, f'astrology.{layer}')
+
+
+def _record_astrology_usage(
+    *,
+    therapist,
+    patient: Patient,
+    result: AIInterpretationResult,
+    source_id: str = '',
+) -> None:
+    if not result.success:
+        return
+    record_usage(
+        UsageRecordInput(
+            therapist=therapist,
+            task_type=_task_type_for_layer(result.layer),
+            provider=result.provider or 'unknown',
+            model=result.model or '',
+            prompt_tokens=result.prompt_tokens,
+            completion_tokens=result.completion_tokens,
+            patient_id=patient.id,
+            source_type='astrology_ai_interpretation',
+            source_id=source_id,
+        )
+    )
+
+
+def _save_astrology_interpretation(
+    *,
+    patient: Patient,
+    therapist,
+    result: AIInterpretationResult,
+    interpretation_type: str,
+    input_context: dict,
+    source_id: str = '',
+) -> AstrologyAIInterpretation:
+    model_version = result.model or astrology_ai_service.model_name or 'unknown'
+    interpretation = AstrologyAIInterpretation.objects.create(
+        patient=patient,
+        created_by=therapist,
+        interpretation_type=interpretation_type,
+        interpretation_text=result.interpretation,
+        input_context=input_context,
+        model_version=model_version,
+        token_count=result.tokens_used,
+    )
+    _record_astrology_usage(
+        therapist=therapist,
+        patient=patient,
+        result=result,
+        source_id=source_id or str(interpretation.id),
+    )
+    return interpretation
+
+
+def _ai_error_response(error: str):
+    if is_rate_limit_error(error):
+        return Response(
+            {
+                'error': (
+                    'Límite diario del proveedor AI alcanzado. '
+                    'Espera unos minutos o usa interpretaciones ya guardadas.'
+                ),
+                'code': 'rate_limit_exceeded',
+                'retry_after_hint': error,
+            },
+            status=status.HTTP_429_TOO_MANY_REQUESTS,
+        )
+    return Response(
+        {'error': error or 'Error generando interpretación'},
+        status=status.HTTP_503_SERVICE_UNAVAILABLE,
+    )
+
+
+def _layer_chart_payload(natal_chart: AstrologyNatalChart, layer: str):
+    """Resolve multitech layer data for AI interpret endpoints."""
+    fallback = natal_chart.chart_payload
+    input_snapshot = natal_chart.input_snapshot
+    if not isinstance(natal_chart.chart_payload, dict) or not isinstance(input_snapshot, dict):
+        return fallback
+
+    try:
+        from api.astrology_kerykeion.multi_tech import build_multitech_payload, multitech_enabled
+
+        if not multitech_enabled():
+            return fallback
+
+        payload = build_multitech_payload(
+            natal_chart=natal_chart.chart_payload,
+            input_data=input_snapshot,
+        )
+        if layer == 'transits':
+            return payload.get('transits') or fallback
+        if layer == 'progressions':
+            progressions = payload.get('progressions') or {}
+            return progressions.get('chart') or fallback
+        if layer == 'solar_return':
+            solar_return = payload.get('solarReturn') or {}
+            return solar_return.get('chart') or fallback
+    except Exception as exc:
+        logger.warning('multitech layer %s fallback to natal: %s', layer, exc)
+
+    return fallback
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -111,16 +228,14 @@ class AstrologyInterpretNatalView(APIView):
         result = astrology_ai_service.interpret_natal(natal_chart.chart_payload)
         
         if result.success:
-            # Save interpretation to database
-            interpretation = AstrologyAIInterpretation.objects.create(
+            interpretation = _save_astrology_interpretation(
                 patient=patient,
-                created_by=request.user,
+                therapist=request.user,
+                result=result,
                 interpretation_type='natal',
-                interpretation_text=result.interpretation,
                 input_context={'chart_id': natal_chart.id},
-                model_version='gemini-2.5-flash',
             )
-            
+
             logger.info(f"Saved new natal interpretation {interpretation.id} for patient {patient_id}")
             
             return Response({
@@ -132,10 +247,7 @@ class AstrologyInterpretNatalView(APIView):
                 'interpretation_id': interpretation.id,
             })
         else:
-            return Response(
-                {'error': result.error or 'Error generando interpretación'},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            return _ai_error_response(result.error or 'Error generando interpretación')
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -189,13 +301,7 @@ class AstrologyInterpretTransitsView(APIView):
                 status=status.HTTP_503_SERVICE_UNAVAILABLE
             )
         
-        # Obtener tránsitos del input_snapshot si existe, o usar natal como fallback
-        input_snapshot = natal_chart.input_snapshot or {}
-        
-        # Para tránsitos necesitamos calcular las posiciones actuales
-        # Por ahora usamos el chart_payload como referencia
-        # TODO: Integrar con multi_tech para tránsitos reales
-        transits_data = natal_chart.chart_payload  # Fallback temporal
+        transits_data = _layer_chart_payload(natal_chart, 'transits')
         
         result = astrology_ai_service.interpret_transits(
             natal_data=natal_chart.chart_payload,
@@ -204,18 +310,21 @@ class AstrologyInterpretTransitsView(APIView):
         )
         
         if result.success:
+            _record_astrology_usage(
+                therapist=request.user,
+                patient=patient,
+                result=result,
+            )
             return Response({
                 'success': True,
                 'interpretation': result.interpretation,
                 'layer': result.layer,
                 'patient_id': patient_id,
                 'transit_date': transit_date,
+                'tokens_used': result.tokens_used,
             })
         else:
-            return Response(
-                {'error': result.error or 'Error generando interpretación'},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            return _ai_error_response(result.error or 'Error generando interpretación')
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -266,8 +375,7 @@ class AstrologyInterpretProgressionsView(APIView):
                 status=status.HTTP_503_SERVICE_UNAVAILABLE
             )
         
-        # TODO: Obtener progresiones reales de multi_tech
-        progressions_data = natal_chart.chart_payload  # Fallback temporal
+        progressions_data = _layer_chart_payload(natal_chart, 'progressions')
         
         result = astrology_ai_service.interpret_progressions(
             natal_data=natal_chart.chart_payload,
@@ -276,17 +384,20 @@ class AstrologyInterpretProgressionsView(APIView):
         )
         
         if result.success:
+            _record_astrology_usage(
+                therapist=request.user,
+                patient=patient,
+                result=result,
+            )
             return Response({
                 'success': True,
                 'interpretation': result.interpretation,
                 'layer': result.layer,
                 'patient_id': patient_id,
+                'tokens_used': result.tokens_used,
             })
         else:
-            return Response(
-                {'error': result.error or 'Error generando interpretación'},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            return _ai_error_response(result.error or 'Error generando interpretación')
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -337,8 +448,7 @@ class AstrologyInterpretSolarReturnView(APIView):
                 status=status.HTTP_503_SERVICE_UNAVAILABLE
             )
         
-        # TODO: Obtener retorno solar real de multi_tech
-        solar_return_data = natal_chart.chart_payload  # Fallback temporal
+        solar_return_data = _layer_chart_payload(natal_chart, 'solar_return')
         
         result = astrology_ai_service.interpret_solar_return(
             natal_data=natal_chart.chart_payload,
@@ -347,18 +457,21 @@ class AstrologyInterpretSolarReturnView(APIView):
         )
         
         if result.success:
+            _record_astrology_usage(
+                therapist=request.user,
+                patient=patient,
+                result=result,
+            )
             return Response({
                 'success': True,
                 'interpretation': result.interpretation,
                 'layer': result.layer,
                 'patient_id': patient_id,
                 'year': year,
+                'tokens_used': result.tokens_used,
             })
         else:
-            return Response(
-                {'error': result.error or 'Error generando interpretación'},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            return _ai_error_response(result.error or 'Error generando interpretación')
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -422,18 +535,21 @@ class AstrologyQuerySituationView(APIView):
         )
         
         if result.success:
+            _record_astrology_usage(
+                therapist=request.user,
+                patient=patient,
+                result=result,
+            )
             return Response({
                 'success': True,
                 'interpretation': result.interpretation,
                 'layer': result.layer,
                 'patient_id': patient_id,
                 'question': question,
+                'tokens_used': result.tokens_used,
             })
         else:
-            return Response(
-                {'error': result.error or 'Error generando respuesta'},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            return _ai_error_response(result.error or 'Error generando respuesta')
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -449,12 +565,16 @@ class AstrologyAIStatusView(APIView):
     def get(self, request):
         # Trigger lazy initialization
         astrology_ai_service._ensure_initialized()
-        
-        return Response({
-            'enabled': astrology_ai_service.enabled,
-            'model': astrology_ai_service.model_name if astrology_ai_service.enabled else None,
-            'error': astrology_ai_service.error_message if not astrology_ai_service.enabled else None,
-        })
+
+        payload = {'enabled': astrology_ai_service.enabled}
+        if request.user and request.user.is_authenticated:
+            payload['model'] = (
+                astrology_ai_service.model_name if astrology_ai_service.enabled else None
+            )
+            payload['error'] = (
+                astrology_ai_service.error_message if not astrology_ai_service.enabled else None
+            )
+        return Response(payload)
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -759,41 +879,43 @@ Tu objetivo es proporcionar interpretaciones que:
 
 Escribe en español, con un tono profesional pero cálido."""
 
-        # Generate interpretation using the AI service
         try:
-            result = astrology_ai_service._generate_content(
+            generated = astrology_ai_service._generate_content(
                 system_prompt=system_instruction,
                 user_prompt=prompt,
                 max_tokens=4096,
                 temperature=0.7,
             )
-            
-            if result and not result.startswith('Error'):
-                # Save to database
-                interpretation = AstrologyAIInterpretation.objects.create(
+            ai_result = astrology_ai_service._finalize_interpretation(
+                generated,
+                f'psychological_{section}',
+            )
+
+            if ai_result.success:
+                interpretation = _save_astrology_interpretation(
                     patient=patient,
-                    created_by=request.user,
+                    therapist=request.user,
+                    result=ai_result,
                     interpretation_type=f'psychological_{section}',
-                    interpretation_text=result,
                     input_context={
                         'section': section,
                         'data': data,
-                        'profile_summary': profile_summary
+                        'profile_summary': profile_summary,
                     },
-                    model_version='gemini-2.5-flash',
                 )
-                
+
                 logger.info(f"Saved psychological interpretation ({section}) for patient {patient_id}")
-                
+
                 return Response({
                     'success': True,
-                    'interpretation': result,
+                    'interpretation': ai_result.interpretation,
                     'section': section,
                     'patient_id': patient_id,
                     'interpretation_id': interpretation.id,
+                    'tokens_used': ai_result.tokens_used,
                 })
             else:
-                error_msg = result if result and result.startswith('Error') else 'No se pudo generar la interpretación'
+                error_msg = ai_result.error or 'No se pudo generar la interpretación'
                 return Response(
                     {'error': error_msg},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR

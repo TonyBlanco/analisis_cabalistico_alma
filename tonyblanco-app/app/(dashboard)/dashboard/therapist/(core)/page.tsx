@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { AlertCircle, BarChart3, Calendar, ClipboardList, FileText, Plus, UserPlus } from 'lucide-react';
 import { useTherapistMetrics } from '@/hooks/useTherapistMetrics';
+import { useTherapistAIUsage } from '@/hooks/useTherapistAIUsage';
 
 // Lazy-load chart bundle — avoids SSR issues with Chart.js canvas
 const MetricsDashboard = dynamic(() => import('@/components/dashboard/MetricsDashboard'), {
@@ -11,12 +12,47 @@ const MetricsDashboard = dynamic(() => import('@/components/dashboard/MetricsDas
   loading: () => <ChartSkeleton />,
 });
 
+const TherapistAIUsagePanel = dynamic(
+  () => import('@/components/dashboard/TherapistAIUsagePanel'),
+  { ssr: false, loading: () => <AIUsageSkeleton /> }
+);
+
 export default function TherapistDashboardPage() {
   const router = useRouter();
   const { data, status, error, refetch } = useTherapistMetrics();
+  const {
+    data: aiUsage,
+    status: aiUsageStatus,
+    error: aiUsageError,
+    refetch: refetchAIUsage,
+  } = useTherapistAIUsage();
 
   return (
     <div className="space-y-8">
+      {/* AI usage */}
+      {aiUsageStatus === 'loading' && <AIUsageSkeleton />}
+
+      {aiUsageStatus === 'error' && (
+        <div
+          role="alert"
+          className="flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800"
+        >
+          <AlertCircle className="h-5 w-5 shrink-0" aria-hidden="true" />
+          <span>No se pudo cargar el consumo IA: {aiUsageError}</span>
+          <button
+            type="button"
+            onClick={refetchAIUsage}
+            className="ml-auto rounded-md border border-amber-300 px-3 py-1 text-xs hover:bg-amber-100"
+          >
+            Reintentar
+          </button>
+        </div>
+      )}
+
+      {aiUsageStatus === 'success' && aiUsage && (
+        <TherapistAIUsagePanel usage={aiUsage} onRefresh={refetchAIUsage} />
+      )}
+
       {/* Metrics section */}
       {status === 'loading' && <ChartSkeleton />}
 
@@ -55,7 +91,7 @@ export default function TherapistDashboardPage() {
             label="Nuevo paciente"
             icon={<UserPlus className="h-5 w-5" />}
             colorClass="bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white"
-            onClick={() => router.push('/dashboard/therapist/patients/new')}
+            onClick={() => router.push('/dashboard/therapist/patients')}
           />
           <QuickAction
             label="Registrar sesión"
@@ -67,7 +103,7 @@ export default function TherapistDashboardPage() {
             label="Nuevo análisis"
             icon={<FileText className="h-5 w-5" />}
             colorClass="border-2 border-gray-300 bg-white hover:bg-gray-50 text-gray-700"
-            onClick={() => router.push('/calcular')}
+            onClick={() => router.push('/dashboard/therapist/cabala')}
           />
         </div>
       </div>
@@ -94,6 +130,20 @@ function QuickAction({ label, icon, colorClass, onClick }: QuickActionProps) {
       {icon}
       {label}
     </button>
+  );
+}
+
+function AIUsageSkeleton() {
+  return (
+    <div className="animate-pulse rounded-xl border border-gray-200 bg-white p-6" aria-busy="true">
+      <div className="mb-4 h-5 w-40 rounded bg-gray-100" />
+      <div className="mb-2 h-2.5 rounded-full bg-gray-100" />
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="h-14 rounded-lg bg-gray-100" />
+        ))}
+      </div>
+    </div>
   );
 }
 

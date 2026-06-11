@@ -2,8 +2,9 @@
 ## Arquitectura de Fallback Automático para Lecturas Simbólicas
 
 **Fecha**: 28 Enero 2026  
-**Versión**: 1.0  
-**Estado**: ✅ Implementado y Probado
+**Versión**: 1.1  
+**Estado**: ✅ Implementado y Probado  
+**Actualización 2026-06-10:** Metering por terapeuta — ver [AI_USAGE_METERING_IMPLEMENTATION.md](01_PROJECT_STATE/AI_USAGE_METERING_IMPLEMENTATION.md)
 
 ---
 
@@ -11,14 +12,20 @@
 
 Sistema de generación de lecturas simbólicas con **múltiples proveedores de IA** y **fallback automático** para garantizar disponibilidad 24/7 sin errores 503.
 
+### AI Usage Metering (nuevo — pendiente código)
+
+Toda llamada vía `llm_bridge` / `multi_ai_service` debe registrar un `AIUsageEvent` (tokens + coste EUR por terapeuta). La suscripción plana actual se sustituye por **base + créditos AI incluidos + overage**. Especificación completa: [AI_USAGE_METERING_IMPLEMENTATION.md](01_PROJECT_STATE/AI_USAGE_METERING_IMPLEMENTATION.md).
+
 ### Proveedores Soportados
 
-| Provider | Modelo | Rate Limits | Estado | Prioridad |
-|----------|--------|-------------|--------|-----------|
-| **Groq** | Llama 3.3 70B Versatile | Alta disponibilidad | ✅ Activo | 1 (Principal) |
-| **Gemini** | Gemini 2.5 Flash | Medio, puede tener 503 | ✅ Activo | 2 (Respaldo) |
-| **OpenAI** | GPT-4o-mini | Pago, confiable | ⏳ Pendiente config | 3 (Tercer respaldo) |
-| **Ollama** | Llama 3.2 (Local) | Sin límites | 🔄 Opcional | 4 (Último recurso) |
+| Provider | Modelo | Rate Limits | Estado | Prioridad prod (2026-06) |
+|----------|--------|-------------|--------|--------------------------|
+| **Gemini** | Gemini 2.5 Flash | Paid tier, alto throughput | ✅ Activo | 1 (Principal prod) |
+| **OpenAI** | GPT-4o-mini | Pago, confiable | ✅ Fallback | 2 (Respaldo) |
+| **Groq** | Llama 3.3 70B Versatile | Free tier limitado (TPD) | ✅ Activo | 3 (Dev / último cloud) |
+| **Ollama** | Llama 3.x (Local) | Sin límites API | 🔄 Opcional | 4 (Último recurso) |
+
+> **Nota:** Con `AI_PROVIDER=free_first` el orden en código sigue siendo Groq primero. En producción con clientes reales usar `AI_PROVIDER=gemini` hasta que el metering esté activo.
 
 ---
 

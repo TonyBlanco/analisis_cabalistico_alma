@@ -32,7 +32,7 @@ class ContextSummaryView(APIView):
     Designed for enriching Tarot/Oracle symbolic readings with natal chart data.
     Read-only, aggregates data from multiple engines into a concise summary.
     
-    GET /api/therapist/patients/{patient_id}/astrology/context-summary/
+    GET /api/therapist/patients/{patient_id}/context-summary/
         Query parameters:
         - include_transits: bool (default: true)
         - include_progressions: bool (default: true)  
@@ -133,6 +133,26 @@ class ContextSummaryView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
     
+    def _natal_planets_list(self, natal_chart) -> list:
+        """Convert domain planets to dict format expected by engines."""
+        return [
+            {
+                'planet_name': planet.planet_name,
+                'longitude': float(planet.longitude),
+            }
+            for planet in natal_chart.planets
+        ]
+
+    def _natal_houses_list(self, natal_chart) -> list:
+        """Convert domain houses to dict format expected by engines."""
+        return [
+            {
+                'number': house.house_number,
+                'cusp_longitude': float(house.longitude),
+            }
+            for house in natal_chart.houses
+        ]
+
     def _build_natal_summary(self, natal_chart) -> dict:
         """Extract key natal chart data for summary."""
         summary = {
@@ -143,52 +163,33 @@ class ContextSummaryView(APIView):
             'dominant_modality': None,
             'chart_pattern': None
         }
-        
-        # Extract planet positions
-        planets = getattr(natal_chart, 'planets', None)
-        if planets:
-            # Handle both dict and object access
-            if isinstance(planets, dict):
-                sun_data = planets.get('sun', {})
-                moon_data = planets.get('moon', {})
-            else:
-                sun_data = getattr(planets, 'sun', {})
-                moon_data = getattr(planets, 'moon', {})
-            
-            if sun_data:
+
+        for planet in natal_chart.planets:
+            name = planet.planet_name.lower()
+            if name == 'sun':
                 summary['sun'] = {
-                    'sign': self._get_sign_name(sun_data.get('sign') if isinstance(sun_data, dict) else getattr(sun_data, 'sign', None)),
-                    'degree': round(sun_data.get('longitude', 0) % 30, 1) if isinstance(sun_data, dict) else round(getattr(sun_data, 'longitude', 0) % 30, 1),
-                    'house': sun_data.get('house') if isinstance(sun_data, dict) else getattr(sun_data, 'house', None)
+                    'sign': self._get_sign_name(planet.sign),
+                    'degree': round(float(planet.sign_degree), 1),
+                    'house': planet.house,
                 }
-            
-            if moon_data:
+            elif name == 'moon':
                 summary['moon'] = {
-                    'sign': self._get_sign_name(moon_data.get('sign') if isinstance(moon_data, dict) else getattr(moon_data, 'sign', None)),
-                    'degree': round(moon_data.get('longitude', 0) % 30, 1) if isinstance(moon_data, dict) else round(getattr(moon_data, 'longitude', 0) % 30, 1),
-                    'house': moon_data.get('house') if isinstance(moon_data, dict) else getattr(moon_data, 'house', None)
+                    'sign': self._get_sign_name(planet.sign),
+                    'degree': round(float(planet.sign_degree), 1),
+                    'house': planet.house,
                 }
-        
-        # Extract ascendant
-        houses = getattr(natal_chart, 'houses', None)
-        if houses:
-            if isinstance(houses, dict):
-                asc_data = houses.get('1', houses.get('ascendant', {}))
-            else:
-                asc_data = getattr(houses, 'ascendant', {})
-            
-            if asc_data:
-                asc_sign = asc_data.get('sign') if isinstance(asc_data, dict) else getattr(asc_data, 'sign', None)
-                asc_degree = asc_data.get('longitude', 0) if isinstance(asc_data, dict) else getattr(asc_data, 'longitude', 0)
+
+        for house in natal_chart.houses:
+            if house.house_number == 1:
                 summary['rising'] = {
-                    'sign': self._get_sign_name(asc_sign),
-                    'degree': round(asc_degree % 30, 1) if asc_degree else None
+                    'sign': self._get_sign_name(house.sign),
+                    'degree': round(float(house.sign_degree), 1),
                 }
-        
-        # Calculate dominants (simplified)
+                break
+
         summary['dominant_element'] = self._calculate_dominant_element(natal_chart)
         summary['dominant_modality'] = self._calculate_dominant_modality(natal_chart)
-        
+
         return summary
     
     def _get_sign_name(self, sign_index_or_name) -> str:
@@ -214,18 +215,13 @@ class ContextSummaryView(APIView):
         
         element_count = {'Fuego': 0, 'Tierra': 0, 'Aire': 0, 'Agua': 0}
         
-        planets = getattr(natal_chart, 'planets', None)
-        if planets:
-            planet_data = planets if isinstance(planets, dict) else vars(planets)
-            for planet_name, planet_info in planet_data.items():
-                if planet_info:
-                    sign = planet_info.get('sign') if isinstance(planet_info, dict) else getattr(planet_info, 'sign', None)
-                    sign_name = self._get_sign_name(sign)
-                    for element, signs in element_signs.items():
-                        if sign_name in signs:
-                            element_count[element] += 1
-                            break
-        
+        for planet in natal_chart.planets:
+            sign_name = self._get_sign_name(planet.sign)
+            for element, signs in element_signs.items():
+                if sign_name in signs:
+                    element_count[element] += 1
+                    break
+
         return max(element_count, key=element_count.get) if any(element_count.values()) else 'Equilibrado'
     
     def _calculate_dominant_modality(self, natal_chart) -> str:
@@ -238,43 +234,43 @@ class ContextSummaryView(APIView):
         
         modality_count = {'Cardinal': 0, 'Fijo': 0, 'Mutable': 0}
         
-        planets = getattr(natal_chart, 'planets', None)
-        if planets:
-            planet_data = planets if isinstance(planets, dict) else vars(planets)
-            for planet_name, planet_info in planet_data.items():
-                if planet_info:
-                    sign = planet_info.get('sign') if isinstance(planet_info, dict) else getattr(planet_info, 'sign', None)
-                    sign_name = self._get_sign_name(sign)
-                    for modality, signs in modality_signs.items():
-                        if sign_name in signs:
-                            modality_count[modality] += 1
-                            break
-        
+        for planet in natal_chart.planets:
+            sign_name = self._get_sign_name(planet.sign)
+            for modality, signs in modality_signs.items():
+                if sign_name in signs:
+                    modality_count[modality] += 1
+                    break
+
         return max(modality_count, key=modality_count.get) if any(modality_count.values()) else 'Equilibrado'
     
     def _get_current_transits(self, natal_chart, orb: float = 2.0) -> list:
         """Get current planetary transits to natal chart."""
         try:
             engine = TransitsEngine()
+            target_date = datetime.now().strftime('%Y-%m-%d')
             transits_result = engine.calculate_transits(
-                natal_chart=natal_chart,
-                transit_date=datetime.now(),
-                orb=orb
+                natal_planets=self._natal_planets_list(natal_chart),
+                natal_houses=self._natal_houses_list(natal_chart),
+                target_date=target_date,
+                include_outer_only=False,
             )
-            
-            # Format for summary (take most significant)
+
             formatted_transits = []
-            aspects = transits_result.get('aspects', [])
-            
-            for aspect in aspects[:5]:  # Limit to 5 most relevant
+            aspects = transits_result.get('transit_aspects', [])
+
+            for aspect in aspects:
+                if aspect.get('orb', 999) > orb:
+                    continue
                 formatted_transits.append({
-                    'planet': aspect.get('transiting_planet', ''),
-                    'aspect': aspect.get('aspect_name', ''),
+                    'planet': aspect.get('transit_planet', ''),
+                    'aspect': aspect.get('aspect_type', ''),
                     'natal_point': aspect.get('natal_planet', ''),
                     'orb': round(aspect.get('orb', 0), 2),
-                    'applying': aspect.get('is_applying', False)
+                    'applying': aspect.get('applying', False),
                 })
-            
+                if len(formatted_transits) >= 5:
+                    break
+
             return formatted_transits
         except Exception as e:
             logger.warning(f"Transit calculation failed: {e}")
@@ -284,20 +280,37 @@ class ContextSummaryView(APIView):
         """Get secondary progressions summary."""
         try:
             engine = ProgressionsEngine()
+            birth_datetime = natal_chart.birth_datetime
+            birth_data = {
+                'year': birth_datetime.year,
+                'month': birth_datetime.month,
+                'day': birth_datetime.day,
+                'hour': birth_datetime.hour,
+                'minute': birth_datetime.minute,
+            }
+            target_date = datetime.now().strftime('%Y-%m-%d')
             progressions_result = engine.calculate_progressions(
-                natal_chart=natal_chart,
-                target_date=datetime.now()
+                birth_data=birth_data,
+                natal_planets=self._natal_planets_list(natal_chart),
+                natal_houses=self._natal_houses_list(natal_chart),
+                target_date=target_date,
+                latitude=float(natal_chart.latitude),
+                longitude=float(natal_chart.longitude),
             )
-            
+
+            progressed_planets = progressions_result.get('progressed_planets', {})
+            moon_phase = progressions_result.get('progressed_moon_phase', {})
+            moon_phase_label = moon_phase.get('phase_name', '') if isinstance(moon_phase, dict) else str(moon_phase)
+
             return {
                 'progressed_moon_sign': self._get_sign_name(
-                    progressions_result.get('progressed_planets', {}).get('moon', {}).get('sign')
+                    progressed_planets.get('moon', {}).get('progressed_sign')
                 ),
-                'progressed_moon_phase': progressions_result.get('progressed_moon_phase', ''),
+                'progressed_moon_phase': moon_phase_label,
                 'progressed_sun_sign': self._get_sign_name(
-                    progressions_result.get('progressed_planets', {}).get('sun', {}).get('sign')
+                    progressed_planets.get('sun', {}).get('progressed_sign')
                 ),
-                'key_aspects': progressions_result.get('key_progressions', [])[:3]
+                'key_aspects': progressions_result.get('key_progressions', [])[:3],
             }
         except Exception as e:
             logger.warning(f"Progressions calculation failed: {e}")
@@ -307,21 +320,37 @@ class ContextSummaryView(APIView):
         """Get current year's solar return themes."""
         try:
             engine = SolarReturnEngine()
-            
-            # Calculate for current year
             current_year = datetime.now().year
+
+            house_system_name = natal_chart.house_system or 'P'
+            house_system_map = {
+                'placidus': 'P',
+                'koch': 'K',
+                'equal': 'E',
+                'whole_sign': 'W',
+                'campanus': 'C',
+                'regiomontanus': 'R',
+                'porphyry': 'O',
+            }
+            house_system = house_system_map.get(house_system_name.lower(), house_system_name)
+
             solar_return_result = engine.calculate_solar_return(
-                natal_chart=natal_chart,
-                year=current_year
+                patient_id=natal_chart.patient_id,
+                birth_datetime=natal_chart.birth_datetime,
+                natal_latitude=natal_chart.latitude,
+                natal_longitude=natal_chart.longitude,
+                target_year=current_year,
+                timezone=natal_chart.timezone or 'UTC',
+                house_system=house_system,
+                zodiac_type=natal_chart.zodiac_type or 'T',
             )
-            
-            # Extract key themes
-            sr_houses = solar_return_result.get('houses', {})
-            sr_sun = solar_return_result.get('planets', {}).get('sun', {})
-            
-            themes = []
-            sun_house = sr_sun.get('house')
-            if sun_house:
+
+            analysis = solar_return_result.get('analysis', {})
+            themes = analysis.get('themes', [])
+            sun_house = analysis.get('sun_house')
+            sr_rising = analysis.get('ascendant', {}).get('sign')
+
+            if not themes and sun_house:
                 house_themes = {
                     1: 'Identidad y nuevos comienzos',
                     2: 'Recursos y valores',
@@ -334,17 +363,14 @@ class ContextSummaryView(APIView):
                     9: 'Expansión y filosofía',
                     10: 'Carrera y vocación',
                     11: 'Comunidad y metas',
-                    12: 'Espiritualidad y cierre de ciclos'
+                    12: 'Espiritualidad y cierre de ciclos',
                 }
-                themes.append(house_themes.get(sun_house, f'Casa {sun_house}'))
-            
-            # Rising sign of solar return
-            sr_rising = sr_houses.get('1', {}).get('sign')
-            
+                themes = [house_themes.get(sun_house, f'Casa {sun_house}')]
+
             return {
                 'year_themes': themes,
                 'sr_rising': self._get_sign_name(sr_rising),
-                'sr_sun_house': sun_house
+                'sr_sun_house': sun_house,
             }
         except Exception as e:
             logger.warning(f"Solar return calculation failed: {e}")

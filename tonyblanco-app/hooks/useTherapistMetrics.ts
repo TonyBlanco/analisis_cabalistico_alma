@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { API_BASE_URL, getAuthHeaders } from '@/lib/api';
+import { apiUrl, getAuthHeaders } from '@/lib/api';
 import type { TherapistMetrics } from '@/lib/types/metrics';
 
 type Status = 'idle' | 'loading' | 'success' | 'error';
@@ -24,7 +24,7 @@ export function useTherapistMetrics(): UseTherapistMetricsResult {
     setStatus('loading');
     setError(null);
 
-    fetch(`${API_BASE_URL}therapist/metrics/`, {
+    fetch(apiUrl('therapist/metrics/'), {
       headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
     })
       .then(async (res) => {

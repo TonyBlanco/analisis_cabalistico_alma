@@ -47,6 +47,7 @@ from .views import (
     service_stats,
 )
 from .ai_views import AIHolisticQueryView, AIGenerateView
+from .ai_usage_views import TherapistAIUsageView, TherapistAIUsageHistoryView
 from api.ai.status_views import AIStatusView
 from api.ai.governed_views import KabbalahInterpretView, AIInteractionFeedbackView
 from .astrology_ai_views import (
@@ -249,6 +250,8 @@ urlpatterns = [
     path('therapist/dashboard/', TherapistDashboardView.as_view(), name='therapist_dashboard'),
     path('therapist/metrics/', TherapistMetricsView.as_view(), name='therapist_metrics'),
     path('therapist/hybrid-metrics/', HybridModeMetricsView.as_view(), name='therapist_hybrid_metrics'),
+    path('therapist/ai-usage/', TherapistAIUsageView.as_view(), name='therapist_ai_usage'),
+    path('therapist/ai-usage/history/', TherapistAIUsageHistoryView.as_view(), name='therapist_ai_usage_history'),
     path('therapist/patients/', PatientListCreateView.as_view(), name='patient_list_create'),
     path('therapist/patients/<int:pk>/', PatientDetailView.as_view(), name='patient_detail'),
     path('therapist/patients/<int:pk>/profile/', TherapistPatientProfileView.as_view(), name='therapist_patient_profile'),

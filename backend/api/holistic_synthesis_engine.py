@@ -319,7 +319,21 @@ class HolisticSynthesisEngine:
         prompt = self._build_ai_prompt(synthesis_data)
 
         try:
-            result = generate_text(prompt, temperature=0.7, max_tokens=1536)
+            from api.ai.usage_meter import UsageContext
+
+            usage_context = None
+            therapist = getattr(self, 'therapist', None)
+            patient = getattr(self, 'patient', None)
+            if therapist is not None:
+                usage_context = UsageContext(
+                    therapist=therapist,
+                    task_type='holistic.synthesis',
+                    patient_id=patient.id if patient else None,
+                    source_type='holistic_evaluative_synthesis',
+                )
+            result = generate_text(
+                prompt, temperature=0.7, max_tokens=1536, usage_context=usage_context
+            )
             if not result.get('success'):
                 return self._fallback_ai_analysis(synthesis_data)
             return self._parse_ai_response(result.get('text') or '')

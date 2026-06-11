@@ -7,6 +7,7 @@ import { generateMSHEPDF } from '@lib/pdfUtils';
 import MSHETrainingModal from './MSHETrainingModal';
 import FederationHubFeedBlock from '@/components/federation/FederationHubFeedBlock';
 import { Download, HelpCircle, Activity, TrendingUp } from 'lucide-react';
+import { GuidedBlock } from '@/components/ui/guided-block';
 import {
   exportForSWM,
   importToMSHE,
@@ -338,8 +339,19 @@ export default function MSHEClinicalModule() {
 
   if (!patientId) {
     return (
-      <div className="text-center py-8">
-        <p className="text-gray-500">Selecciona un paciente para usar el Motor de Síntesis Holística Evaluativa</p>
+      <div className="py-4">
+        <GuidedBlock
+          variant="info"
+          role="therapist"
+          title="Selecciona un consultante"
+          description="El Motor de Síntesis Holística requiere un consultante activo. Selecciona un paciente desde el panel clínico para comenzar."
+          steps={[
+            { label: 'Abre el panel de pacientes en la barra lateral' },
+            { label: 'Selecciona o busca el consultante' },
+            { label: 'Vuelve a esta pantalla — los datos cargarán automáticamente' },
+          ]}
+          actions={[{ label: 'Ir a Pacientes', href: '/dashboard/therapist/patients' }]}
+        />
       </div>
     );
   }
@@ -460,9 +472,14 @@ export default function MSHEClinicalModule() {
         </div>
 
         {bioEmotionalError && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-700 text-sm">
-            {bioEmotionalError}
-          </div>
+          <GuidedBlock
+            variant="missing"
+            role="therapist"
+            title="Error al cargar datos BioEmotional"
+            description={bioEmotionalError}
+            actions={[{ label: 'Reintentar', onClick: loadBioEmotionalData, variant: 'primary' }]}
+            className="mb-4"
+          />
         )}
 
         {bioEmotionalData && bioEmotionalData.total_sessions > 0 ? (
@@ -557,13 +574,23 @@ export default function MSHEClinicalModule() {
             </div>
           </div>
         ) : !isBioEmotionalLoading ? (
-          <div className="text-center py-8 text-gray-500">
-            <Activity className="w-12 h-12 mx-auto mb-2 opacity-50" />
-            <p>No hay datos BioEmotional para este paciente</p>
-            <p className="text-sm mt-1">
-              Complete sesiones en el módulo &quot;Simbiosis Consultante-Terapeuta&quot; para integrar datos corporales
-            </p>
-          </div>
+          <GuidedBlock
+            variant="info"
+            role="therapist"
+            title="Sin datos BioEmotional"
+            description="Este consultante no tiene sesiones corporales registradas aún. Completa sesiones en el módulo Bio-Emoción Experiencial para habilitar la integración holística."
+            steps={[
+              { label: 'Accede al módulo Bio-Emoción Experiencial Profunda' },
+              { label: 'Completa al menos una sesión con este consultante' },
+              { label: 'Regresa aquí — los datos se integrarán automáticamente' },
+            ]}
+            actions={[
+              {
+                label: 'Ir a Bio-Emoción Experiencial',
+                href: '/dashboard/therapist/bioemotional-experiencial-profunda',
+              },
+            ]}
+          />
         ) : null}
       </div>
 

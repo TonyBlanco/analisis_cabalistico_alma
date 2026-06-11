@@ -175,7 +175,7 @@ export default function AstrologyTarotWorkspace({
       .map((draw) => ({
         sefira: draw.position!.id as SefiraId,
         cardId: draw.card.id,
-        cardLabel: draw.card.nameSpanish ?? draw.card.name,
+        cardLabel: draw.card.nameSpanish ?? draw.card.name ?? undefined,
         reversed: draw.reversed ?? false,
       }));
     return buildTreeStateFromTarotReading({ system: selectedSystem, positions }) ?? undefined;

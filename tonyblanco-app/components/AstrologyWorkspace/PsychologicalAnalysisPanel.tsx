@@ -1,3 +1,8 @@
+/**
+ * @deprecated Componente huérfano — no tiene imports activos en el workspace.
+ * La interpretación psicológica vive en `PsychologicalHoroscopeAdvanced` dentro de
+ * `AstrologyProfessionalView`. Mantener solo como referencia hasta integración o eliminación.
+ */
 "use client";
 
 import React, { useMemo, useState } from 'react';

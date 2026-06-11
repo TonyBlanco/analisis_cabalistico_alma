@@ -48,12 +48,6 @@ export interface MyProfile {
   [key: string]: unknown;
 }
 
-/**
- * Fetch the current user's profile (/api/profile/me/).
- *
- * @returns The profile payload, including clinical-mode flags.
- * @throws Error if request fails
- */
 export async function fetchMyProfile(): Promise<MyProfile> {
   const response = await fetch(`${API_BASE_URL}/profile/me/`, {
     method: 'GET',

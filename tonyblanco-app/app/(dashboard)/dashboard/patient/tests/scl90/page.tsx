@@ -43,7 +43,7 @@ export default function Scl90Page() {
           Próximamente disponible
         </button>
         <Link
-          href="/dashboard/therapist/core/tests"
+          href="/dashboard/patient/tests"
           className="text-sm text-slate-500 underline"
         >
           Volver al catálogo

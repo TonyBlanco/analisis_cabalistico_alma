@@ -102,8 +102,23 @@
 - Feedback loop formal (validación terapeuta → mejora modelo)
 - IA en **bioemotional** (diccionario y síntesis son reglas/DB)
 - Llamadas IA desde **frontend** en producción Studios33 (correcto: todo vía API)
+- **Metering / facturación por consumo API** — especificado 2026-06-10, código pendiente
 
-### 3.4 Defectos documentación / seguridad
+### 3.4 AI Usage Metering (especificación 2026-06-10)
+
+**Doc canónico:** [AI_USAGE_METERING_IMPLEMENTATION.md](./AI_USAGE_METERING_IMPLEMENTATION.md)
+
+| Aspecto | Estado |
+|---------|--------|
+| Ledger `AIUsageEvent` por terapeuta | 📋 Spec |
+| `token_count` en `AstrologyAIInterpretation` | Campo existe, sin rellenar |
+| API `GET /api/therapist/ai-usage/` | 📋 Spec |
+| Planes Stripe base + créditos + overage | 📋 Fase 4 |
+| Inventario 20+ `task_type` (todos los módulos IA) | ✅ En spec |
+
+**Motivo:** suscripción plana (~49 €) no refleja coste API cuando un terapeuta tiene 100 pacientes vs 10.
+
+### 3.5 Defectos documentación / seguridad
 
 - `docs/technical/README_AI.md` incluye **ejemplo de API key real** en `.env.local` — **rotar y limpiar doc**
 - Varios paths siguen asumiendo solo `GEMINI_API_KEY` sin fallback

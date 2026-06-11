@@ -5,7 +5,7 @@ import { getAvailableTests, executeTest } from '@/lib/test-api';
 import { TestModule, ExecuteTestRequest } from '@/lib/test-types';
 import { getActivePatientId, getActivePatientName } from '@/lib/active-patient';
 import { getPatientDetail } from '@/lib/assignment-api';
-import { validateProfileForAnalysis } from '@/lib/profile-validation';
+import { validatePatientForAnalysis } from '@/lib/profile-validation';
 import ProfileCompletionModal from './ProfileCompletionModal';
 import { generateWithGemini } from '@/lib/gemini-config';
 import { getApiBaseUrl } from '@/lib/api-base';
@@ -203,8 +203,18 @@ export default function ClinicalEvaluationsSection() {
       return;
     }
 
-    // VALIDATION: Check profile before allowing clinical evaluation
-    const validation = await validateProfileForAnalysis();
+    let patientRecord = patientData;
+    if (!patientRecord && activePatientId) {
+      try {
+        patientRecord = await getPatientDetail(activePatientId);
+        setPatientData(patientRecord);
+      } catch {
+        patientRecord = null;
+      }
+    }
+
+    // Validate consultante — never the therapist's own profile
+    const validation = validatePatientForAnalysis(patientRecord);
     if (!validation.isValid) {
       setProfileValidationResult({ missingFields: validation.missingFields });
       setShowProfileModal(true);
@@ -629,6 +639,9 @@ export default function ClinicalEvaluationsSection() {
           setProfileValidationResult(null);
         }}
         missingFields={profileValidationResult?.missingFields}
+        subject="patient"
+        patientId={activePatientId}
+        patientName={activePatientName}
       />
 
       {/* Execute Confirmation Modal */}

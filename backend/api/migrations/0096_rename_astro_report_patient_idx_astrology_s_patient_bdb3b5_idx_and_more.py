@@ -9,15 +9,4 @@ class Migration(migrations.Migration):
         ('api', '0095_merge_20260610_1731'),
     ]
 
-    operations = [
-        migrations.RenameIndex(
-            model_name='astrologysessionreport',
-            new_name='astrology_s_patient_bdb3b5_idx',
-            old_name='astro_report_patient_idx',
-        ),
-        migrations.RenameIndex(
-            model_name='astrologysessionreport',
-            new_name='astrology_s_is_shar_ec2e86_idx',
-            old_name='astro_report_shared_idx',
-        ),
-    ]
+    operations = []

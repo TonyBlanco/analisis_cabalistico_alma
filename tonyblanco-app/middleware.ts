@@ -45,7 +45,7 @@ export function middleware(request: NextRequest) {
     const cspHeader = `
     default-src 'self';
     script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://accounts.google.com https://cdn.cookie-script.com https://report.cookie-script.com;
-    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com;
     img-src 'self' blob: data: https:;
     font-src 'self' https://fonts.gstatic.com;
     connect-src ${connectSrcOrigins().join(' ')} https://challenges.cloudflare.com https://accounts.google.com https://cdn.cookie-script.com https://report.cookie-script.com;

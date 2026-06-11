@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, Heart, Sparkles, Target, Zap, Users, Moon, Sun, Star, LogIn, User } from 'lucide-react';
 import { calcularAnalisisCabalistico, API_BASE_URL } from '@/lib/api';
-import { loginForTesting, isAuthenticated, logout, getAuthToken } from '@/lib/auth';
+import { isAuthenticated, getAuthToken } from '@/lib/auth';
 
 const CabalaAnalyzer = () => {
   const [formData, setFormData] = useState({
@@ -367,8 +367,8 @@ const CabalaAnalyzer = () => {
             {!isAuthenticated() ? (
               <button
                 onClick={() => {
-                  loginForTesting();
-                  window.location.reload(); // Recargar para actualizar el estado
+                  // Redirect to login page
+                  window.location.href = '/login';
                 }}
                 className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
               >
@@ -387,8 +387,9 @@ const CabalaAnalyzer = () => {
                 )}
                 <button
                   onClick={() => {
-                    logout();
-                    window.location.reload();
+                    // Clear auth token and redirect
+                    localStorage.removeItem('auth_token');
+                    window.location.href = '/';
                   }}
                   className="flex items-center gap-2 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
                 >

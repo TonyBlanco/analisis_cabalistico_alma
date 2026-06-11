@@ -36,12 +36,22 @@ Un solo camino de inferencia en el backend: `generate_with_fallback()` (`api/uti
 | `api/tests/test_ai_llm_bridge.py` | **Nuevo** |
 | `docs/technical/README_AI.md` | Quitar secretos de ejemplo |
 
+## Fase 0.5 — AI Usage Metering (2026-06-10, pendiente)
+
+Router unificado sin metering deja la facturación en modo plano. Siguiente paso **sin entrenamiento**:
+
+- Spec: [AI_USAGE_METERING_IMPLEMENTATION.md](../AI_USAGE_METERING_IMPLEMENTATION.md)
+- Hook en `llm_bridge.generate_text` + `astrology_ai_service`
+- Modelo `AIUsageEvent` + API `/api/therapist/ai-usage/`
+- Prod: `AI_PROVIDER=gemini` (Groq solo dev / fallback)
+
 ## Criterios de salida
 
 1. Con solo `GROQ_API_KEY` en `.env`, `GET /api/ai/status/` devuelve `groq` disponible.
 2. `POST /api/ai/holistic-query/` responde sin exigir Gemini.
 3. Tests `test_ai_llm_bridge` pasan sin llamadas HTTP reales.
 4. Ningún archivo nuevo menciona training/fine-tune.
+5. *(Fase 0.5)* Cada llamada billable vía bridge crea `AIUsageEvent` cuando `AI_METERING_ENABLED=true`.
 
 ## Verificación
 

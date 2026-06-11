@@ -2,8 +2,10 @@
 
 **Documento:** Guía técnica para configuración de servicios AI
 **Fecha:** 26 de enero de 2026
-**Última actualización:** Soporte multi-proveedor (Groq, Ollama, Gemini)
+**Última actualización:** 2026-06-10 — Metering por terapeuta + prod Gemini-first
 **Propósito:** Evitar problemas comunes de configuración al integrar AI en nuevos módulos
+
+**Metering (obligatorio en módulos nuevos):** [AI_USAGE_METERING_IMPLEMENTATION.md](01_PROJECT_STATE/AI_USAGE_METERING_IMPLEMENTATION.md)
 
 ---
 
@@ -11,11 +13,12 @@
 
 Este documento documenta los aprendizajes críticos de la implementación del servicio de Astrología AI con **arquitectura multi-proveedor**, que soporta:
 
-- **Groq** (principal): `llama-3.3-70b-versatile` - 30 req/min gratis
-- **Ollama** (local): `llama3.2` - Sin límites, requiere instalación local
-- **Gemini** (fallback): `gemini-2.5-flash` - 20 req/día tier gratuito
+- **Gemini** (principal prod): `gemini-2.5-flash` — coste bajo, alto volumen
+- **OpenAI** (fallback): `gpt-4o-mini` — estable en picos
+- **Groq** (dev / legacy free_first): `llama-3.3-70b-versatile` — techo TPD en free tier
+- **Ollama** (local): `llama3.x` — sin coste API cloud
 
-Incluye configuración correcta de **token limits** y **prompts** para cada proveedor.
+Incluye configuración correcta de **token limits**, **prompts** y **registro de uso** por terapeuta.
 
 ---
 
@@ -48,8 +51,20 @@ OLLAMA_BASE_URL=http://localhost:11434
 OLLAMA_MODEL=llama3.2
 
 # Forzar proveedor específico (opcional)
-AI_PROVIDER=auto  # auto | groq | gemini | ollama
+AI_PROVIDER=gemini  # prod recomendado | free_first | auto | groq | openai | ollama
+
+# Metering por terapeuta (Fase 1+)
+AI_METERING_ENABLED=true
+AI_METERING_ENFORCED=false
+AI_DEFAULT_INCLUDED_CREDIT_EUR=8.00
 ```
+
+### Regla para módulos nuevos (2026-06-10)
+
+1. Inferencia **solo** vía `api/ai/llm_bridge.generate_text` (o wrapper que llame a `usage_meter.record`).
+2. Declarar `task_type` del catálogo en [AI_USAGE_METERING_IMPLEMENTATION.md](01_PROJECT_STATE/AI_USAGE_METERING_IMPLEMENTATION.md).
+3. Pasar `therapist` + `patient` opcional en `usage_context`.
+4. No llamar Gemini/Groq directamente desde views (deuda: gematria, SCID5, tarot holístico — migrar en Fase 1).
 
 ### Instalación de Proveedores
 

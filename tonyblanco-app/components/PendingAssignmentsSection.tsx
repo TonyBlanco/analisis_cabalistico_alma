@@ -109,7 +109,7 @@ export default function PendingAssignmentsSection() {
     if (assignment.test_type === 'mcmi4-signal') {
       router.push('/dashboard/patient/tests/mcmi4-signal');
     } else {
-      router.push(`/dashboard/patient/tests/holistic?assignment_id=${assignment.id}`);
+      router.push(`/dashboard/patient/tests?assignment_id=${assignment.id}`);
     }
   };
 

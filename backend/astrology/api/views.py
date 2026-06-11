@@ -22,6 +22,8 @@ from ..engine.harmonics import HarmonicsEngine
 from ..engine.fixed_stars import FixedStarsEngine
 from ..engine.relocation import RelocationEngine
 from ..engine.arabic_parts import ArabicPartsEngine
+from ..engine.natal_chart_engine import NatalChartEngine
+from ..config.astrology_settings import normalize_house_system, normalize_zodiac_type
 from ..api.serializers import (
     NatalChartSerializer,
     NatalChartRequestSerializer,
@@ -1565,28 +1567,23 @@ class ArabicPartsView(APIView):
                         return p
                 return None
 
-            sun_planet = _find_planet(natal_planets, {'sun', 'sol'})
-            moon_planet = _find_planet(natal_planets, {'moon', 'luna'})
+            sun_planet = _find_planet(natal_planets, {'sun', 'sol', '☉'})
+            moon_planet = _find_planet(natal_planets, {'moon', 'luna', '☽'})
 
-            # Fallback: recalculate chart if Sun/Moon missing
+            # Fallback: recalculate in-memory if Sun/Moon missing (no legacy DB write)
             if (not sun_planet or not moon_planet) and patient.birth_date and patient.birth_latitude is not None and patient.birth_longitude is not None:
                 birth_time = patient.birth_time or time(12, 0)
                 birth_dt = datetime.combine(patient.birth_date, birth_time)
-                house_system = natal_chart.house_system or 'P'
-                if len(str(house_system)) > 1:
-                    house_system_map = {
-                        'placidus': 'P', 'koch': 'K', 'equal': 'E',
-                        'whole_sign': 'W', 'campanus': 'C', 'regiomontanus': 'R',
-                    }
-                    house_system = house_system_map.get(str(house_system).lower(), 'P')
-                natal_chart = chart_service.get_or_create_natal_chart(
+                house_system = normalize_house_system(natal_chart.house_system)
+                zodiac_type = normalize_zodiac_type(natal_chart.zodiac_type)
+                natal_chart = NatalChartEngine().calculate_natal_chart(
                     patient_id=patient_id,
                     birth_datetime=birth_dt,
                     latitude=patient.birth_latitude,
                     longitude=patient.birth_longitude,
                     timezone=patient.birth_timezone or 'UTC',
                     house_system=house_system,
-                    zodiac_type=natal_chart.zodiac_type,
+                    zodiac_type=zodiac_type,
                 )
                 natal_planets = [
                     {
@@ -1612,13 +1609,22 @@ class ArabicPartsView(APIView):
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-            # Get ASC and MC from houses
-            asc_house = next((h for h in natal_houses if h['house'] == 1), None)
-            mc_house = next((h for h in natal_houses if h['house'] == 10), None)
+            # Get ASC and MC from house cusps (fallback: sorted cusps 1 and 10)
+            asc_house = next((h for h in natal_houses if h.get('house') == 1), None)
+            mc_house = next((h for h in natal_houses if h.get('house') == 10), None)
+            if natal_houses and (not asc_house or not mc_house):
+                by_house = sorted(
+                    (h for h in natal_houses if h.get('house')),
+                    key=lambda item: int(item['house']),
+                )
+                if not asc_house and by_house:
+                    asc_house = by_house[0]
+                if not mc_house:
+                    mc_house = next((h for h in by_house if int(h['house']) == 10), None)
 
             if not asc_house or not mc_house:
                 return Response(
-                    {"error": "House cusps required for Arabic Parts"},
+                    {"error": "House cusps required for Arabic Parts (houses 1 and 10)"},
                     status=status.HTTP_400_BAD_REQUEST
                 )
 

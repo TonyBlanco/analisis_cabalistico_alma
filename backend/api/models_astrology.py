@@ -13,8 +13,11 @@ from .models import Patient
 
 class AstrologyNatalChart(models.Model):
     """
-    Almacenamiento de carta natal calculada
-    
+    Almacenamiento de carta natal calculada (ruta canónica de escritura).
+
+    KerykeionAnalysisView POST/GET persiste y lee exclusivamente este modelo.
+    astrology.NatalChart es legado de lectura para motores core; no escribir en dual.
+
     Guarda un único cálculo por paciente (el más reciente).
     Estructura: contrato normalizado estable para consumo del frontend.
     """

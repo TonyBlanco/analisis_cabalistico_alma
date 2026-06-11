@@ -69,6 +69,33 @@ else
   bad "GET /api/ai/status/ → ${api_code}"
 fi
 
+echo "▶ Astrología — AI status (URL canónica, sin doble /api)"
+astro_ai_code="$(curl -sS -o /tmp/smoke-astro-ai.json -w '%{http_code}' "${API_BASE}/api/astrology/ai-status/")"
+if [[ "$astro_ai_code" == "200" ]] && grep -q '"enabled"' /tmp/smoke-astro-ai.json; then
+  ok "GET /api/astrology/ai-status/ → 200"
+  if grep -q '"model"' /tmp/smoke-astro-ai.json; then
+    bad "ai-status anónimo no debe exponer model (hardening Fase 3)"
+  else
+    ok "ai-status anónimo solo expone enabled"
+  fi
+else
+  bad "GET /api/astrology/ai-status/ → ${astro_ai_code}"
+fi
+double_api_code="$(curl -sS -o /dev/null -w '%{http_code}' "${API_BASE}/api/api/astrology/ai-status/")"
+if [[ "$double_api_code" == "404" ]]; then
+  ok "GET /api/api/astrology/ai-status/ → 404 (doble prefijo rechazado)"
+else
+  bad "GET /api/api/astrology/ai-status/ → ${double_api_code} (esperado 404)"
+fi
+
+echo "▶ Front — ruta astrología terapeuta (sin sesión)"
+astro_fe_code="$(curl -sS -o /dev/null -w '%{http_code}' "${WEB_BASE}/dashboard/therapist/astrologia")"
+if [[ "$astro_fe_code" =~ ^(200|307|308)$ ]]; then
+  ok "GET /dashboard/therapist/astrologia → ${astro_fe_code}"
+else
+  bad "GET /dashboard/therapist/astrologia → ${astro_fe_code}"
+fi
+
 if [[ -z "$AUTH_CRED" && -n "$SMOKE_USER" && -n "$SMOKE_PASS" ]]; then
   echo "▶ Login terapeuta (API)"
   login_resp="$(curl -sS -X POST "${API_BASE}/api/login/" \
@@ -94,6 +121,37 @@ if [[ -n "$AUTH_CRED" ]]; then
     ok "therapist/patients → 200"
   else
     bad "therapist/patients → ${patients_code}"
+  fi
+
+  patient_id="$(python3 -c "
+import json,sys
+d=json.load(sys.stdin)
+items=d if isinstance(d,list) else d.get('results',d.get('patients',[]))
+print(items[0]['id'] if items else '')
+" < /tmp/smoke-patients.json 2>/dev/null || true)"
+  if [[ -n "$patient_id" ]]; then
+    kery_code="$(curl -sS -o /tmp/smoke-kerykeion.json -w '%{http_code}' -H "$auth_hdr" \
+      "${API_BASE}/api/therapist/patients/${patient_id}/astrology-kerykeion/")"
+    if [[ "$kery_code" == "200" ]]; then
+      multitech="$(python3 -c "
+import json,sys
+d=json.load(sys.stdin)
+ar=d.get('analysis_result') or {}
+keys=[k for k in ('transits','progressions','solarReturn') if ar.get(k)]
+print(','.join(keys) if keys else 'none')
+" < /tmp/smoke-kerykeion.json 2>/dev/null || echo 'parse_error')"
+      if [[ "$multitech" != "none" && "$multitech" != "parse_error" ]]; then
+        ok "astrology-kerykeion paciente ${patient_id}: analysis_result (${multitech})"
+      else
+        bad "astrology-kerykeion paciente ${patient_id}: sin analysis_result multitech (¿ASTRO_MULTITECH_ENABLED?)"
+      fi
+    elif [[ "$kery_code" == "404" ]]; then
+      ok "astrology-kerykeion paciente ${patient_id}: 404 (sin carta — estado esperado si no calculada)"
+    else
+      bad "astrology-kerykeion paciente ${patient_id} → ${kery_code}"
+    fi
+  else
+    echo "  ⚠️  Sin pacientes en lista — omitiendo smoke kerykeion"
   fi
 else
   echo "  ⚠️  Sin SMOKE_THERAPIST_TOKEN — omitiendo checks autenticados (D5 parcial)"

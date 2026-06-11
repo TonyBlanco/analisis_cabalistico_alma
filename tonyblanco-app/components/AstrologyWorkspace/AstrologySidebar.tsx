@@ -3,8 +3,18 @@
 import { useState, useCallback } from 'react';
 import { HelpCircle, ChevronDown, ChevronUp, X, Orbit, Sparkles, Sun, Music, Star, Moon, Loader2 } from 'lucide-react';
 import ASTRO_METHODS from '@/lib/astrologyMethods';
+import { HOUSE_OPTIONS, ZODIAC_OPTIONS } from '@/lib/astrologyChartOptions';
 import { getAuthToken } from '@/lib/auth';
 import { getApiBaseUrl } from '@/lib/api-base';
+
+/** Backend wraps technique payloads under `{ data: ... }`. */
+function unwrapTechniquePayload(raw: unknown): Record<string, unknown> {
+  if (!raw || typeof raw !== 'object') return {};
+  const envelope = raw as Record<string, unknown>;
+  const inner = envelope.data;
+  if (inner && typeof inner === 'object') return inner as Record<string, unknown>;
+  return envelope;
+}
 
 // Help panel content organized by sections
 const HELP_SECTIONS = [
@@ -146,20 +156,17 @@ interface AstrologySidebarProps {
   setLunarReturnMonth?: (m: string) => void;
   patientId?: string | number;
   hasNatalChart?: boolean;
+  onOpenOnDemandPanel?: (
+    panel: 'advancedTransits' | 'secondaryProgressions' | 'solarReturn' | 'compareSolarReturn' | 'compareProgressions'
+  ) => void;
 }
 
-const HOUSE_OPTIONS: Array<{ code: string; name: string; desc?: string }> = [
-  { code: 'P', name: 'Placidus', desc: 'Predeterminado (actualmente activo).' },
-  { code: 'K', name: 'Koch', desc: 'Mayor sensibilidad a latitud/tiempo en la cúspide.' },
-  { code: 'E', name: 'Equal (Casas Iguales)', desc: 'Simplificación estructural (útil para lectura simbólica).' },
-  { code: 'W', name: 'Whole Sign', desc: 'Cada casa = un signo completo.' },
-  { code: 'R', name: 'Regiomontanus', desc: 'Tradicional/horaria.' },
-];
-
-const ZODIAC_OPTIONS: Array<{ code: string; name: string; desc?: string }> = [
-  { code: 'tropical', name: 'Tropical', desc: 'Estándar occidental.' },
-  { code: 'sidereal', name: 'Sideral', desc: 'Usa ayanamsha (backend).' },
-  { code: 'draconic', name: 'Dracónico', desc: 'Rotación por Nodo Norte (lectura simbólica).' },
+const ON_DEMAND_PANELS = [
+  { key: 'advancedTransits' as const, label: 'Tránsitos on-demand' },
+  { key: 'secondaryProgressions' as const, label: 'Progresiones on-demand' },
+  { key: 'solarReturn' as const, label: 'Retorno solar on-demand' },
+  { key: 'compareSolarReturn' as const, label: 'Comparar Natal ↔ Retorno' },
+  { key: 'compareProgressions' as const, label: 'Comparar Natal ↔ Progresiones' },
 ];
 
 export default function AstrologySidebar({
@@ -210,6 +217,7 @@ export default function AstrologySidebar({
   setLunarReturnMonth,
   patientId,
   hasNatalChart = false,
+  onOpenOnDemandPanel,
 }: AstrologySidebarProps) {
   const isRealMode = mode === 'real';
   const canUseForecast = Boolean(hasIdentity);
@@ -348,6 +356,26 @@ export default function AstrologySidebar({
       )}
 
       <div className="flex-1 px-3 py-3 space-y-4 overflow-y-auto">
+        {onOpenOnDemandPanel && (
+          <div className="px-4 py-3 border-t border-gray-200">
+            <div className="text-[12px] font-semibold text-gray-800 mb-2">Observación on-demand</div>
+            <div className="grid grid-cols-1 gap-1">
+              {ON_DEMAND_PANELS.map((panel) => (
+                <button
+                  key={panel.key}
+                  type="button"
+                  disabled={!hasNatalChart}
+                  onClick={() => onOpenOnDemandPanel(panel.key)}
+                  className="text-left text-[11px] px-2 py-1.5 rounded border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  title={!hasNatalChart ? 'Requiere carta natal calculada' : panel.label}
+                >
+                  {panel.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {patientId && (
           <AdvancedTechniquesSidebarSection
             patientId={patientId}
@@ -916,7 +944,7 @@ export default function AstrologySidebar({
       </div>
 
       <div className="px-4 py-3 border-t border-gray-200 text-[11px] text-gray-500">
-        Visualización profesional del consultante con datos reales. Próximas fases activarán cálculos avanzados.
+        Visualización profesional con datos reales. Técnicas avanzadas y paneles on-demand disponibles con carta natal calculada.
       </div>
 
       {/* Recalcular control (UI only triggers modal in parent) */}
@@ -948,6 +976,8 @@ const ADVANCED_TECHNIQUES = [
   { key: 'transits', name: 'Tránsitos', icon: Orbit, endpoint: '/transits/', color: 'blue' },
   { key: 'progressions', name: 'Progresiones', icon: Sparkles, endpoint: '/progressions/', color: 'purple' },
   { key: 'solarReturn', name: 'Retorno Solar', icon: Sun, endpoint: '/solar-return/', color: 'amber' },
+  { key: 'solarArc', name: 'Arco Solar', icon: Sun, endpoint: '/solar-arc/', color: 'orange' },
+  { key: 'lunarReturn', name: 'Retorno Lunar', icon: Moon, endpoint: '/lunar-return/', color: 'cyan' },
   { key: 'harmonics', name: 'Armónicos', icon: Music, endpoint: '/harmonics/?all=true', color: 'indigo' },
   { key: 'fixedStars', name: 'Estrellas Fijas', icon: Star, endpoint: '/fixed-stars/', color: 'yellow' },
   { key: 'arabicParts', name: 'Partes Árabes', icon: Moon, endpoint: '/arabic-parts/', color: 'emerald' },
@@ -968,6 +998,8 @@ function AdvancedTechniquesSidebarSection({
     transits: { loading: false, error: null, data: null },
     progressions: { loading: false, error: null, data: null },
     solarReturn: { loading: false, error: null, data: null },
+    solarArc: { loading: false, error: null, data: null },
+    lunarReturn: { loading: false, error: null, data: null },
     harmonics: { loading: false, error: null, data: null },
     fixedStars: { loading: false, error: null, data: null },
     arabicParts: { loading: false, error: null, data: null },
@@ -1009,10 +1041,11 @@ function AdvancedTechniquesSidebarSection({
         throw new Error(errorData.error || errorData.detail || `Error ${response.status}`);
       }
 
-      const data = await response.json();
+      const raw = await response.json();
+      const payload = unwrapTechniquePayload(raw);
       setResults(prev => ({
         ...prev,
-        [key]: { loading: false, error: null, data }
+        [key]: { loading: false, error: null, data: payload }
       }));
       setActiveResult(key);
     } catch (err) {
@@ -1031,6 +1064,8 @@ function AdvancedTechniquesSidebarSection({
     blue: 'bg-blue-500 hover:bg-blue-600',
     purple: 'bg-purple-500 hover:bg-purple-600',
     amber: 'bg-amber-500 hover:bg-amber-600',
+    orange: 'bg-orange-500 hover:bg-orange-600',
+    cyan: 'bg-cyan-600 hover:bg-cyan-700',
     indigo: 'bg-indigo-500 hover:bg-indigo-600',
     yellow: 'bg-yellow-500 hover:bg-yellow-600',
     emerald: 'bg-emerald-500 hover:bg-emerald-600',
@@ -1224,6 +1259,10 @@ function TechniqueResultDisplay({ techniqueKey, data }: { techniqueKey: Techniqu
       return <HarmonicsDisplay data={data} />;
     case 'fixedStars':
       return <FixedStarsDisplay data={data} />;
+    case 'solarArc':
+      return <SolarArcApiDisplay data={data} />;
+    case 'lunarReturn':
+      return <LunarReturnApiDisplay data={data} />;
     case 'arabicParts':
       return <ArabicPartsDisplay data={data} />;
     default:
@@ -1388,21 +1427,29 @@ function HarmonicsDisplay({ data }: { data: any }) {
 
   return (
     <div className="space-y-2">
-      {entries.map(([harmonic, hData]: [string, any]) => (
-        <div key={harmonic} className="border-b border-gray-200 pb-2">
-          <p className="text-[10px] font-medium text-indigo-700 mb-1">
-            Armónico {harmonic} (H{harmonic})
-          </p>
-          <div className="grid grid-cols-2 gap-1 text-[9px]">
-            {Object.entries(hData?.planets || {}).slice(0, 6).map(([planet, info]: [string, any]) => (
-              <div key={planet} className="flex justify-between">
-                <span>{PLANET_SYMBOLS[planet] || ''} {PLANET_NAMES_ES[planet]?.slice(0, 3) || planet}</span>
-                <span className="font-mono">{getSignSymbol(info?.sign)} {formatDegree(info?.longitude || 0)}</span>
-              </div>
-            ))}
+      {entries.map(([harmonic, hData]: [string, any]) => {
+        const planetRows = Array.isArray(hData?.planets)
+          ? hData.planets.map((p: any) => [p.planet_name || p.name, p] as const)
+          : Object.entries(hData?.planets || {});
+        return (
+          <div key={harmonic} className="border-b border-gray-200 pb-2">
+            <p className="text-[10px] font-medium text-indigo-700 mb-1">
+              {hData?.harmonic_info?.name || `Armónico ${harmonic}`}
+            </p>
+            {hData?.harmonic_info?.theme && (
+              <p className="text-[9px] text-gray-500 mb-1">{hData.harmonic_info.theme}</p>
+            )}
+            <div className="grid grid-cols-2 gap-1 text-[9px]">
+              {planetRows.slice(0, 6).map(([planet, info]: [string, any]) => (
+                <div key={planet} className="flex justify-between">
+                  <span>{PLANET_SYMBOLS[planet] || ''} {PLANET_NAMES_ES[planet]?.slice(0, 3) || planet}</span>
+                  <span className="font-mono">{getSignSymbol(info?.sign)} {formatDegree(info?.longitude || info?.harmonic_longitude || 0)}</span>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
@@ -1441,40 +1488,103 @@ function FixedStarsDisplay({ data }: { data: any }) {
 }
 
 function ArabicPartsDisplay({ data }: { data: any }) {
-  const parts = data?.parts || data?.arabic_parts || {};
-  const entries = Object.entries(parts);
+  const partsList: any[] = Array.isArray(data?.parts)
+    ? data.parts
+    : Object.entries(data?.parts || data?.arabic_parts || {}).map(([name, info]) => ({
+        name,
+        ...(typeof info === 'object' && info ? info : {}),
+      }));
 
-  if (entries.length === 0) {
+  if (partsList.length === 0 && !data?.fortune && !data?.spirit) {
     return <p className="text-[10px] text-gray-500">Sin partes árabes calculadas</p>;
   }
 
+  const total = data?.total_parts_calculated ?? partsList.length;
+
   return (
     <div className="space-y-1">
-      <p className="text-[10px] text-gray-500 mb-1">{entries.length} partes calculadas</p>
-      <table className="w-full text-[10px]">
-        <thead>
-          <tr className="text-gray-500 border-b">
-            <th className="text-left py-1">Parte</th>
-            <th className="text-center">Signo</th>
-            <th className="text-right">Grado</th>
-          </tr>
-        </thead>
-        <tbody>
-          {entries.slice(0, 10).map(([name, info]: [string, any]) => (
-            <tr key={name} className="border-b border-gray-100">
-              <td className="py-1 truncate max-w-[80px]" title={name}>
-                {name.replace(/_/g, ' ').replace(/part of /i, '')}
-              </td>
-              <td className="text-center">{getSignSymbol(info?.sign)}</td>
-              <td className="text-right font-mono">
-                {formatDegree(info?.longitude || info?.degree || 0)}
-              </td>
+      <p className="text-[10px] text-gray-500 mb-1">
+        {total} partes · carta {data?.chart_type === 'nocturnal' ? 'nocturna' : 'diurna'}
+      </p>
+      {(data?.fortune || data?.spirit) && (
+        <div className="text-[10px] space-y-0.5 mb-2">
+          {data.fortune && (
+            <p>
+              Fortuna: {getSignSymbol(data.fortune.sign)} {data.fortune.sign_degree?.toFixed?.(1) ?? '—'}° (Casa {data.fortune.house})
+            </p>
+          )}
+          {data.spirit && (
+            <p>
+              Espíritu: {getSignSymbol(data.spirit.sign)} {data.spirit.sign_degree?.toFixed?.(1) ?? '—'}° (Casa {data.spirit.house})
+            </p>
+          )}
+        </div>
+      )}
+      {partsList.length > 0 && (
+        <table className="w-full text-[10px]">
+          <thead>
+            <tr className="text-gray-500 border-b">
+              <th className="text-left py-1">Parte</th>
+              <th className="text-center">Signo</th>
+              <th className="text-right">Grado</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-      {entries.length > 10 && (
-        <p className="text-[9px] text-gray-400">+{entries.length - 10} más...</p>
+          </thead>
+          <tbody>
+            {partsList.slice(0, 10).map((part: any, idx: number) => {
+              const label = part?.name || part?.arabic_name || `parte-${idx}`;
+              const lon = part?.sign_degree ?? part?.longitude ?? part?.degree ?? 0;
+              return (
+                <tr key={`${label}-${idx}`} className="border-b border-gray-100">
+                  <td className="py-1 truncate max-w-[80px]" title={label}>
+                    {String(label).replace(/part of /i, '')}
+                  </td>
+                  <td className="text-center">{getSignSymbol(part?.sign)}</td>
+                  <td className="text-right font-mono">
+                    {typeof lon === 'number' && lon <= 30 ? `${lon.toFixed(1)}°` : formatDegree(Number(lon) || 0)}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      )}
+      {partsList.length > 10 && (
+        <p className="text-[9px] text-gray-400">+{partsList.length - 10} más...</p>
+      )}
+    </div>
+  );
+}
+
+function SolarArcApiDisplay({ data }: { data: any }) {
+  const payload = data?.solar_arc || data;
+  const arc = payload?.arc_degrees ?? payload?.solar_arc_degrees;
+  const planets = payload?.directed_planets || payload?.planets || [];
+  const rows = Array.isArray(planets) ? planets : Object.entries(planets).map(([k, v]) => ({ planet_name: k, ...(v as object) }));
+  return (
+    <div className="space-y-1">
+      <p className="text-[10px] text-gray-500">
+        Arco: {typeof arc === 'number' ? `${arc.toFixed(2)}°` : '—'} · {payload?.target_date || data?.target_date || '—'}
+      </p>
+      {rows.slice(0, 6).map((p: any, i: number) => (
+        <div key={i} className="text-[9px] flex justify-between">
+          <span>{PLANET_NAMES_ES[p.planet_name] || p.planet_name}</span>
+          <span>{getSignSymbol(p.sign)} {formatDegree(p.longitude || 0)}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function LunarReturnApiDisplay({ data }: { data: any }) {
+  const lr = data?.lunar_return || data;
+  return (
+    <div className="space-y-1 text-[10px]">
+      <p className="text-gray-500">{lr?.return_datetime || lr?.target_month || 'Retorno lunar'}</p>
+      {lr?.return_lunar_position != null && (
+        <p>Luna retorno: {Number(lr.return_lunar_position).toFixed(2)}°</p>
+      )}
+      {lr?.precision != null && (
+        <p className="text-[9px] text-gray-400">Precisión: {(Number(lr.precision) * 3600).toFixed(1)}&quot;</p>
       )}
     </div>
   );

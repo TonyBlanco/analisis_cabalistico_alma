@@ -6,11 +6,14 @@ No fine-tuning, LoRA, PEFT, or checkpoints. Delegates to multi_ai_service.genera
 from __future__ import annotations
 
 import time
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, TYPE_CHECKING
 
 from django.conf import settings
 
 from api.utils.multi_ai_service import generate_with_fallback, multi_ai
+
+if TYPE_CHECKING:
+    from api.ai.usage_meter import UsageContext
 
 _last_call: Dict[str, Any] = {
     "provider": None,
@@ -41,9 +44,11 @@ def generate_text(
     max_tokens: int = 1024,
     top_p: float = 0.8,
     preferred_provider: Optional[str] = None,
+    usage_context: Optional["UsageContext"] = None,
 ) -> Dict[str, Any]:
     """
-    Returns {success, text, provider, error} and updates last-call metrics for /api/ai/status/.
+    Returns {success, text, provider, model, prompt_tokens, completion_tokens, total_tokens, error}
+    and updates last-call metrics for /api/ai/status/.
     """
     global _last_call
     started = time.monotonic()
@@ -65,6 +70,10 @@ def generate_text(
         "success": result.get("success"),
         "at": time.time(),
     }
+    if usage_context and result.get("success"):
+        from api.ai.usage_meter import record_from_llm_result
+
+        record_from_llm_result(usage_context, result)
     return result
 
 

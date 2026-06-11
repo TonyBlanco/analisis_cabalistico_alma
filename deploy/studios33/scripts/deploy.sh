@@ -63,6 +63,12 @@ GROQ_MODEL=llama-3.3-70b-versatile
 ${GEMINI_LINE}
 GEMINI_MODEL=gemini-1.5-flash
 KERYKEION_AI_SNIPPETS_ENABLED=True
+AI_PROVIDER=free_first
+AI_METERING_ENABLED=true
+AI_METERING_ENFORCED=false
+AI_DEFAULT_INCLUDED_CREDIT_EUR=8.00
+AI_EUR_USD_RATE=0.92
+AI_OVERAGE_ALLOWED=true
 NEXT_PUBLIC_API_URL=https://api.studios33.app/api
 ADMIN_DEFAULT_PASSWORD=${ADMIN_PASS}
 ENV
@@ -91,11 +97,32 @@ docker exec studio33_api python /app/deploy/studios33/scripts/ensure_admin_profi
 echo "▶ Migraciones API:"
 docker exec studio33_api python manage.py migrate api --noinput
 
+echo "▶ Catálogo de tests (initialize_tests.py):"
+docker exec studio33_api python /app/initialize_tests.py 2>&1 | tail -8
+
 echo "▶ Tests vinculación terapeuta-consultante (beta):"
 docker exec studio33_api python manage.py test api.tests.test_therapist_patient_invitation -v 1 --keepdb 2>&1 | tail -20
 
 echo "▶ Tests process memory + tarot seal:"
 docker exec studio33_api python manage.py test api.tests.test_process_memory api.tests.test_process_memory_embeddings swm.tarot.tests.test_api.ProcessMemoryTarotSealTest -v 1 --keepdb 2>&1 | tail -25
+
+echo "▶ Swiss Ephemeris (swisseph + efemérides):"
+docker exec studio33_api python -c "
+import os
+import swisseph as swe
+from pathlib import Path
+p = os.environ.get('SWISSEPH_PATH', '/app/astrology/ephemeris')
+swe.set_ephe_path(p)
+se = list(Path(p).glob('*.se1'))
+if not se:
+    raise SystemExit(f'No .se1 files in {p}')
+jd = swe.julday(2026, 6, 10, 12)
+lon = swe.calc_ut(jd, swe.SUN)[0][0]
+print(f'swisseph {swe.version} ephe={p} files={len(se)} sun_lon={lon:.2f}')
+"
+
+echo "▶ Tests astrología API (kerykeion + AI):"
+docker exec studio33_api python manage.py test api.tests.test_astrology_kerykeion_api api.tests.test_astrology_ai_api -v 1 --keepdb 2>&1 | tail -25
 
 docker exec voxtv_nginx nginx -t
 docker exec voxtv_nginx nginx -s reload

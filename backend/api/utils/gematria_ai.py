@@ -1,54 +1,21 @@
 """
 Servicio de IA para Interpretación de Gematria
-Genera análisis espiritual profundo usando Gemini
+Genera análisis espiritual profundo vía router unificado (llm_bridge).
 """
 import json
+import re
 from typing import Dict, Any, List, Optional
-from django.conf import settings
-from .genai_response import extract_text
 
-# Importar Gemini
-genai = None
-try:
-    from google import genai as genai_local
-    genai = genai_local
-except ImportError:
-    genai = None
+from api.ai.llm_bridge import generate_text, is_llm_available, unavailable_message
 
 
 class GematriaAI:
     """Generador de interpretaciones espirituales de Gematria usando IA"""
-    
+
     def __init__(self):
-        """Inicializa el cliente de Gemini"""
-        api_key = getattr(settings, 'GEMINI_API_KEY', None)
-        model_name = getattr(settings, 'GEMINI_MODEL', 'gemini-1.5-flash')
-        
-        self.enabled = False
-        self.model = None
-        self.error_message = None
-        
-        if not api_key:
-            self.error_message = "GEMINI_API_KEY no está configurada en settings.py"
-            print(f"[WARNING] {self.error_message}")
-            return
-        
-        if not genai:
-            self.error_message = "Módulo google.genai no está instalado. Ejecuta: pip install google-genai"
-            print(f"[WARNING] {self.error_message}")
-            return
-        
-        try:
-            self.client = genai.Client(api_key=api_key)
-            self.model = self.client.models.generate_content
-            self.model_name = model_name
-            self.enabled = True
-            print(f"[OK] GematriaAI configurado con modelo: {model_name}")
-        except Exception as e:
-            self.error_message = f"Error configurando Gemini: {str(e)}"
-            print(f"[ERROR] {self.error_message}")
-            self.enabled = False
-    
+        self.enabled = is_llm_available()
+        self.error_message = None if self.enabled else unavailable_message()
+
     def generate_interpretation(
         self,
         word: str,
@@ -56,7 +23,9 @@ class GematriaAI:
         katan: int,
         gadol: int,
         atbash_value: int,
-        resonances: List[Dict[str, Any]]
+        resonances: List[Dict[str, Any]],
+        *,
+        therapist=None,
     ) -> Dict[str, Any]:
         """
         Genera una interpretación espiritual profunda de los valores de Gematria
@@ -150,44 +119,39 @@ IMPORTANTE:
 """
         
         try:
-            # Generar respuesta con Gemini
-            response = self.model(
-                model=self.model_name,
-                contents=prompt,
-                config={
-                    "temperature": 0.8,
-                    "top_p": 0.9,
-                    "top_k": 40,
-                    "max_output_tokens": 2048,
-                }
+            from api.ai.usage_meter import UsageContext
+
+            usage_context = None
+            if therapist is not None:
+                usage_context = UsageContext(
+                    therapist=therapist,
+                    task_type='kabbalah.gematria',
+                    source_type='gematria',
+                    source_id=word[:64],
+                )
+            result = generate_text(
+                prompt, temperature=0.8, max_tokens=2048, usage_context=usage_context
             )
-            
-            # Extraer el texto de la respuesta
-            response_text = extract_text(response).strip()
-            
-            # Limpiar el texto si tiene markdown code blocks
+            if not result.get('success'):
+                return {"error": result.get('error') or 'Error de IA'}
+
+            response_text = (result.get('text') or '').strip()
             if response_text.startswith('```json'):
                 response_text = response_text.replace('```json', '').replace('```', '').strip()
             elif response_text.startswith('```'):
                 response_text = response_text.replace('```', '').strip()
-            
-            # Parsear el JSON
+
             try:
-                interpretation = json.loads(response_text)
-                return interpretation
+                return json.loads(response_text)
             except json.JSONDecodeError as e:
-                # Si falla el parseo, intentar extraer JSON del texto
-                import re
                 json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
                 if json_match:
-                    interpretation = json.loads(json_match.group())
-                    return interpretation
-                else:
-                    return {
-                        "error": f"Error al parsear la respuesta de Gemini: {str(e)}",
-                        "raw_response": response_text[:500]  # Primeros 500 caracteres para debug
-                    }
-        
+                    return json.loads(json_match.group())
+                return {
+                    "error": f"Error al parsear la respuesta de IA: {str(e)}",
+                    "raw_response": response_text[:500],
+                }
+
         except Exception as e:
             return {
                 "error": f"Error al generar la interpretación: {str(e)}"

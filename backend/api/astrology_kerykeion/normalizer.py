@@ -303,6 +303,8 @@ def normalize_kerykeion_output(
                     attribute=(path.get('path_name') if path else None),
                     ref_title=first.get('title', ''),
                     ref_url=first.get('url', ''),
+                    therapist_id=input_data.get('therapist_id'),
+                    patient_id=input_data.get('patient_id'),
                 )
                 if snippet:
                     first['snippet'] = snippet

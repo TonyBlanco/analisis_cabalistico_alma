@@ -216,6 +216,8 @@ class AstrologyKabbalahSnippetAI:
         attribute: Optional[str],
         ref_title: str,
         ref_url: str,
+        therapist_id: Optional[int] = None,
+        patient_id: Optional[int] = None,
     ) -> Optional[str]:
         if not self.enabled:
             return None
@@ -270,7 +272,27 @@ SALIDA: devuelve solo las 3 líneas, sin encabezados.
 """
 
         try:
-            result = generate_text(prompt, temperature=0.5, max_tokens=220, top_p=0.8)
+            usage_context = None
+            if therapist_id:
+                from django.contrib.auth import get_user_model
+                from api.ai.usage_meter import UsageContext
+
+                therapist = get_user_model().objects.filter(pk=therapist_id).first()
+                if therapist:
+                    usage_context = UsageContext(
+                        therapist=therapist,
+                        task_type='astrology.snippet',
+                        patient_id=patient_id,
+                        source_type='kerykeion_snippet',
+                        source_id=f'{planet}:{sign}',
+                    )
+            result = generate_text(
+                prompt,
+                temperature=0.5,
+                max_tokens=220,
+                top_p=0.8,
+                usage_context=usage_context,
+            )
             if not result.get("success"):
                 return _fallback_snippet(
                     planet=ctx.planet, sign=ctx.sign, letter_name=ctx.letter_name

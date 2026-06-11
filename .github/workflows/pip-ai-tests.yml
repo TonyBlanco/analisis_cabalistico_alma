@@ -45,6 +45,7 @@ jobs:
         run: |
           python manage.py test \
             api.tests.test_ai_llm_bridge \
+            api.tests.test_ai_usage_meter \
             api.tests.test_ai_guardrails \
             api.tests.test_planai_prompt_registry \
             api.tests.test_planai_eval_harness \

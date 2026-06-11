@@ -1,7 +1,10 @@
 # Sistema de Persistencia y Tooltips para Interpretaciones Astrológicas AI
 
 **Fecha:** 26 de enero de 2026  
+**Actualización:** 2026-06-10 — `token_count` se rellenará vía AI Usage Metering  
 **Objetivo:** Guardar interpretaciones AI para evitar recálculos + agregar tooltips informativos para el terapeuta
+
+**Metering:** [AI_USAGE_METERING_IMPLEMENTATION.md](01_PROJECT_STATE/AI_USAGE_METERING_IMPLEMENTATION.md)
 
 ---
 
@@ -18,6 +21,8 @@
   - Permite notas del terapeuta
   - Soft delete (archivado)
   - Historial de versiones con `AstrologyAIInterpretationVersion`
+  - `token_count`: tokens totales de la generación (desde `AIUsageEvent`, Fase 1 metering)
+  - Regenerar interpretación debita crédito AI del terapeuta (Fase 3+)
 
 #### 2. **Endpoints Actualizados**
 - **Archivo:** `backend/api/astrology_ai_views.py`

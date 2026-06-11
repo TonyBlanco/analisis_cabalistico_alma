@@ -8,6 +8,7 @@ import {
   FederationApiError,
   HubCode,
 } from '@lib/api/federation';
+import { GuidedBlock } from '@/components/ui/guided-block';
 
 interface FederationHubFeedBlockProps {
   hub: HubCode;
@@ -40,6 +41,7 @@ export default function FederationHubFeedBlock({
 }: FederationHubFeedBlockProps) {
   const [feedLoading, setFeedLoading] = useState(false);
   const [feedError, setFeedError] = useState<string | null>(null);
+  const [feedErrorType, setFeedErrorType] = useState<'consent' | 'no_access' | 'generic' | null>(null);
   const [feedRecords, setFeedRecords] = useState<HubFeedRecord[]>([]);
   const [feedMetadata, setFeedMetadata] = useState<HubFeedSnapshot['metadata'] | null>(null);
 
@@ -55,6 +57,7 @@ export default function FederationHubFeedBlock({
 
     setFeedLoading(true);
     setFeedError(null);
+    setFeedErrorType(null);
 
     try {
       const snapshot = await getFederationHubFeed({ patientId, hub });
@@ -65,13 +68,18 @@ export default function FederationHubFeedBlock({
       const status = apiError.status;
 
       if (status === 400) {
+        setFeedErrorType('generic');
         setFeedError('Parámetros inválidos.');
       } else if (status === 403) {
-        setFeedError('Acceso no autorizado (ownership/consentimiento).');
+        const isConsentIssue = apiError.message?.toLowerCase().includes('consent');
+        setFeedErrorType(isConsentIssue ? 'consent' : 'no_access');
+        setFeedError(null);
       } else if (status === 401) {
+        setFeedErrorType('generic');
         setFeedError('Sesión no válida. Inicia sesión para continuar.');
       } else {
-        setFeedError('Error temporal. Intenta de nuevo.');
+        setFeedErrorType('generic');
+        setFeedError('Error temporal al conectar con el servidor federado.');
       }
 
       setFeedRecords([]);
@@ -103,6 +111,7 @@ export default function FederationHubFeedBlock({
           </p>
         </div>
         <button
+          type="button"
           onClick={handleRefresh}
           disabled={feedLoading}
           className="px-4 py-2 text-sm bg-gray-900 text-white rounded-md hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -112,19 +121,69 @@ export default function FederationHubFeedBlock({
       </div>
 
       {!patientId && (
-        <p className="text-sm text-gray-500">Selecciona consultante para ver el feed federado.</p>
+        <GuidedBlock
+          variant="info"
+          role="therapist"
+          compact
+          title="Selecciona un consultante"
+          description="Elige un consultante activo para ver el feed federado de este módulo."
+        />
       )}
 
       {patientId && feedLoading && (
         <p className="text-sm text-gray-600">Cargando...</p>
       )}
 
-      {patientId && !feedLoading && feedError && (
-        <p className="text-sm text-red-600">{feedError}</p>
+      {patientId && !feedLoading && feedErrorType === 'consent' && (
+        <GuidedBlock
+          variant="consent"
+          role="both"
+          title="Consentimiento federado requerido"
+          description="El consultante no ha autorizado el acceso federado a sus datos. Sin este consentimiento, la síntesis holística no puede generarse."
+          steps={[
+            { label: 'Ir al perfil del consultante' },
+            { label: 'Solicitar consentimiento de federación de datos' },
+            { label: 'El consultante acepta desde su portal personal' },
+            { label: 'Volver a esta vista — el feed se desbloqueará automáticamente' },
+          ]}
+          actions={[
+            {
+              label: 'Ver perfil del consultante',
+              href: patientId ? `/dashboard/therapist/patients/${patientId}` : '/dashboard/therapist/patients',
+            },
+          ]}
+        />
       )}
 
-      {patientId && !feedLoading && !feedError && feedRecords.length === 0 && (
-        <p className="text-sm text-gray-500">No hay registros federados disponibles.</p>
+      {patientId && !feedLoading && feedErrorType === 'no_access' && (
+        <GuidedBlock
+          variant="locked"
+          role="therapist"
+          compact
+          title="Consultante no asignado"
+          description="Este consultante no está asignado a tu cuenta de terapeuta. Verifica la asignación en el panel de pacientes."
+          actions={[{ label: 'Ir a Pacientes', href: '/dashboard/therapist/patients' }]}
+        />
+      )}
+
+      {patientId && !feedLoading && feedErrorType === 'generic' && feedError && (
+        <GuidedBlock
+          variant="missing"
+          role="therapist"
+          compact
+          title="Error al cargar feed federado"
+          description={feedError}
+          actions={[{ label: 'Reintentar', onClick: handleRefresh, variant: 'primary' }]}
+        />
+      )}
+
+      {patientId && !feedLoading && !feedErrorType && feedRecords.length === 0 && (
+        <GuidedBlock
+          variant="info"
+          compact
+          title="Sin registros federados"
+          description="No hay registros disponibles en el feed federado para este consultante en este módulo todavía."
+        />
       )}
 
       {patientId && !feedLoading && !feedError && feedRecords.length > 0 && (

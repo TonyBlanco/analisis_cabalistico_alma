@@ -74,6 +74,36 @@ export function identityFromSnapshot(snapshot: any): CanonicalConsultantIdentity
   };
 }
 
+export type MissingCanonicalFields = {
+  birth_time: boolean;
+  timezone: boolean;
+  city: boolean;
+  country: boolean;
+  lat: boolean;
+  lon: boolean;
+};
+
+/** Returns which required fields are absent in a snapshot-like object. */
+export function getMissingCanonicalFields(snapshot: any): MissingCanonicalFields {
+  if (!snapshot) {
+    return { birth_time: true, timezone: true, city: true, country: true, lat: true, lon: true };
+  }
+  const birthTime = snapshot.birth_time ?? snapshot.hora_nacimiento ?? snapshot.time_of_birth ?? null;
+  const timezone = snapshot.birth_timezone ?? snapshot.timezone ?? snapshot.tz ?? null;
+  const city = snapshot.birth_city ?? snapshot.ciudad ?? snapshot.city ?? null;
+  const country = snapshot.birth_country ?? snapshot.pais ?? snapshot.country ?? null;
+  const lat = snapshot.birth_latitude ?? snapshot.lat ?? snapshot.latitude ?? null;
+  const lon = snapshot.birth_longitude ?? snapshot.lon ?? snapshot.longitude ?? null;
+  return {
+    birth_time: !isNonEmptyString(birthTime),
+    timezone: !isNonEmptyString(timezone),
+    city: !isNonEmptyString(city),
+    country: !isNonEmptyString(country),
+    lat: !isNumber(lat),
+    lon: !isNumber(lon),
+  };
+}
+
 /**
  * Build canonical identity from sources in priority order:
  * 1. chart.metadatos.input_snapshot

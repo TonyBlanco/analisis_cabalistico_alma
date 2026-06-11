@@ -175,6 +175,8 @@ export default function TarotDrawPanel(props: {
   systemId?: string;
   onSystemChange?: (systemId: string) => void;
   useBotaSvg?: boolean;
+  /** Emitido cuando se completa una tirada con las cartas resultantes. */
+  onReadingChange?: (cards: TarotCardDraw[]) => void;
 }) {
   const [systemIdState, setSystemIdState] = useState<string>('thoth');
   const systemId = props.systemId ?? systemIdState;
@@ -351,6 +353,7 @@ export default function TarotDrawPanel(props: {
 
       setReading(nextReading);
       setSelectedCard(draws[0] ?? null);
+      props.onReadingChange?.(draws);
     } catch (e: any) {
       setError(e?.message || 'Error inesperado al ejecutar la lectura.');
     } finally {

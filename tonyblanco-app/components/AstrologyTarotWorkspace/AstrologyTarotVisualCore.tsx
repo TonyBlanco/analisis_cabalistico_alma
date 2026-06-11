@@ -6,6 +6,7 @@ import { TarotDeck } from '@/components/TarotCard';
 import { API_BASE_URL, getAuthToken } from '@/lib/api';
 import type { TarotCardData } from '@/components/TarotCard/TarotCard.types';
 import TarotDrawPanel from '@/components/tarot/TarotDrawPanel';
+import type { TarotCardDraw } from '@/components/tarot/TarotSpreadView';
 import { ARCANOS_MAYORES } from '@/components/BodySoulVisualization/plugins/tarot/tarot.logic';
 import type { PatientContext } from '@/components/BodySoulVisualization/types';
 import BotaImageReferencePanel from '@/components/tarot/bota/BotaImageReferencePanel';
@@ -40,6 +41,8 @@ interface AstrologyTarotVisualCoreProps {
   onSefirahHighlight?: (sefirahId: string | null) => void;
   onReadingComplete?: (reading: unknown) => void;
   onCardSelect?: (card: unknown) => void;
+  /** Emitido cuando el usuario completa una tirada del Árbol (tree-spread). */
+  onReadingChange?: (cards: TarotCardDraw[]) => void;
   selectedSystem?: TarotSystemId | null;
   onSystemChange?: (systemId: TarotSystemId) => void;
   // SWM Integration props
@@ -125,6 +128,7 @@ export default function AstrologyTarotVisualCore({
   onSefirahHighlight,
   onReadingComplete,
   onCardSelect,
+  onReadingChange,
   selectedSystem,
   onSystemChange,
   // SWM Integration
@@ -562,6 +566,7 @@ export default function AstrologyTarotVisualCore({
             systemId={systemKey}
             onSystemChange={(next) => onSystemChange?.(next as TarotSystemId)}
             useBotaSvg={systemKey === 'bota'}
+            onReadingChange={onReadingChange}
           />
         )}
         {activeSection === 'tarot-free-spread' && (

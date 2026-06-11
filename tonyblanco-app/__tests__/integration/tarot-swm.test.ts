@@ -168,7 +168,7 @@ describe('SWM Tarot API Client', () => {
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({ workspaces: mockWorkspaces }),
+        json: () => Promise.resolve({ count: mockWorkspaces.length, results: mockWorkspaces }),
       });
 
       const result = await swmTarotApi.listWorkspaces({ subject_user_id: 1 });

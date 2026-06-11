@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { Star, Play, Lock, Sparkles, Eye } from 'lucide-react';
 import AstrologyTarotSidebar from './AstrologyTarotSidebar';
 import AstrologyTarotVisualCore from './AstrologyTarotVisualCore';
@@ -9,6 +9,9 @@ import TarotHistoryPanel from './TarotHistoryPanel';
 import type { AstrologyTarotSectionId, TarotSystemId } from './types';
 import { getActivePatientId, getActivePatientName } from '@/lib/active-patient';
 import { API_BASE_URL, getAuthToken } from '@/lib/api';
+import { buildTreeStateFromTarotReading, type TarotTreePosition } from '@/lib/symbolic-session/tarot-tree-state';
+import type { TarotCardDraw } from '@/components/tarot/TarotSpreadView';
+import type { SefiraId } from '@holistica/symbolic/tree';
 import { SessionStepper } from '@/components/SymbolicSession';
 
 // SWM Tarot hooks
@@ -59,7 +62,10 @@ export default function AstrologyTarotWorkspace({
   const [selectedSystem, setSelectedSystem] = useState<TarotSystemId>('thoth');
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [activeView, setActiveView] = useState<WorkspaceView>('lectura');
-  
+
+  // Cards from the tree-of-life spread — lifted from AstrologyTarotVisualCore
+  const [treeReadingCards, setTreeReadingCards] = useState<TarotCardDraw[]>([]);
+
   // Load active patient from global context
   const [patientId, setPatientId] = useState<string | undefined>(patientIdProp);
   const [patientName, setPatientName] = useState<string | undefined>(undefined);
@@ -155,6 +161,25 @@ export default function AstrologyTarotWorkspace({
     },
     [],
   );
+
+  const handleTreeReadingChange = useCallback((cards: TarotCardDraw[]) => {
+    setTreeReadingCards(cards);
+  }, []);
+
+  // Builds a structural Tree state from the placed cards when in tree-spread mode.
+  // Undefined when section is not tree-spread or no cards have been placed yet.
+  const treeState = useMemo(() => {
+    if (activeSection !== 'tarot-tree-spread' || treeReadingCards.length === 0) return undefined;
+    const positions: TarotTreePosition[] = treeReadingCards
+      .filter((draw) => draw.position?.id)
+      .map((draw) => ({
+        sefira: draw.position!.id as SefiraId,
+        cardId: draw.card.id,
+        cardLabel: draw.card.nameSpanish ?? draw.card.name,
+        reversed: draw.reversed ?? false,
+      }));
+    return buildTreeStateFromTarotReading({ system: selectedSystem, positions }) ?? undefined;
+  }, [activeSection, treeReadingCards, selectedSystem]);
 
   // Auto-load active workspace when patientUserId is available
   useEffect(() => {
@@ -340,7 +365,9 @@ export default function AstrologyTarotWorkspace({
                 />
               )}
               <SessionStepper
+                treeState={treeState}
                 consultantRef={patientId}
+                correspondenceSystem={selectedSystem}
                 onEvent={emitSessionEvent}
               />
             </div>
@@ -425,6 +452,7 @@ export default function AstrologyTarotWorkspace({
                   selectedSystem={selectedSystem}
                   onSystemChange={setSelectedSystem}
                   onCardSelect={(card) => setSelectedCardId((card as { id?: string } | null)?.id ?? null)}
+                  onReadingChange={handleTreeReadingChange}
                   instanceId={currentInstanceId}
                   sessionId={currentSessionId}
                   isWorkspaceActive={workspaceStatus === 'active'}

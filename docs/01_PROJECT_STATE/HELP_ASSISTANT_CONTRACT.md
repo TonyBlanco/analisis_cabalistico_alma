@@ -1,5 +1,10 @@
 # Help Assistant Contract
 
+**Estado:** IMPLEMENTADO · prod desde `40bd449b` (2026-06-11)  
+**Implementación:** `backend/api/help_assistant_views.py` · índice `backend/api/help_assistant/`  
+**Tests:** `backend/api/tests/test_help_assistant_api.py`  
+**Metering:** `task_type=help.ask` en `AIUsageEvent`
+
 `POST /api/help/ask`
 
 ## Request

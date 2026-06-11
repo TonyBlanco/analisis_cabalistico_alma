@@ -43,3 +43,10 @@
 **Decision:** NO cablear sessions/notes en el dashboard principal. Señales de avance agregadas en `workload.patients[].progress`, `last_session_at` y `sessions_count`. Endpoints `/sessions/` y `/notes/` se mantienen para ficha de paciente y sesión nueva (consumo diferido).  
 **Consequences:** SUB-FRONTEND usa solo `workload` del dashboard ampliado; incidencia `2026-01-05-visibility-assigned-tests.md` se cierra al cablear UI operativa. Contrato congelado en `.ai-memory/therapist_dashboard_contract.md`.  
 **Agent:** sub-backend
+
+## [2026-06-11] Centro de Aprendizaje + Help Assistant — Fase 1
+
+**Context:** Terapeutas sin onboarding ni ayuda de producto separada del intérprete simbólico.  
+**Decision:** `/learn` + widget `LearningAssistantShell` → `POST /api/help/ask`; RAG keyword local sobre `/docs` + `docs/learning-center/`; guard `classify_help_scope` + `validateSafetyContent`; fallback desde primera cita; Docker copia `docs/` en imágenes web y api (`b659616d`).  
+**Consequences:** Contrato en `HELP_ASSISTANT_CONTRACT.md`; plan actualizado con DoD [x]. Pendiente Fase 2: rate-limit, AN1 analytics, GIFs en guías.  
+**Agent:** grok

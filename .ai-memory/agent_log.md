@@ -51,3 +51,6 @@
 
 ## [2026-06-11 18:34 UTC] Claude
 [DECISION] help_assistant consolidado en paquete backend/api/help_assistant/ — 6 archivos planos eliminados, safety con normalización ASCII, TF-IDF RAG, serializer DRF, metering via UsageContext; contrato POST /api/help/ask sin cambios
+
+## [2026-06-11 19:22 UTC] Claude
+[DECISION] Centro Aprendizaje Fase 1 cerrada — plan DoD [x], PROJECT_STATE + HELP_ASSISTANT_CONTRACT actualizados; prod b659616d/3c90cfbf

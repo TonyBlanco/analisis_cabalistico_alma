@@ -11,6 +11,7 @@ import KarmicMatrix from '@/src/components/cabala/comprehensive-report/KarmicMat
 import VibrationTable from '@/src/components/cabala/comprehensive-report/VibrationTable';
 import TreeWrapper from '@/src/components/cabala/comprehensive-report/TreeWrapper';
 import LetrasDelAlma from '@/src/components/cabala/comprehensive-report/LetrasDelAlma';
+import GenerarInforme from '@/src/components/cabala/comprehensive-report/GenerarInforme';
 import SacredGeometryLoader from '@/src/components/cabala/comprehensive-report/SacredGeometryLoader';
 import { getApiBaseUrl } from '@/lib/api-base';
 
@@ -216,6 +217,13 @@ export default function CabalaReportPage() {
 
         {/* Letters of the Soul */}
         <LetrasDelAlma nombre={userName} />
+
+        {/* Professional Report */}
+        {birthDate && (
+          <div className="flex justify-center pt-4 pb-8">
+            <GenerarInforme nombre={userName} birthDate={birthDate} />
+          </div>
+        )}
 
         {/* Kabbalistic Analysis */}
         {analisis_cabalista && analisis_cabalista.length > 0 && (

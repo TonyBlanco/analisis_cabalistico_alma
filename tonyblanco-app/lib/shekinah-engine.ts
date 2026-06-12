@@ -74,7 +74,7 @@ export interface ShekinahResult {
 /**
  * Suma simple de dígitos de un número
  */
-const sumDigits = (n: number): number => {
+export const sumDigits = (n: number): number => {
   return n.toString()
     .split('')
     .reduce((acc, curr) => acc + parseInt(curr, 10), 0);
@@ -85,7 +85,7 @@ const sumDigits = (n: number): number => {
  * Si es 0, retorna 0 (El Loco)
  * Si es mayor a 21, reduce sumando dígitos hasta que sea <= 21
  */
-const reduceToArcana = (n: number): number => {
+export const reduceToArcana = (n: number): number => {
   if (n === 0) return 0;
   if (n >= 1 && n <= 21) return n;
   
@@ -227,6 +227,36 @@ export const calculateShekinahProfile = (
       method: 'Atlantis - Shejinah Moderno Pitagórico'
     }
   };
+};
+
+/**
+ * Tokeniza un nombre y retorna el array de valores gematría (Método Atlantis)
+ */
+export const tokenizeAtlantis = (fullName: string): number[] => {
+  const cleanName = fullName.toUpperCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^A-ZÑÇ\s]/g, '')
+    .replace(/\s+/g, '');
+
+  const sortedKeys = Object.keys(GEMATRIA_TABLE).sort((a, b) => b.length - a.length);
+  const values: number[] = [];
+  let i = 0;
+
+  while (i < cleanName.length) {
+    let matched = false;
+    for (const key of sortedKeys) {
+      if (cleanName.substring(i, i + key.length) === key) {
+        values.push(GEMATRIA_TABLE[key]);
+        i += key.length;
+        matched = true;
+        break;
+      }
+    }
+    if (!matched) i++;
+  }
+
+  return values;
 };
 
 /**

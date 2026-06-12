@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Calendar, Heart, Sparkles, Target, Zap, Users, Moon, Sun, Star, LogIn, User } from 'lucide-react';
 import { calcularAnalisisCabalistico, API_BASE_URL } from '@/lib/api';
 import { isAuthenticated, getAuthToken } from '@/lib/auth';
+import { calculateShekinahProfile, reduceToArcana } from '@/lib/shekinah-engine';
 
 const CabalaAnalyzer = () => {
   const [formData, setFormData] = useState({
@@ -53,69 +54,20 @@ const CabalaAnalyzer = () => {
     fetchCurrentUser();
   }, []);
 
-  const valorLetra = (letra: string) => {
-    const valores: Record<string, number> = {
-      'A': 1, 'J': 1, 'S': 1,
-      'B': 2, 'K': 2, 'T': 2,
-      'C': 3, 'L': 3, 'U': 3,
-      'D': 4, 'M': 4, 'V': 4,
-      'E': 5, 'N': 5, 'W': 5,
-      'F': 6, 'O': 6, 'X': 6,
-      'G': 7, 'P': 7, 'Y': 7,
-      'H': 8, 'Q': 8, 'Z': 8,
-      'I': 9, 'R': 9
-    };
-    return valores[letra.toUpperCase()] || 0;
-  };
-
-  const reducirNumero = (num: number, manteneMaestros = true) => {
-    if (manteneMaestros && (num === 11 || num === 22 || num === 33 || num === 44)) {
-      return num;
+  const calcularCuentasDeterministas = (
+    gematria: number,
+    scf: number,
+    pin: number
+  ): Record<string, number> => {
+    const KARMIC_NUMBERS = [11, 12, 13, 15, 19, 22, 23, 26, 29, 31, 33, 37, 43, 49, 61, 63, 73, 97];
+    const seed = (gematria * 100003 + scf * 1009 + pin) >>> 0;
+    const result: Record<string, number> = {};
+    for (const k of KARMIC_NUMBERS) {
+      let h = (seed ^ (k * 2654435761)) >>> 0;
+      h = (((h ^ (h >>> 16)) * 0x45d9f3b) >>> 0) ^ (h >>> 16);
+      result[String(k)] = (h % 7) + 1;
     }
-    while (num > 9 && num !== 11 && num !== 22 && num !== 33 && num !== 44) {
-      num = num.toString().split('').reduce((a, b) => a + parseInt(b), 0);
-    }
-    return num;
-  };
-
-  const calcularValorNombre = (nombre: string) => {
-    return nombre.toUpperCase().split('').reduce((sum, letra) => {
-      return sum + valorLetra(letra);
-    }, 0);
-  };
-
-  const calcularCuentasPendientes = (nombre: string, dia: number, mes: number, ano: number) => {
-    const numeros: Record<string, number> = {};
-    const nombreCompleto = nombre.toUpperCase().replace(/\s/g, '');
-    const fecha = `${dia}${mes}${ano}`;
-    
-    // Analizar letras del nombre
-    for (let letra of nombreCompleto) {
-      const valor = valorLetra(letra);
-      if (valor > 0) {
-        const vKey = String(valor);
-        numeros[vKey] = (numeros[vKey] || 0) + 1;
-      }
-    }
-    
-    // Analizar dígitos de la fecha
-    for (let digito of fecha) {
-      const num = parseInt(digito);
-      if (num > 0) {
-        numeros[num] = (numeros[num] || 0) + 1;
-      }
-    }
-
-    // Generar números compuestos específicos
-    const compuestos = [11, 12, 13, 15, 19, 22, 23, 26, 29, 31, 33, 37, 43, 49, 61, 63, 73, 97];
-    const cuentasPendientes: Record<string, number> = {};
-    
-    compuestos.forEach(num => {
-      const apariciones = Math.floor(Math.random() * 7) + 1; // Simulación temporal
-      cuentasPendientes[String(num)] = apariciones;
-    });
-
-    return cuentasPendientes;
+    return result;
   };
 
   const calcularAnalisis = async () => {
@@ -150,6 +102,10 @@ const CabalaAnalyzer = () => {
       return;
     }
 
+    // Perfil Atlantis/Shekinah — fuente única de verdad para cálculos OTD e identidad
+    const birthDateStr = `${ano}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+    const shekinah = calculateShekinahProfile(nombre, birthDateStr);
+
     setLoading(true);
     setError(null);
 
@@ -178,60 +134,69 @@ const CabalaAnalyzer = () => {
         }
       }
 
-      // Transformar el resultado de la API al formato esperado por el componente
+      // Transformar el resultado al formato esperado por el componente
+      const esenciaNum = resultadoAPI.numeros_principales.esencia.numero;
+      const cuentasPendientes = resultadoAPI.cuentas_pendientes
+        || calcularCuentasDeterministas(
+          shekinah.identity.gematriaTotal,
+          shekinah.identity.scf,
+          shekinah.identity.pin
+        );
+
       const result = {
-        // Números principales
+        // Números principales — Método Coquatrix (API)
         esencia: resultadoAPI.numeros_principales.esencia.valor,
         expresion: resultadoAPI.numeros_principales.expresion.valor,
         herencia: resultadoAPI.numeros_principales.herencia.valor,
         destino: resultadoAPI.numeros_principales.destino.valor,
         caminoVida: resultadoAPI.numeros_principales.camino_vida.valor,
 
-        // Inclusión base
+        // Inclusión base (API)
         casas: resultadoAPI.inclusion_base.casas,
         dominantes: resultadoAPI.inclusion_base.dominantes,
         ausentes: resultadoAPI.inclusion_base.ausentes,
         maestrias: resultadoAPI.inclusion_base.maestrias,
 
-        // Mantener algunos cálculos locales que no están en la API
-        temaOrigen: reducirNumero(dia),
-        principioTransformacion: reducirNumero(mes),
-        temaDestino: reducirNumero(dia + mes + ano.toString().split('').reduce((a, b) => a + parseInt(b), 0)),
-        estructuraEnergetica: reducirNumero(dia + mes),
-        imagenAlma: reducirNumero(parseInt(resultadoAPI.numeros_principales.esencia.numero.toString())),
-        razonesKarmicas: reducirNumero(dia + mes + ano.toString().split('').reduce((a, b) => a + parseInt(b), 0) + resultadoAPI.numeros_principales.esencia.numero),
+        // OTD — Método Atlantis (shekinah-engine, fuente única de verdad)
+        temaOrigen: shekinah.otd.to,
+        principioTransformacion: shekinah.otd.pt,
+        temaDestino: shekinah.otd.td,
 
-        // Números de vibración (mantener cálculo local por ahora)
-        vibracionCuerpo: reducirNumero(dia + mes + ano.toString().split('').reduce((a, b) => a + parseInt(b), 0) + 5),
-        vibracionAlma: reducirNumero(resultadoAPI.numeros_principales.esencia.numero + dia),
-        vibracionEspiritu: reducirNumero(mes + ano.toString().split('').reduce((a, b) => a + parseInt(b), 0)),
-        efectoSanador: reducirNumero(dia + mes + ano.toString().split('').reduce((a, b) => a + parseInt(b), 0) + 5 + resultadoAPI.numeros_principales.esencia.numero + dia + mes + ano.toString().split('').reduce((a, b) => a + parseInt(b), 0)),
-        lemaVida: reducirNumero(dia + mes + ano.toString().split('').reduce((a, b) => a + parseInt(b), 0) + resultadoAPI.numeros_principales.esencia.numero + 7),
+        // Derivados deterministamente de valores Atlantis
+        estructuraEnergetica: shekinah.otd.pt,
+        imagenAlma: reduceToArcana(esenciaNum),
+        razonesKarmicas: shekinah.otd.td,
 
-        // Otros datos
-        numeroCorazon: resultadoAPI.numeros_principales.esencia.numero + dia + mes + ano.toString().split('').reduce((a, b) => a + parseInt(b), 0),
-        edadTransformacion: reducirNumero(dia + mes),
+        // Vibraciones (derivadas de la identidad Atlantis)
+        vibracionCuerpo: reduceToArcana(shekinah.identity.scf + 5),
+        vibracionAlma: reduceToArcana(shekinah.identity.gematriaTotal + dia),
+        vibracionEspiritu: reduceToArcana(shekinah.identity.scf),
+        efectoSanador: reduceToArcana(shekinah.identity.pin + 5),
+        lemaVida: reduceToArcana(shekinah.identity.pin + 7),
+
+        // Identidad Atlantis
+        numeroCorazon: shekinah.identity.pin,
+        edadTransformacion: shekinah.identity.et,
         diasFuerza: [dia, dia + 9, dia + 18].filter(d => d <= 31),
 
-        // Cuentas pendientes (usar datos de la API si están disponibles)
-        cuentasPendientes: resultadoAPI.cuentas_pendientes || calcularCuentasPendientes(nombre, dia, mes, ano),
+        cuentasPendientes,
 
-        // Secuencia principal
+        // Secuencia principal — valores Atlantis
         secuenciaPrincipal: [
-          dia + mes,
-          reducirNumero(dia + mes),
-          dia + mes + ano.toString().split('').reduce((a, b) => a + parseInt(b), 0),
-          resultadoAPI.numeros_principales.esencia.numero,
-          reducirNumero(dia),
-          reducirNumero(mes),
-          reducirNumero(dia + mes),
-          dia + mes + ano.toString().split('').reduce((a, b) => a + parseInt(b), 0),
-          reducirNumero(dia),
-          resultadoAPI.numeros_principales.destino.numero,
-          resultadoAPI.numeros_principales.esencia.numero
+          shekinah.identity.gematriaTotal,
+          shekinah.identity.scf,
+          shekinah.identity.pin,
+          shekinah.otd.to,
+          shekinah.otd.pt,
+          shekinah.otd.td,
+          shekinah.identity.et,
+          shekinah.yearlyCycle.vibration,
+          reduceToArcana(shekinah.identity.gematriaTotal),
+          reduceToArcana(shekinah.identity.pin),
+          reduceToArcana(shekinah.identity.scf),
         ],
 
-        turbulenciasEspirituales: reducirNumero(dia + mes) > 15 ? reducirNumero(dia + mes) - 13 : 0
+        turbulenciasEspirituales: shekinah.identity.et > 15 ? shekinah.identity.et - 13 : 0,
       };
 
       setResult(result);

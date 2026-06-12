@@ -1,1 +1,30 @@
-import type { TemurahInput } from './types'; export function calcularAnalisisTemurah(i:TemurahInput){ const name=i.nombreCompleto||''; let seed=0; for(let j=0;j<name.length;j++) seed += name.charCodeAt(j); const casas:{}={} as any; for(let k=1;k<=9;k++){ (casas as any)[k]={numero:k,conteo:(seed+k)%4,letras:[]} } return {identidad:{nombreCompleto:name,fechaNacimiento:`${i.fechaNacimiento.anio}-${i.fechaNacimiento.mes}-${i.fechaNacimiento.dia}`},numeros:{esencia:{original:seed,reducido:(seed%9)+1,esMaestro:false},expresion:{original:seed+1,reducido:((seed+1)%9)+1,esMaestro:false},herencia:{original:seed+2,reducido:((seed+2)%9)+1,esMaestro:false},caminoVida:{original:seed+3,reducido:((seed+3)%9)+1,esMaestro:false,edadTransformacion:0}},casasInclusion:casas,ausencias:[],dominantes:[],metadatos:{metodo:'temurah',sistema:'temurah',alfabeto:'hebrew',version:'1.0.0',timestamp:new Date().toISOString()}} }
+import type { TemurahInput } from './types';
+import {
+	normalizarHebreo,
+	aplicarCifrado,
+	ATBACH,
+	analizarConValores,
+	valorPorTabla,
+	MISPAR_GADOL,
+	crearMetadatos,
+} from '../../cabala/gematria-core';
+import { interpretarAnalisis } from '../../cabala/interpretacion';
+
+const DESCRIPCION = 'Temurah (Atbach): sustitucion por complemento a 10/100/1000; luego gematria con finales (Gadol).';
+
+export function calcularAnalisisTemurah(input: TemurahInput) {
+	const hebreo = normalizarHebreo(input.nombreCompleto || '');
+	const transformado = aplicarCifrado(hebreo, ATBACH);
+	const analisis = analizarConValores({
+		entrada: { nombreCompleto: input.nombreCompleto || '', fechaNacimiento: input.fechaNacimiento },
+		textoHebreoOriginal: hebreo,
+		textoEvaluado: transformado,
+		textoTransformado: transformado,
+		valorDeLetra: valorPorTabla(MISPAR_GADOL),
+	});
+	return {
+		...analisis,
+		metadatos: crearMetadatos('temurah', 'temurah', DESCRIPCION),
+		interpretacion: interpretarAnalisis(analisis, 'temurah', DESCRIPCION),
+	};
+}

@@ -1,0 +1,1 @@
+"""Canales de notificación salientes (email, WhatsApp, etc.)."""

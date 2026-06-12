@@ -9,7 +9,8 @@ import { clearAuthState } from '@/lib/auth-state';
 import { completeAuthFromToken } from '@/lib/finishAuthSession';
 import { TurnstileField, type TurnstileFieldHandle } from '@/components/TurnstileField';
 import { turnstileApiErrorMessage } from '@/lib/turnstile-messages';
-import { Eye, EyeOff, Mail, Lock, AlertCircle, User, Sparkles, Heart } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, AlertCircle, User, Sparkles, Heart, ArrowLeft } from 'lucide-react';
+import { BrandLogo } from '@/components/marketing/brand';
 
 type ErrorType =
   | 'user_not_found'
@@ -175,17 +176,17 @@ export default function LoginPage() {
   const getErrorStyles = (type: ErrorType) => {
     switch (type) {
       case 'user_not_found':
-        return 'bg-amber-50 border-amber-200 text-amber-800';
+        return 'bg-[rgba(251,191,36,0.10)] border-[rgba(251,191,36,0.40)] text-[#F3C14B]';
       case 'invalid_password':
-        return 'bg-orange-50 border-orange-200 text-orange-800';
+        return 'bg-[rgba(251,146,60,0.10)] border-[rgba(251,146,60,0.40)] text-[#FB923C]';
       case 'account_inactive':
-        return 'bg-red-50 border-red-200 text-red-800';
+        return 'bg-[rgba(248,113,113,0.10)] border-[rgba(248,113,113,0.40)] text-[#F87171]';
       case 'network':
-        return 'bg-gray-50 border-gray-300 text-gray-700';
+        return 'bg-white/[0.04] border-[var(--ha-line-soft)] text-[var(--ha-ink-2)]';
       case 'turnstile':
-        return 'bg-sky-50 border-sky-200 text-sky-800';
+        return 'bg-[rgba(56,130,246,0.08)] border-[rgba(96,165,250,0.35)] text-[#93C5FD]';
       default:
-        return 'bg-red-50 border-red-200 text-red-700';
+        return 'bg-[rgba(248,113,113,0.10)] border-[rgba(248,113,113,0.40)] text-[#F87171]';
     }
   };
 
@@ -200,74 +201,105 @@ export default function LoginPage() {
     }
   };
 
+  const inputClassName =
+    'ha-input w-full rounded-xl border px-4 py-3 text-[15px] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition-[border-color,box-shadow,background-color] focus:outline-none focus:ring-4 focus:ring-[var(--ha-ring)]';
+
   return (
-    <div className="min-h-screen flex">
-      {/* Left Panel - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 p-12 flex-col justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-white mb-2">
-            Holistica Aplicada
+    <div className="grid min-h-screen lg:grid-cols-2">
+      <div
+        className="relative hidden flex-col justify-between gap-10 overflow-hidden p-12 lg:flex"
+        style={{ background: 'var(--ha-panel-bg)' }}
+      >
+        <div
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_20%_0%,rgba(255,255,255,0.06),transparent_70%)]"
+          aria-hidden
+        />
+        <div className="relative flex flex-col gap-9">
+          <div className="flex items-center justify-between gap-4">
+            <BrandLogo variant="on-dark" />
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-[13px] font-semibold text-white/85 transition-colors hover:bg-white/15 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            >
+              <ArrowLeft className="h-4 w-4" aria-hidden />
+              Volver al landing
+            </Link>
+          </div>
+          <h1 className="max-w-[420px] font-[family-name:var(--font-cormorant)] text-[40px] font-semibold leading-[1.12] text-balance text-white">
+            El espacio de trabajo de tu práctica
           </h1>
-          <p className="text-violet-200 text-lg">
-            Bienestar integral y desarrollo humano
-          </p>
         </div>
-        
-        <div className="space-y-8">
+
+        <div className="relative flex max-w-[420px] flex-col gap-7">
           <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
-              <Sparkles className="w-6 h-6 text-white" />
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/10">
+              <Sparkles className="h-5 w-5 text-white" aria-hidden />
             </div>
             <div>
-              <h3 className="text-white font-semibold mb-1">Analisis Holistico Personal</h3>
-              <p className="text-violet-200 text-sm">
-                Explora patrones simbolicos y energias de tu nombre y fecha de nacimiento
+              <h2 className="mb-1 text-[15px] font-bold text-white">Análisis simbólico profundo</h2>
+              <p className="text-[13.5px] leading-[1.55] text-white/65">
+                Informes completos con Árbol de la Vida, números maestros y patrones, generados en minutos.
               </p>
             </div>
           </div>
-          
           <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
-              <Heart className="w-6 h-6 text-white" />
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/10">
+              <Heart className="h-5 w-5 text-white" aria-hidden />
             </div>
             <div>
-              <h3 className="text-white font-semibold mb-1">Acompanamiento Holistico</h3>
-              <p className="text-violet-200 text-sm">
-                Conecta con acompanantes especializados en bienestar integral y desarrollo humano
+              <h2 className="mb-1 text-[15px] font-bold text-white">Acompañamiento con estructura</h2>
+              <p className="text-[13.5px] leading-[1.55] text-white/65">
+                Fichas, historial de sesiones y seguimiento de la evolución de cada persona, en un solo lugar.
               </p>
             </div>
           </div>
+          <figure className="flex flex-col gap-2.5 rounded-2xl border border-white/15 bg-white/[0.07] p-5">
+            <blockquote className="font-[family-name:var(--font-cormorant)] text-[19px] italic leading-[1.4] text-white">
+              &ldquo;Preparo cada sesión en minutos, no en horas.&rdquo;
+            </blockquote>
+            <figcaption className="text-[12.5px] text-white/60">
+              Laura G. · Terapeuta gestalt — testimonio de ejemplo
+            </figcaption>
+          </figure>
         </div>
-        
-        <p className="text-violet-300 text-sm">
-          © 2024 Tony Blanco. Todos los derechos reservados.
+
+        <p className="relative text-[12.5px] text-white/45">
+          © {new Date().getFullYear()} Tony Blanco. Todos los derechos reservados.
         </p>
       </div>
-      
-      {/* Right Panel - Login Form */}
-      <div className="flex-1 flex items-center justify-center p-8 bg-gray-50">
-        <div className="w-full max-w-md">
-          {/* Mobile Logo */}
-          <div className="lg:hidden text-center mb-8">
-            <h1 className="text-2xl font-bold text-gray-900">Holistica Aplicada</h1>
-            <p className="text-gray-600">Bienestar integral y desarrollo humano</p>
+
+      <div className="flex items-center justify-center bg-[var(--ha-bg)] p-8 sm:p-10 lg:p-12">
+        <div className="w-full max-w-[440px]">
+          <div className="mb-8 flex flex-col gap-3 lg:hidden">
+            <BrandLogo />
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 self-start text-sm font-medium text-[var(--ha-acc)] hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ha-acc)]"
+            >
+              <ArrowLeft className="h-4 w-4" aria-hidden />
+              Volver al landing
+            </Link>
           </div>
-          
-          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-gray-900">Bienvenido</h2>
-              <p className="text-gray-500 mt-1">Inicia sesión en tu cuenta</p>
+
+          <div className="rounded-[20px] border border-[var(--ha-line-soft)] bg-[var(--ha-surface)] p-9 shadow-[var(--ha-shadow)]">
+            <div className="mb-5 text-center">
+              <h2 className="font-[family-name:var(--font-cormorant)] text-[30px] font-semibold text-[var(--ha-ink)]">
+                Bienvenido
+              </h2>
+              <p className="mt-1 text-sm text-[var(--ha-ink-3)]">Inicia sesión en tu cuenta</p>
             </div>
-            
+
             <form onSubmit={handleSubmit} className="space-y-5">
-              {/* Email/Username Field */}
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="email"
+                  className="mb-2 block text-xs font-semibold uppercase tracking-[0.05em] text-[var(--ha-ink-2)]"
+                >
                   Email o usuario
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Mail className="h-5 w-5 text-gray-400" />
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                    <Mail className="h-5 w-5 text-[var(--ha-ink-3)]" aria-hidden />
                   </div>
                   <input
                     id="email"
@@ -276,19 +308,21 @@ export default function LoginPage() {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="tu@email.com"
                     autoComplete="username"
-                    className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent focus:bg-white transition-all"
+                    className={`${inputClassName} pl-10`}
                   />
                 </div>
               </div>
-              
-              {/* Password Field */}
+
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="password"
+                  className="mb-2 block text-xs font-semibold uppercase tracking-[0.05em] text-[var(--ha-ink-2)]"
+                >
                   Contraseña
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Lock className="h-5 w-5 text-gray-400" />
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                    <Lock className="h-5 w-5 text-[var(--ha-ink-3)]" aria-hidden />
                   </div>
                   <input
                     id="password"
@@ -297,81 +331,80 @@ export default function LoginPage() {
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
                     autoComplete="current-password"
-                    className="w-full pl-10 pr-12 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent focus:bg-white transition-all"
+                    className={`${inputClassName} pl-10 pr-12`}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-[var(--ha-ink-3)] transition-colors hover:text-[var(--ha-ink)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ha-acc)]"
+                    aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                   >
                     {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
                 </div>
               </div>
-              
-              {/* Error Message */}
+
               {error && (
-                <div className={`flex items-start gap-3 px-4 py-3 rounded-xl border ${getErrorStyles(error.type)}`}>
+                <div
+                  role="alert"
+                  className={`flex items-start gap-3 rounded-xl border px-4 py-3 ${getErrorStyles(error.type)}`}
+                >
                   {getErrorIcon(error.type)}
                   <div className="flex-1">
-                    <p className="text-sm font-medium">{error.message}</p>
+                    <p className="text-sm font-semibold">{error.message}</p>
                     {error.type === 'user_not_found' && (
-                      <p className="text-xs mt-1 opacity-80">
+                      <p className="mt-1 text-xs opacity-80">
                         Verifica que el email o usuario sea correcto
                       </p>
                     )}
                   </div>
                 </div>
               )}
-              
-              {/* Password Reset Form */}
+
               {showResetForm && !resetSent && (
-                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 space-y-3">
-                  <p className="text-sm text-blue-800 font-medium">
-                    ¿Olvidaste tu contraseña?
-                  </p>
+                <div className="space-y-3 rounded-xl border border-[rgba(96,165,250,0.35)] bg-[rgba(56,130,246,0.08)] p-4">
+                  <p className="text-sm font-semibold text-[var(--ha-ink)]">¿Olvidaste tu contraseña?</p>
                   <div className="flex gap-2">
                     <input
                       type="email"
                       value={resetEmail}
                       onChange={(e) => setResetEmail(e.target.value)}
                       placeholder="Email para recuperación"
-                      className="flex-1 px-3 py-2 bg-white border border-blue-200 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                      className="ha-input min-w-0 flex-1 rounded-lg border px-3 py-2 text-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] focus:border-[#60A5FA] focus:outline-none focus:ring-2 focus:ring-[rgba(96,165,250,0.35)]"
                     />
                     <button
                       type="button"
                       onClick={handleResetPassword}
                       disabled={resetLoading || !resetEmail.trim()}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+                      className="rounded-lg bg-[#2563EB] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#1D4ED8] disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {resetLoading ? '...' : 'Enviar'}
                     </button>
                   </div>
                 </div>
               )}
-              
+
               {resetSent && (
-                <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-xl text-sm">
+                <div className="rounded-xl border border-[rgba(74,222,128,0.35)] bg-[rgba(74,222,128,0.08)] px-4 py-3 text-sm text-[#4ADE80]">
                   ✓ Si el email existe, recibirás un enlace para restablecer tu contraseña.
                 </div>
               )}
 
               <TurnstileField
                 ref={turnstileRef}
-                theme="light"
+                theme="dark"
                 onReadyChange={setTurnstileReady}
                 onError={(msg) => setError({ type: 'turnstile', message: msg })}
               />
 
-              {/* Submit Button */}
               <button
                 type="submit"
                 disabled={loading || (Boolean(turnstileRef.current?.isEnforced()) && !turnstileReady)}
-                className="w-full py-3 px-4 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-xl font-semibold shadow-lg shadow-violet-500/30 hover:shadow-xl hover:shadow-violet-500/40 hover:from-violet-700 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
+                className="w-full rounded-xl border-0 bg-[image:var(--ha-grad)] px-4 py-3.5 text-[15px] font-bold text-[var(--ha-acc-ink)] shadow-[0_8px_24px_var(--ha-btn-glow)] transition-[transform,opacity] hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:hover:translate-y-0"
               >
                 {loading ? (
                   <span className="flex items-center justify-center gap-2">
-                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                    <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24" aria-hidden>
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                     </svg>
@@ -386,11 +419,11 @@ export default function LoginPage() {
             <AuthGoogleSection
               googleKey={googleSignInKey}
               disabled={loading}
+              tone="marketing"
               onCredential={handleGoogleCredential}
               onError={(msg) => setError({ type: 'other', message: msg })}
             />
-            
-            {/* Forgot Password Link */}
+
             <div className="mt-4 text-center">
               <button
                 type="button"
@@ -398,45 +431,44 @@ export default function LoginPage() {
                   setShowResetForm(!showResetForm);
                   setResetSent(false);
                 }}
-                className="text-sm text-violet-600 hover:text-violet-800 transition-colors"
+                className="text-[13.5px] font-medium text-[var(--ha-acc)] hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ha-acc)]"
               >
                 ¿Olvidaste tu contraseña?
               </button>
             </div>
-            
-            {/* Divider */}
-            <div className="relative my-8">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white text-gray-500">¿No tienes cuenta?</span>
-              </div>
+
+            <div className="my-8 flex items-center gap-3.5">
+              <span className="h-px flex-1 bg-[var(--ha-line-soft)]" aria-hidden />
+              <span className="text-[12.5px] text-[var(--ha-ink-3)]">¿No tienes cuenta?</span>
+              <span className="h-px flex-1 bg-[var(--ha-line-soft)]" aria-hidden />
             </div>
-            
-            {/* Registration Links */}
-            <div className="space-y-3">
+
+            <div className="space-y-2.5">
               <Link
                 href="/register/therapist"
-                className="flex items-center justify-center w-full py-3 px-4 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-colors"
+                className="flex w-full items-center justify-center rounded-xl border border-[var(--ha-line)] bg-[var(--ha-bg-2)] px-4 py-3 text-sm font-semibold text-[var(--ha-ink)] transition-colors hover:border-[var(--ha-acc)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ha-acc)]"
               >
                 Crear cuenta profesional
               </Link>
               <Link
                 href="/register/personal"
-                className="flex items-center justify-center w-full py-3 px-4 bg-white border border-gray-200 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-colors"
+                className="flex w-full items-center justify-center rounded-xl border border-[var(--ha-line-soft)] px-4 py-3 text-sm font-semibold text-[var(--ha-ink-2)] transition-colors hover:border-[var(--ha-acc)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ha-acc)]"
               >
                 Crear cuenta personal
               </Link>
             </div>
           </div>
-          
-          {/* Footer */}
-          <p className="text-center text-sm text-gray-500 mt-6">
+
+          <p className="mt-6 text-center text-[12.5px] text-[var(--ha-ink-3)]">
             Al iniciar sesión, aceptas nuestros{' '}
-            <Link href="/terms" className="text-violet-600 hover:underline">términos</Link>
-            {' '}y{' '}
-            <Link href="/privacy" className="text-violet-600 hover:underline">privacidad</Link>
+            <Link href="/terms" className="text-[var(--ha-acc)] hover:underline">
+              términos
+            </Link>{' '}
+            y{' '}
+            <Link href="/privacy" className="text-[var(--ha-acc)] hover:underline">
+              privacidad
+            </Link>
+            .
           </p>
         </div>
       </div>

@@ -26,6 +26,9 @@ import {
   type TreeStructuralState,
 } from '@holistica/symbolic/tree';
 import FormativeReadingPanel from './FormativeReadingPanel';
+import GematriaInterpretacionPanel, {
+  extractGematriaInterpretacion,
+} from './GematriaInterpretacionPanel';
 import { GuidedBlock } from '@/components/ui/guided-block';
 
 // ============================================================================
@@ -200,7 +203,10 @@ import { ejecutarMetodoTemurah, adaptTemurahToTree } from '@holistica/symbolic/m
 import { ejecutarMetodoNotarikon, adaptNotarikonToTree } from '@holistica/symbolic/methods/notarikon';
 
 // Symbolic Interpretation AI
-import { saveCabalaAplicadaMethodRecord } from '@/lib/cabala-aplicada-api';
+import {
+  dispatchCabalaAplicadaRecordSaved,
+  saveCabalaAplicadaMethodRecord,
+} from '@/lib/cabala-aplicada-api';
 
 export type CabalaAplicadaWorkspaceExportState = {
   patientId: number | null;
@@ -487,7 +493,7 @@ const SECTION_META: Record<
   },
   gematria: {
     title: 'Datos numéricos del método',
-    subtitle: 'Gráficos y números del cálculo (sin lectura interpretativa).',
+    subtitle: 'Gráficos, números e interpretación simbólica educativa del cálculo.',
   },
   resources: {
     title: 'Recursos',
@@ -586,6 +592,7 @@ export default function CabalAppliedVisualCore({
   const [clinicalContext, setClinicalContext] = useState<ClinicalContextSummary | null>(null);
   const [executeLoading, setExecuteLoading] = useState(false);
   const [executeError, setExecuteError] = useState<string | null>(null);
+  const [saveHistoryWarning, setSaveHistoryWarning] = useState<string | null>(null);
 
   const METHODS = useMemo(() => [
     { id: 'pitagoras', name: 'Pitágoras', run: (input: any) => ejecutarMetodoPitagorico(input as any) },
@@ -653,6 +660,7 @@ export default function CabalAppliedVisualCore({
 
   async function runSelectedMethodForPatient() {
     setExecuteError(null);
+    setSaveHistoryWarning(null);
 
     let profile = patientProfile;
     const needsProfileRefresh =
@@ -730,8 +738,13 @@ export default function CabalAppliedVisualCore({
           if (res.id) {
             onSnapshotSaved?.(res.id);
           }
+          dispatchCabalaAplicadaRecordSaved(activePatientId);
         } catch (e) {
-          console.warn('No se pudo guardar Cabala Aplicada en historial:', e);
+          const msg =
+            e instanceof Error ? e.message : 'No se pudo guardar en el historial.';
+          setSaveHistoryWarning(
+            `El método se ejecutó correctamente, pero no se pudo guardar en el historial: ${msg}`,
+          );
         }
       }
     } catch (err) {
@@ -892,6 +905,11 @@ export default function CabalAppliedVisualCore({
     [treeAnalysis, treeStructuralState],
   );
 
+  const gematriaInterpretacion = useMemo(
+    () => extractGematriaInterpretacion(methodSymbolicState),
+    [methodSymbolicState],
+  );
+
   const formativeBrief: FormativeBrief | null = useMemo(() => {
     if (!treeAnalysis || !treeStructuralState) return null;
     const ctx = methodSymbolicState
@@ -1031,9 +1049,29 @@ export default function CabalAppliedVisualCore({
             />
           )}
 
+          {saveHistoryWarning && (
+            <div
+              className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900"
+              role="status"
+              aria-live="polite"
+            >
+              <p>{saveHistoryWarning}</p>
+              <button
+                type="button"
+                onClick={() => setSaveHistoryWarning(null)}
+                className="mt-2 text-xs font-medium text-amber-800 underline hover:text-amber-950"
+              >
+                Entendido
+              </button>
+            </div>
+          )}
+
           {activeSection === 'synthesis' && (
-            <div className="mt-4">
+            <div className="mt-4 space-y-6">
               {methodRunner}
+              {gematriaInterpretacion && (
+                <GematriaInterpretacionPanel interpretacion={gematriaInterpretacion} />
+              )}
               <FormativeReadingPanel brief={formativeBrief} loading={executeLoading} />
             </div>
           )}
@@ -1043,9 +1081,12 @@ export default function CabalAppliedVisualCore({
               {methodRunner}
               {pitagorasState ? (
                 <PitagorasReport pitagorasState={pitagorasState} />
+              ) : gematriaInterpretacion ? (
+                <GematriaInterpretacionPanel interpretacion={gematriaInterpretacion} />
               ) : (
                 <div className="rounded-lg border border-dashed border-gray-200 bg-gray-50 p-4 text-sm text-gray-600">
-                  Ejecuta <strong>Pitágoras</strong> para ver gráficos numéricos. Otros métodos muestran sus datos en el Árbol y la Síntesis.
+                  Ejecuta un método de gematría para ver la interpretación simbólica, o{' '}
+                  <strong>Pitágoras</strong> para gráficos numéricos.
                 </div>
               )}
             </div>
@@ -1203,6 +1244,21 @@ export default function CabalAppliedVisualCore({
           </div>
           )}
         </>
+      )}
+
+      {activeSection !== 'tree' && treeStructuralState && (
+        <div
+          className="pointer-events-none fixed left-[-99999px] top-0 z-[-1] h-72 w-[640px] overflow-hidden"
+          aria-hidden="true"
+        >
+          <div id="cabala-aplicada-export-tree" className="relative h-full w-full">
+            <TreeWithFlows
+              treeState={treeStructuralState}
+              size="responsive"
+              className="absolute inset-0 h-full w-full"
+            />
+          </div>
+        </div>
       )}
     </section>
   );

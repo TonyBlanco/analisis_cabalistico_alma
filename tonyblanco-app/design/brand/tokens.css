@@ -1,0 +1,195 @@
+/* ============================================================
+   Holistica Aplicada — Design Tokens
+   Tres variantes: oro (principal), indigo, clinico
+   ============================================================ */
+
+/* ---- Variante A: Negro + Oro (principal/legacy modernizado) ---- */
+:root,
+[data-theme="oro"] {
+  /* Superficies */
+  --ha-bg:            #07070C;
+  --ha-bg-2:          #0C0C16;
+  --ha-surface:       rgba(255,255,255,0.035);
+  --ha-nav-bg:        rgba(7,7,12,0.78);
+
+  /* Bordes */
+  --ha-line:          rgba(212,175,55,0.18);
+  --ha-line-soft:     rgba(255,255,255,0.10);
+
+  /* Texto */
+  --ha-ink:           #F4F1E8;
+  --ha-ink-2:         #A9A698;
+  --ha-ink-3:         #71705F;
+
+  /* Acento / brand */
+  --ha-acc:           #D4AF37;
+  --ha-acc-dark:      #B8911A;   /* oro sobre fondo claro */
+  --ha-grad:          linear-gradient(120deg, #E8CB62, #B8941F);
+  --ha-acc-ink:       #171204;   /* texto sobre boton dorado */
+  --ha-glow:          rgba(212,175,55,0.13);
+  --ha-btn-glow:      rgba(212,175,55,0.22);
+  --ha-ring:          rgba(212,175,55,0.20);
+
+  /* Tipografia display */
+  --ha-d-font:        'Cormorant Garamond', Georgia, serif;
+  --ha-d-weight:      600;
+  --ha-d-ls:          0em;
+
+  /* Sombras */
+  --ha-shadow:        0 18px 48px rgba(0,0,0,0.35);
+
+  /* Panel login (split izquierdo) */
+  --ha-panel-bg:      linear-gradient(165deg, #0A0A12 0%, #15101F 55%, #1C1428 100%);
+
+  /* Campos de formulario */
+  --ha-input-bg:        #191926;
+  --ha-input-bg-focus:  #1A1A28;
+  --ha-input-border:    rgba(255,255,255,0.30);
+}
+
+/* ---- Variante B: Indigo + Oro ---- */
+[data-theme="indigo"] {
+  --ha-bg:            #0A0E22;
+  --ha-bg-2:          #0D1230;
+  --ha-surface:       rgba(255,255,255,0.045);
+  --ha-nav-bg:        rgba(10,14,34,0.78);
+
+  --ha-line:          rgba(212,175,55,0.22);
+  --ha-line-soft:     rgba(255,255,255,0.10);
+
+  --ha-ink:           #EEF0FA;
+  --ha-ink-2:         #9DA4C6;
+  --ha-ink-3:         #646B8E;
+
+  --ha-acc:           #D4AF37;
+  --ha-acc-dark:      #B8911A;
+  --ha-grad:          linear-gradient(120deg, #E8CB62, #B8941F);
+  --ha-acc-ink:       #16102A;
+  --ha-glow:          rgba(99,102,241,0.20);
+  --ha-btn-glow:      rgba(212,175,55,0.20);
+  --ha-ring:          rgba(212,175,55,0.22);
+
+  --ha-d-font:        'Cormorant Garamond', Georgia, serif;
+  --ha-d-weight:      600;
+  --ha-d-ls:          0em;
+
+  --ha-shadow:        0 18px 48px rgba(4,6,24,0.45);
+  --ha-panel-bg:      linear-gradient(165deg, #0B1026 0%, #1E1B4B 100%);
+
+  --ha-input-bg:        #12182E;
+  --ha-input-bg-focus:  #171E38;
+  --ha-input-border:    rgba(255,255,255,0.30);
+}
+
+/* ---- Variante C: Clinico (Studio33 violeta→cian) ---- */
+[data-theme="clinico"] {
+  --ha-bg:            #F7F7FB;
+  --ha-bg-2:          #FFFFFF;
+  --ha-surface:       #FFFFFF;
+  --ha-nav-bg:        rgba(247,247,251,0.85);
+
+  --ha-line:          #E0DBF5;
+  --ha-line-soft:     #E5E7EB;
+
+  --ha-ink:           #0F172A;
+  --ha-ink-2:         #475569;
+  --ha-ink-3:         #94A3B8;
+
+  --ha-acc:           #7C5CFF;
+  --ha-acc-dark:      #6B4AF0;
+  --ha-grad:          linear-gradient(120deg, #6B4AF0, #7C5CFF);
+  --ha-acc-ink:       #FFFFFF;
+  --ha-glow:          rgba(124,92,255,0.10);
+  --ha-btn-glow:      rgba(124,92,255,0.30);
+  --ha-ring:          rgba(124,92,255,0.16);
+
+  --ha-d-font:        Inter, system-ui, sans-serif;
+  --ha-d-weight:      800;
+  --ha-d-ls:          -0.025em;
+
+  --ha-shadow:        0 1px 3px rgba(15,23,42,0.06), 0 10px 30px rgba(15,23,42,0.07);
+  --ha-panel-bg:      linear-gradient(165deg, #4C36C4 0%, #7C5CFF 65%, #19B8D8 145%);
+
+  --ha-input-bg:        #FFFFFF;
+  --ha-input-bg-focus:  #FFFFFF;
+  --ha-input-border:    #CBD5E1;
+}
+
+/* ============================================================
+   Escala tipografica funcional
+   ============================================================ */
+:root {
+  --ha-text-xs:   12px;
+  --ha-text-sm:   13.5px;
+  --ha-text-base: 15px;
+  --ha-text-lg:   17px;
+  --ha-text-xl:   19px;
+  --ha-text-2xl:  24px;
+  --ha-text-3xl:  30px;
+  --ha-text-4xl:  42px;
+  --ha-text-5xl:  60px;
+  --ha-text-6xl:  72px;
+}
+
+/* ============================================================
+   Radios
+   ============================================================ */
+:root {
+  --ha-r-xs:   6px;
+  --ha-r-sm:   10px;
+  --ha-r-md:   12px;
+  --ha-r-lg:   16px;
+  --ha-r-xl:   20px;
+  --ha-r-pill: 999px;
+}
+
+/* ============================================================
+   Logo — colores por contexto
+   ------------------------------------------------------------
+   Sobre oscuro (oro/indigo) -> #D4AF37  (ha-horizontal-dark.svg)
+   Sobre claro / clinico      -> #B8911A  (ha-horizontal-light.svg)
+   Monocromo oscuro           -> #FFFFFF
+   Monocromo claro            -> #1A1205
+   Icono inline usa currentColor para control total via CSS.
+   ============================================================ */
+
+/* ============================================================
+   Campos de formulario (marketing / login)
+   ============================================================ */
+[data-theme="oro"],
+[data-theme="indigo"] {
+  color-scheme: dark;
+}
+
+[data-theme] .ha-input {
+  color: var(--ha-ink);
+  background-color: var(--ha-input-bg);
+  border-color: var(--ha-input-border);
+  caret-color: var(--ha-acc);
+}
+
+[data-theme] .ha-input::placeholder {
+  color: var(--ha-ink-3);
+  opacity: 1;
+}
+
+[data-theme] .ha-input:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.32);
+}
+
+[data-theme] .ha-input:focus {
+  color: var(--ha-ink);
+  background-color: var(--ha-input-bg-focus);
+  border-color: var(--ha-acc);
+}
+
+[data-theme] .ha-input:-webkit-autofill,
+[data-theme] .ha-input:-webkit-autofill:hover,
+[data-theme] .ha-input:-webkit-autofill:focus,
+[data-theme] .ha-input:-webkit-autofill:active {
+  -webkit-text-fill-color: var(--ha-ink) !important;
+  -webkit-box-shadow: 0 0 0 1000px var(--ha-input-bg) inset !important;
+  box-shadow: 0 0 0 1000px var(--ha-input-bg) inset !important;
+  caret-color: var(--ha-acc);
+  transition: background-color 99999s ease-out, color 99999s ease-out;
+}

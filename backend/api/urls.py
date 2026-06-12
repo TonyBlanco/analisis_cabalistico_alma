@@ -2,6 +2,7 @@ from django.urls import path, include
 from rest_framework.authtoken.views import obtain_auth_token
 from .views import (
     CreatePatientWithAccountView,
+    ResendPatientCredentialsView,
     CalculoCabalisticoView,
     welcome_api,
     FichaListCreateView,
@@ -156,6 +157,13 @@ from .astrology_report_views import (
     PatientAstrologyReportsView,
     PatientAstrologyReportDetailView,
 )
+from .patient_welcome_views import PatientWelcomePreviewView, PatientWelcomeRedeemView
+from .telegram_views import (
+    TelegramLinkView,
+    TelegramOAuthConfigView,
+    TelegramOAuthView,
+    telegram_webhook,
+)
 from .therapist_patient_invitation_views import (
     TherapistPatientLookupView,
     TherapistPatientInviteView,
@@ -193,6 +201,12 @@ urlpatterns = [
     path('google/config/', GoogleOAuthConfigView.as_view(), name='google_oauth_config'),
     path('login/', EmailOrUsernameAuthToken.as_view(), name='api_token_auth'),
     path('login/google/', GoogleOAuthView.as_view(), name='google_oauth'),
+    path('login/telegram/', TelegramOAuthView.as_view(), name='telegram_oauth'),
+    path('telegram/config/', TelegramOAuthConfigView.as_view(), name='telegram_oauth_config'),
+    path('auth/patient-welcome/', PatientWelcomeRedeemView.as_view(), name='patient_welcome_redeem'),
+    path('auth/patient-welcome/preview/', PatientWelcomePreviewView.as_view(), name='patient_welcome_preview'),
+    path('telegram/webhook/', telegram_webhook, name='telegram_webhook'),
+    path('telegram/link/', TelegramLinkView.as_view(), name='telegram_link'),
     path('register/therapist/', RegisterTherapistView.as_view(), name='register_therapist'),
     path('register/personal/', RegisterPersonalView.as_view(), name='register_personal'),
     path('me/', CurrentUserView.as_view(), name='current_user'),
@@ -261,6 +275,11 @@ urlpatterns = [
     path('therapist/patients/<int:pk>/profile/validation/', PatientProfileValidationView.as_view(), name='patient_profile_validation'),
     path('therapist/patients/<int:pk>/status/', PatientStatusUpdateView.as_view(), name='patient_status_update'),
     path('therapist/patients/<int:pk>/archive/', PatientArchiveView.as_view(), name='patient_archive'),
+    path(
+        'therapist/patients/<int:pk>/resend-credentials/',
+        ResendPatientCredentialsView.as_view(),
+        name='patient_resend_credentials',
+    ),
     path('therapist/patients/<int:id>/symbolic-overview/', PatientSymbolicOverviewView.as_view(), name='patient_symbolic_overview'),
     path('therapist/patients/<int:id>/holistic-exports/', PatientHolisticExportsView.as_view(), name='patient_holistic_exports'),
     path('therapist/patients/<int:id>/tarot-analysis/', TarotAnalysisView.as_view(), name='tarot_analysis'),

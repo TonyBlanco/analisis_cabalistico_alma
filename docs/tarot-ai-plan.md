@@ -3,6 +3,8 @@
 **Objetivo**
 - Integrar interpretaciones holísticas generadas por IA (Groq → Ollama → Gemini) para `tarot` sin tocar módulos clínicos; agregar contrato API, esquema de datos, wireframes y checklist de despliegue.
 
+> **Nota de consentimiento (actualizado 2026-06-12).** El consentimiento es **a nivel de cuenta y se otorga una sola vez al registrar al consultante**; cubre TODAS las lecturas simbólicas educativas (incl. la Tirada del Árbol determinista). **Ya NO se pide consentimiento por lectura.** Las menciones de "banner/opt-in por lectura" en este documento son **históricas (LEGACY)**; el modelo vigente está en `docs/SWM_V3_INTERPRETACION_SIMBOLICA_GOBERNADA.md` (sección Consentimiento) y `docs/CHANGELOG_CONSENT_LEGACY.md`. La federación cross-workspace mantiene su propio consentimiento aparte.
+
 **Providers AI**:
 - **Groq AI** (prioritario): `llama-3.3-70b-versatile` - rate limits altos (30 req/min)
 - **Ollama** (local/Vercel): `llama3.2` - sin límites, flexible
@@ -66,7 +68,7 @@ Notas API:
   - Panel izquierdo: selector de `Deck` y `Spread`.
   - Panel central: cartas (interactivas) con botón `Interpretación Holística IA`.
   - Panel derecho: interpretación AI (resumen + botón "Ver detalle") + badge indicando provider usado (Groq/Ollama/Gemini).
-  - Banner de consentimiento holístico: checkbox `Acepto interpretaciones simbólicas educativas generadas por IA` con enlace a políticas + lista de providers disponibles.
+  - Banner de consentimiento holístico: checkbox `Acepto interpretaciones simbólicas educativas generadas por IA` con enlace a políticas + lista de providers disponibles. *(LEGACY/histórico: el consentimiento es a nivel de cuenta y ya no se solicita por lectura — ver `docs/CHANGELOG_CONSENT_LEGACY.md`.)*
 
 - Modal de detalle:
   - Texto completo de la interpretación.
@@ -86,6 +88,7 @@ Notas API:
 **Privacidad, consentimiento y ética (enfoque holístico)**
 - Mostrar disclaimer claro: interpretaciones simbólicas educativas, NO reemplazan acompañamiento profesional en salud integral.
 - Terminología correcta: "consultante" (NO "paciente"), "lectura simbólica" (NO "diagnóstico").
+- Consentimiento: **a nivel de cuenta, otorgado una sola vez en el registro del consultante**, y cubre todas las lecturas (incl. la Tirada del Árbol determinista). El consentimiento por-lectura queda **deprecado (LEGACY)** — ver `docs/CHANGELOG_CONSENT_LEGACY.md`.
 - Opciones de almacenamiento: `no_store`, `store_anonymized`, `store_with_consent`.
 - Si `themes` indican temas sensibles, UI debe mostrar recursos educativos (sin carácter clínico).
 
@@ -127,8 +130,8 @@ Phase 2 — API core y multi-provider (3–4 días)
 - Entregables: endpoints con multi-provider integrado y tests en `backend/tests`.
 
 Phase 3 — UI mínimo y consentimiento (3–5 días)
-- Tareas: componente `TarotReading` con selector `Deck`/`Spread`, visor de cartas, panel AI; banner consentimiento y modal de detalle con opciones de guardado.
-- Criterios de aceptación: flujo completo en staging (tirar cartas → interpretar → ver trazabilidad); consentimiento requerido antes de interpretar.
+- Tareas: componente `TarotReading` con selector `Deck`/`Spread`, visor de cartas, panel AI; modal de detalle con opciones de guardado.
+- Criterios de aceptación: flujo completo en staging (tirar cartas → interpretar → ver trazabilidad). *(Nota: consentimiento a nivel de cuenta, otorgado en el registro; NO se requiere consentimiento por lectura — LEGACY.)*
 - Entregables: componentes en `src/components/TarotReading`, estilos y storybook / snapshots.
 
 Phase 4 — Multi-provider y trazabilidad (2–3 días)
@@ -165,7 +168,7 @@ Implicaciones concretas para la integración `tarot-ai` holística:
 
 - **Enfoque 100% holístico**: Lenguaje simbólico-educativo, evitar CUALQUIER término clínico. Usar `consultante` (NO `paciente`) y `lectura simbólica` (NO `diagnóstico` ni `terapéutico`) en UI y docs.
 - **Multi-provider AI**: Groq (prioritario) → Ollama (local/Vercel) → Gemini (fallback). Config: `AI_PROVIDER=auto`.
-- Implementar opt-in obligatorio y banner de consentimiento holístico (UI) antes de permitir interpretaciones IA; por defecto `AI_TAROT_ENABLED=false`.
+- *(LEGACY)* Opt-in/banner de consentimiento por lectura: **deprecado**. El consentimiento es a nivel de cuenta (registro) y cubre todas las lecturas; mantener únicamente `AI_TAROT_ENABLED=false` por defecto como control de feature flag.
 - Integrar la misma validación de seguridad y filtrado de salida (5-layer validation + lista negra de términos clínicos) descrita en `ARCHITECTURE_SYMBOLIC_SYSTEM.md`.
 - **Provider tracking**: Todas las respuestas deben incluir `provider_used` y `model_used` para auditoría.
 - Registrar cualquier nuevo documento creado por el agente en `01_PROJECT_STATE/PROJECT_STATE_CURRENT.md` como exige `DOCUMENTATION_GOVERNANCE.md`.

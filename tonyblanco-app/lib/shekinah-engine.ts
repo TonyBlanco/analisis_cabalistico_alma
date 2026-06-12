@@ -74,7 +74,7 @@ export interface ShekinahResult {
 /**
  * Suma simple de dígitos de un número
  */
-const sumDigits = (n: number): number => {
+export const sumDigits = (n: number): number => {
   return n.toString()
     .split('')
     .reduce((acc, curr) => acc + parseInt(curr, 10), 0);
@@ -85,7 +85,7 @@ const sumDigits = (n: number): number => {
  * Si es 0, retorna 0 (El Loco)
  * Si es mayor a 21, reduce sumando dígitos hasta que sea <= 21
  */
-const reduceToArcana = (n: number): number => {
+export const reduceToArcana = (n: number): number => {
   if (n === 0) return 0;
   if (n >= 1 && n <= 21) return n;
   
@@ -108,6 +108,38 @@ const calculatePathAlgorithm = (value: number): number => {
   const division = subtraction / 9;
   const result = Math.floor(division) + 1;
   return reduceToArcana(result);
+};
+
+/**
+ * Tokeniza un nombre completo usando la tabla Atlantis.
+ * Retorna el array de valores numéricos (en orden de aparición) sin deduplicar.
+ * Usa la misma lógica de longest-match-first que calculateShekinahProfile.
+ */
+export const tokenizeAtlantis = (fullName: string): number[] => {
+  const tempName = fullName.toUpperCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^A-ZÑÇ\s]/g, '')
+    .replace(/\s+/g, '');
+
+  const sortedKeys = Object.keys(GEMATRIA_TABLE).sort((a, b) => b.length - a.length);
+  const values: number[] = [];
+
+  let i = 0;
+  while (i < tempName.length) {
+    let matched = false;
+    for (const key of sortedKeys) {
+      if (tempName.substring(i, i + key.length) === key) {
+        values.push(GEMATRIA_TABLE[key]);
+        i += key.length;
+        matched = true;
+        break;
+      }
+    }
+    if (!matched) i++;
+  }
+
+  return values;
 };
 
 /**

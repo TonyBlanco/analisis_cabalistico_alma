@@ -58,6 +58,7 @@ from .serializers import (
 )
 from .serializers import UserBirthDataSerializer
 from .emails import send_welcome_email, send_booking_confirmation_email
+from .notifications.dispatch import notify_patient_account_access
 
 
 # Vista para la raíz /api/
@@ -1933,15 +1934,25 @@ class CreatePatientWithAccountView(APIView):
             "message": "Paciente creado exitosamente"
         }
         """
+        from .serializers import CreatePatientWithAccountInputSerializer
+
+        input_serializer = CreatePatientWithAccountInputSerializer(data=request.data)
+        if not input_serializer.is_valid():
+            return Response(input_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        validated = input_serializer.validated_data
+
         # ========== DATOS PERSONALES ==========
-        first_name = request.data.get('first_name', '').strip()
-        last_name = request.data.get('last_name', '').strip()
-        email = request.data.get('email', '').strip()
-        phone = request.data.get('phone', '').strip()
+        first_name = validated['first_name'].strip()
+        last_name = validated['last_name'].strip()
+        email = validated['email'].strip()
+        phone = validated.get('phone', '').strip()
+        telegram = validated.get('telegram', '').strip()
+        send_via = validated.get('send_via', ['email'])
         avatar = request.data.get('avatar', '').strip()
         
         # ========== DATOS ASTROLÓGICOS/CABALÍSTICOS ==========
-        birth_date = request.data.get('birth_date')
+        birth_date = validated['birth_date']
         birth_time = request.data.get('birth_time', '').strip()
         birth_place = request.data.get('birth_place', '').strip()
         hebrew_name = request.data.get('hebrew_name', '').strip()
@@ -1963,31 +1974,6 @@ class CreatePatientWithAccountView(APIView):
             treatment_plan['magnetism'] = []
         if 'biodecoding' not in treatment_plan:
             treatment_plan['biodecoding'] = []
-        
-        # Validaciones
-        if not first_name:
-            return Response(
-                {'error': 'first_name es requerido'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        if not last_name:
-            return Response(
-                {'error': 'last_name es requerido'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        if not email:
-            return Response(
-                {'error': 'email es requerido'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        if not birth_date:
-            return Response(
-                {'error': 'birth_date es requerido'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
         
         # Verificar que el email no esté en uso
         if User.objects.filter(email=email).exists():
@@ -2122,6 +2108,8 @@ class CreatePatientWithAccountView(APIView):
                 full_name=full_name,  # Se calculará automáticamente en save()
                 email=email,
                 phone=phone,
+                telegram=telegram,
+                send_credentials_via=send_via,
                 avatar=avatar,
                 birth_date=birth_date_obj,
                 birth_time=birth_time_obj,
@@ -2153,38 +2141,19 @@ class CreatePatientWithAccountView(APIView):
             ).count()
             therapist_profile.save()
             
-            # Notificación simulada (preparada para send_mail más adelante)
-            email_body = f"""
-Hola {first_name},
+            therapist_name = therapist_profile.full_name or request.user.get_full_name() or request.user.username
+            notification = notify_patient_account_access(
+                patient_id=patient.id,
+                user_id=user.id,
+                patient_email=email,
+                patient_phone=phone,
+                patient_first_name=first_name,
+                username=username,
+                temp_password=temp_password,
+                therapist_name=therapist_name,
+                send_via=send_via,
+            )
 
-Bienvenido/a a Mi Camino del Alma.
-
-Tu cuenta de paciente ha sido creada por tu terapeuta.
-
-Credenciales de acceso:
-- Usuario: {username}
-- Contraseña: {temp_password}
-
-Por favor, cambia tu contraseña después de tu primer inicio de sesión.
-
-Puedes acceder a tu cuenta en: https://app.tonyblanco.com/login
-
-Saludos,
-Equipo Mi Camino del Alma
-            """.strip()
-            
-            # Imprimir en consola (simulación)
-            print("=" * 60)
-            print("EMAIL DE BIENVENIDA (SIMULADO)")
-            print("=" * 60)
-            print(f"Para: {email}")
-            print(f"Asunto: Bienvenido/a a Mi Camino del Alma - Credenciales de Acceso")
-            print("-" * 60)
-            print(email_body)
-            print("=" * 60)
-            print(f"\n[NOTA: En producción, esto se enviará con send_mail de Django]")
-            print("=" * 60)
-            
             # Serializar respuesta con datos del paciente
             from .serializers import PatientSerializer
             patient_serializer = PatientSerializer(patient)
@@ -2196,6 +2165,11 @@ Equipo Mi Camino del Alma
                     'username': username,
                     'password': temp_password
                 },
+                'email_sent': notification.email_sent,
+                'telegram_sent': notification.telegram_sent,
+                'telegram_link': notification.telegram_link,
+                'whatsapp_sent': notification.whatsapp_sent,
+                'welcome_url': notification.welcome_url,
                 'message': 'Paciente creado exitosamente'
             }, status=status.HTTP_201_CREATED)
             
@@ -2210,6 +2184,93 @@ Equipo Mi Camino del Alma
                 {'error': f'Error al crear paciente: {str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+
+class ResendPatientCredentialsView(APIView):
+    """
+    Regenera contraseña temporal y reenvía credenciales al consultante.
+    Ruta: POST /api/therapist/patients/<pk>/resend-credentials/
+    """
+    permission_classes = [IsAuthenticated, IsTherapist]
+    RESEND_COOLDOWN_SECONDS = 60
+
+    def post(self, request, pk):
+        from django.core.cache import cache
+
+        cache_key = f'patient_resend:{request.user.id}:{pk}'
+        if cache.get(cache_key):
+            return Response(
+                {
+                    'error': 'rate_limited',
+                    'message': 'Espera un momento antes de reenviar credenciales otra vez.',
+                },
+                status=status.HTTP_429_TOO_MANY_REQUESTS,
+            )
+
+        try:
+            patient = Patient.objects.select_related('user', 'therapist__profile').get(pk=pk)
+        except Patient.DoesNotExist:
+            return Response({'error': 'Consultante no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+
+        if patient.therapist_id != request.user.id:
+            return Response({'error': 'No autorizado'}, status=status.HTTP_403_FORBIDDEN)
+
+        if not patient.user_id:
+            return Response(
+                {'error': 'Este consultante no tiene cuenta de acceso. Usa «Vincular cuenta existente».'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user = patient.user
+        if not patient.email and not user.email:
+            return Response({'error': 'El consultante no tiene email registrado'}, status=status.HTTP_400_BAD_REQUEST)
+
+        creator = CreatePatientWithAccountView()
+        temp_password = creator._generate_temp_password()
+        user.set_password(temp_password)
+        user.save(update_fields=['password'])
+
+        therapist_profile = request.user.profile
+        therapist_name = therapist_profile.full_name or request.user.get_full_name() or request.user.username
+        target_email = patient.email or user.email
+        target_phone = patient.phone or getattr(user.profile, 'phone', '')
+        send_via = patient.send_credentials_via or ['email']
+
+        notification = notify_patient_account_access(
+            patient_id=patient.id,
+            user_id=user.id,
+            patient_email=target_email,
+            patient_phone=target_phone,
+            patient_first_name=patient.first_name or user.first_name,
+            username=user.username,
+            temp_password=temp_password,
+            therapist_name=therapist_name,
+            send_via=send_via,
+        )
+
+        cache.set(cache_key, True, self.RESEND_COOLDOWN_SECONDS)
+
+        channels = []
+        if notification.email_sent:
+            channels.append('email')
+        if notification.telegram_sent:
+            channels.append('Telegram')
+        if notification.whatsapp_sent:
+            channels.append('WhatsApp')
+        channel_note = ', '.join(channels) if channels else 'ningún canal'
+
+        return Response({
+            'credentials': {
+                'username': user.username,
+                'password': temp_password,
+            },
+            'email_sent': notification.email_sent,
+            'telegram_sent': notification.telegram_sent,
+            'telegram_link': notification.telegram_link,
+            'whatsapp_sent': notification.whatsapp_sent,
+            'welcome_url': notification.welcome_url,
+            'message': f'Credenciales reenviadas por {channel_note}',
+        })
 
 
 class SessionListCreateView(generics.ListCreateAPIView):

@@ -246,6 +246,23 @@ EMAIL_SUBJECT_PREFIX = config('EMAIL_SUBJECT_PREFIX', default='[Studios33] ')
 # Frontend URL (for password reset links, etc.)
 FRONTEND_URL = config('FRONTEND_URL', default='http://localhost:3000')
 
+# WhatsApp Cloud API (Meta) — notificaciones móviles opcionales
+WHATSAPP_ENABLED = config('WHATSAPP_ENABLED', default=False, cast=bool)
+WHATSAPP_ACCESS_TOKEN = config('WHATSAPP_ACCESS_TOKEN', default='')
+WHATSAPP_PHONE_NUMBER_ID = config('WHATSAPP_PHONE_NUMBER_ID', default='')
+WHATSAPP_API_VERSION = config('WHATSAPP_API_VERSION', default='v21.0')
+WHATSAPP_DEFAULT_COUNTRY_CODE = config('WHATSAPP_DEFAULT_COUNTRY_CODE', default='34')
+
+# Telegram Bot — notificaciones móviles (canal principal)
+TELEGRAM_ENABLED = config('TELEGRAM_ENABLED', default=False, cast=bool)
+TELEGRAM_BOT_TOKEN = config('TELEGRAM_BOT_TOKEN', default='')
+TELEGRAM_BOT_USERNAME = config('TELEGRAM_BOT_USERNAME', default='')
+TELEGRAM_WEBHOOK_URL = config(
+    'TELEGRAM_WEBHOOK_URL',
+    default='https://api.studios33.app/api/telegram/webhook/',
+)
+TELEGRAM_WEBHOOK_SECRET = config('TELEGRAM_WEBHOOK_SECRET', default='')
+
 # Gemini AI Configuration
 GEMINI_API_KEY = config('GEMINI_API_KEY', default='')
 GEMINI_MODEL = config('GEMINI_MODEL', default='gemini-1.5-flash')

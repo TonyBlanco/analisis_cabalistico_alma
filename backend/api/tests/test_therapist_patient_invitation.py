@@ -109,8 +109,10 @@ class TherapistPatientInvitationTests(APITestCase):
 
         mock_notify.return_value = PatientAccessNotificationResult(
             welcome_url='https://studios33.app/welcome/patient?token=test',
+            telegram_link='https://t.me/Studios33Bot?start=pabc',
             email_sent=True,
-            whatsapp_sent=True,
+            telegram_sent=False,
+            whatsapp_sent=False,
         )
         self._auth(self.therapist_token)
         response = self.client.post(
@@ -125,17 +127,22 @@ class TherapistPatientInvitationTests(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertTrue(response.data.get('email_sent'))
-        self.assertTrue(response.data.get('whatsapp_sent'))
         self.assertIn('credentials', response.data)
+        self.assertIn('telegram_link', response.data)
         mock_notify.assert_called_once()
 
     @patch('api.views.notify_patient_account_access')
     def test_resend_patient_credentials(self, mock_notify):
+        from django.core.cache import cache
         from api.notifications.dispatch import PatientAccessNotificationResult
+
+        cache.clear()
 
         mock_notify.return_value = PatientAccessNotificationResult(
             welcome_url='https://studios33.app/welcome/patient?token=test',
+            telegram_link='https://t.me/Studios33Bot?start=pabc',
             email_sent=True,
+            telegram_sent=False,
             whatsapp_sent=False,
         )
         self._auth(self.therapist_token)

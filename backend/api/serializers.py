@@ -433,6 +433,73 @@ class FichaSerializer(serializers.ModelSerializer):
 from .models import Patient, Session, TherapistNote
 
 
+CREDENTIAL_CHANNEL_CHOICES = frozenset({'email', 'telegram'})
+
+
+def normalize_telegram_handle(value: str) -> str:
+    """Guarda el handle de Telegram sin @ ni espacios laterales."""
+    if not value:
+        return ''
+    return str(value).strip().lstrip('@').strip()
+
+
+class CreatePatientWithAccountInputSerializer(serializers.Serializer):
+    """Validación del payload de POST /api/therapist/patients/create/."""
+
+    first_name = serializers.CharField(max_length=100)
+    last_name = serializers.CharField(max_length=100)
+    email = serializers.EmailField()
+    birth_date = serializers.DateField()
+    phone = serializers.CharField(max_length=20, required=False, allow_blank=True, default='')
+    telegram = serializers.CharField(max_length=64, required=False, allow_blank=True, default='')
+    send_via = serializers.ListField(
+        child=serializers.CharField(),
+        required=False,
+        default=['email'],
+    )
+
+    def validate_phone(self, value: str) -> str:
+        value = (value or '').strip()
+        if not value:
+            return ''
+        import re
+        if not re.match(r'^\+?[0-9\s()-]{7,20}$', value):
+            raise serializers.ValidationError('El teléfono no es válido')
+        return value
+
+    def validate_telegram(self, value: str) -> str:
+        return normalize_telegram_handle(value)
+
+    def validate_send_via(self, value):
+        if value is None:
+            return ['email']
+        if not isinstance(value, list):
+            raise serializers.ValidationError('send_via debe ser una lista de canales')
+
+        normalized = []
+        for channel in value:
+            key = str(channel).strip().lower()
+            if key not in CREDENTIAL_CHANNEL_CHOICES:
+                raise serializers.ValidationError(
+                    f'Canal no permitido: {channel}. Use email o telegram.'
+                )
+            if key not in normalized:
+                normalized.append(key)
+
+        if not normalized:
+            raise serializers.ValidationError('Selecciona al menos un canal de envío')
+        return normalized
+
+    def validate(self, attrs):
+        send_via = attrs.get('send_via', ['email'])
+        telegram = attrs.get('telegram', '')
+        if 'telegram' in send_via and not telegram:
+            raise serializers.ValidationError({
+                'telegram': 'El usuario de Telegram es requerido si eliges envío por Telegram',
+            })
+        return attrs
+
+
 class PatientSerializer(serializers.ModelSerializer):
     """Serializer para pacientes - Ficha clínica holística"""
     therapist = serializers.ReadOnlyField(source='therapist.username')
@@ -446,7 +513,8 @@ class PatientSerializer(serializers.ModelSerializer):
             # Identificación
             'id', 'therapist', 'user',
             # Datos personales
-            'first_name', 'last_name', 'full_name', 'email', 'phone', 'avatar',
+            'first_name', 'last_name', 'full_name', 'email', 'phone', 'telegram',
+            'send_credentials_via', 'avatar',
             # Datos astrológicos/cabalísticos
             'birth_date', 'birth_time', 'birth_place', 'hebrew_name',
             # Coordenadas geográficas (CORE FIELDS para astrología)

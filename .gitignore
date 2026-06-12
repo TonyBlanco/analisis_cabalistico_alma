@@ -64,10 +64,14 @@ packages/symbolic/dist/
 /.agent/
 **/.agent/**
 
-# Environment
+# Environment — never commit secrets
 .env
 .env.local
 .env.*.local
+.env.*
+backend/.env.gemini
+backend/.env.local
+backend/.env*.local
 deploy/studios33/.env.studios33
 
 # Render

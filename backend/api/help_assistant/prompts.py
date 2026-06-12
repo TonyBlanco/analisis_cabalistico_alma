@@ -2,8 +2,6 @@ from __future__ import annotations
 
 from typing import Dict, List
 
-from .help_assistant_contract import HelpAssistantContext
-
 
 SYSTEM_PROMPT = """Eres el asistente de ayuda de Studios33.
 Respondes solo sobre cómo funciona la app: pantallas, guías, permisos, flujos y novedades.
@@ -15,7 +13,10 @@ Si el contexto no alcanza, di "No lo sé con certeza" y apóyate en la guía má
 def _citation_block(citations: List[Dict[str, str]]) -> str:
     if not citations:
         return "(sin citas recuperadas)"
-    return "\n".join(f"- {item['title']} [{item['path']}]: {item['excerpt']}" for item in citations)
+    return "\n".join(
+        f"- {item['title']} [{item['path']}]: {item['excerpt']}"
+        for item in citations
+    )
 
 
 def build_help_prompt(
@@ -26,11 +27,19 @@ def build_help_prompt(
     screen: str = "",
     locale: str = "",
 ) -> str:
-    ctx = HelpAssistantContext(route=route, screen=screen, locale=locale)
+    ctx_parts: List[str] = []
+    if route:
+        ctx_parts.append(f"route: {route}")
+    if screen:
+        ctx_parts.append(f"screen: {screen}")
+    if locale:
+        ctx_parts.append(f"locale: {locale}")
+    ctx_block = "\n".join(ctx_parts) or "(sin contexto de pantalla)"
+
     return (
         f"{SYSTEM_PROMPT}\n\n"
         "Contexto de la app:\n"
-        f"{ctx.as_prompt_block() or '(sin contexto de pantalla)'}\n\n"
+        f"{ctx_block}\n\n"
         "Consulta del usuario:\n"
         f"{query.strip()}\n\n"
         "Citas recuperadas desde /docs:\n"

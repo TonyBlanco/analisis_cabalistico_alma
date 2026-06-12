@@ -7,7 +7,10 @@ import { API_BASE_URL, getAuthToken } from '@/lib/api';
 import type { TarotCardData } from '@/components/TarotCard/TarotCard.types';
 import TarotDrawPanel from '@/components/tarot/TarotDrawPanel';
 import type { TarotCardDraw } from '@/components/tarot/TarotSpreadView';
-import { ARCANOS_MAYORES } from '@/components/BodySoulVisualization/plugins/tarot/tarot.logic';
+import {
+  ARCANOS_MAYORES,
+  computeBirthCards,
+} from '@/components/BodySoulVisualization/plugins/tarot/tarot.logic';
 import type { PatientContext } from '@/components/BodySoulVisualization/types';
 import BotaImageReferencePanel from '@/components/tarot/bota/BotaImageReferencePanel';
 import { THOTH_MAJOR_ARCANA } from '@holistica/symbolic/tarot/decks/thoth';
@@ -578,14 +581,69 @@ export default function AstrologyTarotVisualCore({
             useBotaSvg={systemKey === 'bota'}
           />
         )}
-        {activeSection === 'tarot-natal' && (
-          <TarotDeck
-            cards={deckCards.slice(0, 3)}
-            layout="grid"
-            interactive={true}
-            onCardSelect={handleCardSelect}
-          />
-        )}
+        {activeSection === 'tarot-natal' && (() => {
+          if (!patientBirthDate) {
+            return (
+              <div className="rounded-lg border border-amber-200 bg-amber-50 p-6 text-center text-sm text-amber-900">
+                <p className="font-medium">Fecha de nacimiento no disponible</p>
+                <p className="mt-1 text-xs text-amber-800">
+                  Añade la fecha de nacimiento del paciente para calcular su carta natal.
+                </p>
+              </div>
+            );
+          }
+
+          const birthCards = computeBirthCards(patientBirthDate);
+          if (!birthCards) {
+            return (
+              <div className="rounded-lg border border-amber-200 bg-amber-50 p-6 text-center text-sm text-amber-900">
+                <p className="font-medium">No se pudo calcular la carta natal</p>
+                <p className="mt-1 text-xs text-amber-800">
+                  La fecha de nacimiento registrada no es válida.
+                </p>
+              </div>
+            );
+          }
+
+          const LABELS: Record<'soulCard' | 'personalityCard' | 'yearCard', string> = {
+            soulCard: 'Carta del Alma',
+            personalityCard: 'Carta de Personalidad',
+            yearCard: 'Carta del Año',
+          };
+
+          const natalCards: TarotCardData[] = (
+            ['soulCard', 'personalityCard', 'yearCard'] as const
+          ).map((key) => {
+            const card = birthCards[key];
+            return {
+              id: card.id,
+              name: `${LABELS[key]}: ${card.spanishName || card.name}`,
+              number: card.number,
+              arcana: 'major',
+              element: card.element,
+              keywords: card.keywords,
+              imageUrl:
+                systemKey === 'rider-waite'
+                  ? `/tarot/rider-waite/m${String(card.number).padStart(2, '0')}.jpg`
+                  : `/tarot/${card.id}.png`,
+              sefirahId: card.sefirah,
+            };
+          });
+
+          return (
+            <div className="grid gap-4">
+              <TarotDeck
+                cards={natalCards}
+                layout="grid"
+                interactive={true}
+                onCardSelect={handleCardSelect}
+              />
+              <p className="text-[11px] text-gray-400 italic text-center">
+                Correspondencias simbólicas basadas en numerología tarot. Observacional — no constituye interpretación clínica.
+              </p>
+            </div>
+          );
+        })()}
         {activeSection === 'tarot-correspondences' && isSystemUsable && (
           <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700">
             {selectedCard ? (

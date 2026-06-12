@@ -1,18 +1,26 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import CabalaAplicadaHistoryList from './CabalaAplicadaHistoryList';
 import {
   dispatchCabalaAplicadaRecordSaved,
   saveCabalaAplicadaMethodRecord,
+  CABALA_APLICADA_RECORD_SAVED_EVENT,
 } from '@/lib/cabala-aplicada-api';
 import { generateCabalaAplicadaGraphicPDF } from './cabalaAplicadaPdf';
+import type { CabalaReportInclude } from './cabalaAplicadaPdf';
+import {
+  buildActivityItems,
+  pickLatestMethodRecord,
+  type CabalaActivityItem,
+} from './cabalaAplicadaActivity';
+import { extractGematriaInterpretacion } from './GematriaInterpretacionPanel';
+import { API_BASE_URL, getAuthToken } from '@/lib/api';
 import { SymbolicInterpretationPanel } from '@/components/SymbolicInterpretation';
 import { CorrespondencesPanel } from '@/components/SymbolicCorrespondences';
 import { generateAISymbolicInterpretation } from '@/lib/api/symbolic-interpreter-api';
 import type { SwmV3ConsentState } from '@/lib/api/symbolic-interpreter-api';
 import ConsentModal from '@/components/SWMV3/ConsentModal';
-import type { SwmV3ConsentMode } from '@/components/SWMV3/ConsentModal';
 import type { SymbolicInterpretation, SystemId } from '@holistica/symbolic/tree/symbolic-interpreter.types';
 import type { CabalaAplicadaWorkspaceExportState } from './CabalAppliedVisualCore';
 
@@ -67,9 +75,85 @@ export default function CabalAppliedToolsPanel({
   const [swmV3Consent, setSwmV3Consent] = useState<SwmV3ConsentState | null>(null);
   const [showConsentModal, setShowConsentModal] = useState(false);
 
+  // --- PDF report configuration ---
+  const [pdfInclude, setPdfInclude] = useState<CabalaReportInclude>({
+    tree: true,
+    estructurales: true,
+    metodo: true,
+    actividad: true,
+    ia: false,
+  });
+  const [activity, setActivity] = useState<CabalaActivityItem[]>([]);
+  const [activitySelected, setActivitySelected] = useState<Record<string, boolean>>({});
+  const [activityLoading, setActivityLoading] = useState(false);
+  const [gematriaForPdf, setGematriaForPdf] = useState<Record<string, unknown> | null>(null);
+  const [methodNameForPdf, setMethodNameForPdf] = useState<string | null>(null);
+
   const canSnapshot = useMemo(() => Boolean(patientId && (treeState || backendStructuralState)), [patientId, treeState, backendStructuralState]);
   const canInterpret = useMemo(() => Boolean(treeState), [treeState]);
   const canPdf = useMemo(() => Boolean(patientId && patientName), [patientId, patientName]);
+
+  // Load real session activity and derive the latest method interpretation for the PDF report.
+  useEffect(() => {
+    if (activeTab !== 'pdf' || !patientId) {
+      return;
+    }
+    const token = getAuthToken();
+    if (!token) {
+      return;
+    }
+
+    let cancelled = false;
+
+    const run = () => {
+      setActivityLoading(true);
+      fetch(`${API_BASE_URL}/analysis-records/?patient_id=${encodeURIComponent(String(patientId))}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Token ${token}`,
+        },
+      })
+        .then((res) => (res.ok ? res.json() : Promise.reject(new Error(`Failed (${res.status})`))))
+        .then((data) => {
+          if (cancelled) return;
+          const results = Array.isArray(data?.results) ? data.results : [];
+          const built = buildActivityItems(results);
+          setActivity(built);
+          setActivitySelected((prev) => {
+            const next: Record<string, boolean> = {};
+            for (const a of built) next[a.id] = prev[a.id] !== false;
+            return next;
+          });
+
+          const rec = pickLatestMethodRecord(results);
+          const ca = rec ? (rec.computed_result as any)?.cabala_aplicada : null;
+          const methodOutput = (ca?.method_output ?? null) as Record<string, unknown> | null;
+          const gi = extractGematriaInterpretacion(methodOutput);
+          setGematriaForPdf((gi as unknown as Record<string, unknown>) ?? null);
+          setMethodNameForPdf(
+            typeof ca?.method_name === 'string' && ca.method_name.trim()
+              ? ca.method_name
+              : selectedMethodId ?? null,
+          );
+        })
+        .catch(() => {
+          if (cancelled) return;
+          setActivity([]);
+        })
+        .finally(() => {
+          if (cancelled) return;
+          setActivityLoading(false);
+        });
+    };
+
+    run();
+    const onSaved = () => run();
+    window.addEventListener(CABALA_APLICADA_RECORD_SAVED_EVENT, onSaved);
+    return () => {
+      cancelled = true;
+      window.removeEventListener(CABALA_APLICADA_RECORD_SAVED_EVENT, onSaved);
+    };
+  }, [activeTab, patientId, selectedMethodId]);
 
   const tabs: Array<{ id: CabalaToolsTabId; label: string }> = [
     { id: 'history', label: 'Historial' },
@@ -190,11 +274,19 @@ export default function CabalAppliedToolsPanel({
         return null;
       })();
 
+      const selectedActivity = activity
+        .filter((a) => activitySelected[a.id] !== false)
+        .map((a) => ({ label: a.label, tipo: a.tipo, fecha: a.fecha }));
+
       const { filename, base64 } = await generateCabalaAplicadaGraphicPDF({
         patientName,
         patientBirthDate,
         selectedMethodId,
+        methodName: methodNameForPdf,
         interpretationText,
+        gematriaInterpretacion: gematriaForPdf,
+        activity: selectedActivity,
+        include: pdfInclude,
         pdfSummary,
       });
 
@@ -208,6 +300,8 @@ export default function CabalAppliedToolsPanel({
               source: 'cabala_aplicada_internal_panel',
               selected_method_id: selectedMethodId,
               snapshot_record_id: lastSnapshotRecordId,
+              include_sections: pdfInclude,
+              included_activity_count: selectedActivity.length,
             },
             method_output: {
               deliverable: {
@@ -411,10 +505,64 @@ export default function CabalAppliedToolsPanel({
         {activeTab === 'pdf' && (
           <div className="space-y-3">
             <p className="text-xs text-gray-600">
-              Exporta un PDF gráfico desde el render visible del Árbol y gráficos.
+              Genera un informe PDF del consultante activo. Elige qué incluir y qué registros listar.
             </p>
+
+            <fieldset className="space-y-2 rounded-md border border-gray-200 p-3">
+              <legend className="px-1 text-[11px] font-medium text-gray-500">Secciones</legend>
+              {([
+                ['tree', 'Árbol (visual)'],
+                ['estructurales', 'Datos estructurales'],
+                ['metodo', 'Interpretación del método (qué hace y cómo ayuda)'],
+                ['actividad', 'Actividad de la sesión'],
+              ] as Array<[keyof CabalaReportInclude, string]>).map(([key, label]) => (
+                <label key={key} className="flex items-center gap-2 text-xs text-gray-700">
+                  <input
+                    type="checkbox"
+                    checked={pdfInclude[key]}
+                    onChange={(e) => setPdfInclude((prev) => ({ ...prev, [key]: e.target.checked }))}
+                  />
+                  {label}
+                </label>
+              ))}
+              <label className={`flex items-center gap-2 text-xs ${interpretation ? 'text-gray-700' : 'text-gray-400'}`}>
+                <input
+                  type="checkbox"
+                  checked={pdfInclude.ia && Boolean(interpretation)}
+                  disabled={!interpretation}
+                  onChange={(e) => setPdfInclude((prev) => ({ ...prev, ia: e.target.checked }))}
+                />
+                Interpretación IA {interpretation ? '' : '(genera una primero)'}
+              </label>
+            </fieldset>
+
+            {pdfInclude.actividad && (
+              <fieldset className="space-y-2 rounded-md border border-gray-200 p-3">
+                <legend className="px-1 text-[11px] font-medium text-gray-500">
+                  Registros a incluir {activityLoading ? '(cargando…)' : `(${activity.length})`}
+                </legend>
+                {activity.length === 0 && !activityLoading && (
+                  <p className="text-[11px] text-gray-500">Sin registros para este consultante.</p>
+                )}
+                {activity.map((a) => (
+                  <label key={a.id} className="flex items-center gap-2 text-xs text-gray-700">
+                    <input
+                      type="checkbox"
+                      checked={activitySelected[a.id] !== false}
+                      onChange={(e) =>
+                        setActivitySelected((prev) => ({ ...prev, [a.id]: e.target.checked }))
+                      }
+                    />
+                    <span className="truncate">
+                      {a.label} <span className="text-gray-400">· {a.tipo}</span>
+                    </span>
+                  </label>
+                ))}
+              </fieldset>
+            )}
+
             <div className="rounded-md border border-gray-200 bg-gray-50 p-2 text-[11px] text-gray-600">
-              Recomendado: guardar snapshot y (opcional) generar interpretación antes de exportar.
+              El informe incluye siempre el aviso profesional. Material simbólico · No médico.
             </div>
             <button
               type="button"
@@ -422,7 +570,7 @@ export default function CabalAppliedToolsPanel({
               disabled={!canPdf || busy}
               className="w-full rounded-md bg-gray-900 px-3 py-2 text-xs font-medium text-white hover:bg-gray-800 disabled:cursor-not-allowed disabled:bg-gray-300"
             >
-              {busy ? 'Generando…' : 'Generar PDF gráfico'}
+              {busy ? 'Generando…' : 'Generar PDF'}
             </button>
           </div>
         )}

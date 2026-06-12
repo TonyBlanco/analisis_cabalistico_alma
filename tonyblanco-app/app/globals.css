@@ -71,6 +71,21 @@ html, body {
   animation: slide-in-right 0.3s ease-out;
 }
 
+[data-theme] {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-theme] {
+    scroll-behavior: auto;
+  }
+
+  [data-theme] * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
 /* Print layout for exports (frontend-only) */
 @media print {
   body {

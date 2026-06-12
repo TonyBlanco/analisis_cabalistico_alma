@@ -8,6 +8,8 @@ import { getTherapistPatients, Patient } from '@/lib/patient-api';
 import CreatePatientModal from '@/components/CreatePatientModal';
 import LinkExistingPatientModal from '@/components/LinkExistingPatientModal';
 import TherapistPendingInvitations from '@/components/TherapistPendingInvitations';
+import { GuidedBlock } from '@/components/ui/guided-block';
+import { UserPlus } from 'lucide-react';
 
 /**
  * Therapist Patients Management Page
@@ -143,14 +145,30 @@ export default function TherapistPatientsPage() {
             </button>
           </div>
         ) : patients.length === 0 ? (
-          <div className="border border-gray-200 border-dashed rounded-lg p-12 text-center">
-            <p className="text-gray-500 text-sm">
-              No tienes consultantes registrados aún.
-            </p>
-            <p className="text-gray-400 text-xs mt-2">
-              Haz clic en "Crear Consultante" para comenzar.
-            </p>
-          </div>
+          <GuidedBlock
+            variant="info"
+            role="therapist"
+            icon={UserPlus}
+            title="Aún no tienes consultantes"
+            description="Crea la ficha de la primera persona con la que vas a trabajar. Podrás vincular análisis, sesiones y recursos desde su perfil."
+            steps={[
+              { label: 'Pulsa el botón para abrir el formulario de alta.' },
+              { label: 'Completa nombre y datos de nacimiento básicos.' },
+              { label: 'Guarda la ficha y empieza a explorar los módulos.' },
+            ]}
+            actions={[
+              {
+                label: 'Crear tu primer consultante',
+                onClick: () => setShowCreateModal(true),
+                variant: 'primary',
+              },
+              {
+                label: 'Vincular cuenta existente',
+                onClick: () => setShowLinkModal(true),
+                variant: 'secondary',
+              },
+            ]}
+          />
         ) : (
           <div className="space-y-3">
             {patients.map((patient) => (

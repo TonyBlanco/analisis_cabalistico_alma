@@ -176,6 +176,7 @@ from .symbolic_views import TreeStructuralStateView
 from .symbolic_session_notes_views import SymbolicSessionNoteView
 from .symbolic_session_metrics_views import SymbolicSessionEventView, HybridModeMetricsView
 from .clinical_onboarding_views import ClinicalModeRequestView, BetaFeedbackView
+from .therapist_onboarding_views import TherapistOnboardingView
 from .utils.symbolic_interpreter_ai import (
     generate_symbolic_interpretation_view,
     symbolic_interpreter_status_view,
@@ -264,6 +265,7 @@ urlpatterns = [
         name='therapist_patient_invitation_cancel',
     ),
     path('therapist/dashboard/', TherapistDashboardView.as_view(), name='therapist_dashboard'),
+    path('therapist/onboarding/', TherapistOnboardingView.as_view(), name='therapist_onboarding'),
     path('therapist/metrics/', TherapistMetricsView.as_view(), name='therapist_metrics'),
     path('therapist/hybrid-metrics/', HybridModeMetricsView.as_view(), name='therapist_hybrid_metrics'),
     path('therapist/ai-usage/', TherapistAIUsageView.as_view(), name='therapist_ai_usage'),

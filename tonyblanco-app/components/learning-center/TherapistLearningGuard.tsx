@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 
 import { getUserRole } from '@/lib/getUserRole';
 import {
@@ -11,15 +11,18 @@ import {
   queueTherapistLearningAutotour,
 } from '@/lib/therapistOnboarding';
 
+/**
+ * Marca la visita al Centro de Aprendizaje y encola el autotour.
+ * Ya no redirige al dashboard: el checklist de primeros pasos guía el flujo.
+ */
 export default function TherapistLearningGuard() {
   const pathname = usePathname();
-  const router = useRouter();
 
   useEffect(() => {
     let cancelled = false;
 
     const run = async () => {
-      if (!pathname || hasSeenTherapistLearningLanding()) {
+      if (!pathname || !isLearningCenterPath(pathname) || hasSeenTherapistLearningLanding()) {
         return;
       }
 
@@ -28,17 +31,8 @@ export default function TherapistLearningGuard() {
         return;
       }
 
-      if (isLearningCenterPath(pathname)) {
-        markTherapistLearningLandingSeen();
-        queueTherapistLearningAutotour();
-        return;
-      }
-
-      if (pathname.startsWith('/dashboard/therapist')) {
-        markTherapistLearningLandingSeen();
-        queueTherapistLearningAutotour();
-        router.replace('/learn');
-      }
+      markTherapistLearningLandingSeen();
+      queueTherapistLearningAutotour();
     };
 
     void run();
@@ -46,7 +40,7 @@ export default function TherapistLearningGuard() {
     return () => {
       cancelled = true;
     };
-  }, [pathname, router]);
+  }, [pathname]);
 
   return null;
 }

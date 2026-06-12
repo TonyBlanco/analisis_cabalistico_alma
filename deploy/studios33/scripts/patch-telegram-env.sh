@@ -14,6 +14,11 @@ TELEGRAM_BOT_USERNAME="${TELEGRAM_BOT_USERNAME:-}"
 TELEGRAM_WEBHOOK_URL="${TELEGRAM_WEBHOOK_URL:-https://api.studios33.app/api/telegram/webhook/}"
 TELEGRAM_WEBHOOK_SECRET="${TELEGRAM_WEBHOOK_SECRET:-}"
 
+if [[ -z "$TELEGRAM_WEBHOOK_SECRET" ]]; then
+  TELEGRAM_WEBHOOK_SECRET="$(openssl rand -hex 32)"
+  echo "▶ TELEGRAM_WEBHOOK_SECRET generado automáticamente (no se muestra en log)"
+fi
+
 [[ -n "$TELEGRAM_BOT_TOKEN" && -n "$TELEGRAM_BOT_USERNAME" ]] || {
   echo "Faltan TELEGRAM_BOT_TOKEN y/o TELEGRAM_BOT_USERNAME"
   exit 1

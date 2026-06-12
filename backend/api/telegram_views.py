@@ -22,7 +22,12 @@ from .telegram_auth import issue_auth_token, login_or_register_with_telegram, ve
 
 from .models import Patient, TelegramLinkToken, UserProfile
 from .notifications.patient_access import build_patient_welcome_token, build_patient_welcome_url
-from .notifications.telegram import get_bot_username, is_telegram_configured, send_telegram_message
+from .notifications.telegram import (
+    get_bot_username,
+    is_telegram_configured,
+    is_telegram_webhook_secured,
+    send_telegram_message,
+)
 from .notifications.telegram_links import (
     create_user_link_token,
     resolve_start_payload,
@@ -132,11 +137,17 @@ def _handle_start(chat_id: int, start_payload: str) -> None:
 @csrf_exempt
 @require_POST
 def telegram_webhook(request):
-    secret = getattr(settings, 'TELEGRAM_WEBHOOK_SECRET', '')
-    if secret:
-        header = request.headers.get('X-Telegram-Bot-Api-Secret-Token', '')
-        if header != secret:
-            return HttpResponse(status=403)
+    if not is_telegram_configured():
+        return HttpResponse(status=503)
+
+    secret = getattr(settings, 'TELEGRAM_WEBHOOK_SECRET', '').strip()
+    if not secret:
+        logger.warning('Telegram webhook rechazado: TELEGRAM_WEBHOOK_SECRET no configurado')
+        return HttpResponse(status=503)
+
+    header = request.headers.get('X-Telegram-Bot-Api-Secret-Token', '')
+    if not header or header != secret:
+        return HttpResponse(status=403)
 
     try:
         payload = json.loads(request.body.decode('utf-8'))

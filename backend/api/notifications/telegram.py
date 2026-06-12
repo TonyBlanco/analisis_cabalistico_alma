@@ -19,6 +19,11 @@ def is_telegram_configured() -> bool:
     )
 
 
+def is_telegram_webhook_secured() -> bool:
+    """Telegram activo con secret de webhook configurado (obligatorio en prod)."""
+    return bool(is_telegram_configured() and getattr(settings, 'TELEGRAM_WEBHOOK_SECRET', '').strip())
+
+
 def get_bot_username() -> str:
     return getattr(settings, 'TELEGRAM_BOT_USERNAME', '').strip().lstrip('@')
 
@@ -64,9 +69,10 @@ def register_telegram_webhook() -> tuple[bool, str]:
 
     url = f'https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/setWebhook'
     payload = {'url': webhook_url, 'drop_pending_updates': True}
-    secret = getattr(settings, 'TELEGRAM_WEBHOOK_SECRET', '')
-    if secret:
-        payload['secret_token'] = secret
+    secret = getattr(settings, 'TELEGRAM_WEBHOOK_SECRET', '').strip()
+    if not secret:
+        return False, 'TELEGRAM_WEBHOOK_SECRET vacío — genera uno antes de registrar webhook'
+    payload['secret_token'] = secret
     try:
         response = requests.post(url, json=payload, timeout=15)
         data = response.json()

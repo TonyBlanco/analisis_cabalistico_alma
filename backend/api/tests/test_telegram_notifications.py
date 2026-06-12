@@ -59,13 +59,23 @@ class TelegramNotificationsTests(APITestCase):
         mock_notify.assert_called_once()
         self.assertEqual(mock_notify.call_args.kwargs['send_via'], ['email', 'telegram'])
 
-    def test_webhook_rejects_missing_secret(self):
+    def test_webhook_rejects_missing_header(self):
         response = self.client.post(
             '/api/telegram/webhook/',
             {'message': {'chat': {'id': 1}, 'text': '/start'}},
             format='json',
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    @override_settings(TELEGRAM_WEBHOOK_SECRET='')
+    def test_webhook_rejects_when_secret_not_configured(self):
+        response = self.client.post(
+            '/api/telegram/webhook/',
+            {'message': {'chat': {'id': 1}, 'text': '/start'}},
+            format='json',
+            HTTP_X_TELEGRAM_BOT_API_SECRET_TOKEN='anything',
+        )
+        self.assertEqual(response.status_code, status.HTTP_503_SERVICE_UNAVAILABLE)
 
     @patch('api.telegram_views.send_patient_account_telegram', return_value=True)
     def test_webhook_links_chat_on_start(self, mock_send):

@@ -563,6 +563,10 @@ export default function AstrologyTarotVisualCore({
         {activeSection === 'tarot-tree-spread' && (
           <TarotDrawPanel
             consultantId={patientId ? String(patientId) : null}
+            consultantName={patientName ?? null}
+            consultantBirthDate={
+              patientBirthDate ? patientBirthDate.toISOString().slice(0, 10) : null
+            }
             systemId={systemKey}
             onSystemChange={(next) => onSystemChange?.(next as TarotSystemId)}
             useBotaSvg={systemKey === 'bota'}
@@ -573,6 +577,10 @@ export default function AstrologyTarotVisualCore({
         {activeSection === 'tarot-free-spread' && (
           <TarotDrawPanel
             consultantId={patientId ? String(patientId) : null}
+            consultantName={patientName ?? null}
+            consultantBirthDate={
+              patientBirthDate ? patientBirthDate.toISOString().slice(0, 10) : null
+            }
             systemId={systemKey}
             onSystemChange={(next) => onSystemChange?.(next as TarotSystemId)}
             useBotaSvg={systemKey === 'bota'}

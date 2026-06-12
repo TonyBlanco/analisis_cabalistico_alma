@@ -35,13 +35,14 @@ Persistencia gobernada
 - Ownership: las lecturas persistidas pertenecen al terapeuta que las genera; acceso del consultante regulado por permisos y acuerdo.
 
 Consentimiento
-- **[LEGACY MODE - 2026-01-28]**: El flujo de consentimiento explícito per-lectura ha sido deprecado.
-- **ACTUAL**: El consentimiento se otorga al crear la cuenta del consultante y acepta "Almacenar con consentimiento (asociado al terapeuta)".
-- El modal de consentimiento fue requerido durante el proceso clínico inicial pero ya no es necesario en el modo educativo (tirada libre).
-- La función `acceptConsent()` y el banner `TarotHolisticConsentBanner` se mantienen solo para compatibilidad legacy.
-- **Nuevo comportamiento**: `hasConsent = true` por defecto en `useTarotHolistic()` hook.
-- Registro auditable del consentimiento inicial (timestamp durante registro de cuenta).
-- Revocabilidad: el consultante/terapeuta puede solicitar eliminación o anonimización conforme a políticas del proyecto.
+- **MODELO VIGENTE (consentimiento a nivel de cuenta, una sola vez):** el consultante otorga el consentimiento **una única vez al crear/registrar su cuenta** y ese consentimiento **cubre todas las superficies de lectura simbólica educativa** del producto. No se requiere re-consentir por lectura ni por funcionalidad.
+- **Alcance (cubre todo):** tirada libre, Tirada del Árbol de la Vida (10 Sefirot), interpretación por carta, lecturas natales y cualquier otra lectura simbólica educativa, incluidas las que derivan una tirada **determinista** a partir de la identidad del consultante.
+- **Uso de identidad para determinismo:** bajo este consentimiento de cuenta, la identidad del consultante (nombre + fecha de nacimiento) puede usarse de forma transitoria para sembrar una tirada determinista (misma persona → misma tirada). El uso de identidad para el sembrado **no** implica por sí mismo persistencia; el almacenamiento sigue gobernado por los modos `no_store` / `store_anonymized` / `store_with_consent`.
+- **[HISTÓRICO - LEGACY MODE 2026-01-28]:** el flujo de consentimiento explícito **per-lectura** (modal/banner por cada interpretación) queda **deprecado**. El modal fue requerido durante el proceso clínico inicial y ya no es necesario en el modo educativo.
+- Compatibilidad: la función `acceptConsent()` y el banner `TarotHolisticConsentBanner` se mantienen solo por compatibilidad legacy; `hasConsent = true` por defecto en `useTarotHolistic()`.
+- Registro auditable: se conserva el timestamp del consentimiento inicial otorgado durante el registro de la cuenta.
+- Revocabilidad: el consultante/terapeuta puede solicitar eliminación o anonimización conforme a las políticas del proyecto.
+- **Excepción (consentimiento aparte):** la **federación cross-workspace** (síntesis de datos entre espacios de trabajo distintos) **NO** está cubierta por este consentimiento de cuenta y mantiene su propio opt-in explícito y revocable, según `docs/HOLISTIC_FEDERATION_POLICY.md`.
 
 Auditoría y trazabilidad
 - Registrar versión de motor IA, parámetros clave (`temperature`, `seed`), fecha/hora y metadatos del deck usado.

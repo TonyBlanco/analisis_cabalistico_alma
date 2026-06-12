@@ -2,7 +2,7 @@
 
 **Fecha**: 2026-01-28  
 **Tipo**: Simplificación de flujo UX  
-**Alcance**: Módulo de Tarot Holístico (Tirada Libre Educativa)
+**Alcance**: Todas las superficies de lectura simbólica educativa (tarot tirada libre, Tirada del Árbol de la Vida, interpretación por carta, lecturas natales)
 
 ---
 
@@ -14,6 +14,24 @@ El flujo de consentimiento explícito per-lectura fue implementado durante la fa
 - El consultante ya otorga consentimiento al crear su cuenta
 - El consentimiento acepta: "Almacenar con consentimiento (asociado al terapeuta)"
 - El modal de consentimiento se convirtió en fricción innecesaria para uso educativo
+
+---
+
+## 🆕 Actualización 2026-06-12 — El consentimiento de cuenta cubre TODO
+
+**Decisión confirmada:** el consentimiento se otorga **una sola vez al inicio (registro de la cuenta del consultante)** y **vale para todas las funcionalidades** de lectura simbólica educativa. No se re-consiente por lectura ni por feature.
+
+**Alcance explícito (cubre todo):**
+- Tirada libre educativa.
+- **Tirada del Árbol de la Vida (10 Sefirot)**, incluida su variante **determinista por cliente** (misma persona → misma tirada; clientes distintos → tiradas distintas).
+- Interpretación por carta y lecturas natales.
+
+**Uso de identidad para tiradas deterministas:**
+- Bajo el consentimiento de cuenta, la identidad del consultante (nombre + fecha de nacimiento) puede enviarse y usarse de forma **transitoria** para sembrar el sorteo determinista (`random.Random(seed)` a partir de un hash SHA-256 de la identidad) en `backend/symbolic/swm_v3/views.py`.
+- El envío/uso de identidad para el *seed* **no** implica persistencia; el almacenamiento sigue gobernado por `no_store` / `store_anonymized` / `store_with_consent`.
+- Referencia de implementación: PR #23 (`fix/tree-of-life-deterministic-redesign`).
+
+**Fuera de alcance (consentimiento aparte):** la federación cross-workspace mantiene su propio opt-in explícito y revocable (`docs/HOLISTIC_FEDERATION_POLICY.md`).
 
 ---
 

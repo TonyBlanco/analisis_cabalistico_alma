@@ -2,17 +2,37 @@
 
 import { jsPDF } from 'jspdf';
 
+export type CabalaReportInclude = {
+  tree: boolean;
+  estructurales: boolean;
+  metodo: boolean;
+  actividad: boolean;
+  ia: boolean;
+};
+
+export type CabalaActivityPdfItem = {
+  label: string;
+  tipo: string;
+  fecha: string | null;
+};
+
 export type CabalaAplicadaGraphicPdfParams = {
   patientName: string;
   patientBirthDate?: string | null;
   selectedMethodId?: string | null;
+  methodName?: string | null;
   interpretationText?: string | null;
+  gematriaInterpretacion?: Record<string, unknown> | null;
+  activity?: CabalaActivityPdfItem[];
+  include?: Partial<CabalaReportInclude>;
   pdfSummary?: {
     sefirotActivas: Array<{ id: string; indice?: number | null; peso?: number | null }>;
     senderosActivos: Array<{ from: string; to: string; peso?: number | null }>;
     repeticiones: Array<{ id: string; tipo?: string | null; veces?: number | null }>;
   };
 };
+
+export type ReportSection = { title: string; lines: string[] };
 
 function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
   return new Promise<T>((resolve, reject) => {
@@ -46,6 +66,17 @@ function safeDateEs() {
     return new Date().toLocaleDateString('es-ES');
   } catch {
     return new Date().toISOString().slice(0, 10);
+  }
+}
+
+function formatDateEs(iso: string | null): string {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  try {
+    return d.toLocaleString('es-ES');
+  } catch {
+    return iso;
   }
 }
 
@@ -95,159 +126,253 @@ function assertNoModernColorFunctions(svgMarkup: string) {
   }
 }
 
-function getExportTreeSvg(): SVGSVGElement {
+function tryGetExportTreeSvg(): SVGSVGElement | null {
+  if (typeof document === 'undefined') return null;
   const container = document.getElementById('cabala-aplicada-export-tree');
-  if (!container) {
-    throw new Error('No se encontró el contenedor del Árbol exportable (cabala-aplicada-export-tree).');
-  }
+  if (!container) return null;
   const svg = container.querySelector('svg');
-  if (!svg) {
-    throw new Error('No se encontró el SVG del Árbol dentro del contenedor exportable.');
+  return (svg as SVGSVGElement) || null;
+}
+
+function asText(v: unknown): string | null {
+  if (typeof v === 'string') {
+    const t = v.trim();
+    return t || null;
   }
-  return svg as SVGSVGElement;
+  if (typeof v === 'number' && Number.isFinite(v)) return String(v);
+  return null;
+}
+
+function asLines(v: unknown): string[] {
+  if (Array.isArray(v)) {
+    return v.map((x) => asText(x)).filter((s): s is string => Boolean(s));
+  }
+  const t = asText(v);
+  return t ? [t] : [];
+}
+
+function getField(obj: unknown, key: string): unknown {
+  if (obj && typeof obj === 'object') {
+    return (obj as Record<string, unknown>)[key];
+  }
+  return undefined;
+}
+
+export function normalizeInclude(include?: Partial<CabalaReportInclude>): CabalaReportInclude {
+  return {
+    tree: include?.tree !== false,
+    estructurales: include?.estructurales !== false,
+    metodo: include?.metodo !== false,
+    actividad: include?.actividad !== false,
+    ia: include?.ia === true,
+  };
+}
+
+export function buildReportSections(params: CabalaAplicadaGraphicPdfParams): ReportSection[] {
+  const include = normalizeInclude(params.include);
+  const sections: ReportSection[] = [];
+
+  if (include.metodo) {
+    const gi = params.gematriaInterpretacion;
+    const lines: string[] = [];
+
+    const nombre =
+      asText(getField(gi, 'nombreMetodo')) ??
+      asText(params.methodName) ??
+      asText(params.selectedMethodId);
+    if (nombre) lines.push(`Método: ${nombre}`);
+
+    const queEs = asText(getField(gi, 'queEs'));
+    if (queEs) lines.push('', 'Qué es:', queEs);
+
+    const como = asText(getField(gi, 'comoSeCalcula'));
+    if (como) lines.push('', 'Cómo se calcula:', como);
+
+    const ln = getField(gi, 'lecturaNumeros');
+    const lnLines: string[] = [];
+    const esencia = asText(getField(ln, 'esencia'));
+    const expresion = asText(getField(ln, 'expresion'));
+    const herencia = asText(getField(ln, 'herencia'));
+    const caminoVida = asText(getField(ln, 'caminoVida'));
+    if (esencia) lnLines.push(`- Esencia: ${esencia}`);
+    if (expresion) lnLines.push(`- Expresión: ${expresion}`);
+    if (herencia) lnLines.push(`- Herencia: ${herencia}`);
+    if (caminoVida) lnLines.push(`- Camino de vida: ${caminoVida}`);
+    if (lnLines.length) lines.push('', 'Lectura de números:', ...lnLines);
+
+    const casas = asLines(getField(gi, 'lecturaCasas'));
+    if (casas.length) lines.push('', 'Lectura de casas:', ...casas.map((c) => `- ${c}`));
+
+    const equivalencias = asLines(getField(gi, 'equivalencias'));
+    if (equivalencias.length) lines.push('', 'Equivalencias:', ...equivalencias.map((e) => `- ${e}`));
+
+    const sintesis = asText(getField(gi, 'sintesis'));
+    if (sintesis) lines.push('', 'Síntesis:', sintesis);
+
+    const utilidad = asText(getField(gi, 'utilidadTerapeutica'));
+    if (utilidad) lines.push('', 'Cómo ayuda al paciente:', utilidad);
+
+    const avisos = asLines(getField(gi, 'avisos'));
+    if (avisos.length) lines.push('', 'Avisos:', ...avisos.map((a) => `- ${a}`));
+
+    if (!lines.length) lines.push('(sin datos en esta sesión)');
+    sections.push({ title: 'Interpretación del método', lines });
+  }
+
+  if (include.estructurales) {
+    const summary = params.pdfSummary;
+    const sefirot = summary?.sefirotActivas ?? [];
+    const senderos = summary?.senderosActivos ?? [];
+    const reps = summary?.repeticiones ?? [];
+    const lines: string[] = [];
+
+    lines.push(`Sefirot activas (${sefirot.length})`);
+    if (sefirot.length) {
+      for (const s of sefirot) {
+        const parts = [s.id];
+        if (s.indice !== null && s.indice !== undefined && fmtNum(s.indice)) parts.push(`indice=${fmtNum(s.indice)}`);
+        if (s.peso !== null && s.peso !== undefined && fmtNum(s.peso)) parts.push(`peso=${fmtNum(s.peso)}`);
+        lines.push(`- ${parts.join(' · ')}`);
+      }
+    } else {
+      lines.push('- (sin datos)');
+    }
+
+    lines.push('', `Senderos activos (${senderos.length})`);
+    if (senderos.length) {
+      for (const s of senderos) {
+        const parts = [`${s.from}→${s.to}`];
+        if (s.peso !== null && s.peso !== undefined && fmtNum(s.peso)) parts.push(`peso=${fmtNum(s.peso)}`);
+        lines.push(`- ${parts.join(' · ')}`);
+      }
+    } else {
+      lines.push('- (sin datos)');
+    }
+
+    lines.push('', `Repeticiones (${reps.length})`);
+    if (reps.length) {
+      for (const r of reps) {
+        const parts = [r.id];
+        if (r.tipo) parts.push(`tipo=${r.tipo}`);
+        if (r.veces !== null && r.veces !== undefined && fmtNum(r.veces)) parts.push(`veces=${fmtNum(r.veces)}`);
+        lines.push(`- ${parts.join(' · ')}`);
+      }
+    } else {
+      lines.push('- (sin datos)');
+    }
+
+    sections.push({ title: 'Datos estructurales (export)', lines });
+  }
+
+  if (include.actividad) {
+    const activity = params.activity ?? [];
+    const lines: string[] = [];
+    if (activity.length) {
+      for (const a of activity) {
+        lines.push(`- ${formatDateEs(a.fecha)} · ${a.label} (${a.tipo})`);
+      }
+    } else {
+      lines.push('(sin actividad registrada en esta sesión)');
+    }
+    sections.push({ title: 'Actividad de la sesión', lines });
+  }
+
+  if (include.ia) {
+    const ia = asText(params.interpretationText);
+    const lines = ia ? [ia] : ['(sin interpretación IA generada en esta sesión)'];
+    sections.push({ title: 'Lectura simbólica asistida (IA)', lines });
+  }
+
+  return sections;
 }
 
 export async function generateCabalaAplicadaGraphicPDF(params: CabalaAplicadaGraphicPdfParams): Promise<{
   filename: string;
   base64: string;
 }> {
-  // Canonical export path: SVG -> PDF. No Tailwind/DOM capture.
-  const svg = getExportTreeSvg();
-  const svgMarkup = svg.outerHTML;
-  assertNoModernColorFunctions(svgMarkup);
-
-  const svg2pdfMod = await import('svg2pdf.js');
-  const svg2pdf = (svg2pdfMod as any).svg2pdf ?? (svg2pdfMod as any).default ?? svg2pdfMod;
+  const include = normalizeInclude(params.include);
 
   const pdf = new jsPDF('p', 'mm', 'a4');
   const pageWidth = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
   const margin = 14;
+  const maxWidth = pageWidth - margin * 2;
 
-  // Header
+  // Cover header
   pdf.setFont('helvetica', 'bold');
   pdf.setFontSize(16);
-  pdf.text('Cábala Aplicada — Informe visual', margin, 18);
+  pdf.text('Cábala Aplicada — Informe', margin, 18);
 
   pdf.setFont('helvetica', 'normal');
   pdf.setFontSize(10);
   pdf.text(`Paciente: ${params.patientName}`, margin, 26);
   pdf.text(`Fecha: ${safeDateEs()}`, margin, 32);
+  let coverY = 38;
   if (params.patientBirthDate) {
-    pdf.text(`Nacimiento: ${params.patientBirthDate}`, margin, 38);
+    pdf.text(`Nacimiento: ${params.patientBirthDate}`, margin, coverY);
+    coverY += 6;
   }
-  if (params.selectedMethodId) {
-    pdf.text(`Método: ${params.selectedMethodId}`, margin, params.patientBirthDate ? 44 : 38);
+  const metodoLabel = params.methodName || params.selectedMethodId;
+  if (metodoLabel) {
+    pdf.text(`Método: ${metodoLabel}`, margin, coverY);
+    coverY += 6;
   }
 
-  // Visual (Tree SVG)
-  const headerHeight = params.patientBirthDate ? 50 : 44;
-  const availableWidth = pageWidth - margin * 2;
-  const availableHeight = pageHeight - headerHeight - margin;
+  // Visual (Tree SVG), optional and tolerant to absence
+  let svg: SVGSVGElement | null = null;
+  if (include.tree) {
+    svg = tryGetExportTreeSvg();
+  }
+  if (svg) {
+    const svgMarkup = svg.outerHTML;
+    assertNoModernColorFunctions(svgMarkup);
 
-  const viewBox = svg.viewBox?.baseVal;
-  const vbWidth = viewBox?.width || 400;
-  const vbHeight = viewBox?.height || 600;
-  const scale = Math.min(availableWidth / vbWidth, availableHeight / vbHeight);
+    const svg2pdfMod = await import('svg2pdf.js');
+    const svg2pdf = (svg2pdfMod as any).svg2pdf ?? (svg2pdfMod as any).default ?? svg2pdfMod;
 
-  // svg2pdf.js uses xOffset/yOffset + scale.
-  await withTimeout(
-    Promise.resolve(svg2pdf(svg, pdf, { xOffset: margin, yOffset: headerHeight, scale })),
-    25_000,
-    'Render SVG (svg2pdf)'
-  );
+    const headerHeight = coverY + 4;
+    const availableWidth = pageWidth - margin * 2;
+    const availableHeight = pageHeight - headerHeight - margin;
 
-  // Data page (plain text only)
-  pdf.addPage();
-  pdf.setFont('helvetica', 'bold');
-  pdf.setFontSize(14);
-  pdf.text('Datos estructurales (export)', margin, 18);
+    const viewBox = svg.viewBox?.baseVal;
+    const vbWidth = viewBox?.width || 400;
+    const vbHeight = viewBox?.height || 600;
+    const scale = Math.min(availableWidth / vbWidth, availableHeight / vbHeight);
 
-  pdf.setFont('helvetica', 'normal');
-  pdf.setFontSize(10);
+    await withTimeout(
+      Promise.resolve(svg2pdf(svg, pdf, { xOffset: margin, yOffset: headerHeight, scale })),
+      25_000,
+      'Render SVG (svg2pdf)'
+    );
+  } else if (include.tree) {
+    pdf.setFontSize(10);
+    pdf.text('Árbol no disponible para exportar en esta sesión.', margin, coverY + 4);
+  }
 
-  const summary = params.pdfSummary;
-  const sefirot = summary?.sefirotActivas ?? [];
-  const senderos = summary?.senderosActivos ?? [];
-  const reps = summary?.repeticiones ?? [];
+  // Text sections
+  const sections = buildReportSections(params);
+  for (const section of sections) {
+    pdf.addPage();
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(14);
+    pdf.text(section.title, margin, 18);
 
-  let y = 28;
-  const maxWidth = pageWidth - margin * 2;
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(10);
 
-  const headerLines = splitText(
-    pdf,
-    `Paciente: ${params.patientName}${params.patientBirthDate ? `\nNacimiento: ${params.patientBirthDate}` : ''}${
-      params.selectedMethodId ? `\nMétodo: ${params.selectedMethodId}` : ''
-    }\nFecha: ${safeDateEs()}`,
-    maxWidth,
-    10
-  );
-  y = addWrappedLines(pdf, headerLines.map(String), margin, y, pageHeight, margin) + 2;
-
-  pdf.setFont('helvetica', 'bold');
-  pdf.text(`Sefirot activas (${sefirot.length})`, margin, y);
-  y += 6;
-  pdf.setFont('helvetica', 'normal');
-  const sefirotLines = sefirot.length
-    ? sefirot.map((s) => {
-        const parts = [s.id];
-        if (s.indice !== null && s.indice !== undefined && fmtNum(s.indice)) parts.push(`indice=${fmtNum(s.indice)}`);
-        if (s.peso !== null && s.peso !== undefined && fmtNum(s.peso)) parts.push(`peso=${fmtNum(s.peso)}`);
-        return `- ${parts.join(' · ')}`;
-      })
-    : ['- (sin datos)'];
-  y = addWrappedLines(pdf, splitText(pdf, sefirotLines.join('\n'), maxWidth, 10).map(String), margin, y, pageHeight, margin) + 2;
-
-  pdf.setFont('helvetica', 'bold');
-  pdf.text(`Senderos activos (${senderos.length})`, margin, y);
-  y += 6;
-  pdf.setFont('helvetica', 'normal');
-  const senderosLines = senderos.length
-    ? senderos.map((s) => {
-        const parts = [`${s.from}→${s.to}`];
-        if (s.peso !== null && s.peso !== undefined && fmtNum(s.peso)) parts.push(`peso=${fmtNum(s.peso)}`);
-        return `- ${parts.join(' · ')}`;
-      })
-    : ['- (sin datos)'];
-  y = addWrappedLines(pdf, splitText(pdf, senderosLines.join('\n'), maxWidth, 10).map(String), margin, y, pageHeight, margin) + 2;
-
-  pdf.setFont('helvetica', 'bold');
-  pdf.text(`Repeticiones (${reps.length})`, margin, y);
-  y += 6;
-  pdf.setFont('helvetica', 'normal');
-  const repLines = reps.length
-    ? reps.map((r) => {
-        const parts = [r.id];
-        if (r.tipo) parts.push(`tipo=${r.tipo}`);
-        if (r.veces !== null && r.veces !== undefined && fmtNum(r.veces)) parts.push(`veces=${fmtNum(r.veces)}`);
-        return `- ${parts.join(' · ')}`;
-      })
-    : ['- (sin datos)'];
-  addWrappedLines(pdf, splitText(pdf, repLines.join('\n'), maxWidth, 10).map(String), margin, y, pageHeight, margin);
-
-  // Interpretation page
-  pdf.addPage();
-  pdf.setFont('helvetica', 'bold');
-  pdf.setFontSize(14);
-  pdf.text('Interpretación simbólica (educativa)', margin, 18);
-
-  pdf.setFont('helvetica', 'normal');
-  pdf.setFontSize(10);
-
-  const interpretation = (params.interpretationText || '').trim();
-  const bodyText = interpretation
-    ? interpretation
-    : 'Sin interpretación generada en esta sesión. (Opcional: generar interpretación educativa desde el panel interno antes de exportar.)';
-
-  const lines = splitText(pdf, bodyText, pageWidth - margin * 2, 10);
-  let curY = 28;
-  for (const line of lines) {
-    if (curY > pageHeight - margin) {
-      pdf.addPage();
-      curY = margin;
+    let y = 28;
+    for (const logicalLine of section.lines) {
+      if (logicalLine === '') {
+        y += 3;
+        if (y > pageHeight - margin) {
+          pdf.addPage();
+          y = margin;
+        }
+        continue;
+      }
+      const wrapped = splitText(pdf, logicalLine, maxWidth, 10).map(String);
+      y = addWrappedLines(pdf, wrapped, margin, y, pageHeight, margin);
     }
-    pdf.text(String(line), margin, curY);
-    curY += 5;
   }
 
   // Disclaimer
@@ -259,15 +384,15 @@ export async function generateCabalaAplicadaGraphicPDF(params: CabalaAplicadaGra
   pdf.setFont('helvetica', 'normal');
   pdf.setFontSize(11);
 
-  const disclaimer = `Este documento es un material simbólico y educativo.
-
-No constituye diagnóstico médico ni psicológico, ni sustituye tratamiento profesional.
-
-La lectura requiere contexto clínico y criterio humano del terapeuta.`;
+  const disclaimer = `Este documento es un material simbólico y educativo.\n\nNo constituye diagnóstico médico ni psicológico, ni sustituye tratamiento profesional.\n\nLa lectura requiere contexto clínico y criterio humano del terapeuta.`;
 
   const dLines = splitText(pdf, disclaimer, pageWidth - margin * 2, 11);
-  curY = 30;
+  let curY = 30;
   for (const line of dLines) {
+    if (curY > pageHeight - margin) {
+      pdf.addPage();
+      curY = margin;
+    }
     pdf.text(String(line), margin, curY);
     curY += 6;
   }
@@ -285,10 +410,8 @@ La lectura requiere contexto clínico y criterio humano del terapeuta.`;
   const todayIso = new Date().toISOString().slice(0, 10);
   const filename = `Cabala_Aplicada_${params.patientName.replace(/\s+/g, '_')}_${todayIso}.pdf`;
 
-  // Save locally
   pdf.save(filename);
 
-  // Persist-friendly base64 (without data: prefix)
   const base64 = await withTimeout(blobToBase64(pdf.output('blob')), 30_000, 'Codificación base64 (PDF)');
 
   return { filename, base64 };

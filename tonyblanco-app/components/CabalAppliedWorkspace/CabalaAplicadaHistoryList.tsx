@@ -5,14 +5,11 @@ import { Download, Loader2 } from 'lucide-react';
 import { API_BASE_URL, getAuthToken } from '@/lib/api';
 import { CABALA_APLICADA_RECORD_SAVED_EVENT } from '@/lib/cabala-aplicada-api';
 import { getActivePatientId } from '@/lib/active-patient';
-
-type AnalysisRecordListItem = {
-  id: string;
-  created_at: string | null;
-  kind: string;
-  module_code: string;
-  computed_result?: unknown;
-};
+import {
+  extractMethodLabel,
+  safeDateLabel,
+  type AnalysisRecordListItem,
+} from './cabalaAplicadaActivity';
 
 function downloadJson(filename: string, data: unknown) {
   const blob = new Blob([JSON.stringify(data, null, 2)], {
@@ -26,29 +23,6 @@ function downloadJson(filename: string, data: unknown) {
   a.click();
   a.remove();
   URL.revokeObjectURL(url);
-}
-
-function safeDateLabel(iso: string | null) {
-  if (!iso) return '—';
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return '—';
-  return d.toLocaleString();
-}
-
-function extractMethodLabel(item: AnalysisRecordListItem): string {
-  const cr = item.computed_result as any;
-  const ca = cr?.cabala_aplicada;
-  const methodName = ca?.method_name;
-  const methodId = ca?.method_id || ca?.method;
-
-  if (typeof methodName === 'string' && methodName.trim()) return methodName;
-  if (typeof methodId === 'string' && methodId.trim()) return methodId;
-
-  if (typeof item.module_code === 'string' && item.module_code.startsWith('CABALA_APLICADA_')) {
-    return item.module_code.replace('CABALA_APLICADA_', '').toLowerCase();
-  }
-
-  return 'Método';
 }
 
 export default function CabalaAplicadaHistoryList() {

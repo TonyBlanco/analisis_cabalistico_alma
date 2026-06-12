@@ -14,6 +14,16 @@ export type CabalaAplicadaSavedRecord = {
   id: string;
 };
 
+export const CABALA_APLICADA_RECORD_SAVED_EVENT = 'cabalaAplicadaRecordSaved';
+
+/** Notifica al historial (y otros listeners) que hay un registro nuevo para el paciente. */
+export function dispatchCabalaAplicadaRecordSaved(patientId: number): void {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(
+    new CustomEvent(CABALA_APLICADA_RECORD_SAVED_EVENT, { detail: { patientId } }),
+  );
+}
+
 export async function saveCabalaAplicadaMethodRecord(
   patientId: number,
   payload: CabalaAplicadaMethodRecordPayload

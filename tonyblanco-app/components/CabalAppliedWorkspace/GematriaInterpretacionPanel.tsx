@@ -152,6 +152,15 @@ export default function GematriaInterpretacionPanel({
                 {interpretacion.comoSeCalcula}
               </p>
             )}
+            {interpretacion.utilidadTerapeutica && (
+              <p className="mt-3 text-sm leading-relaxed text-indigo-900/90 border-t border-indigo-100 pt-3">
+                <span className="font-semibold text-indigo-800">Utilidad en sesión: </span>
+                {interpretacion.utilidadTerapeutica}
+                <span className="mt-1 block text-[11px] text-indigo-600/80 italic">
+                  Orientación formativa; no sustituye criterio clínico ni diagnóstico.
+                </span>
+              </p>
+            )}
           </div>
         </div>
       </div>

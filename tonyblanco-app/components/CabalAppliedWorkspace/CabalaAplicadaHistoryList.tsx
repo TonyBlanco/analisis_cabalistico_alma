@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Download, Loader2 } from 'lucide-react';
 import { API_BASE_URL, getAuthToken } from '@/lib/api';
+import { CABALA_APLICADA_RECORD_SAVED_EVENT } from '@/lib/cabala-aplicada-api';
 import { getActivePatientId } from '@/lib/active-patient';
 
 type AnalysisRecordListItem = {
@@ -75,6 +76,19 @@ export default function CabalaAplicadaHistoryList() {
       window.removeEventListener('activePatientChanged', load);
     };
   }, []);
+
+  useEffect(() => {
+    const onRecordSaved = (event: Event) => {
+      const detail = (event as CustomEvent<{ patientId?: number }>).detail;
+      if (detail?.patientId && detail.patientId !== resolvedPatientId) return;
+      setReloadToken((n) => n + 1);
+    };
+
+    window.addEventListener(CABALA_APLICADA_RECORD_SAVED_EVENT, onRecordSaved);
+    return () => {
+      window.removeEventListener(CABALA_APLICADA_RECORD_SAVED_EVENT, onRecordSaved);
+    };
+  }, [resolvedPatientId]);
 
   useEffect(() => {
     if (!resolvedPatientId) {

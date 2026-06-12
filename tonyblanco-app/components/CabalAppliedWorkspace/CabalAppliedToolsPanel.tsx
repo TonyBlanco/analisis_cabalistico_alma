@@ -2,7 +2,10 @@
 
 import { useMemo, useState } from 'react';
 import CabalaAplicadaHistoryList from './CabalaAplicadaHistoryList';
-import { saveCabalaAplicadaMethodRecord } from '@/lib/cabala-aplicada-api';
+import {
+  dispatchCabalaAplicadaRecordSaved,
+  saveCabalaAplicadaMethodRecord,
+} from '@/lib/cabala-aplicada-api';
 import { generateCabalaAplicadaGraphicPDF } from './cabalaAplicadaPdf';
 import { SymbolicInterpretationPanel } from '@/components/SymbolicInterpretation';
 import { CorrespondencesPanel } from '@/components/SymbolicCorrespondences';
@@ -109,6 +112,7 @@ export default function CabalAppliedToolsPanel({
       if (res?.id) {
         onSnapshotSaved(res.id);
       }
+      dispatchCabalaAplicadaRecordSaved(patientId);
       setOk('Snapshot guardado.');
     } catch (e: any) {
       setError(e?.message || 'No se pudo guardar el snapshot.');
@@ -136,7 +140,32 @@ export default function CabalAppliedToolsPanel({
         swmV3Consent,
       });
       setInterpretation(result);
-      setOk('Interpretación generada (educativa).');
+
+      if (swmV3Consent.mode === 'no_store') {
+        setOk(
+          'Interpretación generada (educativa). Según el consentimiento SWM v3, esta lectura no se guarda en el historial.',
+        );
+        return;
+      }
+
+      if (!patientId) {
+        setOk('Interpretación generada. No hay paciente activo para persistir en historial.');
+        return;
+      }
+
+      const saved = await saveCabalaAplicadaMethodRecord(patientId, {
+        method_id: 'interpretation',
+        method_name: 'Lectura simbólica asistida (IA)',
+        symbolic_interpretation: result as unknown as Record<string, unknown>,
+        tree_state: (treeState as unknown as Record<string, unknown>) ?? null,
+        backend_structural_state: backendStructuralState ?? null,
+        input: { source: 'swm_v3', consent_mode: swmV3Consent.mode },
+      });
+      if (saved.id) {
+        onSnapshotSaved(saved.id);
+      }
+      dispatchCabalaAplicadaRecordSaved(patientId);
+      setOk('Interpretación generada y guardada en historial.');
     } catch (e: any) {
       setError(e?.message || 'No se pudo generar interpretación.');
     } finally {
@@ -196,6 +225,7 @@ export default function CabalAppliedToolsPanel({
           'Guardado en historial'
         );
 
+        dispatchCabalaAplicadaRecordSaved(patientId);
         setOk('PDF generado y guardado en historial (best-effort).');
       } catch (persistErr: any) {
         setOk('PDF generado. Guardado en historial pendiente (best-effort).');

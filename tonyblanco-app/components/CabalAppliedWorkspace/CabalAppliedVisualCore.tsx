@@ -203,7 +203,10 @@ import { ejecutarMetodoTemurah, adaptTemurahToTree } from '@holistica/symbolic/m
 import { ejecutarMetodoNotarikon, adaptNotarikonToTree } from '@holistica/symbolic/methods/notarikon';
 
 // Symbolic Interpretation AI
-import { saveCabalaAplicadaMethodRecord } from '@/lib/cabala-aplicada-api';
+import {
+  dispatchCabalaAplicadaRecordSaved,
+  saveCabalaAplicadaMethodRecord,
+} from '@/lib/cabala-aplicada-api';
 
 export type CabalaAplicadaWorkspaceExportState = {
   patientId: number | null;
@@ -589,6 +592,7 @@ export default function CabalAppliedVisualCore({
   const [clinicalContext, setClinicalContext] = useState<ClinicalContextSummary | null>(null);
   const [executeLoading, setExecuteLoading] = useState(false);
   const [executeError, setExecuteError] = useState<string | null>(null);
+  const [saveHistoryWarning, setSaveHistoryWarning] = useState<string | null>(null);
 
   const METHODS = useMemo(() => [
     { id: 'pitagoras', name: 'Pitágoras', run: (input: any) => ejecutarMetodoPitagorico(input as any) },
@@ -656,6 +660,7 @@ export default function CabalAppliedVisualCore({
 
   async function runSelectedMethodForPatient() {
     setExecuteError(null);
+    setSaveHistoryWarning(null);
 
     let profile = patientProfile;
     const needsProfileRefresh =
@@ -733,8 +738,13 @@ export default function CabalAppliedVisualCore({
           if (res.id) {
             onSnapshotSaved?.(res.id);
           }
+          dispatchCabalaAplicadaRecordSaved(activePatientId);
         } catch (e) {
-          console.warn('No se pudo guardar Cabala Aplicada en historial:', e);
+          const msg =
+            e instanceof Error ? e.message : 'No se pudo guardar en el historial.';
+          setSaveHistoryWarning(
+            `El método se ejecutó correctamente, pero no se pudo guardar en el historial: ${msg}`,
+          );
         }
       }
     } catch (err) {
@@ -1039,6 +1049,23 @@ export default function CabalAppliedVisualCore({
             />
           )}
 
+          {saveHistoryWarning && (
+            <div
+              className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900"
+              role="status"
+              aria-live="polite"
+            >
+              <p>{saveHistoryWarning}</p>
+              <button
+                type="button"
+                onClick={() => setSaveHistoryWarning(null)}
+                className="mt-2 text-xs font-medium text-amber-800 underline hover:text-amber-950"
+              >
+                Entendido
+              </button>
+            </div>
+          )}
+
           {activeSection === 'synthesis' && (
             <div className="mt-4 space-y-6">
               {methodRunner}
@@ -1217,6 +1244,21 @@ export default function CabalAppliedVisualCore({
           </div>
           )}
         </>
+      )}
+
+      {activeSection !== 'tree' && treeStructuralState && (
+        <div
+          className="pointer-events-none fixed left-[-99999px] top-0 z-[-1] h-72 w-[640px] overflow-hidden"
+          aria-hidden="true"
+        >
+          <div id="cabala-aplicada-export-tree" className="relative h-full w-full">
+            <TreeWithFlows
+              treeState={treeStructuralState}
+              size="responsive"
+              className="absolute inset-0 h-full w-full"
+            />
+          </div>
+        </div>
       )}
     </section>
   );

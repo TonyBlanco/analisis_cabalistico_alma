@@ -92,6 +92,30 @@ export const EXPLICACION_METODO: Record<string, string> = {
   'notarikon': 'Notarikon trabaja con las iniciales (rashei tevot) y finales (sofei tevot) de las palabras del nombre, formando una palabra oculta. Es el mensaje condensado del nombre.',
 };
 
+/** Para qué puede ayudar en sesión (tono observacional; no es diagnóstico). */
+export const UTILIDAD_METODO: Record<string, string> = {
+  'gematria-standard':
+    'Ofrece un punto de partida numérico compartido con la tradición hebrea. En sesión ayuda a anclar el nombre del consultante en un lenguaje simbólico reconocible y a contrastar resonancias con palabras clave (amor, vida, paz) sin forzar conclusiones.',
+  'gematria-katan':
+    'Reduce el ruido de los valores grandes y destaca la vibración esencial. Útil cuando el terapeuta quiere explorar la raíz numérica del nombre sin abrumar con magnitudes; invita a preguntas sobre patrones repetidos (1-9).',
+  'mispar-gadol':
+    'Resalta finales y culminaciones del nombre. En sesión puede orientar la conversación hacia potenciales latentes o cierres de ciclo simbólicos, siempre como hipótesis de trabajo que el terapeuta valida con el relato del consultante.',
+  'mispar-siduri':
+    'Muestra en qué etapa del alfabeto se sitúan las fuerzas del nombre. Ayuda a ordenar el proceso (inicio, desarrollo, cierre) y a vincular el nombre con secuencias evolutivas sin etiquetar al consultante.',
+  'milui':
+    'Abre el interior de cada letra mediante su deletreo. En sesión invita a profundizar en capas ocultas del nombre y a explorar significados que no aparecen en la lectura superficial.',
+  'atbash':
+    'Revela el reflejo invertido del nombre. Útil para explorar sombras simbólicas, complementos o perspectivas opuestas que el consultante aún no verbaliza, siempre como material de reflexión compartida.',
+  'albam':
+    'Intercambia mitades del alfabeto y muestra pares complementarios. En sesión puede facilitar diálogo sobre polaridades internas o recursos que equilibran una tendencia dominante observada en el caso.',
+  'avgad':
+    'Desplaza cada letra al paso siguiente. Orienta la conversación hacia impulsos evolutivos, direcciones emergentes o el “siguiente movimiento” simbólico que el consultante podría estar gestando.',
+  'temurah':
+    'Empareja letras por complemento numérico. Ayuda a identificar fuerzas que completan o equilibran el nombre; el terapeuta puede usarlo para preguntas sobre carencias percibidas y recursos compensatorios.',
+  'notarikon':
+    'Condensa iniciales y finales en un mensaje breve. En sesión sirve como mantra o síntesis simbólica del nombre, útil para cerrar una exploración o proponer una frase de trabajo reflexivo.',
+};
+
 // --- Tipos de salida de la interpretacion ---
 export interface LecturaNumero {
   valor: number;
@@ -116,6 +140,7 @@ export interface InterpretacionGematrica {
   nombreMetodo: string;
   queEs: string;
   comoSeCalcula: string;
+  utilidadTerapeutica: string;
   lecturaNumeros: {
     esencia: LecturaNumero;
     expresion: LecturaNumero;
@@ -152,6 +177,9 @@ export function interpretarAnalisis(
 ): InterpretacionGematrica {
   const nombreMetodo = NOMBRE_METODO[metodoId] ?? metodoId;
   const queEs = EXPLICACION_METODO[metodoId] ?? 'Metodo gematrico.';
+  const utilidadTerapeutica =
+    UTILIDAD_METODO[metodoId] ??
+    'Herramienta simbólica para orientar la reflexión en sesión; el terapeuta contrasta con el contexto del consultante.';
 
   const esencia = lecturaDeNumero(analisis.numeros.esencia, 'Esencia (vocales)');
   const expresion = lecturaDeNumero(analisis.numeros.expresion, 'Expresion (consonantes)');
@@ -212,6 +240,7 @@ export function interpretarAnalisis(
     nombreMetodo,
     queEs,
     comoSeCalcula,
+    utilidadTerapeutica,
     lecturaNumeros: { esencia, expresion, herencia, caminoVida },
     lecturaCasas,
     equivalencias,

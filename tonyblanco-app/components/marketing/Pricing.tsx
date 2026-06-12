@@ -99,7 +99,7 @@ export function MarketingPricing() {
           </article>
 
           <article className="relative flex flex-col gap-[22px] rounded-[20px] border-[1.5px] border-[var(--ha-acc)] bg-[var(--ha-surface)] p-[34px] shadow-[0_0_0_4px_var(--ha-ring),var(--ha-shadow)]">
-            <span className="absolute right-[18px] top-[18px] rounded-full bg-[var(--ha-grad)] px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--ha-acc-ink)]">
+            <span className="absolute right-[18px] top-[18px] rounded-full bg-[image:var(--ha-grad)] px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--ha-acc-ink)]">
               Popular
             </span>
             <div className="flex flex-col gap-2">

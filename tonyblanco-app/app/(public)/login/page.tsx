@@ -400,7 +400,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading || (Boolean(turnstileRef.current?.isEnforced()) && !turnstileReady)}
-                className="w-full rounded-xl border-0 bg-[var(--ha-grad)] px-4 py-3.5 text-[15px] font-bold text-[var(--ha-acc-ink)] shadow-[0_8px_24px_var(--ha-btn-glow)] transition-[transform,opacity] hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:hover:translate-y-0"
+                className="w-full rounded-xl border-0 bg-[image:var(--ha-grad)] px-4 py-3.5 text-[15px] font-bold text-[var(--ha-acc-ink)] shadow-[0_8px_24px_var(--ha-btn-glow)] transition-[transform,opacity] hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:hover:translate-y-0"
               >
                 {loading ? (
                   <span className="flex items-center justify-center gap-2">

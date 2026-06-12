@@ -8,15 +8,77 @@ import { getAuthToken } from '@/lib/api';
 
 const API_URL = getApiBaseUrl();
 
+/** Canales de envío de credenciales (UI; el backend actual no filtra por flags en el body). */
+type CredentialChannel = 'email' | 'telegram' | 'whatsapp';
+
+interface PatientFormData {
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string;
+  birth_date: string;
+}
+
+interface CreatePatientPayload {
+  first_name: string;
+  last_name: string;
+  email: string;
+  birth_date: string;
+  phone?: string;
+}
+
+interface CreatePatientCredentials {
+  username: string;
+  password: string;
+}
+
+interface CreatePatientResponse {
+  patient?: { id: number };
+  credentials?: CreatePatientCredentials;
+  email_sent?: boolean;
+  telegram_sent?: boolean;
+  telegram_link?: string;
+  whatsapp_sent?: boolean;
+  welcome_url?: string;
+  message?: string;
+  error?: string;
+}
+
 interface CreatePatientModalProps {
   open: boolean;
   onClose: () => void;
   onSuccess: () => void;
 }
 
+const INITIAL_FORM: PatientFormData = {
+  first_name: '',
+  last_name: '',
+  email: '',
+  phone: '',
+  birth_date: '',
+};
+
+const PHONE_PATTERN = /^\+?[0-9][0-9\s\-().]{7,18}[0-9]$/;
+
+const CREDENTIAL_CHANNEL_OPTIONS: Array<{
+  id: CredentialChannel;
+  label: string;
+  disabled?: boolean;
+  hint?: string;
+}> = [
+  { id: 'email', label: 'Email' },
+  { id: 'telegram', label: 'Telegram' },
+  {
+    id: 'whatsapp',
+    label: 'WhatsApp',
+    disabled: true,
+    hint: '(próximamente)',
+  },
+];
+
 /**
  * Create Patient Modal with Mandatory Disclaimer
- * 
+ *
  * B) Create Patient Modal (Mandatory Flow)
  * STEP 1: Disclaimer Modal (must accept)
  * STEP 2: Patient Form (only after accepting disclaimer)
@@ -29,29 +91,45 @@ export default function CreatePatientModal({
   const [showDisclaimer, setShowDisclaimer] = useState(true);
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
   const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({
-    first_name: '',
-    last_name: '',
-    email: '',
-    birth_date: '',
-  });
+  const [formData, setFormData] = useState<PatientFormData>(INITIAL_FORM);
+  const [credentialChannels, setCredentialChannels] = useState<CredentialChannel[]>(['email']);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-  const [createdCredentials, setCreatedCredentials] = useState<{
-    username: string;
-    password: string;
-  } | null>(null);
+  const [createdCredentials, setCreatedCredentials] = useState<CreatePatientCredentials | null>(null);
+  const [emailSent, setEmailSent] = useState<boolean | null>(null);
+  const [telegramSent, setTelegramSent] = useState<boolean | null>(null);
+  const [telegramLink, setTelegramLink] = useState<string | null>(null);
+  const [whatsappSent, setWhatsappSent] = useState<boolean | null>(null);
+  const [welcomeUrl, setWelcomeUrl] = useState<string | null>(null);
+
+  const resetFormState = () => {
+    setFormData(INITIAL_FORM);
+    setCredentialChannels(['email']);
+    setError(null);
+    setFieldErrors({});
+    setCreatedCredentials(null);
+    setEmailSent(null);
+    setTelegramSent(null);
+    setTelegramLink(null);
+    setWhatsappSent(null);
+    setWelcomeUrl(null);
+  };
+
+  const copyToClipboard = async (value: string) => {
+    try {
+      await navigator.clipboard.writeText(value);
+    } catch {
+      // ignore clipboard errors
+    }
+  };
 
   // Reset state when modal opens/closes
   useEffect(() => {
     if (open && !disclaimerAccepted) {
       setShowDisclaimer(true);
       setShowForm(false);
-      setFormData({ first_name: '', last_name: '', email: '', birth_date: '' });
-      setError(null);
-      setFieldErrors({});
-      setCreatedCredentials(null);
+      resetFormState();
     }
   }, [open, disclaimerAccepted]);
 
@@ -73,6 +151,18 @@ export default function CreatePatientModal({
     }
   };
 
+  const toggleCredentialChannel = (channel: CredentialChannel, checked: boolean) => {
+    if (channel === 'whatsapp') return;
+
+    setCredentialChannels((prev) => {
+      if (checked) {
+        return prev.includes(channel) ? prev : [...prev, channel];
+      }
+      const next = prev.filter((item) => item !== channel);
+      return next.length > 0 ? next : ['email'];
+    });
+  };
+
   const validateForm = (): boolean => {
     const errors: Record<string, string> = {};
 
@@ -90,6 +180,11 @@ export default function CreatePatientModal({
       errors.email = 'El email no es válido';
     }
 
+    const phone = formData.phone.trim();
+    if (phone && !PHONE_PATTERN.test(phone)) {
+      errors.phone = 'Introduce un teléfono internacional válido (ej. +34 600 000 000)';
+    }
+
     if (!formData.birth_date) {
       errors.birth_date = 'La fecha de nacimiento es requerida';
     } else {
@@ -100,8 +195,28 @@ export default function CreatePatientModal({
       }
     }
 
+    if (credentialChannels.length === 0) {
+      errors.credential_channels = 'Selecciona al menos un canal de envío';
+    }
+
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
+  };
+
+  const buildPayload = (): CreatePatientPayload => {
+    const payload: CreatePatientPayload = {
+      first_name: formData.first_name.trim(),
+      last_name: formData.last_name.trim(),
+      email: formData.email.trim(),
+      birth_date: formData.birth_date,
+    };
+
+    const phone = formData.phone.trim();
+    if (phone) {
+      payload.phone = phone;
+    }
+
+    return payload;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -116,32 +231,28 @@ export default function CreatePatientModal({
 
     try {
       const token = getAuthToken();
-      const payload = {
-        first_name: formData.first_name.trim(),
-        last_name: formData.last_name.trim(),
-        email: formData.email.trim(),
-        birth_date: formData.birth_date,
-      };
+      const payload = buildPayload();
 
       const response = await fetch(`${API_URL}/therapist/patients/create/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(token ? { 'Authorization': `Token ${token}` } : {}),
+          ...(token ? { Authorization: `Token ${token}` } : {}),
         },
         body: JSON.stringify(payload),
       });
 
-      const data = await response.json();
+      const data = (await response.json()) as CreatePatientResponse;
 
       if (!response.ok) {
         if (response.status === 400 && data) {
           const backendErrors: Record<string, string> = {};
           Object.keys(data).forEach((key) => {
-            if (Array.isArray(data[key])) {
-              backendErrors[key] = data[key][0];
-            } else {
-              backendErrors[key] = data[key];
+            const value = (data as Record<string, unknown>)[key];
+            if (Array.isArray(value)) {
+              backendErrors[key] = String(value[0]);
+            } else if (typeof value === 'string') {
+              backendErrors[key] = value;
             }
           });
           setFieldErrors(backendErrors);
@@ -161,15 +272,16 @@ export default function CreatePatientModal({
         throw new Error(data.error || data.message || 'Error al crear consultante');
       }
 
-      // Success - show credentials
       if (data.credentials) {
         setCreatedCredentials(data.credentials);
-        // Show credentials for a moment, then close and refresh
-        setTimeout(() => {
-          onSuccess();
-        }, 3000);
+        setEmailSent(typeof data.email_sent === 'boolean' ? data.email_sent : null);
+        setTelegramSent(typeof data.telegram_sent === 'boolean' ? data.telegram_sent : null);
+        setTelegramLink(typeof data.telegram_link === 'string' ? data.telegram_link : null);
+        setWhatsappSent(typeof data.whatsapp_sent === 'boolean' ? data.whatsapp_sent : null);
+        setWelcomeUrl(typeof data.welcome_url === 'string' ? data.welcome_url : null);
       } else {
         onSuccess();
+        handleClose();
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error al crear el consultante';
@@ -185,12 +297,36 @@ export default function CreatePatientModal({
       setShowDisclaimer(true);
       setDisclaimerAccepted(false);
       setShowForm(false);
-      setFormData({ first_name: '', last_name: '', email: '', birth_date: '' });
-      setError(null);
-      setFieldErrors({});
-      setCreatedCredentials(null);
+      resetFormState();
       onClose();
     }
+  };
+
+  const handleCredentialsDone = () => {
+    onSuccess();
+    handleClose();
+  };
+
+  const successSummary = () => {
+    const wantsEmail = credentialChannels.includes('email');
+    const wantsTelegram = credentialChannels.includes('telegram');
+
+    if (wantsTelegram && telegramSent === true) {
+      return 'Notificación enviada por Telegram.';
+    }
+    if (wantsTelegram && telegramLink) {
+      return 'Comparte el enlace de Telegram con el consultante para activar el acceso.';
+    }
+    if (wantsEmail && emailSent === true) {
+      return 'Credenciales enviadas por email.';
+    }
+    if (wantsEmail && emailSent === false) {
+      return 'No se pudo enviar el email. Comparte el enlace de Telegram o las credenciales manualmente.';
+    }
+    if (whatsappSent === true) {
+      return 'Credenciales enviadas también por WhatsApp.';
+    }
+    return 'Comparte las credenciales o el enlace de acceso con el consultante.';
   };
 
   // Reset disclaimer state when modal closes
@@ -200,6 +336,11 @@ export default function CreatePatientModal({
       setDisclaimerAccepted(false);
       setShowForm(false);
       setCreatedCredentials(null);
+      setEmailSent(null);
+      setTelegramSent(null);
+      setTelegramLink(null);
+      setWhatsappSent(null);
+      setWelcomeUrl(null);
     }
   }, [open]);
 
@@ -249,26 +390,74 @@ export default function CreatePatientModal({
                 <p className="text-sm font-medium text-green-800 mb-2">
                   ✓ Consultante creado exitosamente
                 </p>
-                <p className="text-sm text-green-700">
-                  Las credenciales se han enviado por email al consultante.
-                </p>
+                <p className="text-sm text-green-700">{successSummary()}</p>
               </div>
               <div className="bg-gray-50 border border-gray-200 rounded-md p-4">
                 <p className="text-sm font-medium text-gray-900 mb-2">Credenciales generadas:</p>
-                <div className="space-y-2 text-sm">
-                  <div>
-                    <span className="font-medium text-gray-700">Usuario: </span>
-                    <span className="font-mono text-gray-900">{createdCredentials.username}</span>
+                <div className="space-y-3 text-sm">
+                  <div className="flex items-center justify-between gap-2">
+                    <div>
+                      <span className="font-medium text-gray-700">Usuario: </span>
+                      <span className="font-mono text-gray-900">{createdCredentials.username}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => copyToClipboard(createdCredentials.username)}
+                      className="text-xs text-gray-600 hover:text-gray-900 underline"
+                    >
+                      Copiar
+                    </button>
                   </div>
-                  <div>
-                    <span className="font-medium text-gray-700">Contraseña temporal: </span>
-                    <span className="font-mono text-gray-900">{createdCredentials.password}</span>
+                  <div className="flex items-center justify-between gap-2">
+                    <div>
+                      <span className="font-medium text-gray-700">Contraseña temporal: </span>
+                      <span className="font-mono text-gray-900">{createdCredentials.password}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => copyToClipboard(createdCredentials.password)}
+                      className="text-xs text-gray-600 hover:text-gray-900 underline"
+                    >
+                      Copiar
+                    </button>
                   </div>
                 </div>
+                {credentialChannels.includes('telegram') && telegramLink && (
+                  <div className="mt-3 p-3 bg-blue-50 border border-blue-100 rounded-md">
+                    <p className="text-xs text-blue-900 font-medium mb-1">Enlace Telegram (recomendado)</p>
+                    <p className="text-xs text-blue-800 break-all">{telegramLink}</p>
+                    <button
+                      type="button"
+                      onClick={() => copyToClipboard(telegramLink)}
+                      className="mt-2 text-xs text-blue-700 hover:text-blue-900 underline"
+                    >
+                      Copiar enlace Telegram
+                    </button>
+                    <p className="text-xs text-blue-700 mt-2">
+                      El consultante abre el enlace, pulsa Iniciar en el bot y recibe credenciales al instante.
+                    </p>
+                  </div>
+                )}
                 <p className="text-xs text-gray-500 mt-3">
-                  Estas credenciales también se han enviado por email. El modal se cerrará automáticamente.
+                  También puede entrar en https://studios33.app/login
                 </p>
+                {welcomeUrl && (
+                  <button
+                    type="button"
+                    onClick={() => copyToClipboard(welcomeUrl)}
+                    className="mt-2 text-xs text-gray-600 hover:text-gray-900 underline"
+                  >
+                    Copiar enlace web de acceso
+                  </button>
+                )}
               </div>
+              <button
+                type="button"
+                onClick={handleCredentialsDone}
+                className="w-full px-4 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-800 transition-colors"
+              >
+                Listo
+              </button>
             </div>
           ) : (
             <>
@@ -342,6 +531,32 @@ export default function CreatePatientModal({
                 </div>
 
                 <div>
+                  <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
+                    Teléfono
+                  </label>
+                  <input
+                    id="phone"
+                    name="phone"
+                    type="tel"
+                    inputMode="tel"
+                    autoComplete="tel"
+                    placeholder="+34 600 000 000"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    className={`w-full px-4 py-2 bg-white border rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition-colors ${
+                      fieldErrors.phone ? 'border-red-300' : 'border-gray-300'
+                    }`}
+                  />
+                  {fieldErrors.phone ? (
+                    <p className="mt-1 text-xs text-red-600">{fieldErrors.phone}</p>
+                  ) : (
+                    <p className="mt-1 text-xs text-gray-500">
+                      Formato internacional recomendado. Se guarda en la ficha del consultante.
+                    </p>
+                  )}
+                </div>
+
+                <div>
                   <label htmlFor="birth_date" className="block text-sm font-medium text-gray-700 mb-2">
                     Fecha de nacimiento <span className="text-red-500">*</span>
                   </label>
@@ -362,10 +577,56 @@ export default function CreatePatientModal({
                   )}
                 </div>
 
+                <fieldset className="border border-gray-200 rounded-md p-4">
+                  <legend className="text-sm font-medium text-gray-700 px-1">
+                    Enviar credenciales por
+                  </legend>
+                  <div className="mt-2 space-y-2">
+                    {CREDENTIAL_CHANNEL_OPTIONS.map((option) => {
+                      const checked = credentialChannels.includes(option.id);
+                      const inputId = `credential-channel-${option.id}`;
+
+                      return (
+                        <label
+                          key={option.id}
+                          htmlFor={inputId}
+                          className={`flex items-center gap-2 text-sm ${
+                            option.disabled ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700 cursor-pointer'
+                          }`}
+                        >
+                          <input
+                            id={inputId}
+                            type="checkbox"
+                            checked={checked}
+                            disabled={option.disabled || loading}
+                            onChange={(event) => toggleCredentialChannel(option.id, event.target.checked)}
+                            className="h-4 w-4 rounded border-gray-300 text-gray-900 focus:ring-gray-400 disabled:opacity-50"
+                          />
+                          <span>
+                            {option.label}
+                            {option.hint ? ` ${option.hint}` : ''}
+                          </span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                  {credentialChannels.includes('telegram') && (
+                    <p className="mt-3 text-xs text-gray-600">
+                      Telegram no usa un @usuario en el alta: el backend genera un enlace único
+                      (<code className="text-gray-800">telegram_link</code>) para que el consultante active el bot.
+                    </p>
+                  )}
+                  {fieldErrors.credential_channels && (
+                    <p className="mt-2 text-xs text-red-600">{fieldErrors.credential_channels}</p>
+                  )}
+                </fieldset>
+
                 <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
                   <p className="text-sm text-blue-800">
-                    <strong>Nota:</strong> El sistema generará automáticamente un username único (formato: PAT-XXXX)
-                      y una contraseña temporal segura. Las credenciales se enviarán al email del consultante.
+                    <strong>Nota:</strong> Se generan usuario y contraseña temporal automáticamente.
+                    {credentialChannels.includes('email') && ' Se enviará email si el servidor lo tiene activo.'}
+                    {credentialChannels.includes('telegram') &&
+                      ' Tras crear, comparte el enlace de Telegram que aparecerá en pantalla.'}
                   </p>
                 </div>
 

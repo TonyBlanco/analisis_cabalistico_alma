@@ -1,5 +1,4 @@
 """Tests for phone/telegram/send_via on patient creation."""
-from datetime import date
 from unittest.mock import patch
 
 from django.contrib.auth.models import User
@@ -8,6 +7,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
 
 from api.models import Patient, UserProfile
+from api.notifications.dispatch import PatientAccessNotificationResult
 
 
 class CreatePatientChannelsTests(APITestCase):
@@ -20,8 +20,15 @@ class CreatePatientChannelsTests(APITestCase):
         self.token = Token.objects.create(user=self.therapist).key
         self.client.credentials(HTTP_AUTHORIZATION=f'Token {self.token}')
 
-    @patch('api.emails.send_patient_account_credentials_email', return_value=True)
-    def test_create_patient_with_phone_telegram_and_send_via(self, mock_email):
+    @patch('api.views.notify_patient_account_access')
+    def test_create_patient_with_phone_telegram_and_send_via(self, mock_notify):
+        mock_notify.return_value = PatientAccessNotificationResult(
+            welcome_url='https://studios33.app/welcome/patient?token=test',
+            telegram_link='https://t.me/Studios33Bot?start=pabc',
+            email_sent=True,
+            telegram_sent=False,
+            whatsapp_sent=False,
+        )
         response = self.client.post(
             '/api/therapist/patients/create/',
             {
@@ -37,13 +44,13 @@ class CreatePatientChannelsTests(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertTrue(response.data.get('email_sent'))
-        self.assertFalse(response.data.get('telegram_sent'))
+        self.assertIn('telegram_link', response.data)
 
         patient = Patient.objects.get(email='ana.lopez@example.com')
         self.assertEqual(patient.phone, '+34 600 000 000')
         self.assertEqual(patient.telegram, 'analopez')
         self.assertEqual(patient.send_credentials_via, ['email', 'telegram'])
-        mock_email.assert_called_once()
+        mock_notify.assert_called_once()
 
     def test_telegram_required_when_channel_selected(self):
         response = self.client.post(

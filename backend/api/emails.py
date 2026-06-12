@@ -567,15 +567,31 @@ def send_therapist_patient_invitation_email(
 
 def send_patient_account_credentials_email(
     *,
-    to_email: str,
-    first_name: str,
+    patient_email: str,
+    patient_first_name: str,
     username: str,
     temp_password: str,
+    therapist_name: str,
+    welcome_url: str = '',
+    telegram_link: str = '',
 ) -> bool:
-    """Envía credenciales de acceso al consultante recién creado."""
+    """Envía credenciales de acceso al consultante recién creado por su terapeuta."""
     frontend_url = getattr(settings, 'FRONTEND_URL', 'https://studios33.app').rstrip('/')
-    login_url = f'{frontend_url}/login'
-    subject = f'{getattr(settings, "EMAIL_SUBJECT_PREFIX", "")}Bienvenido/a a Studios33 — Credenciales de acceso'
+    login_url = welcome_url or f'{frontend_url}/login'
+    direct_access_note = (
+        f'<p style="text-align:center;"><a class="button" href="{welcome_url}" target="_blank">Acceder a mi cuenta</a></p>'
+        if welcome_url
+        else ''
+    )
+    telegram_block = (
+        f'<p>O abre Telegram para recibir avisos y activar tu acceso: <a href="{telegram_link}">{telegram_link}</a></p>'
+        if telegram_link
+        else ''
+    )
+    display_name = (patient_first_name or '').strip() or username
+    therapist_label = (therapist_name or '').strip() or 'tu terapeuta'
+
+    subject = f'{settings.EMAIL_SUBJECT_PREFIX}Acceso a Studios33 — credenciales de tu cuenta'
 
     html_message = f"""
     <!DOCTYPE html>
@@ -585,24 +601,26 @@ def send_patient_account_credentials_email(
             body {{ font-family: Arial, sans-serif; background-color: #0A0A1F; color: #ffffff; }}
             .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
             .content {{ background-color: #1a1a2e; border-radius: 12px; padding: 30px; margin: 20px 0; }}
-            .credentials {{ background-color: #111; border: 1px solid #333; border-radius: 8px; padding: 16px; }}
-            .footer {{ text-align: center; padding: 20px; color: #666; font-size: 12px; }}
+            .credentials {{ background-color: #0f0f23; border-radius: 8px; padding: 16px; margin: 16px 0; }}
+            .credentials p {{ margin: 8px 0; }}
+            .mono {{ font-family: monospace; color: #D4AF37; }}
+            .button {{ display: inline-block; padding: 14px 28px; background-color: #D4AF37; color: #000;
+                text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0; }}
         </style>
     </head>
     <body>
         <div class="container">
             <div class="content">
-                <p>Hola {first_name},</p>
-                <p>Tu terapeuta ha creado tu cuenta en Studios33. Estas son tus credenciales de acceso:</p>
+                <p>Hola {display_name},</p>
+                <p><strong>{therapist_label}</strong> ha creado tu cuenta de consultante en Studios33.</p>
                 <div class="credentials">
-                    <p><strong>Usuario:</strong> {username}</p>
-                    <p><strong>Contraseña temporal:</strong> {temp_password}</p>
+                    <p><strong>Usuario:</strong> <span class="mono">{username}</span></p>
+                    <p><strong>Contraseña temporal:</strong> <span class="mono">{temp_password}</span></p>
                 </div>
-                <p>Puedes iniciar sesión en <a href="{login_url}" style="color:#D4AF37;">{login_url}</a>.</p>
-                <p>Cambia tu contraseña después del primer acceso.</p>
-            </div>
-            <div class="footer">
-                <p>Este es un email automático. Si no esperabas este mensaje, contacta a tu terapeuta.</p>
+                <p>Por seguridad, cambia tu contraseña después del primer inicio de sesión.</p>
+                {direct_access_note or f'<p style="text-align:center;"><a class="button" href="{login_url}" target="_blank">Iniciar sesión</a></p>'}
+                {telegram_block}
+                <p style="font-size: 12px; color: #888;">Si no esperabas este mensaje, contacta a tu terapeuta antes de usar la cuenta.</p>
             </div>
         </div>
     </body>
@@ -610,14 +628,17 @@ def send_patient_account_credentials_email(
     """
 
     plain_message = f"""
-    Hola {first_name},
+    Acceso a Studios33
 
-    Tu terapeuta ha creado tu cuenta en Studios33.
+    Hola {display_name},
+
+    {therapist_label} ha creado tu cuenta de consultante.
 
     Usuario: {username}
     Contraseña temporal: {temp_password}
 
-    Inicia sesión en: {login_url}
+    Accede aquí: {login_url}
+    {f'Telegram: {telegram_link}' if telegram_link else ''}
 
     Cambia tu contraseña después del primer acceso.
     """
@@ -627,13 +648,13 @@ def send_patient_account_credentials_email(
             subject=subject,
             body=plain_message,
             from_email=settings.DEFAULT_FROM_EMAIL,
-            to=[to_email],
+            to=[patient_email],
         )
         email.attach_alternative(html_message, 'text/html')
         email.send(fail_silently=False)
         return True
     except Exception as e:
-        print(f'Error enviando credenciales de consultante: {e}')
+        print(f'Error enviando email de credenciales de consultante: {e}')
         return False
 
 

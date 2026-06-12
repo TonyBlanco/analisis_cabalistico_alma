@@ -58,6 +58,7 @@ from .serializers import (
 )
 from .serializers import UserBirthDataSerializer
 from .emails import send_welcome_email, send_booking_confirmation_email
+from .notifications.dispatch import notify_patient_account_access
 
 
 # Vista para la raíz /api/
@@ -2140,29 +2141,18 @@ class CreatePatientWithAccountView(APIView):
             ).count()
             therapist_profile.save()
             
-            import logging
-            from .emails import send_patient_account_credentials_email
-
-            logger = logging.getLogger(__name__)
-            email_sent = False
-            telegram_sent = False
-
-            if 'email' in send_via:
-                email_sent = send_patient_account_credentials_email(
-                    to_email=email,
-                    first_name=first_name,
-                    username=username,
-                    temp_password=temp_password,
-                )
-
-            if 'telegram' in send_via:
-                # TODO: integrar bot/servicio Telegram cuando esté disponible en prod.
-                logger.warning(
-                    'TODO: envío de credenciales por Telegram pendiente — patient_id=%s telegram=%s',
-                    patient.id,
-                    telegram,
-                )
-                telegram_sent = False
+            therapist_name = therapist_profile.full_name or request.user.get_full_name() or request.user.username
+            notification = notify_patient_account_access(
+                patient_id=patient.id,
+                user_id=user.id,
+                patient_email=email,
+                patient_phone=phone,
+                patient_first_name=first_name,
+                username=username,
+                temp_password=temp_password,
+                therapist_name=therapist_name,
+                send_via=send_via,
+            )
 
             # Serializar respuesta con datos del paciente
             from .serializers import PatientSerializer
@@ -2175,8 +2165,11 @@ class CreatePatientWithAccountView(APIView):
                     'username': username,
                     'password': temp_password
                 },
-                'email_sent': email_sent,
-                'telegram_sent': telegram_sent,
+                'email_sent': notification.email_sent,
+                'telegram_sent': notification.telegram_sent,
+                'telegram_link': notification.telegram_link,
+                'whatsapp_sent': notification.whatsapp_sent,
+                'welcome_url': notification.welcome_url,
                 'message': 'Paciente creado exitosamente'
             }, status=status.HTTP_201_CREATED)
             
@@ -2191,6 +2184,93 @@ class CreatePatientWithAccountView(APIView):
                 {'error': f'Error al crear paciente: {str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+
+class ResendPatientCredentialsView(APIView):
+    """
+    Regenera contraseña temporal y reenvía credenciales al consultante.
+    Ruta: POST /api/therapist/patients/<pk>/resend-credentials/
+    """
+    permission_classes = [IsAuthenticated, IsTherapist]
+    RESEND_COOLDOWN_SECONDS = 60
+
+    def post(self, request, pk):
+        from django.core.cache import cache
+
+        cache_key = f'patient_resend:{request.user.id}:{pk}'
+        if cache.get(cache_key):
+            return Response(
+                {
+                    'error': 'rate_limited',
+                    'message': 'Espera un momento antes de reenviar credenciales otra vez.',
+                },
+                status=status.HTTP_429_TOO_MANY_REQUESTS,
+            )
+
+        try:
+            patient = Patient.objects.select_related('user', 'therapist__profile').get(pk=pk)
+        except Patient.DoesNotExist:
+            return Response({'error': 'Consultante no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+
+        if patient.therapist_id != request.user.id:
+            return Response({'error': 'No autorizado'}, status=status.HTTP_403_FORBIDDEN)
+
+        if not patient.user_id:
+            return Response(
+                {'error': 'Este consultante no tiene cuenta de acceso. Usa «Vincular cuenta existente».'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user = patient.user
+        if not patient.email and not user.email:
+            return Response({'error': 'El consultante no tiene email registrado'}, status=status.HTTP_400_BAD_REQUEST)
+
+        creator = CreatePatientWithAccountView()
+        temp_password = creator._generate_temp_password()
+        user.set_password(temp_password)
+        user.save(update_fields=['password'])
+
+        therapist_profile = request.user.profile
+        therapist_name = therapist_profile.full_name or request.user.get_full_name() or request.user.username
+        target_email = patient.email or user.email
+        target_phone = patient.phone or getattr(user.profile, 'phone', '')
+        send_via = patient.send_credentials_via or ['email']
+
+        notification = notify_patient_account_access(
+            patient_id=patient.id,
+            user_id=user.id,
+            patient_email=target_email,
+            patient_phone=target_phone,
+            patient_first_name=patient.first_name or user.first_name,
+            username=user.username,
+            temp_password=temp_password,
+            therapist_name=therapist_name,
+            send_via=send_via,
+        )
+
+        cache.set(cache_key, True, self.RESEND_COOLDOWN_SECONDS)
+
+        channels = []
+        if notification.email_sent:
+            channels.append('email')
+        if notification.telegram_sent:
+            channels.append('Telegram')
+        if notification.whatsapp_sent:
+            channels.append('WhatsApp')
+        channel_note = ', '.join(channels) if channels else 'ningún canal'
+
+        return Response({
+            'credentials': {
+                'username': user.username,
+                'password': temp_password,
+            },
+            'email_sent': notification.email_sent,
+            'telegram_sent': notification.telegram_sent,
+            'telegram_link': notification.telegram_link,
+            'whatsapp_sent': notification.whatsapp_sent,
+            'welcome_url': notification.welcome_url,
+            'message': f'Credenciales reenviadas por {channel_note}',
+        })
 
 
 class SessionListCreateView(generics.ListCreateAPIView):

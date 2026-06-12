@@ -131,6 +131,11 @@ class UserProfile(models.Model):
     full_name = models.CharField(max_length=255)  # Nombre para cálculos cabalísticos
     legal_full_name = models.CharField(max_length=255, blank=True)  # Nombre legal completo
     phone = models.CharField(max_length=20, blank=True)
+    telegram_chat_id = models.BigIntegerField(
+        null=True,
+        blank=True,
+        help_text='Chat ID de Telegram vinculado vía bot (notificaciones)',
+    )
 
     # Demografía
     biological_sex = models.CharField(
@@ -605,6 +610,35 @@ class TherapistPatientInvitation(models.Model):
 
     def __str__(self):
         return f"Invitación {self.therapist_id} → {self.target_user_id} ({self.status})"
+
+
+class TelegramLinkToken(models.Model):
+    """Código corto para deep-link t.me/bot?start=… (máx. 64 chars en Telegram)."""
+    PURPOSE_CHOICES = [
+        ('patient_welcome', 'Bienvenida consultante'),
+        ('user_link', 'Vincular cuenta existente'),
+        ('invitation', 'Invitación terapeuta'),
+    ]
+
+    code = models.CharField(max_length=32, unique=True, db_index=True)
+    purpose = models.CharField(max_length=32, choices=PURPOSE_CHOICES)
+    user_id = models.IntegerField(help_text='Usuario Django a vincular')
+    patient_id = models.IntegerField(null=True, blank=True)
+    invitation_id = models.IntegerField(null=True, blank=True)
+    context = models.JSONField(default=dict, blank=True)
+    expires_at = models.DateTimeField()
+    consumed_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Token enlace Telegram'
+        verbose_name_plural = 'Tokens enlace Telegram'
+        indexes = [
+            models.Index(fields=['code', 'expires_at'], name='tg_link_code_exp_idx'),
+        ]
+
+    def __str__(self):
+        return f'TelegramLinkToken({self.code}, {self.purpose})'
 
 
 class Session(models.Model):

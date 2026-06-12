@@ -315,7 +315,7 @@ class BioEmotionalSessionSerializer(serializers.ModelSerializer):
 
     therapist_id = serializers.IntegerField(source="therapist.id", read_only=True, allow_null=True)
     patient_id = serializers.IntegerField(source="patient.id", read_only=True)
-    patient_name = serializers.CharField(source="patient.nombre", read_only=True)
+    patient_name = serializers.CharField(source="patient.full_name", read_only=True)
 
     class Meta:
         model = BioEmotionalSession
@@ -380,7 +380,8 @@ class RegionRankingSerializer(serializers.Serializer):
 
 class EmotionalTrendSerializer(serializers.Serializer):
     """Tendencia emocional a lo largo de sesiones."""
-    date = serializers.DateField()
+    # DateTimeField: BioEmotionalSession.date es DateTimeField (auto_now_add).
+    date = serializers.DateTimeField()
     state = serializers.CharField()
     feeling_score = serializers.IntegerField(allow_null=True)
 
@@ -388,7 +389,7 @@ class EmotionalTrendSerializer(serializers.Serializer):
 class SessionSummarySerializer(serializers.Serializer):
     """Resumen de sesión para exportación."""
     id = serializers.UUIDField()
-    date = serializers.DateField()
+    date = serializers.DateTimeField()
     emotional_state = serializers.CharField()
     observations_count = serializers.IntegerField()
     hypotheses_count = serializers.IntegerField()
@@ -434,7 +435,7 @@ class SCID5CorrelationResultSerializer(serializers.Serializer):
 class BioEmotionalSessionListSerializer(serializers.ModelSerializer):
     """Serializer ligero para listados de sesiones (timeline)."""
 
-    patient_name = serializers.CharField(source="patient.nombre", read_only=True)
+    patient_name = serializers.CharField(source="patient.full_name", read_only=True)
 
     class Meta:
         model = BioEmotionalSession

@@ -373,7 +373,79 @@ export const FULL_DECK: TarotCard[] = [
 ];
 
 // ---------------------------------------------------------------------------
-// 3. CALCULADORA Y MOTOR DE LECTURAS
+// 3. CARTA NATAL — cálculo determinista por fecha de nacimiento
+// ---------------------------------------------------------------------------
+
+export interface BirthCards {
+  soulCard: TarotCard;
+  personalityCard: TarotCard;
+  yearCard: TarotCard;
+}
+
+/** Suma los dígitos decimales de un número entero positivo. */
+function sumDigits(n: number): number {
+  return String(Math.abs(n))
+    .split('')
+    .reduce((acc, d) => acc + Number(d), 0);
+}
+
+/**
+ * Calcula las cartas natales usando numerología tarot estándar sobre los 22 Arcanos Mayores.
+ *
+ * Algoritmo:
+ * 1. Concatenar DD (pad 2) + MM (pad 2) + YYYY y sumar todos los dígitos.
+ * 2. Si la suma > 21, reducir una vez (sumar sus dígitos).
+ *    22 se mapea a 0 (El Loco).
+ * 3. personalityNumber = resultado; soulNumber = reducir personality si ≥ 10.
+ * 4. yearCard = misma reducción usando día + mes + año actual.
+ *
+ * @param birthDate Fecha de nacimiento del paciente.
+ * @param year Año de referencia para la Carta del Año (default: año actual).
+ * @returns BirthCards con las tres cartas, o null si la fecha es inválida.
+ */
+export function computeBirthCards(
+  birthDate: Date,
+  year: number = new Date().getFullYear()
+): BirthCards | null {
+  if (!(birthDate instanceof Date) || isNaN(birthDate.getTime())) {
+    return null;
+  }
+
+  const day = birthDate.getDate();
+  const month = birthDate.getMonth() + 1;
+  const birthYear = birthDate.getFullYear();
+
+  const reduceDate = (d: number, m: number, y: number): number => {
+    const str =
+      String(d).padStart(2, '0') +
+      String(m).padStart(2, '0') +
+      String(y);
+    const total = str.split('').reduce((acc, ch) => acc + Number(ch), 0);
+    const reduced = total > 21 ? sumDigits(total) : total;
+    // 22 mapea a 0 (El Loco)
+    return reduced === 22 ? 0 : reduced;
+  };
+
+  const personalityNumber = reduceDate(day, month, birthYear);
+  const soulNumber = personalityNumber >= 10 ? sumDigits(personalityNumber) : personalityNumber;
+  const yearNumber = reduceDate(day, month, year);
+
+  const findCard = (n: number): TarotCard | undefined =>
+    ARCANOS_MAYORES.find((c) => c.number === n);
+
+  const personalityCard = findCard(personalityNumber);
+  const soulCard = findCard(soulNumber);
+  const yearCard = findCard(yearNumber);
+
+  if (!personalityCard || !soulCard || !yearCard) {
+    return null;
+  }
+
+  return { soulCard, personalityCard, yearCard };
+}
+
+// ---------------------------------------------------------------------------
+// 4. CALCULADORA Y MOTOR DE LECTURAS
 // ---------------------------------------------------------------------------
 
 export class TarotEngine {

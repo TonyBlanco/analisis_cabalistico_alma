@@ -1,2 +1,30 @@
 import type { MisparGadolInput } from './types';
-export function calcularAnalisisMisparGadol(input: MisparGadolInput){ const name=input.nombreCompleto||''; let seed=0; for(let i=0;i<name.length;i++) seed += name.charCodeAt(i); const casas={}; for(let i=1;i<=9;i++){ (casas as any)[i]={numero:i,conteo:(seed+i)%5,letras:[]} } return { identidad:{nombreCompleto:name,fechaNacimiento:`${input.fechaNacimiento.anio}-${input.fechaNacimiento.mes}-${input.fechaNacimiento.dia}`}, numeros:{esencia:{original:seed,reducido:(seed%9)+1,esMaestro:false},expresion:{original:seed+1,reducido:((seed+1)%9)+1,esMaestro:false},herencia:{original:seed+2,reducido:((seed+2)%9)+1,esMaestro:false},caminoVida:{original:seed+3,reducido:((seed+3)%9)+1,esMaestro:false,edadTransformacion:0}}, casasInclusion:casas,ausencias:[],dominantes:[],metadatos:{metodo:'mispar-gadol',sistema:'mispar',alfabeto:'hebrew',version:'1.0.0',timestamp:new Date().toISOString()}} }
+import {
+	normalizarHebreo,
+	analizarConValores,
+	valorPorTabla,
+	MISPAR_GADOL,
+	crearMetadatos,
+} from '../../cabala/gematria-core';
+
+/**
+ * Mispar Gadol: como el estandar, pero las finales valen 500-900
+ * (kaf=500, mem=600, nun=700, pe=800, tsadi=900).
+ */
+export function calcularAnalisisMisparGadol(input: MisparGadolInput) {
+	const hebreo = normalizarHebreo(input.nombreCompleto || '');
+	const analisis = analizarConValores({
+		entrada: { nombreCompleto: input.nombreCompleto || '', fechaNacimiento: input.fechaNacimiento },
+		textoHebreoOriginal: hebreo,
+		textoEvaluado: hebreo,
+		valorDeLetra: valorPorTabla(MISPAR_GADOL),
+	});
+	return {
+		...analisis,
+		metadatos: crearMetadatos(
+			'mispar-gadol',
+			'mispar',
+			'Mispar Gadol: estandar con finales 500-900 (kaf=500, mem=600, nun=700, pe=800, tsadi=900).',
+		),
+	};
+}

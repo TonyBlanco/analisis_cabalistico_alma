@@ -1,1 +1,34 @@
-import type { AvgadInput } from './types'; export function calcularAnalisisAvgad(i:AvgadInput){ const name=i.nombreCompleto||''; let seed=0; for(let j=0;j<name.length;j++) seed += name.charCodeAt(j); const casas:{}={} as any; for(let k=1;k<=9;k++){ (casas as any)[k]={numero:k,conteo:(seed+k)%5,letras:[]} } return {identidad:{nombreCompleto:name,fechaNacimiento:`${i.fechaNacimiento.anio}-${i.fechaNacimiento.mes}-${i.fechaNacimiento.dia}`},numeros:{esencia:{original:seed,reducido:(seed%9)+1,esMaestro:false},expresion:{original:seed+1,reducido:((seed+1)%9)+1,esMaestro:false},herencia:{original:seed+2,reducido:((seed+2)%9)+1,esMaestro:false},caminoVida:{original:seed+3,reducido:((seed+3)%9)+1,esMaestro:false,edadTransformacion:0}},casasInclusion:casas,ausencias:[],dominantes:[],metadatos:{metodo:'avgad',sistema:'subst',alfabeto:'hebrew',version:'1.0.0',timestamp:new Date().toISOString()}} }
+import type { AvgadInput } from './types';
+import {
+	normalizarHebreo,
+	aplicarCifrado,
+	AVGAD,
+	analizarConValores,
+	valorPorTabla,
+	MISPAR_HECHRACHI,
+	crearMetadatos,
+} from '../../cabala/gematria-core';
+
+/**
+ * Avgad: cada letra se sustituye por la siguiente (alef->bet ... tav->alef);
+ * luego gematria estandar del texto transformado.
+ */
+export function calcularAnalisisAvgad(input: AvgadInput) {
+	const hebreo = normalizarHebreo(input.nombreCompleto || '');
+	const transformado = aplicarCifrado(hebreo, AVGAD);
+	const analisis = analizarConValores({
+		entrada: { nombreCompleto: input.nombreCompleto || '', fechaNacimiento: input.fechaNacimiento },
+		textoHebreoOriginal: hebreo,
+		textoEvaluado: transformado,
+		textoTransformado: transformado,
+		valorDeLetra: valorPorTabla(MISPAR_HECHRACHI),
+	});
+	return {
+		...analisis,
+		metadatos: crearMetadatos(
+			'avgad',
+			'temurah',
+			'Avgad: cada letra -> la siguiente (alef->bet ... tav->alef); luego gematria estandar.',
+		),
+	};
+}

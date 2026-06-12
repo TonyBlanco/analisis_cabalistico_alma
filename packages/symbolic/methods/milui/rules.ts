@@ -1,1 +1,30 @@
-import type { MiluiInput } from './types'; export function calcularAnalisisMilui(i:MiluiInput){ const name=i.nombreCompleto||''; const seed=Array.from(name).reduce((s,c)=>s+c.charCodeAt(0),0); const casas:{}={} as any; for(let k=1;k<=9;k++){ (casas as any)[k]={numero:k,conteo:(seed+k)%6,letras:[]} } return {identidad:{nombreCompleto:name,fechaNacimiento:`${i.fechaNacimiento.anio}-${i.fechaNacimiento.mes}-${i.fechaNacimiento.dia}`},numeros:{esencia:{original:seed,reducido:(seed%9)+1,esMaestro:false},expresion:{original:seed+1,reducido:((seed+1)%9)+1,esMaestro:false},herencia:{original:seed+2,reducido:((seed+2)%9)+1,esMaestro:false},caminoVida:{original:seed+3,reducido:((seed+3)%9)+1,esMaestro:false,edadTransformacion:0}},casasInclusion:casas,ausencias:[],dominantes:[],metadatos:{metodo:'milui',sistema:'milui',alfabeto:'hebrew',version:'1.0.0',timestamp:new Date().toISOString()}} }
+import type { MiluiInput } from './types';
+import {
+	normalizarHebreo,
+	analizarConValores,
+	valorPorTabla,
+	MISPAR_MILUI,
+	crearMetadatos,
+} from '../../cabala/gematria-core';
+
+/**
+ * Mispar Milui: cada letra vale la gematria de su nombre completo deletreado
+ * (alef=alef-lamed-pe=111, bet=bet-yod-tav=412 ...). Deletreos en gematria-core.
+ */
+export function calcularAnalisisMilui(input: MiluiInput) {
+	const hebreo = normalizarHebreo(input.nombreCompleto || '');
+	const analisis = analizarConValores({
+		entrada: { nombreCompleto: input.nombreCompleto || '', fechaNacimiento: input.fechaNacimiento },
+		textoHebreoOriginal: hebreo,
+		textoEvaluado: hebreo,
+		valorDeLetra: valorPorTabla(MISPAR_MILUI),
+	});
+	return {
+		...analisis,
+		metadatos: crearMetadatos(
+			'milui',
+			'milui',
+			'Mispar Milui: cada letra vale la gematria de su nombre deletreado (variante estandar documentada).',
+		),
+	};
+}

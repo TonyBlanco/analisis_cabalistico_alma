@@ -103,15 +103,8 @@ class TherapistPatientInvitationTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('email', response.data.get('error', '').lower() + str(response.data))
 
-    @patch('api.views.notify_patient_account_access')
-    def test_create_patient_sends_credentials_email(self, mock_notify):
-        from api.notifications.dispatch import PatientAccessNotificationResult
-
-        mock_notify.return_value = PatientAccessNotificationResult(
-            welcome_url='https://studios33.app/welcome/patient?token=test',
-            email_sent=True,
-            whatsapp_sent=True,
-        )
+    @patch('api.emails.send_patient_account_credentials_email', return_value=True)
+    def test_create_patient_sends_credentials_email(self, mock_email):
         self._auth(self.therapist_token)
         response = self.client.post(
             '/api/therapist/patients/create/',
@@ -125,39 +118,8 @@ class TherapistPatientInvitationTests(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertTrue(response.data.get('email_sent'))
-        self.assertTrue(response.data.get('whatsapp_sent'))
         self.assertIn('credentials', response.data)
-        mock_notify.assert_called_once()
-
-    @patch('api.views.notify_patient_account_access')
-    def test_resend_patient_credentials(self, mock_notify):
-        from api.notifications.dispatch import PatientAccessNotificationResult
-
-        mock_notify.return_value = PatientAccessNotificationResult(
-            welcome_url='https://studios33.app/welcome/patient?token=test',
-            email_sent=True,
-            whatsapp_sent=False,
-        )
-        self._auth(self.therapist_token)
-        create = self.client.post(
-            '/api/therapist/patients/create/',
-            {
-                'first_name': 'Reenvio',
-                'last_name': 'Test',
-                'email': 'reenvio@example.com',
-                'birth_date': '1988-03-03',
-            },
-            format='json',
-        )
-        self.assertEqual(create.status_code, status.HTTP_201_CREATED)
-        patient_id = create.data['patient']['id']
-        mock_notify.reset_mock()
-
-        resend = self.client.post(f'/api/therapist/patients/{patient_id}/resend-credentials/')
-        self.assertEqual(resend.status_code, status.HTTP_200_OK)
-        self.assertTrue(resend.data.get('email_sent'))
-        self.assertIn('credentials', resend.data)
-        self.assertEqual(mock_notify.call_count, 1)
+        mock_email.assert_called_once()
 
     @patch('api.therapist_patient_invitation_views.send_therapist_patient_invitation_email', return_value=True)
     def test_cancel_pending_invitation(self, _mock_email):

@@ -1933,15 +1933,25 @@ class CreatePatientWithAccountView(APIView):
             "message": "Paciente creado exitosamente"
         }
         """
+        from .serializers import CreatePatientWithAccountInputSerializer
+
+        input_serializer = CreatePatientWithAccountInputSerializer(data=request.data)
+        if not input_serializer.is_valid():
+            return Response(input_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        validated = input_serializer.validated_data
+
         # ========== DATOS PERSONALES ==========
-        first_name = request.data.get('first_name', '').strip()
-        last_name = request.data.get('last_name', '').strip()
-        email = request.data.get('email', '').strip()
-        phone = request.data.get('phone', '').strip()
+        first_name = validated['first_name'].strip()
+        last_name = validated['last_name'].strip()
+        email = validated['email'].strip()
+        phone = validated.get('phone', '').strip()
+        telegram = validated.get('telegram', '').strip()
+        send_via = validated.get('send_via', ['email'])
         avatar = request.data.get('avatar', '').strip()
         
         # ========== DATOS ASTROLÓGICOS/CABALÍSTICOS ==========
-        birth_date = request.data.get('birth_date')
+        birth_date = validated['birth_date']
         birth_time = request.data.get('birth_time', '').strip()
         birth_place = request.data.get('birth_place', '').strip()
         hebrew_name = request.data.get('hebrew_name', '').strip()
@@ -1963,31 +1973,6 @@ class CreatePatientWithAccountView(APIView):
             treatment_plan['magnetism'] = []
         if 'biodecoding' not in treatment_plan:
             treatment_plan['biodecoding'] = []
-        
-        # Validaciones
-        if not first_name:
-            return Response(
-                {'error': 'first_name es requerido'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        if not last_name:
-            return Response(
-                {'error': 'last_name es requerido'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        if not email:
-            return Response(
-                {'error': 'email es requerido'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        if not birth_date:
-            return Response(
-                {'error': 'birth_date es requerido'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
         
         # Verificar que el email no esté en uso
         if User.objects.filter(email=email).exists():
@@ -2122,6 +2107,8 @@ class CreatePatientWithAccountView(APIView):
                 full_name=full_name,  # Se calculará automáticamente en save()
                 email=email,
                 phone=phone,
+                telegram=telegram,
+                send_credentials_via=send_via,
                 avatar=avatar,
                 birth_date=birth_date_obj,
                 birth_time=birth_time_obj,
@@ -2153,38 +2140,30 @@ class CreatePatientWithAccountView(APIView):
             ).count()
             therapist_profile.save()
             
-            # Notificación simulada (preparada para send_mail más adelante)
-            email_body = f"""
-Hola {first_name},
+            import logging
+            from .emails import send_patient_account_credentials_email
 
-Bienvenido/a a Mi Camino del Alma.
+            logger = logging.getLogger(__name__)
+            email_sent = False
+            telegram_sent = False
 
-Tu cuenta de paciente ha sido creada por tu terapeuta.
+            if 'email' in send_via:
+                email_sent = send_patient_account_credentials_email(
+                    to_email=email,
+                    first_name=first_name,
+                    username=username,
+                    temp_password=temp_password,
+                )
 
-Credenciales de acceso:
-- Usuario: {username}
-- Contraseña: {temp_password}
+            if 'telegram' in send_via:
+                # TODO: integrar bot/servicio Telegram cuando esté disponible en prod.
+                logger.warning(
+                    'TODO: envío de credenciales por Telegram pendiente — patient_id=%s telegram=%s',
+                    patient.id,
+                    telegram,
+                )
+                telegram_sent = False
 
-Por favor, cambia tu contraseña después de tu primer inicio de sesión.
-
-Puedes acceder a tu cuenta en: https://app.tonyblanco.com/login
-
-Saludos,
-Equipo Mi Camino del Alma
-            """.strip()
-            
-            # Imprimir en consola (simulación)
-            print("=" * 60)
-            print("EMAIL DE BIENVENIDA (SIMULADO)")
-            print("=" * 60)
-            print(f"Para: {email}")
-            print(f"Asunto: Bienvenido/a a Mi Camino del Alma - Credenciales de Acceso")
-            print("-" * 60)
-            print(email_body)
-            print("=" * 60)
-            print(f"\n[NOTA: En producción, esto se enviará con send_mail de Django]")
-            print("=" * 60)
-            
             # Serializar respuesta con datos del paciente
             from .serializers import PatientSerializer
             patient_serializer = PatientSerializer(patient)
@@ -2196,6 +2175,8 @@ Equipo Mi Camino del Alma
                     'username': username,
                     'password': temp_password
                 },
+                'email_sent': email_sent,
+                'telegram_sent': telegram_sent,
                 'message': 'Paciente creado exitosamente'
             }, status=status.HTTP_201_CREATED)
             

@@ -565,6 +565,78 @@ def send_therapist_patient_invitation_email(
         return False
 
 
+def send_patient_account_credentials_email(
+    *,
+    to_email: str,
+    first_name: str,
+    username: str,
+    temp_password: str,
+) -> bool:
+    """Envía credenciales de acceso al consultante recién creado."""
+    frontend_url = getattr(settings, 'FRONTEND_URL', 'https://studios33.app').rstrip('/')
+    login_url = f'{frontend_url}/login'
+    subject = f'{getattr(settings, "EMAIL_SUBJECT_PREFIX", "")}Bienvenido/a a Studios33 — Credenciales de acceso'
+
+    html_message = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body {{ font-family: Arial, sans-serif; background-color: #0A0A1F; color: #ffffff; }}
+            .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+            .content {{ background-color: #1a1a2e; border-radius: 12px; padding: 30px; margin: 20px 0; }}
+            .credentials {{ background-color: #111; border: 1px solid #333; border-radius: 8px; padding: 16px; }}
+            .footer {{ text-align: center; padding: 20px; color: #666; font-size: 12px; }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="content">
+                <p>Hola {first_name},</p>
+                <p>Tu terapeuta ha creado tu cuenta en Studios33. Estas son tus credenciales de acceso:</p>
+                <div class="credentials">
+                    <p><strong>Usuario:</strong> {username}</p>
+                    <p><strong>Contraseña temporal:</strong> {temp_password}</p>
+                </div>
+                <p>Puedes iniciar sesión en <a href="{login_url}" style="color:#D4AF37;">{login_url}</a>.</p>
+                <p>Cambia tu contraseña después del primer acceso.</p>
+            </div>
+            <div class="footer">
+                <p>Este es un email automático. Si no esperabas este mensaje, contacta a tu terapeuta.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+
+    plain_message = f"""
+    Hola {first_name},
+
+    Tu terapeuta ha creado tu cuenta en Studios33.
+
+    Usuario: {username}
+    Contraseña temporal: {temp_password}
+
+    Inicia sesión en: {login_url}
+
+    Cambia tu contraseña después del primer acceso.
+    """
+
+    try:
+        email = EmailMultiAlternatives(
+            subject=subject,
+            body=plain_message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[to_email],
+        )
+        email.attach_alternative(html_message, 'text/html')
+        email.send(fail_silently=False)
+        return True
+    except Exception as e:
+        print(f'Error enviando credenciales de consultante: {e}')
+        return False
+
+
 def send_birthdata_unlock_email(user_profile: UserProfile, token: str):
     """Enviar link de desbloqueo para birth_data"""
     subject = '🔓 Solicitud: Desbloquear datos de nacimiento'

@@ -391,6 +391,17 @@ class Patient(models.Model):
     last_name = models.CharField(max_length=100, blank=True, help_text='Apellidos del paciente')
     email = models.EmailField(help_text='Email del paciente')
     phone = models.CharField(max_length=20, blank=True, help_text='Teléfono de contacto')
+    telegram = models.CharField(
+        max_length=64,
+        blank=True,
+        default='',
+        help_text='Usuario de Telegram sin @ (handle)',
+    )
+    send_credentials_via = models.JSONField(
+        default=list,
+        blank=True,
+        help_text='Canales para enviar credenciales, p.ej. ["email", "telegram"]',
+    )
     avatar = models.URLField(blank=True, help_text='URL del avatar del paciente')
 
     # Demografía

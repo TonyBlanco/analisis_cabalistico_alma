@@ -8,7 +8,7 @@ import { getAuthToken } from '@/lib/api';
 
 const API_URL = getApiBaseUrl();
 
-/** Canales de envío de credenciales (UI; el backend actual no filtra por flags en el body). */
+/** Canales de envío de credenciales aceptados por el backend en send_via. */
 type CredentialChannel = 'email' | 'telegram' | 'whatsapp';
 
 interface PatientFormData {
@@ -16,7 +16,9 @@ interface PatientFormData {
   last_name: string;
   email: string;
   phone: string;
+  telegram: string;
   birth_date: string;
+  send_via: CredentialChannel[];
 }
 
 interface CreatePatientPayload {
@@ -25,6 +27,8 @@ interface CreatePatientPayload {
   email: string;
   birth_date: string;
   phone?: string;
+  telegram?: string;
+  send_via: CredentialChannel[];
 }
 
 interface CreatePatientCredentials {
@@ -55,10 +59,12 @@ const INITIAL_FORM: PatientFormData = {
   last_name: '',
   email: '',
   phone: '',
+  telegram: '',
   birth_date: '',
+  send_via: ['email'],
 };
 
-const PHONE_PATTERN = /^\+?[0-9][0-9\s\-().]{7,18}[0-9]$/;
+const PHONE_PATTERN = /^\+?[0-9\s()-]{7,20}$/;
 
 const CREDENTIAL_CHANNEL_OPTIONS: Array<{
   id: CredentialChannel;
@@ -92,7 +98,6 @@ export default function CreatePatientModal({
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState<PatientFormData>(INITIAL_FORM);
-  const [credentialChannels, setCredentialChannels] = useState<CredentialChannel[]>(['email']);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -105,7 +110,6 @@ export default function CreatePatientModal({
 
   const resetFormState = () => {
     setFormData(INITIAL_FORM);
-    setCredentialChannels(['email']);
     setError(null);
     setFieldErrors({});
     setCreatedCredentials(null);
@@ -154,14 +158,22 @@ export default function CreatePatientModal({
   const toggleCredentialChannel = (channel: CredentialChannel, checked: boolean) => {
     if (channel === 'whatsapp') return;
 
-    setCredentialChannels((prev) => {
+    setFormData((prev) => {
+      const current = prev.send_via;
+      let next: CredentialChannel[];
       if (checked) {
-        return prev.includes(channel) ? prev : [...prev, channel];
+        next = current.includes(channel) ? current : [...current, channel];
+      } else {
+        next = current.filter((item) => item !== channel);
+        if (next.length === 0) {
+          next = ['email'];
+        }
       }
-      const next = prev.filter((item) => item !== channel);
-      return next.length > 0 ? next : ['email'];
+      return { ...prev, send_via: next };
     });
   };
+
+  const normalizeTelegramHandle = (value: string): string => value.trim().replace(/^@+/, '');
 
   const validateForm = (): boolean => {
     const errors: Record<string, string> = {};
@@ -182,7 +194,12 @@ export default function CreatePatientModal({
 
     const phone = formData.phone.trim();
     if (phone && !PHONE_PATTERN.test(phone)) {
-      errors.phone = 'Introduce un teléfono internacional válido (ej. +34 600 000 000)';
+      errors.phone = 'El teléfono no es válido';
+    }
+
+    const telegram = normalizeTelegramHandle(formData.telegram);
+    if (formData.send_via.includes('telegram') && !telegram) {
+      errors.telegram = 'El usuario de Telegram es requerido si eliges envío por Telegram';
     }
 
     if (!formData.birth_date) {
@@ -195,8 +212,8 @@ export default function CreatePatientModal({
       }
     }
 
-    if (credentialChannels.length === 0) {
-      errors.credential_channels = 'Selecciona al menos un canal de envío';
+    if (formData.send_via.length === 0) {
+      errors.send_via = 'Selecciona al menos un canal de envío';
     }
 
     setFieldErrors(errors);
@@ -209,11 +226,17 @@ export default function CreatePatientModal({
       last_name: formData.last_name.trim(),
       email: formData.email.trim(),
       birth_date: formData.birth_date,
+      send_via: formData.send_via.filter((channel) => channel !== 'whatsapp'),
     };
 
     const phone = formData.phone.trim();
     if (phone) {
       payload.phone = phone;
+    }
+
+    const telegram = normalizeTelegramHandle(formData.telegram);
+    if (telegram) {
+      payload.telegram = telegram;
     }
 
     return payload;
@@ -308,8 +331,8 @@ export default function CreatePatientModal({
   };
 
   const successSummary = () => {
-    const wantsEmail = credentialChannels.includes('email');
-    const wantsTelegram = credentialChannels.includes('telegram');
+    const wantsEmail = formData.send_via.includes('email');
+    const wantsTelegram = formData.send_via.includes('telegram');
 
     if (wantsTelegram && telegramSent === true) {
       return 'Notificación enviada por Telegram.';
@@ -422,7 +445,7 @@ export default function CreatePatientModal({
                     </button>
                   </div>
                 </div>
-                {credentialChannels.includes('telegram') && telegramLink && (
+                {formData.send_via.includes('telegram') && telegramLink && (
                   <div className="mt-3 p-3 bg-blue-50 border border-blue-100 rounded-md">
                     <p className="text-xs text-blue-900 font-medium mb-1">Enlace Telegram (recomendado)</p>
                     <p className="text-xs text-blue-800 break-all">{telegramLink}</p>
@@ -531,6 +554,31 @@ export default function CreatePatientModal({
                 </div>
 
                 <div>
+                  <label htmlFor="telegram" className="block text-sm font-medium text-gray-700 mb-2">
+                    Telegram
+                  </label>
+                  <input
+                    id="telegram"
+                    name="telegram"
+                    type="text"
+                    autoComplete="off"
+                    placeholder="@usuario"
+                    value={formData.telegram}
+                    onChange={handleChange}
+                    className={`w-full px-4 py-2 bg-white border rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition-colors ${
+                      fieldErrors.telegram ? 'border-red-300' : 'border-gray-300'
+                    }`}
+                  />
+                  {fieldErrors.telegram ? (
+                    <p className="mt-1 text-xs text-red-600">{fieldErrors.telegram}</p>
+                  ) : (
+                    <p className="mt-1 text-xs text-gray-500">
+                      Opcional salvo que marques envío por Telegram. Se guarda sin @.
+                    </p>
+                  )}
+                </div>
+
+                <div>
                   <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
                     Teléfono
                   </label>
@@ -583,7 +631,7 @@ export default function CreatePatientModal({
                   </legend>
                   <div className="mt-2 space-y-2">
                     {CREDENTIAL_CHANNEL_OPTIONS.map((option) => {
-                      const checked = credentialChannels.includes(option.id);
+                      const checked = formData.send_via.includes(option.id);
                       const inputId = `credential-channel-${option.id}`;
 
                       return (
@@ -610,23 +658,17 @@ export default function CreatePatientModal({
                       );
                     })}
                   </div>
-                  {credentialChannels.includes('telegram') && (
-                    <p className="mt-3 text-xs text-gray-600">
-                      Telegram no usa un @usuario en el alta: el backend genera un enlace único
-                      (<code className="text-gray-800">telegram_link</code>) para que el consultante active el bot.
-                    </p>
-                  )}
-                  {fieldErrors.credential_channels && (
-                    <p className="mt-2 text-xs text-red-600">{fieldErrors.credential_channels}</p>
+                  {fieldErrors.send_via && (
+                    <p className="mt-2 text-xs text-red-600">{fieldErrors.send_via}</p>
                   )}
                 </fieldset>
 
                 <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
                   <p className="text-sm text-blue-800">
                     <strong>Nota:</strong> Se generan usuario y contraseña temporal automáticamente.
-                    {credentialChannels.includes('email') && ' Se enviará email si el servidor lo tiene activo.'}
-                    {credentialChannels.includes('telegram') &&
-                      ' Tras crear, comparte el enlace de Telegram que aparecerá en pantalla.'}
+                    {formData.send_via.includes('email') && ' Se enviará email si el servidor lo tiene activo.'}
+                    {formData.send_via.includes('telegram') &&
+                      ' El envío por Telegram quedará registrado; comparte credenciales manualmente hasta activar el bot.'}
                   </p>
                 </div>
 

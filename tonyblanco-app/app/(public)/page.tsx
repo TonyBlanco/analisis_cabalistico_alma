@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
 import {
+  MarketingAbout,
   MarketingCtaBand,
   MarketingFaq,
   MarketingFeatureGrid,
   MarketingFooter,
   MarketingHero,
+  MarketingModules,
   MarketingNav,
   MarketingPricing,
   MarketingShowcase,
@@ -38,7 +40,9 @@ export default function TherapistLandingPage() {
       <main>
         <MarketingHero />
         <MarketingTrustBar />
+        <MarketingAbout />
         <MarketingFeatureGrid />
+        <MarketingModules />
         <MarketingSteps />
         <MarketingShowcase />
         <MarketingTestimonials />

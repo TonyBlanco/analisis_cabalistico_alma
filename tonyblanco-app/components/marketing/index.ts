@@ -1,7 +1,9 @@
 export { MarketingNav } from './Nav';
 export { MarketingHero } from './Hero';
 export { MarketingTrustBar } from './TrustBar';
+export { MarketingAbout } from './About';
 export { MarketingFeatureGrid } from './FeatureGrid';
+export { MarketingModules } from './Modules';
 export { MarketingSteps } from './Steps';
 export { MarketingShowcase } from './Showcase';
 export { MarketingTestimonials } from './Testimonials';

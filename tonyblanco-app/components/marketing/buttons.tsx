@@ -35,13 +35,13 @@ export function MarketingButton({
 
   const variants = {
     primary:
-      'border-0 bg-[var(--ha-grad)] font-bold text-[var(--ha-acc-ink)] shadow-[0_10px_30px_var(--ha-btn-glow)] hover:-translate-y-0.5 motion-reduce:hover:translate-y-0',
+      'border-0 bg-[image:var(--ha-grad)] font-bold text-[var(--ha-acc-ink)] shadow-[0_10px_30px_var(--ha-btn-glow)] hover:-translate-y-0.5 motion-reduce:hover:translate-y-0',
     secondary:
       'border border-[var(--ha-line-soft)] bg-white/[0.04] text-[var(--ha-ink)] hover:border-[var(--ha-acc)]',
     ghost:
       'border border-[var(--ha-line-soft)] bg-transparent text-[var(--ha-ink)] hover:border-[var(--ha-acc)]',
     'outline-gold':
-      'border border-[var(--ha-acc)] bg-transparent font-bold text-[var(--ha-acc)] hover:bg-[var(--ha-grad)] hover:text-[var(--ha-acc-ink)] hover:border-transparent',
+      'border border-[var(--ha-acc)] bg-transparent font-bold text-[var(--ha-acc)] hover:bg-[image:var(--ha-grad)] hover:text-[var(--ha-acc-ink)] hover:border-transparent',
   };
 
   const classes = cn(base, sizeClasses[size], variants[variant], className);

@@ -42,9 +42,9 @@
   --ha-panel-bg:      linear-gradient(165deg, #0A0A12 0%, #15101F 55%, #1C1428 100%);
 
   /* Campos de formulario */
-  --ha-input-bg:        #14141F;
+  --ha-input-bg:        #191926;
   --ha-input-bg-focus:  #1A1A28;
-  --ha-input-border:    rgba(255,255,255,0.22);
+  --ha-input-border:    rgba(255,255,255,0.30);
 }
 
 /* ---- Variante B: Indigo + Oro ---- */
@@ -78,7 +78,7 @@
 
   --ha-input-bg:        #12182E;
   --ha-input-bg-focus:  #171E38;
-  --ha-input-border:    rgba(255,255,255,0.22);
+  --ha-input-border:    rgba(255,255,255,0.30);
 }
 
 /* ---- Variante C: Clinico (Studio33 violeta→cian) ---- */

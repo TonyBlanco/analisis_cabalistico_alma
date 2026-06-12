@@ -62,7 +62,7 @@ export const MARKETING_FEATURES: MarketingFeature[] = [
   {
     title: 'Seguridad y privacidad',
     description:
-      'Datos cifrados y protegidos. Confidencialidad profesional desde el diseño: solo tú decides quién accede.',
+      'Conexión cifrada y control de accesos. Confidencialidad profesional desde el diseño: solo tú decides quién accede.',
     iconPaths: [
       'M12 3.5 5 6v6c0 4.4 3 7.4 7 8.5 4-1.1 7-4.1 7-8.5V6l-7-2.5Z',
       'M9.2 12l2 2 3.6-3.8',
@@ -127,7 +127,7 @@ export const MARKETING_FAQS: MarketingFaq[] = [
   {
     question: '¿Cómo protegéis los datos de mis pacientes?',
     answer:
-      'Los datos viajan y se almacenan cifrados, y solo tú decides quién accede a cada ficha. Trabajamos bajo estándares de confidencialidad profesional.',
+      'La conexión con la plataforma está cifrada (HTTPS), el acceso requiere autenticación y solo tú decides quién accede a cada ficha. Trabajamos bajo estándares de confidencialidad profesional.',
   },
   {
     question: '¿Qué incluye la prueba gratuita?',

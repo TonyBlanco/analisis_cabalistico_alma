@@ -36,7 +36,8 @@ export const MISPAR_HECHRACHI: Record<string, number> = {
 	'ך': 20, 'ם': 40, 'ן': 50, 'ף': 80, 'ץ': 90,
 };
 
-// --- Mispar Gadol (finales 500-900) ---
+// --- Mispar Gadol (finales 500-900; convención canónica del repo) ---
+// ך=500, ם=600, ן=700, ף=800, ץ=900 — alineado con cabala tradicional y tests.
 export const MISPAR_GADOL: Record<string, number> = {
 	...MISPAR_HECHRACHI,
 	'ך': 500, 'ם': 600, 'ן': 700, 'ף': 800, 'ץ': 900,

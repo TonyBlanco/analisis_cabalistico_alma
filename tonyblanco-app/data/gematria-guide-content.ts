@@ -90,8 +90,8 @@ export const GEMATRIA_GUIDE_CONTENT = `
         <ul class="mt-2 space-y-1 text-sm list-disc list-inside">
           <li>Kaf final (ך) = 500 (en lugar de 20)</li>
           <li>Mem final (ם) = 600 (en lugar de 40)</li>
-          <li>Nun final (ן) = 600 (en lugar de 50)</li>
-          <li>Pe final (ף) = 700 (en lugar de 80)</li>
+          <li>Nun final (ן) = 700 (en lugar de 50)</li>
+          <li>Pe final (ף) = 800 (en lugar de 80)</li>
           <li>Tzadi final (ץ) = 900 (en lugar de 90)</li>
         </ul>
       </div>

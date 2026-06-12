@@ -26,6 +26,9 @@ import {
   type TreeStructuralState,
 } from '@holistica/symbolic/tree';
 import FormativeReadingPanel from './FormativeReadingPanel';
+import GematriaInterpretacionPanel, {
+  extractGematriaInterpretacion,
+} from './GematriaInterpretacionPanel';
 import { GuidedBlock } from '@/components/ui/guided-block';
 
 // ============================================================================
@@ -487,7 +490,7 @@ const SECTION_META: Record<
   },
   gematria: {
     title: 'Datos numéricos del método',
-    subtitle: 'Gráficos y números del cálculo (sin lectura interpretativa).',
+    subtitle: 'Gráficos, números e interpretación simbólica educativa del cálculo.',
   },
   resources: {
     title: 'Recursos',
@@ -892,6 +895,11 @@ export default function CabalAppliedVisualCore({
     [treeAnalysis, treeStructuralState],
   );
 
+  const gematriaInterpretacion = useMemo(
+    () => extractGematriaInterpretacion(methodSymbolicState),
+    [methodSymbolicState],
+  );
+
   const formativeBrief: FormativeBrief | null = useMemo(() => {
     if (!treeAnalysis || !treeStructuralState) return null;
     const ctx = methodSymbolicState
@@ -1032,8 +1040,11 @@ export default function CabalAppliedVisualCore({
           )}
 
           {activeSection === 'synthesis' && (
-            <div className="mt-4">
+            <div className="mt-4 space-y-6">
               {methodRunner}
+              {gematriaInterpretacion && (
+                <GematriaInterpretacionPanel interpretacion={gematriaInterpretacion} />
+              )}
               <FormativeReadingPanel brief={formativeBrief} loading={executeLoading} />
             </div>
           )}
@@ -1043,9 +1054,12 @@ export default function CabalAppliedVisualCore({
               {methodRunner}
               {pitagorasState ? (
                 <PitagorasReport pitagorasState={pitagorasState} />
+              ) : gematriaInterpretacion ? (
+                <GematriaInterpretacionPanel interpretacion={gematriaInterpretacion} />
               ) : (
                 <div className="rounded-lg border border-dashed border-gray-200 bg-gray-50 p-4 text-sm text-gray-600">
-                  Ejecuta <strong>Pitágoras</strong> para ver gráficos numéricos. Otros métodos muestran sus datos en el Árbol y la Síntesis.
+                  Ejecuta un método de gematría para ver la interpretación simbólica, o{' '}
+                  <strong>Pitágoras</strong> para gráficos numéricos.
                 </div>
               )}
             </div>

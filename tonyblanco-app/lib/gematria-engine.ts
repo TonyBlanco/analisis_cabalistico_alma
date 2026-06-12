@@ -1,23 +1,18 @@
 /**
- * Motor de Cálculo de Gematria
- * Soporta Gematria Ragil (estándar), Katan (reducido), Gadol (completo) y Atbash
+ * Motor de Cálculo de Gematria (legacy UI / herramientas)
+ * Soporta Gematria Ragil (estándar), Katan (reducido), Gadol (completo) y Atbash.
+ *
+ * Convención canónica de finales (Mispar Gadol): ך=500, ם=600, ן=700, ף=800, ץ=900.
+ * Fuente de verdad: packages/symbolic/cabala/gematria-core.ts (MISPAR_HECHRACHI / MISPAR_GADOL).
  */
 
-// Tabla de valores Gematria Ragil (estándar)
-const GEMATRIA_RAGIL: Record<string, number> = {
-  // Aleph-Bet estándar
-  'א': 1, 'ב': 2, 'ג': 3, 'ד': 4, 'ה': 5, 'ו': 6, 'ז': 7, 'ח': 8, 'ט': 9,
-  'י': 10, 'כ': 20, 'ל': 30, 'מ': 40, 'נ': 50, 'ס': 60, 'ע': 70, 'פ': 80, 'צ': 90,
-  'ק': 100, 'ר': 200, 'ש': 300, 'ת': 400,
-  // Letras finales (Sofit) para Gematria Gadol
-  'ך': 500, 'ם': 600, 'ן': 600, 'ף': 700, 'ץ': 900
-};
+import { MISPAR_GADOL, MISPAR_HECHRACHI } from '@holistica/symbolic/cabala/gematria-core';
 
-// Tabla de valores Gematria Gadol (con letras finales)
-const GEMATRIA_GADOL: Record<string, number> = {
-  ...GEMATRIA_RAGIL,
-  'ך': 500, 'ם': 600, 'ן': 600, 'ף': 700, 'ץ': 900
-};
+/** Mispar Hechrachi — finales valen igual que su letra base (ן=50, ף=80, …) */
+const GEMATRIA_RAGIL: Record<string, number> = MISPAR_HECHRACHI;
+
+/** Mispar Gadol — finales 500–900 (ן=700, ף=800, …) */
+const GEMATRIA_GADOL: Record<string, number> = MISPAR_GADOL;
 
 // Tabla Atbash (inversión: Aleph <-> Tav, Bet <-> Shin, etc.)
 const ATBASH_MAP: Record<string, string> = {

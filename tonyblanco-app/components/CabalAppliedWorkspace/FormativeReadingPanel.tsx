@@ -16,26 +16,12 @@ import {
   Waves,
 } from 'lucide-react';
 import type { FormativeBrief } from '@holistica/symbolic/tree';
+import { formatFormativeBriefMarkdownBody } from './formativeBriefContent';
 
 function briefToMarkdown(brief: FormativeBrief): string {
   const lines = [
     `# Síntesis formativa — ${brief.methodId}`,
-    brief.headline,
-    '',
-    '## Hipótesis de trabajo',
-    brief.workingHypothesis,
-    '',
-    '## Arco de proceso',
-    brief.processArc,
-    '',
-    '## Focos sefiróticos',
-    ...brief.dominantSefirot.map(
-      (s, i) =>
-        `${i + 1}. **${s.displayName}** (${Math.round(s.activation * 100)}%)\n   - Luz: ${s.light}\n   - Sombra: ${s.shadowWatch}\n   - Tikkun: ${s.tikkun}`,
-    ),
-    '',
-    '## Preguntas guía',
-    ...brief.sessionQuestions.map((q, i) => `${i + 1}. ${q}`),
+    ...formatFormativeBriefMarkdownBody(brief),
     '',
     brief.disclaimer,
   ];

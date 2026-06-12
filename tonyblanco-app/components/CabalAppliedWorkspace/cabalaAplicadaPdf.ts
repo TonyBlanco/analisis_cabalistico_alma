@@ -1,6 +1,7 @@
 'use client';
 
 import { jsPDF } from 'jspdf';
+import { formatFormativeBriefPdfLines } from './formativeBriefContent';
 
 export type CabalaReportInclude = {
   tree: boolean;
@@ -223,44 +224,10 @@ export function buildReportSections(params: CabalaAplicadaGraphicPdfParams): Rep
   }
 
   if (include.formativa) {
-    const fb = params.formativeBrief;
-    const lines: string[] = [];
-
-    const headline = asText(getField(fb, 'headline'));
-    if (headline) lines.push(headline, '');
-
-    const hypothesis = asText(getField(fb, 'workingHypothesis'));
-    if (hypothesis) lines.push('Hipótesis de trabajo:', hypothesis, '');
-
-    const arc = asText(getField(fb, 'processArc'));
-    if (arc) lines.push('Arco de proceso:', arc, '');
-
-    const sefirot = getField(fb, 'dominantSefirot');
-    if (Array.isArray(sefirot) && sefirot.length) {
-      lines.push('Focos sefiróticos:');
-      for (const s of sefirot) {
-        const name = asText(getField(s, 'displayName')) ?? '—';
-        const act = getField(s, 'activation');
-        const pct = typeof act === 'number' && Number.isFinite(act) ? `${Math.round(act * 100)}%` : '';
-        lines.push(`- ${name}${pct ? ` (${pct})` : ''}`);
-        const luz = asText(getField(s, 'light'));
-        if (luz) lines.push(`  Luz: ${luz}`);
-        const sombra = asText(getField(s, 'shadowWatch'));
-        if (sombra) lines.push(`  Sombra: ${sombra}`);
-        const tikkun = asText(getField(s, 'tikkun'));
-        if (tikkun) lines.push(`  Tikkun: ${tikkun}`);
-      }
-      lines.push('');
-    }
-
-    const questions = asLines(getField(fb, 'sessionQuestions'));
-    if (questions.length) {
-      lines.push('Preguntas guía:');
-      questions.forEach((q, i) => lines.push(`${i + 1}. ${q}`));
-    }
-
-    if (!lines.length) lines.push('(sin datos en esta sesión)');
-    sections.push({ title: 'Síntesis formativa', lines });
+    sections.push({
+      title: 'Síntesis formativa',
+      lines: formatFormativeBriefPdfLines(params.formativeBrief),
+    });
   }
 
   if (include.estructurales) {

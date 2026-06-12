@@ -4,28 +4,20 @@
 from django.db import migrations, models
 
 
-def _column_exists(schema_editor, table: str, column: str) -> bool:
-    with schema_editor.connection.cursor() as cursor:
-        cursor.execute(
-            """
-            SELECT 1 FROM information_schema.columns
-            WHERE table_name = %s AND column_name = %s
-            """,
-            [table, column],
-        )
-        return cursor.fetchone() is not None
-
-
 def _table_exists(schema_editor, table: str) -> bool:
-    with schema_editor.connection.cursor() as cursor:
-        cursor.execute(
-            """
-            SELECT 1 FROM information_schema.tables
-            WHERE table_name = %s
-            """,
-            [table],
-        )
-        return cursor.fetchone() is not None
+    # Introspección de Django: funciona en PostgreSQL (prod) y SQLite (tests).
+    connection = schema_editor.connection
+    with connection.cursor() as cursor:
+        return table in connection.introspection.table_names(cursor)
+
+
+def _column_exists(schema_editor, table: str, column: str) -> bool:
+    if not _table_exists(schema_editor, table):
+        return False
+    connection = schema_editor.connection
+    with connection.cursor() as cursor:
+        description = connection.introspection.get_table_description(cursor, table)
+    return any(col.name == column for col in description)
 
 
 def apply_telegram_schema(apps, schema_editor):
@@ -35,13 +27,16 @@ def apply_telegram_schema(apps, schema_editor):
         )
 
     if not _table_exists(schema_editor, 'api_telegramlinktoken'):
-        TelegramLinkToken = apps.get_model('api', 'TelegramLinkToken')
+        # Dentro de SeparateDatabaseAndState el estado histórico aún no contiene
+        # el modelo (CreateModel va en state_operations), así que usamos el
+        # modelo concreto. La migración es contemporánea al modelo.
+        from api.models import TelegramLinkToken
         schema_editor.create_model(TelegramLinkToken)
 
 
 def reverse_telegram_schema(apps, schema_editor):
     if _table_exists(schema_editor, 'api_telegramlinktoken'):
-        TelegramLinkToken = apps.get_model('api', 'TelegramLinkToken')
+        from api.models import TelegramLinkToken
         schema_editor.delete_model(TelegramLinkToken)
 
     if _column_exists(schema_editor, 'api_userprofile', 'telegram_chat_id'):

@@ -2,7 +2,7 @@ import { MarketingContainer } from './brand';
 
 const TRUST_ITEMS = [
   {
-    label: 'Datos cifrados',
+    label: 'Conexión cifrada (HTTPS)',
     icon: (
       <>
         <path d="M12 3.5 5 6v6c0 4.4 3 7.4 7 8.5 4-1.1 7-4.1 7-8.5V6l-7-2.5Z" />

@@ -7,6 +7,8 @@ import { useTherapistMetrics } from '@/hooks/useTherapistMetrics';
 import { useTherapistAIUsage } from '@/hooks/useTherapistAIUsage';
 import { useTherapistWorkload } from '@/hooks/useTherapistWorkload';
 import TherapistWorkloadSection from '@/components/dashboard/TherapistWorkloadSection';
+import OnboardingChecklist from '@/components/onboarding/OnboardingChecklist';
+import { useTherapistOnboarding } from '@/hooks/useTherapistOnboarding';
 
 // Lazy-load chart bundle — avoids SSR issues with Chart.js canvas
 const MetricsDashboard = dynamic(() => import('@/components/dashboard/MetricsDashboard'), {
@@ -35,9 +37,23 @@ export default function TherapistDashboardPage() {
     isEmpty: workloadEmpty,
     refetch: refetchWorkload,
   } = useTherapistWorkload();
+  const {
+    steps: onboardingSteps,
+    pendingCount: onboardingPendingCount,
+    shouldShow: showOnboarding,
+    dismiss: dismissOnboarding,
+  } = useTherapistOnboarding();
 
   return (
     <div className="space-y-8">
+      {showOnboarding && (
+        <OnboardingChecklist
+          steps={onboardingSteps}
+          pendingCount={onboardingPendingCount}
+          onDismiss={dismissOnboarding}
+        />
+      )}
+
       {/* Operational workload */}
       <TherapistWorkloadSection
         workload={workload}

@@ -1,4 +1,5 @@
 import ClinicalContextHeader from '@/components/clinical/ClinicalContextHeader';
+import TherapistLearningGuard from '@/components/learning-center/TherapistLearningGuard';
 
 export default function TherapistRouteLayout({
   children,
@@ -7,6 +8,7 @@ export default function TherapistRouteLayout({
 }) {
   return (
     <>
+      <TherapistLearningGuard />
       <ClinicalContextHeader />
       {children}
     </>

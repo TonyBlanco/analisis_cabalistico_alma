@@ -222,6 +222,11 @@ class AnalysisRecordListCreateView(generics.ListCreateAPIView):
         user = self.request.user
         qs = AnalysisRecord.objects.all()
 
+        # Filtro opcional por tipo: GET /api/analysis-records/?kind=holistic_evaluative_synthesis
+        kind = self.request.query_params.get('kind')
+        if kind:
+            qs = qs.filter(kind=kind)
+
         # Soportar GET /api/analysis-records/?patient_id={id} para terapeutas
         patient_id = self.request.query_params.get('patient_id')
         if patient_id:

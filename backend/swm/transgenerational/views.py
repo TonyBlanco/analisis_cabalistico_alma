@@ -209,9 +209,26 @@ class TransgenerationalSessionCloseView(APIView):
             )
         
         session.close()
-        
+
+        self._record_for_mshe(session)
+
         detail_serializer = TransgenerationalSessionDetailSerializer(session)
         return Response(detail_serializer.data)
+
+    def _record_for_mshe(self, session) -> None:
+        """Persiste el artefacto normalizado (kind='transgenerational') del cierre.
+
+        Scores 0-100 derivados de los datos reales del genograma; el MSHE los
+        lee desde computed_result['lineage'] (federación de solo lectura).
+        """
+        from api.services.holistic_records import (
+            build_transgenerational_module_payload,
+            record_module_synthesis,
+        )
+
+        payload = build_transgenerational_module_payload(session)
+        if payload:
+            record_module_synthesis(**payload)
 
 
 # ============================================================================

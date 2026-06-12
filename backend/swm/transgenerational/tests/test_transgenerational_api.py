@@ -105,6 +105,50 @@ class TransgenerationalSessionAPITest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['status'], 'closed')
 
+    def test_close_creates_mshe_analysis_record(self):
+        """El cierre persiste el AnalysisRecord normalizado (kind='transgenerational') para MSHE."""
+        from api.models import AnalysisRecord, Patient
+
+        self.client.force_authenticate(user=self.therapist)
+
+        self.therapist.profile.user_type = 'therapist'
+        self.therapist.profile.save()
+        clinical_patient = Patient.objects.create(
+            therapist=self.therapist,
+            user=self.patient,
+            first_name='Trans',
+            last_name='Gen',
+            email='patient@test.com',
+            full_name='Trans Gen',
+            birth_date='1985-05-05',
+        )
+
+        session = TransgenerationalSession.objects.create(
+            patient=self.patient,
+            therapist=self.therapist,
+            title='Federación MSHE',
+        )
+        TransgenerationalPattern.objects.create(
+            session=session,
+            pattern_name='Lealtad invisible',
+            pattern_type='loyalty',
+            generations_affected=[-2, -1, 0],
+        )
+
+        self.client.post(f'/api/swm/transgenerational/sessions/{session.id}/start/')
+        response = self.client.post(f'/api/swm/transgenerational/sessions/{session.id}/close/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        record = AnalysisRecord.objects.filter(
+            patient=clinical_patient, kind='transgenerational'
+        ).first()
+        self.assertIsNotNone(record)
+        self.assertEqual(record.module_code, 'SWM_TRANSGEN_CLOSE')
+        lineage = record.computed_result['lineage']
+        self.assertEqual(lineage['identity_patterns'], 15.0)  # 1 patrón * 15
+        self.assertEqual(lineage['generational_cycles'], 75.0)  # 3 generaciones * 25
+        self.assertEqual(record.computed_result['snapshot']['patterns_count'], 1)
+
 
 class FamilyMemberAPITest(TestCase):
     """Test cases for FamilyMember API endpoints."""

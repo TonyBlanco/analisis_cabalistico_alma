@@ -839,7 +839,7 @@ class BioEmotionalExportView(APIView):
         # Construir respuesta
         export_data = {
             "patient_id": patient.id,
-            "patient_name": patient.nombre,
+            "patient_name": patient.full_name or f"{patient.first_name} {patient.last_name}".strip(),
             "sessions_summary": [
                 {
                     "id": s.id,
@@ -871,8 +871,9 @@ class MSHEImportBioEmotionalView(APIView):
 
     POST /api/bioemotional/mshe-import/
 
-    Crea una referencia del estado BioEmotional actual para ser
-    considerado en la síntesis holística MSHE.
+    Persiste el AnalysisRecord normalizado (kind='biodecoding') con scores
+    derivados de las regiones observadas, para que el motor de síntesis
+    holística (MSHE) lo consuma como fuente federada de solo lectura.
     """
 
     permission_classes = [IsAuthenticated, IsTherapist]
@@ -905,21 +906,30 @@ class MSHEImportBioEmotionalView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Calcular contribución de peso basada en datos disponibles
-        observations_count = BioEmotionalObservation.objects.filter(
-            patient=patient
-        ).count()
-        
-        # Peso contribuido basado en cantidad de datos (0.05 - 0.20)
-        base_weight = 0.05
-        data_factor = min(observations_count / 50, 1.0)  # Máximo en 50 observaciones
-        weight_contribution = round(base_weight + (data_factor * 0.15), 3)
+        # Persistir el artefacto normalizado que consume el MSHE.
+        from api.services.holistic_records import (
+            build_bioemotional_module_payload,
+            record_module_synthesis,
+        )
+
+        module_payload = build_bioemotional_module_payload(patient, therapist=request.user)
+        if module_payload is None:
+            return Response(
+                {"detail": "No hay datos BioEmotional suficientes para este paciente."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        record = record_module_synthesis(**module_payload)
+        weight_contribution = module_payload["params"]["weight_contribution"]
+
+        message = f"Datos BioEmotional integrados. Última sesión: {last_session.date.strftime('%Y-%m-%d')}"
+        if record is None:
+            message += " (advertencia: no se pudo persistir el registro para MSHE)"
 
         result = {
-            "integrated": True,
+            "integrated": record is not None,
             "new_weight_contribution": weight_contribution,
             "bioemotional_snapshot_id": str(last_session.id),
-            "message": f"Datos BioEmotional integrados. Última sesión: {last_session.date.strftime('%Y-%m-%d')}"
+            "message": message,
         }
 
         from .serializers import MSHEImportResultSerializer

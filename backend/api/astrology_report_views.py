@@ -105,6 +105,17 @@ class PatientAstrologyReportsView(APIView):
             therapist_notes=therapist_notes,
         )
 
+        if report.status == 'final':
+            # Artefacto normalizado para federación MSHE (el hub solo lee).
+            from api.services.holistic_records import (
+                build_astrology_module_payload,
+                record_module_synthesis,
+            )
+
+            module_payload = build_astrology_module_payload(report)
+            if module_payload:
+                record_module_synthesis(**module_payload)
+
         return Response(_serialize_report_detail(report), status=status.HTTP_201_CREATED)
 
 

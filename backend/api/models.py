@@ -1094,6 +1094,9 @@ class AnalysisRecord(models.Model):
         ('clinical_test', 'Clinical Test'),
         ('kabbalah', 'Kabbalah'),
         ('astrology', 'Astrology'),
+        ('tarot', 'Tarot'),
+        ('transgenerational', 'Transgenerational'),
+        ('biodecoding', 'Biodecoding (BioEmotional)'),
         ('legacy', 'Legacy'),
         ('holistic_evaluative_synthesis', 'Holistic Evaluative Synthesis'),
     ]

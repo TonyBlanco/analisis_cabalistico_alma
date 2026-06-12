@@ -98,9 +98,21 @@ class HolisticSynthesisEngine:
         """Extraer scores de análisis cabalístico"""
         # Lógica simplificada - en producción sería más compleja
         scores = {}
+        sefirot_scores = None
+
         if 'sefirot' in computed:
-            # Mapear sefirot a ejes holísticos
             sefirot_scores = computed.get('sefirot', {})
+        elif 'cabala_aplicada' in computed:
+            # Records reales de Cábala Aplicada (cabalistic_views): buscar
+            # sefirot dentro del tree_state; si no hay valores numéricos,
+            # el record contribuye con los valores neutros por defecto.
+            cabala = computed.get('cabala_aplicada') or {}
+            tree_state = cabala.get('tree_state') or {}
+            candidate = tree_state.get('sefirot') if isinstance(tree_state, dict) else None
+            sefirot_scores = candidate if isinstance(candidate, dict) else {}
+
+        if sefirot_scores is not None:
+            # Mapear sefirot a ejes holísticos
             scores['identity_purpose'] = sefirot_scores.get('keter', 70)  # Corona
             scores['emotion_regulation'] = sefirot_scores.get('yesod', 65)  # Fundación
             scores['relationships_bonds'] = sefirot_scores.get('hod_netzach', 60)  # Gloria/Victoria

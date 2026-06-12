@@ -333,6 +333,27 @@ class ProcessMemoryTarotSealTest(TarotAPITestCase):
         self.assertEqual(len(snapshot.structured.get("cards", [])), 2)
         self.assertIn("major_01", snapshot.text_summary)
 
+    def test_seal_creates_mshe_analysis_record(self):
+        """El sellado persiste el AnalysisRecord normalizado (kind='tarot') para MSHE."""
+        from api.models import AnalysisRecord
+
+        instance = self._workspace_ready_to_seal()
+        response = self.client.post(
+            "/api/swm/tarot/seal",
+            {"instance_id": str(instance.id)},
+            format="json",
+        )
+        self.assertEqual(response.status_code, http_status.HTTP_200_OK)
+
+        record = AnalysisRecord.objects.filter(
+            patient=self.clinical_patient, kind="tarot"
+        ).first()
+        self.assertIsNotNone(record)
+        self.assertEqual(record.module_code, "SWM_TAROT_SEAL")
+        self.assertEqual(record.therapist, self.therapist)
+        self.assertEqual(record.computed_result["reading"]["cards_count"], 2)
+        self.assertEqual(record.raw_input["workspace_id"], str(instance.id))
+
 
 class AuditTrailAPITest(TarotAPITestCase):
     """Tests for /api/swm/tarot/audit endpoint."""

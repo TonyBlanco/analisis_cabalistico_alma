@@ -371,12 +371,23 @@ class SealWorkspaceView(APIView):
 
             patient = resolve_tarot_workspace_patient(instance)
             if patient:
+                spread = build_tarot_spread_from_instance(instance)
                 ingest_tarot_seal(
                     therapist=instance.creator_user,
                     patient=patient,
                     source_id=str(instance.id),
-                    spread=build_tarot_spread_from_instance(instance),
+                    spread=spread,
                 )
+
+                # Artefacto normalizado para federación MSHE (el hub solo lee).
+                from api.services.holistic_records import (
+                    build_tarot_module_payload,
+                    record_module_synthesis,
+                )
+
+                payload = build_tarot_module_payload(instance)
+                if payload:
+                    record_module_synthesis(**payload)
             
             return Response({
                 'instance': WorkspaceInstanceSerializer(instance).data,

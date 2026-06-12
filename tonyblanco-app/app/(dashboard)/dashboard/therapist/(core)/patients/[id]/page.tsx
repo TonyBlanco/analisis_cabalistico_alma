@@ -10,6 +10,7 @@ import dynamic from 'next/dynamic'
 import { getActivePatient, setActivePatientId } from '@/lib/active-patient';
 import AssignMCMI4Modal from '@/components/AssignMCMI4Modal';
 import AssignMCMI4MysticModal from '@/components/AssignMCMI4MysticModal';
+import HolisticSynthesisCard from '@/components/patient/HolisticSynthesisCard';
 
 import { getApiBaseUrl } from '@/lib/api-base';
 import { getAuthToken } from '@/lib/api';
@@ -267,6 +268,11 @@ export default function TherapistPatientDetailPage() {
             ))}
           </div>
         )}
+      </section>
+
+      <section className="bg-white border border-gray-200 rounded-lg p-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-3">Síntesis Holística (MSHE)</h2>
+        <HolisticSynthesisCard records={analysisRecords} />
       </section>
 
       <section className="bg-white border border-gray-200 rounded-lg p-6">

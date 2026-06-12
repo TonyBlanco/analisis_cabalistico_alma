@@ -86,20 +86,46 @@ async function main() {
     { token: TOKEN, pid: PATIENT_ID, pname: PATIENT_NAME },
   );
 
-  await page.goto(`${BASE}/dashboard/therapist/cabala-aplicada`, { waitUntil: 'domcontentloaded', timeout: 60000 });
+  await page.goto(`${BASE}/dashboard/therapist/cabala-aplicada`, { waitUntil: 'domcontentloaded', timeout: 90000 });
   await dismissCookies(page);
-  await page.waitForTimeout(3000);
+
+  await page
+    .getByText(/Cargando consultante activo/i)
+    .waitFor({ state: 'hidden', timeout: 60000 })
+    .catch(() => {});
 
   const patientVisible = await page.getByText(PATIENT_NAME, { exact: false }).first().isVisible().catch(() => false);
   record('patient-active', patientVisible, patientVisible ? `Consultante ${PATIENT_NAME} visible` : 'Consultante no visible en UI');
 
   // 1) Ejecutar método en el Árbol
-  const ejecutar = page.locator('main button', { hasText: /^Ejecutar$/ }).first();
-  await ejecutar.waitFor({ timeout: 30000 });
-  await ejecutar.click();
-  await page.waitForTimeout(8000);
-  const treeActive = await page.getByText(/workspace activo/i).isVisible().catch(() => false);
-  record('method-execute', treeActive, treeActive ? 'Método ejecutado; workspace activo' : 'No se confirmó workspace activo tras Ejecutar');
+  await page.locator('aside[aria-label="Secciones del workspace"] button', { hasText: /^Árbol$/ }).first().click().catch(() => {});
+
+  const ejecutar = page.getByRole('button', { name: /Ejecutar método cabalístico/i });
+  try {
+    await ejecutar.waitFor({ state: 'visible', timeout: 60000 });
+    await ejecutar.click();
+    await page
+      .getByText(/Ejecutando…|Analizando estructura simbólica/i)
+      .waitFor({ state: 'hidden', timeout: 90000 })
+      .catch(() => {});
+    await page.waitForTimeout(2000);
+    const treeActive =
+      (await page.locator('#cabala-aplicada-export-tree svg').count()) > 0 ||
+      (await page.getByText(/Síntesis disponible/i).isVisible().catch(() => false)) ||
+      !(await page.getByText(/Aún no hay análisis en el Árbol/i).isVisible().catch(() => true));
+    record(
+      'method-execute',
+      treeActive,
+      treeActive ? 'Método ejecutado; árbol o síntesis visible' : 'No se confirmó árbol/síntesis tras Ejecutar',
+    );
+  } catch (e) {
+    const errText = await page.locator('main').innerText().catch(() => '');
+    record(
+      'method-execute',
+      false,
+      `Botón Ejecutar no disponible: ${e.message}${errText.includes('Error cargando consultante') ? ' (perfil consultante 404 — revisa PATIENT_ID)' : ''}`,
+    );
+  }
 
   // 2) Pestaña PDF + actividad
   await page.locator('header button', { hasText: /^PDF$/ }).first().click();

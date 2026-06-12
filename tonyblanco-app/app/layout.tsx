@@ -19,6 +19,14 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Kabbalah Aplicada & Psicoterapias del Alma",
   description: "Plataforma de análisis cabalístico y numerología para profesionales del alma y buscadores personales. Descubre tu camino a través de la sabiduría ancestral.",
+  icons: {
+    icon: [
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/icon.svg', type: 'image/svg+xml' },
+    ],
+    apple: [{ url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
+    other: [{ rel: 'icon', url: '/icon-192.png', sizes: '192x192', type: 'image/png' }],
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',

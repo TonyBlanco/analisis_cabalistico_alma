@@ -11,6 +11,16 @@ const nextConfig: NextConfig = {
   },
   transpilePackages: ["@holistica/symbolic"],
 
+  async redirects() {
+    return [
+      {
+        source: '/para-terapeutas',
+        destination: '/',
+        permanent: true,
+      },
+    ];
+  },
+
   async rewrites() {
     return [
       {

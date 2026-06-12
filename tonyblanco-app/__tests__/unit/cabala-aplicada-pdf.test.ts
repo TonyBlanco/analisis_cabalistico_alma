@@ -12,6 +12,7 @@ describe('normalizeInclude', () => {
       metodo: true,
       actividad: true,
       ia: false,
+      formativa: true,
     });
   });
 
@@ -20,6 +21,12 @@ describe('normalizeInclude', () => {
     expect(inc.estructurales).toBe(false);
     expect(inc.ia).toBe(true);
     expect(inc.metodo).toBe(true);
+  });
+
+  it('formativa es true por defecto y se puede desactivar', () => {
+    expect(normalizeInclude(undefined).formativa).toBe(true);
+    expect(normalizeInclude({ formativa: false }).formativa).toBe(false);
+    expect(normalizeInclude({ formativa: true }).formativa).toBe(true);
   });
 });
 
@@ -85,5 +92,72 @@ describe('buildReportSections', () => {
     const sections = buildReportSections({ patientName: 'T' });
     const metodo = sections.find((s) => s.title === 'Interpretación del método');
     expect(metodo!.lines.join('\n')).toContain('(sin datos en esta sesión)');
+  });
+
+  it('incluye Síntesis formativa con brief completo', () => {
+    const brief = {
+      headline: 'Titular de prueba',
+      workingHypothesis: 'Hipótesis de trabajo',
+      processArc: 'Arco del proceso',
+      dominantSefirot: [
+        {
+          displayName: 'Keter',
+          activation: 0.85,
+          light: 'Conciencia pura',
+          shadowWatch: 'Disociación',
+          tikkun: 'Encarnación',
+        },
+        {
+          displayName: 'Tiferet',
+          activation: 0.6,
+          light: 'Armonía',
+          shadowWatch: 'Abandono',
+          tikkun: 'Centro',
+        },
+      ],
+      sessionQuestions: ['¿Qué necesitas integrar?', '¿Qué resistes?'],
+    };
+
+    const sections = buildReportSections({
+      patientName: 'Prueba',
+      formativeBrief: brief as Record<string, unknown>,
+    });
+
+    const formativa = sections.find((s) => s.title === 'Síntesis formativa');
+    expect(formativa).toBeTruthy();
+    const text = formativa!.lines.join('\n');
+
+    expect(text).toContain('Titular de prueba');
+    expect(text).toContain('Hipótesis de trabajo');
+    expect(text).toContain('Arco del proceso');
+    expect(text).toContain('Keter (85%)');
+    expect(text).toContain('Luz: Conciencia pura');
+    expect(text).toContain('Sombra: Disociación');
+    expect(text).toContain('Tikkun: Encarnación');
+    expect(text).toContain('Tiferet (60%)');
+    expect(text).toContain('1. ¿Qué necesitas integrar?');
+    expect(text).toContain('2. ¿Qué resistes?');
+  });
+
+  it('omite Síntesis formativa cuando include.formativa === false', () => {
+    const sections = buildReportSections({
+      patientName: 'T',
+      include: { formativa: false },
+      formativeBrief: { headline: 'X', workingHypothesis: 'Y', processArc: 'Z', dominantSefirot: [], sessionQuestions: [] },
+    });
+    expect(sections.find((s) => s.title === 'Síntesis formativa')).toBeFalsy();
+  });
+
+  it('muestra (sin datos) en Síntesis formativa cuando no hay brief', () => {
+    const sections = buildReportSections({ patientName: 'T' });
+    const formativa = sections.find((s) => s.title === 'Síntesis formativa');
+    expect(formativa).toBeTruthy();
+    expect(formativa!.lines.join('\n')).toContain('(sin datos en esta sesión)');
+  });
+
+  it('muestra (sin datos) en Síntesis formativa cuando el brief es null', () => {
+    const sections = buildReportSections({ patientName: 'T', formativeBrief: null });
+    const formativa = sections.find((s) => s.title === 'Síntesis formativa');
+    expect(formativa!.lines.join('\n')).toContain('(sin datos en esta sesión)');
   });
 });

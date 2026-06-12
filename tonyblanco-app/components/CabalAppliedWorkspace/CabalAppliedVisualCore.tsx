@@ -723,6 +723,18 @@ export default function CabalAppliedVisualCore({
 
       if (activePatientId) {
         try {
+          const briefForRecord: Record<string, unknown> | null = (() => {
+            try {
+              const ctx = methodContextFromSymbolicState(
+                estado as Parameters<typeof methodContextFromSymbolicState>[0],
+              );
+              const brief = buildFormativeBrief(treeState, analyzed.analysis, ctx, undefined);
+              return brief as unknown as Record<string, unknown>;
+            } catch {
+              return null;
+            }
+          })();
+
           const res = await saveCabalaAplicadaMethodRecord(activePatientId, {
             method_id: selectedMethod,
             method_name: method.name ?? null,
@@ -734,6 +746,7 @@ export default function CabalAppliedVisualCore({
               analysis: analyzed.analysis,
             },
             symbolic_interpretation: null,
+            formative_brief: briefForRecord,
           });
           if (res.id) {
             onSnapshotSaved?.(res.id);

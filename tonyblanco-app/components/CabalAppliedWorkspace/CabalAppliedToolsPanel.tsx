@@ -82,11 +82,13 @@ export default function CabalAppliedToolsPanel({
     metodo: true,
     actividad: true,
     ia: false,
+    formativa: true,
   });
   const [activity, setActivity] = useState<CabalaActivityItem[]>([]);
   const [activitySelected, setActivitySelected] = useState<Record<string, boolean>>({});
   const [activityLoading, setActivityLoading] = useState(false);
   const [gematriaForPdf, setGematriaForPdf] = useState<Record<string, unknown> | null>(null);
+  const [formativeForPdf, setFormativeForPdf] = useState<Record<string, unknown> | null>(null);
   const [methodNameForPdf, setMethodNameForPdf] = useState<string | null>(null);
 
   const canSnapshot = useMemo(() => Boolean(patientId && (treeState || backendStructuralState)), [patientId, treeState, backendStructuralState]);
@@ -130,6 +132,11 @@ export default function CabalAppliedToolsPanel({
           const methodOutput = (ca?.method_output ?? null) as Record<string, unknown> | null;
           const gi = extractGematriaInterpretacion(methodOutput);
           setGematriaForPdf((gi as unknown as Record<string, unknown>) ?? null);
+          setFormativeForPdf(
+            ca?.formative_brief && typeof ca.formative_brief === 'object'
+              ? (ca.formative_brief as Record<string, unknown>)
+              : null,
+          );
           setMethodNameForPdf(
             typeof ca?.method_name === 'string' && ca.method_name.trim()
               ? ca.method_name
@@ -285,6 +292,7 @@ export default function CabalAppliedToolsPanel({
         methodName: methodNameForPdf,
         interpretationText,
         gematriaInterpretacion: gematriaForPdf,
+        formativeBrief: formativeForPdf,
         activity: selectedActivity,
         include: pdfInclude,
         pdfSummary,
@@ -514,6 +522,7 @@ export default function CabalAppliedToolsPanel({
                 ['tree', 'Árbol (visual)'],
                 ['estructurales', 'Datos estructurales'],
                 ['metodo', 'Interpretación del método (qué hace y cómo ayuda)'],
+                ['formativa', 'Síntesis formativa (hipótesis, arco, focos, preguntas)'],
                 ['actividad', 'Actividad de la sesión'],
               ] as Array<[keyof CabalaReportInclude, string]>).map(([key, label]) => (
                 <label key={key} className="flex items-center gap-2 text-xs text-gray-700">

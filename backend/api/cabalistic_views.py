@@ -117,6 +117,7 @@ class CabalaAplicadaMethodRecordView(APIView):
                     'tree_state': body.get('tree_state') if isinstance(body.get('tree_state'), dict) else None,
                     'backend_structural_state': body.get('backend_structural_state') if isinstance(body.get('backend_structural_state'), dict) else None,
                     'symbolic_interpretation': body.get('symbolic_interpretation') if isinstance(body.get('symbolic_interpretation'), dict) else None,
+                    'formative_brief': body.get('formative_brief') if isinstance(body.get('formative_brief'), dict) else None,
                 }
             }
 

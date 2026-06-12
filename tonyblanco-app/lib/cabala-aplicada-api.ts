@@ -8,6 +8,7 @@ export type CabalaAplicadaMethodRecordPayload = {
   tree_state?: Record<string, unknown> | null;
   backend_structural_state?: Record<string, unknown> | null;
   symbolic_interpretation?: Record<string, unknown> | null;
+  formative_brief?: Record<string, unknown> | null;
 };
 
 export type CabalaAplicadaSavedRecord = {

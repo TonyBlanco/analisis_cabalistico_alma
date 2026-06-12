@@ -6,11 +6,10 @@ import {
 	MISPAR_MILUI,
 	crearMetadatos,
 } from '../../cabala/gematria-core';
+import { interpretarAnalisis } from '../../cabala/interpretacion';
 
-/**
- * Mispar Milui: cada letra vale la gematria de su nombre completo deletreado
- * (alef=alef-lamed-pe=111, bet=bet-yod-tav=412 ...). Deletreos en gematria-core.
- */
+const DESCRIPCION = 'Mispar Milui: cada letra vale la gematria de su nombre deletreado (variante estandar documentada).';
+
 export function calcularAnalisisMilui(input: MiluiInput) {
 	const hebreo = normalizarHebreo(input.nombreCompleto || '');
 	const analisis = analizarConValores({
@@ -21,10 +20,7 @@ export function calcularAnalisisMilui(input: MiluiInput) {
 	});
 	return {
 		...analisis,
-		metadatos: crearMetadatos(
-			'milui',
-			'milui',
-			'Mispar Milui: cada letra vale la gematria de su nombre deletreado (variante estandar documentada).',
-		),
+		metadatos: crearMetadatos('milui', 'milui', DESCRIPCION),
+		interpretacion: interpretarAnalisis(analisis, 'milui', DESCRIPCION),
 	};
 }

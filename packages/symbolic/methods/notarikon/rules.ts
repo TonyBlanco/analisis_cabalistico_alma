@@ -8,15 +8,13 @@ import {
 	MISPAR_HECHRACHI,
 	crearMetadatos,
 } from '../../cabala/gematria-core';
+import { interpretarAnalisis } from '../../cabala/interpretacion';
 
-/**
- * Notarikon: rashei tevot (iniciales de cada palabra) y sofei tevot (finales).
- * Se valora la cadena de iniciales con gematria estandar.
- */
 export function calcularAnalisisNotarikon(input: NotarikonInput) {
 	const hebreo = normalizarHebreo(input.nombreCompleto || '');
 	const iniciales = notarikonIniciales(hebreo);
 	const finales = notarikonFinales(hebreo);
+	const DESCRIPCION = `Notarikon: rashei tevot (iniciales) -> "${iniciales}"; sofei tevot (finales) -> "${finales}". Gematria estandar de las iniciales.`;
 	const analisis = analizarConValores({
 		entrada: { nombreCompleto: input.nombreCompleto || '', fechaNacimiento: input.fechaNacimiento },
 		textoHebreoOriginal: hebreo,
@@ -28,10 +26,7 @@ export function calcularAnalisisNotarikon(input: NotarikonInput) {
 		...analisis,
 		rasheiTevot: iniciales,
 		sofeiTevot: finales,
-		metadatos: crearMetadatos(
-			'notarikon',
-			'notarikon',
-			`Notarikon: rashei tevot (iniciales) -> "${iniciales}"; sofei tevot (finales) -> "${finales}". Gematria estandar de las iniciales.`,
-		),
+		metadatos: crearMetadatos('notarikon', 'notarikon', DESCRIPCION),
+		interpretacion: interpretarAnalisis(analisis, 'notarikon', DESCRIPCION),
 	};
 }

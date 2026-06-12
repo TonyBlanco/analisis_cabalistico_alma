@@ -8,11 +8,10 @@ import {
 	MISPAR_HECHRACHI,
 	crearMetadatos,
 } from '../../cabala/gematria-core';
+import { interpretarAnalisis } from '../../cabala/interpretacion';
 
-/**
- * Avgad: cada letra se sustituye por la siguiente (alef->bet ... tav->alef);
- * luego gematria estandar del texto transformado.
- */
+const DESCRIPCION = 'Avgad: cada letra -> la siguiente (alef->bet ... tav->alef); luego gematria estandar.';
+
 export function calcularAnalisisAvgad(input: AvgadInput) {
 	const hebreo = normalizarHebreo(input.nombreCompleto || '');
 	const transformado = aplicarCifrado(hebreo, AVGAD);
@@ -25,10 +24,7 @@ export function calcularAnalisisAvgad(input: AvgadInput) {
 	});
 	return {
 		...analisis,
-		metadatos: crearMetadatos(
-			'avgad',
-			'temurah',
-			'Avgad: cada letra -> la siguiente (alef->bet ... tav->alef); luego gematria estandar.',
-		),
+		metadatos: crearMetadatos('avgad', 'temurah', DESCRIPCION),
+		interpretacion: interpretarAnalisis(analisis, 'avgad', DESCRIPCION),
 	};
 }

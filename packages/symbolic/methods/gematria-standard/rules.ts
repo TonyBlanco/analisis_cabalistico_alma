@@ -6,10 +6,13 @@ import {
 	MISPAR_HECHRACHI,
 	crearMetadatos,
 } from '../../cabala/gematria-core';
+import { interpretarAnalisis } from '../../cabala/interpretacion';
+
+const DESCRIPCION = 'Mispar Hechrachi: valor absoluto estandar de cada letra (alef=1 ... tav=400).';
 
 /**
- * Gematria estandar (Mispar Hechrachi / Ragil).
- * Suma el valor absoluto de cada letra hebrea del nombre.
+ * Gematria estandar (Mispar Hechrachi / Ragil): suma el valor absoluto de cada
+ * letra hebrea del nombre, mas interpretacion y explicacion del metodo.
  */
 export function calcularAnalisisGematriaStandard(input: GematriaStandardInput) {
 	const hebreo = normalizarHebreo(input.nombreCompleto || '');
@@ -21,10 +24,7 @@ export function calcularAnalisisGematriaStandard(input: GematriaStandardInput) {
 	});
 	return {
 		...analisis,
-		metadatos: crearMetadatos(
-			'gematria-standard',
-			'mispar',
-			'Mispar Hechrachi: valor absoluto estandar de cada letra (alef=1 ... tav=400).',
-		),
+		metadatos: crearMetadatos('gematria-standard', 'mispar', DESCRIPCION),
+		interpretacion: interpretarAnalisis(analisis, 'gematria-standard', DESCRIPCION),
 	};
 }

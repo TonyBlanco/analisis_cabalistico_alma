@@ -8,11 +8,10 @@ import {
 	MISPAR_HECHRACHI,
 	crearMetadatos,
 } from '../../cabala/gematria-core';
+import { interpretarAnalisis } from '../../cabala/interpretacion';
 
-/**
- * Atbash: cifrado por inversion del alfabeto (alef<->tav, bet<->shin ...);
- * luego gematria estandar del texto transformado.
- */
+const DESCRIPCION = 'Atbash: inversion del alfabeto (alef<->tav, bet<->shin ...); luego gematria estandar.';
+
 export function calcularAnalisisAtbash(input: AtbashInput) {
 	const hebreo = normalizarHebreo(input.nombreCompleto || '');
 	const transformado = aplicarCifrado(hebreo, ATBASH);
@@ -25,10 +24,7 @@ export function calcularAnalisisAtbash(input: AtbashInput) {
 	});
 	return {
 		...analisis,
-		metadatos: crearMetadatos(
-			'atbash',
-			'temurah',
-			'Atbash: inversion del alfabeto (alef<->tav, bet<->shin ...); luego gematria estandar.',
-		),
+		metadatos: crearMetadatos('atbash', 'temurah', DESCRIPCION),
+		interpretacion: interpretarAnalisis(analisis, 'atbash', DESCRIPCION),
 	};
 }

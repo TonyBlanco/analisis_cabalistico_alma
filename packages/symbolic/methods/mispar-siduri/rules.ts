@@ -6,10 +6,10 @@ import {
 	MISPAR_SIDURI,
 	crearMetadatos,
 } from '../../cabala/gematria-core';
+import { interpretarAnalisis } from '../../cabala/interpretacion';
 
-/**
- * Mispar Siduri: valor ordinal de cada letra (alef=1 ... tav=22).
- */
+const DESCRIPCION = 'Mispar Siduri: valor ordinal de cada letra (alef=1 ... tav=22).';
+
 export function calcularAnalisisMisparSiduri(input: MisparSiduriInput) {
 	const hebreo = normalizarHebreo(input.nombreCompleto || '');
 	const analisis = analizarConValores({
@@ -20,10 +20,7 @@ export function calcularAnalisisMisparSiduri(input: MisparSiduriInput) {
 	});
 	return {
 		...analisis,
-		metadatos: crearMetadatos(
-			'mispar-siduri',
-			'mispar',
-			'Mispar Siduri: valor ordinal de cada letra (alef=1 ... tav=22).',
-		),
+		metadatos: crearMetadatos('mispar-siduri', 'mispar', DESCRIPCION),
+		interpretacion: interpretarAnalisis(analisis, 'mispar-siduri', DESCRIPCION),
 	};
 }

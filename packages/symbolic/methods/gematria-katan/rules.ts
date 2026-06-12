@@ -6,10 +6,10 @@ import {
 	MISPAR_KATAN,
 	crearMetadatos,
 } from '../../cabala/gematria-core';
+import { interpretarAnalisis } from '../../cabala/interpretacion';
 
-/**
- * Mispar Katan: cada letra reducida a su digito significativo (10->1, 20->2, 400->4).
- */
+const DESCRIPCION = 'Mispar Katan: cada letra reducida a su digito significativo (10->1, 20->2, 400->4).';
+
 export function calcularAnalisisGematriaKatan(input: GematriaKatanInput) {
 	const hebreo = normalizarHebreo(input.nombreCompleto || '');
 	const analisis = analizarConValores({
@@ -20,10 +20,7 @@ export function calcularAnalisisGematriaKatan(input: GematriaKatanInput) {
 	});
 	return {
 		...analisis,
-		metadatos: crearMetadatos(
-			'gematria-katan',
-			'mispar',
-			'Mispar Katan: cada letra reducida a su digito significativo (10->1, 20->2, 400->4).',
-		),
+		metadatos: crearMetadatos('gematria-katan', 'mispar', DESCRIPCION),
+		interpretacion: interpretarAnalisis(analisis, 'gematria-katan', DESCRIPCION),
 	};
 }

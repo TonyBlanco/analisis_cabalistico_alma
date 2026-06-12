@@ -8,11 +8,10 @@ import {
 	MISPAR_GADOL,
 	crearMetadatos,
 } from '../../cabala/gematria-core';
+import { interpretarAnalisis } from '../../cabala/interpretacion';
 
-/**
- * Temurah (Atbach / aleph-tet-bet-het): sustitucion por complemento a 10/100/1000.
- * Mapea letras a finales (centenas altas), por lo que se valora con Mispar Gadol.
- */
+const DESCRIPCION = 'Temurah (Atbach): sustitucion por complemento a 10/100/1000; luego gematria con finales (Gadol).';
+
 export function calcularAnalisisTemurah(input: TemurahInput) {
 	const hebreo = normalizarHebreo(input.nombreCompleto || '');
 	const transformado = aplicarCifrado(hebreo, ATBACH);
@@ -25,10 +24,7 @@ export function calcularAnalisisTemurah(input: TemurahInput) {
 	});
 	return {
 		...analisis,
-		metadatos: crearMetadatos(
-			'temurah',
-			'temurah',
-			'Temurah (Atbach): sustitucion por complemento a 10/100/1000; luego gematria con finales (Gadol).',
-		),
+		metadatos: crearMetadatos('temurah', 'temurah', DESCRIPCION),
+		interpretacion: interpretarAnalisis(analisis, 'temurah', DESCRIPCION),
 	};
 }

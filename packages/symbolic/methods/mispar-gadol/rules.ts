@@ -6,11 +6,10 @@ import {
 	MISPAR_GADOL,
 	crearMetadatos,
 } from '../../cabala/gematria-core';
+import { interpretarAnalisis } from '../../cabala/interpretacion';
 
-/**
- * Mispar Gadol: como el estandar, pero las finales valen 500-900
- * (kaf=500, mem=600, nun=700, pe=800, tsadi=900).
- */
+const DESCRIPCION = 'Mispar Gadol: estandar con finales 500-900 (kaf=500, mem=600, nun=700, pe=800, tsadi=900).';
+
 export function calcularAnalisisMisparGadol(input: MisparGadolInput) {
 	const hebreo = normalizarHebreo(input.nombreCompleto || '');
 	const analisis = analizarConValores({
@@ -21,10 +20,7 @@ export function calcularAnalisisMisparGadol(input: MisparGadolInput) {
 	});
 	return {
 		...analisis,
-		metadatos: crearMetadatos(
-			'mispar-gadol',
-			'mispar',
-			'Mispar Gadol: estandar con finales 500-900 (kaf=500, mem=600, nun=700, pe=800, tsadi=900).',
-		),
+		metadatos: crearMetadatos('mispar-gadol', 'mispar', DESCRIPCION),
+		interpretacion: interpretarAnalisis(analisis, 'mispar-gadol', DESCRIPCION),
 	};
 }

@@ -8,11 +8,10 @@ import {
 	MISPAR_HECHRACHI,
 	crearMetadatos,
 } from '../../cabala/gematria-core';
+import { interpretarAnalisis } from '../../cabala/interpretacion';
 
-/**
- * Albam: intercambia las dos mitades de 11 letras (alef<->lamed, bet<->mem ...);
- * luego gematria estandar del texto transformado.
- */
+const DESCRIPCION = 'Albam: intercambio de las dos mitades del alfabeto (alef<->lamed ...); luego gematria estandar.';
+
 export function calcularAnalisisAlbam(input: AlbamInput) {
 	const hebreo = normalizarHebreo(input.nombreCompleto || '');
 	const transformado = aplicarCifrado(hebreo, ALBAM);
@@ -25,10 +24,7 @@ export function calcularAnalisisAlbam(input: AlbamInput) {
 	});
 	return {
 		...analisis,
-		metadatos: crearMetadatos(
-			'albam',
-			'temurah',
-			'Albam: intercambio de las dos mitades del alfabeto (alef<->lamed ...); luego gematria estandar.',
-		),
+		metadatos: crearMetadatos('albam', 'temurah', DESCRIPCION),
+		interpretacion: interpretarAnalisis(analisis, 'albam', DESCRIPCION),
 	};
 }

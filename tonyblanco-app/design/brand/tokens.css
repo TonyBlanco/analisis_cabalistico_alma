@@ -40,6 +40,11 @@
 
   /* Panel login (split izquierdo) */
   --ha-panel-bg:      linear-gradient(165deg, #0A0A12 0%, #15101F 55%, #1C1428 100%);
+
+  /* Campos de formulario */
+  --ha-input-bg:        #14141F;
+  --ha-input-bg-focus:  #1A1A28;
+  --ha-input-border:    rgba(255,255,255,0.22);
 }
 
 /* ---- Variante B: Indigo + Oro ---- */
@@ -70,6 +75,10 @@
 
   --ha-shadow:        0 18px 48px rgba(4,6,24,0.45);
   --ha-panel-bg:      linear-gradient(165deg, #0B1026 0%, #1E1B4B 100%);
+
+  --ha-input-bg:        #12182E;
+  --ha-input-bg-focus:  #171E38;
+  --ha-input-border:    rgba(255,255,255,0.22);
 }
 
 /* ---- Variante C: Clinico (Studio33 violeta→cian) ---- */
@@ -100,6 +109,10 @@
 
   --ha-shadow:        0 1px 3px rgba(15,23,42,0.06), 0 10px 30px rgba(15,23,42,0.07);
   --ha-panel-bg:      linear-gradient(165deg, #4C36C4 0%, #7C5CFF 65%, #19B8D8 145%);
+
+  --ha-input-bg:        #FFFFFF;
+  --ha-input-bg-focus:  #FFFFFF;
+  --ha-input-border:    #CBD5E1;
 }
 
 /* ============================================================
@@ -139,3 +152,44 @@
    Monocromo claro            -> #1A1205
    Icono inline usa currentColor para control total via CSS.
    ============================================================ */
+
+/* ============================================================
+   Campos de formulario (marketing / login)
+   ============================================================ */
+[data-theme="oro"],
+[data-theme="indigo"] {
+  color-scheme: dark;
+}
+
+[data-theme] .ha-input {
+  color: var(--ha-ink);
+  background-color: var(--ha-input-bg);
+  border-color: var(--ha-input-border);
+  caret-color: var(--ha-acc);
+}
+
+[data-theme] .ha-input::placeholder {
+  color: var(--ha-ink-3);
+  opacity: 1;
+}
+
+[data-theme] .ha-input:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.32);
+}
+
+[data-theme] .ha-input:focus {
+  color: var(--ha-ink);
+  background-color: var(--ha-input-bg-focus);
+  border-color: var(--ha-acc);
+}
+
+[data-theme] .ha-input:-webkit-autofill,
+[data-theme] .ha-input:-webkit-autofill:hover,
+[data-theme] .ha-input:-webkit-autofill:focus,
+[data-theme] .ha-input:-webkit-autofill:active {
+  -webkit-text-fill-color: var(--ha-ink) !important;
+  -webkit-box-shadow: 0 0 0 1000px var(--ha-input-bg) inset !important;
+  box-shadow: 0 0 0 1000px var(--ha-input-bg) inset !important;
+  caret-color: var(--ha-acc);
+  transition: background-color 99999s ease-out, color 99999s ease-out;
+}

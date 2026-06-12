@@ -202,7 +202,7 @@ export default function LoginPage() {
   };
 
   const inputClassName =
-    'w-full rounded-xl border border-[var(--ha-line-soft)] bg-[var(--ha-bg-2)] px-4 py-3 text-[15px] text-[var(--ha-ink)] placeholder:text-[var(--ha-ink-3)] transition-[border-color,box-shadow] focus:border-[var(--ha-acc)] focus:outline-none focus:ring-4 focus:ring-[var(--ha-ring)]';
+    'ha-input w-full rounded-xl border px-4 py-3 text-[15px] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] transition-[border-color,box-shadow,background-color] focus:outline-none focus:ring-4 focus:ring-[var(--ha-ring)]';
 
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
@@ -370,7 +370,7 @@ export default function LoginPage() {
                       value={resetEmail}
                       onChange={(e) => setResetEmail(e.target.value)}
                       placeholder="Email para recuperación"
-                      className="min-w-0 flex-1 rounded-lg border border-[var(--ha-line-soft)] bg-[var(--ha-bg-2)] px-3 py-2 text-sm text-[var(--ha-ink)] focus:border-[#60A5FA] focus:outline-none focus:ring-2 focus:ring-[rgba(96,165,250,0.35)]"
+                      className="ha-input min-w-0 flex-1 rounded-lg border px-3 py-2 text-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] focus:border-[#60A5FA] focus:outline-none focus:ring-2 focus:ring-[rgba(96,165,250,0.35)]"
                     />
                     <button
                       type="button"

@@ -176,6 +176,8 @@ function synthesize(cards: TarotCardDraw[], contextFocus: string): string {
 
 export default function TarotDrawPanel(props: {
   consultantId?: string | null;
+  consultantName?: string | null;
+  consultantBirthDate?: string | null;
   patientId?: number | null;
   systemId?: string;
   onSystemChange?: (systemId: string) => void;
@@ -291,8 +293,9 @@ export default function TarotDrawPanel(props: {
           deck_scope: supportsFullDeck ? deckScope : 'major',
           context_focus: contextFocus,
           intention,
-          consultant_id:
-            consent?.mode === 'store_with_consent' ? props.consultantId ?? null : null,
+          consultant_id: props.consultantId ?? null,
+          consultant_name: props.consultantName?.trim() || null,
+          consultant_birthdate: props.consultantBirthDate || null,
           // Astrology enrichment options
           astrology_enrichment: astrologyOptions.enabled ? {
             enabled: true,

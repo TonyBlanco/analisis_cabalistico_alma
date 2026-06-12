@@ -3,6 +3,7 @@
 import clsx from 'clsx';
 import TarotCardView, { type TarotCardViewCard } from './TarotCardView';
 import BotaTarotCardSVG, { type BotaTarotCardData } from './bota/BotaTarotCardSVG';
+import TreeOfLifeSpreadLayout from './TreeOfLifeSpreadLayout';
 
 export type TarotSpreadPosition = {
   id: string;
@@ -74,6 +75,21 @@ export default function TarotSpreadView({
       <div className="rounded-lg border border-slate-200 bg-white p-4 text-sm text-slate-700">
         No hay cartas para renderizar.
       </div>
+    );
+  }
+
+  if (spread?.id === 'tree_of_life') {
+    return (
+      <TreeOfLifeSpreadLayout
+        title={title}
+        cards={cards}
+        systemId={systemId}
+        useBotaSvg={useBotaSvg}
+        selectedCardDrawId={selectedCardDrawId}
+        onSelectCard={onSelectCard}
+        mapBotaCard={mapBotaCard}
+        getBotaMajorPngSrc={getBotaMajorPngSrc}
+      />
     );
   }
 

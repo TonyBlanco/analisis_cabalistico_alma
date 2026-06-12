@@ -10,9 +10,11 @@ Implementa persistencia gobernada con tres modos:
 Refs: docs/SWM_V3_INTERPRETACION_SIMBOLICA_GOBERNADA.md
 """
 
+import hashlib
 import json
 import logging
 import random
+import unicodedata
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -767,6 +769,85 @@ def generate_fallback_symbolic_reading(
     }
 
 
+def _normalize_consultant_name(name: Optional[str]) -> str:
+    """Lowercase, strip accents, collapse whitespace (aligned with birth-card identity)."""
+    if not name:
+        return ""
+    lowered = str(name).lower().strip()
+    decomposed = unicodedata.normalize("NFD", lowered)
+    without_accents = "".join(
+        ch for ch in decomposed if unicodedata.category(ch) != "Mn"
+    )
+    return " ".join(without_accents.split())
+
+
+def _normalize_birthdate_iso(value: Any) -> Optional[str]:
+    if not value:
+        return None
+    if hasattr(value, "isoformat"):
+        try:
+            return value.isoformat()[:10]
+        except (TypeError, ValueError):
+            return None
+    raw = str(value).strip()[:10]
+    try:
+        datetime.strptime(raw, "%Y-%m-%d")
+        return raw
+    except (TypeError, ValueError):
+        return None
+
+
+def _consultant_rng(
+    system_id: str,
+    spread_type: str,
+    consultant_name: Optional[str],
+    consultant_birthdate: Optional[Any],
+) -> random.Random:
+    """
+    Deterministic RNG when consultant identity is complete; otherwise unseeded (non-repeatable).
+    """
+    norm_name = _normalize_consultant_name(consultant_name)
+    birth_iso = _normalize_birthdate_iso(consultant_birthdate)
+    if norm_name and birth_iso:
+        seed_material = f"{system_id}|{spread_type}|{norm_name}|{birth_iso}"
+        seed_int = int.from_bytes(
+            hashlib.sha256(seed_material.encode("utf-8")).digest()[:8],
+            "big",
+        )
+        return random.Random(seed_int)
+    return random.Random()
+
+
+def resolve_consultant_identity_for_seed(request, data: Dict[str, Any]) -> Dict[str, Optional[str]]:
+    """Resolve consultant name + birthdate for deterministic tarot draws."""
+    consultant_id = data.get("consultant_id")
+    name = (data.get("consultant_name") or "").strip()
+    birthdate = data.get("consultant_birthdate")
+
+    if consultant_id and getattr(request, "user", None) and request.user.is_authenticated:
+        try:
+            from api.models import Patient
+
+            patient = Patient.objects.get(id=int(consultant_id), therapist=request.user)
+            if not name:
+                name = (patient.full_name or "").strip()
+                if not name:
+                    name = f"{patient.first_name} {patient.last_name}".strip()
+            if not birthdate and patient.birth_date:
+                birthdate = patient.birth_date.isoformat()
+        except Exception:
+            logger.warning(
+                "[SWM-v3] Could not resolve consultant %s for therapist %s",
+                consultant_id,
+                getattr(request.user, "id", None),
+            )
+
+    return {
+        "consultant_name": name or None,
+        "consultant_birthdate": _normalize_birthdate_iso(birthdate),
+    }
+
+
 def generate_educational_reading(
     system_id: str,
     selected_cards: List[str],
@@ -777,6 +858,8 @@ def generate_educational_reading(
     include_ai: bool = False,
     deck_scope: str = "major",
     usage_context=None,
+    consultant_name: Optional[str] = None,
+    consultant_birthdate: Optional[str] = None,
 ) -> Dict[str, Any]:
     """
     Generate an educational symbolic reading.
@@ -808,6 +891,7 @@ def generate_educational_reading(
     deck_data = load_deck_for_system(system_id)
     deck_scope = resolve_deck_scope(system_id, deck_scope)
     draw_pool = get_draw_pool(deck_data, system_id, deck_scope)
+    rng = _consultant_rng(system_id, spread_type, consultant_name, consultant_birthdate)
 
     # If no cards selected, pick random cards based on spread
     num_cards = {
@@ -821,7 +905,7 @@ def generate_educational_reading(
     
     if not selected_cards and draw_pool:
         selected_cards = [
-            card["id"] for card in random.sample(draw_pool, min(num_cards, len(draw_pool)))
+            card["id"] for card in rng.sample(draw_pool, min(num_cards, len(draw_pool)))
         ]
 
     # Build cards data
@@ -837,7 +921,7 @@ def generate_educational_reading(
             correspondences = card_data.get("correspondences", {})
             keywords = resolve_spanish_keywords(card_data)
             
-            reversed_flag = random.choice([True, False]) if i > 0 else False
+            reversed_flag = rng.choice([True, False]) if i > 0 else False
 
             # Build symbols for frontend compatibility (divinatory + kabbalistic)
             symbols = build_frontend_symbols(card_data, system_id, kabbalistic, keywords)
@@ -1003,6 +1087,7 @@ class SwmV3SymbolicReadingCreateView(APIView):
             context_focus = data.get("context_focus")
             intention = data.get("intention")
             consultant_id = data.get("consultant_id")
+            consultant_identity = resolve_consultant_identity_for_seed(request, data)
             consent_data = data.get("consent", {})
             include_ai = bool(data.get("include_ai", False))
             deck_scope = data.get("deck_scope", "major")
@@ -1037,6 +1122,8 @@ class SwmV3SymbolicReadingCreateView(APIView):
                 include_ai=include_ai,
                 deck_scope=deck_scope,
                 usage_context=usage_context,
+                consultant_name=consultant_identity.get("consultant_name"),
+                consultant_birthdate=consultant_identity.get("consultant_birthdate"),
             )
             
             # Determine if we should store

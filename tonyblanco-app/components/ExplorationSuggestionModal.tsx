@@ -64,6 +64,7 @@ const WORLD_METADATA: Record<string, {
     suggestedTests: [
       { code: 'wellness', name: 'Wellness Assessment' },
       { code: 'screening-general', name: 'Screening Psicológico General' },
+      { code: 'aq_kabbalah', name: 'AQ-Kabbalah (Espectro de Conciencia)' },
       { code: 'scl90', name: 'SCL-90 (Visión Holística)' },
     ],
   },

@@ -20,7 +20,6 @@ from .test_serializers import (
     TestExecutionSerializer
 )
 from api.utils import ClinicalScorer, TEST_LINKS
-from .diagnostics import compute_asrs_essence
 from .models import Patient, UserProfile
 from .validators.test_execution import (
     validate_execution_mode,
@@ -574,45 +573,9 @@ class ExecuteTestView(APIView):
 
         # Procesar el test
         processed_ok = True
-        if test_module.code == 'asrs_essence':
-            raw_answers = input_data.get('answers')
-            answers = raw_answers if isinstance(raw_answers, dict) else {}
-            required_keys = [f"q{i}" for i in range(1, 9)]
-            normalized_answers = {}
-            missing = []
-            invalid = []
-            for key in required_keys:
-                if key not in answers:
-                    missing.append(key)
-                    continue
-                try:
-                    value = int(answers[key])
-                except Exception:
-                    invalid.append(key)
-                    continue
-                if value < 1 or value > 5:
-                    invalid.append(key)
-                    continue
-                normalized_answers[key] = value
-
-            input_data['answers'] = normalized_answers
-
-            if missing or invalid:
-                processed_ok = False
-                result_data = {
-                    'processed': False,
-                    'structured_data': None,
-                    'raw_answers': {},
-                    'message': 'Respuestas incompletas para ASRS-Essence.',
-                    'timestamp': str(datetime.now()),
-                }
-            else:
-                result_data = compute_asrs_essence({'answers': normalized_answers})
-                processed_ok = bool(result_data.get('processed', True))
-        else:
-            result_data = self._process_test(test_module, input_data)
-            if test_module.code == 'anxiety-state-trait' and isinstance(result_data, dict):
-                processed_ok = bool(result_data.get('processed', True))
+        result_data = self._process_test(test_module, input_data)
+        if test_module.code in {'anxiety-state-trait', 'asrs_essence', 'aq_kabbalah'} and isinstance(result_data, dict):
+            processed_ok = bool(result_data.get('processed', True))
 
         if processed_ok:
             user_access.record_use()
@@ -657,9 +620,6 @@ class ExecuteTestView(APIView):
             details_dict = {
                 'audit': audit_metadata
             }
-            if test_module.code == 'asrs_essence':
-                details_dict['raw_answers'] = result_data.get('raw_answers', {})
-
             clinician_notes = ''
             try:
                 raw_notes = input_data.get('clinician_notes')
@@ -845,6 +805,34 @@ class ExecuteTestView(APIView):
                     }
                 from .diagnostics import compute_ybocs_soul as _compute_ybocs
                 return _compute_ybocs({'responses': responses})
+
+            if test_module.code == 'asrs_essence':
+                responses = input_data.get('responses', {})
+                required_asrs = {f'q{i}' for i in range(1, 7)}
+                missing_asrs = required_asrs - set(responses.keys())
+                if missing_asrs:
+                    return {
+                        'processed': False,
+                        'structured_data': None,
+                        'summary_text': f'Respuestas incompletas: faltan {sorted(missing_asrs)}',
+                        'timestamp': str(datetime.now()),
+                    }
+                from .diagnostics import compute_asrs_essence as _compute_asrs
+                return _compute_asrs({'responses': responses})
+
+            if test_module.code == 'aq_kabbalah':
+                responses = input_data.get('responses', {})
+                required_aq = {f'q{i}' for i in range(1, 51)}
+                missing_aq = required_aq - set(responses.keys())
+                if missing_aq:
+                    return {
+                        'processed': False,
+                        'structured_data': None,
+                        'summary_text': f'Respuestas incompletas: faltan {sorted(missing_aq)}',
+                        'timestamp': str(datetime.now()),
+                    }
+                from .diagnostics import compute_aq_kabbalah as _compute_aq
+                return _compute_aq({'responses': responses})
 
             if test_type == 'bdi' or test_module.code == 'bdi-ii':
                 responses = input_data.get('responses', {})

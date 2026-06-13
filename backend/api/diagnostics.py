@@ -1191,55 +1191,163 @@ def compute_screening_general(input_data: dict) -> dict:
 
 
 def compute_asrs_essence(input_data: dict) -> dict:
-    """Compute ASRS-Essence symbolic profile (non-clinical)."""
-    answers = input_data.get('answers', {}) or {}
-    values = []
-    for key in sorted(answers.keys()):
-        try:
-            values.append(float(answers[key]))
-        except Exception:
-            continue
+    """
+    ASRS-Essence — Conciencia Esencial Abierta (non-clinical symbolic screener).
 
-    if not values:
+    Internal structure: ASRS v1.1 Part A (6 items, shaded zone logic).
+    - Items q1-q3: in zone if response >= 2 ('A veces')
+    - Items q4-q6: in zone if response >= 3 ('A menudo')
+    - Screener POSITIVE if >= 4 of 6 items in shaded zone
+    """
+    responses = input_data.get('responses', {}) or {}
+
+    def _as_int(val: object) -> int:
+        try:
+            return max(0, min(4, int(val)))  # type: ignore[arg-type]
+        except Exception:
+            return 0
+
+    required_keys = {f'q{i}' for i in range(1, 7)}
+    missing = required_keys - set(responses.keys())
+    if missing:
         return {
             'processed': False,
             'structured_data': None,
-            'raw_answers': {},
-            'message': 'Respuestas incompletas para ASRS-Essence.',
+            'summary_text': f'Respuestas incompletas: faltan {sorted(missing)}',
             'timestamp': str(datetime.now()),
         }
 
-    score_total = sum(values) / len(values)
-    score_total = round(score_total, 2)
+    # Shaded zone thresholds per ASRS Part A spec
+    thresholds = {f'q{i}': 2 for i in range(1, 4)}
+    thresholds.update({f'q{i}': 3 for i in range(4, 7)})
 
-    if score_total >= 4.2:
-        rhythm_state = 'anchored'
-    elif score_total >= 3.2:
-        rhythm_state = 'fluctuating'
+    items_in_zone = [
+        key for key in [f'q{i}' for i in range(1, 7)]
+        if _as_int(responses[key]) >= thresholds[key]
+    ]
+    zone_count = len(items_in_zone)
+    screener_positive = zone_count >= 4
+
+    if screener_positive:
+        tiferet_state = 'fragmented'
+        kabbalistic_reading = 'El eje Tiferet-Malkuth muestra tensión. La energía esencial busca anclar en la presencia.'
+        transition_suggestion = 'assiah'
+    elif zone_count >= 2:
+        tiferet_state = 'fluctuating'
+        kabbalistic_reading = 'Se observan oscilaciones en el flujo de atención. Tiferet invita al retorno al centro.'
+        transition_suggestion = 'yetzirah'
     else:
-        rhythm_state = 'fragmented'
+        tiferet_state = 'anchored'
+        kabbalistic_reading = 'El pulso esencial se percibe estable. La presencia en Malkuth está integrada.'
+        transition_suggestion = None
 
-    atzilut_level = 'high' if rhythm_state == 'anchored' else 'medium' if rhythm_state == 'fluctuating' else 'low'
-    transition_suggestion = 'deepening' if rhythm_state == 'anchored' else 'integration' if rhythm_state == 'fluctuating' else 'beriah'
-
-    summary_text_map = {
-        'anchored': 'Ritmo esencial estable. Se percibe coherencia interna y claridad de pulso.',
-        'fluctuating': 'Ritmo esencial variable. Hay momentos de alineacion que alternan con dispersion.',
-        'fragmented': 'Ritmo esencial disperso. Se sugiere volver a un eje sencillo y sostenido.',
+    summary_map = {
+        'anchored': 'Conciencia esencial estable. La atención fluye con coherencia y presencia.',
+        'fluctuating': 'Oscilaciones en el ritmo de atención. Hay momentos de claridad que alternan con dispersión.',
+        'fragmented': 'La atención requiere sostén. Se sugiere explorar las raíces de la dispersión.',
     }
 
     structured_data = {
-        'score_total': score_total,
-        'rhythm_state': rhythm_state,
-        'atzilut_level': atzilut_level,
+        'zone_count': zone_count,
+        'items_in_zone': items_in_zone,
+        'screener_positive': screener_positive,
+        'tiferet_state': tiferet_state,
+        'kabbalistic_reading': kabbalistic_reading,
         'transition_suggestion': transition_suggestion,
+        'referral_recommended': screener_positive,
     }
 
     return {
         'processed': True,
         'structured_data': structured_data,
-        'raw_answers': answers,
-        'summary_text': summary_text_map.get(rhythm_state, ''),
+        'summary_text': summary_map[tiferet_state],
+        'timestamp': str(datetime.now()),
+    }
+
+
+def compute_aq_kabbalah(input_data: dict) -> dict:
+    """
+    AQ-Kabbalah — Espectro de Conciencia Cabalístico (non-clinical symbolic instrument).
+
+    50 binary items (0=En desacuerdo, 1=De acuerdo), 5 subscales of 10 items each.
+    Reverse flag is read from AQ_KABBALAH_BANK — not hardcoded.
+    Screener positive: total >= 26. High positive: total >= 32.
+    """
+    from tests.holistic.aq_kabbalah.aq_kabbalah_bank import AQ_KABBALAH_BANK
+
+    responses = input_data.get('responses', {}) or {}
+
+    required_keys = {f'q{i}' for i in range(1, 51)}
+    missing = required_keys - set(responses.keys())
+    if missing:
+        return {
+            'processed': False,
+            'structured_data': None,
+            'summary_text': f'Respuestas incompletas: faltan {sorted(missing)}',
+            'timestamp': str(datetime.now()),
+        }
+
+    def _as_bin(val: object) -> int:
+        try:
+            return 1 if int(val) >= 1 else 0  # type: ignore[arg-type]
+        except Exception:
+            return 0
+
+    subscale_scores: dict[str, int] = {
+        'social_skill': 0,
+        'attention_switching': 0,
+        'attention_to_detail': 0,
+        'communication': 0,
+        'imagination': 0,
+    }
+    total_score = 0
+
+    for item in AQ_KABBALAH_BANK:
+        qid = item['id']
+        val = _as_bin(responses[qid])
+        point = (1 - val) if item.get('reverse', False) else val
+        total_score += point
+        dim = item['dimension']
+        if dim in subscale_scores:
+            subscale_scores[dim] += point
+
+    screener_positive = total_score >= 26
+    high_positive = total_score >= 32
+
+    if high_positive:
+        spectrum_label = 'alta_intensidad'
+        kabbalistic_reading = 'Patrón de conciencia altamente distintivo. El árbol muestra una distribución energética concentrada y singular.'
+        transition_suggestion = 'beriah'
+    elif screener_positive:
+        spectrum_label = 'umbral_sefirótico'
+        kabbalistic_reading = 'Se detecta un umbral de diferenciación significativo. El flujo de Tiferet busca integrar la singularidad del alma.'
+        transition_suggestion = 'yetzirah'
+    else:
+        spectrum_label = 'equilibrio_relacional'
+        kabbalistic_reading = 'El árbol manifiesta un patrón relacional y adaptativo dentro del rango habitual.'
+        transition_suggestion = None
+
+    summary_map = {
+        'equilibrio_relacional': 'Conciencia esencial dentro del rango de equilibrio relacional. El árbol fluye con apertura.',
+        'umbral_sefirótico': 'Se percibe un patrón de conciencia singular que merece exploración consciente.',
+        'alta_intensidad': 'Patrón de conciencia muy diferenciado. El alma expresa una singularidad profunda.',
+    }
+
+    structured_data = {
+        'total_score': total_score,
+        'subscale_scores': subscale_scores,
+        'screener_positive': screener_positive,
+        'high_positive': high_positive,
+        'spectrum_label': spectrum_label,
+        'kabbalistic_reading': kabbalistic_reading,
+        'transition_suggestion': transition_suggestion,
+        'referral_recommended': high_positive,
+    }
+
+    return {
+        'processed': True,
+        'structured_data': structured_data,
+        'summary_text': summary_map[spectrum_label],
         'timestamp': str(datetime.now()),
     }
 
@@ -2353,12 +2461,14 @@ def compute_eat26_spirit(input_data: dict) -> dict:
     # Item 25 (reverse scored): opposite pattern
     
     total_score = 0
-    reverse_item = 25  # Q25 is reverse scored
-    
+    # Q25 is reverse scored per eat26_spirit_bank.py
+    reverse_items = {'q25'}
+
     for i in range(1, 27):
-        val = _clamp_0_5(_as_int(responses.get(f'q{i}', 5)))  # Default to "Never" (5)
-        
-        if i == reverse_item:
+        qid = f'q{i}'
+        val = _clamp_0_5(_as_int(responses.get(qid, 5)))  # Default to "Never" (5)
+
+        if qid in reverse_items:
             # Reverse scoring: 3 points for Sometimes/Rarely/Never
             if val >= 3:
                 total_score += 3

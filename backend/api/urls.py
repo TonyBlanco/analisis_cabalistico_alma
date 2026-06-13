@@ -160,7 +160,9 @@ from .analysis_views import (
     HolisticSynthesisView,
     TherapistHolisticConfigView,
     SCID5AIAssistantView,
+    PatientMyResultsView,
 )
+from .patient_process_views import PatientProcessMilestonesView
 from .patient_profile_views import (
     TherapistUpdatePatientProfileView,
     PatientProfileValidationView,
@@ -432,6 +434,8 @@ urlpatterns = [
     
     # AnalysisRecord core (núcleo normalizado de análisis)
     path('analysis-records/', AnalysisRecordListCreateView.as_view(), name='analysisrecord_list_create'),
+    path('analysis-records/my-results/', PatientMyResultsView.as_view(), name='analysisrecord_my_results'),
+    path('patient/process-milestones/', PatientProcessMilestonesView.as_view(), name='patient_process_milestones'),
     path('analysis-records/<uuid:pk>/', AnalysisRecordDetailView.as_view(), name='analysisrecord_detail'),
     path('analysis-records/<uuid:pk>/annotations/', UpdateAnalysisAnnotationsView.as_view(), name='analysisrecord_annotations'),
     

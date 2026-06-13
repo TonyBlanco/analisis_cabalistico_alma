@@ -538,29 +538,30 @@ export const clinicalTestsRegistry: ClinicalTestRegistryEntry[] = [
   },
 
   {
-
     test_code: "asrs_essence",
-
-    display_name: "ASRS-Essence (Ritmo del Alma)",
-
-    domain: "Exploración arquetipal",
-
+    display_name: "ASRS-Essence (Conciencia Esencial Abierta)",
+    domain: "Atención y presencia vital",
     family: "cabalisticos",
-
     implemented: true,
-
     patient_route: "/dashboard/patient/tests/asrs-essence",
-
     guidance: {
-
-      what: "Exploración simbólica del ritmo esencial (no diagnóstico).",
-
-      when: "Útil para observar estabilidad interna y coherencia del pulso vital.",
-
-      reminder: "Lectura orientativa para acompañamiento terapéutico.",
-
+      what: "Exploración simbólica del ritmo de atención y presencia (no diagnóstico).",
+      when: "Útil para observar patrones de dispersión o enfoque en el flujo vital.",
+      reminder: "No diagnóstico. No evalúa TDAH. Lectura orientativa.",
     },
-
+  },
+  {
+    test_code: "aq_kabbalah",
+    display_name: "AQ-Kabbalah (Espectro de Conciencia Cabalístico)",
+    domain: "Patrón de conciencia y conexión relacional",
+    family: "cabalisticos",
+    implemented: true,
+    patient_route: "/dashboard/patient/tests/aq-kabbalah",
+    guidance: {
+      what: "Exploración simbólica del patrón de conciencia y singularidad del alma (no diagnóstico).",
+      when: "Útil para explorar la forma en que el alma percibe, se relaciona y crea.",
+      reminder: "No diagnóstico. No evalúa TEA. Herramienta de autoconocimiento.",
+    },
   },
 
   // Cabalistico (placeholder)

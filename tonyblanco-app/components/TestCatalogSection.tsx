@@ -280,7 +280,7 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
         key: 'beria',
         label: 'Beriá — Intelecto y Conciencia',
         desc: 'Exploraciones centradas en pensamiento y consciencia.',
-        codes: ['wellness', 'screening-general'],
+        codes: ['wellness', 'screening-general', 'aq_kabbalah'],
       },
       {
         key: 'ietzira',
@@ -315,6 +315,7 @@ export default function TestCatalogSection({ onTestAssigned }: TestCatalogSectio
     scl90: 'Neshamá',
 
     asrs_essence: 'Jaiá',
+    aq_kabbalah: 'Neshamá',
     mcmi4_mystic: 'Jaiá',
     'past-lives': 'Iejidá',
 

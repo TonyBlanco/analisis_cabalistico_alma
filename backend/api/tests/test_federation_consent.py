@@ -22,6 +22,9 @@ class FederationConsentFlowTestCase(APITestCase):
         )
         self.therapist_profile.user_type = 'therapist'
         self.therapist_profile.save()
+        if hasattr(self.therapist_user, '_profile_cache'):
+            del self.therapist_user._profile_cache
+        self.therapist_user.refresh_from_db()
 
         self.patient_user = User.objects.create_user(
             username='fed_consent_patient',
@@ -34,6 +37,9 @@ class FederationConsentFlowTestCase(APITestCase):
         )
         self.patient_profile.user_type = 'patient'
         self.patient_profile.save()
+        if hasattr(self.patient_user, '_profile_cache'):
+            del self.patient_user._profile_cache
+        self.patient_user.refresh_from_db()
 
         self.patient = Patient.objects.create(
             therapist=self.therapist_user,

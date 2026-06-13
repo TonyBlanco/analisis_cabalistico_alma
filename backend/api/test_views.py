@@ -783,6 +783,26 @@ class ExecuteTestView(APIView):
                 logger.error('compute_anxiety_state_trait not available; refusing symbolic fallback for anxiety-state-trait')
                 raise ValueError('Anxiety-state-trait wellness engine not available')
 
+            if test_module.code == 'sha_harmony':
+                responses = input_data.get('responses', {})
+                from .diagnostics import compute_sha_harmony as _compute_sha
+                return _compute_sha({'responses': responses})
+
+            if test_module.code == 'eat26_spirit':
+                responses = input_data.get('responses', {})
+                from .diagnostics import compute_eat26_spirit as _compute_eat26
+                return _compute_eat26({'responses': responses})
+
+            if test_module.code == 'dudit_spirit':
+                responses = input_data.get('responses', {})
+                from .diagnostics import compute_dudit_spirit as _compute_dudit
+                return _compute_dudit({'responses': responses})
+
+            if test_module.code == 'ybocs_soul':
+                responses = input_data.get('responses', {})
+                from .diagnostics import compute_ybocs_soul as _compute_ybocs
+                return _compute_ybocs({'responses': responses})
+
             if test_type == 'bdi' or test_module.code == 'bdi-ii':
                 responses = input_data.get('responses', {})
                 if compute_bdi:

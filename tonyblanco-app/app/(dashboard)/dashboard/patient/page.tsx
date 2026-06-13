@@ -4,15 +4,15 @@ import React, { useEffect, useState, useRef } from 'react';
 import PatientNotesList from '@/components/PatientNotes/PatientNotesList';
 import PendingAssignmentsSection from '@/components/PendingAssignmentsSection';
 import MCMI4ReflectionCard from '@/components/MCMI4ReflectionCard';
-import { AlertCircle, CheckCircle, Clock, MessageSquare } from 'lucide-react';
+import { AlertCircle, CheckCircle, MessageSquare } from 'lucide-react';
 import { getUserProfile, acceptConsent, acknowledgeProfileUpdate } from '@/lib/api';
+import { getTestResults } from '@/lib/test-api';
 import TherapeuticConsentModal from '@/components/TherapeuticConsentModal';
 import ProfileUpdateNotice from '@/components/ProfileUpdateNotice';
 
 export default function PatientHome() {
   const [profileComplete, setProfileComplete] = useState(true);
-  const [pendingTests, setPendingTests] = useState(2);
-  const [newResults, setNewResults] = useState(1);
+  const [resultsCount, setResultsCount] = useState(0);
   const [showConsentModal, setShowConsentModal] = useState(false);
   const [consentLoading, setConsentLoading] = useState(true);
   const [showProfileUpdateNotice, setShowProfileUpdateNotice] = useState(false);
@@ -55,6 +55,19 @@ export default function PatientHome() {
     };
 
     checkConsent();
+  }, []);
+
+  useEffect(() => {
+    const loadResultsCount = async () => {
+      try {
+        const results = await getTestResults();
+        setResultsCount(Array.isArray(results) ? results.length : 0);
+      } catch {
+        setResultsCount(0);
+      }
+    };
+
+    loadResultsCount();
   }, []);
 
   // Check if MCMI-4 signal is completed but reflection is not
@@ -199,14 +212,14 @@ export default function PatientHome() {
         )}
 
         {/* Nuevos resultados */}
-        {newResults > 0 && (
+        {resultsCount > 0 && (
           <div className="bg-green-50 border border-green-200 rounded-lg p-4">
             <div className="flex items-center gap-2 mb-2">
               <CheckCircle className="w-5 h-5 text-green-600" />
-              <h3 className="font-medium text-green-900">Nuevos resultados</h3>
+              <h3 className="font-medium text-green-900">Tus resultados</h3>
             </div>
             <p className="text-sm text-green-700 mb-3">
-              {newResults} resultado{newResults > 1 ? 's' : ''} disponible{newResults > 1 ? 's' : ''}
+              {resultsCount} resultado{resultsCount > 1 ? 's' : ''} disponible{resultsCount > 1 ? 's' : ''}
             </p>
             <a
               href="/dashboard/patient/results"

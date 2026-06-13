@@ -1,0 +1,160 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { duditSpiritDefinition } from "./dudit-spirit.config";
+import { executeTest } from "@/lib/test-api";
+
+type AnswerMap = Record<string, string>;
+type Sex = "hombre" | "mujer" | "";
+
+export default function DuditSpiritPage() {
+  const router = useRouter();
+  const [sex, setSex] = useState<Sex>("");
+  const [answers, setAnswers] = useState<AnswerMap>({});
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const questions = duditSpiritDefinition.questions;
+  const totalQuestions = questions.length;
+  const answeredCount = useMemo(
+    () => questions.filter((q) => answers[q.id] !== undefined).length,
+    [answers, questions],
+  );
+  const isComplete = sex !== "" && answeredCount === totalQuestions;
+
+  const handleSelect = (questionId: string, value: string) => {
+    setAnswers((prev) => ({ ...prev, [questionId]: value }));
+  };
+
+  const handleSubmit = async () => {
+    if (!isComplete || submitting) return;
+
+    setSubmitting(true);
+    setError(null);
+
+    try {
+      const responses: Record<string, number> = {};
+      for (const q of questions) {
+        responses[q.id] = Number(answers[q.id]);
+      }
+
+      await executeTest({
+        test_module_code: duditSpiritDefinition.code,
+        input_data: {
+          fecha: new Date().toISOString().split("T")[0],
+          sex,
+          responses,
+        },
+        save_result: true,
+      });
+
+      router.push("/dashboard/patient/tests/dudit-spirit/result");
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Error al enviar el cuestionario.";
+      setError(msg);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+        <h1 className="text-2xl font-semibold text-gray-900">{duditSpiritDefinition.name}</h1>
+        <p className="text-sm text-gray-600 mt-2">
+          {duditSpiritDefinition.purpose}. Tiempo estimado {duditSpiritDefinition.estimated_time_minutes} minutos.
+        </p>
+        <p className="text-xs text-amber-600 mt-2 border border-amber-200 bg-amber-50 rounded px-3 py-2">
+          {duditSpiritDefinition.disclaimer}
+        </p>
+
+        <div className="mt-4 text-xs text-gray-500">
+          Pregunta {Math.min(answeredCount + 1, totalQuestions)} de {totalQuestions}
+        </div>
+        <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
+          <div
+            className="h-2 rounded-full transition-all"
+            style={{
+              width: `${Math.round((answeredCount / totalQuestions) * 100)}%`,
+              backgroundColor: "var(--accent-color)",
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Sex selector — required for sex-dependent scoring */}
+      <div className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
+        <p className="text-xs text-gray-500 mb-2">Sexo biológico (necesario para la interpretación)</p>
+        <div className="flex gap-4">
+          {(["hombre", "mujer"] as const).map((option) => (
+            <label key={option} className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+              <input
+                type="radio"
+                name="sex"
+                value={option}
+                checked={sex === option}
+                onChange={() => setSex(option)}
+                className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+              />
+              <span className="capitalize">{option}</span>
+            </label>
+          ))}
+        </div>
+        {sex === "" && (
+          <p className="text-xs text-gray-400 mt-2">Selecciona una opción para continuar.</p>
+        )}
+      </div>
+
+      {error && (
+        <div className="bg-white border border-red-200 rounded-lg p-4">
+          <p className="text-sm text-red-700">{error}</p>
+        </div>
+      )}
+
+      <div className="space-y-4">
+        {questions.map((question, index) => (
+          <div key={question.id} className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
+            <div className="text-xs text-gray-500 mb-2">Pregunta {index + 1}</div>
+            <h2 className="text-sm font-medium text-gray-900">{question.text}</h2>
+            <div className="mt-4 space-y-2">
+              {Object.entries(question.scale).map(([value, label]) => (
+                <label
+                  key={value}
+                  className="flex items-center gap-3 text-sm text-gray-700 cursor-pointer"
+                >
+                  <input
+                    type="radio"
+                    name={question.id}
+                    value={value}
+                    checked={answers[question.id] === value}
+                    onChange={() => handleSelect(question.id, value)}
+                    className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                  />
+                  <span>{value} — {label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+        <button
+          type="button"
+          disabled={!isComplete || submitting}
+          onClick={handleSubmit}
+          className="w-full sm:w-auto px-5 py-2 text-sm font-medium text-white rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{ backgroundColor: "var(--accent-color)" }}
+        >
+          {submitting ? "Enviando..." : "Enviar"}
+        </button>
+        {!isComplete && (
+          <p className="text-xs text-gray-500 mt-2">
+            {sex === "" ? "Selecciona tu sexo biológico y " : "C"}ompleta todas las preguntas para habilitar el envío.
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}

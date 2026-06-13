@@ -453,6 +453,84 @@ def load_canonical_bank() -> List[Dict]:
         return json.load(f)
 
 
+# Stable mapping for the static FE questionnaire (anst-state-* / anst-trait-*).
+FRONTEND_LEGACY_TO_CANONICAL: Dict[str, str] = {
+    'anst-state-1': 'E_TENS_001',
+    'anst-state-2': 'E_TENS_003',
+    'anst-state-3': 'E_INQU_001',
+    'anst-state-4': 'E_INQU_003',
+    'anst-state-5': 'E_SINT_001',
+    'anst-state-6': 'E_SINT_003',
+    'anst-state-7': 'E_PREO_001',
+    'anst-state-8': 'E_PREO_003',
+    'anst-state-9': 'E_TENS_005',
+    'anst-state-10': 'E_INQU_005',
+    'anst-trait-1': 'R_PREO_001',
+    'anst-trait-2': 'R_PREO_003',
+    'anst-trait-3': 'R_TENS_001',
+    'anst-trait-4': 'R_TENS_003',
+    'anst-trait-5': 'R_SINT_001',
+    'anst-trait-6': 'R_SINT_003',
+    'anst-trait-7': 'R_INQU_001',
+    'anst-trait-8': 'R_INQU_003',
+    'anst-trait-9': 'R_PREO_005',
+    'anst-trait-10': 'R_TENS_005',
+}
+
+FRONTEND_FIXED_SEED = 20260613
+FRONTEND_SELECTED_ITEM_IDS: List[str] = list(FRONTEND_LEGACY_TO_CANONICAL.values())
+
+
+def _bank_by_id() -> Dict[str, Dict]:
+    return {item['id']: item for item in load_canonical_bank()}
+
+
+def select_items_by_ids(item_ids: List[str]) -> List[Dict]:
+    bank = _bank_by_id()
+    selected: List[Dict] = []
+    for item_id in item_ids:
+        item = bank.get(item_id)
+        if not item:
+            raise ValueError(f'Unknown anxiety item id: {item_id}')
+        selected.append(dict(item))
+    return selected
+
+
+def get_fixed_frontend_selection() -> List[Dict]:
+    """Deterministic 20-item set aligned with the static FE questionnaire."""
+    canonical_to_legacy = {v: k for k, v in FRONTEND_LEGACY_TO_CANONICAL.items()}
+    selected = select_items_by_ids(FRONTEND_SELECTED_ITEM_IDS)
+    for item in selected:
+        item['legacy_id'] = canonical_to_legacy.get(item['id'])
+    return selected
+
+
+def resolve_anxiety_selection(input_data: dict) -> List[Dict]:
+    """
+    Resolve the item set used for scoring. Priority:
+    1) explicit selected_item_ids (round-trip from FE)
+    2) legacy anst-* response keys (static FE questionnaire)
+    3) seed-based dynamic selection
+    """
+    responses = (input_data.get('responses') or {}) if isinstance(input_data.get('responses'), dict) else {}
+    selected_ids = input_data.get('selected_item_ids')
+    if isinstance(selected_ids, list) and selected_ids:
+        items = select_items_by_ids([str(i) for i in selected_ids])
+        canonical_to_legacy = {v: k for k, v in FRONTEND_LEGACY_TO_CANONICAL.items()}
+        for item in items:
+            item['legacy_id'] = canonical_to_legacy.get(item['id'])
+        return items
+
+    if any(str(k).startswith('anst-') for k in responses.keys()):
+        return get_fixed_frontend_selection()
+
+    seed = input_data.get('seed')
+    if seed is not None:
+        return select_items_for_execution(seed=seed)
+
+    return []
+
+
 def select_items_for_execution(n: int = 20, seed: Optional[int] = None) -> List[Dict]:
     bank = load_canonical_bank()
     domain_items = {

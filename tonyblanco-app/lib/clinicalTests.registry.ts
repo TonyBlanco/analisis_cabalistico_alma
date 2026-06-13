@@ -510,6 +510,34 @@ export const clinicalTestsRegistry: ClinicalTestRegistryEntry[] = [
   },
 
   {
+    test_code: "dudit_spirit",
+    display_name: "DUDIT-Spirit (Unidad Divina)",
+    domain: "Relación con sustancias",
+    family: "cabalisticos",
+    implemented: true,
+    patient_route: "/dashboard/patient/tests/dudit-spirit",
+    guidance: {
+      what: "Exploración simbólica de la relación con sustancias y el equilibrio de Yesod (no diagnóstico).",
+      when: "Útil para explorar patrones de consumo desde una perspectiva de autoconocimiento.",
+      reminder: "No diagnóstico. Herramienta de acompañamiento y reflexión.",
+    },
+  },
+
+  {
+    test_code: "ybocs_soul",
+    display_name: "Y-BOCS-Soul (Balance Ietzirático)",
+    domain: "Equilibrio Gevurah-Chesed",
+    family: "cabalisticos",
+    implemented: true,
+    patient_route: "/dashboard/patient/tests/ybocs-soul",
+    guidance: {
+      what: "Exploración simbólica del balance entre pensamientos repetitivos y rituales (no diagnóstico).",
+      when: "Útil para observar patrones de obsesiones y compulsiones desde una perspectiva kabbalistic.",
+      reminder: "No diagnóstico. Herramienta de acompañamiento y reflexión.",
+    },
+  },
+
+  {
 
     test_code: "asrs_essence",
 

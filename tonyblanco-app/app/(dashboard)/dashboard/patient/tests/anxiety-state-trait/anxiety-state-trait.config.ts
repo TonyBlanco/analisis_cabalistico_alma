@@ -4,8 +4,35 @@ export type AnxietyStateTraitQuestion = {
   text: string;
 };
 
+/** Must match backend FRONTEND_SELECTED_ITEM_IDS / FRONTEND_FIXED_SEED (stai_bank.py). */
+export const anxietyFixedSeed = 20260613;
+export const anxietySelectedItemIds = [
+  'E_TENS_001',
+  'E_TENS_003',
+  'E_INQU_001',
+  'E_INQU_003',
+  'E_SINT_001',
+  'E_SINT_003',
+  'E_PREO_001',
+  'E_PREO_003',
+  'E_TENS_005',
+  'E_INQU_005',
+  'R_PREO_001',
+  'R_PREO_003',
+  'R_TENS_001',
+  'R_TENS_003',
+  'R_SINT_001',
+  'R_SINT_003',
+  'R_INQU_001',
+  'R_INQU_003',
+  'R_PREO_005',
+  'R_TENS_005',
+] as const;
+
 export const anxietyStateTraitDefinition = {
   code: 'anxiety-state-trait',
+  fixedSeed: anxietyFixedSeed,
+  selectedItemIds: anxietySelectedItemIds,
   name: 'Ansiedad — Estado y rasgo',
   purpose: 'Wellness orientativo para explorar cómo se siente la ansiedad hoy y en general.',
   estimated_time_minutes: '6-8',

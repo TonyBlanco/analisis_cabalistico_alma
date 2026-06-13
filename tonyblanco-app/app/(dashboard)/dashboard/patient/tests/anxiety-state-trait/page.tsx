@@ -42,6 +42,8 @@ export default function AnxietyStateTraitPage() {
         input_data: {
           fecha: new Date().toISOString().split('T')[0],
           responses,
+          seed: anxietyStateTraitDefinition.fixedSeed,
+          selected_item_ids: [...anxietyStateTraitDefinition.selectedItemIds],
         },
         save_result: true,
       });

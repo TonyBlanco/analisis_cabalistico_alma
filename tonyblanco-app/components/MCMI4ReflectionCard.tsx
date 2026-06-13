@@ -2,6 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { MCMI4_SIGNAL_PUBLIC_NAME } from '@/lib/mcmi4SignalCopy';
 import { Sparkles, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
@@ -24,9 +25,9 @@ export default function MCMI4ReflectionCard({ onDismiss }: MCMI4ReflectionCardPr
           <div className="flex items-center gap-3">
             <Sparkles className="w-6 h-6 text-violet-600" />
             <div>
-              <CardTitle>Reflexión Personal MCMI-4</CardTitle>
+              <CardTitle>Reflexión personal</CardTitle>
               <CardDescription>
-                Has completado el test. Ahora puedes registrar tus reflexiones personales.
+                Has completado {MCMI4_SIGNAL_PUBLIC_NAME}. Ahora puedes registrar tus reflexiones personales.
               </CardDescription>
             </div>
           </div>

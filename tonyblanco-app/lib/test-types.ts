@@ -45,6 +45,7 @@ export interface TestModule {
   id: number;
   code: string;
   name: string;
+  public_name?: string;
   description: string;
   test_type: TestType;
   required_access_level: AccessLevel;
@@ -94,6 +95,7 @@ export interface TestResult {
     id: number;
     code: string;
     name: string;
+    public_name?: string;
     description?: string;
     test_type: TestType;
     execution_mode: 'patient_self' | 'therapist_clinical';

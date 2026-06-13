@@ -1,3 +1,5 @@
+import { MCMI4_SIGNAL_PUBLIC_NAME } from "@/lib/mcmi4SignalCopy";
+
 export type ClinicalTestRegistryEntry = {
 
   test_code: string;
@@ -637,7 +639,7 @@ export const clinicalTestsRegistry: ClinicalTestRegistryEntry[] = [
   },
   {
     test_code: "mcmi4-mystic",
-    display_name: "MCMI-4-Mystic (Matriz Cósmica Multiaxial)",
+    display_name: "Matriz Cósmica Multiaxial",
     domain: "Evaluación clínica especializada",
     family: "psicologicos",
     implemented: true,
@@ -653,7 +655,7 @@ export const clinicalTestsRegistry: ClinicalTestRegistryEntry[] = [
   },
   {
     test_code: "mcmi4-signal",
-    display_name: "SWM MCMI-4 SIGNAL",
+    display_name: MCMI4_SIGNAL_PUBLIC_NAME,
     domain: "Señal mínima",
     family: "cabalisticos",
     implemented: true,
@@ -704,4 +706,3 @@ export function isClinicalTestFeImplemented(testCode: string): boolean {
   if (!entry) return true;
   return entry.implemented !== false;
 }
-

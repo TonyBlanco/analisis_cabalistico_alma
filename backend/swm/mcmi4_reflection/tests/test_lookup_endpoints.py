@@ -6,6 +6,10 @@ import pytest
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from rest_framework.test import APIClient
+from api.mcmi4_signal_public_name import (
+    MCMI4_SIGNAL_PUBLIC_DESCRIPTION,
+    MCMI4_SIGNAL_PUBLIC_NAME,
+)
 from api.test_models import TestModule, TestResult
 from swm.mcmi4_reflection.models import WorkspaceDefinition, WorkspaceInstance, WorkspaceArtifact
 
@@ -29,8 +33,9 @@ class TestReflectionBySignalView(TestCase):
         )
         self.test_module = TestModule.objects.create(
             code='mcmi4-signal',
-            name='MCMI-4 Signal',
-            description='MCMI-4 Signal test',
+            name=MCMI4_SIGNAL_PUBLIC_NAME,
+            public_name=MCMI4_SIGNAL_PUBLIC_NAME,
+            description=MCMI4_SIGNAL_PUBLIC_DESCRIPTION,
             test_type='personality'
         )
         self.signal_result = TestResult.objects.create(
@@ -91,8 +96,9 @@ class TestReflectionByUserView(TestCase):
         )
         self.test_module = TestModule.objects.create(
             code='mcmi4-signal',
-            name='MCMI-4 Signal',
-            description='MCMI-4 Signal test',
+            name=MCMI4_SIGNAL_PUBLIC_NAME,
+            public_name=MCMI4_SIGNAL_PUBLIC_NAME,
+            description=MCMI4_SIGNAL_PUBLIC_DESCRIPTION,
             test_type='personality'
         )
         self.client = APIClient()

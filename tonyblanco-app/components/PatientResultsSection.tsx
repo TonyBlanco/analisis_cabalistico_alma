@@ -7,6 +7,7 @@ import { getTestResults, getTestResult, deleteTestResult } from '@/lib/test-api'
 import { TestResult } from '@/lib/test-types';
 import ReadableResult from '@/components/test-results/ReadableResult';
 import { getUserRole } from '@/lib/getUserRole';
+import { MCMI4_SIGNAL_PUBLIC_NAME } from '@/lib/mcmi4SignalCopy';
 import { Sparkles, ArrowRight } from 'lucide-react';
 
 /**
@@ -148,9 +149,14 @@ export default function PatientResultsSection() {
                           day: 'numeric',
                         })}
                       </span>
-                      {result.test_module?.code && (
+                      {result.test_module?.code && result.test_module.code !== 'mcmi4-signal' && (
                         <span className="text-xs px-2 py-1 bg-gray-100 text-gray-700 rounded">
                           {result.test_module.code}
+                        </span>
+                      )}
+                      {result.test_module?.code === 'mcmi4-signal' && (
+                        <span className="text-xs px-2 py-1 bg-violet-50 text-violet-700 rounded">
+                          {MCMI4_SIGNAL_PUBLIC_NAME}
                         </span>
                       )}
                     </div>

@@ -6,6 +6,7 @@ import { Loader2, FileText, AlertCircle, Sparkles, ShieldAlert } from 'lucide-re
 import Link from 'next/link';
 import { fetchSession } from '@/lib/session';
 import { getApiBaseUrl } from '@/lib/api-base';
+import { MCMI4_SIGNAL_PUBLIC_NAME } from '@/lib/mcmi4SignalCopy';
 
 const API_BASE = getApiBaseUrl();
 
@@ -75,7 +76,7 @@ export default function PatientReflectionEntrypoint() {
           setLoading(false);
           return;
         }
-        throw new Error('Error al verificar tu evaluación MCMI-4.');
+        throw new Error(`Error al verificar tu evaluación ${MCMI4_SIGNAL_PUBLIC_NAME}.`);
       }
 
       const signalData = await signalResp.json();
@@ -221,10 +222,10 @@ export default function PatientReflectionEntrypoint() {
         <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full text-center">
           <Sparkles className="w-12 h-12 text-violet-600 mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-gray-900 mb-2">
-            Completa tu MCMI-4 primero
+            Completa tu evaluación primero
           </h2>
           <p className="text-sm text-gray-600 mb-6">
-            Para acceder a la Reflexión Personal, primero debes completar la evaluación MCMI-4 Señal que te ha asignado tu terapeuta.
+            Para acceder a la Reflexión Personal, primero debes completar {MCMI4_SIGNAL_PUBLIC_NAME}, que te ha asignado tu terapeuta.
           </p>
           <div className="space-y-3">
             <Link

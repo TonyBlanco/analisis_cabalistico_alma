@@ -670,8 +670,8 @@ TEST_HOLISTIC_MAP = {
         "arcanos_relacionados": ["El Ermitaño", "La Muerte", "El Juicio"],
     },
     "mcmi4-signal": {
-        "nombre_holistico": "Exploración de Señales de Personalidad",
-        "nombre_exploracion": "Exploración de Señales MCMI",
+        "nombre_holistico": "Señal de la Matriz Cósmica",
+        "nombre_exploracion": "Exploración de Señales de la Matriz Cósmica",
         "categoria": "multidimensional",
         "sefira_principal": "Tiferet",
         "sefirot_secundarias": ["Da'at"],

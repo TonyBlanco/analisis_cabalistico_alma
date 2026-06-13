@@ -12,6 +12,10 @@ Verifies that executing mcmi4-signal produces a TestResult with:
 import json
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
+from api.mcmi4_signal_public_name import (
+    MCMI4_SIGNAL_PUBLIC_DESCRIPTION,
+    MCMI4_SIGNAL_PUBLIC_NAME,
+)
 from api.test_models import TestModule, TestResult
 
 
@@ -41,8 +45,9 @@ class MCMI4SignalSchemaTest(TestCase):
         
         self.test_module = TestModule.objects.create(
             code='mcmi4-signal',
-            name='SWM MCMI-4 SIGNAL',
-            description='Minimal 16-item signal for MCMI-4 Místico',
+            name=MCMI4_SIGNAL_PUBLIC_NAME,
+            public_name=MCMI4_SIGNAL_PUBLIC_NAME,
+            description=MCMI4_SIGNAL_PUBLIC_DESCRIPTION,
             test_type='holistic_screening',
             is_active=True,
             available_for_personal=True,

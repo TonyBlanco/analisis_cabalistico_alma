@@ -7,12 +7,16 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 django.setup()
 
 from api.test_models import TestModule
+from api.mcmi4_signal_public_name import (
+    MCMI4_SIGNAL_PUBLIC_DESCRIPTION,
+    MCMI4_SIGNAL_PUBLIC_NAME,
+)
 
 # Create/update mcmi4-signal
 test_data = {
     'code': 'mcmi4-signal',
-    'name': 'SWM MCMI-4 SIGNAL',
-    'description': 'Señal mínima simbólica para habilitar el flujo SWM MCMI-4 Místico. Cuestionario corto de señal no clínica.',
+    'name': MCMI4_SIGNAL_PUBLIC_NAME,
+    'description': MCMI4_SIGNAL_PUBLIC_DESCRIPTION,
     'test_type': 'holistic_screening',
     'required_access_level': 'free',
     'icon': '🧭',
@@ -24,7 +28,7 @@ test_data = {
     'is_assignable': True,
     'requires_license': False,
     'domain': 'holistic',
-    'public_name': 'SWM MCMI-4 SIGNAL',
+    'public_name': MCMI4_SIGNAL_PUBLIC_NAME,
     'is_active': True,
 }
 

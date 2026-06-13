@@ -194,7 +194,7 @@ export default function Mcmi4MysticPage() {
         <div className="max-w-3xl mx-auto py-8 px-4 space-y-6">
             {/* Header */}
             <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-                <h1 className="text-2xl font-semibold text-gray-900">Matriz Cósmica Multiaxial (MCMI-4-Mystic)</h1>
+                <h1 className="text-2xl font-semibold text-gray-900">Matriz Cósmica Multiaxial</h1>
                 <p className="text-sm text-gray-600 mt-2">
                     Responde a las siguientes afirmaciones basándote en cómo te has sentido recientemente.
                     No hay respuestas correctas o incorrectas.

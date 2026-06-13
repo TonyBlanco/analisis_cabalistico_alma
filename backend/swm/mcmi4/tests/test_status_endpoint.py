@@ -5,6 +5,10 @@ Tests for MCMI-4 process status endpoint.
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
+from api.mcmi4_signal_public_name import (
+    MCMI4_SIGNAL_PUBLIC_DESCRIPTION,
+    MCMI4_SIGNAL_PUBLIC_NAME,
+)
 from api.test_models import TestModule, TestResult, Assignment
 from swm.mcmi4.models import WorkspaceDefinition as McmiDefinition, WorkspaceInstance as McmiWorkspace
 from swm.mcmi4_reflection.models import WorkspaceDefinition as ReflectionDefinition, WorkspaceInstance as ReflectionWorkspace
@@ -27,8 +31,9 @@ class ProcessStatusEndpointTest(TestCase):
         )
         self.test_module = TestModule.objects.create(
             code='mcmi4-signal',
-            name='MCMI-4 Signal',
-            description='MCMI-4 Signal test',
+            name=MCMI4_SIGNAL_PUBLIC_NAME,
+            public_name=MCMI4_SIGNAL_PUBLIC_NAME,
+            description=MCMI4_SIGNAL_PUBLIC_DESCRIPTION,
             test_type='personality'
         )
         self.mcmi_definition = McmiDefinition.objects.get_or_create(

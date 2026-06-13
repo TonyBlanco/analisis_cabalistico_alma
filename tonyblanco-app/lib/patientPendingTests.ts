@@ -67,7 +67,7 @@ export function toPatientPendingTests(tests: TestModule[]): PatientPendingTest[]
   return tests.map((test) => ({
     id: test.id,
     code: test.code,
-    name: test.name,
+    name: test.public_name || test.name,
     description: test.description,
     test_type: test.test_type,
     route: resolvePatientTestRoute(test.code),

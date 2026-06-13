@@ -2579,6 +2579,22 @@ class TherapistMetricsView(APIView):
         })
 
 
+class TherapistReportsSummaryView(APIView):
+    """
+    GET /api/therapist/reports/summary/
+
+    Panel de reportes del terapeuta: cartera, resultados recientes con alertas,
+    métricas por consultante y actividad de sesiones. Solo lectura; solo pacientes
+    asignados al terapeuta autenticado.
+    """
+    permission_classes = [IsAuthenticated, IsTherapist]
+
+    def get(self, request):
+        from .therapist_reports import build_therapist_reports_summary
+
+        return Response(build_therapist_reports_summary(request.user))
+
+
 # ========== VISTAS PARA SERVICIOS Y RESERVAS ==========
 
 class ServiceCategoryListView(generics.ListAPIView):

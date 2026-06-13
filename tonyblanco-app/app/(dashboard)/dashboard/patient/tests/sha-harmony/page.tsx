@@ -1,9 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { shaHarmonyDefinition } from "./sha-harmony.config";
 import { executeTest } from "@/lib/test-api";
+import {
+  PatientQuestionnaireCompletionPanel,
+  usePatientQuestionnaireCompletion,
+} from "@/components/patient/PatientQuestionnaireCompletion";
 
 type AnswerMap = Record<string, string>;
 
@@ -14,19 +18,18 @@ export default function ShaHarmonyPage() {
   const [error, setError] = useState<string | null>(null);
 
   const questions = shaHarmonyDefinition.questions;
-  const totalQuestions = questions.length;
-  const answeredCount = useMemo(
-    () => questions.filter((q) => answers[q.id] !== undefined).length,
-    [answers, questions],
+  const completion = usePatientQuestionnaireCompletion(
+    questions.map((question) => question.id),
+    answers,
   );
-  const isComplete = answeredCount === totalQuestions;
+  const { answeredCount, totalQuestions } = completion;
 
   const handleSelect = (questionId: string, value: string) => {
     setAnswers((prev) => ({ ...prev, [questionId]: value }));
   };
 
   const handleSubmit = async () => {
-    if (!isComplete || submitting) return;
+    if (!completion.revealMissing() || submitting) return;
 
     setSubmitting(true);
     setError(null);
@@ -88,7 +91,14 @@ export default function ShaHarmonyPage() {
 
       <div className="space-y-4">
         {questions.map((question, index) => (
-          <div key={question.id} className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
+          <div
+            key={question.id}
+            {...completion.getQuestionCardProps(question.id)}
+            className={completion.getQuestionCardClassName(
+              question.id,
+              "bg-white border border-gray-200 rounded-lg p-5 shadow-sm",
+            )}
+          >
             <div className="text-xs text-gray-500 mb-2">Pregunta {index + 1}</div>
             <h2 className="text-sm font-medium text-gray-900">{question.text}</h2>
             <div className="mt-4 space-y-2">
@@ -115,20 +125,11 @@ export default function ShaHarmonyPage() {
         ))}
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-        <button
-          type="button"
-          disabled={!isComplete || submitting}
-          onClick={handleSubmit}
-          className="w-full sm:w-auto px-5 py-2 text-sm font-medium text-white rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
-          style={{ backgroundColor: "var(--accent-color)" }}
-        >
-          {submitting ? "Enviando..." : "Enviar"}
-        </button>
-        {!isComplete && (
-          <p className="text-xs text-gray-500 mt-2">Completa todas las preguntas para habilitar el envío.</p>
-        )}
-      </div>
+      <PatientQuestionnaireCompletionPanel
+        completion={completion}
+        submitting={submitting}
+        onSubmit={handleSubmit}
+      />
     </div>
   );
 }

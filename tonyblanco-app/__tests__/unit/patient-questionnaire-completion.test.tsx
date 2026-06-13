@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
   PatientQuestionnaireCompletionPanel,
@@ -65,6 +65,6 @@ describe('PatientQuestionnaireCompletion', () => {
     );
     expect(screen.getByTestId('question-card-q1')).toHaveAttribute('aria-invalid', 'true');
     expect(screen.getByTestId('question-card-q1')).toHaveClass('border-red-400');
-    expect(scrollIntoView).toHaveBeenCalledOnce();
+    await waitFor(() => expect(scrollIntoView).toHaveBeenCalledOnce());
   });
 });

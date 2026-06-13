@@ -1,9 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ybocsSoulDefinition } from "./ybocs-soul.config";
 import { executeTest } from "@/lib/test-api";
+
+import {
+  PatientQuestionnaireCompletionStatus,
+  usePatientQuestionnaireCompletion,
+} from "@/components/patient/PatientQuestionnaireCompletion";
 
 type AnswerMap = Record<string, string>;
 
@@ -14,12 +19,11 @@ export default function YbocsSoulPage() {
   const [error, setError] = useState<string | null>(null);
 
   const questions = ybocsSoulDefinition.questions;
-  const totalQuestions = questions.length;
-  const answeredCount = useMemo(
-    () => questions.filter((q) => answers[q.id] !== undefined).length,
-    [answers, questions],
+  const completion = usePatientQuestionnaireCompletion(
+    questions.map((question) => question.id),
+    answers,
   );
-  const isComplete = answeredCount === totalQuestions;
+  const { answeredCount, totalQuestions, isComplete } = completion;
 
   const obsesionesQuestions = questions.filter((q) => q.group === "obsesiones");
   const compulsionesQuestions = questions.filter((q) => q.group === "compulsiones");
@@ -29,7 +33,7 @@ export default function YbocsSoulPage() {
   };
 
   const handleSubmit = async () => {
-    if (!isComplete || submitting) return;
+    if (!completion.revealMissing() || submitting) return;
 
     setSubmitting(true);
     setError(null);
@@ -68,7 +72,14 @@ export default function YbocsSoulPage() {
         {groupLabel}
       </h2>
       {groupQuestions.map((question, idx) => (
-        <div key={question.id} className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
+        <div
+            key={question.id}
+            {...completion.getQuestionCardProps(question.id)}
+            className={completion.getQuestionCardClassName(
+              question.id,
+              "bg-white border border-gray-200 rounded-lg p-5 shadow-sm",
+            )}
+          >
           <div className="text-xs text-gray-500 mb-2">Pregunta {globalOffset + idx + 1}</div>
           <p className="text-sm font-medium text-gray-900">{question.text}</p>
           <div className="mt-4 space-y-2">
@@ -128,7 +139,11 @@ export default function YbocsSoulPage() {
       {renderQuestionGroup(obsesionesQuestions, "Pensamientos repetitivos (Ecos del alma)", 0)}
       {renderQuestionGroup(compulsionesQuestions, "Rituales y conductas repetitivas", obsesionesQuestions.length)}
 
-      <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+      <div
+        className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm"
+        onPointerDownCapture={() => completion.revealMissing()}
+      >
+        <PatientQuestionnaireCompletionStatus completion={completion} />
         <button
           type="button"
           disabled={!isComplete || submitting}

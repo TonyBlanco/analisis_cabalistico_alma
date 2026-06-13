@@ -1,9 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { baiDefinition } from "./bai.config";
 import { getApiBaseUrl } from "@/lib/api-base";
+
+import {
+  PatientQuestionnaireCompletionStatus,
+  usePatientQuestionnaireCompletion,
+} from "@/components/patient/PatientQuestionnaireCompletion";
 
 type AnswerMap = Record<string, string>;
 
@@ -16,19 +21,18 @@ export default function BaiPage() {
   const [error, setError] = useState<string | null>(null);
 
   const questions = baiDefinition.questions;
-  const totalQuestions = questions.length;
-  const answeredCount = useMemo(
-    () => questions.filter((question) => answers[question.id] !== undefined).length,
-    [answers, questions]
+  const completion = usePatientQuestionnaireCompletion(
+    questions.map((question) => question.id),
+    answers,
   );
-  const isComplete = answeredCount === totalQuestions;
+  const { answeredCount, totalQuestions, isComplete } = completion;
 
   const handleSelect = (questionId: string, value: string) => {
     setAnswers((prev) => ({ ...prev, [questionId]: value }));
   };
 
   const handleSubmit = async () => {
-    if (!isComplete || submitting) return;
+    if (!completion.revealMissing() || submitting) return;
 
     const token = typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
     if (!token) {
@@ -90,7 +94,14 @@ export default function BaiPage() {
 
       <div className="space-y-4">
         {questions.map((question, index) => (
-          <div key={question.id} className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
+          <div
+            key={question.id}
+            {...completion.getQuestionCardProps(question.id)}
+            className={completion.getQuestionCardClassName(
+              question.id,
+              "bg-white border border-gray-200 rounded-lg p-5 shadow-sm",
+            )}
+          >
             <div className="text-xs text-gray-500 mb-2">Ítem {index + 1}</div>
             <h2 className="text-sm font-medium text-gray-900">{question.text}</h2>
             <div className="mt-4 space-y-2">
@@ -117,7 +128,11 @@ export default function BaiPage() {
         ))}
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+      <div
+        className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm"
+        onPointerDownCapture={() => completion.revealMissing()}
+      >
+        <PatientQuestionnaireCompletionStatus completion={completion} />
         {error && (
           <div className="mb-3 bg-red-50 border border-red-200 rounded-md p-3">
             <p className="text-sm text-red-800">{error}</p>

@@ -1,9 +1,14 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { anxietyStateTraitDefinition } from './anxiety-state-trait.config';
 import { executeTest } from '@/lib/test-api';
+
+import {
+  PatientQuestionnaireCompletionStatus,
+  usePatientQuestionnaireCompletion,
+} from "@/components/patient/PatientQuestionnaireCompletion";
 
 type AnswerMap = Record<string, string>;
 
@@ -14,19 +19,18 @@ export default function AnxietyStateTraitPage() {
   const [error, setError] = useState<string | null>(null);
 
   const questions = anxietyStateTraitDefinition.questions;
-  const totalQuestions = questions.length;
-  const answeredCount = useMemo(
-    () => questions.filter((q) => answers[q.id] !== undefined).length,
-    [answers, questions]
+  const completion = usePatientQuestionnaireCompletion(
+    questions.map((question) => question.id),
+    answers,
   );
-  const isComplete = answeredCount === totalQuestions;
+  const { answeredCount, totalQuestions, isComplete } = completion;
 
   const handleSelect = (questionId: string, value: string) => {
     setAnswers((prev) => ({ ...prev, [questionId]: value }));
   };
 
   const handleSubmit = async () => {
-    if (!isComplete || submitting) return;
+    if (!completion.revealMissing() || submitting) return;
 
     setSubmitting(true);
     setError(null);
@@ -88,7 +92,14 @@ export default function AnxietyStateTraitPage() {
 
       <div className="space-y-4">
         {questions.map((question, index) => (
-          <div key={question.id} className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
+          <div
+            key={question.id}
+            {...completion.getQuestionCardProps(question.id)}
+            className={completion.getQuestionCardClassName(
+              question.id,
+              "bg-white border border-gray-200 rounded-lg p-5 shadow-sm",
+            )}
+          >
             <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
               <span>Pregunta {index + 1}</span>
               <span>{question.dimension === 'state' ? 'Estado (hoy)' : 'Rasgo (general)'}</span>
@@ -115,7 +126,11 @@ export default function AnxietyStateTraitPage() {
         ))}
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+      <div
+        className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm"
+        onPointerDownCapture={() => completion.revealMissing()}
+      >
+        <PatientQuestionnaireCompletionStatus completion={completion} />
         <button
           type="button"
           disabled={!isComplete || submitting}

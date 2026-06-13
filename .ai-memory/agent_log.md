@@ -1,12 +1,5 @@
 # Agent Action Log
 
-> Auto-appended by memory_manager.py on every `store` call.
-> Run `python3 memory_manager.py prune` to remove duplicates and archive old entries.
-
----
-
-<!-- Entries are appended automatically below this line -->
-
 ## [2026-06-08 14:57 UTC] Claude
 [DECISION] AI Memory Layer installed — multi-agent coordination via AGENTS.md and .ai-memory/
 
@@ -42,3 +35,16 @@
 
 ## [2026-06-11 18:08 UTC] Claude
 [ENDPOINT] POST /api/help/ask — RAG local sobre /docs + learning-center; guard alcance clínico; metering help.ask
+
+## [2026-06-13 20:49 UTC] Claude
+[DEPLOY] feat/therapist-reports merge 463d5553 — reports summary en prod, sin migrate
+
+## [2026-06-13 20:54 UTC] Claude
+[DEPLOY] sha_harmony activado 0108 + guía terapeuta FE — merge 19a98932 prod
+
+## [2026-06-13 20:58 UTC] Claude
+[DECISION] Plan dashboard §9 reportes DONE — smoke prod confirmado usuario 2026-06-13
+
+## [2026-06-13 21:04 UTC] Claude
+[BUG] MCMI4_REFLECTION missing WorkspaceDefinition en prod — fix migraciones 0002 seed + deploy migrate all
+

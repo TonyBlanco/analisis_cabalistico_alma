@@ -1,27 +1,27 @@
 # Session Context — Análisis Cabalístico / Studios33
 
-**Última actualización:** 2026-06-11 18:08 UTC  
-**Rama:** `main` · **HEAD:** `cb13d7ce` · **Working tree:** 22 archivo(s) sin commit  
+**Última actualización:** 2026-06-13 21:10 UTC  
+**Rama:** `main` · **HEAD:** `97db8f89` · **Working tree:** 6 archivo(s) sin commit  
 **Prod:** Hetzner `studios33.app` + `api.studios33.app`
 
 ## Current Focus
 
-Centro Aprendizaje + Help Assistant — tests verdes, pendiente commit/deploy
+Learning center desplegado prod
 
 ## Completed (reciente)
 
+- Último commit: `97db8f89` — docs(learning-center): actualiza /learn con sprint 2026-06-13
+- Push 97db8f89 learning-center; deploy /learn
+- Migraciones 0002 seed MCMI4_REFLECTION+MYSTIC; deploy 44c0f007; prod definitions OK
+- Último commit: `44c0f007` — fix(swm): seed MCMI4 workspace definitions on migrate
+- PLAN-dashboard-terapeuta + cockpit docs actualizados reportes DONE
+- Último commit: `93349c92` — docs(plan): mark therapist reports panel DONE — smoke prod confirmed
+- 0108 migrate prod; sha_harmony en /api/tests/; guidance en clinicalTests.registry
+- Último commit: `19a98932` — feat(catalog): activate sha_harmony for therapist assign + therapist guide
+- therapist-reports en main+prod; smoke API OK (1 activo, 9 resultados, 1 alerta)
+- Último commit: `463d5553` — feat(therapist): reports panel with portfolio, alerts, export (#reports)
+- Último commit: `efb9dc49` — feat(resonance-map): F2 — Vista Árbol cableada al backend genealógico
 - Fix classify_help_scope acentos; fallback desde citas; catálogo learning-center; widget envía route
-- Último commit: `cb13d7ce` — fix(hybrid-metrics): usar apiUrl() — faltaba / entre base y path (404)
-- Merge feat/therapist-dashboard-revamp; plan DoD checklist [x]; smoke prod OK
-- Último commit: `ad5b50f6` — docs(plans): add Therapist Dashboard revamp + Learning Center/Help-AI plans (orchestrator handoff)
-- Dashboard terapeuta: workload BE+FE+tests+incidencia cerrada en rama feat/therapist-dashboard-revamp
-- Deploy verde, 0096 aplicada, AI_METERING_ENABLED=true, panel FE + cableado completo
-- Último commit: `4fac3ffa` — fix(astrologia): 429 Groq no bloquea informe ni guarda errores como interpretación
-- TherapistAIUsagePanel en dashboard; usage_context en holistic_ai, synthesis, governed, tarot_holistic, swm_v3
-- Fase 1 metering: modelo, bridge, astrología, API usage, tests 11 OK, migración 0096
-- Spec metering + actualización docs IA (14 archivos)
-- Cherry-pick PR1 a main, fix dep migración 0094→0090, deploy verde, API+web 200
-- Último commit: `91363fcb` — fix(migrations): 0094 depende de 0090 en main (0093 no desplegada aún)
 
 ## Active Tasks
 
@@ -31,7 +31,7 @@ Centro Aprendizaje + Help Assistant — tests verdes, pendiente commit/deploy
 
 ## Next Steps
 
-1. Commit feat learning-center+help-assistant y smoke en navegador /learn
+1. Smoke /dashboard/therapist/learn en prod
 
 ## Key Docs
 

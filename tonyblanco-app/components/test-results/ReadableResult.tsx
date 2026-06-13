@@ -15,6 +15,7 @@ import {
 import ExplorationSuggestionModal from '@/components/ExplorationSuggestionModal';
 import ResultSuggestionsCard, { Suggestion } from './ResultSuggestionsCard';
 import { ResponseDetail } from '@/lib/test-types';
+import { asText, listItems } from '@/lib/normalizeText';
 
 export type ReadableResultProps = {
   resultData: any;
@@ -144,9 +145,9 @@ export default function ReadableResult({
     activationGrade || (intensityReference !== null ? getIntensityDescriptor(intensityReference) : 'Nivel en movimiento');
 
   const summary = payload.summary_text ?? payload.interpretacion?.resumen ?? payload.resumen ?? null;
-  const strengths = normalizeList(payload.map?.strengths ?? payload.interpretacion?.fortalezas);
-  const focusAreas = normalizeList(payload.map?.focus_areas ?? payload.interpretacion?.areas_enfoque);
-  const recommendations = normalizeList(payload.suggested_steps ?? payload.recomendaciones);
+  const strengths = listItems(payload.map?.strengths ?? payload.interpretacion?.fortalezas);
+  const focusAreas = listItems(payload.map?.focus_areas ?? payload.interpretacion?.areas_enfoque);
+  const recommendations = listItems(payload.suggested_steps ?? payload.recomendaciones);
   const disclaimer = payload.disclaimer ?? payload.alertas?.nota ?? payload.alerta ?? null;
 
   const structuredData = payload?.structured_data ?? null;
@@ -601,7 +602,7 @@ export default function ReadableResult({
                     Fortalezas
                   </h4>
                   <ul className="text-sm text-gray-600 space-y-1 pl-1">
-                    {strengths.map((s, i) => <li key={i} className="flex items-start gap-2"><span className="text-green-400 mt-1">•</span>{s}</li>)}
+                    {strengths.map((s, i) => <li key={i} className="flex items-start gap-2"><span className="text-green-400 mt-1">•</span>{asText(s)}</li>)}
                   </ul>
                 </div>
               )}
@@ -612,7 +613,7 @@ export default function ReadableResult({
                     Áreas de Enfoque
                   </h4>
                   <ul className="text-sm text-gray-600 space-y-1 pl-1">
-                    {focusAreas.map((f, i) => <li key={i} className="flex items-start gap-2"><span className="text-orange-400 mt-1">•</span>{f}</li>)}
+                    {focusAreas.map((f, i) => <li key={i} className="flex items-start gap-2"><span className="text-orange-400 mt-1">•</span>{asText(f)}</li>)}
                   </ul>
                 </div>
               )}
@@ -668,7 +669,7 @@ export default function ReadableResult({
               {recommendations.map((r, i) => (
                 <li key={i} className="text-sm text-blue-800 flex items-start gap-2">
                   <span className="mt-1.5 w-1.5 h-1.5 bg-blue-400 rounded-full flex-shrink-0" />
-                  {r}
+                  {asText(r)}
                 </li>
               ))}
             </ul>

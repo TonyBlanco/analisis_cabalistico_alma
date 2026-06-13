@@ -630,9 +630,22 @@ export const clinicalTestsRegistry: ClinicalTestRegistryEntry[] = [
     implemented: true,
     patient_route: "/dashboard/patient/tests/mcmi4-signal",
   },
-
-
-
+  {
+    test_code: "sha_harmony",
+    display_name: "Sephirotic Harmony Audit (SHA)",
+    domain: "Equilibrio de Netzach",
+    family: "cabalisticos",
+    implemented: true,
+    patient_route: "/dashboard/patient/tests/sha-harmony",
+  },
+  {
+    test_code: "eat26_spirit",
+    display_name: "Eternal Abundance Threshold (EAT-26-Spirit)",
+    domain: "Relación con el Sustento",
+    family: "cabalisticos",
+    implemented: true,
+    patient_route: "/dashboard/patient/tests/eat26-spirit",
+  },
 ];
 
 /** Normalize test codes for registry lookup (hyphen vs underscore). */

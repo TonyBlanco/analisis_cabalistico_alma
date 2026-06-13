@@ -1,9 +1,13 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { executeTest } from '@/lib/test-api';
 import { pastLivesDefinition } from './past-lives.config';
+import {
+  PatientQuestionnaireCompletionStatus,
+  usePatientQuestionnaireCompletion,
+} from '@/components/patient/PatientQuestionnaireCompletion';
 
 type AnswerMap = Record<string, string>;
 
@@ -16,12 +20,11 @@ export default function PastLivesAssessmentPage() {
   const [error, setError] = useState<string | null>(null);
 
   const questions = pastLivesDefinition.questions;
-  const totalQuestions = questions.length;
-  const answeredCount = useMemo(
-    () => questions.filter((q) => answers[q.id] !== undefined).length,
-    [answers, questions]
+  const completion = usePatientQuestionnaireCompletion(
+    questions.map((question) => question.id),
+    answers
   );
-  const isComplete = answeredCount === totalQuestions;
+  const { answeredCount, totalQuestions, isComplete } = completion;
 
   const sections = pastLivesDefinition.sections;
 
@@ -30,7 +33,7 @@ export default function PastLivesAssessmentPage() {
   };
 
   const handleSubmit = async () => {
-    if (!ack || !isComplete || submitting) return;
+    if (!completion.revealMissing() || !ack || submitting) return;
 
     setSubmitting(true);
     setError(null);
@@ -111,7 +114,14 @@ export default function PastLivesAssessmentPage() {
               <h2 className="text-sm font-semibold text-gray-900">{section.title}</h2>
               <div className="mt-4 space-y-4">
                 {sectionQuestions.map((question) => (
-                  <div key={question.id} className="border border-gray-200 rounded-md p-4">
+                  <div
+                    key={question.id}
+                    {...completion.getQuestionCardProps(question.id)}
+                    className={completion.getQuestionCardClassName(
+                      question.id,
+                      'border border-gray-200 rounded-md p-4'
+                    )}
+                  >
                     <p className="text-sm font-medium text-gray-900">{question.text}</p>
                     <div className="mt-3 space-y-2">
                       {pastLivesDefinition.scale.labels.map((opt) => {
@@ -157,7 +167,11 @@ export default function PastLivesAssessmentPage() {
         />
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+      <div
+        className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm"
+        onPointerDownCapture={() => completion.revealMissing()}
+      >
+        <PatientQuestionnaireCompletionStatus completion={completion} />
         <button
           type="button"
           disabled={!ack || !isComplete || submitting}

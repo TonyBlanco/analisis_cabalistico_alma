@@ -1,9 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { duditSpiritDefinition } from "./dudit-spirit.config";
 import { executeTest } from "@/lib/test-api";
+import {
+  PatientQuestionnaireCompletionStatus,
+  usePatientQuestionnaireCompletion,
+} from "@/components/patient/PatientQuestionnaireCompletion";
 
 type AnswerMap = Record<string, string>;
 type Sex = "hombre" | "mujer" | "";
@@ -16,19 +20,19 @@ export default function DuditSpiritPage() {
   const [error, setError] = useState<string | null>(null);
 
   const questions = duditSpiritDefinition.questions;
-  const totalQuestions = questions.length;
-  const answeredCount = useMemo(
-    () => questions.filter((q) => answers[q.id] !== undefined).length,
-    [answers, questions],
+  const completion = usePatientQuestionnaireCompletion(
+    questions.map((question) => question.id),
+    answers,
   );
-  const isComplete = sex !== "" && answeredCount === totalQuestions;
+  const { answeredCount, totalQuestions } = completion;
+  const isComplete = sex !== "" && completion.isComplete;
 
   const handleSelect = (questionId: string, value: string) => {
     setAnswers((prev) => ({ ...prev, [questionId]: value }));
   };
 
   const handleSubmit = async () => {
-    if (!isComplete || submitting) return;
+    if (!completion.revealMissing() || sex === "" || submitting) return;
 
     setSubmitting(true);
     setError(null);
@@ -114,7 +118,14 @@ export default function DuditSpiritPage() {
 
       <div className="space-y-4">
         {questions.map((question, index) => (
-          <div key={question.id} className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
+          <div
+            key={question.id}
+            {...completion.getQuestionCardProps(question.id)}
+            className={completion.getQuestionCardClassName(
+              question.id,
+              "bg-white border border-gray-200 rounded-lg p-5 shadow-sm",
+            )}
+          >
             <div className="text-xs text-gray-500 mb-2">Pregunta {index + 1}</div>
             <h2 className="text-sm font-medium text-gray-900">{question.text}</h2>
             <div className="mt-4 space-y-2">
@@ -139,7 +150,11 @@ export default function DuditSpiritPage() {
         ))}
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+      <div
+        className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm"
+        onPointerDownCapture={() => completion.revealMissing()}
+      >
+        <PatientQuestionnaireCompletionStatus completion={completion} />
         <button
           type="button"
           disabled={!isComplete || submitting}

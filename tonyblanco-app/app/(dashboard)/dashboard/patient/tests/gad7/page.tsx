@@ -1,9 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { gad7Definition } from "./gad7.config";
 import { getApiBaseUrl } from "@/lib/api-base";
+import {
+  PatientQuestionnaireCompletionPanel,
+  usePatientQuestionnaireCompletion,
+} from "@/components/patient/PatientQuestionnaireCompletion";
 
 type AnswerMap = Record<string, string>;
 
@@ -16,19 +20,18 @@ export default function Gad7Page() {
   const [error, setError] = useState<string | null>(null);
 
   const questions = gad7Definition.questions;
-  const totalQuestions = questions.length;
-  const answeredCount = useMemo(
-    () => questions.filter((question) => answers[question.id] !== undefined).length,
-    [answers, questions]
+  const completion = usePatientQuestionnaireCompletion(
+    questions.map((question) => question.id),
+    answers
   );
-  const isComplete = answeredCount === totalQuestions;
+  const { answeredCount, totalQuestions } = completion;
 
   const handleSelect = (questionId: string, value: string) => {
     setAnswers((prev) => ({ ...prev, [questionId]: value }));
   };
 
   const handleSubmit = async () => {
-    if (!isComplete || submitting) return;
+    if (!completion.revealMissing() || submitting) return;
 
     const token = typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
     if (!token) {
@@ -90,7 +93,14 @@ export default function Gad7Page() {
 
       <div className="space-y-4">
         {questions.map((question, index) => (
-          <div key={question.id} className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
+          <div
+            key={question.id}
+            {...completion.getQuestionCardProps(question.id)}
+            className={completion.getQuestionCardClassName(
+              question.id,
+              "bg-white border border-gray-200 rounded-lg p-5 shadow-sm"
+            )}
+          >
             <div className="text-xs text-gray-500 mb-2">Pregunta {index + 1}</div>
             <h2 className="text-sm font-medium text-gray-900">{question.text}</h2>
             <div className="mt-4 space-y-2">
@@ -117,26 +127,17 @@ export default function Gad7Page() {
         ))}
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-        {error && (
-          <div className="mb-3 bg-red-50 border border-red-200 rounded-md p-3">
-            <p className="text-sm text-red-800">{error}</p>
-          </div>
-        )}
-        <button
-          type="button"
-          onClick={handleSubmit}
-          disabled={!isComplete || submitting}
-          className="w-full sm:w-auto px-5 py-2 text-sm font-medium text-white rounded-md bg-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {submitting ? "Enviando…" : "Enviar"}
-        </button>
-        {!isComplete && (
-          <p className="text-xs text-gray-500 mt-2">
-            Completa todas las preguntas para habilitar el envío.
-          </p>
-        )}
-      </div>
+      {error && (
+        <div className="bg-white border border-red-200 rounded-lg p-4">
+          <p className="text-sm text-red-700">{error}</p>
+        </div>
+      )}
+      <PatientQuestionnaireCompletionPanel
+        completion={completion}
+        submitting={submitting}
+        submittingLabel="Enviando…"
+        onSubmit={handleSubmit}
+      />
     </div>
   );
 }

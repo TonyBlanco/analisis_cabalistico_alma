@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { AuthGoogleSection } from '@/components/AuthGoogleSection';
-import { login, loginWithGoogle, getCurrentUser } from '@/lib/api';
+import { login, loginWithGoogle, requestPasswordReset } from '@/lib/api';
 import { clearAuthState } from '@/lib/auth-state';
 import { completeAuthFromToken } from '@/lib/finishAuthSession';
 import { TurnstileField, type TurnstileFieldHandle } from '@/components/TurnstileField';
@@ -38,6 +38,7 @@ export default function LoginPage() {
   const [showResetForm, setShowResetForm] = useState(false);
   const [resetSent, setResetSent] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
+  const [resetError, setResetError] = useState<string | null>(null);
   const [turnstileReady, setTurnstileReady] = useState(false);
   const turnstileRef = useRef<TurnstileFieldHandle>(null);
   const [googleSignInKey, setGoogleSignInKey] = useState(0);
@@ -158,16 +159,38 @@ export default function LoginPage() {
     }
   };
 
-  const handleResetPassword = async () => {
-    if (!resetEmail.trim()) return;
-    
+  const resolveResetEmail = () => {
+    if (resetEmail.trim()) return resetEmail.trim();
+    if (error?.email?.trim()) return error.email.trim();
+    if (email.includes('@')) return email.trim();
+    return '';
+  };
+
+  const openResetForm = () => {
+    const nextEmail = resolveResetEmail();
+    setResetEmail(nextEmail);
+    setResetSent(false);
+    setResetError(null);
+    setShowResetForm(true);
+  };
+
+  const handleResetPassword = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+    const targetEmail = resolveResetEmail();
+    if (!targetEmail) {
+      setResetError('Ingresa el email asociado a tu cuenta.');
+      return;
+    }
+
+    setResetEmail(targetEmail);
     setResetLoading(true);
+    setResetError(null);
     try {
-      // TODO: Implementar endpoint de reset password
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await requestPasswordReset(targetEmail);
       setResetSent(true);
-    } catch (err) {
-      console.error('Reset error:', err);
+    } catch (err: unknown) {
+      const response = (err as { response?: { message?: string } })?.response;
+      setResetError(response?.message || 'No se pudo enviar el enlace. Inténtalo de nuevo.');
     } finally {
       setResetLoading(false);
     }
@@ -353,40 +376,22 @@ export default function LoginPage() {
                   <div className="flex-1">
                     <p className="text-sm font-semibold">{error.message}</p>
                     {error.type === 'user_not_found' && (
-                      <p className="mt-1 text-xs opacity-80">
-                        Verifica que el email o usuario sea correcto
-                      </p>
+                      <div className="mt-2 space-y-2 text-xs opacity-90">
+                        <p>Verifica que el email o usuario sea correcto.</p>
+                        <p>
+                          Si olvidaste tu usuario, prueba con el email con el que te registraste o usa
+                          recuperación de contraseña.
+                        </p>
+                        <button
+                          type="button"
+                          onClick={openResetForm}
+                          className="font-semibold text-[var(--ha-acc)] underline-offset-2 hover:underline"
+                        >
+                          Recuperar acceso con email
+                        </button>
+                      </div>
                     )}
                   </div>
-                </div>
-              )}
-
-              {showResetForm && !resetSent && (
-                <div className="space-y-3 rounded-xl border border-[rgba(96,165,250,0.35)] bg-[rgba(56,130,246,0.08)] p-4">
-                  <p className="text-sm font-semibold text-[var(--ha-ink)]">¿Olvidaste tu contraseña?</p>
-                  <div className="flex gap-2">
-                    <input
-                      type="email"
-                      value={resetEmail}
-                      onChange={(e) => setResetEmail(e.target.value)}
-                      placeholder="Email para recuperación"
-                      className="ha-input min-w-0 flex-1 rounded-lg border px-3 py-2 text-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] focus:border-[#60A5FA] focus:outline-none focus:ring-2 focus:ring-[rgba(96,165,250,0.35)]"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleResetPassword}
-                      disabled={resetLoading || !resetEmail.trim()}
-                      className="rounded-lg bg-[#2563EB] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#1D4ED8] disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      {resetLoading ? '...' : 'Enviar'}
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {resetSent && (
-                <div className="rounded-xl border border-[rgba(74,222,128,0.35)] bg-[rgba(74,222,128,0.08)] px-4 py-3 text-sm text-[#4ADE80]">
-                  ✓ Si el email existe, recibirás un enlace para restablecer tu contraseña.
                 </div>
               )}
 
@@ -416,6 +421,46 @@ export default function LoginPage() {
               </button>
             </form>
 
+            {showResetForm && !resetSent && (
+              <form
+                onSubmit={handleResetPassword}
+                className="mt-4 space-y-3 rounded-xl border border-[rgba(96,165,250,0.35)] bg-[rgba(56,130,246,0.08)] p-4"
+              >
+                <p className="text-sm font-semibold text-[var(--ha-ink)]">¿Olvidaste tu contraseña?</p>
+                <p className="text-xs text-[var(--ha-ink-3)]">
+                  Usa el email con el que te registraste. Si solo recuerdas tu nombre de usuario, escribe aquí tu email.
+                </p>
+                <div className="flex gap-2">
+                  <input
+                    type="email"
+                    value={resetEmail}
+                    onChange={(e) => setResetEmail(e.target.value)}
+                    placeholder="Email para recuperación"
+                    autoComplete="email"
+                    className="ha-input min-w-0 flex-1 rounded-lg border px-3 py-2 text-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] focus:border-[#60A5FA] focus:outline-none focus:ring-2 focus:ring-[rgba(96,165,250,0.35)]"
+                  />
+                  <button
+                    type="submit"
+                    disabled={resetLoading || !resolveResetEmail()}
+                    className="rounded-lg bg-[#2563EB] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#1D4ED8] disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {resetLoading ? '...' : 'Enviar'}
+                  </button>
+                </div>
+                {resetError && (
+                  <p role="alert" className="text-xs font-medium text-[#F87171]">
+                    {resetError}
+                  </p>
+                )}
+              </form>
+            )}
+
+            {resetSent && (
+              <div className="mt-4 rounded-xl border border-[rgba(74,222,128,0.35)] bg-[rgba(74,222,128,0.08)] px-4 py-3 text-sm text-[#4ADE80]">
+                Si el email existe, recibirás un enlace para restablecer tu contraseña.
+              </div>
+            )}
+
             <AuthGoogleSection
               googleKey={googleSignInKey}
               disabled={loading}
@@ -428,8 +473,13 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => {
-                  setShowResetForm(!showResetForm);
-                  setResetSent(false);
+                  if (showResetForm) {
+                    setShowResetForm(false);
+                    setResetSent(false);
+                    setResetError(null);
+                  } else {
+                    openResetForm();
+                  }
                 }}
                 className="text-[13.5px] font-medium text-[var(--ha-acc)] hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ha-acc)]"
               >

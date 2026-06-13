@@ -338,14 +338,27 @@ export const getCurrentUser = async (): Promise<User> => {
   return apiRequest<User>('/me/');
 };
 
-// Nota: el backend aún no expone un endpoint público documentado para
-// recuperación de contraseña. Este helper asume un posible endpoint
-// `/password-reset/` y permite que el frontend compile; si el backend no lo
-// implementa devolverá un error manejable en la UI.
 export const requestPasswordReset = async (email: string): Promise<{ message: string }> => {
-  return apiRequest<{ message: string }>('/password-reset/', {
+  return apiRequest<{ message: string }>('/password-reset/request/', {
     method: 'POST',
-    body: JSON.stringify({ email }),
+    body: JSON.stringify({ email: email.trim() }),
+  });
+};
+
+export const confirmPasswordReset = async (data: {
+  uid: string;
+  token: string;
+  password: string;
+  confirm_password?: string;
+}): Promise<{ message: string }> => {
+  return apiRequest<{ message: string }>('/password-reset/confirm/', {
+    method: 'POST',
+    body: JSON.stringify({
+      uid: data.uid,
+      token: data.token,
+      password: data.password,
+      confirm_password: data.confirm_password ?? data.password,
+    }),
   });
 };
 

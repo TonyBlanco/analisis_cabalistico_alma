@@ -10,6 +10,11 @@ from datetime import date
 from django.utils import timezone
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, get_user_model
+from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth.tokens import default_token_generator
+from django.core.exceptions import ValidationError as DjangoValidationError
+from django.utils.encoding import force_bytes, force_str
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from google.auth.transport import requests
 from google.oauth2 import id_token
 
@@ -57,7 +62,7 @@ from .serializers import (
     UserResourceAccessSerializer,
 )
 from .serializers import UserBirthDataSerializer
-from .emails import send_welcome_email, send_booking_confirmation_email
+from .emails import send_welcome_email, send_booking_confirmation_email, send_password_reset_email
 from .notifications.dispatch import notify_patient_account_access
 
 
@@ -960,6 +965,111 @@ class EmailOrUsernameAuthToken(APIView):
             'email': user_auth.email,
             'role': role
         })
+
+
+class PasswordResetRequestView(APIView):
+    """Solicita enlace de recuperación de contraseña por email."""
+
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        email = (request.data.get('email') or '').strip()
+        if not email:
+            return Response(
+                {
+                    'error': 'validation',
+                    'message': 'Ingresa el email asociado a tu cuenta',
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        UserModel = get_user_model()
+        user = UserModel.objects.filter(email__iexact=email).first()
+        if user and user.is_active and user.email:
+            token = default_token_generator.make_token(user)
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            send_password_reset_email(user, token, uid)
+
+        return Response(
+            {
+                'message': 'Si el email existe en nuestra base de datos, recibirás un enlace para restablecer tu contraseña.',
+            },
+            status=status.HTTP_200_OK,
+        )
+
+
+class PasswordResetConfirmView(APIView):
+    """Confirma el restablecimiento de contraseña con token y uid."""
+
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        uid = (request.data.get('uid') or '').strip()
+        token = (request.data.get('token') or '').strip()
+        password = request.data.get('password') or ''
+        confirm_password = request.data.get('confirm_password') or password
+
+        if not uid or not token or not password:
+            return Response(
+                {
+                    'error': 'validation',
+                    'message': 'Enlace, token y nueva contraseña son requeridos',
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if password != confirm_password:
+            return Response(
+                {
+                    'error': 'validation',
+                    'message': 'Las contraseñas no coinciden',
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        UserModel = get_user_model()
+        try:
+            user_id = force_str(urlsafe_base64_decode(uid))
+            user = UserModel.objects.get(pk=user_id)
+        except (TypeError, ValueError, OverflowError, UserModel.DoesNotExist):
+            return Response(
+                {
+                    'error': 'invalid_link',
+                    'message': 'El enlace de recuperación no es válido o ha expirado',
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not user.is_active or not default_token_generator.check_token(user, token):
+            return Response(
+                {
+                    'error': 'invalid_link',
+                    'message': 'El enlace de recuperación no es válido o ha expirado',
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            validate_password(password, user)
+        except DjangoValidationError as exc:
+            return Response(
+                {
+                    'error': 'validation',
+                    'message': ' '.join(exc.messages),
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user.set_password(password)
+        user.save(update_fields=['password'])
+        Token.objects.filter(user=user).delete()
+
+        return Response(
+            {
+                'message': 'Contraseña actualizada correctamente. Ya puedes iniciar sesión.',
+            },
+            status=status.HTTP_200_OK,
+        )
 
 
 class CalculoCabalisticoView(APIView):

@@ -663,11 +663,19 @@ export const clinicalTestsRegistry: ClinicalTestRegistryEntry[] = [
   },
   {
     test_code: "sha_harmony",
-    display_name: "Sephirotic Harmony Audit (SHA)",
+    display_name: "Auditoría de Armonía Sefirótica (SHA)",
     domain: "Equilibrio de Netzach",
     family: "cabalisticos",
     implemented: true,
     patient_route: "/dashboard/patient/tests/sha-harmony",
+    guidance: {
+      what:
+        "Auditoría de equilibrio de pasiones y armonía energética (lectura simbólica de Netzach). Screening orientativo, no diagnóstico.",
+      when:
+        "Útil para abrir conversación sobre hábitos, consumo y regulación del deseo con tu consultante.",
+      reminder:
+        "El detalle técnico (puntaje/banda) es solo para el terapeuta. No sustituye evaluación clínica.",
+    },
   },
   {
     test_code: "eat26_spirit",

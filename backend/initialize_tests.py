@@ -516,6 +516,27 @@ def initialize_tests():
             'uses_per_month': None,
         },
         {
+            'code': 'sha_harmony',
+            'name': 'Sephirotic Harmony Audit (SHA)',
+            'public_name': 'Auditoría de Armonía Sefirótica (SHA)',
+            'description': (
+                'Auditoría de equilibrio de pasiones y armonía energética (lectura simbólica de '
+                'Netzach). Screening orientativo, no diagnóstico. Útil para abrir conversación '
+                'sobre hábitos, consumo y regulación del deseo; el detalle técnico (puntaje/banda) '
+                'es solo para el terapeuta.'
+            ),
+            'test_type': 'holistic_screening',
+            'required_access_level': 'personal',
+            'icon': '⚖️',
+            'order': 102,
+            'estimated_duration': 6,
+            'is_active': True,
+            'is_assignable': True,
+            'available_for_therapists': True,
+            'available_for_personal': True,
+            'uses_per_month': None,
+        },
+        {
             'code': 'mcmi4-mystic',
             'name': 'MCMI-4-Mystic - Inventario Multiaxial Cósmico',
             'description': 'Inventario comprensivo de 195 ítems que mapea la personalidad del alma a través de los 4 Mundos Cabalísticos (Atzilut, Briah, Yetzirah, Assiah). Sistema modular con rotación inteligente de preguntas. **Gestionado exclusivamente desde SWM dedicado.**',

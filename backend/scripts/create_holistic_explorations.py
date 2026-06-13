@@ -207,12 +207,15 @@ EXPLORATIONS = {
         'therapist_only_results': True,
     },
     'sha_harmony': {
-        'public_name': 'Sephirotic Harmony Audit (SHA)',
-        'category': '',
+        'public_name': 'Auditoría de Armonía Sefirótica (SHA)',
+        'category': 'equilibrio',
         'primary_sefirah': 'Netzach',
         'secondary_sefirot': [],
         'description': (
-            "Reinterpretacion del AUDIT. Foco en equilibrio de Netzach (pasiones)."
+            "Auditoría de equilibrio de pasiones y armonía energética (lectura simbólica de "
+            "Netzach). Screening orientativo, no diagnóstico. Útil para abrir conversación "
+            "sobre hábitos, consumo y regulación del deseo; el detalle técnico (puntaje/banda) "
+            "es solo para el terapeuta."
         ),
         'client_visible_fields': [],
         'therapist_only_fields': [],

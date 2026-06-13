@@ -34,10 +34,23 @@ def enable_implemented_tests():
         try:
             test = TestModule.objects.get(code=code)
             
-            if not test.is_assignable or not test.available_for_therapists:
+            needs_update = (
+                not test.is_active
+                or not test.is_assignable
+                or not test.available_for_therapists
+                or test.is_internal
+                or test.domain != 'holistic'
+            )
+            if needs_update:
+                test.is_active = True
                 test.is_assignable = True
+                test.is_internal = False
+                test.domain = 'holistic'
                 test.available_for_therapists = True
-                test.available_for_personal = False  # Symbolic tests for therapists only
+                if code == 'sha_harmony':
+                    test.available_for_personal = True
+                else:
+                    test.available_for_personal = False
                 test.save()
                 
                 print(f"✅ ENABLED: {test.name} (code={code})")

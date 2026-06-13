@@ -323,7 +323,12 @@ GHOST_TEST_CONFIGS = {
     'sha_harmony': {
         'name': 'Sephirotic Harmony Audit (SHA)',
         'public_name': 'Auditoría de Armonía Sefirótica (SHA)',
-        'description': 'Auditoría de equilibrio de pasiones y armonía energética. Evalúa el balance entre las columnas del Árbol de la Vida (Misericordia/Severidad) y la integración emocional.',
+        'description': (
+            'Auditoría de equilibrio de pasiones y armonía energética (lectura simbólica de '
+            'Netzach). Screening orientativo, no diagnóstico. Útil para abrir conversación '
+            'sobre hábitos, consumo y regulación del deseo; el detalle técnico (puntaje/banda) '
+            'es solo para el terapeuta.'
+        ),
         'test_type': 'holistic_screening',
         'questions': SHA_HARMONY_QUESTIONS,
         'required_access_level': 'personal',

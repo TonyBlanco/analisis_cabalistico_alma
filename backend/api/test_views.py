@@ -813,11 +813,29 @@ class ExecuteTestView(APIView):
 
             if test_module.code == 'dudit_spirit':
                 responses = input_data.get('responses', {})
+                required_dudit = {f'q{i}' for i in range(1, 12)}
+                missing_dudit = required_dudit - set(responses.keys())
+                if missing_dudit:
+                    return {
+                        'processed': False,
+                        'structured_data': None,
+                        'summary_text': f'Respuestas incompletas: faltan {sorted(missing_dudit)}',
+                        'timestamp': str(datetime.now()),
+                    }
                 from .diagnostics import compute_dudit_spirit as _compute_dudit
-                return _compute_dudit({'responses': responses})
+                return _compute_dudit({'responses': responses, 'sex': input_data.get('sex', 'hombre')})
 
             if test_module.code == 'ybocs_soul':
                 responses = input_data.get('responses', {})
+                required_ybocs = {f'q{i}' for i in range(1, 11)}
+                missing_ybocs = required_ybocs - set(responses.keys())
+                if missing_ybocs:
+                    return {
+                        'processed': False,
+                        'structured_data': None,
+                        'summary_text': f'Respuestas incompletas: faltan {sorted(missing_ybocs)}',
+                        'timestamp': str(datetime.now()),
+                    }
                 from .diagnostics import compute_ybocs_soul as _compute_ybocs
                 return _compute_ybocs({'responses': responses})
 

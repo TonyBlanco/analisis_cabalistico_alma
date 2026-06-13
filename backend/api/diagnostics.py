@@ -1761,86 +1761,95 @@ def compute_dudit_spirit(input_data: dict) -> dict:
     Based on DUDIT framework but with symbolic-clinical perspective.
     """
     responses = input_data.get('responses', {}) or {}
-    
-    # Extract responses (assuming keys like 'q1', 'q2', ... 'q11')
-    # Scale 0-4 for most items
+    sex_raw = str(input_data.get('sex', 'hombre')).lower().strip()
+    sex = 'mujer' if sex_raw in {'mujer', 'f', 'female', 'w', 'woman'} else 'hombre'
+
     def _as_int(val) -> int:
         try:
             return int(val)
         except Exception:
             return 0
-    
+
     def _clamp_0_4(v: int) -> int:
         return max(0, min(4, v))
-    
-    # DUDIT-style scoring dimensions
-    # Frequency/quantity (q1-q3): consumption pattern
+
+    def _snap_0_2_4(v: int) -> int:
+        """Q10/Q11 only accept 0, 2, 4."""
+        if v <= 0:
+            return 0
+        if v <= 2:
+            return 2
+        return 4
+
+    # Frequency/quantity (q1-q3)
     freq_keys = ['q1', 'q2', 'q3']
     freq_vals = [_clamp_0_4(_as_int(responses.get(k, 0))) for k in freq_keys]
     freq_score = sum(freq_vals)
-    
-    # Problems/consequences (q4-q6): functional impact
+
+    # Problems/consequences (q4-q6)
     impact_keys = ['q4', 'q5', 'q6']
     impact_vals = [_clamp_0_4(_as_int(responses.get(k, 0))) for k in impact_keys]
     impact_score = sum(impact_vals)
-    
-    # Compulsion/control (q7-q9): loss of regulation
+
+    # Compulsion/control (q7-q9)
     control_keys = ['q7', 'q8', 'q9']
     control_vals = [_clamp_0_4(_as_int(responses.get(k, 0))) for k in control_keys]
     control_score = sum(control_vals)
-    
-    # Body awareness (q10-q11): somatic connection
+
+    # Harm/concern items (q10-q11): scale 0/2/4 only
     body_keys = ['q10', 'q11']
-    body_vals = [_clamp_0_4(_as_int(responses.get(k, 0))) for k in body_keys]
+    body_vals = [_snap_0_2_4(_as_int(responses.get(k, 0))) for k in body_keys]
     body_score = sum(body_vals)
-    
-    # Total score (0-44 max if 11 items × 4)
+
+    # Total score (max 44)
     score_total = freq_score + impact_score + control_score + body_score
-    
-    # Risk level determination (DUDIT thresholds adapted)
+
+    # Sex-dependent problematic threshold (DUDIT standard)
+    problematic_threshold = 2 if sex == 'mujer' else 6
+
     if score_total >= 25:
         risk_level = "high"
-    elif score_total >= 6:
+    elif score_total >= problematic_threshold:
         risk_level = "medium"
     else:
         risk_level = "low"
-    
-    # Usage pattern classification
+
+    # Usage pattern
     if control_score >= 8:
         usage_pattern = "compulsive"
     elif freq_score >= 8:
         usage_pattern = "habitual"
     else:
         usage_pattern = "exploratory"
-    
-    # Body awareness level (inverted: lower body score = lower awareness)
-    body_avg = body_score / (len(body_keys) * 4.0)
+
+    # Harm awareness (q10-q11 max = 8)
+    body_avg = body_score / 8.0
     if body_avg >= 0.66:
         body_awareness_level = "high"
     elif body_avg >= 0.33:
         body_awareness_level = "medium"
     else:
         body_awareness_level = "low"
-    
-    # Transition suggestion (Ietzirá → Asiá)
-    # Suggest Asiá if body awareness is low or physical symptoms are high
+
     transition_suggestion = None
     if body_awareness_level == "low" or impact_score >= 8:
         transition_suggestion = "assiah"
-    
-    # Summary text
+
     summary_map = {
         "low": "Relación de bajo riesgo con sustancias. Mantén atención a patrones y regulación emocional.",
         "medium": "Relación moderada que merece atención. Observa si hay evasión emocional o patrones automáticos.",
         "high": "Patrón de alto riesgo detectado. Se sugiere apoyo profesional especializado y exploración de raíces emocionales.",
     }
-    
+
     structured_data = {
         'score_total': score_total,
         'risk_level': risk_level,
         'usage_pattern': usage_pattern,
         'body_awareness_level': body_awareness_level,
         'transition_suggestion': transition_suggestion,
+        'sex_used': sex,
+        'problematic_threshold': problematic_threshold,
+        'referral_recommended': risk_level in ["medium", "high"],
     }
     
     return {
@@ -2146,6 +2155,7 @@ def compute_ybocs_soul(input_data: dict) -> dict:
         'karmic_pattern': pattern,
         'sephirotic_balance': sephirotic_balance,
         'transition_suggestion': transition_suggestion,
+        'referral_recommended': severity in ["severe", "extreme"],
     }
     
     return {

@@ -242,6 +242,7 @@ export default function PatientResultsSection() {
                       resultData={selectedResult.result_data} 
                       resultId={selectedResult.id}
                       showRaw={false}
+                      clientFacing={userRole !== 'therapist'}
                       testCode={selectedResult.test_module?.code}
                       executionMode={selectedResult.test_module?.execution_mode}
                       isTherapist={userRole === 'therapist'}

@@ -1,6 +1,6 @@
 # Studios33.app — Despliegue en Hetzner (aislado de VoxTV)
 
-**Estado:** ACTIVO — **Fase A–C + auth (Turnstile + Google) en producción** (2026-06-05)  
+**Estado:** ACTIVO — **Fase A–C + auth (Turnstile + Google + magic link/OTP/passkeys) en producción** (2026-06-13)  
 **Fecha:** 2026-06-05 (dominio corregido: **`studios33.app`**, no `studio33.app`)  
 **Sesión detallada:** [SESSION_2026-06-05_STUDIOS33.md](./SESSION_2026-06-05_STUDIOS33.md)
 **Dominio objetivo:** `studios33.app` + `api.studios33.app` (sustituye el uso previsto de `tonyblanco.es` para esta app)  
@@ -29,6 +29,7 @@
 | **F1** Django Admin CSS en producción | ✅ CSP dedicada `api.studios33.app` (no heredar VoxTV) |
 | **F2** Cloudflare Turnstile (login + registro) | ✅ Widget Studios33 + `TURNSTILE_ENFORCED` en prod |
 | **F3** Google Sign-In (Gmail) | ✅ OAuth Web + `/login` + auto-registro `personal` trial |
+| **F5** Auth avanzado (magic link, OTP, passkeys) | ✅ Migración `0102`, `webauthn` en API, tabs login + `/auth/magic` (2026-06-13) |
 | **F4** Secretos locales Studios33 | ✅ `deploy/studios33/.env.studios33` (gitignored) |
 | **PIP0** Router LLM unificado (`llm_bridge`, `free_first`) | ✅ En imagen `studio33_api` (2026-06-05 noche) |
 | **PIP2** Endpoints gobernados + prompts YAML | ✅ Prod: `/api/ai/status/`, kabbalah, bioemotional assist-draft, feedback |
@@ -37,7 +38,7 @@
 | **D** Corte tráfico / desactivar Render + Vercel | ✅ Repo (2026-06-08); borrar proyectos en dashboards |
 | **E** Deuda producto (registry, Tarot, etc.) | ⏳ Post-go-live |
 | **—** Scroll fixes admin Next (local, no desplegado) | ⏸️ Descartado por usuario |
-| **—** Commit / push `main` remoto | ⏳ Verificar `git push` local |
+| **—** Commit / push `main` remoto | ✅ 2026-06-13 (auth avanzado + docs) |
 | **—** Rotar Google Client Secret (expuesto en chat) | ⏳ Recomendado |
 | **—** Smoke test E2E (Tarot, terapeuta, etc.) | ⏳ Pendiente |
 | **PIP1** Process Memory + RAG | ⏳ Siguiente fase planai |

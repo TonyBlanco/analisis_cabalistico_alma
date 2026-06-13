@@ -323,8 +323,9 @@ Frontend espera endpoints no presentes en backend:
    - Implementar `app/tests` y `app/tests/[domain]/[code]` en la estructura actual, o integrar todo en dashboards.
    - Migrar rutas legacy necesarias y definir redirects internos.
 
-6. Password reset real
-   - Implementar backend de `/api/password-reset/` o eliminar el flujo en frontend para evitar falsas expectativas.
+6. Password reset real — **RESUELTO 2026-06-13**
+   - Implementado: OTP 6 dígitos, magic link, passkeys WebAuthn. Ver `docs/01_PROJECT_STATE/AUTH_ADVANCED_2026-06-13.md`.
+   - Endpoints: `/api/password-reset/request|confirm/`, `/api/auth/otp/*`, `/api/auth/magic-link/*`, `/api/auth/passkeys/*`.
 
 ### P2 (calidad y cobertura)
 7. Completar tests faltantes
@@ -357,9 +358,8 @@ Frontend espera endpoints no presentes en backend:
    - Frontend consume `/api/resources/*` inexistentes; backend expone `/api/resources/my/` y `/api/resources/<id>/acquire/`.
    - Riesgo: 404s y huecos de autorizacion en recursos si se implementan a medias.
 
-3. Password reset asumido
-   - `tonyblanco-app/lib/api.ts` llama `/api/password-reset/` sin backend.
-   - Riesgo: UX rota; potencial vector de soporte si se deja en produccion.
+3. Password reset asumido — **RESUELTO 2026-06-13** (ver AUTH_ADVANCED_2026-06-13.md)
+   - Backend y frontend alineados; reset por OTP; enlace legacy `confirm` conservado.
 
 4. LocalStorage para tokens
    - Tokens guardados en localStorage elevan riesgo ante XSS.

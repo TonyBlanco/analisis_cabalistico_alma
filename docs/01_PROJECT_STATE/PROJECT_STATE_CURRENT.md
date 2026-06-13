@@ -3,7 +3,7 @@
 ## Arquitectura
 - Frontend: Next.js App Router
 - Backend: Django + DRF
-- Auth: Token-based
+- Auth: Token-based + magic link + OTP email + passkeys WebAuthn (2026-06-13, prod)
 - Roles: admin / therapist / personal / patient (SEALED)
 - Execution modes: patient_self / therapist_clinical (SEALED)
 
@@ -449,6 +449,7 @@ Cualquier modificación futura requiere actualización explícita de este docume
 - ✅ Django Admin estilos (CSP API dedicada)
 - ✅ Turnstile en login + registro (widget Studios33, prod enforced)
 - ✅ Google Sign-In Gmail en `/login` (OAuth `studio33-app`, cuenta personal trial verificada)
+- ✅ **Auth avanzado (2026-06-13):** magic link, OTP 6 dígitos (login + reset), passkeys WebAuthn — ver [AUTH_ADVANCED_2026-06-13.md](./AUTH_ADVANCED_2026-06-13.md); migración `0102`; deploy prod OK
 
 ### IA y módulos (2026-06-05 / actualizado 2026-06-10)
 - 📋 Auditoría wiring + IA: [AUDIT_MODULOS_IA_2026-06-05.md](./AUDIT_MODULOS_IA_2026-06-05.md)
@@ -464,7 +465,7 @@ Cualquier modificación futura requiere actualización explícita de este docume
 - ⏳ Fase D: corte Render/Vercel + backup Postgres
 - ⏳ Fase E: deuda producto (registry tests, Tarot, módulos “Próximamente”)
 - ⏳ Smoke test clínico/simbólico completo en prod
-- ⏳ Commit git de cambios auth/deploy; rotar Google secret si se expuso
+- ⏳ Rotar Google secret si se expuso; verificar SMTP prod para emails OTP/magic link
 - ⏸️ Scroll admin Next (cambios locales — no desplegados por decisión explícita)
 
 ## Documentation Governance

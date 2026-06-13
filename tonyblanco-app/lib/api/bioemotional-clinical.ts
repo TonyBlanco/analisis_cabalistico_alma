@@ -452,14 +452,50 @@ export type SCID5SectionKey =
   | "self_regulation"
   | "identity_relationships";
 
+/** Raw API payload — backend returns strength as low|medium|high and no matched_regions. */
+type RawSCID5CorrelationResult = {
+  section_key: SCID5SectionKey;
+  correlation_strength: CorrelationStrength | number;
+  regions_matched?: string[];
+  suggested_notes: string;
+  clinical_notes?: string;
+  confidence_score: number;
+};
+
 export interface SCID5CorrelationResult {
   section_key: SCID5SectionKey;
-  correlation_strength: number;  // 0-1 float, not string
+  correlation_strength: number;  // 0-1 float for UI
   regions_matched: string[];
   matched_regions: Array<{ region: string; count: number }>;  // For UI display
   suggested_notes: string;
-  clinical_notes?: string;  // Optional notes from correlation
+  clinical_notes?: string;
   confidence_score: number;
+}
+
+const CORRELATION_STRENGTH_NUMERIC: Record<CorrelationStrength, number> = {
+  low: 0.2,
+  medium: 0.6,
+  high: 0.9,
+};
+
+function normalizeSCID5Correlation(raw: RawSCID5CorrelationResult): SCID5CorrelationResult {
+  const correlation_strength =
+    typeof raw.correlation_strength === "number"
+      ? raw.correlation_strength
+      : CORRELATION_STRENGTH_NUMERIC[raw.correlation_strength] ?? raw.confidence_score ?? 0.2;
+
+  const regions_matched = Array.isArray(raw.regions_matched) ? raw.regions_matched : [];
+  const matched_regions = regions_matched.map((region) => ({ region, count: 1 }));
+
+  return {
+    section_key: raw.section_key,
+    correlation_strength,
+    regions_matched,
+    matched_regions,
+    suggested_notes: raw.suggested_notes,
+    clinical_notes: raw.clinical_notes ?? raw.suggested_notes,
+    confidence_score: raw.confidence_score,
+  };
 }
 
 export interface SCID5CorrelationPayload {
@@ -496,10 +532,11 @@ export async function importToMSHE(patientId: number): Promise<MSHEImportResult>
 export async function correlateSCID5(
   payload: SCID5CorrelationPayload
 ): Promise<SCID5CorrelationResult> {
-  return request<SCID5CorrelationResult>(SCID5_CORRELATE_URL, {
+  const raw = await request<RawSCID5CorrelationResult>(SCID5_CORRELATE_URL, {
     method: "POST",
     body: JSON.stringify(payload),
   });
+  return normalizeSCID5Correlation(raw);
 }
 
 /**

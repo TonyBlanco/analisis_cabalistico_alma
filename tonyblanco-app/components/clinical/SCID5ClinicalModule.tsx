@@ -293,10 +293,10 @@ export default function SCID5ClinicalModule() {
               <summary className="cursor-pointer p-4 font-medium text-gray-900 hover:bg-gray-50 flex justify-between items-center">
                 <span className="flex items-center gap-2">
                   {section.title}
-                  {bioCorrelations && bioCorrelations[key] && bioCorrelations[key].matched_regions.length > 0 && (
+                  {(bioCorrelations?.[key]?.matched_regions?.length ?? 0) > 0 && (
                     <span className="px-2 py-0.5 bg-purple-100 text-purple-700 text-xs rounded-full flex items-center gap-1">
                       <Activity className="h-3 w-3" />
-                      {bioCorrelations[key].matched_regions.length} región{bioCorrelations[key].matched_regions.length !== 1 ? 'es' : ''}
+                      {bioCorrelations![key].matched_regions.length} región{bioCorrelations![key].matched_regions.length !== 1 ? 'es' : ''}
                     </span>
                   )}
                 </span>
@@ -411,17 +411,23 @@ export default function SCID5ClinicalModule() {
                 )}
 
                 {/* BioEmotional Correlation Panel */}
-                {bioCorrelations && bioCorrelations[key] && bioCorrelations[key].matched_regions.length > 0 && (
+                {(() => {
+                  const correlation = bioCorrelations?.[key];
+                  const matchedRegions = correlation?.matched_regions ?? [];
+                  if (matchedRegions.length === 0) return null;
+
+                  const strength = correlation?.correlation_strength ?? 0;
+                  return (
                   <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 space-y-3">
                     <div className="flex items-center gap-2">
                       <Activity className="h-4 w-4 text-purple-600" />
                       <h4 className="font-medium text-purple-900">Correlación Corporal BioEmotional</h4>
                       <span className={`px-2 py-0.5 rounded text-xs font-medium ${
-                        bioCorrelations[key].correlation_strength >= 0.7 ? 'bg-green-100 text-green-800' :
-                        bioCorrelations[key].correlation_strength >= 0.4 ? 'bg-yellow-100 text-yellow-800' :
+                        strength >= 0.7 ? 'bg-green-100 text-green-800' :
+                        strength >= 0.4 ? 'bg-yellow-100 text-yellow-800' :
                         'bg-gray-100 text-gray-800'
                       }`}>
-                        {(bioCorrelations[key].correlation_strength * 100).toFixed(0)}% correlación
+                        {(strength * 100).toFixed(0)}% correlación
                       </span>
                     </div>
 
@@ -431,7 +437,7 @@ export default function SCID5ClinicalModule() {
                         Regiones corporales asociadas:
                       </h5>
                       <div className="flex flex-wrap gap-2">
-                        {bioCorrelations[key].matched_regions.map((region, idx) => (
+                        {matchedRegions.map((region, idx) => (
                           <span
                             key={idx}
                             className="px-2 py-1 bg-purple-100 text-purple-800 text-sm rounded-full flex items-center gap-1"
@@ -443,13 +449,14 @@ export default function SCID5ClinicalModule() {
                       </div>
                     </div>
 
-                    {bioCorrelations[key].clinical_notes && (
+                    {correlation?.clinical_notes && (
                       <div className="text-sm text-purple-700 bg-white rounded p-2 border border-purple-100">
-                        <strong>Nota clínica:</strong> {bioCorrelations[key].clinical_notes}
+                        <strong>Nota clínica:</strong> {correlation.clinical_notes}
                       </div>
                     )}
                   </div>
-                )}
+                  );
+                })()}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <label className="flex items-center gap-2">

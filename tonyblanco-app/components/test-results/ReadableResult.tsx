@@ -16,6 +16,7 @@ import ExplorationSuggestionModal from '@/components/ExplorationSuggestionModal'
 import ResultSuggestionsCard, { Suggestion } from './ResultSuggestionsCard';
 import { ResponseDetail } from '@/lib/test-types';
 import { asText, listItems } from '@/lib/normalizeText';
+import { formatClientSuggestion } from '@/lib/formatClientReading';
 
 export type ReadableResultProps = {
   resultData: any;
@@ -36,7 +37,15 @@ export type ReadableResultProps = {
     secondary_suggestions?: Array<{ code?: string | null; name?: string | null }>;
   };
   onClose?: () => void;
+  /** Patient-safe copy: warm sentences, no JSON or raw keys. Defaults to !isTherapist. */
+  clientFacing?: boolean;
 };
+
+function formatListItem(item: unknown, clientFacing: boolean): string | null {
+  if (clientFacing) return formatClientSuggestion(item);
+  const text = asText(item);
+  return text.trim() ? text : null;
+}
 
 function normalizeList(value: any): string[] {
   if (!value) return [];
@@ -114,7 +123,8 @@ export default function ReadableResult({
   executionMode,
   responsesDetail,
   therapistSuggestion,
-  onClose
+  onClose,
+  clientFacing: clientFacingProp
 }: ReadableResultProps) {
   const [showTechnical, setShowTechnical] = useState(false);
   const [showSuggestionModal, setShowSuggestionModal] = useState(false);
@@ -180,6 +190,16 @@ export default function ReadableResult({
 
   // Determine therapist role: prefer explicit prop, fallback to executionMode heuristic
   const isTherapist = typeof propsIsTherapist !== 'undefined' ? propsIsTherapist : (executionMode && executionMode !== 'patient_self');
+  const clientFacing = clientFacingProp ?? !isTherapist;
+  const strengthLines = strengths
+    .map((item) => formatListItem(item, clientFacing))
+    .filter((line): line is string => Boolean(line));
+  const focusLines = focusAreas
+    .map((item) => formatListItem(item, clientFacing))
+    .filter((line): line is string => Boolean(line));
+  const recommendationLines = recommendations
+    .map((item) => formatListItem(item, clientFacing))
+    .filter((line): line is string => Boolean(line));
 
   // result id to key sessionStorage
   const resultId = propResultId ?? payload?.id ?? payload?.result?.id ?? null;
@@ -593,27 +613,27 @@ export default function ReadableResult({
           )}
 
           {/* Strengths & Focus */}
-          {(strengths.length > 0 || focusAreas.length > 0) && (
+          {(strengthLines.length > 0 || focusLines.length > 0) && (
             <div className="space-y-4">
-              {strengths.length > 0 && (
+              {strengthLines.length > 0 && (
                 <div>
                   <h4 className="text-sm font-semibold text-gray-900 mb-2 flex items-center gap-2">
                     <CheckCircle size={16} className="text-green-500" />
                     Fortalezas
                   </h4>
                   <ul className="text-sm text-gray-600 space-y-1 pl-1">
-                    {strengths.map((s, i) => <li key={i} className="flex items-start gap-2"><span className="text-green-400 mt-1">•</span>{asText(s)}</li>)}
+                    {strengthLines.map((line, i) => <li key={i} className="flex items-start gap-2"><span className="text-green-400 mt-1">•</span>{line}</li>)}
                   </ul>
                 </div>
               )}
-              {focusAreas.length > 0 && (
+              {focusLines.length > 0 && (
                 <div>
                   <h4 className="text-sm font-semibold text-gray-900 mb-2 flex items-center gap-2">
                     <Activity size={16} className="text-orange-500" />
                     Áreas de Enfoque
                   </h4>
                   <ul className="text-sm text-gray-600 space-y-1 pl-1">
-                    {focusAreas.map((f, i) => <li key={i} className="flex items-start gap-2"><span className="text-orange-400 mt-1">•</span>{asText(f)}</li>)}
+                    {focusLines.map((line, i) => <li key={i} className="flex items-start gap-2"><span className="text-orange-400 mt-1">•</span>{line}</li>)}
                   </ul>
                 </div>
               )}
@@ -662,14 +682,14 @@ export default function ReadableResult({
         </div>
 
         {/* Recommendations */}
-        {recommendations.length > 0 && (
+        {recommendationLines.length > 0 && (
           <div className="bg-blue-50 border border-blue-100 rounded-lg p-4">
             <h4 className="text-sm font-semibold text-blue-900 mb-3">Sugerencias simbólicas</h4>
             <ul className="space-y-2">
-              {recommendations.map((r, i) => (
+              {recommendationLines.map((line, i) => (
                 <li key={i} className="text-sm text-blue-800 flex items-start gap-2">
                   <span className="mt-1.5 w-1.5 h-1.5 bg-blue-400 rounded-full flex-shrink-0" />
-                  {asText(r)}
+                  {line}
                 </li>
               ))}
             </ul>

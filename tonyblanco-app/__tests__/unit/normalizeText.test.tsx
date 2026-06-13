@@ -14,9 +14,10 @@ describe('asText', () => {
     );
   });
 
-  it('falls back to text, titulo, label, descripcion', () => {
+  it('falls back to text, titulo, label, descripcion, sugerencia', () => {
     expect(asText({ text: 'Fortaleza A' })).toBe('Fortaleza A');
     expect(asText({ label: 'Enfoque B' })).toBe('Enfoque B');
+    expect(asText({ sugerencia: 'Respirar con intención' })).toBe('Respirar con intención');
   });
 
   it('does not return [object Object] for plain objects', () => {
@@ -26,12 +27,14 @@ describe('asText', () => {
   });
 });
 
-describe('ReadableResult — object list items', () => {
+describe('ReadableResult — object list items (clientFacing)', () => {
   it('renders symbolic suggestions as readable text, not [object Object]', () => {
     render(
       <ReadableResult
         testName="Vidas Pasadas"
         testCode="past-lives"
+        clientFacing
+        isTherapist={false}
         resultData={{
           recomendaciones: [
             { texto: 'Registrar sueños recurrentes', sefira: 'Yesod' },
@@ -45,8 +48,8 @@ describe('ReadableResult — object list items', () => {
       />
     );
 
-    expect(screen.getByText('Registrar sueños recurrentes')).toBeInTheDocument();
-    expect(screen.getByText('Ritual de cierre con intención')).toBeInTheDocument();
+    expect(screen.getByText(/Registrar sueños recurrentes/)).toBeInTheDocument();
+    expect(screen.getByText(/Ritual de cierre con intención/)).toBeInTheDocument();
     expect(screen.getByText('Memoria simbólica activa')).toBeInTheDocument();
     expect(screen.getByText('Integrar huellas del pasado')).toBeInTheDocument();
     expect(screen.queryByText('[object Object]')).not.toBeInTheDocument();

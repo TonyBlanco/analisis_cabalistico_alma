@@ -785,11 +785,29 @@ class ExecuteTestView(APIView):
 
             if test_module.code == 'sha_harmony':
                 responses = input_data.get('responses', {})
+                required_sha = {f'q{i}' for i in range(1, 11)}
+                missing_sha = required_sha - set(responses.keys())
+                if missing_sha:
+                    return {
+                        'processed': False,
+                        'structured_data': None,
+                        'summary_text': f'Respuestas incompletas: faltan {sorted(missing_sha)}',
+                        'timestamp': str(datetime.now()),
+                    }
                 from .diagnostics import compute_sha_harmony as _compute_sha
                 return _compute_sha({'responses': responses})
 
             if test_module.code == 'eat26_spirit':
                 responses = input_data.get('responses', {})
+                required_eat26 = {f'q{i}' for i in range(1, 27)}
+                missing_eat26 = required_eat26 - set(responses.keys())
+                if missing_eat26:
+                    return {
+                        'processed': False,
+                        'structured_data': None,
+                        'summary_text': f'Respuestas incompletas: faltan {sorted(missing_eat26)}',
+                        'timestamp': str(datetime.now()),
+                    }
                 from .diagnostics import compute_eat26_spirit as _compute_eat26
                 return _compute_eat26({'responses': responses})
 

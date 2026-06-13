@@ -10,7 +10,7 @@ type Eat26Structured = {
   risk_label?: string;
   dominant_pattern?: string;
   malkhut_keter_disruption?: boolean;
-  body_reverence?: string;
+  body_reverence?: boolean;
   gevurah_excess?: boolean;
   transition_suggestion?: string | null;
 };
@@ -19,6 +19,18 @@ type Eat26Payload = {
   processed?: boolean;
   summary_text?: string;
   structured_data?: Eat26Structured | null;
+};
+
+const PATTERN_LABELS: Record<string, string> = {
+  restriction: "Restricción — Gevurah excesiva sobre el sustento",
+  preoccupation: "Preocupación — Conflicto Malkhut-Keter",
+  ritualization: "Ritualización — Binah rígida",
+  balanced: "Equilibrado — Chesed-Gevurah en armonía",
+};
+
+const TRANSITION_LABELS: Record<string, string> = {
+  yetzirah: "Mundo de Ietzirá — exploración emocional",
+  beriah: "Mundo de Beriá — reestructuración cognitiva",
 };
 
 const DISCLAIMER =
@@ -113,16 +125,16 @@ export default function Eat26SpiritResultPage() {
           </div>
           <div>
             <span className="text-xs text-gray-500 block">Patrón dominante</span>
-            <span>{sd.dominant_pattern ?? "N/A"}</span>
+            <span>{PATTERN_LABELS[sd.dominant_pattern ?? ""] ?? sd.dominant_pattern ?? "N/A"}</span>
           </div>
           <div>
             <span className="text-xs text-gray-500 block">Reverencia corporal</span>
-            <span>{sd.body_reverence ?? "N/A"}</span>
+            <span>{sd.body_reverence === true ? "Sí — reverencia presente" : sd.body_reverence === false ? "En desarrollo" : "N/A"}</span>
           </div>
           {sd.transition_suggestion ? (
             <div>
               <span className="text-xs text-gray-500 block">Sugerencia de transición</span>
-              <span>{sd.transition_suggestion}</span>
+              <span>{TRANSITION_LABELS[sd.transition_suggestion] ?? sd.transition_suggestion}</span>
             </div>
           ) : null}
         </div>

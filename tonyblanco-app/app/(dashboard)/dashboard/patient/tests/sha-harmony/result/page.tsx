@@ -23,6 +23,18 @@ type ShaPayload = {
 
 const REFERRAL_ZONES: Array<ShaStructured["risk_zone"]> = ["high", "severe"];
 
+const GEVURAH_LABELS: Record<string, string> = {
+  intact: "Íntegra — Gevurah en equilibrio",
+  challenged: "En tensión — Gevurah bajo presión",
+  weakened: "Debilitada — Gevurah requiere atención",
+};
+
+const NETZACH_LABELS: Record<string, string> = {
+  occasional_refuge: "Refugio ocasional — Netzach estable",
+  moderate_refuge: "Refugio moderado — Netzach en vigilancia",
+  excessive_refuge: "Refugio excesivo — Netzach desequilibrado",
+};
+
 const DISCLAIMER =
   "Exploración simbólica no clínica. No sustituye diagnóstico médico.";
 
@@ -116,11 +128,11 @@ export default function ShaHarmonyResultPage() {
           </div>
           <div>
             <span className="text-xs text-gray-500 block">Estado de Gevurah</span>
-            <span>{sd.gevurah_status ?? "N/A"}</span>
+            <span>{GEVURAH_LABELS[sd.gevurah_status ?? ""] ?? sd.gevurah_status ?? "N/A"}</span>
           </div>
           <div>
             <span className="text-xs text-gray-500 block">Estado de Netzach</span>
-            <span>{sd.netzach_status ?? "N/A"}</span>
+            <span>{NETZACH_LABELS[sd.netzach_status ?? ""] ?? sd.netzach_status ?? "N/A"}</span>
           </div>
         </div>
       </div>

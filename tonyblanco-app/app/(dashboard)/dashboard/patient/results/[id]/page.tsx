@@ -107,7 +107,7 @@ export default function PatientResultDetailPage() {
 
             <div className="bg-white border border-gray-200 rounded-lg p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-3">Resultado</h2>
-            <ReadableResult resultData={payload} resultId={result?.id} showRaw={false} />
+            <ReadableResult resultData={payload} resultId={result?.id} showRaw={false} clientFacing />
             <p className="text-xs text-gray-500 mt-3">
               Si no aparecen detalles adicionales, consulta con tu terapeuta.
             </p>

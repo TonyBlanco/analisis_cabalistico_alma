@@ -2263,6 +2263,7 @@ def compute_sha_harmony(input_data: dict) -> dict:
         'netzach_status': netzach_status,
         'manifestation_impaired': manifestation_impaired,
         'transition_suggestion': transition_suggestion,
+        'referral_recommended': risk_zone in ["high", "severe"],
     }
     
     return {
@@ -2391,6 +2392,7 @@ def compute_eat26_spirit(input_data: dict) -> dict:
         'body_reverence': body_reverence,
         'gevurah_excess': gevurah_excess,
         'transition_suggestion': transition_suggestion,
+        'referral_recommended': risk_level == "high",
     }
     
     return {

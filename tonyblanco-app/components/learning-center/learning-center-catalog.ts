@@ -166,6 +166,33 @@ export const learningCenterCatalogDefinition: LearningCenterCatalogDefinition = 
         ctaLabel: 'Abrir novedades',
         keywords: ['novedades', 'cambios', 'changelog'],
       },
+      {
+        id: 'tests-holisticos',
+        question: '¿Qué tests holísticos puedo asignar?',
+        answer:
+          'Los tests holísticos activos son: SHA-Harmony, EAT26-Spirit, DUDIT-Spirit, YBOCS-Soul, ASRS-Essence y AQ-Kabbalah. Los asignas desde el catálogo de tests y el consultante los completa en su portal.',
+        guideSlug: 'workspaces-del-terapeuta',
+        ctaLabel: 'Ver workspaces',
+        keywords: ['test', 'holistico', 'sha', 'asrs', 'aq', 'asignar', 'catalogo'],
+      },
+      {
+        id: 'transgeneracional',
+        question: '¿Cómo uso el workspace transgeneracional?',
+        answer:
+          'Abre Transgeneracional Profundo desde el menú, selecciona un consultante activo y usa el panel lateral para añadir personas al árbol con sus campos Armoni (número de orden, fallecido, aborto, rama). La sección Eventos registra hechos históricos observados. Solo observacional — sin inferencias automáticas.',
+        guideSlug: 'workspaces-del-terapeuta',
+        ctaLabel: 'Ver guía de workspaces',
+        keywords: ['transgeneracional', 'arbol', 'genealogia', 'resonancia', 'armoni'],
+      },
+      {
+        id: 'reportes',
+        question: '¿Dónde veo los tests completados por mis consultantes?',
+        answer:
+          'En el panel de Reportes (/dashboard/therapist/reports) verás alertas de tests completados pendientes de revisión, métricas por consultante y export CSV. También puedes ir directamente a la ficha del consultante.',
+        guideSlug: 'metricas-y-reportes',
+        ctaLabel: 'Ver guía de reportes',
+        keywords: ['reportes', 'tests', 'completados', 'alertas', 'csv', 'export'],
+      },
     ],
   },
 };

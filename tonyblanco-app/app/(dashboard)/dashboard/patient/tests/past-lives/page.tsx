@@ -3,15 +3,19 @@
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { executeTest } from '@/lib/test-api';
-import { pastLivesDefinition } from './past-lives.config';
+import {
+  buildPastLivesOpenReflection,
+  pastLivesDefinition,
+} from './past-lives.config';
 
 type AnswerMap = Record<string, string>;
+type ReflectionMap = Record<string, string>;
 
 export default function PastLivesAssessmentPage() {
   const router = useRouter();
   const [ack, setAck] = useState(false);
   const [answers, setAnswers] = useState<AnswerMap>({});
-  const [openReflection, setOpenReflection] = useState('');
+  const [reflection, setReflection] = useState<ReflectionMap>({});
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -19,7 +23,7 @@ export default function PastLivesAssessmentPage() {
   const totalQuestions = questions.length;
   const answeredCount = useMemo(
     () => questions.filter((q) => answers[q.id] !== undefined).length,
-    [answers, questions]
+    [answers, questions],
   );
   const isComplete = answeredCount === totalQuestions;
 
@@ -27,6 +31,10 @@ export default function PastLivesAssessmentPage() {
 
   const handleSelect = (questionId: string, value: string) => {
     setAnswers((prev) => ({ ...prev, [questionId]: value }));
+  };
+
+  const handleReflectionChange = (fieldId: string, value: string) => {
+    setReflection((prev) => ({ ...prev, [fieldId]: value }));
   };
 
   const handleSubmit = async () => {
@@ -41,12 +49,14 @@ export default function PastLivesAssessmentPage() {
         responses[q.id] = Number(answers[q.id]);
       }
 
+      const openReflection = buildPastLivesOpenReflection(reflection);
+
       await executeTest({
         test_module_code: pastLivesDefinition.code,
         input_data: {
           fecha: new Date().toISOString().split('T')[0],
           responses,
-          open_reflection: openReflection.trim() || undefined,
+          ...(openReflection !== undefined ? { open_reflection: openReflection } : {}),
         },
         save_result: true,
       });
@@ -67,8 +77,20 @@ export default function PastLivesAssessmentPage() {
       <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
         <h1 className="text-2xl font-semibold text-gray-900">{pastLivesDefinition.name}</h1>
         <p className="text-sm text-gray-600 mt-2">
-          Tiempo estimado {pastLivesDefinition.estimated_time_minutes} minutos.
+          Tiempo estimado {pastLivesDefinition.estimated_time_minutes} minutos ·{' '}
+          {sections.length} bloques de exploración.
         </p>
+
+        <div className="mt-4 bg-violet-50 border border-violet-200 rounded-md p-4 space-y-2">
+          <h2 className="text-sm font-semibold text-violet-900">
+            {pastLivesDefinition.intro.title}
+          </h2>
+          {pastLivesDefinition.intro.paragraphs.map((paragraph) => (
+            <p key={paragraph.slice(0, 40)} className="text-sm text-violet-900 leading-relaxed">
+              {paragraph}
+            </p>
+          ))}
+        </div>
 
         <div className="mt-4 bg-amber-50 border border-amber-200 rounded-md p-4">
           <p className="text-sm text-amber-900 whitespace-pre-line">{pastLivesDefinition.disclaimer}</p>
@@ -109,6 +131,14 @@ export default function PastLivesAssessmentPage() {
           return (
             <div key={section.id} className="bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
               <h2 className="text-sm font-semibold text-gray-900">{section.title}</h2>
+              {section.hint ? (
+                <p className="text-xs text-gray-500 mt-1 italic">{section.hint}</p>
+              ) : null}
+              {section.note ? (
+                <p className="text-xs text-amber-700 mt-2 bg-amber-50 border border-amber-100 rounded px-2 py-1">
+                  {section.note}
+                </p>
+              ) : null}
               <div className="mt-4 space-y-4">
                 {sectionQuestions.map((question) => (
                   <div key={question.id} className="border border-gray-200 rounded-md p-4">
@@ -144,17 +174,40 @@ export default function PastLivesAssessmentPage() {
         })}
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-        <label className="block text-sm font-medium text-gray-900">
-          {pastLivesDefinition.openReflection.label}
-        </label>
-        <textarea
-          value={openReflection}
-          onChange={(e) => setOpenReflection(e.target.value)}
-          rows={5}
-          className="mt-2 w-full border border-gray-300 rounded-md p-3 text-sm text-gray-900"
-          placeholder="(Opcional)"
-        />
+      <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm space-y-5">
+        <h2 className="text-sm font-semibold text-gray-900">Reflexión guiada (opcional)</h2>
+        <p className="text-xs text-gray-500">
+          Estos campos te ayudan a profundizar. No son obligatorios para enviar el cuestionario.
+        </p>
+        {pastLivesDefinition.guidedReflection.map((field) => (
+          <div key={field.id}>
+            <label className="block text-sm font-medium text-gray-900">{field.label}</label>
+            {field.hints && field.hints.length > 0 ? (
+              <ul className="mt-1 text-xs text-gray-500 list-disc list-inside">
+                {field.hints.map((hint) => (
+                  <li key={hint}>{hint}</li>
+                ))}
+              </ul>
+            ) : null}
+            {field.type === 'text_long' ? (
+              <textarea
+                value={reflection[field.id] || ''}
+                onChange={(e) => handleReflectionChange(field.id, e.target.value)}
+                rows={5}
+                className="mt-2 w-full border border-gray-300 rounded-md p-3 text-sm text-gray-900"
+                placeholder={field.placeholder}
+              />
+            ) : (
+              <input
+                type="text"
+                value={reflection[field.id] || ''}
+                onChange={(e) => handleReflectionChange(field.id, e.target.value)}
+                className="mt-2 w-full border border-gray-300 rounded-md p-3 text-sm text-gray-900"
+                placeholder={field.placeholder}
+              />
+            )}
+          </div>
+        ))}
       </div>
 
       <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">

@@ -1352,12 +1352,31 @@ def compute_aq_kabbalah(input_data: dict) -> dict:
     }
 
 
+def _normalize_past_lives_open_reflection(raw) -> str:
+    """Accept legacy string or guided-reflection object from expanded questionnaire."""
+    if isinstance(raw, str):
+        return raw.strip()
+    if isinstance(raw, dict):
+        labels = {
+            'recurring_scene': 'Escena o sueño recurrente',
+            'inexplicable_gift_fear': 'Talento, miedo o atracción inexplicable',
+            'familiar_person_place': 'Persona o lugar que sentiste conocer de antes',
+        }
+        parts: list[str] = []
+        for key, label in labels.items():
+            val = raw.get(key)
+            if isinstance(val, str) and val.strip():
+                parts.append(f'{label}: {val.strip()}')
+        return '\n\n'.join(parts)
+    return ''
+
+
 def compute_past_lives(input_data: dict) -> dict:
     """Compute symbolic (non-diagnostic) aggregation for Past Lives exploration.
 
     Expects:
       - responses: dict(questionId -> 1..5)
-      - open_reflection: optional str
+      - open_reflection: optional str or guided-reflection dict
 
     Returns EXACT schema:
       {
@@ -1368,10 +1387,7 @@ def compute_past_lives(input_data: dict) -> dict:
       }
     """
     responses = (input_data.get('responses', {}) or {})
-    open_reflection = input_data.get('open_reflection')
-    if not isinstance(open_reflection, str):
-        open_reflection = ''
-    open_reflection = open_reflection.strip()
+    open_reflection = _normalize_past_lives_open_reflection(input_data.get('open_reflection'))
 
     sections = {
         's1': 'Sensación de continuidad del alma',
@@ -1380,6 +1396,11 @@ def compute_past_lives(input_data: dict) -> dict:
         's4': 'Afinidades históricas y simbólicas',
         's5': 'Sueños y memorias internas',
         's6': 'Misión, sentido y aprendizaje',
+        's7': 'Talentos y saberes espontáneos',
+        's8': 'El cuerpo y sus señales',
+        's9': 'Vínculos del alma',
+        's10': 'Lugares y épocas',
+        's11': 'Aprendizaje del alma / Tikun',
     }
 
     def _as_int(val) -> int:
@@ -1431,13 +1452,13 @@ def compute_past_lives(input_data: dict) -> dict:
     for sid, avg in ranked:
         if avg >= 3.6:
             dominant_themes.append(sections[sid])
-        if len(dominant_themes) >= 2:
+        if len(dominant_themes) >= 3:
             break
     # Add one "integration" pointer from the weakest section
     weakest_sid, weakest_avg = sorted(section_avgs.items(), key=lambda kv: kv[1])[0]
-    if len(dominant_themes) < 3 and weakest_avg <= 2.8:
+    if len(dominant_themes) < 4 and weakest_avg <= 2.8:
         dominant_themes.append(f"Área a integrar: {sections[weakest_sid]}")
-    dominant_themes = dominant_themes[:3]
+    dominant_themes = dominant_themes[:4]
 
     reflection_axes: list[str] = []
     # Always provide 3 neutral prompts (axes)

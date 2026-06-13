@@ -1,6 +1,6 @@
 from django.test import TestCase
 from ..diagnostics import compute_bdi, compute_bai
-from ..diagnostics import compute_scl90, compute_stai, compute_mcmi4, compute_scid5
+from ..diagnostics import compute_scl90, compute_stai, compute_mcmi4, compute_scid5, compute_past_lives
 
 
 class DiagnosticTests(TestCase):
@@ -94,3 +94,58 @@ class DiagnosticTests(TestCase):
         input_data_pt = { 'PT1': 3, 'PT2': 3, 'PT3': 3, 'PT4': 3 }
         res3 = compute_scid5({**input_data, 'responses': input_data_pt})
         self.assertTrue(res3['diagnosticos'].get('PTSD'))
+
+
+def _legacy_past_lives_responses():
+    """Six original sections only, uniform score 4."""
+    responses = {}
+    for section in range(1, 7):
+        for question in range(1, 6):
+            responses[f'pl_s{section}_q{question}'] = 4
+    return responses
+
+
+class PastLivesDiagnosticTests(TestCase):
+    REQUIRED_KEYS = {
+        'symbolic_resonance_level',
+        'dominant_themes',
+        'reflection_axes',
+        'summary_text',
+    }
+
+    def test_legacy_payload_retrocompat(self):
+        payload = {
+            'responses': _legacy_past_lives_responses(),
+            'open_reflection': 'Sueño recurrente con un patio antiguo.',
+        }
+        res = compute_past_lives(payload)
+        self.assertEqual(self.REQUIRED_KEYS, set(res.keys()))
+        self.assertEqual(res['symbolic_resonance_level'], 'high')
+        self.assertIn('Sensación de continuidad del alma', res['dominant_themes'])
+        self.assertTrue(
+            any('reflexión escrita' in axis.lower() for axis in res['reflection_axes']),
+        )
+
+    def test_new_sections_s7_s11_influence_dominant_themes(self):
+        responses = _legacy_past_lives_responses()
+        for question in range(1, 6):
+            responses[f'pl_s7_q{question}'] = 5
+            responses[f'pl_s8_q{question}'] = 3
+            responses[f'pl_s9_q{question}'] = 3
+            responses[f'pl_s10_q{question}'] = 3
+            responses[f'pl_s11_q{question}'] = 3
+        res = compute_past_lives({'responses': responses})
+        self.assertIn('Talentos y saberes espontáneos', res['dominant_themes'])
+
+    def test_guided_reflection_object_normalized(self):
+        payload = {
+            'responses': _legacy_past_lives_responses(),
+            'open_reflection': {
+                'recurring_scene': 'Un mercado al atardecer.',
+                'familiar_person_place': 'Una mujer con mantón azul.',
+            },
+        }
+        res = compute_past_lives(payload)
+        self.assertTrue(
+            any('reflexión escrita' in axis.lower() for axis in res['reflection_axes']),
+        )

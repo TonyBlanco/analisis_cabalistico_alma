@@ -175,13 +175,16 @@ def initialize_tests():
         },
         {
             'code': 'past-lives',
-            'name': 'Vidas Pasadas',
-            'description': 'Explora las influencias de vidas pasadas en tu existencia actual a través de la numerología kármica.',
+            'name': 'Vidas Pasadas – Exploración de Memorias del Alma',
+            'description': (
+                'Exploración simbólica y no diagnóstica de patrones, afinidades y memorias del alma '
+                'que pueden iluminar tu presente.'
+            ),
             'test_type': 'past_life',
             'required_access_level': 'premium',
             'icon': '🔮',
             'order': 10,
-            'estimated_duration': 30,
+            'estimated_duration': 20,
             'available_for_therapists': True,
             'available_for_personal': True,
             'uses_per_month': 2,

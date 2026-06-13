@@ -246,6 +246,11 @@ EMAIL_SUBJECT_PREFIX = config('EMAIL_SUBJECT_PREFIX', default='[Studios33] ')
 # Frontend URL (for password reset links, etc.)
 FRONTEND_URL = config('FRONTEND_URL', default='http://localhost:3000')
 
+# WebAuthn / Passkeys
+WEBAUTHN_RP_ID = config('WEBAUTHN_RP_ID', default='studios33.app')
+WEBAUTHN_RP_NAME = config('WEBAUTHN_RP_NAME', default='Studios33')
+WEBAUTHN_ORIGIN = config('WEBAUTHN_ORIGIN', default=FRONTEND_URL)
+
 # WhatsApp Cloud API (Meta) — notificaciones móviles opcionales
 WHATSAPP_ENABLED = config('WHATSAPP_ENABLED', default=False, cast=bool)
 WHATSAPP_ACCESS_TOKEN = config('WHATSAPP_ACCESS_TOKEN', default='')

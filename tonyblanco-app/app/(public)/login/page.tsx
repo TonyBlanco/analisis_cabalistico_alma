@@ -4,7 +4,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { AuthGoogleSection } from '@/components/AuthGoogleSection';
-import { login, loginWithGoogle, requestPasswordReset } from '@/lib/api';
+import { login, loginWithGoogle } from '@/lib/api';
+import { LoginAdvancedMethods, type AuthMethod } from '@/components/auth/LoginAdvancedMethods';
 import { clearAuthState } from '@/lib/auth-state';
 import { completeAuthFromToken } from '@/lib/finishAuthSession';
 import { TurnstileField, type TurnstileFieldHandle } from '@/components/TurnstileField';
@@ -34,11 +35,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<LoginError | null>(null);
-  const [resetEmail, setResetEmail] = useState('');
-  const [showResetForm, setShowResetForm] = useState(false);
-  const [resetSent, setResetSent] = useState(false);
-  const [resetLoading, setResetLoading] = useState(false);
-  const [resetError, setResetError] = useState<string | null>(null);
+  const [authMethod, setAuthMethod] = useState<AuthMethod>('password');
   const [turnstileReady, setTurnstileReady] = useState(false);
   const turnstileRef = useRef<TurnstileFieldHandle>(null);
   const [googleSignInKey, setGoogleSignInKey] = useState(0);
@@ -53,8 +50,6 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    setShowResetForm(false);
-    
     // Validación básica
     if (!email.trim()) {
       setError({ type: 'validation', message: 'Ingresa tu email o nombre de usuario' });
@@ -110,8 +105,10 @@ export default function LoginPage() {
       } else if (errorCode === 'invalid_password') {
         errorType = 'invalid_password';
         displayMessage = 'La contraseña es incorrecta';
-        setResetEmail(response.email || email);
-        setShowResetForm(true);
+        if (response.email || email.includes('@')) {
+          setEmail(response.email || email);
+        }
+        setAuthMethod('reset');
       } else if (errorCode === 'account_inactive') {
         errorType = 'account_inactive';
         displayMessage = 'Esta cuenta ha sido desactivada. Contacta soporte.';
@@ -159,40 +156,15 @@ export default function LoginPage() {
     }
   };
 
-  const resolveResetEmail = () => {
-    if (resetEmail.trim()) return resetEmail.trim();
-    if (error?.email?.trim()) return error.email.trim();
-    if (email.includes('@')) return email.trim();
-    return '';
-  };
-
-  const openResetForm = () => {
-    const nextEmail = resolveResetEmail();
-    setResetEmail(nextEmail);
-    setResetSent(false);
-    setResetError(null);
-    setShowResetForm(true);
-  };
-
-  const handleResetPassword = async (e?: React.FormEvent) => {
-    e?.preventDefault();
-    const targetEmail = resolveResetEmail();
-    if (!targetEmail) {
-      setResetError('Ingresa el email asociado a tu cuenta.');
-      return;
-    }
-
-    setResetEmail(targetEmail);
-    setResetLoading(true);
-    setResetError(null);
+  const handleAdvancedAuthSuccess = async (token: string, role?: string) => {
+    setLoading(true);
+    setError(null);
     try {
-      await requestPasswordReset(targetEmail);
-      setResetSent(true);
-    } catch (err: unknown) {
-      const response = (err as { response?: { message?: string } })?.response;
-      setResetError(response?.message || 'No se pudo enviar el enlace. Inténtalo de nuevo.');
-    } finally {
-      setResetLoading(false);
+      const path = await completeAuthFromToken(token, role);
+      router.push(path);
+    } catch {
+      setError({ type: 'other', message: 'No se pudo completar el inicio de sesión.' });
+      setLoading(false);
     }
   };
 
@@ -312,7 +284,17 @@ export default function LoginPage() {
               <p className="mt-1 text-sm text-[var(--ha-ink-3)]">Inicia sesión en tu cuenta</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <LoginAdvancedMethods
+              email={email}
+              onEmailChange={setEmail}
+              method={authMethod}
+              onMethodChange={setAuthMethod}
+              onAuthSuccess={handleAdvancedAuthSuccess}
+              onError={(message) => setError({ type: 'other', message })}
+            />
+
+            {authMethod === 'password' && (
+            <form onSubmit={handleSubmit} className="mt-5 space-y-5">
               <div>
                 <label
                   htmlFor="email"
@@ -384,10 +366,10 @@ export default function LoginPage() {
                         </p>
                         <button
                           type="button"
-                          onClick={openResetForm}
+                          onClick={() => setAuthMethod('reset')}
                           className="font-semibold text-[var(--ha-acc)] underline-offset-2 hover:underline"
                         >
-                          Recuperar acceso con email
+                          Recuperar acceso con código OTP
                         </button>
                       </div>
                     )}
@@ -420,44 +402,15 @@ export default function LoginPage() {
                 )}
               </button>
             </form>
-
-            {showResetForm && !resetSent && (
-              <form
-                onSubmit={handleResetPassword}
-                className="mt-4 space-y-3 rounded-xl border border-[rgba(96,165,250,0.35)] bg-[rgba(56,130,246,0.08)] p-4"
-              >
-                <p className="text-sm font-semibold text-[var(--ha-ink)]">¿Olvidaste tu contraseña?</p>
-                <p className="text-xs text-[var(--ha-ink-3)]">
-                  Usa el email con el que te registraste. Si solo recuerdas tu nombre de usuario, escribe aquí tu email.
-                </p>
-                <div className="flex gap-2">
-                  <input
-                    type="email"
-                    value={resetEmail}
-                    onChange={(e) => setResetEmail(e.target.value)}
-                    placeholder="Email para recuperación"
-                    autoComplete="email"
-                    className="ha-input min-w-0 flex-1 rounded-lg border px-3 py-2 text-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] focus:border-[#60A5FA] focus:outline-none focus:ring-2 focus:ring-[rgba(96,165,250,0.35)]"
-                  />
-                  <button
-                    type="submit"
-                    disabled={resetLoading || !resolveResetEmail()}
-                    className="rounded-lg bg-[#2563EB] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#1D4ED8] disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    {resetLoading ? '...' : 'Enviar'}
-                  </button>
-                </div>
-                {resetError && (
-                  <p role="alert" className="text-xs font-medium text-[#F87171]">
-                    {resetError}
-                  </p>
-                )}
-              </form>
             )}
 
-            {resetSent && (
-              <div className="mt-4 rounded-xl border border-[rgba(74,222,128,0.35)] bg-[rgba(74,222,128,0.08)] px-4 py-3 text-sm text-[#4ADE80]">
-                Si el email existe, recibirás un enlace para restablecer tu contraseña.
+            {error && authMethod !== 'password' && (
+              <div
+                role="alert"
+                className={`mt-4 flex items-start gap-3 rounded-xl border px-4 py-3 ${getErrorStyles(error.type)}`}
+              >
+                {getErrorIcon(error.type)}
+                <p className="text-sm font-semibold">{error.message}</p>
               </div>
             )}
 
@@ -472,15 +425,7 @@ export default function LoginPage() {
             <div className="mt-4 text-center">
               <button
                 type="button"
-                onClick={() => {
-                  if (showResetForm) {
-                    setShowResetForm(false);
-                    setResetSent(false);
-                    setResetError(null);
-                  } else {
-                    openResetForm();
-                  }
-                }}
+                onClick={() => setAuthMethod((m) => (m === 'reset' ? 'password' : 'reset'))}
                 className="text-[13.5px] font-medium text-[var(--ha-acc)] hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ha-acc)]"
               >
                 ¿Olvidaste tu contraseña?

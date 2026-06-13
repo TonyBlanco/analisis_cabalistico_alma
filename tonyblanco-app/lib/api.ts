@@ -157,7 +157,7 @@ export const removeAuthToken = (): void => {
 };
 
 // Generic fetch wrapper with auth
-async function apiRequest<T>(
+export async function apiRequest<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {

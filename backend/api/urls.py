@@ -1,5 +1,18 @@
 from django.urls import path, include
 from rest_framework.authtoken.views import obtain_auth_token
+from .auth_advanced_views import (
+    MagicLinkRequestView,
+    MagicLinkVerifyView,
+    OtpRequestView,
+    OtpVerifyLoginView,
+    OtpVerifyPasswordResetView,
+    PasskeyDeleteView,
+    PasskeyListView,
+    PasskeyLoginOptionsView,
+    PasskeyLoginVerifyView,
+    PasskeyRegisterOptionsView,
+    PasskeyRegisterVerifyView,
+)
 from .views import (
     CreatePatientWithAccountView,
     ResendPatientCredentialsView,
@@ -204,6 +217,17 @@ urlpatterns = [
     path('login/', EmailOrUsernameAuthToken.as_view(), name='api_token_auth'),
     path('password-reset/request/', PasswordResetRequestView.as_view(), name='password_reset_request'),
     path('password-reset/confirm/', PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
+    path('auth/magic-link/request/', MagicLinkRequestView.as_view(), name='magic_link_request'),
+    path('auth/magic-link/verify/', MagicLinkVerifyView.as_view(), name='magic_link_verify'),
+    path('auth/otp/request/', OtpRequestView.as_view(), name='otp_request'),
+    path('auth/otp/verify-login/', OtpVerifyLoginView.as_view(), name='otp_verify_login'),
+    path('auth/otp/verify-password-reset/', OtpVerifyPasswordResetView.as_view(), name='otp_verify_password_reset'),
+    path('auth/passkeys/register/options/', PasskeyRegisterOptionsView.as_view(), name='passkey_register_options'),
+    path('auth/passkeys/register/verify/', PasskeyRegisterVerifyView.as_view(), name='passkey_register_verify'),
+    path('auth/passkeys/login/options/', PasskeyLoginOptionsView.as_view(), name='passkey_login_options'),
+    path('auth/passkeys/login/verify/', PasskeyLoginVerifyView.as_view(), name='passkey_login_verify'),
+    path('auth/passkeys/', PasskeyListView.as_view(), name='passkey_list'),
+    path('auth/passkeys/<int:pk>/', PasskeyDeleteView.as_view(), name='passkey_delete'),
     path('login/google/', GoogleOAuthView.as_view(), name='google_oauth'),
     path('login/telegram/', TelegramOAuthView.as_view(), name='telegram_oauth'),
     path('telegram/config/', TelegramOAuthConfigView.as_view(), name='telegram_oauth_config'),

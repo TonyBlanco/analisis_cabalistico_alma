@@ -488,6 +488,109 @@ def send_password_reset_email(user, token: str, uid: str):
         return False
 
 
+def send_magic_link_email(user, magic_url: str) -> bool:
+    """Enviar enlace mágico de inicio de sesión (un clic)."""
+    subject = '✨ Tu enlace de acceso a Studios33'
+    html_message = f"""
+    <!DOCTYPE html>
+    <html>
+    <body style="font-family:Arial,sans-serif;background:#0A0A1F;color:#fff;">
+      <div style="max-width:600px;margin:0 auto;padding:24px;">
+        <h1 style="color:#D4AF37;">Acceso con un clic</h1>
+        <p>Hola {user.username},</p>
+        <p>Usa este enlace para iniciar sesión sin contraseña. Expira en 15 minutos.</p>
+        <p style="text-align:center;">
+          <a href="{magic_url}" style="display:inline-block;padding:14px 28px;background:#D4AF37;color:#000;text-decoration:none;border-radius:8px;font-weight:bold;">
+            Entrar a Studios33
+          </a>
+        </p>
+        <p style="word-break:break-all;color:#D4AF37;">{magic_url}</p>
+        <p style="color:#999;font-size:12px;">Si no solicitaste este acceso, ignora este mensaje.</p>
+      </div>
+    </body>
+    </html>
+    """
+    plain_message = f"Hola {user.username},\n\nEntra con un clic:\n{magic_url}\n\nExpira en 15 minutos."
+    try:
+        email = EmailMultiAlternatives(
+            subject=subject,
+            body=plain_message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[user.email],
+        )
+        email.attach_alternative(html_message, 'text/html')
+        email.send()
+        return True
+    except Exception as e:
+        print(f"Error enviando magic link: {e}")
+        return False
+
+
+def send_otp_email(user, code: str, purpose_label: str, ttl_minutes: int) -> bool:
+    """Enviar código OTP de 6 dígitos."""
+    subject = f'🔑 Tu código para {purpose_label}'
+    html_message = f"""
+    <!DOCTYPE html>
+    <html>
+    <body style="font-family:Arial,sans-serif;background:#0A0A1F;color:#fff;">
+      <div style="max-width:600px;margin:0 auto;padding:24px;">
+        <h1 style="color:#D4AF37;">Código de verificación</h1>
+        <p>Hola {user.username},</p>
+        <p>Tu código para {purpose_label}:</p>
+        <p style="font-size:32px;letter-spacing:8px;font-weight:bold;color:#D4AF37;">{code}</p>
+        <p>Expira en {ttl_minutes} minutos.</p>
+        <p style="color:#999;font-size:12px;">No compartas este código con nadie.</p>
+      </div>
+    </body>
+    </html>
+    """
+    plain_message = f"Código: {code}\nVálido {ttl_minutes} minutos para {purpose_label}."
+    try:
+        email = EmailMultiAlternatives(
+            subject=subject,
+            body=plain_message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[user.email],
+        )
+        email.attach_alternative(html_message, 'text/html')
+        email.send()
+        return True
+    except Exception as e:
+        print(f"Error enviando OTP: {e}")
+        return False
+
+
+def send_password_changed_email(user) -> bool:
+    """Notificar cambio de contraseña exitoso."""
+    subject = '✅ Tu contraseña fue actualizada'
+    html_message = f"""
+    <!DOCTYPE html>
+    <html>
+    <body style="font-family:Arial,sans-serif;background:#0A0A1F;color:#fff;">
+      <div style="max-width:600px;margin:0 auto;padding:24px;">
+        <p>Hola {user.username},</p>
+        <p>Tu contraseña en Studios33 se actualizó correctamente.</p>
+        <p style="color:#999;font-size:12px;">Si no fuiste tú, contacta soporte de inmediato.</p>
+      </div>
+    </body>
+    </html>
+    """
+    plain_message = f"Hola {user.username},\n\nTu contraseña fue actualizada. Si no fuiste tú, contacta soporte."
+    try:
+        email = EmailMultiAlternatives(
+            subject=subject,
+            body=plain_message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[user.email],
+        )
+        email.attach_alternative(html_message, 'text/html')
+        email.send()
+        return True
+    except Exception as e:
+        print(f"Error enviando confirmación de password: {e}")
+        return False
+
+
 def send_therapist_patient_invitation_email(
     invitation,
     therapist_profile: UserProfile,

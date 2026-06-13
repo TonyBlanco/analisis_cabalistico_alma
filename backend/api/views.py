@@ -983,19 +983,15 @@ class PasswordResetRequestView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        UserModel = get_user_model()
-        user = UserModel.objects.filter(email__iexact=email).first()
-        if user and user.is_active and user.email:
-            token = default_token_generator.make_token(user)
-            uid = urlsafe_base64_encode(force_bytes(user.pk))
-            send_password_reset_email(user, token, uid)
+        from api.services.auth_advanced import request_otp
+        from api.models_auth_advanced import AuthOneTimeCode
 
-        return Response(
-            {
-                'message': 'Si el email existe en nuestra base de datos, recibirás un enlace para restablecer tu contraseña.',
-            },
-            status=status.HTTP_200_OK,
+        result = request_otp(
+            email=email,
+            purpose=AuthOneTimeCode.PURPOSE_PASSWORD_RESET,
+            request=request,
         )
+        return Response({'message': result['message']}, status=status.HTTP_200_OK)
 
 
 class PasswordResetConfirmView(APIView):

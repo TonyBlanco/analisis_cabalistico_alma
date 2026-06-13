@@ -7,6 +7,7 @@ import { getUserRole } from '@/lib/getUserRole';
 import { getUserProfile, updateUserProfile, UserProfileData } from '@/lib/api';
 import { clearAuthState } from '@/lib/auth-state';
 import { User, MapPin, Calendar, Lock, LogOut, AlertTriangle, CheckCircle, AlertCircle as AlertIcon } from 'lucide-react';
+import { PasskeyManager } from '@/components/auth/PasskeyManager';
 import { getApiBaseUrl } from '@/lib/api-base';
 
 /**
@@ -577,6 +578,8 @@ export default function AccountPage() {
           </div>
         </div>
       </div>
+
+      <PasskeyManager />
 
       {/* Metadata (read-only) */}
       <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">

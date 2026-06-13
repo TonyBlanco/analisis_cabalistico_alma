@@ -25,6 +25,7 @@
     "@radix-ui/react-slot": "^1.2.4",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.5.0",
+    "@simplewebauthn/browser": "^13.3.0",
     "astronomy-engine": "^2.1.19",
     "chart.js": "^4.5.1",
     "class-variance-authority": "^0.7.1",

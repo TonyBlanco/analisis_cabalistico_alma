@@ -31,3 +31,4 @@ geopy==2.4.1
 timezonefinder==6.5.1
 PyYAML>=6.0
 pyswisseph==2.10.3.2
+webauthn>=2.2.0,<3

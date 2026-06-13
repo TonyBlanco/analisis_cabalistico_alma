@@ -1817,3 +1817,6 @@ class FederationAuditLog(models.Model):
 
     def __str__(self) -> str:  # pragma: no cover
         return f'ResonanciaRelation {self.position} ({self.subject_id})'
+
+
+from api.models_auth_advanced import AuthOneTimeCode, PasskeyCredential, WebAuthnChallenge  # noqa: E402,F401

@@ -142,6 +142,10 @@ from .admin_views import (
     ClinicalCredentialVerificationView
 )
 from .federation_views import FederationHubFeedView
+from .federation_consent_views import (
+    PatientFederationConsentView,
+    TherapistPatientFederationConsentView,
+)
 from .views import (
     reset_admin_passwords_temp,
     configure_admin_profiles_temp,
@@ -304,6 +308,11 @@ urlpatterns = [
     path('therapist/patients/<int:pk>/status/', PatientStatusUpdateView.as_view(), name='patient_status_update'),
     path('therapist/patients/<int:pk>/archive/', PatientArchiveView.as_view(), name='patient_archive'),
     path(
+        'therapist/patients/<int:pk>/federation-consent/',
+        TherapistPatientFederationConsentView.as_view(),
+        name='therapist_patient_federation_consent',
+    ),
+    path(
         'therapist/patients/<int:pk>/resend-credentials/',
         ResendPatientCredentialsView.as_view(),
         name='patient_resend_credentials',
@@ -434,6 +443,7 @@ urlpatterns = [
     path('analysis-records/scid5-ai-assistant/', SCID5AIAssistantView.as_view(), name='scid5_ai_assistant'),
     
     # ========== FEDERACIÓN HOLÍSTICA (Phase-1) ==========
+    path('patient/federation-consent/', PatientFederationConsentView.as_view(), name='patient_federation_consent'),
     # Endpoint read-only para lectura federada cross-workspace (hubs MSHE/SCDF/SCID-5)
     path('federation/hub-feed/', FederationHubFeedView.as_view(), name='federation_hub_feed'),
 

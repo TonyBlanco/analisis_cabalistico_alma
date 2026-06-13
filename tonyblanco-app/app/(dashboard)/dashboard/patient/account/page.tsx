@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { User, Calendar, Lock, LogOut, CheckCircle, AlertCircle, MapPin } from 'lucide-react';
 import { clearAuthState } from '@/lib/auth-state';
 import { getApiBaseUrl } from '@/lib/api-base';
+import PatientFederationConsentCard from '@/components/patient/PatientFederationConsentCard';
 
 interface PatientProfile {
   legal_full_name: string;
@@ -367,6 +368,8 @@ export default function PatientAccountPage() {
           </div>
         </div>
       </div>
+
+      <PatientFederationConsentCard />
 
       {/* Consent Status */}
       <div className="bg-white border border-gray-200 rounded-lg p-6">

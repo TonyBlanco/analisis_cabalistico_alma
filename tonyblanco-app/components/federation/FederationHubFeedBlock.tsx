@@ -8,6 +8,7 @@ import {
   FederationApiError,
   HubCode,
 } from '@lib/api/federation';
+import { setTherapistPatientFederationConsent } from '@lib/api/federation-consent';
 import { GuidedBlock } from '@/components/ui/guided-block';
 
 interface FederationHubFeedBlockProps {
@@ -44,6 +45,8 @@ export default function FederationHubFeedBlock({
   const [feedErrorType, setFeedErrorType] = useState<'consent' | 'no_access' | 'generic' | null>(null);
   const [feedRecords, setFeedRecords] = useState<HubFeedRecord[]>([]);
   const [feedMetadata, setFeedMetadata] = useState<HubFeedSnapshot['metadata'] | null>(null);
+  const [consentRegistering, setConsentRegistering] = useState(false);
+  const [consentActionError, setConsentActionError] = useState<string | null>(null);
 
   const displayTitle = title || `Feed federado (${hub})`;
 
@@ -101,6 +104,22 @@ export default function FederationHubFeedBlock({
     loadFeed();
   };
 
+  const handleRegisterInPersonConsent = async () => {
+    if (!patientId || Number.isNaN(patientId)) return;
+    setConsentRegistering(true);
+    setConsentActionError(null);
+    try {
+      await setTherapistPatientFederationConsent(patientId, true);
+      await loadFeed();
+    } catch (err) {
+      setConsentActionError(
+        err instanceof Error ? err.message : 'No se pudo registrar el consentimiento',
+      );
+    } finally {
+      setConsentRegistering(false);
+    }
+  };
+
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <div className="flex items-center justify-between mb-3">
@@ -135,24 +154,34 @@ export default function FederationHubFeedBlock({
       )}
 
       {patientId && !feedLoading && feedErrorType === 'consent' && (
-        <GuidedBlock
-          variant="consent"
-          role="both"
-          title="Consentimiento federado requerido"
-          description="El consultante no ha autorizado el acceso federado a sus datos. Sin este consentimiento, la síntesis holística no puede generarse."
-          steps={[
-            { label: 'Ir al perfil del consultante' },
-            { label: 'Solicitar consentimiento de federación de datos' },
-            { label: 'El consultante acepta desde su portal personal' },
-            { label: 'Volver a esta vista — el feed se desbloqueará automáticamente' },
-          ]}
-          actions={[
-            {
-              label: 'Ver perfil del consultante',
-              href: patientId ? `/dashboard/therapist/patients/${patientId}` : '/dashboard/therapist/patients',
-            },
-          ]}
-        />
+        <>
+          <GuidedBlock
+            variant="consent"
+            role="both"
+            title="Consentimiento federado requerido"
+            description="El consultante no ha autorizado el acceso federado a sus datos. Sin este consentimiento, la síntesis holística no puede generarse."
+            steps={[
+              { label: 'Explicar al consultante qué implica la lectura compartida' },
+              { label: 'El consultante autoriza desde Mi cuenta en su portal, o tú registras el acuerdo en sesión' },
+              { label: 'Volver a esta vista — el feed se desbloqueará automáticamente' },
+            ]}
+            actions={[
+              {
+                label: consentRegistering ? 'Registrando…' : 'Registrar consentimiento en sesión',
+                onClick: handleRegisterInPersonConsent,
+                variant: 'primary',
+              },
+              {
+                label: 'Ver perfil del consultante',
+                href: patientId ? `/dashboard/therapist/patients/${patientId}` : '/dashboard/therapist/patients',
+                variant: 'secondary',
+              },
+            ]}
+          />
+          {consentActionError ? (
+            <p className="mt-2 text-sm text-red-600">{consentActionError}</p>
+          ) : null}
+        </>
       )}
 
       {patientId && !feedLoading && feedErrorType === 'no_access' && (

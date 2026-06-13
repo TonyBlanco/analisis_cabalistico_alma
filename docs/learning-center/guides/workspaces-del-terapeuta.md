@@ -9,7 +9,7 @@ Aquí se resume qué hace cada workspace visible desde el menú del terapeuta.
 - **Cabala Aplicada**: vista simbólica principal con árbol, correspondencias e interpretación.
 - **Correspondencias**: tablas de referencia para lectura comparada.
 - **Bio-Emoción**: espacio estructurado para organizar notas y contexto operativo.
-- **Reportes**: salida de información agregada y paneles de seguimiento.
+- **Reportes** (`/dashboard/therapist/reports`): cartera de consultantes, resultados recientes con alertas, métricas por paciente, sesiones y export CSV. Datos vía `GET /api/therapist/reports/summary/`.
 
 ## Regla de uso
 

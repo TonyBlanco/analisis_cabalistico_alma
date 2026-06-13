@@ -140,10 +140,8 @@ http://localhost:3000/dashboard/therapist
    - Check `holistic_ai.py` for setup instructions
 
 3. **Navigation Routes**
-   - Some routes may need to be created:
-     - `/dashboard/therapist/tests` (if not exists)
-     - `/dashboard/therapist/reports` (if not exists)
-   - Update routes as needed based on actual structure
+   - `/dashboard/therapist/tests` — exists
+   - `/dashboard/therapist/reports` — **implemented** (`463d5553`): panel con `GET /api/therapist/reports/summary/`, deploy prod 2026-06-13, smoke OK
 
 ---
 

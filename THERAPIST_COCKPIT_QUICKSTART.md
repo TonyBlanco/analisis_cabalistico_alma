@@ -88,10 +88,9 @@ GEMINI_API_KEY=your_key_here
 **Future**: Will connect to real backend APIs
 
 ### Navigation links 404
-**Check**: Ensure target routes exist:
-- `/dashboard/therapist/tests`
-- `/dashboard/therapist/reports`  
-**Fix**: Create pages or update routes as needed
+**Check**: Target routes:
+- `/dashboard/therapist/tests` — OK
+- `/dashboard/therapist/reports` — OK (panel operativo desde `463d5553`; smoke prod 2026-06-13)
 
 ---
 

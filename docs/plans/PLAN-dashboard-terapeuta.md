@@ -98,3 +98,36 @@ DoD: endpoint con aislamiento + seccion operativa visible + incidencia 2026-01-0
 | Exponer PHI de mas en la lista | Mostrar solo estado/avance; detalle clinico tras entrar a la ficha |
 | Reintroducir bugs del dashboard legacy | Usar `_legacy_app_backup` solo como referencia visual, no copiar tal cual |
 | Endpoints huerfanos sin decidir | D4 obliga a consumir o deprecar con nota en `.ai-memory/` |
+
+---
+
+## 9. Panel de Reportes del terapeuta (follow-on — **DONE**)
+
+> Ruta: `/dashboard/therapist/reports` · Rama: `feat/therapist-reports` · Merge `main` `463d5553` · Deploy prod **2026-06-13** · Smoke OK (confirmado por usuario).
+
+### Objetivo
+
+Reemplazar el placeholder ("próximamente") por un panel operativo: cartera agregada, resultados recientes con alertas, métricas por consultante, sesiones y export CSV — solo terapeuta, lectura indicativa.
+
+### Workstreams
+
+- [x] **R1 — Agregador backend.** `GET /api/therapist/reports/summary/` (`therapist_reports.py` + `TherapistReportsSummaryView`); compone `build_therapist_workload`, `TestResult` (alertas pre-calculadas: `referral_recommended`, severidad), `Session`. Sin modelos nuevos → **sin migrate**.
+- [x] **R2 — Frontend.** `TherapistReportsPanel`, `useTherapistReports`, export CSV/portapapeles; disclaimer orientativo.
+- [x] **R3 — Tests + prod.** 7 tests `test_therapist_reports_summary.py`; smoke `api.studios33.app` con token terapeuta: `portfolio.total.patients_active > 0`, `recent_results` con `alert=true` cuando `referral_recommended`.
+
+### Definition of Done (reportes)
+
+- [x] `/dashboard/therapist/reports` muestra datos reales (no placeholder).
+- [x] Alertas usan señales ya calculadas; filas enlazan a `/dashboard/therapist/tests/results/{id}`.
+- [x] Aislamiento: terapeuta solo ve sus consultantes (test de aislamiento en suite).
+- [x] Export funcional del panel visible.
+- [x] Merge en `main` + deploy Hetzner verde.
+
+### Referencias
+
+| Pieza | Ruta |
+|---|---|
+| Endpoint | `backend/api/therapist_reports.py`, `views.TherapistReportsSummaryView` |
+| UI | `tonyblanco-app/components/therapist/TherapistReportsPanel.tsx` |
+| Hook | `tonyblanco-app/hooks/useTherapistReports.ts` |
+| Tipos | `tonyblanco-app/lib/types/therapist-reports.ts` |

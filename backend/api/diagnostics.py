@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime
-from typing import Dict
-from tests.wellness.anxiety_state_trait.stai_bank import select_items_for_execution
+from typing import Dict, Optional
+from tests.wellness.anxiety_state_trait.stai_bank import resolve_anxiety_selection
 from tests.wellness.scl90 import select_items_scdf  # noqa: F401
 
 logger = logging.getLogger(__name__)
@@ -845,31 +845,60 @@ def compute_stress_regulation_wellness(input_data: dict) -> dict:
 def compute_anxiety_state_trait(input_data: dict) -> dict:
     """Compute a wellness-oriented anxiety assessment inspired by STAI."""
 
-    seed = input_data.get('seed')
-    selected_items = select_items_for_execution(seed=seed)
     responses = (input_data.get('responses', {}) or {})
+    selected_items = resolve_anxiety_selection(input_data)
+
+    if not selected_items:
+        return {
+            'processed': False,
+            'message': 'Falta la selección de ítems (seed o selected_item_ids) para puntuar el test.',
+            'timestamp': str(datetime.now()),
+        }
+
+    missing_keys = []
 
     def _as_int(val) -> int:
         try:
             return int(val)
         except Exception:
-            return 0
+            return None
 
-    def _normalize_value(item: Dict) -> int:
-        raw_value = responses.get(item['id'], None)
+    def _normalize_value(item: Dict) -> Optional[int]:
+        raw_value = responses.get(item['id'])
         if raw_value is None:
-            raw_value = responses.get(item.get('legacy_id', ''), 0)
-        return max(0, min(4, _as_int(raw_value)))
+            raw_value = responses.get(item.get('legacy_id', ''))
+        if raw_value is None:
+            missing_keys.append(item.get('legacy_id') or item['id'])
+            return None
+        parsed = _as_int(raw_value)
+        if parsed is None:
+            missing_keys.append(item.get('legacy_id') or item['id'])
+            return None
+        return max(0, min(4, parsed))
+
+    for item in selected_items:
+        _normalize_value(item)
+
+    if missing_keys:
+        return {
+            'processed': False,
+            'message': f'Respuestas incompletas para ansiedad: faltan {sorted(missing_keys)}',
+            'timestamp': str(datetime.now()),
+        }
 
     domain_scores = {}
     all_vals = []
     for domain in ('estado', 'rasgo'):
         domain_items = [item for item in selected_items if item.get('domain') == domain]
         if len(domain_items) != 10:
-            raise ValueError(
-                f'Canonical selection returned {len(domain_items)} items for domain {domain}; expected 10'
-            )
-        vals = [_normalize_value(item) for item in domain_items]
+            return {
+                'processed': False,
+                'message': (
+                    f'Selección inválida: dominio {domain} tiene {len(domain_items)} ítems; se esperaban 10.'
+                ),
+                'timestamp': str(datetime.now()),
+            }
+        vals = [int(_normalize_value(item)) for item in domain_items]
         all_vals.extend(vals)
         avg = sum(vals) / (len(vals) or 1)
         domain_scores[domain] = {
@@ -878,18 +907,28 @@ def compute_anxiety_state_trait(input_data: dict) -> dict:
             'items': len(domain_items),
         }
 
-    overall_avg = (sum(all_vals) / (len(all_vals) or 1))
+    overall_avg = sum(all_vals) / (len(all_vals) or 1)
     index_0_100 = int(round((overall_avg / 4) * 100))
 
+    # Index measures regulation capacity (higher = better regulation, lower anxiety load).
     if index_0_100 >= 70:
-        tier = 'Alto'
-        summary = 'Estado y rasgo muestran gestión sólida de la ansiedad; tus recursos mantienen equilibrio a pesar de señales puntuales.'
+        regulacion = 'Alta'
+        summary = (
+            'Tu regulación emocional se percibe sólida; estado y rasgo muestran recursos '
+            'para mantener la calma incluso ante señales puntuales.'
+        )
     elif index_0_100 >= 40:
-        tier = 'Medio'
-        summary = 'Hay señales de inquietud moderada, pero continúas contando con recursos para regular y reconectar con la calma.'
+        regulacion = 'Media'
+        summary = (
+            'Tu regulación emocional es moderada: hay inquietud, pero conservas margen '
+            'para reconectar con la calma con pequeños apoyos.'
+        )
     else:
-        tier = 'Bajo'
-        summary = 'Estado y rasgo reflejan una ansiedad más marcada; prioriza pausas, apoyo y prácticas suaves de regulación.'
+        regulacion = 'Baja'
+        summary = (
+            'Tu regulación emocional se percibe baja y la ansiedad aparece más marcada; '
+            'prioriza pausas, apoyo y prácticas suaves de regulación.'
+        )
 
     ranked = sorted(domain_scores.items(), key=lambda kv: kv[1]['percent_0_100'], reverse=True)
     strengths = [name for name, v in ranked if v['percent_0_100'] >= 70][:3]
@@ -904,12 +943,14 @@ def compute_anxiety_state_trait(input_data: dict) -> dict:
     ]
 
     return {
+        'processed': True,
         'codigo_evaluacion': _generate_code('ANST'),
         'fecha_evaluacion': input_data.get('fecha') or datetime.utcnow().strftime('%Y-%m-%d'),
         'respuestas': responses,
         'puntuaciones': {
             'indice_0_100': index_0_100,
-            'nivel': tier,
+            'regulacion': regulacion,
+            'nivel': regulacion,
             'dominios': domain_scores,
         },
         'interpretacion': {
@@ -923,6 +964,8 @@ def compute_anxiety_state_trait(input_data: dict) -> dict:
         },
         'raw_inputs': {
             'selected_items': selected_items,
+            'seed': input_data.get('seed'),
+            'selected_item_ids': input_data.get('selected_item_ids'),
         },
     }
 

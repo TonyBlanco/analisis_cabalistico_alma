@@ -7,9 +7,12 @@ import type { TestResult } from '@/lib/test-types';
 type ConditionedResult = {
   puntuaciones?: {
     indice_0_100?: number;
+    regulacion?: string;
     nivel?: string;
     dominios?: Record<string, { avg_0_4?: number; percent_0_100?: number }>;
   };
+  processed?: boolean;
+  message?: string;
   interpretacion?: {
     resumen?: string;
     fortalezas?: string[];
@@ -54,7 +57,7 @@ export default function AnxietyStateTraitResultPage() {
 
   const computed = useMemo(() => getAnxietyComputed(result), [result]);
   const index = computed?.puntuaciones?.indice_0_100 ?? null;
-  const tier = computed?.puntuaciones?.nivel ?? null;
+  const regulacion = computed?.puntuaciones?.regulacion ?? computed?.puntuaciones?.nivel ?? null;
   const dominios = computed?.puntuaciones?.dominios;
 
   const statePercent = dominios?.estado?.percent_0_100 ?? null;
@@ -73,6 +76,19 @@ export default function AnxietyStateTraitResultPage() {
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white border border-red-200 rounded-lg p-4">
           <p className="text-sm text-red-700">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (computed?.processed === false) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="bg-white border border-amber-200 rounded-lg p-6">
+          <h1 className="text-xl font-semibold text-gray-900">Ansiedad — Estado y rasgo</h1>
+          <p className="text-sm text-amber-800 mt-2">
+            {computed.message || 'No se pudo calcular el resultado. Vuelve a completar el cuestionario.'}
+          </p>
         </div>
       </div>
     );
@@ -104,8 +120,9 @@ export default function AnxietyStateTraitResultPage() {
           <p className="text-3xl font-semibold text-gray-900">{index ?? 'N/A'}</p>
         </div>
         <div className="bg-white border border-gray-200 rounded-lg p-5 text-center">
-          <p className="text-xs text-gray-500">Nivel</p>
-          <p className="text-lg font-medium text-gray-900">{tier ?? 'N/A'}</p>
+          <p className="text-xs text-gray-500">Regulación emocional</p>
+          <p className="text-lg font-medium text-gray-900">{regulacion ?? 'N/A'}</p>
+          <p className="text-[11px] text-gray-500 mt-1">Índice de regulación (no nivel clínico de ansiedad)</p>
         </div>
         <div className="bg-white border border-gray-200 rounded-lg p-5">
           <p className="text-xs text-gray-500">Progreso general</p>

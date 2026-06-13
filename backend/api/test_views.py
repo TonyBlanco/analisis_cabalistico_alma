@@ -611,6 +611,8 @@ class ExecuteTestView(APIView):
                 processed_ok = bool(result_data.get('processed', True))
         else:
             result_data = self._process_test(test_module, input_data)
+            if test_module.code == 'anxiety-state-trait' and isinstance(result_data, dict):
+                processed_ok = bool(result_data.get('processed', True))
 
         if processed_ok:
             user_access.record_use()
@@ -779,7 +781,12 @@ class ExecuteTestView(APIView):
             if test_module.code == 'anxiety-state-trait':
                 responses = input_data.get('responses', {})
                 if compute_anxiety_state_trait:
-                    return compute_anxiety_state_trait({'fecha': input_data.get('fecha'), 'responses': responses})
+                    return compute_anxiety_state_trait({
+                        'fecha': input_data.get('fecha'),
+                        'responses': responses,
+                        'seed': input_data.get('seed'),
+                        'selected_item_ids': input_data.get('selected_item_ids'),
+                    })
                 logger.error('compute_anxiety_state_trait not available; refusing symbolic fallback for anxiety-state-trait')
                 raise ValueError('Anxiety-state-trait wellness engine not available')
 

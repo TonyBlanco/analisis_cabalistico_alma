@@ -67,4 +67,15 @@ describe('PatientQuestionnaireCompletion', () => {
     expect(screen.getByTestId('question-card-q1')).toHaveClass('border-red-400');
     await waitFor(() => expect(scrollIntoView).toHaveBeenCalledOnce());
   });
+
+  it('permite revisar las respuestas pendientes con una acción accesible', async () => {
+    const user = userEvent.setup();
+    render(<QuestionnaireFixture />);
+
+    await user.click(screen.getByRole('button', { name: 'Revisar respuestas pendientes' }));
+
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'Te faltan 3 respuestas para poder enviar.'
+    );
+  });
 });

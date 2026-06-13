@@ -113,7 +113,13 @@ export function PatientQuestionnaireCompletionPanel({
           {completion.answeredCount} de {completion.totalQuestions} respondidas
         </p>
         {!completion.isComplete ? (
-          <p className="text-xs text-gray-500">El envío se activa cuando respondas todas.</p>
+          <button
+            type="button"
+            onClick={completion.revealMissing}
+            className="text-xs font-medium text-gray-600 underline hover:text-gray-900"
+          >
+            Revisar respuestas pendientes
+          </button>
         ) : (
           <p className="text-xs font-medium text-green-700">Lista para enviar</p>
         )}
@@ -150,6 +156,15 @@ export function PatientQuestionnaireCompletionStatus({
       <p className="text-sm font-medium text-gray-800">
         {completion.answeredCount} de {completion.totalQuestions} respondidas
       </p>
+      {!completion.isComplete ? (
+        <button
+          type="button"
+          onClick={completion.revealMissing}
+          className="text-xs font-medium text-gray-600 underline hover:text-gray-900"
+        >
+          Revisar respuestas pendientes
+        </button>
+      ) : null}
       {completion.showMissing && !completion.isComplete ? (
         <p role="alert" className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800">
           Te faltan {completion.missingCount} respuestas para poder enviar.

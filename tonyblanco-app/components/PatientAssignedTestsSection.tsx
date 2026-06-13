@@ -3,13 +3,13 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { getAvailableTests, getTestResults, executeTest, getPatientPreviousTests } from '@/lib/test-api';
+import { executeTest, getPatientPreviousTests } from '@/lib/test-api';
 import { TestModule, ExecuteTestRequest } from '@/lib/test-types';
 import {
-  clinicalTestsRegistry,
-  DEPRECATED_TEST_CODE_ALIASES,
-  normalizeClinicalTestCode,
-} from '@/lib/clinicalTests.registry';
+  partitionAssignedTests,
+  resolvePatientTestRoute,
+  loadPatientAssignedTestsSnapshot,
+} from '@/lib/patientPendingTests';
 import { getActivePatientId } from '@/lib/active-patient';
 import { unassignTestFromPatient } from '@/lib/assignment-api';
 import StartTestModal from '@/components/StartTestModal';
@@ -45,31 +45,6 @@ export default function PatientAssignedTestsSection() {
   const [unassignTarget, setUnassignTarget] = useState<TestModule | null>(null);
 
   const activePatientId = getActivePatientId();
-
-  const normalizeCode = (code?: string | null) =>
-    normalizeClinicalTestCode(String(code || ''));
-
-  const routeByTestCode = useState(() => {
-    const map = new Map<string, string>();
-    for (const entry of clinicalTestsRegistry) {
-      if (entry.patient_route) map.set(normalizeCode(entry.test_code), entry.patient_route);
-    }
-    return map;
-  })[0];
-
-  const routeAliases = useState(() => {
-    const aliases = new Map<string, string>([
-      ['phq9', 'phq-9'],
-      ['gad7', 'gad-7'],
-      ['bdi2', 'bdi-ii'],
-      ['stai', 'anxiety-state-trait'],
-      ['mcmi4-mystic', 'mcmi4-mystic'],
-    ]);
-    for (const [from, to] of Object.entries(DEPRECATED_TEST_CODE_ALIASES)) {
-      aliases.set(normalizeClinicalTestCode(from), normalizeClinicalTestCode(to));
-    }
-    return aliases;
-  })[0];
 
   useEffect(() => {
     fetchAssignedTests();
@@ -116,35 +91,11 @@ export default function PatientAssignedTestsSection() {
         console.debug('getPatientPreviousTests not available, falling back to available-tests flow', innerErr);
       }
 
-      // Fallback: original flow for patients (uses UserTestAccess info)
-      const response = await getAvailableTests();
-      setUserType(response.user_type || '');
-      const allTests = response.tests || [];
-
-      const tests = allTests.map((t) => ({
-        ...t,
-        status: t.is_active ? 'active' : 'inactive',
-      }));
-
-      const visibleTests = tests.filter((t) => t.status === 'active');
-
-      const assigned = visibleTests.filter(
-        (test: TestModule) => test.user_access?.has_special_access === true
-      );
-
+      const { assigned, completedIds, userType: patientUserType } =
+        await loadPatientAssignedTestsSnapshot();
+      setUserType(patientUserType);
       setAssignedTests(assigned);
-
-      // Fetch completed results to determine status
-      try {
-        const results = await getTestResults();
-        const completedIds = new Set(
-          results.map((result: any) => result.test_module?.id).filter(Boolean)
-        );
-        setCompletedTestIds(completedIds);
-      } catch (err) {
-        console.warn('Error fetching results for status check:', err);
-        // Continue without status info
-      }
+      setCompletedTestIds(completedIds);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error al cargar tests asignados';
       setError(errorMessage);
@@ -202,9 +153,7 @@ export default function PatientAssignedTestsSection() {
     if (!test) return;
     if (executingTestCode) return; // Prevent double execution
 
-    const normalizedCode = normalizeCode(test.code);
-    const mappedCode = routeAliases.get(normalizedCode) || normalizedCode;
-    const route = routeByTestCode.get(mappedCode);
+    const route = resolvePatientTestRoute(test.code);
     if (route) {
       setStartModalOpen(false);
       setStartTestTarget(null);
@@ -289,11 +238,9 @@ export default function PatientAssignedTestsSection() {
     );
   }
 
-  const pendingTests = assignedTests.filter(
-    (test) => !completedTestIds.has(test.id)
-  );
-  const completedTests = assignedTests.filter((test) =>
-    completedTestIds.has(test.id)
+  const { pending: pendingTests, completed: completedTests } = partitionAssignedTests(
+    assignedTests,
+    completedTestIds
   );
 
   return (

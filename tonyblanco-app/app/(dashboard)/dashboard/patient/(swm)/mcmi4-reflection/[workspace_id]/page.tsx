@@ -10,6 +10,7 @@ import {
   type ReflectionWorkspace,
 } from "@/lib/api/mcmi4-reflection-api";
 import { getApiBaseUrl } from "@/lib/api-base";
+import { MCMI4_SIGNAL_PUBLIC_NAME } from "@/lib/mcmi4SignalCopy";
 
 type SignalResult = {
   created_at?: string;
@@ -179,7 +180,7 @@ export default function Mcmi4ReflectionWorkspacePage() {
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="bg-white border border-red-200 rounded-lg p-6 shadow-sm">
           <h1 className="text-2xl font-semibold text-gray-900 mb-4">
-            MCMI-4 Reflexión
+            Reflexión personal
           </h1>
           <p className="text-sm text-red-700">{error || "Reflexión no disponible."}</p>
         </div>
@@ -194,10 +195,10 @@ export default function Mcmi4ReflectionWorkspacePage() {
         <div className="flex items-start justify-between gap-3">
           <div>
             <h1 className="text-2xl font-semibold text-gray-900">
-              MCMI-4 Reflexión Experiencial
+              Reflexión experiencial
             </h1>
             <p className="text-sm text-gray-600 mt-2">
-              Espacio personal para reflexionar sobre tu evaluación MCMI-4.
+              Espacio personal para reflexionar sobre {MCMI4_SIGNAL_PUBLIC_NAME}.
             </p>
           </div>
           <div className="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1 border border-gray-200">
@@ -216,7 +217,7 @@ export default function Mcmi4ReflectionWorkspacePage() {
       {signalResult && (
         <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
           <h2 className="text-lg font-medium text-gray-900 mb-3">
-            Tu Evaluación SIGNAL
+            Tu evaluación
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
             <div>

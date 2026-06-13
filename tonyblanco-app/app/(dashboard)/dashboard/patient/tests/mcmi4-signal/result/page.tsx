@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { getApiBaseUrl } from "@/lib/api-base";
+import { MCMI4_SIGNAL_PUBLIC_NAME } from "@/lib/mcmi4SignalCopy";
 
 const API_URL = getApiBaseUrl();
 
@@ -82,7 +83,7 @@ export default function Mcmi4SignalResultPage() {
     return (
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white border border-gray-200 rounded-lg p-6">
-          <h1 className="text-xl font-semibold text-gray-900">SWM MCMI-4 SIGNAL</h1>
+          <h1 className="text-xl font-semibold text-gray-900">{MCMI4_SIGNAL_PUBLIC_NAME}</h1>
           <p className="text-sm text-gray-600 mt-2">Aún no hay señales registradas.</p>
         </div>
       </div>
@@ -92,7 +93,7 @@ export default function Mcmi4SignalResultPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-        <h1 className="text-2xl font-semibold text-gray-900">SWM MCMI-4 SIGNAL — Resultado</h1>
+        <h1 className="text-2xl font-semibold text-gray-900">{MCMI4_SIGNAL_PUBLIC_NAME} — Resultado</h1>
         <p className="text-sm text-gray-600 mt-2">
           Señal mínima registrada. Este resultado habilita el flujo hacia el módulo Místico.
         </p>

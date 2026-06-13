@@ -5,6 +5,10 @@ Test reflection workspace lifecycle (create, update, seal).
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 
+from api.mcmi4_signal_public_name import (
+    MCMI4_SIGNAL_PUBLIC_DESCRIPTION,
+    MCMI4_SIGNAL_PUBLIC_NAME,
+)
 from api.test_models import TestModule, TestResult
 from swm.mcmi4_reflection.models import WorkspaceDefinition, WorkspaceInstance
 from swm.mcmi4_reflection.services.workspace_service import WorkspaceService
@@ -32,9 +36,9 @@ class ReflectionLifecycleTestCase(TestCase):
         
         self.signal_module = TestModule.objects.create(
             code='mcmi4-signal',
-            name='MCMI-4 SIGNAL',
-            public_name='MCMI-4 SIGNAL',
-            description='Signal module',
+            name=MCMI4_SIGNAL_PUBLIC_NAME,
+            public_name=MCMI4_SIGNAL_PUBLIC_NAME,
+            description=MCMI4_SIGNAL_PUBLIC_DESCRIPTION,
             test_type='holistic_screening',
             domain=TestModule.Domain.TECHNICAL,
             is_active=True,

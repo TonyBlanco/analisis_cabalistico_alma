@@ -1,6 +1,11 @@
+import {
+  MCMI4_SIGNAL_PUBLIC_DESCRIPTION,
+  MCMI4_SIGNAL_PUBLIC_NAME,
+} from "@/lib/mcmi4SignalCopy";
+
 export const mcmi4SignalDefinition = {
-  name: "SWM MCMI-4 SIGNAL",
-  purpose: "Captura de señal mínima simbólica",
+  name: MCMI4_SIGNAL_PUBLIC_NAME,
+  purpose: MCMI4_SIGNAL_PUBLIC_DESCRIPTION,
   target_population: "Consultantes",
   execution_mode: "patient_self",
   estimated_time_minutes: "3–5",

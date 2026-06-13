@@ -9,6 +9,10 @@ from django.test import TestCase
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 
+from api.mcmi4_signal_public_name import (
+    MCMI4_SIGNAL_PUBLIC_DESCRIPTION,
+    MCMI4_SIGNAL_PUBLIC_NAME,
+)
 from api.test_models import TestModule, TestResult
 from swm.mcmi4.models import WorkspaceDefinition, WorkspaceInstance
 
@@ -42,9 +46,9 @@ class CreateWorkspaceSignalGuardTestCase(TestCase):
 
         self.signal_module = TestModule.objects.create(
             code='mcmi4-signal',
-            name='MCMI-4 SIGNAL (mínimo)',
-            public_name='MCMI-4 SIGNAL',
-            description='Señal simbólica mínima para SWM MCMI-4 Místico.',
+            name=MCMI4_SIGNAL_PUBLIC_NAME,
+            public_name=MCMI4_SIGNAL_PUBLIC_NAME,
+            description=MCMI4_SIGNAL_PUBLIC_DESCRIPTION,
             test_type='holistic_screening',
             domain=TestModule.Domain.TECHNICAL,
             is_active=True,

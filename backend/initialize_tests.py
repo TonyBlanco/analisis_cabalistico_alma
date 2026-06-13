@@ -8,6 +8,10 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 django.setup()
 
 from api.test_models import TestModule
+from api.mcmi4_signal_public_name import (
+    MCMI4_SIGNAL_PUBLIC_DESCRIPTION,
+    MCMI4_SIGNAL_PUBLIC_NAME,
+)
 
 HOLISTIC_LEGACY_OVERRIDES = {
     "phq-9": ("Pulse Resonance Mirror", "emotional_balance"),
@@ -528,8 +532,8 @@ def initialize_tests():
         },
         {
             'code': 'mcmi4-signal',
-            'name': 'SWM MCMI-4 SIGNAL',
-            'description': 'Señal mínima simbólica para habilitar el flujo SWM MCMI-4 Místico. Cuestionario corto de señal no clínica.',
+            'name': MCMI4_SIGNAL_PUBLIC_NAME,
+            'description': MCMI4_SIGNAL_PUBLIC_DESCRIPTION,
             'test_type': 'holistic_screening',
             'required_access_level': 'free',
             'icon': '🧭',
@@ -540,6 +544,7 @@ def initialize_tests():
             'uses_per_month': None,
             'is_assignable': True,
             'requires_license': False,
+            'public_name': MCMI4_SIGNAL_PUBLIC_NAME,
         },
         {
             'code': 'scid5',

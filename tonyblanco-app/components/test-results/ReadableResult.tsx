@@ -17,6 +17,7 @@ import ResultSuggestionsCard, { Suggestion } from './ResultSuggestionsCard';
 import { ResponseDetail } from '@/lib/test-types';
 import { asText, listItems } from '@/lib/normalizeText';
 import { formatClientSuggestion } from '@/lib/formatClientReading';
+import { MCMI4_SIGNAL_PUBLIC_NAME } from '@/lib/mcmi4SignalCopy';
 
 export type ReadableResultProps = {
   resultData: any;
@@ -293,8 +294,12 @@ export default function ReadableResult({
         <div className="flex items-start justify-between mb-3">
           <div>
             <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-              {testName || 'SWM MCMI-4 SIGNAL'}
-              {testCode && <span className="text-xs font-normal text-gray-500 px-2 py-0.5 bg-gray-100 rounded-full border border-gray-200">{testCode}</span>}
+              {testName || MCMI4_SIGNAL_PUBLIC_NAME}
+              {testCode && testCode !== "mcmi4-signal" && (
+                <span className="text-xs font-normal text-gray-500 px-2 py-0.5 bg-gray-100 rounded-full border border-gray-200">
+                  {testCode}
+                </span>
+              )}
             </h3>
             {signalData.timestamp && (
               <div className="flex items-center gap-1 mt-1 text-xs text-gray-500">

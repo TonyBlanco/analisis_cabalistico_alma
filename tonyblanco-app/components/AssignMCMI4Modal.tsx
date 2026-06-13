@@ -9,6 +9,7 @@
 
 import { useState } from 'react';
 import { createAssignment } from '@/lib/assignment-api';
+import { MCMI4_SIGNAL_PUBLIC_NAME } from '@/lib/mcmi4SignalCopy';
 import { X, CheckCircle, AlertCircle } from 'lucide-react';
 
 interface AssignMCMI4ModalProps {
@@ -61,7 +62,7 @@ export default function AssignMCMI4Modal({
         }, 300);
       }, 1500);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al asignar MCMI-4';
+      const errorMessage = err instanceof Error ? err.message : `Error al asignar ${MCMI4_SIGNAL_PUBLIC_NAME}`;
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -85,7 +86,7 @@ export default function AssignMCMI4Modal({
         <div className="flex items-start justify-between mb-4">
           <div>
             <h2 className="text-lg font-semibold text-gray-900">
-              Asignar SWM MCMI-4 SIGNAL
+              Asignar {MCMI4_SIGNAL_PUBLIC_NAME}
             </h2>
             <p className="text-sm text-gray-600 mt-1">
               Cribado inicial (16 ítems · 5-8 min)
@@ -136,6 +137,7 @@ export default function AssignMCMI4Modal({
 
               <div className="text-xs text-gray-600 space-y-1">
                 <p>✓ Test: <span className="font-medium">mcmi4-signal</span> (16 ítems de cribado)</p>
+                <p>✓ Nombre visible para el consultante: <span className="font-medium">{MCMI4_SIGNAL_PUBLIC_NAME}</span></p>
                 <p>✓ Duración estimada: <span className="font-medium">5-8 minutos</span></p>
                 <p>✓ El consultante lo verá en Tests Pendientes</p>
                 <p>✓ Tras completar, podrá iniciar la Reflexión Experiencial</p>

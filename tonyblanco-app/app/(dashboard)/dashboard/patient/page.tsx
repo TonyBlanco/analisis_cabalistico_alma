@@ -70,7 +70,7 @@ export default function PatientHome() {
     loadResultsCount();
   }, []);
 
-  // Check if MCMI-4 signal is completed but reflection is not
+  // Check if the signal evaluation is completed but reflection is not
   useEffect(() => {
     if (fetchedReflectionRef.current) return;
     fetchedReflectionRef.current = true;
@@ -165,7 +165,7 @@ export default function PatientHome() {
       />
       
     <div className="max-w-5xl mx-auto space-y-6">
-      {/* MCMI-4 Reflection Card (shown if signal completed but reflection pending) */}
+      {/* Reflection card (shown if signal completed but reflection pending) */}
       {showReflectionCard && !checkingReflection && (
         <MCMI4ReflectionCard
           onComplete={handleReflectionComplete}

@@ -5,24 +5,24 @@ import { useRouter } from "next/navigation";
 import { asrsEssenceDefinition } from "./asrs-essence.config";
 import { executeTest } from "@/lib/test-api";
 
-type AnswerMap = Record<string, string>;
+type ResponseMap = Record<string, string>;
 
 export default function AsrsEssencePage() {
   const router = useRouter();
-  const [answers, setAnswers] = useState<AnswerMap>({});
+  const [responses, setResponses] = useState<ResponseMap>({});
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const questions = asrsEssenceDefinition.questions;
   const totalQuestions = questions.length;
   const answeredCount = useMemo(
-    () => questions.filter((q) => answers[q.id] !== undefined).length,
-    [answers, questions],
+    () => questions.filter((q) => responses[q.id] !== undefined).length,
+    [questions, responses],
   );
   const isComplete = answeredCount === totalQuestions;
 
   const handleSelect = (questionId: string, value: string) => {
-    setAnswers((prev) => ({ ...prev, [questionId]: value }));
+    setResponses((prev) => ({ ...prev, [questionId]: value }));
   };
 
   const handleSubmit = async () => {
@@ -32,16 +32,16 @@ export default function AsrsEssencePage() {
     setError(null);
 
     try {
-      const answersPayload: Record<string, number> = {};
+      const responsesPayload: Record<string, number> = {};
       for (const q of questions) {
-        answersPayload[q.id] = Number(answers[q.id]);
+        responsesPayload[q.id] = Number(responses[q.id]);
       }
 
       await executeTest({
         test_module_code: asrsEssenceDefinition.code,
         input_data: {
           fecha: new Date().toISOString().split("T")[0],
-          answers: answersPayload,
+          responses: responsesPayload,
         },
         save_result: true,
       });
@@ -60,16 +60,15 @@ export default function AsrsEssencePage() {
       <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
         <h1 className="text-2xl font-semibold text-gray-900">{asrsEssenceDefinition.name}</h1>
         <p className="text-sm text-gray-600 mt-2">
-          {asrsEssenceDefinition.purpose}. Tiempo estimado {asrsEssenceDefinition.estimated_time_minutes} minutos.
+          {asrsEssenceDefinition.purpose}. Tiempo estimado: {asrsEssenceDefinition.estimated_time_minutes} minutos.
         </p>
-        <p className="text-xs text-gray-500 mt-2">Nota: exploracion simbolica no clinica.</p>
-
+        <p className="text-xs text-gray-500 mt-2">Exploración simbólica no clínica. No constituye diagnóstico.</p>
         <div className="mt-4 text-xs text-gray-500">
           Pregunta {Math.min(answeredCount + 1, totalQuestions)} de {totalQuestions}
         </div>
         <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
           <div
-            className="h-2 rounded-full"
+            className="h-2 rounded-full transition-all"
             style={{
               width: `${Math.round((answeredCount / totalQuestions) * 100)}%`,
               backgroundColor: "var(--accent-color)",
@@ -96,13 +95,11 @@ export default function AsrsEssencePage() {
                     type="radio"
                     name={question.id}
                     value={value}
-                    checked={answers[question.id] === value}
+                    checked={responses[question.id] === value}
                     onChange={() => handleSelect(question.id, value)}
                     className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                   />
-                  <span>
-                    {value} — {label}
-                  </span>
+                  <span>{value} — {label}</span>
                 </label>
               ))}
             </div>

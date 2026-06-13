@@ -1,6 +1,6 @@
 import { forwardRef, useImperativeHandle } from 'react';
 import { describe, expect, it, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import PersonalRegistrationPage from '@/app/(public)/register/personal/page';
 import type { TurnstileFieldHandle } from '@/components/TurnstileField';
@@ -61,5 +61,26 @@ describe('PersonalRegistrationPage', () => {
     expect(screen.getByText('El nombre de usuario es requerido')).toBeInTheDocument();
     expect(screen.getByText('El email es requerido')).toBeInTheDocument();
     expect(screen.getByText('La contraseña es requerida')).toBeInTheDocument();
+    expect(screen.getByText('Confirma la contraseña')).toBeInTheDocument();
+  });
+
+  it('explica que falta la verificación si los campos son válidos pero Turnstile no tiene token', async () => {
+    const user = userEvent.setup();
+    render(<PersonalRegistrationPage />);
+
+    await user.type(screen.getByLabelText(/Nombre completo/), 'Jose Tony Unomas');
+    fireEvent.change(screen.getByLabelText(/Fecha de nacimiento/), {
+      target: { value: '1960-01-12' },
+    });
+    await user.type(screen.getByLabelText(/Nombre de usuario/), 'PACIENTE1');
+    await user.type(screen.getByLabelText(/Email/), 'malakai33@pm.me');
+    await user.type(screen.getByLabelText(/^Contraseña/), 'ValidPass123!');
+    await user.type(screen.getByLabelText(/Confirmar contraseña/), 'ValidPass123!');
+
+    await user.click(screen.getByRole('button', { name: 'Crear cuenta personal' }));
+
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'Completa la verificación de seguridad antes de continuar.'
+    );
   });
 });

@@ -29,7 +29,6 @@ export default function PersonalRegistrationPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-  const [turnstileReady, setTurnstileReady] = useState(false);
   const [googleSignInKey, setGoogleSignInKey] = useState(0);
   const turnstileRef = useRef<TurnstileFieldHandle>(null);
 
@@ -98,7 +97,9 @@ export default function PersonalRegistrationPage() {
       errors.password = 'La contraseña debe tener al menos 8 caracteres';
     }
 
-    if (formData.password !== formData.confirmPassword) {
+    if (!formData.confirmPassword) {
+      errors.confirmPassword = 'Confirma la contraseña';
+    } else if (formData.password !== formData.confirmPassword) {
       errors.confirmPassword = 'Las contraseñas no coinciden';
     }
 
@@ -210,13 +211,7 @@ export default function PersonalRegistrationPage() {
           </p>
         </div>
 
-        {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 rounded-md p-4">
-            <p className="text-sm text-red-800">{error}</p>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4" noValidate>
           {/* Personal Information */}
           <div>
             <h2 className="text-sm font-medium text-gray-700 mb-4">Información Personal</h2>
@@ -380,14 +375,23 @@ export default function PersonalRegistrationPage() {
           <TurnstileField
             ref={turnstileRef}
             theme="light"
-            onReadyChange={setTurnstileReady}
             onError={(msg) => setError(msg)}
           />
 
           <div className="pt-4">
+            {error && (
+              <div role="alert" className="mb-3 bg-red-50 border border-red-200 rounded-md p-3">
+                <p className="text-sm text-red-800">{error}</p>
+              </div>
+            )}
+            {Object.keys(fieldErrors).length > 0 && (
+              <p role="alert" className="mb-3 text-sm text-red-700">
+                Revisa los campos obligatorios marcados antes de crear la cuenta.
+              </p>
+            )}
             <button
               type="submit"
-              disabled={loading || (Boolean(turnstileRef.current?.isEnforced()) && !turnstileReady)}
+              disabled={loading}
               className="w-full px-4 py-2 rounded-md text-white font-medium transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
               style={{
                 backgroundColor: loading ? undefined : 'var(--accent-color)',

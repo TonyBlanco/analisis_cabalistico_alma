@@ -20,6 +20,7 @@ from .models import (
     TherapistHolisticConfig,
     ResonanciaObservation,
     ResonanciaRelation,
+    ResonanceClientCapture,
 )
 from .birth_data_model import UserBirthData
 from django.contrib.auth.models import User
@@ -1178,6 +1179,15 @@ class ResonanciaRelationSerializer(serializers.ModelSerializer):
             'position',
             'note',
             'tags',
+            # Resonance Map fields (F1 backbone)
+            'resonance_type',
+            'relevance',
+            'direction',
+            'person_a',
+            'person_b',
+            'suggested_rectification',
+            'source',
+            'source_ref',
         ]
         read_only_fields = ['id', 'author', 'from_ref', 'created_at', 'updated_at']
 
@@ -1225,3 +1235,15 @@ class ResonanciaRelationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({'tags': 'Máximo 30 elementos.'})
 
         return cleaned
+
+
+class ResonanceClientCaptureSerializer(serializers.ModelSerializer):
+    """Serializer para ResonanceClientCapture (flag de habilitación de captura del cliente)."""
+
+    therapist = serializers.PrimaryKeyRelatedField(read_only=True)
+    patient = serializers.PrimaryKeyRelatedField(read_only=True)
+
+    class Meta:
+        model = ResonanceClientCapture
+        fields = ['id', 'therapist', 'patient', 'enabled', 'enabled_at', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'therapist', 'patient', 'enabled_at', 'created_at', 'updated_at']

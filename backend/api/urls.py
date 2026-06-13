@@ -205,6 +205,8 @@ from .resonancia_views import (
     ResonanciaObservationListCreateView,
     ResonanciaObservationDetailView,
     ResonanciaRelationListCreateView,
+    ResonanciaRelationDetailView,
+    ResonanceClientCaptureView,
 )
 # SWM v3 - Symbolic Workspace Module v3
 from symbolic.swm_v3.views import SwmV3SymbolicReadingCreateView, SwmV3SystemsListView
@@ -458,6 +460,8 @@ urlpatterns = [
     path('resonancia/observations/', ResonanciaObservationListCreateView.as_view(), name='resonancia_observations'),
     path('resonancia/observations/<uuid:pk>/', ResonanciaObservationDetailView.as_view(), name='resonancia_observation_detail'),
     path('resonancia/relations/', ResonanciaRelationListCreateView.as_view(), name='resonancia_relations'),
+    path('resonancia/relations/<uuid:pk>/', ResonanciaRelationDetailView.as_view(), name='resonancia_relation_detail'),
+    path('resonancia/client-capture/', ResonanceClientCaptureView.as_view(), name='resonancia_client_capture'),
 
     # Estado simbolico estructural (TreeStructuralState v0.1)
     path('symbolic/tree-structural-state/', TreeStructuralStateView.as_view(), name='tree_structural_state'),

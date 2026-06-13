@@ -49,6 +49,7 @@ from .views import (
     TherapistNoteListCreateView,
     TherapistDashboardView,
     TherapistMetricsView,
+    TherapistReportsSummaryView,
     TherapistPatientProfileView,
     # Vistas de servicios
     ServiceCategoryListView,
@@ -301,6 +302,7 @@ urlpatterns = [
     ),
     path('therapist/dashboard/', TherapistDashboardView.as_view(), name='therapist_dashboard'),
     path('therapist/metrics/', TherapistMetricsView.as_view(), name='therapist_metrics'),
+    path('therapist/reports/summary/', TherapistReportsSummaryView.as_view(), name='therapist_reports_summary'),
     path('therapist/hybrid-metrics/', HybridModeMetricsView.as_view(), name='therapist_hybrid_metrics'),
     path('therapist/ai-usage/', TherapistAIUsageView.as_view(), name='therapist_ai_usage'),
     path('therapist/ai-usage/history/', TherapistAIUsageHistoryView.as_view(), name='therapist_ai_usage_history'),

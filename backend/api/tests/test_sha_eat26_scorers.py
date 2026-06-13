@@ -133,7 +133,26 @@ class ShaHarmonyTests(SimpleTestCase):
         self.assertEqual(result1['raw_answers'], result2['raw_answers'])
 
     # ------------------------------------------------------------------
-    # 6. Empty responses — must not raise, must return processed=True
+    # 6. referral_recommended — True only for high and severe zones
+    # ------------------------------------------------------------------
+    def test_sha_referral_recommended_flag(self):
+        """referral_recommended must be False for low/moderate, True for high/severe."""
+        low_result = compute_sha_harmony(_sha_all(0))
+        moderate_responses = {f'q{i}': 1 for i in range(1, 9)}
+        moderate_responses['q9'] = 0
+        moderate_responses['q10'] = 0
+        moderate_result = compute_sha_harmony({'responses': moderate_responses})
+        severe_responses = {f'q{i}': 4 for i in range(1, 9)}
+        severe_responses['q9'] = 2
+        severe_responses['q10'] = 2
+        severe_result = compute_sha_harmony({'responses': severe_responses})
+
+        self.assertFalse(low_result['structured_data']['referral_recommended'])
+        self.assertFalse(moderate_result['structured_data']['referral_recommended'])
+        self.assertTrue(severe_result['structured_data']['referral_recommended'])
+
+    # ------------------------------------------------------------------
+    # 7. Empty responses — must not raise, must return processed=True
     # ------------------------------------------------------------------
     def test_sha_empty_responses(self):
         """{'responses': {}} is a valid edge case: no answer recorded yet.
@@ -267,7 +286,21 @@ class Eat26SpiritTests(SimpleTestCase):
         self.assertEqual(result1['raw_answers'], result2['raw_answers'])
 
     # ------------------------------------------------------------------
-    # 6. Empty responses — must not raise, returns processed=True
+    # 6. referral_recommended — True only for high zone
+    # ------------------------------------------------------------------
+    def test_eat26_referral_recommended_flag(self):
+        """referral_recommended must be True only for high risk_level."""
+        low_result = compute_eat26_spirit(_eat26_all(5))
+
+        high_responses = {f'q{i}': 0 for i in range(1, 27)}
+        high_responses['q25'] = 5
+        high_result = compute_eat26_spirit({'responses': high_responses})
+
+        self.assertFalse(low_result['structured_data']['referral_recommended'])
+        self.assertTrue(high_result['structured_data']['referral_recommended'])
+
+    # ------------------------------------------------------------------
+    # 7. Empty responses — must not raise, returns processed=True
     # ------------------------------------------------------------------
     def test_eat26_empty_responses(self):
         """{'responses': {}} must not raise.

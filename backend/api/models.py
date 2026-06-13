@@ -1488,12 +1488,50 @@ class ResonanciaRelation(models.Model):
     """Relación simbólica manual (Resonancia Ancestral).
 
     Modelo aislado: persiste posicionamiento relacional simbólico 1-9 (sin inferencias, sin scoring).
+    Extendido con campos del Mapa de Resonancias (Rab Armoni + Hellinger). El terapeuta es el ÚNICO
+    autor que confirma resonancias. Observacional/descriptivo — prohibido inferencia automática.
     """
 
     CONTEXT_CHOICES = [
         ('familiar', 'Familiar'),
         ('relacional', 'Relacional'),
         ('sistemico', 'Sistémico'),
+    ]
+
+    RESONANCE_TYPE_CHOICES = [
+        ('resonancia_por_numero', 'Resonancia por Número'),
+        ('complejo_tio', 'Complejo del Tío'),
+        ('duplica_generacional', 'Duplica Generacional'),
+        ('repeticion_nombre', 'Repetición de Nombre'),
+        ('sindrome_aniversario', 'Síndrome de Aniversario'),
+        ('hueco_aborto', 'Hueco por Aborto/Fallecido'),
+        ('proyecto_objetivo', 'Proyecto/Objetivo No Logrado'),
+        ('mismo_rol_sistema', 'Mismo Rol en el Sistema'),
+        ('exclusion', 'Exclusión (Hellinger)'),
+        ('lealtad_invisible', 'Lealtad Invisible (Hellinger)'),
+        ('asunto_de_orden', 'Asunto de Orden (Hellinger)'),
+    ]
+
+    RELEVANCE_CHOICES = [
+        ('baja', 'Baja'),
+        ('media', 'Media'),
+        ('alta', 'Alta'),
+    ]
+
+    DIRECTION_CHOICES = [
+        ('a_to_b', 'a → b'),
+        ('bidireccional', 'Bidireccional'),
+    ]
+
+    RECTIFICATION_CHOICES = [
+        ('nombre', 'Nombre'),
+        ('accion', 'Acción'),
+        ('lugar', 'Lugar'),
+    ]
+
+    SOURCE_CHOICES = [
+        ('terapeuta', 'Terapeuta'),
+        ('cliente', 'Cliente'),
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -1520,9 +1558,67 @@ class ResonanciaRelation(models.Model):
     note = models.CharField(max_length=280, blank=True, default='')
     tags = models.JSONField(default=list, blank=True)
 
+    # Resonance Map fields (F1 backbone)
+    resonance_type = models.CharField(
+        max_length=32, choices=RESONANCE_TYPE_CHOICES, null=True, blank=True,
+        help_text="Tipo de resonancia (Armoni/Hellinger). Null en registros legacy.",
+    )
+    relevance = models.CharField(max_length=8, choices=RELEVANCE_CHOICES, default='media')
+    direction = models.CharField(max_length=16, choices=DIRECTION_CHOICES, default='bidireccional')
+    person_a = models.ForeignKey(
+        'api.GenealogyPerson',
+        on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='resonances_as_a',
+        help_text="Persona A (origen de la resonancia).",
+    )
+    person_b = models.ForeignKey(
+        'api.GenealogyPerson',
+        on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='resonances_as_b',
+        help_text="Persona B (destino/eco de la resonancia).",
+    )
+    suggested_rectification = models.CharField(
+        max_length=16, choices=RECTIFICATION_CHOICES, null=True, blank=True,
+    )
+    source = models.CharField(max_length=16, choices=SOURCE_CHOICES, default='terapeuta')
+    source_ref = models.CharField(
+        max_length=255, blank=True,
+        help_text="Referencia libre a la fuente (sesión, nota, test).",
+    )
+
     class Meta:
         verbose_name = 'Relación (Resonancia)'
         verbose_name_plural = 'Relaciones (Resonancia)'
+        indexes = [
+            models.Index(fields=['subject', '-created_at'], name='resrel_subj_created_idx'),
+            models.Index(fields=['subject', 'resonance_type'], name='resrel_subj_type_idx'),
+        ]
+
+
+class ResonanceClientCapture(models.Model):
+    """Flag de habilitación de captura del cliente para el Mapa de Resonancias Ancestrales."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    therapist = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='resonance_captures',
+        limit_choices_to={'profile__user_type': 'therapist'},
+    )
+    patient = models.ForeignKey(
+        Patient,
+        on_delete=models.CASCADE,
+        related_name='resonance_captures',
+    )
+    enabled = models.BooleanField(default=False)
+    enabled_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Captura cliente (Resonancia)'
+        verbose_name_plural = 'Capturas cliente (Resonancia)'
+        unique_together = [('therapist', 'patient')]
 
 
 class AIInteractionFeedback(models.Model):

@@ -57,6 +57,11 @@ class GenealogyPersonSerializer(serializers.ModelSerializer):
             "birth_year",
             "death_year",
             "notes",
+            # Resonance Map fields (Rab Armoni)
+            "birth_order_number",
+            "is_deceased",
+            "is_abortion",
+            "side",
             "created_at",
             "updated_at",
         ]

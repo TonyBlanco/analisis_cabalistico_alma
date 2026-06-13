@@ -61,6 +61,25 @@ class GenealogyPerson(models.Model):
     death_year = models.IntegerField(null=True, blank=True)
     notes = models.TextField(blank=True)
 
+    # Resonance Map fields (Rab Armoni)
+    SIDE_CHOICES = [
+        ("paterno", "Paterno"),
+        ("materno", "Materno"),
+    ]
+    birth_order_number = models.IntegerField(
+        null=True, blank=True,
+        help_text="Número de orden de nacimiento (cuenta abortos/fallecidos). 1-N.",
+    )
+    is_deceased = models.BooleanField(default=False, help_text="Persona fallecida.")
+    is_abortion = models.BooleanField(
+        default=False,
+        help_text="Aborto o bebé fallecido. Ocupa su posición numérica en el sistema.",
+    )
+    side = models.CharField(
+        max_length=16, choices=SIDE_CHOICES, null=True, blank=True,
+        help_text="Rama paterna o materna (solo aplica a generaciones -1/-2).",
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

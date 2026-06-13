@@ -5,24 +5,29 @@ from django.db import migrations, models
 
 
 def _column_exists(schema_editor, table: str, column: str) -> bool:
+    vendor = schema_editor.connection.vendor
     with schema_editor.connection.cursor() as cursor:
+        if vendor == 'sqlite':
+            cursor.execute(f"PRAGMA table_info({table})")
+            return any(row[1] == column for row in cursor.fetchall())
         cursor.execute(
-            """
-            SELECT 1 FROM information_schema.columns
-            WHERE table_name = %s AND column_name = %s
-            """,
+            "SELECT 1 FROM information_schema.columns WHERE table_name = %s AND column_name = %s",
             [table, column],
         )
         return cursor.fetchone() is not None
 
 
 def _table_exists(schema_editor, table: str) -> bool:
+    vendor = schema_editor.connection.vendor
     with schema_editor.connection.cursor() as cursor:
+        if vendor == 'sqlite':
+            cursor.execute(
+                "SELECT 1 FROM sqlite_master WHERE type='table' AND name=%s",
+                [table],
+            )
+            return cursor.fetchone() is not None
         cursor.execute(
-            """
-            SELECT 1 FROM information_schema.tables
-            WHERE table_name = %s
-            """,
+            "SELECT 1 FROM information_schema.tables WHERE table_name = %s",
             [table],
         )
         return cursor.fetchone() is not None
@@ -30,16 +35,25 @@ def _table_exists(schema_editor, table: str) -> bool:
 
 def apply_telegram_schema(apps, schema_editor):
     if not _column_exists(schema_editor, 'api_userprofile', 'telegram_chat_id'):
-        schema_editor.execute(
-            'ALTER TABLE api_userprofile ADD COLUMN telegram_chat_id BIGINT NULL'
-        )
+        if schema_editor.connection.vendor == 'sqlite':
+            schema_editor.execute(
+                'ALTER TABLE api_userprofile ADD COLUMN telegram_chat_id INTEGER NULL'
+            )
+        else:
+            schema_editor.execute(
+                'ALTER TABLE api_userprofile ADD COLUMN telegram_chat_id BIGINT NULL'
+            )
 
     if not _table_exists(schema_editor, 'api_telegramlinktoken'):
-        TelegramLinkToken = apps.get_model('api', 'TelegramLinkToken')
-        schema_editor.create_model(TelegramLinkToken)
+        if schema_editor.connection.vendor != 'sqlite':
+            TelegramLinkToken = apps.get_model('api', 'TelegramLinkToken')
+            schema_editor.create_model(TelegramLinkToken)
 
 
 def reverse_telegram_schema(apps, schema_editor):
+    if schema_editor.connection.vendor == 'sqlite':
+        return
+
     if _table_exists(schema_editor, 'api_telegramlinktoken'):
         TelegramLinkToken = apps.get_model('api', 'TelegramLinkToken')
         schema_editor.delete_model(TelegramLinkToken)

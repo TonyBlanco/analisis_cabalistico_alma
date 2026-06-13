@@ -1,15 +1,20 @@
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.db.utils import OperationalError, ProgrammingError
+from django.utils import timezone
 from rest_framework import generics, status
-from rest_framework.exceptions import PermissionDenied, ValidationError
+from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 
-from .models import Patient, ResonanciaObservation, ResonanciaRelation
+from .models import Patient, ResonanciaObservation, ResonanciaRelation, ResonanceClientCapture
 from .permissions import IsTherapist
-from .serializers import ResonanciaObservationSerializer, ResonanciaRelationSerializer
+from .serializers import (
+    ResonanciaObservationSerializer,
+    ResonanciaRelationSerializer,
+    ResonanceClientCaptureSerializer,
+)
 
 
 def _get_owned_patient_or_404(*, therapist, patient_id: str) -> Patient:
@@ -212,6 +217,9 @@ class ResonanciaRelationListCreateView(generics.ListCreateAPIView):
         context = self.request.query_params.get('context')
         if context:
             qs = qs.filter(context=context)
+        resonance_type = self.request.query_params.get('resonance_type')
+        if resonance_type:
+            qs = qs.filter(resonance_type=resonance_type)
         return qs
 
     def list(self, request, *args, **kwargs):
@@ -266,3 +274,60 @@ class ResonanciaRelationListCreateView(generics.ListCreateAPIView):
             )
         except Exception:
             return Response({'error': 'Error interno del servidor.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class ResonanciaRelationDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    GET /api/resonancia/relations/{id}/
+    PATCH /api/resonancia/relations/{id}/
+    DELETE /api/resonancia/relations/{id}/
+    """
+
+    serializer_class = ResonanciaRelationSerializer
+    permission_classes = [IsAuthenticated, IsTherapist]
+    renderer_classes = [JSONRenderer]
+    lookup_field = 'pk'
+
+    def get_queryset(self):
+        return ResonanciaRelation.objects.filter(author=self.request.user)
+
+
+class ResonanceClientCaptureView(generics.RetrieveUpdateAPIView):
+    """
+    GET  /api/resonancia/client-capture/?subject={patient_id}
+    PATCH /api/resonancia/client-capture/?subject={patient_id}
+
+    Crea el flag idempotentemente si no existe. Solo el terapeuta puede activar/desactivar.
+    """
+
+    serializer_class = ResonanceClientCaptureSerializer
+    permission_classes = [IsAuthenticated, IsTherapist]
+    renderer_classes = [JSONRenderer]
+
+    def _get_patient(self, request) -> Patient | None:
+        subject_id = request.query_params.get('subject')
+        if not subject_id or not str(subject_id).isdigit():
+            return None
+        try:
+            return Patient.objects.get(pk=subject_id, therapist=request.user)
+        except Patient.DoesNotExist:
+            return None
+
+    def get_object(self):
+        patient = self._get_patient(self.request)
+        if not patient:
+            raise NotFound('subject es requerido y debe pertenecer al terapeuta autenticado.')
+        obj, _ = ResonanceClientCapture.objects.get_or_create(
+            therapist=self.request.user,
+            patient=patient,
+        )
+        return obj
+
+    def patch(self, request, *args, **kwargs):
+        instance = self.get_object()
+        enabled = request.data.get('enabled')
+        instance.enabled = bool(enabled)
+        if instance.enabled and not instance.enabled_at:
+            instance.enabled_at = timezone.now()
+        instance.save(update_fields=['enabled', 'enabled_at', 'updated_at'])
+        return Response(self.get_serializer(instance).data)

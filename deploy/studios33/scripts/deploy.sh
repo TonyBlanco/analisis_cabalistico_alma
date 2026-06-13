@@ -94,8 +94,8 @@ done
 
 docker exec studio33_api python /app/deploy/studios33/scripts/ensure_admin_profiles.py 2>/dev/null || true
 
-echo "▶ Migraciones API:"
-docker exec studio33_api python manage.py migrate api --noinput
+echo "▶ Migraciones (todas las apps, incl. SWM workspace seeds):"
+docker exec studio33_api python manage.py migrate --noinput
 
 echo "▶ Catálogo de tests (initialize_tests.py):"
 docker exec studio33_api python /app/initialize_tests.py 2>&1 | tail -8
